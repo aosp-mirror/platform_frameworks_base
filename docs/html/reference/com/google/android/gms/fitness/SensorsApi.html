@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -764,18 +813,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The Google Fit Sensors API provides methods for finding and registering to real time data streams
- of sensor data.
+<p itemprop="articleBody">API which exposes different sources of fitness data in local and connected devices,
+ and delivers live events to listeners.
  <p>
- The API exposes <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data sources</a></code> from hardware
- sensors in the local device and in companion devices.  It also exposes data sources from
- applications.  Data sources can be queried via
- <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#findDataSources(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataSourcesRequest)">findDataSources(GoogleApiClient, com.google.android.gms.fitness.request.DataSourcesRequest)</a></code>
+ The API exposes <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data sources</a></code> from hardware sensors in the local device and in
+ companion devices.  It also exposes data sources from applications.  Data sources can be queried
+ via <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#findDataSources(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataSourcesRequest)">findDataSources(GoogleApiClient, DataSourcesRequest)</a></code>
  <p>
- The API supports registering and unregistering to real time data streams from any available data
- source.  It also allows for registering based only on the
- <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>, in which case the best available data source
- (or a combination of them) is used.
+ The API supports adding and removing listeners to live data streams from any available data
+ source.  It also allows for listening on a <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>, in which case the
+ best available data source (or a combination of them) is used.
+ <p>
+ The Sensors API should be used whenever live updates from a sensor stream need to be pushed to
+ the application (for instance, to update a UI).  The <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">History</a></code> API can be used
+ to query historical data in a pull-based model for scenarios where latency isn't critical.
  <p>
  The Sensors API should be accessed from the <code><a href="/reference/com/google/android/gms/fitness/Fitness.html">Fitness</a></code> entry point.  Example:
  <pre>
@@ -788,12 +839,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
      PendingResult&lt;Status&gt; pendingResult = Fitness.SensorsApi.register(
          client,
          new SensorRequest.Builder()
-             .setDataType(DataTypes.STEP_COUNT_DELTA)
+             .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
              .setSamplingDelay(1, TimeUnit.MINUTES)  // sample once per minute
              .build(),
          myStepCountListener);
  </pre>
- If the application doesn't need real-time sensor updates, but instead wants persistent
+ If the application doesn't need live sensor updates, but instead wants persistent
  recording of historical sensor data, for batch querying, the <code><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">Recording</a></code>
  and <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">History</a></code> APIs and should be used instead.
 </p>
@@ -863,12 +914,63 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, android.app.PendingIntent)">add</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a> request, PendingIntent intent)</nobr>
+
+        <div class="jd-descrdiv">
+          Adds a <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code> listener to a sensor data source.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.OnDataPointListener)">add</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a> request, <a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">OnDataPointListener</a> listener)</nobr>
+
+        <div class="jd-descrdiv">
+          Adds a data point <code><a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">listener</a></code> to a sensor data source.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+
+
+
+
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/DataSourcesResult.html">DataSourcesResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#findDataSources(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataSourcesRequest)">findDataSources</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.html">DataSourcesRequest</a> request)</nobr>
 
-        <div class="jd-descrdiv">Finds all available data sources, on the device and remotely.</div>
+        <div class="jd-descrdiv">
+          Finds all available data sources, on the device and remotely.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -884,45 +986,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#register(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.DataSourceListener)">register</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a> request, <a href="/reference/com/google/android/gms/fitness/request/DataSourceListener.html">DataSourceListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#remove(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">remove</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent pendingIntent)</nobr>
 
-        <div class="jd-descrdiv">Register for real time updates from a sensor data source.</div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
+        <div class="jd-descrdiv">
+          Removes PendingIntent listener from a sensor data source.
 
 
 
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#register(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, android.app.PendingIntent)">register</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a> request, PendingIntent intent)</nobr>
-
-        <div class="jd-descrdiv">Register for real time updates from a sensor data source using a PendingIntent.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-
-
-
-
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#unregister(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataSourceListener)">unregister</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/DataSourceListener.html">DataSourceListener</a> listener)</nobr>
-
-        <div class="jd-descrdiv">Unregister from real-time updates from a sensor data source.</div>
+        </div>
 
   </td></tr>
 
@@ -938,9 +1009,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#unregister(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">unregister</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent pendingIntent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#remove(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.OnDataPointListener)">remove</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">OnDataPointListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Unregister from updates from a sensor data source with a PendingIntent.</div>
+        <div class="jd-descrdiv">
+          Removes a listener from a sensor data source.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -993,61 +1069,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-<A NAME="findDataSources(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataSourcesRequest)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/DataSourcesResult.html">DataSourcesResult</a>&gt;
-      </span>
-      <span class="sympad">findDataSources</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.html">DataSourcesRequest</a> request)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Finds all available data sources, on the device and remotely.  Results are returned
- asynchronously as a PendingResult.
- <p>
- It's not necessary to call this method if an application is interested only in getting the
- best available data for a data type, regardless of source.  In this case,
- <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#register(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.DataSourceListener)">register(GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.DataSourceListener)</a></code> can be used with a
- generic <code><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setDataType(com.google.android.gms.fitness.data.DataType)">data type</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>client</td>
-          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
-     this call, but the find operation will be delayed until the connection is complete.</td>
-        </tr>
-        <tr>
-          <th>request</td>
-          <td>a built request specifying the data sources we’re interested in finding</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a pending result containing the found data sources.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="register(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.DataSourceListener)"></A>
+<A NAME="add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, android.app.PendingIntent)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1059,70 +1081,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
-      <span class="sympad">register</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a> request, <a href="/reference/com/google/android/gms/fitness/request/DataSourceListener.html">DataSourceListener</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Register for real time updates from a sensor data source.  This method can be called to
- register for a particular data source, or for a data type (in which case a default data
- source is used).
- <p>
- After the registration is successful, new data points in the data stream are delivered to the
- specified listener.  Historic data is not delivered, but can be queried via the
- <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">History API</a></code>.  When the application is closing, or once real-time data
- is no longer needed, the registration should be removed.  If necessary, the
- Recording API can be used to persist data for later querying when the application is
- re-opened.
- <p>
- Applications can call this function several times with the same listener to change the
- desired sampling rate.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>client</td>
-          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
-     this call, but the register operation will be delayed until the connection is complete</td>
-        </tr>
-        <tr>
-          <th>request</td>
-          <td>request specifying the desired data source or data type, as well as the
-     desired parameters for the registration</td>
-        </tr>
-        <tr>
-          <th>listener</td>
-          <td>the listener that will be used to respond to events.  The listener object
-     should be saved, since it can be used to remove the registration when real time events
-     are no longer needed
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="register(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, android.app.PendingIntent)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-        abstract
-
-        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
-      </span>
-      <span class="sympad">register</span>
+      <span class="sympad">add</span>
       <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a> request, PendingIntent intent)</span>
     </h4>
       <div class="api-level">
@@ -1133,18 +1092,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Register for real time updates from a sensor data source using a PendingIntent.  This method
- can be called to register for a particular data source, or for a data type (in which case a
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code> listener to a sensor data source. This method can be called to
+ listen on live updates from a particular data source, or a data type (in which case a
  default data source is used).
  <p>
- After the registration is successful, new data points in the data stream are delivered to the
+ Once registration succeeds, new data points in the data stream are delivered to the
  specified intent.  Historic data is not delivered, but can be queried via the
  <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">History API</a></code>.
  <p>
- Unlike <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#register(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.DataSourceListener)">register(GoogleApiClient, SensorRequest, DataSourceListener)</a></code>,
+ Unlike <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.OnDataPointListener)">add(GoogleApiClient, SensorRequest, OnDataPointListener)</a></code>,
  which takes a listener and is intended for fast sampling rates while the application is
- on the foreground, this method is intended for slower sampling rates without the need to
- have a service always on in the background.
+ on the foreground, this method is intended for slower sampling rates without the need for
+ an always-on service.
  <p>
  The application specifies a PendingIntent callback (typically an IntentService) which will be
  called when new data points are available in the requested stream.  When the PendingIntent
@@ -1152,7 +1114,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  extract the DataPoint from the intent.  See the documentation of
  <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code> for more details.
  <p>
- Applications can call this function several times with the same intent to change the
+ This method can be called several times with the same intent to change the
  desired sampling rate.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1179,7 +1141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </div>
 
 
-<A NAME="unregister(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataSourceListener)"></A>
+<A NAME="add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.OnDataPointListener)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1191,8 +1153,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
-      <span class="sympad">unregister</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/DataSourceListener.html">DataSourceListener</a> listener)</span>
+      <span class="sympad">add</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a> request, <a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">OnDataPointListener</a> listener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1202,9 +1164,134 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Unregister from real-time updates from a sensor data source.  Should be called whenever
- real-time data is no longer needed, such as when the activity that displays real-time data
- is paused, stopped, or destroyed.</p></div>
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a data point <code><a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">listener</a></code> to a sensor data source.  This
+ method can be called to listen on live updates from a particular data source, or data type
+ (in which case a default data source is used).
+ <p>
+ Once registration succeeds, new data points in the data stream are delivered to the
+ specified listener.  Historic data is not delivered, but can be queried via the
+ <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">History API</a></code>.  When the application is closing, or once live data
+ is no longer needed, the listener should be removed.  If necessary, the
+ <code><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">Recording API</a></code> can be used to persist data for later querying when the
+ application is re-opened in a battery-efficient manner.
+ <p>
+ This method can be called several times with the same listener to change the desired
+ sampling rate.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
+     this call, but the register operation will be delayed until the connection is complete</td>
+        </tr>
+        <tr>
+          <th>request</td>
+          <td>request specifying the desired data source or data type, as well as the
+     desired parameters for the registration</td>
+        </tr>
+        <tr>
+          <th>listener</td>
+          <td>the listener that will be used to respond to events.  The listener object
+     should be saved, since it can be used to remove the registration when live events
+     are no longer needed
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="findDataSources(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataSourcesRequest)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/DataSourcesResult.html">DataSourcesResult</a>&gt;
+      </span>
+      <span class="sympad">findDataSources</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.html">DataSourcesRequest</a> request)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Finds all available data sources, on the device and remotely.  Results are returned
+ asynchronously as a PendingResult.
+ <p>
+ It's not necessary to call this method if an application is interested only in getting the
+ best available data for a data type, regardless of source.  In this case,
+ <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.OnDataPointListener)">add(GoogleApiClient, SensorRequest, OnDataPointListener)</a></code> can be used with a
+ generic <code><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setDataType(com.google.android.gms.fitness.data.DataType)">data type</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>client</td>
+          <td>an existing GoogleApiClient.  It does not need to be connected at the time of
+     this call, but the find operation will be delayed until the connection is complete.</td>
+        </tr>
+        <tr>
+          <th>request</td>
+          <td>a built request specifying the data sources we’re interested in finding</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>a pending result containing the found data sources.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="remove(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+        abstract
+
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
+      </span>
+      <span class="sympad">remove</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent pendingIntent)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Removes PendingIntent listener from a sensor data source.  Should be called
+ whenever live updates are no longer needed.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1213,9 +1300,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
         </tr>
         <tr>
-          <th>listener</td>
-          <td>the listener that was used for registering to updates in the
-     <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#register(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.DataSourceListener)">register</a></code> request.</td>
+          <th>pendingIntent</td>
+          <td>the intent that was used in the
+     <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, android.app.PendingIntent)">add</a></code> request.</td>
         </tr>
       </table>
   </div>
@@ -1234,7 +1321,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </div>
 
 
-<A NAME="unregister(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)"></A>
+<A NAME="remove(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.OnDataPointListener)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1246,8 +1333,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/common/api/Status.html">Status</a>&gt;
       </span>
-      <span class="sympad">unregister</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent pendingIntent)</span>
+      <span class="sympad">remove</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">OnDataPointListener</a> listener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1257,8 +1344,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Unregister from updates from a sensor data source with a PendingIntent.  Should be called
- whenever updates are no longer needed.</p></div>
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Removes a listener from a sensor data source.  Should be called whenever live updates are
+ no longer needed, such as when the activity that displays live data is paused, stopped,
+ or destroyed.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1267,9 +1358,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
         </tr>
         <tr>
-          <th>pendingIntent</td>
-          <td>the intent that was used for registering to updates in the
-     <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#register(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, android.app.PendingIntent)">register</a></code> request.</td>
+          <th>listener</td>
+          <td>the listener that was used in the
+     <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html#add(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SensorRequest, com.google.android.gms.fitness.request.OnDataPointListener)">add</a></code> request.</td>
         </tr>
       </table>
   </div>

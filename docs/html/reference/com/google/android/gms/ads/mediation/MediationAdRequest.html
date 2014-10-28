@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -814,27 +863,42 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#TAG_FOR_CHILD_DIRECTED_TREATMENT_FALSE">TAG_FOR_CHILD_DIRECTED_TREATMENT_FALSE</a></td>
-        <td class="jd-descrcol" width="100%">As returned by <code><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment()</a></code>, indicates that the app should not be
+        <td class="jd-descrcol" width="100%">
+          As returned by <code><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment()</a></code>, indicates that the app should not be
  treated as child-directed for purposes of the Children’s Online Privacy Protection Act
- (COPPA).</td>
+ (COPPA).
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE">TAG_FOR_CHILD_DIRECTED_TREATMENT_TRUE</a></td>
-        <td class="jd-descrcol" width="100%">As returned by <code><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment()</a></code>, indicates that the app should be
+        <td class="jd-descrcol" width="100%">
+          As returned by <code><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment()</a></code>, indicates that the app should be
  treated as child-directed for purposes of the Children’s Online Privacy Protection Act
- (COPPA).</td>
+ (COPPA).
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#TAG_FOR_CHILD_DIRECTED_TREATMENT_UNSPECIFIED">TAG_FOR_CHILD_DIRECTED_TREATMENT_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">As returned by <code><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment()</a></code>, indicates that the publisher has not
+        <td class="jd-descrcol" width="100%">
+          As returned by <code><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment()</a></code>, indicates that the publisher has not
  specified whether the app should be treated as child-directed for purposes of the Children’s
- Online Privacy Protection Act (COPPA).</td>
+ Online Privacy Protection Act (COPPA).
+
+
+
+        </td>
     </tr>
 
 
@@ -874,8 +938,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#getBirthday()">getBirthday</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the birthday of the user, if defined by the
- <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.</div>
+        <div class="jd-descrdiv">
+          Returns the birthday of the user, if defined by the
+ <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -893,8 +962,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#getGender()">getGender</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the gender of the user, if defined by the
- <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.</div>
+        <div class="jd-descrdiv">
+          Returns the gender of the user, if defined by the
+ <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -912,8 +986,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#getKeywords()">getKeywords</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the set of keywords requested by the user, if defined by the
- <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.</div>
+        <div class="jd-descrdiv">
+          Returns the set of keywords requested by the user, if defined by the
+ <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -931,8 +1010,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#getLocation()">getLocation</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the location of the user, if defined by the
- <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.</div>
+        <div class="jd-descrdiv">
+          Returns the location of the user, if defined by the
+ <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -950,7 +1034,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#isTesting()">isTesting</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns true if the publisher is asking for test ads.</div>
+        <div class="jd-descrdiv">
+          Returns true if the publisher is asking for test ads.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -968,10 +1057,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns whether the publisher indicated that the app is to be treated as child-directed for
+        <div class="jd-descrdiv">
+          Returns whether the publisher indicated that the app is to be treated as child-directed for
  purposes of the Children’s Online Privacy Protection Act (COPPA) -
  <a href="http://business.ftc.gov/privacy-and-security/childrens-privacy">
- http://business.ftc.gov/privacy-and-security/childrens-privacy</a>.</div>
+ http://business.ftc.gov/privacy-and-security/childrens-privacy</a>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1031,6 +1125,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>As returned by <code><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment()</a></code>, indicates that the app should not be
  treated as child-directed for purposes of the Children’s Online Privacy Protection Act
  (COPPA).
@@ -1072,6 +1169,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>As returned by <code><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment()</a></code>, indicates that the app should be
  treated as child-directed for purposes of the Children’s Online Privacy Protection Act
  (COPPA).
@@ -1112,6 +1212,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>As returned by <code><a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html#taggedForChildDirectedTreatment()">taggedForChildDirectedTreatment()</a></code>, indicates that the publisher has not
  specified whether the app should be treated as child-directed for purposes of the Children’s
@@ -1177,6 +1280,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the birthday of the user, if defined by the
  <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.
 </p></div>
@@ -1207,6 +1313,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the gender of the user, if defined by the
  <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.
@@ -1239,6 +1348,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the set of keywords requested by the user, if defined by the
  <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.
 </p></div>
@@ -1269,6 +1381,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the location of the user, if defined by the
  <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.
@@ -1301,6 +1416,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the publisher is asking for test ads. Publishers request test ads by
  specifying a device ID, but this information is resolved to a boolean for convenience. If no
  Context was provided to this class' constructor, this will always return true.
@@ -1332,6 +1450,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether the publisher indicated that the app is to be treated as child-directed for
  purposes of the Children’s Online Privacy Protection Act (COPPA) -

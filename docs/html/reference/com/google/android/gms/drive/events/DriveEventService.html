@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -858,6 +904,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -1008,7 +1057,12 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#ACTION_HANDLE_EVENT">ACTION_HANDLE_EVENT</a></td>
-        <td class="jd-descrcol" width="100%">The action name used to bind to the DriveEventService for event delivery </td>
+        <td class="jd-descrcol" width="100%">
+          The action name used to bind to the DriveEventService for event delivery
+
+
+
+        </td>
     </tr>
 
 
@@ -1045,49 +1099,84 @@ android.app.Service
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">START_CONTINUATION_MASK</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">START_FLAG_REDELIVERY</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">START_FLAG_RETRY</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">START_NOT_STICKY</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">START_REDELIVER_INTENT</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">START_STICKY</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">START_STICKY_COMPATIBILITY</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1120,497 +1209,864 @@ android.content.Context
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">ACCESSIBILITY_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">ACCOUNT_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">ACTIVITY_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">ALARM_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">APPWIDGET_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">APP_OPS_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">AUDIO_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">BACKUP_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">BATTERY_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_ABOVE_CLIENT</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_ADJUST_WITH_ACTIVITY</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_ALLOW_OOM_MANAGEMENT</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_AUTO_CREATE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_DEBUG_UNBIND</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_IMPORTANT</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_NOT_FOREGROUND</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">BIND_WAIVE_PRIORITY</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">BLUETOOTH_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CAMERA_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CAPTIONING_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CLIPBOARD_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CONNECTIVITY_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">CONSUMER_IR_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTEXT_IGNORE_SECURITY</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTEXT_INCLUDE_CODE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTEXT_RESTRICTED</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DEVICE_POLICY_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DISPLAY_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DOWNLOAD_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">DROPBOX_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">HDMI_CONTROL_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">INPUT_METHOD_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">INPUT_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">JOB_SCHEDULER_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">KEYGUARD_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">LAUNCHER_APPS_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">LAYOUT_INFLATER_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">LOCATION_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">MEDIA_PROJECTION_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">MEDIA_ROUTER_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">MEDIA_SESSION_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_APPEND</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_ENABLE_WRITE_AHEAD_LOGGING</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_MULTI_PROCESS</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_PRIVATE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_WORLD_READABLE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MODE_WORLD_WRITEABLE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NETWORK_SCORE_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NFC_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NOTIFICATION_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NSD_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">PERSISTENT_DATA_BLOCK_SERVICE</td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">POWER_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">PRINT_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">RESTRICTIONS_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">SEARCH_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">SENSOR_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">STORAGE_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
+        <td class="jd-descrcol" width="100%">
 
 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">TELECOMM_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">TELECOM_SERVICE</td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">TELEPHONY_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">TEXT_SERVICES_MANAGER_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">TV_INPUT_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">UI_MODE_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">USB_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">USER_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">VIBRATOR_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WALLPAPER_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WIFI_P2P_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WIFI_RTT_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
+        <td class="jd-descrcol" width="100%">
 
 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">WIFI_SCANNING_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">WIFI_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-linkcol">WIFI_SCANNING_SERVICE</td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol">WIFI_SERVICE</td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol">WINDOW_SERVICE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1645,49 +2101,84 @@ android.content.ComponentCallbacks2
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_BACKGROUND</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_COMPLETE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_MODERATE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_RUNNING_CRITICAL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_RUNNING_LOW</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_RUNNING_MODERATE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_UI_HIDDEN</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1731,7 +2222,12 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#DriveEventService(java.lang.String)">DriveEventService</a></span>(String name)</nobr>
 
-        <div class="jd-descrdiv">Creates a new event service instance.</div>
+        <div class="jd-descrdiv">
+          Creates a new event service instance.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1749,7 +2245,12 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#DriveEventService()">DriveEventService</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Creates a new event service instance with a default name.</div>
+        <div class="jd-descrdiv">
+          Creates a new event service instance with a default name.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1869,7 +2370,12 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/events/DriveEventService.html#getCallingUid()">getCallingUid</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the current calling UID.</div>
+        <div class="jd-descrdiv">
+          Retrieves the current calling UID.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -3753,6 +4259,22 @@ From class
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">bindServiceAsUser</span>(Intent arg0, ServiceConnection arg1, int arg2, UserHandle arg3)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
             abstract
 
 
@@ -3767,7 +4289,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3783,7 +4305,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3799,7 +4321,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3815,7 +4337,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3831,7 +4353,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3847,7 +4369,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3863,7 +4385,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3879,7 +4401,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3895,7 +4417,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3911,7 +4433,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3927,7 +4449,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3943,7 +4465,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3959,7 +4481,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3975,7 +4497,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -3991,7 +4513,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4007,7 +4529,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4023,7 +4545,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4039,7 +4561,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4055,7 +4577,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4071,7 +4593,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4087,7 +4609,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4103,7 +4625,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4119,7 +4641,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4135,7 +4657,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4151,7 +4673,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4167,7 +4689,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4183,7 +4705,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4199,7 +4721,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4215,7 +4737,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4231,7 +4753,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4247,7 +4769,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4263,7 +4785,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4279,7 +4801,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4295,7 +4817,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4311,7 +4833,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4327,7 +4849,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4343,7 +4865,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4359,7 +4881,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4375,7 +4897,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4391,7 +4913,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4407,7 +4929,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4423,7 +4945,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4439,7 +4961,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4455,7 +4977,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4471,7 +4993,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4487,7 +5009,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4503,7 +5025,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4519,7 +5041,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4535,7 +5057,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4551,7 +5073,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4567,7 +5089,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4583,7 +5105,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4599,7 +5121,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4615,7 +5137,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4631,7 +5153,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4647,7 +5169,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4663,7 +5185,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4679,7 +5201,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4695,7 +5217,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4711,7 +5233,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4727,7 +5249,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4743,7 +5265,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4759,7 +5281,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4775,7 +5297,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4791,7 +5313,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4807,7 +5329,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4823,7 +5345,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4839,7 +5361,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -4855,7 +5377,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4871,7 +5393,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4887,7 +5409,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4903,7 +5425,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4919,7 +5441,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4935,7 +5457,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4951,7 +5473,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4967,7 +5489,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4983,7 +5505,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -4999,7 +5521,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5015,7 +5537,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5031,7 +5553,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5047,7 +5569,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5063,7 +5585,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5079,7 +5601,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5095,7 +5617,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5111,7 +5633,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5127,7 +5649,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5143,7 +5665,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5159,7 +5681,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5175,7 +5697,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5191,7 +5713,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5207,7 +5729,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5223,7 +5745,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5239,7 +5761,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5255,7 +5777,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5271,7 +5793,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5287,7 +5809,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5303,7 +5825,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5319,7 +5841,7 @@ From class
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -5335,7 +5857,7 @@ From class
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
 
@@ -5791,6 +6313,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The action name used to bind to the DriveEventService for event delivery </p></div>
 
 
@@ -5846,6 +6371,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new event service instance.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -5884,6 +6412,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new event service instance with a default name.
 </p></div>
@@ -5925,6 +6456,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -5953,6 +6487,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -5983,6 +6520,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -6012,6 +6552,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -6040,6 +6583,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -6078,6 +6624,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the current calling UID.  Exposed to support test mocking </p></div>
 

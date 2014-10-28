@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -772,6 +818,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -869,7 +918,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Drive.html#API">API</a></td>
-          <td class="jd-descrcol" width="100%">The API necessary to use Drive.</td>
+          <td class="jd-descrcol" width="100%">
+            The API necessary to use Drive.
+
+
+
+          </td>
       </tr>
       
     
@@ -880,7 +934,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/drive/DriveApi.html">DriveApi</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Drive.html#DriveApi">DriveApi</a></td>
-          <td class="jd-descrcol" width="100%">The entry point for interacting with the Drive API.</td>
+          <td class="jd-descrcol" width="100%">
+            The entry point for interacting with the Drive API.
+
+
+
+          </td>
       </tr>
       
     
@@ -891,7 +950,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Drive.html#SCOPE_APPFOLDER">SCOPE_APPFOLDER</a></td>
-          <td class="jd-descrcol" width="100%">A Scope that gives 'drive.appfolder' access to a user's drive.</td>
+          <td class="jd-descrcol" width="100%">
+            A Scope that gives 'drive.appfolder' access to a user's drive.
+
+
+
+          </td>
       </tr>
 
 
@@ -902,7 +966,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Drive.html#SCOPE_FILE">SCOPE_FILE</a></td>
-          <td class="jd-descrcol" width="100%">A Scope that gives 'drive.file' access to a user's drive.</td>
+          <td class="jd-descrcol" width="100%">
+            A Scope that gives 'drive.file' access to a user's drive.
+
+
+
+          </td>
       </tr>
       
     
@@ -1183,6 +1252,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The API necessary to use Drive.  Provide this as an API to
  <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api)</a></code>.
 </p></div>
@@ -1213,6 +1285,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The entry point for interacting with the Drive API.
 </p></div>
 
@@ -1241,6 +1316,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A Scope that gives 'drive.appfolder' access to a user's drive.  This scope gives access to
  files that have been created by the app in the App Folder.
@@ -1274,6 +1352,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A Scope that gives 'drive.file' access to a user's drive. This scope give per-file access to
  files that have been created with, or specifically opened by the app.
  <p> This scope can be provided in
