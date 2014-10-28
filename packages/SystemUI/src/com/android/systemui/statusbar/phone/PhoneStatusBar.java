@@ -3052,7 +3052,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     }
                 });
                 if (dismissShade) {
-                    animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                    animateCollapsePanels(
+                            CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
                 }
                 return true;
             }
@@ -3741,7 +3742,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public boolean onSpacePressed() {
         if (mScreenOn != null && mScreenOn
                 && (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED)) {
-            animateCollapsePanels(0 /* flags */, true /* force */);
+            animateCollapsePanels(
+                    CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL /* flags */, true /* force */);
             return true;
         }
         return false;
