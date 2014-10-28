@@ -39,6 +39,8 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -72,6 +74,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private static final Intent INSECURE_CAMERA_INTENT =
             new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
     private static final Intent PHONE_INTENT = new Intent(Intent.ACTION_DIAL);
+    private static final int DOZE_ANIMATION_STAGGER_DELAY = 48;
+    private static final int DOZE_ANIMATION_ELEMENT_DURATION = 250;
 
     private KeyguardAffordanceView mCameraImageView;
     private KeyguardAffordanceView mPhoneImageView;
@@ -92,7 +96,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private PhoneStatusBar mPhoneStatusBar;
 
     private final TrustDrawable mTrustDrawable;
-
+    private final Interpolator mLinearOutSlowInInterpolator;
     private int mLastUnlockIconRes = 0;
 
     public KeyguardBottomAreaView(Context context) {
@@ -111,6 +115,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mTrustDrawable = new TrustDrawable(mContext);
+        mLinearOutSlowInInterpolator =
+                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
     }
 
     private AccessibilityDelegate mAccessibilityDelegate = new AccessibilityDelegate() {
@@ -448,6 +454,35 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             mPreviewContainer.addView(mCameraPreview);
             mCameraPreview.setVisibility(View.INVISIBLE);
         }
+    }
+
+    public void startFinishDozeAnimation() {
+        long delay = 0;
+        if (mPhoneImageView.getVisibility() == View.VISIBLE) {
+            startFinishDozeAnimationElement(mPhoneImageView, delay);
+            delay += DOZE_ANIMATION_STAGGER_DELAY;
+        }
+        startFinishDozeAnimationElement(mLockIcon, delay);
+        delay += DOZE_ANIMATION_STAGGER_DELAY;
+        if (mCameraImageView.getVisibility() == View.VISIBLE) {
+            startFinishDozeAnimationElement(mCameraImageView, delay);
+        }
+        mIndicationText.setAlpha(0f);
+        mIndicationText.animate()
+                .alpha(1f)
+                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setDuration(NotificationPanelView.DOZE_ANIMATION_DURATION);
+    }
+
+    private void startFinishDozeAnimationElement(View element, long delay) {
+        element.setAlpha(0f);
+        element.setTranslationY(element.getHeight() / 2);
+        element.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setInterpolator(mLinearOutSlowInInterpolator)
+                .setStartDelay(delay)
+                .setDuration(DOZE_ANIMATION_ELEMENT_DURATION);
     }
 
     private final BroadcastReceiver mDevicePolicyReceiver = new BroadcastReceiver() {

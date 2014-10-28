@@ -64,7 +64,7 @@ public class NotificationPanelView extends PanelView implements
 
     private static final int DOZE_BACKGROUND_COLOR = 0xff000000;
     private static final int TAG_KEY_ANIM = R.id.scrim;
-    private static final long DOZE_BACKGROUND_ANIM_DURATION = ScrimController.ANIMATION_DURATION;
+    public static final long DOZE_ANIMATION_DURATION = 700;
 
     private KeyguardAffordanceHelper mAfforanceHelper;
     private StatusBarHeaderView mHeader;
@@ -132,6 +132,7 @@ public class NotificationPanelView extends PanelView implements
 
     private Interpolator mFastOutSlowInInterpolator;
     private Interpolator mFastOutLinearInterpolator;
+    private Interpolator mDozeAnimationInterpolator;
     private ObjectAnimator mClockAnimator;
     private int mClockAnimationTarget = -1;
     private int mTopPaddingAdjustment;
@@ -167,6 +168,8 @@ public class NotificationPanelView extends PanelView implements
     private boolean mQsTouchAboveFalsingThreshold;
     private int mQsFalsingThreshold;
 
+    private float mKeyguardStatusBarAnimateAlpha = 1f;
+
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -199,6 +202,8 @@ public class NotificationPanelView extends PanelView implements
                 android.R.interpolator.fast_out_slow_in);
         mFastOutLinearInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_linear_in);
+        mDozeAnimationInterpolator = AnimationUtils.loadInterpolator(getContext(),
+                android.R.interpolator.linear_out_slow_in);
         mKeyguardBottomArea = (KeyguardBottomAreaView) findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mAfforanceHelper = new KeyguardAffordanceHelper(this, getContext());
@@ -909,6 +914,8 @@ public class NotificationPanelView extends PanelView implements
         @Override
         public void run() {
             mKeyguardStatusBar.setVisibility(View.INVISIBLE);
+            mKeyguardStatusBar.setAlpha(1f);
+            mKeyguardStatusBarAnimateAlpha = 1f;
         }
     };
 
@@ -918,7 +925,28 @@ public class NotificationPanelView extends PanelView implements
                 .setStartDelay(mStatusBar.getKeyguardFadingAwayDelay())
                 .setDuration(mStatusBar.getKeyguardFadingAwayDuration()/2)
                 .setInterpolator(PhoneStatusBar.ALPHA_OUT)
+                .setUpdateListener(mStatusBarAnimateAlphaListener)
                 .withEndAction(mAnimateKeyguardStatusBarInvisibleEndRunnable)
+                .start();
+    }
+
+    private final ValueAnimator.AnimatorUpdateListener mStatusBarAnimateAlphaListener =
+            new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            mKeyguardStatusBarAnimateAlpha = mKeyguardStatusBar.getAlpha();
+        }
+    };
+
+    private void animateKeyguardStatusBarIn() {
+        mKeyguardStatusBar.setVisibility(View.VISIBLE);
+        mKeyguardStatusBar.setAlpha(0f);
+        mKeyguardStatusBar.animate()
+                .alpha(1f)
+                .setStartDelay(0)
+                .setDuration(DOZE_ANIMATION_DURATION)
+                .setInterpolator(mDozeAnimationInterpolator)
+                .setUpdateListener(mStatusBarAnimateAlphaListener)
                 .start();
     }
 
@@ -1387,7 +1415,8 @@ public class NotificationPanelView extends PanelView implements
         alphaNotifications = MathUtils.constrain(alphaNotifications, 0, 1);
         alphaNotifications = (float) Math.pow(alphaNotifications, 0.75);
         float alphaQsExpansion = 1 - Math.min(1, getQsExpansionFraction() * 2);
-        mKeyguardStatusBar.setAlpha(Math.min(alphaNotifications, alphaQsExpansion));
+        mKeyguardStatusBar.setAlpha(Math.min(alphaNotifications, alphaQsExpansion)
+                * mKeyguardStatusBarAnimateAlpha);
         mKeyguardBottomArea.setAlpha(Math.min(1 - getQsExpansionFraction(), alphaNotifications));
         setQsTranslation(mQsExpansionHeight);
     }
@@ -1736,19 +1765,22 @@ public class NotificationPanelView extends PanelView implements
         return (1 - t) * start + t * end;
     }
 
-    private void updateKeyguardStatusBarVisibility() {
-        mKeyguardStatusBar.setVisibility(mKeyguardShowing && !mDozing ? VISIBLE : INVISIBLE);
-    }
-
-    public void setDozing(boolean dozing) {
+    public void setDozing(boolean dozing, boolean animate) {
         if (dozing == mDozing) return;
         mDozing = dozing;
         if (mDozing) {
-            setBackgroundColorAlpha(this, DOZE_BACKGROUND_COLOR, 0xff, false /*animate*/);
+            setBackgroundColorAlpha(DOZE_BACKGROUND_COLOR, 0xff, false /*animate*/);
+            mKeyguardStatusBar.setVisibility(View.INVISIBLE);
+            mKeyguardBottomArea.setVisibility(View.INVISIBLE);
         } else {
-            setBackgroundColorAlpha(this, DOZE_BACKGROUND_COLOR, 0, true /*animate*/);
+            setBackgroundColorAlpha(DOZE_BACKGROUND_COLOR, 0, animate);
+            mKeyguardBottomArea.setVisibility(View.VISIBLE);
+            mKeyguardStatusBar.setVisibility(View.VISIBLE);
+            if (animate) {
+                animateKeyguardStatusBarIn();
+                mKeyguardBottomArea.startFinishDozeAnimation();
+            }
         }
-        updateKeyguardStatusBarVisibility();
     }
 
     @Override
@@ -1756,21 +1788,21 @@ public class NotificationPanelView extends PanelView implements
         return mDozing;
     }
 
-    private static void setBackgroundColorAlpha(final View target, int rgb, int targetAlpha,
+    private void setBackgroundColorAlpha(int rgb, int targetAlpha,
             boolean animate) {
-        int currentAlpha = getBackgroundAlpha(target);
+        int currentAlpha = getBackgroundAlpha(this);
         if (currentAlpha == targetAlpha) {
             return;
         }
         final int r = Color.red(rgb);
         final int g = Color.green(rgb);
         final int b = Color.blue(rgb);
-        Object runningAnim = target.getTag(TAG_KEY_ANIM);
+        Object runningAnim = getTag(TAG_KEY_ANIM);
         if (runningAnim instanceof ValueAnimator) {
             ((ValueAnimator) runningAnim).cancel();
         }
         if (!animate) {
-            target.setBackgroundColor(Color.argb(targetAlpha, r, g, b));
+            setBackgroundColor(Color.argb(targetAlpha, r, g, b));
             return;
         }
         ValueAnimator anim = ValueAnimator.ofInt(currentAlpha, targetAlpha);
@@ -1778,18 +1810,19 @@ public class NotificationPanelView extends PanelView implements
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 int value = (int) animation.getAnimatedValue();
-                target.setBackgroundColor(Color.argb(value, r, g, b));
+                setBackgroundColor(Color.argb(value, r, g, b));
             }
         });
-        anim.setDuration(DOZE_BACKGROUND_ANIM_DURATION);
+        anim.setInterpolator(mDozeAnimationInterpolator);
+        anim.setDuration(DOZE_ANIMATION_DURATION);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                target.setTag(TAG_KEY_ANIM, null);
+                setTag(TAG_KEY_ANIM, null);
             }
         });
         anim.start();
-        target.setTag(TAG_KEY_ANIM, anim);
+        setTag(TAG_KEY_ANIM, anim);
     }
 
     private static int getBackgroundAlpha(View view) {
