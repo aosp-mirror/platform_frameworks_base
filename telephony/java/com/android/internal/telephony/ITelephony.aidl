@@ -657,6 +657,15 @@ interface ITelephony {
     int getPreferredNetworkType();
 
     /**
+     * Check TETHER_DUN_REQUIRED and TETHER_DUN_APN settings, net.tethering.noprovisioning
+     * SystemProperty, and config_tether_apndata to decide whether DUN APN is required for
+     * tethering.
+     *
+     * @return 0: Not required. 1: required. 2: Not set.
+     */
+    int getTetherApnRequired();
+
+    /**
      * Set the preferred network type.
      * Used for device configuration by some CDMA operators.
      *
