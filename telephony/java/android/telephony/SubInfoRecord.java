@@ -29,7 +29,7 @@ public class SubInfoRecord implements Parcelable {
      * Subscription Identifier, this is a device unique number
      * and not an index into an array
      */
-    public long subId;
+    public int subId;
     /** The GID for a SIM that maybe associated with this subscription, empty if unknown */
     public String iccId;
     /**
@@ -91,7 +91,7 @@ public class SubInfoRecord implements Parcelable {
         this.mnc = 0;
     }
 
-    public SubInfoRecord(long subId, String iccId, int slotId, String displayName, int nameSource,
+    public SubInfoRecord(int subId, String iccId, int slotId, String displayName, int nameSource,
             int color, String number, int displayFormat, int roaming, int[] iconRes,
             int mcc, int mnc) {
         this.subId = subId;
@@ -136,7 +136,7 @@ public class SubInfoRecord implements Parcelable {
     public static final Parcelable.Creator<SubInfoRecord> CREATOR = new Parcelable.Creator<SubInfoRecord>() {
         @Override
         public SubInfoRecord createFromParcel(Parcel source) {
-            long subId = source.readLong();
+            int subId = source.readInt();
             String iccId = source.readString();
             int slotId = source.readInt();
             String displayName = source.readString();
@@ -162,7 +162,7 @@ public class SubInfoRecord implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(subId);
+        dest.writeInt(subId);
         dest.writeString(iccId);
         dest.writeInt(slotId);
         dest.writeString(displayName);
