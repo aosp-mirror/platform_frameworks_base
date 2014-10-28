@@ -31,6 +31,7 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
@@ -220,7 +221,8 @@ public class ZenModePanel extends LinearLayout {
                 mBucketIndex = -1;
             } else {
                 mBucketIndex = DEFAULT_BUCKET_INDEX;
-                mTimeCondition = ZenModeConfig.toTimeCondition(MINUTE_BUCKETS[mBucketIndex]);
+                mTimeCondition = ZenModeConfig.toTimeCondition(mContext,
+                        MINUTE_BUCKETS[mBucketIndex]);
             }
             if (DEBUG) Log.d(mTag, "Initial bucket index: " + mBucketIndex);
             mConditions = null; // reset conditions
@@ -339,9 +341,11 @@ public class ZenModePanel extends LinearLayout {
         if (condition == null) return null;
         final long time = ZenModeConfig.tryParseCountdownConditionId(condition.id);
         if (time == 0) return null;
-        final long span = time - System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
+        final long span = time - now;
         if (span <= 0 || span > MAX_BUCKET_MINUTES * MINUTES_MS) return null;
-        return ZenModeConfig.toTimeCondition(time, Math.round(span / (float) MINUTES_MS));
+        return ZenModeConfig.toTimeCondition(mContext,
+                time, Math.round(span / (float) MINUTES_MS), now);
     }
 
     private void handleUpdateConditions(Condition[] conditions) {
@@ -395,7 +399,7 @@ public class ZenModePanel extends LinearLayout {
         if (favoriteIndex == -1) {
             getConditionTagAt(FOREVER_CONDITION_INDEX).rb.setChecked(true);
         } else {
-            mTimeCondition = ZenModeConfig.toTimeCondition(MINUTE_BUCKETS[favoriteIndex]);
+            mTimeCondition = ZenModeConfig.toTimeCondition(mContext, MINUTE_BUCKETS[favoriteIndex]);
             mBucketIndex = favoriteIndex;
             bind(mTimeCondition, mZenConditions.getChildAt(TIME_CONDITION_INDEX));
             getConditionTagAt(TIME_CONDITION_INDEX).rb.setChecked(true);
@@ -451,16 +455,32 @@ public class ZenModePanel extends LinearLayout {
             }
         });
 
-        if (tag.title == null) {
-            tag.title = (TextView) row.findViewById(android.R.id.title);
+        if (tag.lines == null) {
+            tag.lines = row.findViewById(android.R.id.content);
         }
+        if (tag.line1 == null) {
+            tag.line1 = (TextView) row.findViewById(android.R.id.text1);
+        }
+        if (tag.line2 == null) {
+            tag.line2 = (TextView) row.findViewById(android.R.id.text2);
+        }
+        final String line1, line2;
         if (condition == null) {
-            tag.title.setText(mContext.getString(com.android.internal.R.string.zen_mode_forever));
+            line1 = mContext.getString(com.android.internal.R.string.zen_mode_forever);
+            line2 = null;
         } else {
-            tag.title.setText(condition.summary);
+            line1 = !TextUtils.isEmpty(condition.line1) ? condition.line1 : condition.summary;
+            line2 = condition.line2;
         }
-        tag.title.setEnabled(enabled);
-        tag.title.setAlpha(enabled ? 1 : .4f);
+        tag.line1.setText(line1);
+        if (TextUtils.isEmpty(line2)) {
+            tag.line2.setVisibility(GONE);
+        } else {
+            tag.line2.setVisibility(VISIBLE);
+            tag.line2.setText(line2);
+        }
+        tag.lines.setEnabled(enabled);
+        tag.lines.setAlpha(enabled ? 1 : .4f);
 
         final ImageView button1 = (ImageView) row.findViewById(android.R.id.button1);
         button1.setOnClickListener(new OnClickListener() {
@@ -477,7 +497,7 @@ public class ZenModePanel extends LinearLayout {
                 onClickTimeButton(row, tag, true /*up*/);
             }
         });
-        tag.title.setOnClickListener(new OnClickListener() {
+        tag.lines.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 tag.rb.setChecked(true);
@@ -492,7 +512,8 @@ public class ZenModePanel extends LinearLayout {
             } else {
                 final long span = time - System.currentTimeMillis();
                 button1.setEnabled(span > MIN_BUCKET_MINUTES * MINUTES_MS);
-                final Condition maxCondition = ZenModeConfig.toTimeCondition(MAX_BUCKET_MINUTES);
+                final Condition maxCondition = ZenModeConfig.toTimeCondition(mContext,
+                        MAX_BUCKET_MINUTES);
                 button2.setEnabled(!Objects.equals(condition.summary, maxCondition.summary));
             }
 
@@ -505,7 +526,7 @@ public class ZenModePanel extends LinearLayout {
         // wire up interaction callbacks for newly-added condition rows
         if (convertView == null) {
             Interaction.register(tag.rb, mInteractionCallback);
-            Interaction.register(tag.title, mInteractionCallback);
+            Interaction.register(tag.lines, mInteractionCallback);
             Interaction.register(button1, mInteractionCallback);
             Interaction.register(button2, mInteractionCallback);
         }
@@ -525,7 +546,7 @@ public class ZenModePanel extends LinearLayout {
                 return;
         }
         announceForAccessibility(mContext.getString(R.string.zen_mode_and_condition, modeText,
-                tag.title.getText()));
+                tag.line1.getText()));
     }
 
     private void onClickTimeButton(View row, ConditionTag tag, boolean up) {
@@ -542,18 +563,21 @@ public class ZenModePanel extends LinearLayout {
                 final long bucketTime = now + bucketMinutes * MINUTES_MS;
                 if (up && bucketTime > time || !up && bucketTime < time) {
                     mBucketIndex = j;
-                    newCondition = ZenModeConfig.toTimeCondition(bucketTime, bucketMinutes);
+                    newCondition = ZenModeConfig.toTimeCondition(mContext,
+                            bucketTime, bucketMinutes, now);
                     break;
                 }
             }
             if (newCondition == null) {
                 mBucketIndex = DEFAULT_BUCKET_INDEX;
-                newCondition = ZenModeConfig.toTimeCondition(MINUTE_BUCKETS[mBucketIndex]);
+                newCondition = ZenModeConfig.toTimeCondition(mContext,
+                        MINUTE_BUCKETS[mBucketIndex]);
             }
         } else {
             // on a known index, simply increment or decrement
             mBucketIndex = Math.max(0, Math.min(N - 1, mBucketIndex + (up ? 1 : -1)));
-            newCondition = ZenModeConfig.toTimeCondition(MINUTE_BUCKETS[mBucketIndex]);
+            newCondition = ZenModeConfig.toTimeCondition(mContext,
+                    MINUTE_BUCKETS[mBucketIndex]);
         }
         mTimeCondition = newCondition;
         bind(mTimeCondition, row);
@@ -640,7 +664,9 @@ public class ZenModePanel extends LinearLayout {
     // used as the view tag on condition rows
     private static class ConditionTag {
         RadioButton rb;
-        TextView title;
+        View lines;
+        TextView line1;
+        TextView line2;
         Condition condition;
     }
 
