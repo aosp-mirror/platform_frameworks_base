@@ -21,7 +21,6 @@ import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 
-import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -120,6 +119,7 @@ class AutomaticBrightnessController {
     // The minimum and maximum screen brightnesses.
     private final int mScreenBrightnessRangeMinimum;
     private final int mScreenBrightnessRangeMaximum;
+    private final float mDozeScaleFactor;
 
     // Amount of time to delay auto-brightness after screen on while waiting for
     // the light sensor to warm-up in milliseconds.
@@ -171,9 +171,12 @@ class AutomaticBrightnessController {
     // The last screen auto-brightness gamma.  (For printing in dump() only.)
     private float mLastScreenAutoBrightnessGamma = 1.0f;
 
+    // Are we going to adjust brightness while dozing.
+    private boolean mDozing;
+
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
-            SensorManager sensorManager, Spline autoBrightnessSpline,
-            int lightSensorWarmUpTime, int brightnessMin, int brightnessMax) {
+            SensorManager sensorManager, Spline autoBrightnessSpline, int lightSensorWarmUpTime,
+            int brightnessMin, int brightnessMax, float dozeScaleFactor) {
         mCallbacks = callbacks;
         mTwilight = LocalServices.getService(TwilightManager.class);
         mSensorManager = sensorManager;
@@ -181,6 +184,7 @@ class AutomaticBrightnessController {
         mScreenBrightnessRangeMinimum = brightnessMin;
         mScreenBrightnessRangeMaximum = brightnessMax;
         mLightSensorWarmUpTimeConfig = lightSensorWarmUpTime;
+        mDozeScaleFactor = dozeScaleFactor;
 
         mHandler = new AutomaticBrightnessHandler(looper);
         mAmbientLightRingBuffer = new AmbientLightRingBuffer();
@@ -195,11 +199,20 @@ class AutomaticBrightnessController {
     }
 
     public int getAutomaticScreenBrightness() {
+        if (mDozing) {
+            return (int) (mScreenAutoBrightness * mDozeScaleFactor);
+        }
         return mScreenAutoBrightness;
     }
 
-    public void configure(boolean enable, float adjustment) {
-        boolean changed = setLightSensorEnabled(enable);
+    public void configure(boolean enable, float adjustment, boolean dozing) {
+        // While dozing, the application processor may be suspended which will prevent us from
+        // receiving new information from the light sensor. On some devices, we may be able to
+        // switch to a wake-up light sensor instead but for now we will simply disable the sensor
+        // and hold onto the last computed screen auto brightness.  We save the dozing flag for
+        // debugging purposes.
+        mDozing = dozing;
+        boolean changed = setLightSensorEnabled(enable && !dozing);
         changed |= setScreenAutoBrightnessAdjustment(adjustment);
         if (changed) {
             updateAutoBrightness(false /*sendUpdate*/);
@@ -230,6 +243,7 @@ class AutomaticBrightnessController {
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mScreenAutoBrightnessAdjustment=" + mScreenAutoBrightnessAdjustment);
         pw.println("  mLastScreenAutoBrightnessGamma=" + mLastScreenAutoBrightnessGamma);
+        pw.println("  mDozing=" + mDozing);
     }
 
     private boolean setLightSensorEnabled(boolean enable) {

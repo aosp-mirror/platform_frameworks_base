@@ -801,6 +801,13 @@
          that can be set by the user. -->
     <integer name="config_screenBrightnessDoze">1</integer>
 
+    <!-- Allow automatic adjusting of the screen brightness while dozing in low power state. -->
+    <bool name="config_allowAutoBrightnessWhileDozing">false</bool>
+
+    <!-- If we allow automatic adjustment of screen brightness while dozing, how many times we want
+         to reduce it to preserve the battery. Value of 100% means no scaling. -->
+    <fraction name="config_screenAutoBrightnessDozeScaleFactor">100%</fraction>
+
     <!-- Screen brightness used to dim the screen when the user activity
          timeout expires.  May be less than the minimum allowed brightness setting
          that can be set by the user. -->
