@@ -151,7 +151,6 @@ OpenGLRenderer::OpenGLRenderer(RenderState& renderState)
         , mScissorOptimizationDisabled(false)
         , mSuppressTiling(false)
         , mFirstFrameAfterResize(true)
-        , mCountOverdraw(false)
         , mLightCenter((Vector3){FLT_MIN, FLT_MIN, FLT_MIN})
         , mLightRadius(FLT_MIN)
         , mAmbientShadowAlpha(0)
@@ -266,7 +265,7 @@ void OpenGLRenderer::discardFramebuffer(float left, float top, float right, floa
 }
 
 status_t OpenGLRenderer::clear(float left, float top, float right, float bottom, bool opaque) {
-    if (!opaque || mCountOverdraw) {
+    if (!opaque) {
         mCaches.enableScissor();
         mCaches.setScissor(left, getViewportHeight() - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -345,10 +344,6 @@ void OpenGLRenderer::finish() {
             mCaches.dumpMemoryUsage();
         }
 #endif
-    }
-
-    if (mCountOverdraw) {
-        countOverdraw();
     }
 
     mFrameStarted = false;
@@ -462,21 +457,6 @@ void OpenGLRenderer::renderOverdraw() {
 
         mCaches.stencil.disable();
     }
-}
-
-void OpenGLRenderer::countOverdraw() {
-    size_t count = getWidth() * getHeight();
-    uint32_t* buffer = new uint32_t[count];
-    glReadPixels(0, 0, getWidth(), getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, &buffer[0]);
-
-    size_t total = 0;
-    for (size_t i = 0; i < count; i++) {
-        total += buffer[i] & 0xff;
-    }
-
-    mOverdraw = total / float(count);
-
-    delete[] buffer;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1647,8 +1627,6 @@ void OpenGLRenderer::setupDraw(bool clearLayer) {
     mDescription.hasDebugHighlight = !mCaches.debugOverdraw &&
             mCaches.debugStencilClip == Caches::kStencilShowHighlight &&
             mCaches.stencil.isTestEnabled();
-
-    mDescription.emulateStencil = mCountOverdraw;
 }
 
 void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
@@ -1980,8 +1958,7 @@ status_t OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int
             return status | replayStruct.mDrawGlStatus;
         }
 
-        bool avoidOverdraw = !mCaches.debugOverdraw && !mCountOverdraw; // shh, don't tell devs!
-        DeferredDisplayList deferredList(*currentClipRect(), avoidOverdraw);
+        DeferredDisplayList deferredList(*currentClipRect());
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
         renderNode->defer(deferStruct, 0);
 
@@ -3452,19 +3429,6 @@ void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
         mDescription.hasRoundRectClip = true;
     }
     mSkipOutlineClip = true;
-
-    if (mCountOverdraw) {
-        if (!mCaches.blend) glEnable(GL_BLEND);
-        if (mCaches.lastSrcMode != GL_ONE || mCaches.lastDstMode != GL_ONE) {
-            glBlendFunc(GL_ONE, GL_ONE);
-        }
-
-        mCaches.blend = true;
-        mCaches.lastSrcMode = GL_ONE;
-        mCaches.lastDstMode = GL_ONE;
-
-        return;
-    }
 
     blend = blend || mode != SkXfermode::kSrcOver_Mode;
 
