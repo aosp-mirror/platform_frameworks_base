@@ -158,7 +158,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         maySetActiveSource(physicalAddress);
-        maySendActiveSource();
+        maySendActiveSource(message.getSource());
         wakeUpIfActiveSource();
         return true;  // Broadcast message.
     }
@@ -198,10 +198,13 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
         }
     }
 
-    private void maySendActiveSource() {
+    private void maySendActiveSource(int dest) {
         if (mIsActiveSource) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
                     mAddress, mService.getPhysicalAddress()));
+            // Always reports menu-status active to receive RCP.
+            mService.sendCecCommand(HdmiCecMessageBuilder.buildReportMenuStatus(
+                    mAddress, dest, Constants.MENU_STATE_ACTIVATED));
         }
     }
 
@@ -209,7 +212,7 @@ final class HdmiCecLocalDevicePlayback extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleRequestActiveSource(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        maySendActiveSource();
+        maySendActiveSource(message.getSource());
         return true;  // Broadcast message.
     }
 
