@@ -91,7 +91,8 @@ public final class MediaProjectionManagerService extends SystemService
     public void onStart() {
         publishBinderService(Context.MEDIA_PROJECTION_SERVICE, new BinderService(),
                 false /*allowIsolated*/);
-        mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY, mMediaRouterCallback);
+        mMediaRouter.addCallback(MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY, mMediaRouterCallback,
+                MediaRouter.CALLBACK_FLAG_PASSIVE_DISCOVERY);
     }
 
     @Override
