@@ -23,9 +23,9 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.ServiceManager;
+import android.util.ArraySet;
 import android.util.Log;
 
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -59,7 +59,7 @@ public class BackgroundDexOptService extends JobService {
         if (pm.isStorageLow()) {
             return false;
         }
-        final HashSet<String> pkgs = pm.getPackagesThatNeedDexOpt();
+        final ArraySet<String> pkgs = pm.getPackagesThatNeedDexOpt();
         if (pkgs == null) {
             return false;
         }
