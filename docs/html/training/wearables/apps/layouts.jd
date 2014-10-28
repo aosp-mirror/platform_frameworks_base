@@ -82,7 +82,7 @@ PendingIntent notificationPendingIntent = PendingIntent.getActivity(this, 0, not
   users view your notification.
   </li>
   <li>Issue the notification using the
-  {@link android.app.NotificationManager#notify notify()} method.
+  <a href="{@docRoot}reference/android/app/NotificationManager.html#notify(int, android.app.Notification)"><code>notify()</code></a> method.
   <p class="note"><b>Note:</b> When the notification is peeking on the homescreen, the system
   displays it with a standard template that it generates from the notification's semantic data. This template works well on all watchfaces. When users swipe the notification up, they'll then see the
   custom activity for the notification.</p>
