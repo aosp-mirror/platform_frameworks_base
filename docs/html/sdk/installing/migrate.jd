@@ -15,23 +15,7 @@ page.title=Migrating from Eclipse
 </div>
 
 <p>If you've previously developed for Android using Eclipse and would like to migrate
-to Android Studio, you should export your projects from Eclipse in order to generate
-Gradle build files. You can then import your project into Android Studio.</p>
-
-
-<h2 id="Export">Export from Eclipse</h2>
-<ol>
-<li><a href="{@docRoot}tools/help/adt.html#Updating">Update your Eclipse ADT Plugin</a>
-  (you must have version 22.0 or higher).</li>
-<li>In Eclipse, select <strong>File > Export</strong>.</li>
-<li>In the window that appears, open <strong>Android</strong> and select <strong>Generate Gradle
-build files</strong>.</li>
-<li>Select the project you want to export for Android Studio and click
-<strong>Finish</strong>.</li>
-</ol>
-
-<p>Your selected project remains in the same location but now contains a {@code build.gradle}
-file and is ready for Android Studio.</p>
+to Android Studio, you can import your project into Android Studio.</p>
 
 
 <h2 id="Export">Import into Android Studio</h2>
