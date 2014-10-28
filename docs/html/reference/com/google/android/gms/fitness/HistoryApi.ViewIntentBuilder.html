@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -92,7 +103,7 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>DataInsertRequest.Builder | Android Developers</title>
+<title>HistoryApi.ViewIntentBuilder | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -421,7 +467,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
 
-        <li class="current">DataInsertRequest.Builder</li>
+        <li class="current">HistoryApi.ViewIntentBuilder</li>
       </ul>
     </div>
   </div>
@@ -760,12 +806,15 @@ Summary:
 
 
     class
-<h1 itemprop="name">DataInsertRequest.Builder</h1>
+<h1 itemprop="name">HistoryApi.ViewIntentBuilder</h1>
 
 
 
 
     extends Object<br/>
+
+
+
 
 
 
@@ -793,7 +842,7 @@ Summary:
 
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
 
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.fitness.request.DataInsertRequest.Builder</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.fitness.HistoryApi.ViewIntentBuilder</td>
     </tr>
 
 
@@ -809,7 +858,42 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Builder used to create new DataInsertRequests.
+<p itemprop="articleBody">Builder of intents to view data stored in Google Fit.  This intent can be used when
+ the application wants to display a more detailed view of a particular
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.  Apps that can handle the data type (such as the app
+ that inserted the data) can register for the intent.
+ <p/>
+ If desired, <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html#setPreferredApplication(java.lang.String)">setPreferredApplication(String)</a></code> can be called to choose a specific
+ application to handle the intent, if the application is installed on the device.
+ This will often be the application defined in
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getAppPackageName()">getAppPackageName()</a></code>.
+ <p/>
+ The data view intent has the following attributes:
+ <ul>
+ <li><b>action</b> is set to <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_VIEW">ACTION_VIEW</a></code>
+ <li><b>type</b> is <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#MIME_TYPE_PREFIX">MIME_TYPE_PREFIX</a></code> followed by the data type
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#getName()">name</a></code>.
+ For example, <code>vnd.google.fitness.data_type/com.google.heart_rate.bpm</code> could be used
+ for an intent to view heart rate.
+ <li><b>extras</b> contain the data source, start time, and end time.  Each of them has a
+ corresponding constant defined in <code><a href="/reference/com/google/android/gms/fitness/Fitness.html">Fitness</a></code>.
+ </ul>
+ <p/>
+ An application that would like to handle History view intents should create an activity and
+ add an intent filter to its manifest file.  Here's an example activity that can display heart
+ rate data:
+ <pre>
+ &lt;activity android:name=".ViewHeartRateActivity" android:exported="true"&gt;
+    &lt;intent-filter&gt;
+      &lt;action android:name="vnd.google.fitness.VIEW" /&gt;
+      &lt;category android:name="android.intent.category.DEFAULT" /&gt;
+      &lt;data android:mimeType="vnd.google.fitness.data_type/com.google.heart_rate.bpm" /&gt;
+   &lt/intent-filter&gt;
+ &lt/activity&gt;
+ </pre>
+ If the application is only able to shown its own data (and not that from other apps),
+ it can opt-out of implicit intents by removing <code><a href="/reference/android/content/Intent.html#CATEGORY_DEFAULT">CATEGORY_DEFAULT</a></code> from the
+ intent filter above.
 </p>
 
 
@@ -876,7 +960,14 @@ Summary:
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/DataInsertRequest.Builder.html#DataInsertRequest.Builder()">DataInsertRequest.Builder</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html#HistoryApi.ViewIntentBuilder(android.content.Context, com.google.android.gms.fitness.data.DataType)">HistoryApi.ViewIntentBuilder</a></span>(Context context, <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a> dataType)</nobr>
+
+        <div class="jd-descrdiv">
+          Starts building an intent to view History data.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -902,12 +993,18 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/fitness/request/DataInsertRequest.html">DataInsertRequest</a></nobr>
+            Intent</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/DataInsertRequest.Builder.html#build()">build</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html#build()">build</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Finishes building and returns the request.</div>
+        <div class="jd-descrdiv">
+          Returns the built intent, which can be used with <code><a href="/reference/android/content/Context.html#startActivity(android.content.Intent)">startActivity(Intent)</a></code> to
+ launch the desired Fitness activity.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -920,12 +1017,63 @@ Summary:
 
 
 
-            <a href="/reference/com/google/android/gms/fitness/request/DataInsertRequest.Builder.html">DataInsertRequest.Builder</a></nobr>
+            <a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">HistoryApi.ViewIntentBuilder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/DataInsertRequest.Builder.html#setDataSet(com.google.android.gms.fitness.data.DataSet)">setDataSet</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataSet.html">DataSet</a> dataSet)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html#setDataSource(com.google.android.gms.fitness.data.DataSource)">setDataSource</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a> dataSource)</nobr>
 
-        <div class="jd-descrdiv">Sets the data set for this request.</div>
+        <div class="jd-descrdiv">
+          Sets the data source to display data for, if a specific data source is desired.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">HistoryApi.ViewIntentBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html#setPreferredApplication(java.lang.String)">setPreferredApplication</a></span>(String packageName)</nobr>
+
+        <div class="jd-descrdiv">
+          Sets a preferred application to use for this intent.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">HistoryApi.ViewIntentBuilder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html#setTimeInterval(long, long, java.util.concurrent.TimeUnit)">setTimeInterval</a></span>(long start, long end, TimeUnit timeUnit)</nobr>
+
+        <div class="jd-descrdiv">
+          Sets the time interval to display data for.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1180,7 +1328,7 @@ From class
 
 
 
-<A NAME="DataInsertRequest.Builder()"></A>
+<A NAME="HistoryApi.ViewIntentBuilder(android.content.Context, com.google.android.gms.fitness.data.DataType)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1192,8 +1340,8 @@ From class
 
 
       </span>
-      <span class="sympad">DataInsertRequest.Builder</span>
-      <span class="normal">()</span>
+      <span class="sympad">HistoryApi.ViewIntentBuilder</span>
+      <span class="normal">(Context context, <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a> dataType)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1203,7 +1351,24 @@ From class
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Starts building an intent to view History data.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>context</td>
+          <td>a valid context</td>
+        </tr>
+        <tr>
+          <th>dataType</td>
+          <td>the data type we want to visualize
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
@@ -1234,7 +1399,7 @@ From class
 
 
 
-        <a href="/reference/com/google/android/gms/fitness/request/DataInsertRequest.html">DataInsertRequest</a>
+        Intent
       </span>
       <span class="sympad">build</span>
       <span class="normal">()</span>
@@ -1247,14 +1412,28 @@ From class
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Finishes building and returns the request.
-</p></div>
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the built intent, which can be used with <code><a href="/reference/android/content/Context.html#startActivity(android.content.Intent)">startActivity(Intent)</a></code> to
+ launch the desired Fitness activity.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th>IllegalStateException</td>
+            <td>if not enough data has been passed into the Builder to
+     build a valid intent.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
 
 
-<A NAME="setDataSet(com.google.android.gms.fitness.data.DataSet)"></A>
+<A NAME="setDataSource(com.google.android.gms.fitness.data.DataSource)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1264,10 +1443,10 @@ From class
 
 
 
-        <a href="/reference/com/google/android/gms/fitness/request/DataInsertRequest.Builder.html">DataInsertRequest.Builder</a>
+        <a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">HistoryApi.ViewIntentBuilder</a>
       </span>
-      <span class="sympad">setDataSet</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/fitness/data/DataSet.html">DataSet</a> dataSet)</span>
+      <span class="sympad">setDataSource</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a> dataSource)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1277,8 +1456,120 @@ From class
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the data set for this request.
-</p></div>
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the data source to display data for, if a specific data source is desired.
+ Otherwise, the viewer can choose any data source or use the default one.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>dataSource</td>
+          <td>the specific data source we want to display data for
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setPreferredApplication(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">HistoryApi.ViewIntentBuilder</a>
+      </span>
+      <span class="sympad">setPreferredApplication</span>
+      <span class="normal">(String packageName)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets a preferred application to use for this intent.  If the given app is installed and
+ able to handle this intent, an explicit intent will be returned.  This can be used in
+ combination with <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getAppPackageName()">getAppPackageName()</a></code> to link back to the original
+ application which inserted the data being displayed.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>packageName</td>
+          <td>the package name for the application we want to link to</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>this builder, for chaining
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setTimeInterval(long, long, java.util.concurrent.TimeUnit)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">HistoryApi.ViewIntentBuilder</a>
+      </span>
+      <span class="sympad">setTimeInterval</span>
+      <span class="normal">(long start, long end, TimeUnit timeUnit)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the time interval to display data for.  Every intent requires a valid time interval.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>start</td>
+          <td>start time, inclusive, in time since epoch</td>
+        </tr>
+        <tr>
+          <th>end</td>
+          <td>end time, exclusive, in time since epoch</td>
+        </tr>
+        <tr>
+          <th>timeUnit</td>
+          <td>the timeUnit for start and end times
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

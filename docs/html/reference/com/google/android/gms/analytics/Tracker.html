@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -772,6 +818,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -953,8 +1002,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAdvertisingIdCollection(boolean)">enableAdvertisingIdCollection</a></span>(boolean enabled)</nobr>
 
-        <div class="jd-descrdiv">Sets whether the advertising id and ad targeting preference should be collected while
- sending hits to GA servers.</div>
+        <div class="jd-descrdiv">
+          Sets whether the advertising id and ad targeting preference should be collected while
+ sending hits to GA servers.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -972,8 +1026,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableAutoActivityTracking(boolean)">enableAutoActivityTracking</a></span>(boolean enabled)</nobr>
 
-        <div class="jd-descrdiv">Specify whether <code><a href="/reference/android/app/Activity.html">Activity</a></code> starts should automatically generate
- screen views from this <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>.</div>
+        <div class="jd-descrdiv">
+          Specify whether <code><a href="/reference/android/app/Activity.html">Activity</a></code> starts should automatically generate
+ screen views from this <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -991,7 +1050,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#enableExceptionReporting(boolean)">enableExceptionReporting</a></span>(boolean enabled)</nobr>
 
-        <div class="jd-descrdiv">Enables or disables uncaught exception reporting for a given tracker.</div>
+        <div class="jd-descrdiv">
+          Enables or disables uncaught exception reporting for a given tracker.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1009,7 +1073,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#get(java.lang.String)">get</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Gets the model value for the given key.</div>
+        <div class="jd-descrdiv">
+          Gets the model value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1027,8 +1096,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send</a></span>(Map&lt;String,&nbsp;String&gt; params)</nobr>
 
-        <div class="jd-descrdiv">Merges the model values set on this Tracker via <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map)</a></code> with <code>params</code> and
- generates a hit to be sent.</div>
+        <div class="jd-descrdiv">
+          Merges the model values set on this Tracker via <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map)</a></code> with <code>params</code> and
+ generates a hit to be sent.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1046,7 +1120,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#set(java.lang.String, java.lang.String)">set</a></span>(String key, String value)</nobr>
 
-        <div class="jd-descrdiv">Sets the model value for the given key.</div>
+        <div class="jd-descrdiv">
+          Sets the model value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1080,7 +1159,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setAppId(java.lang.String)">setAppId</a></span>(String appId)</nobr>
 
-        <div class="jd-descrdiv">Sets the id of the App for analytics reports.</div>
+        <div class="jd-descrdiv">
+          Sets the id of the App for analytics reports.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1098,7 +1182,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setAppInstallerId(java.lang.String)">setAppInstallerId</a></span>(String appInstallerId)</nobr>
 
-        <div class="jd-descrdiv">Sets the Installer Id of the App for analytics reports.</div>
+        <div class="jd-descrdiv">
+          Sets the Installer Id of the App for analytics reports.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1116,7 +1205,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setAppName(java.lang.String)">setAppName</a></span>(String appName)</nobr>
 
-        <div class="jd-descrdiv">Sets the name of the App for analytics reports.</div>
+        <div class="jd-descrdiv">
+          Sets the name of the App for analytics reports.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1134,7 +1228,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setAppVersion(java.lang.String)">setAppVersion</a></span>(String appVersion)</nobr>
 
-        <div class="jd-descrdiv">Sets the version identifier of the App for analytics reports.</div>
+        <div class="jd-descrdiv">
+          Sets the version identifier of the App for analytics reports.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1152,7 +1251,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setClientId(java.lang.String)">setClientId</a></span>(String clientId)</nobr>
 
-        <div class="jd-descrdiv">Sets a particular client Id for the device.</div>
+        <div class="jd-descrdiv">
+          Sets a particular client Id for the device.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1202,7 +1306,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setLanguage(java.lang.String)">setLanguage</a></span>(String language)</nobr>
 
-        <div class="jd-descrdiv">Sets the language based on user's preferred locale.</div>
+        <div class="jd-descrdiv">
+          Sets the language based on user's preferred locale.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1268,7 +1377,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setSampleRate(double)">setSampleRate</a></span>(double sampleRate)</nobr>
 
-        <div class="jd-descrdiv">Set the sample rate for all hits generated by the app.</div>
+        <div class="jd-descrdiv">
+          Set the sample rate for all hits generated by the app.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1302,7 +1416,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setScreenName(java.lang.String)">setScreenName</a></span>(String screenName)</nobr>
 
-        <div class="jd-descrdiv">Set the screen name to be associated with all subsequent hits.</div>
+        <div class="jd-descrdiv">
+          Set the screen name to be associated with all subsequent hits.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1320,7 +1439,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setScreenResolution(int, int)">setScreenResolution</a></span>(int width, int height)</nobr>
 
-        <div class="jd-descrdiv">Sets the screen resolution of the device.</div>
+        <div class="jd-descrdiv">
+          Sets the screen resolution of the device.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1338,8 +1462,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setSessionTimeout(long)">setSessionTimeout</a></span>(long sessionTimeout)</nobr>
 
-        <div class="jd-descrdiv">Specify the time (in seconds) an app can stay in the background before a
- new session is started.</div>
+        <div class="jd-descrdiv">
+          Specify the time (in seconds) an app can stay in the background before a
+ new session is started.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1373,7 +1502,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/analytics/Tracker.html#setUseSecure(boolean)">setUseSecure</a></span>(boolean useSecure)</nobr>
 
-        <div class="jd-descrdiv">Sets whether hits should be sent securely over https.</div>
+        <div class="jd-descrdiv">
+          Sets whether hits should be sent securely over https.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1675,6 +1809,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether the advertising id and ad targeting preference should be collected while
  sending hits to GA servers. The collection of advertising id and the ad targeting preference
  is disabled by default and needs to be turned on for mobile audience features and any other
@@ -1717,6 +1854,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Specify whether <code><a href="/reference/android/app/Activity.html">Activity</a></code> starts should automatically generate
  screen views from this <code><a href="/reference/com/google/android/gms/analytics/Tracker.html">Tracker</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -1757,6 +1897,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Enables or disables uncaught exception reporting for a given tracker.
  This method is equivalent to using 'ga_reportUncaughtExceptions' in the tracker configuration
  file. Note that as with the configuration setting, only the uncaught exceptions are reported
@@ -1790,6 +1933,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the model value for the given key. Returns null if no model value has been set.
 </p></div>
 
@@ -1819,6 +1965,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Merges the model values set on this Tracker via <code><a href="/reference/com/google/android/gms/analytics/Tracker.html#send(java.util.Map<java.lang.String, java.lang.String>)">send(Map)</a></code> with <code>params</code> and
  generates a hit to be sent. The hit may not be dispatched immediately. Note that the hit type
@@ -1864,6 +2013,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the model value for the given key. All subsequent track or send calls will send this
  key-value pair along as well. To remove a particular field, simply set the value to null.</p></div>
@@ -1911,6 +2063,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1939,6 +2094,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the id of the App for analytics reports. This value is populated by default using the
  information provided by the android package manager. This value is usually the package name
@@ -1981,6 +2139,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the Installer Id of the App for analytics reports. This value is populated by default
  using the information provided by the android package manager and the play store.</p></div>
   <div class="jd-tagdata">
@@ -2020,6 +2181,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the name of the App for analytics reports. This value is populated by default using the
  information provided by the android package manager.</p></div>
@@ -2061,6 +2225,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the version identifier of the App for analytics reports. This value is populated by
  default using the information provided by the android package manager.</p></div>
   <div class="jd-tagdata">
@@ -2100,6 +2267,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets a particular client Id for the device. This Id should be a valid UUID (version 4)
  string as described in http://goo.gl/0dlrGx. If not specified, the SDK automatically
@@ -2142,6 +2312,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2171,6 +2344,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2199,6 +2375,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the language based on user's preferred locale. The string should be of the format ll-cc
  where ll is the language and cc is the country. If no value is provided, the default value
@@ -2241,6 +2420,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2269,6 +2451,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -2299,6 +2484,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2327,6 +2515,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Set the sample rate for all hits generated by the app. The sampling is done at app level.
  The default value is 100. To enable sampling, the minimum rate required is 0.01%.</p></div>
@@ -2369,6 +2560,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2397,6 +2591,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Set the screen name to be associated with all subsequent hits.
 </p></div>
@@ -2427,6 +2624,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the screen resolution of the device. If no resolution is specified, the default
  resolution from the android SDK is used.</p></div>
@@ -2472,6 +2672,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Specify the time (in seconds) an app can stay in the background before a
  new session is started.  Setting this to a negative number will result in
  a new session never being started.  Default is 30 seconds.</p></div>
@@ -2513,6 +2716,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2541,6 +2747,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether hits should be sent securely over https. The default value is true.
 </p></div>
@@ -2571,6 +2780,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

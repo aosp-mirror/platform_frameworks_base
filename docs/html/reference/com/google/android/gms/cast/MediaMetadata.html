@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -778,6 +824,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -874,182 +923,312 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_ALBUM_ARTIST">KEY_ALBUM_ARTIST</a></td>
-        <td class="jd-descrcol" width="100%">String key: Album artist.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Album artist.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_ALBUM_TITLE">KEY_ALBUM_TITLE</a></td>
-        <td class="jd-descrcol" width="100%">String key: Album title.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Album title.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_ARTIST">KEY_ARTIST</a></td>
-        <td class="jd-descrcol" width="100%">String key: Artist.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Artist.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_BROADCAST_DATE">KEY_BROADCAST_DATE</a></td>
-        <td class="jd-descrcol" width="100%">String key: Broadcast date.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Broadcast date.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_COMPOSER">KEY_COMPOSER</a></td>
-        <td class="jd-descrcol" width="100%">String key: Composer.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Composer.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_CREATION_DATE">KEY_CREATION_DATE</a></td>
-        <td class="jd-descrcol" width="100%">String key: Creation date.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Creation date.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_DISC_NUMBER">KEY_DISC_NUMBER</a></td>
-        <td class="jd-descrcol" width="100%">Integer key: Disc number.</td>
+        <td class="jd-descrcol" width="100%">
+          Integer key: Disc number.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_EPISODE_NUMBER">KEY_EPISODE_NUMBER</a></td>
-        <td class="jd-descrcol" width="100%">Integer key: Episode number.</td>
+        <td class="jd-descrcol" width="100%">
+          Integer key: Episode number.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_HEIGHT">KEY_HEIGHT</a></td>
-        <td class="jd-descrcol" width="100%">Integer key: Height.</td>
+        <td class="jd-descrcol" width="100%">
+          Integer key: Height.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_LOCATION_LATITUDE">KEY_LOCATION_LATITUDE</a></td>
-        <td class="jd-descrcol" width="100%">Double key: Location latitude.</td>
+        <td class="jd-descrcol" width="100%">
+          Double key: Location latitude.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_LOCATION_LONGITUDE">KEY_LOCATION_LONGITUDE</a></td>
-        <td class="jd-descrcol" width="100%">Double key: Location longitude.</td>
+        <td class="jd-descrcol" width="100%">
+          Double key: Location longitude.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_LOCATION_NAME">KEY_LOCATION_NAME</a></td>
-        <td class="jd-descrcol" width="100%">String key: Location name.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Location name.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_RELEASE_DATE">KEY_RELEASE_DATE</a></td>
-        <td class="jd-descrcol" width="100%">String key: Release date.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Release date.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_SEASON_NUMBER">KEY_SEASON_NUMBER</a></td>
-        <td class="jd-descrcol" width="100%">Integer key: Season number.</td>
+        <td class="jd-descrcol" width="100%">
+          Integer key: Season number.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_SERIES_TITLE">KEY_SERIES_TITLE</a></td>
-        <td class="jd-descrcol" width="100%">String key: Series title.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Series title.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_STUDIO">KEY_STUDIO</a></td>
-        <td class="jd-descrcol" width="100%">String key: Studio.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Studio.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_SUBTITLE">KEY_SUBTITLE</a></td>
-        <td class="jd-descrcol" width="100%">String key: Subtitle.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Subtitle.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_TITLE">KEY_TITLE</a></td>
-        <td class="jd-descrcol" width="100%">String key: Title.</td>
+        <td class="jd-descrcol" width="100%">
+          String key: Title.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_TRACK_NUMBER">KEY_TRACK_NUMBER</a></td>
-        <td class="jd-descrcol" width="100%">Integer key: Track number.</td>
+        <td class="jd-descrcol" width="100%">
+          Integer key: Track number.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#KEY_WIDTH">KEY_WIDTH</a></td>
-        <td class="jd-descrcol" width="100%">Integer key: Width.</td>
+        <td class="jd-descrcol" width="100%">
+          Integer key: Width.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MEDIA_TYPE_GENERIC">MEDIA_TYPE_GENERIC</a></td>
-        <td class="jd-descrcol" width="100%">A media type representing generic media content.</td>
+        <td class="jd-descrcol" width="100%">
+          A media type representing generic media content.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MEDIA_TYPE_MOVIE">MEDIA_TYPE_MOVIE</a></td>
-        <td class="jd-descrcol" width="100%">A media type representing a movie.</td>
+        <td class="jd-descrcol" width="100%">
+          A media type representing a movie.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MEDIA_TYPE_MUSIC_TRACK">MEDIA_TYPE_MUSIC_TRACK</a></td>
-        <td class="jd-descrcol" width="100%">A media type representing a music track.</td>
+        <td class="jd-descrcol" width="100%">
+          A media type representing a music track.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MEDIA_TYPE_PHOTO">MEDIA_TYPE_PHOTO</a></td>
-        <td class="jd-descrcol" width="100%">A media type representing a photo.</td>
+        <td class="jd-descrcol" width="100%">
+          A media type representing a photo.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MEDIA_TYPE_TV_SHOW">MEDIA_TYPE_TV_SHOW</a></td>
-        <td class="jd-descrcol" width="100%">A media type representing an TV show.</td>
+        <td class="jd-descrcol" width="100%">
+          A media type representing an TV show.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MEDIA_TYPE_USER">MEDIA_TYPE_USER</a></td>
-        <td class="jd-descrcol" width="100%">The smallest media type value that can be assigned for application-defined media types.</td>
+        <td class="jd-descrcol" width="100%">
+          The smallest media type value that can be assigned for application-defined media types.
+
+
+
+        </td>
     </tr>
     
     
@@ -1085,7 +1264,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MediaMetadata()">MediaMetadata</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Constructs a new, empty, MediaMetadata with a media type of <code><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MEDIA_TYPE_GENERIC">MEDIA_TYPE_GENERIC</a></code>.</div>
+        <div class="jd-descrdiv">
+          Constructs a new, empty, MediaMetadata with a media type of <code><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MEDIA_TYPE_GENERIC">MEDIA_TYPE_GENERIC</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1103,7 +1287,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MediaMetadata(int)">MediaMetadata</a></span>(int mediaType)</nobr>
         
-        <div class="jd-descrdiv">Constructs a new, empty, MediaMetadata with the given media type.</div>
+        <div class="jd-descrdiv">
+          Constructs a new, empty, MediaMetadata with the given media type.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1134,7 +1323,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#addImage(com.google.android.gms.common.images.WebImage)">addImage</a></span>(<a href="/reference/com/google/android/gms/common/images/WebImage.html">WebImage</a> image)</nobr>
         
-        <div class="jd-descrdiv">Adds an image to the list of images.</div>
+        <div class="jd-descrdiv">
+          Adds an image to the list of images.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1152,7 +1346,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#clear()">clear</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Clears this object.</div>
+        <div class="jd-descrdiv">
+          Clears this object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1170,7 +1369,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#clearImages()">clearImages</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Clears the list of images.</div>
+        <div class="jd-descrdiv">
+          Clears the list of images.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1188,7 +1392,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#containsKey(java.lang.String)">containsKey</a></span>(String key)</nobr>
         
-        <div class="jd-descrdiv">Tests if the object contains a field with the given key.</div>
+        <div class="jd-descrdiv">
+          Tests if the object contains a field with the given key.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1222,7 +1431,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#getDate(java.lang.String)">getDate</a></span>(String key)</nobr>
         
-        <div class="jd-descrdiv">Reads the value of a date field.</div>
+        <div class="jd-descrdiv">
+          Reads the value of a date field.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1240,7 +1454,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#getDateAsString(java.lang.String)">getDateAsString</a></span>(String key)</nobr>
         
-        <div class="jd-descrdiv">Reads the value of a date field, as a string.</div>
+        <div class="jd-descrdiv">
+          Reads the value of a date field, as a string.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1258,7 +1477,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#getDouble(java.lang.String)">getDouble</a></span>(String key)</nobr>
         
-        <div class="jd-descrdiv">Reads the value of a <code>double</code> field.</div>
+        <div class="jd-descrdiv">
+          Reads the value of a <code>double</code> field.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1276,7 +1500,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#getImages()">getImages</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the list of images.</div>
+        <div class="jd-descrdiv">
+          Returns the list of images.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1294,7 +1523,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#getInt(java.lang.String)">getInt</a></span>(String key)</nobr>
         
-        <div class="jd-descrdiv">Reads the value of an <code>int</code> field.</div>
+        <div class="jd-descrdiv">
+          Reads the value of an <code>int</code> field.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1312,7 +1546,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#getMediaType()">getMediaType</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the media type.</div>
+        <div class="jd-descrdiv">
+          Gets the media type.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1330,7 +1569,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#getString(java.lang.String)">getString</a></span>(String key)</nobr>
         
-        <div class="jd-descrdiv">Reads the value of a String field.</div>
+        <div class="jd-descrdiv">
+          Reads the value of a String field.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1348,7 +1592,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#hasImages()">hasImages</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the metadata includes any images.</div>
+        <div class="jd-descrdiv">
+          Checks if the metadata includes any images.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1382,7 +1631,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#keySet()">keySet</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns a set of keys for all fields that are present in the object.</div>
+        <div class="jd-descrdiv">
+          Returns a set of keys for all fields that are present in the object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1400,7 +1654,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#putDate(java.lang.String, java.util.Calendar)">putDate</a></span>(String key, Calendar value)</nobr>
         
-        <div class="jd-descrdiv">Stores a value in a date field.</div>
+        <div class="jd-descrdiv">
+          Stores a value in a date field.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1418,7 +1677,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#putDouble(java.lang.String, double)">putDouble</a></span>(String key, double value)</nobr>
         
-        <div class="jd-descrdiv">Stores a value in a <code>double</code> field.</div>
+        <div class="jd-descrdiv">
+          Stores a value in a <code>double</code> field.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1436,7 +1700,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#putInt(java.lang.String, int)">putInt</a></span>(String key, int value)</nobr>
         
-        <div class="jd-descrdiv">Stores a value in an int field.</div>
+        <div class="jd-descrdiv">
+          Stores a value in an int field.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1454,7 +1723,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#putString(java.lang.String, java.lang.String)">putString</a></span>(String key, String value)</nobr>
         
-        <div class="jd-descrdiv">Stores a value in a String field.</div>
+        <div class="jd-descrdiv">
+          Stores a value in a String field.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1724,6 +1998,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Album artist.
  <p>
  The name of the artist who produced an album. For example, in compilation albums such as DJ
@@ -1766,6 +2043,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Album title.
  <p>
  The title of the album that a music track belongs to. This value is suitable for display
@@ -1807,6 +2087,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Artist.
  <p>
  The name of the artist who created the media. For example, this could be the name of a
@@ -1848,6 +2131,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Broadcast date.
  <p>
  The value is the date and/or time at which the media was first broadcast, in ISO-8601 format.
@@ -1889,6 +2175,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Composer.
  <p>
  The name of the composer of a music track. This value is suitable for display purposes.
@@ -1929,6 +2218,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Creation date.
  <p>
  The value is the date and/or time at which the media was created, in ISO-8601 format.
@@ -1971,6 +2263,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Integer key: Disc number.
  <p>
  The disc number (counting from 1) that a music track belongs to in a multi-disc album.
@@ -2011,6 +2306,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Integer key: Episode number.
  <p>
  The number of an episode in a given season of a TV show. Typically episode numbers are
@@ -2053,6 +2351,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Integer key: Height.
 
  The height of a piece of media, in pixels. This would typically be used for providing the
@@ -2094,6 +2395,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Double key: Location latitude.
  <p>
  The latitude component of the geographical location where a piece of media was created.
@@ -2136,6 +2440,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Double key: Location longitude.
  <p>
  The longitude component of the geographical location where a piece of media was created.
@@ -2178,6 +2485,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Location name.
  <p>
  The name of a location where a piece of media was created. For example, this could be the
@@ -2220,6 +2530,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Release date.
  <p>
  The value is the date and/or time at which the media was released, in ISO-8601 format.
@@ -2261,6 +2574,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Integer key: Season number.
  <p>
  The season number that a TV show episode belongs to. Typically season numbers are counted
@@ -2303,6 +2619,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Series title.
  <p>
  The name of a series. For example, this could be the name of a TV show or series of related
@@ -2344,6 +2663,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Studio.
  <p>
  The name of a recording studio that produced a piece of media. For example, this could be
@@ -2385,6 +2707,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Subtitle.
  <p>
  The subtitle of the media. This value is suitable for display purposes.
@@ -2425,6 +2750,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>String key: Title.
  <p>
  The title of the media. For example, this could be the title of a song, movie, or TV show
@@ -2466,6 +2794,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Integer key: Track number.
  <p>
  The track number of a music track on an album disc. Typically track numbers are counted
@@ -2508,6 +2839,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Integer key: Width.
 
  The width of a piece of media, in pixels. This would typically be used for providing the
@@ -2549,6 +2883,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media type representing generic media content. </p></div>
 
     
@@ -2587,6 +2924,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media type representing a movie. </p></div>
 
     
@@ -2625,6 +2965,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media type representing a music track. </p></div>
 
     
@@ -2663,6 +3006,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media type representing a photo. </p></div>
 
     
@@ -2701,6 +3047,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media type representing an TV show. </p></div>
 
     
@@ -2739,6 +3088,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The smallest media type value that can be assigned for application-defined media types. </p></div>
 
     
@@ -2792,6 +3144,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a new, empty, MediaMetadata with a media type of <code><a href="/reference/com/google/android/gms/cast/MediaMetadata.html#MEDIA_TYPE_GENERIC">MEDIA_TYPE_GENERIC</a></code>.
 </p></div>
 
@@ -2822,6 +3177,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a new, empty, MediaMetadata with the given media type.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2877,6 +3235,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Adds an image to the list of images.
 </p></div>
 
@@ -2907,6 +3268,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Clears this object. The media type is left unchanged.
 </p></div>
 
@@ -2937,6 +3301,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Clears the list of images.
 </p></div>
 
@@ -2967,6 +3334,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Tests if the object contains a field with the given key.
 </p></div>
 
@@ -2997,6 +3367,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3026,6 +3399,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads the value of a date field.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3079,6 +3455,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads the value of a date field, as a string.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3133,6 +3512,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads the value of a <code>double</code> field.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -3177,6 +3559,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the list of images. If there are no images, returns an empty list.
 </p></div>
 
@@ -3207,6 +3592,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads the value of an <code>int</code> field.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -3251,6 +3639,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the media type.
 </p></div>
 
@@ -3281,6 +3672,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads the value of a String field.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -3325,6 +3719,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Checks if the metadata includes any images.
 </p></div>
 
@@ -3355,6 +3752,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3384,6 +3784,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a set of keys for all fields that are present in the object.
 </p></div>
 
@@ -3414,6 +3817,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Stores a value in a date field.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3467,6 +3873,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Stores a value in a <code>double</code> field.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3520,6 +3929,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Stores a value in an int field.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3573,6 +3985,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Stores a value in a String field.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>

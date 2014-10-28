@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -778,6 +824,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -867,175 +916,300 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#COLOR_UNSPECIFIED">COLOR_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">A color value that indicates an unspecified (unset) color.</td>
+        <td class="jd-descrcol" width="100%">
+          A color value that indicates an unspecified (unset) color.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">float</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#DEFAULT_FONT_SCALE">DEFAULT_FONT_SCALE</a></td>
-        <td class="jd-descrcol" width="100%">The default font scale.</td>
+        <td class="jd-descrcol" width="100%">
+          The default font scale.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_DEPRESSED">EDGE_TYPE_DEPRESSED</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating a depressed edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating a depressed edge.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_DROP_SHADOW">EDGE_TYPE_DROP_SHADOW</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating a drop shadow edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating a drop shadow edge.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_NONE">EDGE_TYPE_NONE</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating no edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating no edge.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_OUTLINE">EDGE_TYPE_OUTLINE</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating an outline edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating an outline edge.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_RAISED">EDGE_TYPE_RAISED</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating a raised edge.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating a raised edge.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#EDGE_TYPE_UNSPECIFIED">EDGE_TYPE_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">An edge type indicating an unspecified edge type.</td>
+        <td class="jd-descrcol" width="100%">
+          An edge type indicating an unspecified edge type.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_CASUAL">FONT_FAMILY_CASUAL</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Casual.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Casual.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_CURSIVE">FONT_FAMILY_CURSIVE</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Cursive.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Cursive.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_MONOSPACED_SANS_SERIF">FONT_FAMILY_MONOSPACED_SANS_SERIF</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Monospaced Sans Serif.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Monospaced Sans Serif.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_MONOSPACED_SERIF">FONT_FAMILY_MONOSPACED_SERIF</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Monospaced Serif.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Monospaced Serif.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_SANS_SERIF">FONT_FAMILY_SANS_SERIF</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Sans Serif.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Sans Serif.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_SERIF">FONT_FAMILY_SERIF</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Serif.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Serif.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_SMALL_CAPITALS">FONT_FAMILY_SMALL_CAPITALS</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating Small Capitals.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating Small Capitals.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_FAMILY_UNSPECIFIED">FONT_FAMILY_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">A font family indicating an unspecified font family.</td>
+        <td class="jd-descrcol" width="100%">
+          A font family indicating an unspecified font family.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_BOLD">FONT_STYLE_BOLD</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating a bold style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating a bold style.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_BOLD_ITALIC">FONT_STYLE_BOLD_ITALIC</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating a bold and italic style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating a bold and italic style.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_ITALIC">FONT_STYLE_ITALIC</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating an italic style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating an italic style.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_NORMAL">FONT_STYLE_NORMAL</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating a normal style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating a normal style.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#FONT_STYLE_UNSPECIFIED">FONT_STYLE_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">A font style indicating an unspecified style.</td>
+        <td class="jd-descrcol" width="100%">
+          A font style indicating an unspecified style.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_NONE">WINDOW_TYPE_NONE</a></td>
-        <td class="jd-descrcol" width="100%">A window type indicating no window type.</td>
+        <td class="jd-descrcol" width="100%">
+          A window type indicating no window type.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_NORMAL">WINDOW_TYPE_NORMAL</a></td>
-        <td class="jd-descrcol" width="100%">A window type indicating a normal window.</td>
+        <td class="jd-descrcol" width="100%">
+          A window type indicating a normal window.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_ROUNDED">WINDOW_TYPE_ROUNDED</a></td>
-        <td class="jd-descrcol" width="100%">A window type indicating a window with rounded corners.</td>
+        <td class="jd-descrcol" width="100%">
+          A window type indicating a window with rounded corners.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_UNSPECIFIED">WINDOW_TYPE_UNSPECIFIED</a></td>
-        <td class="jd-descrcol" width="100%">A window type indicating an unspecified window type.</td>
+        <td class="jd-descrcol" width="100%">
+          A window type indicating an unspecified window type.
+
+
+
+        </td>
     </tr>
 
 
@@ -1071,7 +1245,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#TextTrackStyle()">TextTrackStyle</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Constructs a new TextTrackStyle.</div>
+        <div class="jd-descrdiv">
+          Constructs a new TextTrackStyle.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1118,7 +1297,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#fromSystemSettings(android.content.Context)">fromSystemSettings</a></span>(Context context)</nobr>
 
-        <div class="jd-descrdiv">Constructs a new TextTrackStyle based on the system's current closed caption style settings.</div>
+        <div class="jd-descrdiv">
+          Constructs a new TextTrackStyle based on the system's current closed caption style settings.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1136,7 +1320,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getBackgroundColor()">getBackgroundColor</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the text's background color.</div>
+        <div class="jd-descrdiv">
+          Gets the text's background color.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1154,7 +1343,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getCustomData()">getCustomData</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the custom data object.</div>
+        <div class="jd-descrdiv">
+          Gets the custom data object.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1172,7 +1366,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getEdgeColor()">getEdgeColor</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the window's edge color.</div>
+        <div class="jd-descrdiv">
+          Gets the window's edge color.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1190,7 +1389,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getEdgeType()">getEdgeType</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the caption window's edge type.</div>
+        <div class="jd-descrdiv">
+          Gets the caption window's edge type.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1208,7 +1412,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getFontFamily()">getFontFamily</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the text's font family.</div>
+        <div class="jd-descrdiv">
+          Gets the text's font family.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1226,7 +1435,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getFontGenericFamily()">getFontGenericFamily</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the text's generic font family.</div>
+        <div class="jd-descrdiv">
+          Gets the text's generic font family.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1244,7 +1458,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getFontScale()">getFontScale</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the font scale factor.</div>
+        <div class="jd-descrdiv">
+          Gets the font scale factor.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1262,7 +1481,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getFontStyle()">getFontStyle</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the text font style.</div>
+        <div class="jd-descrdiv">
+          Gets the text font style.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1280,7 +1504,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getForegroundColor()">getForegroundColor</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the text's foreground color.</div>
+        <div class="jd-descrdiv">
+          Gets the text's foreground color.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1298,7 +1527,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getWindowColor()">getWindowColor</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the window's color.</div>
+        <div class="jd-descrdiv">
+          Gets the window's color.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1316,7 +1550,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getWindowCornerRadius()">getWindowCornerRadius</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the window corner radius.</div>
+        <div class="jd-descrdiv">
+          Gets the window corner radius.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1334,7 +1573,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#getWindowType()">getWindowType</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Gets the caption window type.</div>
+        <div class="jd-descrdiv">
+          Gets the caption window type.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1368,7 +1612,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setBackgroundColor(int)">setBackgroundColor</a></span>(int backgroundColor)</nobr>
 
-        <div class="jd-descrdiv">Sets the text's background color.</div>
+        <div class="jd-descrdiv">
+          Sets the text's background color.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1386,7 +1635,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setCustomData(org.json.JSONObject)">setCustomData</a></span>(JSONObject customData)</nobr>
 
-        <div class="jd-descrdiv">Sets the custom data object.</div>
+        <div class="jd-descrdiv">
+          Sets the custom data object.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1404,7 +1658,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setEdgeColor(int)">setEdgeColor</a></span>(int edgeColor)</nobr>
 
-        <div class="jd-descrdiv">Sets the window's edge color.</div>
+        <div class="jd-descrdiv">
+          Sets the window's edge color.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1422,7 +1681,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setEdgeType(int)">setEdgeType</a></span>(int edgeType)</nobr>
 
-        <div class="jd-descrdiv">Sets the caption window's edge type.</div>
+        <div class="jd-descrdiv">
+          Sets the caption window's edge type.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1440,7 +1704,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontFamily(java.lang.String)">setFontFamily</a></span>(String fontFamily)</nobr>
 
-        <div class="jd-descrdiv">Sets the text's font family.</div>
+        <div class="jd-descrdiv">
+          Sets the text's font family.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1458,7 +1727,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontGenericFamily(int)">setFontGenericFamily</a></span>(int fontGenericFamily)</nobr>
 
-        <div class="jd-descrdiv">Sets the text's generic font family.</div>
+        <div class="jd-descrdiv">
+          Sets the text's generic font family.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1476,7 +1750,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontScale(float)">setFontScale</a></span>(float fontScale)</nobr>
 
-        <div class="jd-descrdiv">Sets the font scale factor.</div>
+        <div class="jd-descrdiv">
+          Sets the font scale factor.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1494,7 +1773,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontStyle(int)">setFontStyle</a></span>(int fontStyle)</nobr>
 
-        <div class="jd-descrdiv">Sets the text font style.</div>
+        <div class="jd-descrdiv">
+          Sets the text font style.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1512,7 +1796,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setForegroundColor(int)">setForegroundColor</a></span>(int foregroundColor)</nobr>
 
-        <div class="jd-descrdiv">Sets the text's foreground color.</div>
+        <div class="jd-descrdiv">
+          Sets the text's foreground color.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1530,7 +1819,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setWindowColor(int)">setWindowColor</a></span>(int windowColor)</nobr>
 
-        <div class="jd-descrdiv">Sets the window's color.</div>
+        <div class="jd-descrdiv">
+          Sets the window's color.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1548,8 +1842,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setWindowCornerRadius(int)">setWindowCornerRadius</a></span>(int windowCornerRadius)</nobr>
 
-        <div class="jd-descrdiv">If the window type is <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_ROUNDED">WINDOW_TYPE_ROUNDED</a></code>, sets the radius for the window's
- corners.</div>
+        <div class="jd-descrdiv">
+          If the window type is <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_ROUNDED">WINDOW_TYPE_ROUNDED</a></code>, sets the radius for the window's
+ corners.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1567,7 +1866,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setWindowType(int)">setWindowType</a></span>(int windowType)</nobr>
 
-        <div class="jd-descrdiv">Sets the window type.</div>
+        <div class="jd-descrdiv">
+          Sets the window type.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1837,6 +2141,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A color value that indicates an unspecified (unset) color. </p></div>
 
 
@@ -1875,6 +2182,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The default font scale. </p></div>
 
 
@@ -1911,6 +2221,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating a depressed edge. </p></div>
 
@@ -1950,6 +2263,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating a drop shadow edge. </p></div>
 
 
@@ -1987,6 +2303,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating no edge. </p></div>
 
@@ -2026,6 +2345,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating an outline edge. </p></div>
 
 
@@ -2063,6 +2385,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating a raised edge. </p></div>
 
@@ -2102,6 +2427,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>An edge type indicating an unspecified edge type. </p></div>
 
 
@@ -2139,6 +2467,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Casual. </p></div>
 
@@ -2178,6 +2509,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Cursive. </p></div>
 
 
@@ -2215,6 +2549,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Monospaced Sans Serif. </p></div>
 
@@ -2254,6 +2591,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Monospaced Serif. </p></div>
 
 
@@ -2291,6 +2631,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Sans Serif. </p></div>
 
@@ -2330,6 +2673,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Serif. </p></div>
 
 
@@ -2367,6 +2713,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating Small Capitals. </p></div>
 
@@ -2406,6 +2755,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A font family indicating an unspecified font family. </p></div>
 
 
@@ -2443,6 +2795,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating a bold style. </p></div>
 
@@ -2482,6 +2837,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating a bold and italic style. </p></div>
 
 
@@ -2519,6 +2877,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating an italic style. </p></div>
 
@@ -2558,6 +2919,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating a normal style. </p></div>
 
 
@@ -2595,6 +2959,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A font style indicating an unspecified style. </p></div>
 
@@ -2634,6 +3001,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A window type indicating no window type. </p></div>
 
 
@@ -2671,6 +3041,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A window type indicating a normal window. </p></div>
 
@@ -2710,6 +3083,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A window type indicating a window with rounded corners. </p></div>
 
 
@@ -2747,6 +3123,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A window type indicating an unspecified window type. </p></div>
 
@@ -2801,6 +3180,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a new TextTrackStyle.
 </p></div>
 
@@ -2846,6 +3228,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2874,6 +3259,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a new TextTrackStyle based on the system's current closed caption style settings.
  On platform levels below 19, this returns an object with "unspecified" values for all
@@ -2920,6 +3308,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text's background color.
 </p></div>
 
@@ -2949,6 +3340,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Gets the custom data object.
 </p></div>
@@ -2980,6 +3374,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the window's edge color.
 </p></div>
 
@@ -3009,6 +3406,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Gets the caption window's edge type.
 </p></div>
@@ -3040,6 +3440,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text's font family.
 </p></div>
 
@@ -3069,6 +3472,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text's generic font family.
 </p></div>
@@ -3100,6 +3506,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the font scale factor.
 </p></div>
 
@@ -3129,6 +3538,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text font style.
 </p></div>
@@ -3160,6 +3572,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the text's foreground color.
 </p></div>
 
@@ -3189,6 +3604,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Gets the window's color.
 </p></div>
@@ -3220,6 +3638,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the window corner radius.
 </p></div>
 
@@ -3249,6 +3670,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Gets the caption window type.
 </p></div>
@@ -3280,6 +3704,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3308,6 +3735,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text's background color.</p></div>
   <div class="jd-tagdata">
@@ -3348,6 +3778,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the custom data object.
 </p></div>
 
@@ -3377,6 +3810,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the window's edge color.</p></div>
   <div class="jd-tagdata">
@@ -3417,6 +3853,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the caption window's edge type.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3456,6 +3895,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text's font family.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3494,6 +3936,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text's generic font family. This will be used if the font family specified with
  <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#setFontFamily(java.lang.String)">setFontFamily(String)</a></code> (if any) is unavailable.</p></div>
@@ -3536,6 +3981,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the font scale factor. The default is <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#DEFAULT_FONT_SCALE">DEFAULT_FONT_SCALE</a></code>.
 </p></div>
 
@@ -3565,6 +4013,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text font style.</p></div>
   <div class="jd-tagdata">
@@ -3605,6 +4056,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text's foreground color.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3643,6 +4097,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the window's color.</p></div>
   <div class="jd-tagdata">
@@ -3683,6 +4140,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>If the window type is <code><a href="/reference/com/google/android/gms/cast/TextTrackStyle.html#WINDOW_TYPE_ROUNDED">WINDOW_TYPE_ROUNDED</a></code>, sets the radius for the window's
  corners.</p></div>
   <div class="jd-tagdata">
@@ -3722,6 +4182,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the window type.</p></div>
   <div class="jd-tagdata">

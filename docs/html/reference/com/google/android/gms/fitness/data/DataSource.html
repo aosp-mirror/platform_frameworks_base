@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -805,6 +851,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -845,12 +894,11 @@ Summary:
  <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.  Every data point inserted into or read from Google Fit has an
  associated data source.
  <p>
- The DataSource contains enough information to uniquely identify its data, including the hardware
+ The data source contains enough information to uniquely identify its data, including the hardware
  <code><a href="/reference/com/google/android/gms/fitness/data/Device.html">device</a></code> and the <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getAppPackageName()">application</a></code> that collected and/or
- transformed the data.  It also holds useful metadata, such as the hardware version and the
- device type.
+ transformed the data.  It also holds useful metadata, such as a stream name and the device type.
  <p>
- The data source's data stream can be accessed in a real-time fashion by registering a data source
+ The data source's data stream can be accessed in a live fashion by registering a data source
  listener, or via queries over fixed time intervals.
  <p>
  An end-user-visible name for the data stream can be set by calling
@@ -898,7 +946,12 @@ Summary:
 
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.Builder.html">DataSource.Builder</a></td>
-      <td class="jd-descrcol" width="100%">A builder that can be used to construct new data source objects.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        A builder that can be used to construct new data source objects.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -921,18 +974,40 @@ Summary:
 
 
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#TYPE_DERIVED">TYPE_DERIVED</a></td>
-        <td class="jd-descrcol" width="100%">Type constant for a data source which Exposes data which is derived from one or more
- existing data sources by performing transformations on the original data.</td>
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#EXTRA_DATA_SOURCE">EXTRA_DATA_SOURCE</a></td>
+        <td class="jd-descrcol" width="100%">
+          Name for the parcelable intent extra containing a data source.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#TYPE_DERIVED">TYPE_DERIVED</a></td>
+        <td class="jd-descrcol" width="100%">
+          Type constant for a data source which exposes data which is derived from one or more
+ existing data sources by performing transformations on the original data.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#TYPE_RAW">TYPE_RAW</a></td>
-        <td class="jd-descrcol" width="100%">Type constant for a data source which Exposes original, raw data from an external source
- such as a hardware sensor, a wearable device, or user input.</td>
+        <td class="jd-descrcol" width="100%">
+          Type constant for a data source which exposes original, raw data from an external source
+ such as a hardware sensor, a wearable device, or user input.
+
+
+
+        </td>
     </tr>
 
 
@@ -971,14 +1046,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1009,7 +1094,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1036,7 +1126,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           Creator&lt;<a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+
+
+
+
+          </td>
       </tr>
 
 
@@ -1096,6 +1191,30 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
+            static
+
+            <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#extract(android.content.Intent)">extract</a></span>(Intent intent)</nobr>
+
+        <div class="jd-descrdiv">
+          Extracts the data source extra from the given intent, such as an intent to
+ <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">view user's data</a></code>.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
 
 
             String</nobr>
@@ -1103,14 +1222,19 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getAppPackageName()">getAppPackageName</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the package name for the application responsible for setting the data,
- or <code>null</code> if unset/unknown.</div>
+        <div class="jd-descrdiv">
+          Returns the package name for the application responsible for setting the data,
+ or <code>null</code> if unset/unknown.
+
+
+
+        </div>
 
   </td></tr>
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1122,13 +1246,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getDataType()">getDataType</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the data type for data coming from this data source.</div>
+        <div class="jd-descrdiv">
+          Returns the data type for data coming from this data source.
+
+
+
+        </div>
 
   </td></tr>
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1140,13 +1269,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getDevice()">getDevice</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the device where data is being collected, or <code>null</code> if unset.</div>
+        <div class="jd-descrdiv">
+          Returns the device where data is being collected, or <code>null</code> if unset.
+
+
+
+        </div>
 
   </td></tr>
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1158,13 +1292,18 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getName()">getName</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the specified user-visible name for the data source, or <code>null</code> if unset.</div>
+        <div class="jd-descrdiv">
+          Returns the specified user-visible name for the data source, or <code>null</code> if unset.
+
+
+
+        </div>
 
   </td></tr>
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1176,26 +1315,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getStreamIdentifier()">getStreamIdentifier</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns a unique identifier for the data stream produced by this data source.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
+        <div class="jd-descrdiv">
+          Returns a unique identifier for the data stream produced by this data source.
 
 
 
-
-
-            String</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getStreamName()">getStreamName</a></span>()</nobr>
-
-        <div class="jd-descrdiv">Returns the specific <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.Builder.html#setStreamName(java.lang.String)">name</a></code> for the stream coming form
- this data source, or <code>null</code> if unset.</div>
+        </div>
 
   </td></tr>
 
@@ -1208,18 +1333,47 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-            int</nobr>
+            String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getType()">getType</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getStreamName()">getStreamName</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the constant describing the type of this data source.</div>
+        <div class="jd-descrdiv">
+          Returns the specific <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.Builder.html#setStreamName(java.lang.String)">name</a></code> for the stream coming form
+ this data source, or <code>null</code> if unset.
+
+
+
+        </div>
 
   </td></tr>
 
 
 
     <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#getType()">getType</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the constant describing the type of this data source.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1235,7 +1389,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1251,7 +1405,7 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 
 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
 
 
@@ -1571,6 +1725,48 @@ From interface
 
 
 
+<A NAME="EXTRA_DATA_SOURCE"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        String
+      </span>
+        EXTRA_DATA_SOURCE
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Name for the parcelable intent extra containing a data source.  It can be
+ extracted using <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html#extract(android.content.Intent)">extract(Intent)</a></code>.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                "vnd.google.fitness.data_source"
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="TYPE_DERIVED"></A>
 
 <div class="jd-details api apilevel-">
@@ -1591,7 +1787,10 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Type constant for a data source which Exposes data which is derived from one or more
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Type constant for a data source which exposes data which is derived from one or more
  existing data sources by performing transformations on the original data.
 </p></div>
 
@@ -1631,7 +1830,10 @@ From interface
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Type constant for a data source which Exposes original, raw data from an external source
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Type constant for a data source which exposes original, raw data from an external source
  such as a hardware sensor, a wearable device, or user input.
 </p></div>
 
@@ -1681,6 +1883,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
 
@@ -1729,6 +1934,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1758,7 +1966,48 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="extract(android.content.Intent)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a>
+      </span>
+      <span class="sympad">extract</span>
+      <span class="normal">(Intent intent)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Extracts the data source extra from the given intent, such as an intent to
+ <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">view user's data</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the data source, or <code>null</code> if not found
+</li></ul>
+  </div>
 
     </div>
 </div>
@@ -1786,6 +2035,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the package name for the application responsible for setting the data,
  or <code>null</code> if unset/unknown.  The <code><a href="/reference/android/content/pm/PackageManager.html">PackageManager</a></code> can be used to query
@@ -1821,6 +2073,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the data type for data coming from this data source.  Knowing the type of data source
  can be useful to perform transformations on top of raw data without using sources that are
  themselves computed by transforming raw data.
@@ -1853,6 +2108,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the device where data is being collected, or <code>null</code> if unset.
 </p></div>
 
@@ -1882,6 +2140,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the specified user-visible name for the data source, or <code>null</code> if unset.
  <p>
@@ -1915,6 +2176,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a unique identifier for the data stream produced by this data source.  The identifier
  includes:
@@ -1954,6 +2218,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the specific <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.Builder.html#setStreamName(java.lang.String)">name</a></code> for the stream coming form
  this data source, or <code>null</code> if unset.
 </p></div>
@@ -1984,6 +2251,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the constant describing the type of this data source.</p></div>
   <div class="jd-tagdata">
@@ -2020,6 +2290,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2049,6 +2322,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2077,6 +2353,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

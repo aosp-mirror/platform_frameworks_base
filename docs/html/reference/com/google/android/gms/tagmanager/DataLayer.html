@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -778,6 +824,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -934,7 +983,12 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/DataLayer.html#EVENT_KEY">EVENT_KEY</a></td>
-        <td class="jd-descrcol" width="100%">If a map is pushed containing this key, it's treated as an event, and tags are evaluated.</td>
+        <td class="jd-descrcol" width="100%">
+          If a map is pushed containing this key, it's treated as an event, and tags are evaluated.
+
+
+
+        </td>
     </tr>
 
 
@@ -959,8 +1013,13 @@ Summary:
           final
           Object</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/DataLayer.html#OBJECT_NOT_PRESENT">OBJECT_NOT_PRESENT</a></td>
-          <td class="jd-descrcol" width="100%">Values of this type used in a List causes the List to be sparse when merging; it's as if
- there were no element at that index.</td>
+          <td class="jd-descrcol" width="100%">
+            Values of this type used in a List causes the List to be sparse when merging; it's as if
+ there were no element at that index.
+
+
+
+          </td>
       </tr>
 
 
@@ -995,7 +1054,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/DataLayer.html#get(java.lang.String)">get</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the object in the model associated with the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the object in the model associated with the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1013,7 +1077,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/DataLayer.html#listOf(java.lang.Object...)">listOf</a></span>(Object... objects)</nobr>
 
-        <div class="jd-descrdiv">Utility method that creates a list.</div>
+        <div class="jd-descrdiv">
+          Utility method that creates a list.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1031,7 +1100,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/DataLayer.html#mapOf(java.lang.Object...)">mapOf</a></span>(Object... objects)</nobr>
 
-        <div class="jd-descrdiv">Utility method that creates a map.</div>
+        <div class="jd-descrdiv">
+          Utility method that creates a map.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1049,8 +1123,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/DataLayer.html#push(java.util.Map<java.lang.String, java.lang.Object>)">push</a></span>(Map&lt;String,&nbsp;Object&gt; update)</nobr>
 
-        <div class="jd-descrdiv">Merges the given <code>update</code> object into the existing data model, calling any
- listeners with the update (after the merge occurs).</div>
+        <div class="jd-descrdiv">
+          Merges the given <code>update</code> object into the existing data model, calling any
+ listeners with the update (after the merge occurs).
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1068,7 +1147,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/DataLayer.html#push(java.lang.String, java.lang.Object)">push</a></span>(String key, Object value)</nobr>
 
-        <div class="jd-descrdiv">Pushes a key/value pair of data to the data layer.</div>
+        <div class="jd-descrdiv">
+          Pushes a key/value pair of data to the data layer.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1086,7 +1170,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/DataLayer.html#pushEvent(java.lang.String, java.util.Map<java.lang.String, java.lang.Object>)">pushEvent</a></span>(String eventName, Map&lt;String,&nbsp;Object&gt; update)</nobr>
 
-        <div class="jd-descrdiv">Pushes an event, along with an update map, to the data layer.</div>
+        <div class="jd-descrdiv">
+          Pushes an event, along with an update map, to the data layer.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1104,7 +1193,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/DataLayer.html#toString()">toString</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns a human readable string representing the Data Layer object.</div>
+        <div class="jd-descrdiv">
+          Returns a human readable string representing the Data Layer object.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1374,6 +1468,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>If a map is pushed containing this key, it's treated as an event, and tags are evaluated.
 </p></div>
 
@@ -1421,6 +1518,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Values of this type used in a List causes the List to be sparse when merging; it's as if
  there were no element at that index.
@@ -1472,6 +1572,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the object in the model associated with the given key. If the key is not found,
  <code>null</code> is returned.
  <p>
@@ -1507,6 +1610,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Utility method that creates a list.
  <p>
@@ -1544,6 +1650,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Utility method that creates a map. The parameters should be pairs of key values.
  <p>
@@ -1593,6 +1702,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Merges the given <code>update</code> object into the existing data model, calling any
  listeners with the update (after the merge occurs).
@@ -1647,6 +1759,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Pushes a key/value pair of data to the data layer. This is just a convenience method that
  calls <code>push(DataLayer.mapOf(key, value))</code>.
  <p>
@@ -1681,6 +1796,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Pushes an event, along with an update map, to the data layer.
  <p>
  This is just a convenience method that pushes a map containing a key <code>event</code> whose
@@ -1714,6 +1832,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a human readable string representing the Data Layer object.
 </p></div>

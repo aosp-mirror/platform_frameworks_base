@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -129,7 +142,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <body class="gc-documentation google
-  develop">
+  develop reference">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -139,6 +152,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -361,7 +378,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -734,40 +780,95 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
     <h2>Interfaces</h2>
     <div class="jd-sumtable">
 
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a></td>
-              <td class="jd-descrcol" width="100%">Data interface for a representation of a saved game.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a></td>
-              <td class="jd-descrcol" width="100%">Data interface for the metadata of a saved game.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html">Snapshots</a></td>
-              <td class="jd-descrcol" width="100%">The Snapshots API allows you to store data representing the player's game progress on Google's
- servers.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.CommitSnapshotResult.html">Snapshots.CommitSnapshotResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when a snapshot has been committed.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.DeleteSnapshotResult.html">Snapshots.DeleteSnapshotResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when a snapshot has been deleted.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.LoadSnapshotsResult.html">Snapshots.LoadSnapshotsResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when snapshot data has been loaded.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a></td>
-              <td class="jd-descrcol" width="100%">Result delivered when a snapshot has been opened.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data interface for a representation of a saved game.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadata.html">SnapshotMetadata</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data interface for the metadata of a saved game.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.html">Snapshots</a></td>
+        <td class="jd-descrcol" width="100%">
+          The Snapshots API allows you to store data representing the player's game progress on Google's
+ servers.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.CommitSnapshotResult.html">Snapshots.CommitSnapshotResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when a snapshot has been committed.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.DeleteSnapshotResult.html">Snapshots.DeleteSnapshotResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when a snapshot has been deleted.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.LoadSnapshotsResult.html">Snapshots.LoadSnapshotsResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when snapshot data has been loaded.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/Snapshots.OpenSnapshotResult.html">Snapshots.OpenSnapshotResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result delivered when a snapshot has been opened.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
 
 
@@ -776,32 +877,77 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Classes</h2>
     <div class="jd-sumtable">
 
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></td>
-              <td class="jd-descrcol" width="100%">Data interface for a representation of <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a></code> contents.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotEntity.html">SnapshotEntity</a></td>
-              <td class="jd-descrcol" width="100%">Data object representing the data for a saved game.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataBuffer.html">SnapshotMetadataBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of snapshots.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.html">SnapshotMetadataChange</a></td>
-              <td class="jd-descrcol" width="100%">A collection of changes to apply to the metadata of a snapshot.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.Builder.html">SnapshotMetadataChange.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder for <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.html">SnapshotMetadataChange</a></code> objects.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataEntity.html">SnapshotMetadataEntity</a></td>
-              <td class="jd-descrcol" width="100%">Data object representing the metadata for a saved game.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotContents.html">SnapshotContents</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data interface for a representation of <code><a href="/reference/com/google/android/gms/games/snapshot/Snapshot.html">Snapshot</a></code> contents.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotEntity.html">SnapshotEntity</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data object representing the data for a saved game.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataBuffer.html">SnapshotMetadataBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of snapshots.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.html">SnapshotMetadataChange</a></td>
+        <td class="jd-descrcol" width="100%">
+          A collection of changes to apply to the metadata of a snapshot.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.Builder.html">SnapshotMetadataChange.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder for <code><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataChange.html">SnapshotMetadataChange</a></code> objects.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataEntity.html">SnapshotMetadataEntity</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data object representing the metadata for a saved game.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
 
 

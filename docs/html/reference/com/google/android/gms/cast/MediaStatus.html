@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -775,6 +821,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -859,114 +908,194 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">long</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#COMMAND_PAUSE">COMMAND_PAUSE</a></td>
-        <td class="jd-descrcol" width="100%">A flag (bitmask) indicating that a media item can be paused.</td>
+        <td class="jd-descrcol" width="100%">
+          A flag (bitmask) indicating that a media item can be paused.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">long</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#COMMAND_SEEK">COMMAND_SEEK</a></td>
-        <td class="jd-descrcol" width="100%">A flag (bitmask) indicating that a media item supports seeking.</td>
+        <td class="jd-descrcol" width="100%">
+          A flag (bitmask) indicating that a media item supports seeking.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">long</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#COMMAND_SET_VOLUME">COMMAND_SET_VOLUME</a></td>
-        <td class="jd-descrcol" width="100%">A flag (bitmask) indicating that a media item's audio volume can be changed.</td>
+        <td class="jd-descrcol" width="100%">
+          A flag (bitmask) indicating that a media item's audio volume can be changed.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">long</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#COMMAND_SKIP_BACKWARD">COMMAND_SKIP_BACKWARD</a></td>
-        <td class="jd-descrcol" width="100%">A flag (bitmask) indicating that a media item supports skipping backward.</td>
+        <td class="jd-descrcol" width="100%">
+          A flag (bitmask) indicating that a media item supports skipping backward.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">long</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#COMMAND_SKIP_FORWARD">COMMAND_SKIP_FORWARD</a></td>
-        <td class="jd-descrcol" width="100%">A flag (bitmask) indicating that a media item supports skipping forward.</td>
+        <td class="jd-descrcol" width="100%">
+          A flag (bitmask) indicating that a media item supports skipping forward.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">long</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#COMMAND_TOGGLE_MUTE">COMMAND_TOGGLE_MUTE</a></td>
-        <td class="jd-descrcol" width="100%">A flag (bitmask) indicating that a media item's audio can be muted.</td>
+        <td class="jd-descrcol" width="100%">
+          A flag (bitmask) indicating that a media item's audio can be muted.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#IDLE_REASON_CANCELED">IDLE_REASON_CANCELED</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the player is idle because playback has been canceled in
- response to a STOP command.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the player is idle because playback has been canceled in
+ response to a STOP command.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#IDLE_REASON_ERROR">IDLE_REASON_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the player is idle because a playback error has occurred.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the player is idle because a playback error has occurred.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#IDLE_REASON_FINISHED">IDLE_REASON_FINISHED</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the player is idle because playback has finished.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the player is idle because playback has finished.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#IDLE_REASON_INTERRUPTED">IDLE_REASON_INTERRUPTED</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the player is idle because playback has been interrupted by
- a LOAD command.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the player is idle because playback has been interrupted by
+ a LOAD command.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#IDLE_REASON_NONE">IDLE_REASON_NONE</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the player currently has no idle reason.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the player currently has no idle reason.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#PLAYER_STATE_BUFFERING">PLAYER_STATE_BUFFERING</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the media player is buffering.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the media player is buffering.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#PLAYER_STATE_IDLE">PLAYER_STATE_IDLE</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the media player is idle.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the media player is idle.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#PLAYER_STATE_PAUSED">PLAYER_STATE_PAUSED</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the media player is paused.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the media player is paused.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#PLAYER_STATE_PLAYING">PLAYER_STATE_PLAYING</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating that the media player is playing.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating that the media player is playing.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#PLAYER_STATE_UNKNOWN">PLAYER_STATE_UNKNOWN</a></td>
-        <td class="jd-descrcol" width="100%">Constant indicating unknown player state.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant indicating unknown player state.
+
+
+
+        </td>
     </tr>
     
     
@@ -1006,7 +1135,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#getActiveTrackIds()">getActiveTrackIds</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the list of active track IDs, if any, otherwise <code>null</code>.</div>
+        <div class="jd-descrdiv">
+          Returns the list of active track IDs, if any, otherwise <code>null</code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1024,7 +1158,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#getCustomData()">getCustomData</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns any custom data that is associated with the media item.</div>
+        <div class="jd-descrdiv">
+          Returns any custom data that is associated with the media item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1042,7 +1181,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#getIdleReason()">getIdleReason</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the player state idle reason.</div>
+        <div class="jd-descrdiv">
+          Gets the player state idle reason.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1060,7 +1204,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#getMediaInfo()">getMediaInfo</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the <code><a href="/reference/com/google/android/gms/cast/MediaInfo.html">MediaInfo</a></code> for this item.</div>
+        <div class="jd-descrdiv">
+          Returns the <code><a href="/reference/com/google/android/gms/cast/MediaInfo.html">MediaInfo</a></code> for this item.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1078,7 +1227,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#getPlaybackRate()">getPlaybackRate</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the current stream playback rate.</div>
+        <div class="jd-descrdiv">
+          Gets the current stream playback rate.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1096,7 +1250,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#getPlayerState()">getPlayerState</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the current media player state.</div>
+        <div class="jd-descrdiv">
+          Gets the current media player state.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1114,7 +1273,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#getStreamPosition()">getStreamPosition</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the current stream position, in milliseconds.</div>
+        <div class="jd-descrdiv">
+          Returns the current stream position, in milliseconds.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1132,7 +1296,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#getStreamVolume()">getStreamVolume</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the stream's volume.</div>
+        <div class="jd-descrdiv">
+          Returns the stream's volume.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1150,7 +1319,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#isMediaCommandSupported(long)">isMediaCommandSupported</a></span>(long mediaCommand)</nobr>
         
-        <div class="jd-descrdiv">Tests if the stream supports a given control command.</div>
+        <div class="jd-descrdiv">
+          Tests if the stream supports a given control command.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1168,7 +1342,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaStatus.html#isMute()">isMute</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the stream's mute state.</div>
+        <div class="jd-descrdiv">
+          Returns the stream's mute state.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1438,6 +1617,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A flag (bitmask) indicating that a media item can be paused. </p></div>
 
     
@@ -1476,6 +1658,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A flag (bitmask) indicating that a media item supports seeking. </p></div>
 
     
@@ -1514,6 +1699,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A flag (bitmask) indicating that a media item's audio volume can be changed. </p></div>
 
     
@@ -1552,6 +1740,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A flag (bitmask) indicating that a media item supports skipping backward. </p></div>
 
     
@@ -1590,6 +1781,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A flag (bitmask) indicating that a media item supports skipping forward. </p></div>
 
     
@@ -1628,6 +1822,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A flag (bitmask) indicating that a media item's audio can be muted. </p></div>
 
     
@@ -1666,6 +1863,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the player is idle because playback has been canceled in
  response to a STOP command.
 </p></div>
@@ -1706,6 +1906,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the player is idle because a playback error has occurred. </p></div>
 
     
@@ -1744,6 +1947,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the player is idle because playback has finished. </p></div>
 
     
@@ -1782,6 +1988,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the player is idle because playback has been interrupted by
  a LOAD command.
 </p></div>
@@ -1822,6 +2031,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the player currently has no idle reason. </p></div>
 
     
@@ -1860,6 +2072,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the media player is buffering. </p></div>
 
     
@@ -1898,6 +2113,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the media player is idle. </p></div>
 
     
@@ -1936,6 +2154,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the media player is paused. </p></div>
 
     
@@ -1974,6 +2195,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating that the media player is playing. </p></div>
 
     
@@ -2012,6 +2236,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant indicating unknown player state. </p></div>
 
     
@@ -2073,6 +2300,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the list of active track IDs, if any, otherwise <code>null</code>.
 </p></div>
 
@@ -2103,6 +2333,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns any custom data that is associated with the media item.
 </p></div>
 
@@ -2133,6 +2366,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the player state idle reason. This value is only meaningful if the player state is
  in fact <code><a href="/reference/com/google/android/gms/cast/MediaStatus.html#PLAYER_STATE_IDLE">PLAYER_STATE_IDLE</a></code>.
 </p></div>
@@ -2164,6 +2400,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the <code><a href="/reference/com/google/android/gms/cast/MediaInfo.html">MediaInfo</a></code> for this item.
 </p></div>
 
@@ -2194,6 +2433,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the current stream playback rate. This will be negative if the stream is seeking
  backwards, 0 if the stream is paused, 1 if the stream is playing normally, and some other
  postive value if the stream is seeking forwards.
@@ -2226,6 +2468,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the current media player state.
 </p></div>
 
@@ -2256,6 +2501,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the current stream position, in milliseconds.
 </p></div>
 
@@ -2286,6 +2534,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the stream's volume.
 </p></div>
 
@@ -2316,6 +2567,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Tests if the stream supports a given control command.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2359,6 +2613,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the stream's mute state.
 </p></div>
 

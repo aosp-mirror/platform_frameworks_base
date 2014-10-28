@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -787,6 +833,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -866,10 +915,15 @@ Summary:
         
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></td>
-      <td class="jd-descrcol" width="100%"><em>
+      <td class="jd-descrcol" width="100%">
+        <em>
       This class is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></code>.
-</em>&nbsp;</td>
+</em>&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -881,9 +935,14 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a></td>
-      <td class="jd-descrcol" width="100%"><em>
+      <td class="jd-descrcol" width="100%">
+        <em>
       This interface is deprecated.
-    No replacement.</em>&nbsp;</td>
+    No replacement.</em>&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -895,10 +954,15 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a></td>
-      <td class="jd-descrcol" width="100%"><em>
+      <td class="jd-descrcol" width="100%">
+        <em>
       This interface is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/Moments.LoadMomentsResult.html">Moments.LoadMomentsResult</a></code>.
-</em>&nbsp;</td>
+</em>&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -910,10 +974,15 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a></td>
-      <td class="jd-descrcol" width="100%"><em>
+      <td class="jd-descrcol" width="100%">
+        <em>
       This interface is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a></code>.
-</em>&nbsp;</td>
+</em>&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -925,10 +994,15 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.OrderBy.html">PlusClient.OrderBy</a></td>
-      <td class="jd-descrcol" width="100%"><em>
+      <td class="jd-descrcol" width="100%">
+        <em>
       This interface is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/People.OrderBy.html">People.OrderBy</a></code>.
-</em>&nbsp;</td>
+</em>&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -977,10 +1051,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#clearDefaultAccount()">clearDefaultAccount</a></span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/Account.html#clearDefaultAccount(com.google.android.gms.common.api.GoogleApiClient)">clearDefaultAccount(GoogleApiClient)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -998,10 +1077,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect</a></span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1019,10 +1103,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#disconnect()">disconnect</a></span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#disconnect()">disconnect()</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1040,10 +1129,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#getAccountName()">getAccountName</a></span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/Account.html#getAccountName(com.google.android.gms.common.api.GoogleApiClient)">getAccountName(GoogleApiClient)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1061,10 +1155,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#getCurrentPerson()">getCurrentPerson</a></span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/People.html#getCurrentPerson(com.google.android.gms.common.api.GoogleApiClient)">getCurrentPerson(GoogleApiClient)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1082,10 +1181,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#isConnected()">isConnected</a></span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnected()">isConnected()</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1103,10 +1207,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#isConnecting()">isConnecting</a></span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnecting()">isConnecting()</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1124,10 +1233,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">isConnectionCallbacksRegistered(GoogleApiClient.ConnectionCallbacks)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1145,10 +1259,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered(GoogleApiClient.OnConnectionFailedListener)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1166,10 +1285,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener, int, java.lang.String, android.net.Uri, java.lang.String, java.lang.String)">loadMoments</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener, int maxResults, String pageToken, Uri targetUrl, String type, String userId)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/Moments.html#load(com.google.android.gms.common.api.GoogleApiClient)">load(GoogleApiClient)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1187,10 +1311,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadMoments(com.google.android.gms.plus.PlusClient.OnMomentsLoadedListener)">loadMoments</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnMomentsLoadedListener.html">PlusClient.OnMomentsLoadedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/Moments.html#load(com.google.android.gms.common.api.GoogleApiClient)">load(GoogleApiClient)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1208,10 +1337,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.util.Collection<java.lang.String>)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, Collection&lt;String&gt; personIds)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load(GoogleApiClient, String...)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1229,10 +1363,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, String... personIds)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/People.html#load(com.google.android.gms.common.api.GoogleApiClient, java.lang.String...)">load(GoogleApiClient, String...)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1250,10 +1389,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String)">loadVisiblePeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, String pageToken)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/People.html#loadVisible(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String)">loadVisible(GoogleApiClient, int, String)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1271,10 +1415,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html">PlusClient.OnPeopleLoadedListener</a> listener, int orderBy, String pageToken)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/People.html#loadVisible(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String)">loadVisible(GoogleApiClient, int, String)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1292,10 +1441,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#registerConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">registerConnectionCallbacks(GoogleApiClient.ConnectionCallbacks)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1313,10 +1467,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#registerConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">registerConnectionFailedListener(GoogleApiClient.OnConnectionFailedListener)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1334,10 +1493,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#removeMoment(java.lang.String)">removeMoment</a></span>(String momentId)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/Moments.html#remove(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">remove(GoogleApiClient, String)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1355,10 +1519,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#revokeAccessAndDisconnect(com.google.android.gms.plus.PlusClient.OnAccessRevokedListener)">revokeAccessAndDisconnect</a></span>(<a href="/reference/com/google/android/gms/plus/PlusClient.OnAccessRevokedListener.html">PlusClient.OnAccessRevokedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/Account.html#revokeAccessAndDisconnect(com.google.android.gms.common.api.GoogleApiClient)">revokeAccessAndDisconnect(GoogleApiClient)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1376,10 +1545,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">unregisterConnectionCallbacks(GoogleApiClient.ConnectionCallbacks)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1397,10 +1571,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">unregisterConnectionFailedListener(GoogleApiClient.OnConnectionFailedListener)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1418,10 +1597,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.html#writeMoment(com.google.android.gms.plus.model.moments.Moment)">writeMoment</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a> moment)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     See <code><a href="/reference/com/google/android/gms/plus/Moments.html#write(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.plus.model.moments.Moment)">write(GoogleApiClient, Moment)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1675,7 +1859,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Connects the client to Google Play services.</div>
+        <div class="jd-descrdiv">
+          Connects the client to Google Play services.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1693,7 +1882,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#disconnect()">disconnect</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Closes the connection to Google Play services.</div>
+        <div class="jd-descrdiv">
+          Closes the connection to Google Play services.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1711,8 +1905,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnected()">isConnected</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is currently connected to the service, so that
- requests to other methods will succeed.</div>
+        <div class="jd-descrdiv">
+          Checks if the client is currently connected to the service, so that
+ requests to other methods will succeed.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1730,7 +1929,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnecting()">isConnecting</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Checks if the client is attempting to connect to the service.</div>
+        <div class="jd-descrdiv">
+          Checks if the client is attempting to connect to the service.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1748,8 +1952,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection events.</div>
+        <div class="jd-descrdiv">
+          Returns true if the specified listener is currently registered to
+ receive connection events.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1767,8 +1976,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Returns true if the specified listener is currently registered to
- receive connection failed events.</div>
+        <div class="jd-descrdiv">
+          Returns true if the specified listener is currently registered to
+ receive connection failed events.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1786,7 +2000,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1804,8 +2023,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Registers a listener to receive connection failed events from this
+ <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1823,7 +2047,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection listener from this <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Removes a connection listener from this <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1841,7 +2070,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.</div>
+        <div class="jd-descrdiv">
+          Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1916,6 +2150,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -1950,6 +2187,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -1988,6 +2228,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2023,6 +2266,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2057,6 +2303,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2091,6 +2340,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2132,6 +2384,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2171,6 +2426,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2220,6 +2478,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2269,6 +2530,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2303,6 +2567,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2337,6 +2604,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2371,6 +2641,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2405,6 +2678,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2439,6 +2715,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2473,6 +2752,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2530,6 +2812,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2587,6 +2872,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2621,6 +2909,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2655,6 +2946,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2703,6 +2997,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -2751,6 +3048,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>

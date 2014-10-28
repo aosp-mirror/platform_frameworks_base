@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -775,6 +821,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -874,7 +923,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#ItemScope.Builder()">ItemScope.Builder</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Constructs a new Builder.</div>
+        <div class="jd-descrdiv">
+          Constructs a new Builder.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -905,7 +959,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#build()">build</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Constructs a ItemScope with the current properties.</div>
+        <div class="jd-descrdiv">
+          Constructs a ItemScope with the current properties.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -923,7 +982,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAbout(com.google.android.gms.plus.model.moments.ItemScope)">setAbout</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> about)</nobr>
         
-        <div class="jd-descrdiv">The subject matter of the content.</div>
+        <div class="jd-descrdiv">
+          The subject matter of the content.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -941,7 +1005,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAdditionalName(java.util.List<java.lang.String>)">setAdditionalName</a></span>(List&lt;String&gt; additionalName)</nobr>
         
-        <div class="jd-descrdiv">An additional name for a Person, can be used for a middle name.</div>
+        <div class="jd-descrdiv">
+          An additional name for a Person, can be used for a middle name.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -959,7 +1028,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAddress(com.google.android.gms.plus.model.moments.ItemScope)">setAddress</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> address)</nobr>
         
-        <div class="jd-descrdiv">Postal address.</div>
+        <div class="jd-descrdiv">
+          Postal address.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -977,7 +1051,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAddressCountry(java.lang.String)">setAddressCountry</a></span>(String addressCountry)</nobr>
         
-        <div class="jd-descrdiv">Address country.</div>
+        <div class="jd-descrdiv">
+          Address country.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -995,7 +1074,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAddressLocality(java.lang.String)">setAddressLocality</a></span>(String addressLocality)</nobr>
         
-        <div class="jd-descrdiv">Address locality.</div>
+        <div class="jd-descrdiv">
+          Address locality.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1013,7 +1097,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAddressRegion(java.lang.String)">setAddressRegion</a></span>(String addressRegion)</nobr>
         
-        <div class="jd-descrdiv">Address region.</div>
+        <div class="jd-descrdiv">
+          Address region.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1031,7 +1120,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAssociated_media(java.util.List<com.google.android.gms.plus.model.moments.ItemScope>)">setAssociated_media</a></span>(List&lt;<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a>&gt; associated_media)</nobr>
         
-        <div class="jd-descrdiv">The encoding.</div>
+        <div class="jd-descrdiv">
+          The encoding.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1049,7 +1143,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAttendeeCount(int)">setAttendeeCount</a></span>(int attendeeCount)</nobr>
         
-        <div class="jd-descrdiv">Number of attendees.</div>
+        <div class="jd-descrdiv">
+          Number of attendees.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1067,7 +1166,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAttendees(java.util.List<com.google.android.gms.plus.model.moments.ItemScope>)">setAttendees</a></span>(List&lt;<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a>&gt; attendees)</nobr>
         
-        <div class="jd-descrdiv">A person attending the event.</div>
+        <div class="jd-descrdiv">
+          A person attending the event.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1085,7 +1189,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAudio(com.google.android.gms.plus.model.moments.ItemScope)">setAudio</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> audio)</nobr>
         
-        <div class="jd-descrdiv">From http://schema.org/MusicRecording, the audio file.</div>
+        <div class="jd-descrdiv">
+          From http://schema.org/MusicRecording, the audio file.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1103,7 +1212,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setAuthor(java.util.List<com.google.android.gms.plus.model.moments.ItemScope>)">setAuthor</a></span>(List&lt;<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a>&gt; author)</nobr>
         
-        <div class="jd-descrdiv">The person or persons who created this result.</div>
+        <div class="jd-descrdiv">
+          The person or persons who created this result.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1121,7 +1235,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setBestRating(java.lang.String)">setBestRating</a></span>(String bestRating)</nobr>
         
-        <div class="jd-descrdiv">Best possible rating value that a result might obtain.</div>
+        <div class="jd-descrdiv">
+          Best possible rating value that a result might obtain.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1139,7 +1258,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setBirthDate(java.lang.String)">setBirthDate</a></span>(String birthDate)</nobr>
         
-        <div class="jd-descrdiv">Date of birth.</div>
+        <div class="jd-descrdiv">
+          Date of birth.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1157,7 +1281,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setByArtist(com.google.android.gms.plus.model.moments.ItemScope)">setByArtist</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> byArtist)</nobr>
         
-        <div class="jd-descrdiv">From http://schema.org/MusicRecording, the artist that performed this recording.</div>
+        <div class="jd-descrdiv">
+          From http://schema.org/MusicRecording, the artist that performed this recording.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1175,7 +1304,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setCaption(java.lang.String)">setCaption</a></span>(String caption)</nobr>
         
-        <div class="jd-descrdiv">The caption for this object.</div>
+        <div class="jd-descrdiv">
+          The caption for this object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1193,7 +1327,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setContentSize(java.lang.String)">setContentSize</a></span>(String contentSize)</nobr>
         
-        <div class="jd-descrdiv">File size in (mega/kilo) bytes.</div>
+        <div class="jd-descrdiv">
+          File size in (mega/kilo) bytes.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1211,7 +1350,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setContentUrl(java.lang.String)">setContentUrl</a></span>(String contentUrl)</nobr>
         
-        <div class="jd-descrdiv">Actual bytes of the media object, for example the image file or video file.</div>
+        <div class="jd-descrdiv">
+          Actual bytes of the media object, for example the image file or video file.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1229,7 +1373,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setContributor(java.util.List<com.google.android.gms.plus.model.moments.ItemScope>)">setContributor</a></span>(List&lt;<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a>&gt; contributor)</nobr>
         
-        <div class="jd-descrdiv">A list of contributors to this result.</div>
+        <div class="jd-descrdiv">
+          A list of contributors to this result.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1247,7 +1396,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setDateCreated(java.lang.String)">setDateCreated</a></span>(String dateCreated)</nobr>
         
-        <div class="jd-descrdiv">The date the result was created such as the date that a review was first created.</div>
+        <div class="jd-descrdiv">
+          The date the result was created such as the date that a review was first created.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1265,7 +1419,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setDateModified(java.lang.String)">setDateModified</a></span>(String dateModified)</nobr>
         
-        <div class="jd-descrdiv">The date the result was last modified such as the date that a review was last edited.</div>
+        <div class="jd-descrdiv">
+          The date the result was last modified such as the date that a review was last edited.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1283,7 +1442,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setDatePublished(java.lang.String)">setDatePublished</a></span>(String datePublished)</nobr>
         
-        <div class="jd-descrdiv">The initial date that the result was published.</div>
+        <div class="jd-descrdiv">
+          The initial date that the result was published.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1301,7 +1465,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setDescription(java.lang.String)">setDescription</a></span>(String description)</nobr>
         
-        <div class="jd-descrdiv">The string that describes the content of the result.</div>
+        <div class="jd-descrdiv">
+          The string that describes the content of the result.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1319,7 +1488,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setDuration(java.lang.String)">setDuration</a></span>(String duration)</nobr>
         
-        <div class="jd-descrdiv">The duration of the item (movie, audio recording, event, etc.) in ISO 8601 date format.</div>
+        <div class="jd-descrdiv">
+          The duration of the item (movie, audio recording, event, etc.) in ISO 8601 date format.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1337,7 +1511,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setEmbedUrl(java.lang.String)">setEmbedUrl</a></span>(String embedUrl)</nobr>
         
-        <div class="jd-descrdiv">A URL pointing to a player for a specific video.</div>
+        <div class="jd-descrdiv">
+          A URL pointing to a player for a specific video.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1355,7 +1534,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setEndDate(java.lang.String)">setEndDate</a></span>(String endDate)</nobr>
         
-        <div class="jd-descrdiv">The end date and time of the event (in ISO 8601 date format).</div>
+        <div class="jd-descrdiv">
+          The end date and time of the event (in ISO 8601 date format).
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1373,7 +1557,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setFamilyName(java.lang.String)">setFamilyName</a></span>(String familyName)</nobr>
         
-        <div class="jd-descrdiv">Family name.</div>
+        <div class="jd-descrdiv">
+          Family name.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1391,7 +1580,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setGender(java.lang.String)">setGender</a></span>(String gender)</nobr>
         
-        <div class="jd-descrdiv">Gender of the person.</div>
+        <div class="jd-descrdiv">
+          Gender of the person.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1409,7 +1603,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setGeo(com.google.android.gms.plus.model.moments.ItemScope)">setGeo</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> geo)</nobr>
         
-        <div class="jd-descrdiv">Geo coordinates.</div>
+        <div class="jd-descrdiv">
+          Geo coordinates.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1427,7 +1626,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setGivenName(java.lang.String)">setGivenName</a></span>(String givenName)</nobr>
         
-        <div class="jd-descrdiv">Given name.</div>
+        <div class="jd-descrdiv">
+          Given name.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1445,7 +1649,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setHeight(java.lang.String)">setHeight</a></span>(String height)</nobr>
         
-        <div class="jd-descrdiv">The height of the media object.</div>
+        <div class="jd-descrdiv">
+          The height of the media object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1463,7 +1672,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setId(java.lang.String)">setId</a></span>(String id)</nobr>
         
-        <div class="jd-descrdiv">An identifier for the target.</div>
+        <div class="jd-descrdiv">
+          An identifier for the target.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1481,7 +1695,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setImage(java.lang.String)">setImage</a></span>(String image)</nobr>
         
-        <div class="jd-descrdiv">A URL to the image that represents this result.</div>
+        <div class="jd-descrdiv">
+          A URL to the image that represents this result.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1499,7 +1718,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setInAlbum(com.google.android.gms.plus.model.moments.ItemScope)">setInAlbum</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> inAlbum)</nobr>
         
-        <div class="jd-descrdiv">From http://schema.org/MusicRecording, which album a song is in.</div>
+        <div class="jd-descrdiv">
+          From http://schema.org/MusicRecording, which album a song is in.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1517,7 +1741,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setLatitude(double)">setLatitude</a></span>(double latitude)</nobr>
         
-        <div class="jd-descrdiv">Latitude.</div>
+        <div class="jd-descrdiv">
+          Latitude.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1535,7 +1764,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setLocation(com.google.android.gms.plus.model.moments.ItemScope)">setLocation</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> location)</nobr>
         
-        <div class="jd-descrdiv">The location of the event or organization.</div>
+        <div class="jd-descrdiv">
+          The location of the event or organization.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1553,7 +1787,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setLongitude(double)">setLongitude</a></span>(double longitude)</nobr>
         
-        <div class="jd-descrdiv">Longitude.</div>
+        <div class="jd-descrdiv">
+          Longitude.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1571,7 +1810,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setName(java.lang.String)">setName</a></span>(String name)</nobr>
         
-        <div class="jd-descrdiv">The name of the result.</div>
+        <div class="jd-descrdiv">
+          The name of the result.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1589,7 +1833,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setPartOfTVSeries(com.google.android.gms.plus.model.moments.ItemScope)">setPartOfTVSeries</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> partOfTVSeries)</nobr>
         
-        <div class="jd-descrdiv">Property of http://schema.org/TVEpisode indicating which series the episode belongs to.</div>
+        <div class="jd-descrdiv">
+          Property of http://schema.org/TVEpisode indicating which series the episode belongs to.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1607,8 +1856,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setPerformers(java.util.List<com.google.android.gms.plus.model.moments.ItemScope>)">setPerformers</a></span>(List&lt;<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a>&gt; performers)</nobr>
         
-        <div class="jd-descrdiv">The main performer or performers of the event-for example, a presenter, musician, or
- actor.</div>
+        <div class="jd-descrdiv">
+          The main performer or performers of the event-for example, a presenter, musician, or
+ actor.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1626,7 +1880,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setPlayerType(java.lang.String)">setPlayerType</a></span>(String playerType)</nobr>
         
-        <div class="jd-descrdiv">Player type that is required.</div>
+        <div class="jd-descrdiv">
+          Player type that is required.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1644,7 +1903,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setPostOfficeBoxNumber(java.lang.String)">setPostOfficeBoxNumber</a></span>(String postOfficeBoxNumber)</nobr>
         
-        <div class="jd-descrdiv">Post office box number.</div>
+        <div class="jd-descrdiv">
+          Post office box number.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1662,7 +1926,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setPostalCode(java.lang.String)">setPostalCode</a></span>(String postalCode)</nobr>
         
-        <div class="jd-descrdiv">Postal code.</div>
+        <div class="jd-descrdiv">
+          Postal code.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1680,7 +1949,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setRatingValue(java.lang.String)">setRatingValue</a></span>(String ratingValue)</nobr>
         
-        <div class="jd-descrdiv">Rating value.</div>
+        <div class="jd-descrdiv">
+          Rating value.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1698,7 +1972,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setReviewRating(com.google.android.gms.plus.model.moments.ItemScope)">setReviewRating</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> reviewRating)</nobr>
         
-        <div class="jd-descrdiv">Review rating.</div>
+        <div class="jd-descrdiv">
+          Review rating.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1716,7 +1995,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setStartDate(java.lang.String)">setStartDate</a></span>(String startDate)</nobr>
         
-        <div class="jd-descrdiv">The start date and time of the event (in ISO 8601 date format).</div>
+        <div class="jd-descrdiv">
+          The start date and time of the event (in ISO 8601 date format).
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1734,7 +2018,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setStreetAddress(java.lang.String)">setStreetAddress</a></span>(String streetAddress)</nobr>
         
-        <div class="jd-descrdiv">Street address.</div>
+        <div class="jd-descrdiv">
+          Street address.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1752,7 +2041,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setText(java.lang.String)">setText</a></span>(String text)</nobr>
         
-        <div class="jd-descrdiv">The text that is the result of the app activity.</div>
+        <div class="jd-descrdiv">
+          The text that is the result of the app activity.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1770,7 +2064,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setThumbnail(com.google.android.gms.plus.model.moments.ItemScope)">setThumbnail</a></span>(<a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.html">ItemScope</a> thumbnail)</nobr>
         
-        <div class="jd-descrdiv">Thumbnail image for an image or video.</div>
+        <div class="jd-descrdiv">
+          Thumbnail image for an image or video.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1788,7 +2087,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setThumbnailUrl(java.lang.String)">setThumbnailUrl</a></span>(String thumbnailUrl)</nobr>
         
-        <div class="jd-descrdiv">A URL to a thumbnail image that represents this result.</div>
+        <div class="jd-descrdiv">
+          A URL to a thumbnail image that represents this result.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1806,7 +2110,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setTickerSymbol(java.lang.String)">setTickerSymbol</a></span>(String tickerSymbol)</nobr>
         
-        <div class="jd-descrdiv">The exchange traded instrument associated with a Corporation object.</div>
+        <div class="jd-descrdiv">
+          The exchange traded instrument associated with a Corporation object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1824,8 +2133,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setType(java.lang.String)">setType</a></span>(String type)</nobr>
         
-        <div class="jd-descrdiv">The schema.org URL that best describes the referenced target and matches the type of
- moment.</div>
+        <div class="jd-descrdiv">
+          The schema.org URL that best describes the referenced target and matches the type of
+ moment.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1843,7 +2157,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setUrl(java.lang.String)">setUrl</a></span>(String url)</nobr>
         
-        <div class="jd-descrdiv">The URL that points to the result object.</div>
+        <div class="jd-descrdiv">
+          The URL that points to the result object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1861,7 +2180,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setWidth(java.lang.String)">setWidth</a></span>(String width)</nobr>
         
-        <div class="jd-descrdiv">The width of the media object.</div>
+        <div class="jd-descrdiv">
+          The width of the media object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1879,7 +2203,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/moments/ItemScope.Builder.html#setWorstRating(java.lang.String)">setWorstRating</a></span>(String worstRating)</nobr>
         
-        <div class="jd-descrdiv">Worst possible rating value that a result might obtain.</div>
+        <div class="jd-descrdiv">
+          Worst possible rating value that a result might obtain.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -2157,6 +2486,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a new Builder.
 </p></div>
 
@@ -2202,6 +2534,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a ItemScope with the current properties.
 </p></div>
 
@@ -2232,6 +2567,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The subject matter of the content.
 </p></div>
 
@@ -2262,6 +2600,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>An additional name for a Person, can be used for a middle name.
 </p></div>
 
@@ -2292,6 +2633,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Postal address.
 </p></div>
 
@@ -2322,6 +2666,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Address country.
 </p></div>
 
@@ -2352,6 +2699,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Address locality.
 </p></div>
 
@@ -2382,6 +2732,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Address region.
 </p></div>
 
@@ -2412,6 +2765,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The encoding.
 </p></div>
 
@@ -2442,6 +2798,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Number of attendees.
 </p></div>
 
@@ -2472,6 +2831,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A person attending the event.
 </p></div>
 
@@ -2502,6 +2864,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>From http://schema.org/MusicRecording, the audio file.
 </p></div>
 
@@ -2532,6 +2897,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The person or persons who created this result. In the example of restaurant reviews, this
  might be the reviewer's name.
 </p></div>
@@ -2563,6 +2931,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Best possible rating value that a result might obtain. This property defines the upper
  bound for the ratingValue. For example, you might have a 5 star rating scale, you would
  provide 5 as the value for this property.
@@ -2595,6 +2966,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Date of birth.
 </p></div>
 
@@ -2625,6 +2999,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>From http://schema.org/MusicRecording, the artist that performed this recording.
 </p></div>
 
@@ -2655,6 +3032,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The caption for this object.
 </p></div>
 
@@ -2685,6 +3065,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>File size in (mega/kilo) bytes.
 </p></div>
 
@@ -2715,6 +3098,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Actual bytes of the media object, for example the image file or video file.
 </p></div>
 
@@ -2745,6 +3131,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A list of contributors to this result.
 </p></div>
 
@@ -2775,6 +3164,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The date the result was created such as the date that a review was first created.
 </p></div>
 
@@ -2805,6 +3197,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The date the result was last modified such as the date that a review was last edited.
 </p></div>
 
@@ -2835,6 +3230,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The initial date that the result was published. For example, a user writes a comment on a
  blog, which has a result.dateCreated of when they submit it. If the blog users comment
  moderation, the result.datePublished value would match the date when the owner approved
@@ -2868,6 +3266,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The string that describes the content of the result.
 </p></div>
 
@@ -2898,6 +3299,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The duration of the item (movie, audio recording, event, etc.) in ISO 8601 date format.
 </p></div>
 
@@ -2928,6 +3332,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A URL pointing to a player for a specific video. In general, this is the information in
  the src element of an embed tag and should not be the same as the content of the loc tag.
 </p></div>
@@ -2959,6 +3366,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The end date and time of the event (in ISO 8601 date format).
 </p></div>
 
@@ -2989,6 +3399,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Family name. This property can be used with givenName instead of the name property.
 </p></div>
 
@@ -3019,6 +3432,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gender of the person.
 </p></div>
 
@@ -3049,6 +3465,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Geo coordinates.
 </p></div>
 
@@ -3079,6 +3498,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Given name. This property can be used with familyName instead of the name property.
 </p></div>
 
@@ -3109,6 +3531,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The height of the media object.
 </p></div>
 
@@ -3139,6 +3564,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>An identifier for the target. Your app can choose how to identify targets. The target.id
  is required if you are writing an activity that does not have a corresponding web page or
  target.url property.
@@ -3171,6 +3599,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A URL to the image that represents this result. For example, if a user writes a review of
  a restaurant and attaches a photo of their meal, you might use that photo as the
  result.image.
@@ -3203,6 +3634,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>From http://schema.org/MusicRecording, which album a song is in.
 </p></div>
 
@@ -3233,6 +3667,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Latitude.
 </p></div>
 
@@ -3263,6 +3700,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The location of the event or organization.
 </p></div>
 
@@ -3293,6 +3733,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Longitude.
 </p></div>
 
@@ -3323,6 +3766,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The name of the result. In the example of a restaurant review, this might be the summary
  the user gave their review such as "Great ambiance, but overpriced."
 </p></div>
@@ -3354,6 +3800,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Property of http://schema.org/TVEpisode indicating which series the episode belongs to.
 </p></div>
 
@@ -3384,6 +3833,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The main performer or performers of the event-for example, a presenter, musician, or
  actor.
 </p></div>
@@ -3415,6 +3867,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Player type that is required. For example: Flash or Silverlight.
 </p></div>
 
@@ -3445,6 +3900,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Post office box number.
 </p></div>
 
@@ -3475,6 +3933,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Postal code.
 </p></div>
 
@@ -3505,6 +3966,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Rating value.
 </p></div>
 
@@ -3535,6 +3999,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Review rating.
 </p></div>
 
@@ -3565,6 +4032,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The start date and time of the event (in ISO 8601 date format).
 </p></div>
 
@@ -3595,6 +4065,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Street address.
 </p></div>
 
@@ -3625,6 +4098,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The text that is the result of the app activity. For example, if a user leaves a review
  of a restaurant, this might be the text of the review.
 </p></div>
@@ -3656,6 +4132,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Thumbnail image for an image or video.
 </p></div>
 
@@ -3686,6 +4165,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A URL to a thumbnail image that represents this result.
 </p></div>
 
@@ -3716,6 +4198,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The exchange traded instrument associated with a Corporation object. The tickerSymbol is
  expressed as an exchange and an instrument name separated by a space character. For the
  exchange component of the tickerSymbol attribute, we reccommend using the controlled
@@ -3749,6 +4234,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The schema.org URL that best describes the referenced target and matches the type of
  moment.
 </p></div>
@@ -3780,6 +4268,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The URL that points to the result object. For example, a permalink directly to a
  restaurant reviewer's comment.
 </p></div>
@@ -3811,6 +4302,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The width of the media object.
 </p></div>
 
@@ -3841,6 +4335,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Worst possible rating value that a result might obtain. This property defines the lower
  bound for the ratingValue.
 </p></div>

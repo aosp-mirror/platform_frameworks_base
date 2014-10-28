@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -764,11 +813,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The Google Fit Configuration API provides methods for accessing platform configuration and
- metadata.
+<p itemprop="articleBody">API for accessing custom data types and settings in Google Fit.
  <p>
- Custom <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>
- definitions can be added and then retrieved using
+ Custom <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code> definitions can be added and then retrieved using
  <code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html#createCustomDataType(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataTypeCreateRequest)">createCustomDataType(GoogleApiClient, DataTypeCreateRequest)</a></code> and
  <code><a href="/reference/com/google/android/gms/fitness/ConfigApi.html#readDataType(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">readDataType(GoogleApiClient, String)</a></code>.
  <p>
@@ -860,8 +907,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/ConfigApi.html#createCustomDataType(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataTypeCreateRequest)">createCustomDataType</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/DataTypeCreateRequest.html">DataTypeCreateRequest</a> request)</nobr>
 
-        <div class="jd-descrdiv">Defines a new data type which is added to the Google Fit platform on behalf of the current
- application.</div>
+        <div class="jd-descrdiv">
+          Defines a new data type which is added to the Google Fit platform on behalf of the current
+ application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -879,7 +931,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/ConfigApi.html#disableFit(com.google.android.gms.common.api.GoogleApiClient)">disableFit</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
 
-        <div class="jd-descrdiv">Disables Google Fit for an app.</div>
+        <div class="jd-descrdiv">
+          Disables Google Fit for an app.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -897,7 +954,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/ConfigApi.html#readDataType(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">readDataType</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String dataTypeName)</nobr>
 
-        <div class="jd-descrdiv">Returns a data type with the specified <code>dataTypeName</code>.</div>
+        <div class="jd-descrdiv">
+          Returns a data type with the specified <code>dataTypeName</code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -973,6 +1035,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Defines a new data type which is added to the Google Fit platform on behalf of the current
  application.  Useful for adding a private custom data type for recording app-specific data.
  Custom data created by one app will not be visible to other apps.
@@ -1005,6 +1070,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <ul class="nolist"><li>a pending result containing the status of the request.  If an existing DataType has
          the same name but different fields, the operation will fail with
          <code><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#CONFLICTING_DATA_TYPE">CONFLICTING_DATA_TYPE</a></code>.
+         If application package name does not match <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>'s name, the operation
+         will fail with <code><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#INCONSISTENT_DATA_TYPE">INCONSISTENT_DATA_TYPE</a></code> status code.
 </li></ul>
   </div>
 
@@ -1034,6 +1101,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Disables Google Fit for an app. Can be used to revoke all granted OAuth access permissions
  from an app and consequently remove all existing subscriptions and registrations of the app.</p></div>
@@ -1078,6 +1148,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a data type with the specified <code>dataTypeName</code>.  Useful to retrieve
  shareable data types added by other apps or custom data types added by your app.
