@@ -57,7 +57,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
     private boolean mIsViewsTransitionStarted;
     private boolean mIsViewsTransitionComplete;
     private boolean mIsSharedElementTransitionComplete;
-    private ArrayList<Matrix> mSharedElementParentMatrices;
     private Transition mEnterViewsTransition;
 
     public EnterTransitionCoordinator(Activity activity, ResultReceiver resultReceiver,
@@ -122,7 +121,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         if (mIsReturning) {
             sendSharedElementDestination();
         } else {
-            setSharedElementMatrices();
             moveSharedElementsToOverlay();
         }
         if (mSharedElementsBundle != null) {
@@ -194,7 +192,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         }
         if (allReady) {
             Bundle state = captureSharedElementState();
-            setSharedElementMatrices();
             moveSharedElementsToOverlay();
             mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
         } else if (decorView != null) {
@@ -205,7 +202,6 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
                             decorView.getViewTreeObserver().removeOnPreDrawListener(this);
                             if (mResultReceiver != null) {
                                 Bundle state = captureSharedElementState();
-                                setSharedElementMatrices();
                                 moveSharedElementsToOverlay();
                                 mResultReceiver.send(MSG_SHARED_ELEMENT_DESTINATION, state);
                             }
@@ -645,30 +641,4 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
         });
     }
 
-    private void setSharedElementMatrices() {
-        int numSharedElements = mSharedElements.size();
-        if (numSharedElements > 0) {
-            mSharedElementParentMatrices = new ArrayList<Matrix>(numSharedElements);
-        }
-        for (int i = 0; i < numSharedElements; i++) {
-            View view = mSharedElements.get(i);
-
-            // Find the location in the view's parent
-            ViewGroup parent = (ViewGroup) view.getParent();
-            Matrix matrix = new Matrix();
-            parent.transformMatrixToLocal(matrix);
-
-            mSharedElementParentMatrices.add(matrix);
-        }
-    }
-
-    @Override
-    protected void getSharedElementParentMatrix(View view, Matrix matrix) {
-        int index = mSharedElementParentMatrices == null ? -1 : mSharedElements.indexOf(view);
-        if (index < 0) {
-            super.getSharedElementParentMatrix(view, matrix);
-        } else {
-            matrix.set(mSharedElementParentMatrices.get(index));
-        }
-    }
 }
