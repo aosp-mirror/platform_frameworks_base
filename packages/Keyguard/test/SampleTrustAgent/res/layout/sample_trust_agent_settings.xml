@@ -44,4 +44,18 @@
             android:paddingTop="8dp"
             android:paddingBottom="8dp"
             android:text="Report unlock attempts" />
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        <Button android:id="@+id/check_trusted"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Keyguard in trusted state?" />
+        <TextView android:id="@+id/check_trusted_result"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+    </LinearLayout>
+
 </LinearLayout>
