@@ -470,7 +470,7 @@ public class SubscriptionManager implements BaseColumns {
 
     /**
      * Set SIM color by simInfo index
-     * @param color the color of the SIM
+     * @param color the rgb value of color of the SIM
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
      * @hide
@@ -478,7 +478,7 @@ public class SubscriptionManager implements BaseColumns {
     public static int setColor(int color, int subId) {
         if (VDBG) logd("[setColor]+ color:" + color + " subId:" + subId);
         int size = sSimBackgroundDarkRes.length;
-        if (!isValidSubId(subId) || color < 0 || color >= size) {
+        if (!isValidSubId(subId)) {
             logd("[setColor]- fail");
             return -1;
         }
