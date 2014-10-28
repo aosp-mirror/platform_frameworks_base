@@ -25516,7 +25516,6 @@ package android.provider {
     field public static final java.lang.String STATUS = "st";
     field public static final java.lang.String SUBJECT = "sub";
     field public static final java.lang.String SUBJECT_CHARSET = "sub_cs";
-    field public static final java.lang.String SUB_ID = "sub_id";
     field public static final java.lang.String TEXT_ONLY = "text_only";
     field public static final java.lang.String THREAD_ID = "thread_id";
     field public static final java.lang.String TRANSACTION_ID = "tr_id";
@@ -25549,7 +25548,6 @@ package android.provider {
     field public static final java.lang.String PROXY = "proxy";
     field public static final java.lang.String ROAMING_PROTOCOL = "roaming_protocol";
     field public static final java.lang.String SERVER = "server";
-    field public static final java.lang.String SUB_ID = "sub_id";
     field public static final java.lang.String TYPE = "type";
     field public static final java.lang.String USER = "user";
   }
@@ -25646,7 +25644,6 @@ package android.provider {
     field public static final java.lang.String MSG_TYPE = "msg_type";
     field public static final java.lang.String PROTO_TYPE = "proto_type";
     field public static final java.lang.String RETRY_INDEX = "retry_index";
-    field public static final java.lang.String SUB_ID = "pending_sub_id";
   }
 
   public static final class Telephony.Sms implements android.provider.BaseColumns android.provider.Telephony.TextBasedSmsColumns {
@@ -25730,7 +25727,6 @@ package android.provider {
     field public static final int STATUS_NONE = -1; // 0xffffffff
     field public static final int STATUS_PENDING = 32; // 0x20
     field public static final java.lang.String SUBJECT = "subject";
-    field public static final java.lang.String SUB_ID = "sub_id";
     field public static final java.lang.String THREAD_ID = "thread_id";
     field public static final java.lang.String TYPE = "type";
   }
@@ -28370,8 +28366,6 @@ package android.telephony {
     method public void downloadMultimediaMessage(android.content.Context, java.lang.String, android.net.Uri, android.os.Bundle, android.app.PendingIntent);
     method public android.os.Bundle getCarrierConfigValues();
     method public static android.telephony.SmsManager getDefault();
-    method public static android.telephony.SmsManager getSmsManagerForSubscriber(long);
-    method public long getSubId();
     method public void sendDataMessage(java.lang.String, java.lang.String, short, byte[], android.app.PendingIntent, android.app.PendingIntent);
     method public void sendMultimediaMessage(android.content.Context, android.net.Uri, java.lang.String, android.os.Bundle, android.app.PendingIntent);
     method public void sendMultipartTextMessage(java.lang.String, java.lang.String, java.util.ArrayList<java.lang.String>, java.util.ArrayList<android.app.PendingIntent>, java.util.ArrayList<android.app.PendingIntent>);
@@ -28480,47 +28474,6 @@ package android.telephony {
   public static class SmsMessage.SubmitPdu {
     field public byte[] encodedMessage;
     field public byte[] encodedScAddress;
-  }
-
-  public class SubInfoRecord implements android.os.Parcelable {
-    ctor public SubInfoRecord();
-    ctor public SubInfoRecord(long, java.lang.String, int, java.lang.String, int, int, java.lang.String, int, int, int[], int, int);
-    method public int describeContents();
-    method public int getColor();
-    method public android.graphics.drawable.BitmapDrawable getIconDrawable();
-    method public java.lang.String getLabel();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.SubInfoRecord> CREATOR;
-    field public int color;
-    field public int dataRoaming;
-    field public java.lang.String displayName;
-    field public int displayNumberFormat;
-    field public java.lang.String iccId;
-    field public int mcc;
-    field public int mnc;
-    field public int nameSource;
-    field public java.lang.String number;
-    field public int[] simIconRes;
-    field public int slotId;
-    field public long subId;
-  }
-
-  public class SubscriptionManager implements android.provider.BaseColumns {
-    method public static java.util.List<android.telephony.SubInfoRecord> getActiveSubInfoList();
-    method public static long getDefaultSmsSubId();
-    method public static int getSlotId(long);
-    method public static android.telephony.SubInfoRecord getSubInfoForSubscriber(long);
-    method public static java.util.List<android.telephony.SubInfoRecord> getSubInfoUsingSlotId(int);
-    method public static boolean isValidSubId(long);
-    field public static final long ASK_USER_SUB_ID = -1001L; // 0xfffffffffffffc17L
-    field public static final int DEFAULT_PHONE_ID = 2147483647; // 0x7fffffff
-    field public static final long DEFAULT_SUB_ID = 9223372036854775807L; // 0x7fffffffffffffffL
-    field public static final int INVALID_PHONE_ID = -1000; // 0xfffffc18
-    field public static final int INVALID_SLOT_ID = -1000; // 0xfffffc18
-    field public static final long INVALID_SUB_ID = -1000L; // 0xfffffffffffffc18L
-    field public static final java.lang.String MCC = "mcc";
-    field public static final java.lang.String MNC = "mnc";
-    field public static final int SIM_NOT_INSERTED = -1; // 0xffffffff
   }
 
   public class TelephonyManager {
