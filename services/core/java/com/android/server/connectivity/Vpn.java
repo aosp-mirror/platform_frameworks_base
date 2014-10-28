@@ -215,7 +215,7 @@ public class Vpn {
      */
     public synchronized boolean prepare(String oldPackage, String newPackage) {
         // Return false if the package does not match.
-        if (oldPackage != null && !oldPackage.equals(mPackage)) {
+        if (oldPackage != null && getAppUid(oldPackage, mUserHandle) != mOwnerUID) {
             // The package doesn't match. If this VPN was not previously authorized, return false
             // to force user authorization. Otherwise, revoke the VPN anyway.
             if (!oldPackage.equals(VpnConfig.LEGACY_VPN) && isVpnUserPreConsented(oldPackage)) {
@@ -234,8 +234,8 @@ public class Vpn {
         }
 
         // Return true if we do not need to revoke.
-        if (newPackage == null ||
-                (newPackage.equals(mPackage) && !newPackage.equals(VpnConfig.LEGACY_VPN))) {
+        if (newPackage == null || (!newPackage.equals(VpnConfig.LEGACY_VPN) &&
+                getAppUid(newPackage, mUserHandle) == mOwnerUID)) {
             return true;
         }
 
