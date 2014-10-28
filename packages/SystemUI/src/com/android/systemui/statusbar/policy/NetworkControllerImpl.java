@@ -168,7 +168,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         void setIsAirplaneMode(boolean is, int airplaneIcon);
     }
 
-    private final WifiAccessPointController mAccessPoints;
+    private final AccessPointController mAccessPoints;
     private final MobileDataController mMobileDataController;
 
     /**
@@ -239,7 +239,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         updateAirplaneMode();
 
         mLastLocale = mContext.getResources().getConfiguration().locale;
-        mAccessPoints = new WifiAccessPointController(mContext);
+        mAccessPoints = new AccessPointController(mContext);
         mMobileDataController = new MobileDataController(mContext);
         mMobileDataController.setCallback(new MobileDataController.Callback() {
             @Override
@@ -247,6 +247,16 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 notifyMobileDataEnabled(enabled);
             }
         });
+    }
+
+    @Override
+    public boolean canConfigWifi() {
+        return mAccessPoints.canConfigWifi();
+    }
+
+    @Override
+    public void onUserSwitched(int newUserId) {
+        mAccessPoints.onUserSwitched(newUserId);
     }
 
     private void notifyMobileDataEnabled(boolean enabled) {
@@ -313,8 +323,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     @Override
-    public void connect(AccessPoint ap) {
-        mAccessPoints.connect(ap);
+    public boolean connect(AccessPoint ap) {
+        return mAccessPoints.connect(ap);
     }
 
     @Override

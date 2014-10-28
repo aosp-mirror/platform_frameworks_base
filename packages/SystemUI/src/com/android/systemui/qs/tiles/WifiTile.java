@@ -87,7 +87,15 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleSecondaryClick() {
-        mHost.startSettingsActivity(WIFI_SETTINGS);
+        if (!mController.canConfigWifi()) {
+            mHost.startSettingsActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+            return;
+        }
+        if (!mState.enabled) {
+            mController.setWifiEnabled(true);
+            mState.enabled = true;
+        }
+        showDetail(true);
     }
 
     @Override
@@ -279,7 +287,9 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             if (item == null || item.tag == null) return;
             final AccessPoint ap = (AccessPoint) item.tag;
             if (!ap.isConnected) {
-                mController.connect(ap);
+                if (mController.connect(ap)) {
+                    mHost.collapsePanels();
+                }
             }
             showDetail(false);
         }
