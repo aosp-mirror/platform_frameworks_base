@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.SpeedBumpView;
+import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
@@ -84,6 +85,9 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mLastMotionY;
     private int mDownX;
     private int mActivePointerId;
+    private boolean mTouchIsClick;
+    private float mInitialTouchX;
+    private float mInitialTouchY;
 
     private int mSidePaddings;
     private Paint mDebugPaint;
@@ -133,6 +137,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private OnChildLocationsChangedListener mListener;
     private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
+    private OnEmptySpaceClickListener mOnEmptySpaceClickListener;
     private boolean mNeedsAnimation;
     private boolean mTopPaddingNeedsAnimation;
     private boolean mDimmedNeedsAnimation;
@@ -581,7 +586,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int count = getChildCount();
         for (int childIdx = 0; childIdx < count; childIdx++) {
             ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
-            if (slidingChild.getVisibility() == GONE) {
+            if (slidingChild.getVisibility() == GONE
+                    || slidingChild instanceof StackScrollerDecorView
+                    || slidingChild == mSpeedBumpView) {
                 continue;
             }
             float childTop = slidingChild.getTranslationY();
@@ -687,6 +694,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             transformTouchEvent(ev, this, mScrollView);
             return mScrollView.onTouchEvent(ev);
         }
+        handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;
         if (!mSwipingInProgress && !mOnlyScrollingInThisMotion && isScrollingEnabled()) {
             if (isCancelOrUp) {
@@ -1430,6 +1438,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             transformTouchEvent(ev, mScrollView, this);
         }
         initDownStates(ev);
+        handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;
         if (!mSwipingInProgress && !mOnlyScrollingInThisMotion && isScrollingEnabled()) {
             expandWantsIt = mExpandHelper.onInterceptTouchEvent(ev);
@@ -1448,11 +1457,31 @@ public class NotificationStackScrollLayout extends ViewGroup
         return swipeWantsIt || scrollWantsIt || expandWantsIt || super.onInterceptTouchEvent(ev);
     }
 
+    private void handleEmptySpaceClick(MotionEvent ev) {
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_MOVE:
+                if (mTouchIsClick && (Math.abs(ev.getY() - mInitialTouchY) > mTouchSlop
+                        || Math.abs(ev.getX() - mInitialTouchX) > mTouchSlop )) {
+                    mTouchIsClick = false;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (mPhoneStatusBar.getBarState() != StatusBarState.KEYGUARD && mTouchIsClick &&
+                        isBelowLastNotification(mInitialTouchX, mInitialTouchY)) {
+                    mOnEmptySpaceClickListener.onEmptySpaceClicked(mInitialTouchX, mInitialTouchY);
+                }
+                break;
+        }
+    }
+
     private void initDownStates(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             mExpandedInThisMotion = false;
             mOnlyScrollingInThisMotion = !mScroller.isFinished();
             mDisallowScrollingInThisMotion = false;
+            mTouchIsClick = true;
+            mInitialTouchX = ev.getX();
+            mInitialTouchY = ev.getY();
         }
     }
 
@@ -1995,6 +2024,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         this.mOnHeightChangedListener = mOnHeightChangedListener;
     }
 
+    public void setOnEmptySpaceClickListener(OnEmptySpaceClickListener listener) {
+        mOnEmptySpaceClickListener = listener;
+    }
+
     public void onChildAnimationFinished() {
         requestChildrenUpdate();
     }
@@ -2245,11 +2278,36 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
+    private boolean isBelowLastNotification(float touchX, float touchY) {
+        ExpandableView lastChildNotGone = (ExpandableView) getLastChildNotGone();
+        if (lastChildNotGone == null) {
+            return touchY > mIntrinsicPadding;
+        }
+        if (lastChildNotGone != mDismissView && lastChildNotGone != mEmptyShadeView) {
+            return touchY > lastChildNotGone.getY() + lastChildNotGone.getActualHeight();
+        } else if (lastChildNotGone == mEmptyShadeView) {
+            return touchY > mEmptyShadeView.getY();
+        } else {
+            float dismissY = mDismissView.getY();
+            boolean belowDismissView = touchY > dismissY + mDismissView.getActualHeight();
+            return belowDismissView || (touchY > dismissY
+                    && mDismissView.isOnEmptySpace(touchX - mDismissView.getX(),
+                    touchY - dismissY));
+        }
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
     public interface OnChildLocationsChangedListener {
         public void onChildLocationsChanged(NotificationStackScrollLayout stackScrollLayout);
+    }
+
+    /**
+     * A listener that is notified when the empty space below the notifications is clicked on
+     */
+    public interface OnEmptySpaceClickListener {
+        public void onEmptySpaceClicked(float x, float y);
     }
 
     /**

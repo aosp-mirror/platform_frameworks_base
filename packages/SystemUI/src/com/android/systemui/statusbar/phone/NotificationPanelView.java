@@ -52,7 +52,7 @@ import com.android.systemui.statusbar.stack.StackStateAnimator;
 public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener, ObservableScrollView.Listener,
         View.OnClickListener, NotificationStackScrollLayout.OnOverscrollTopChangedListener,
-        KeyguardAffordanceHelper.Callback {
+        KeyguardAffordanceHelper.Callback, NotificationStackScrollLayout.OnEmptySpaceClickListener {
 
     // Cap and total height of Roboto font. Needs to be adjusted when font for the big clock is
     // changed.
@@ -197,6 +197,7 @@ public class NotificationPanelView extends PanelView implements
                 findViewById(R.id.notification_stack_scroller);
         mNotificationStackScroller.setOnHeightChangedListener(this);
         mNotificationStackScroller.setOverscrollTopChangedListener(this);
+        mNotificationStackScroller.setOnEmptySpaceClickListener(this);
         mNotificationStackScroller.setScrollView(mScrollView);
         mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(getContext(),
                 android.R.interpolator.fast_out_slow_in);
@@ -1866,5 +1867,10 @@ public class NotificationPanelView extends PanelView implements
 
     public void onScreenTurnedOn() {
         mKeyguardStatusView.refreshTime();
+    }
+
+    @Override
+    public void onEmptySpaceClicked(float x, float y) {
+        onEmptySpaceClick(x);
     }
 }
