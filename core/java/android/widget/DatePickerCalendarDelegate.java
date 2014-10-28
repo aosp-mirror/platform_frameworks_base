@@ -21,13 +21,11 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
-import android.util.SparseArray;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -186,6 +184,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
                 headerSelectedTextColor));
 
         mDayPickerView = new DayPickerView(mContext, this);
+        mDayPickerView.setRange(mMinDate, mMaxDate);
+
         mYearPickerView = new YearPickerView(mContext);
         mYearPickerView.init(this);
 
@@ -411,7 +411,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             updateDisplay(false);
         }
         mMinDate.setTimeInMillis(minDate);
-        mDayPickerView.goTo(getSelectedDay(), false, true, true);
+        mDayPickerView.setRange(mMinDate, mMaxDate);
+        mYearPickerView.setRange(mMinDate, mMaxDate);
     }
 
     @Override
@@ -432,7 +433,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             updateDisplay(false);
         }
         mMaxDate.setTimeInMillis(maxDate);
-        mDayPickerView.goTo(getSelectedDay(), false, true, true);
+        mDayPickerView.setRange(mMinDate, mMaxDate);
+        mYearPickerView.setRange(mMinDate, mMaxDate);
     }
 
     @Override
@@ -451,36 +453,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             return mFirstDayOfWeek;
         }
         return mCurrentDate.getFirstDayOfWeek();
-    }
-
-    @Override
-    public int getMinYear() {
-        return mMinDate.get(Calendar.YEAR);
-    }
-
-    @Override
-    public int getMaxYear() {
-        return mMaxDate.get(Calendar.YEAR);
-    }
-
-    @Override
-    public int getMinMonth() {
-        return mMinDate.get(Calendar.MONTH);
-    }
-
-    @Override
-    public int getMaxMonth() {
-        return mMaxDate.get(Calendar.MONTH);
-    }
-
-    @Override
-    public int getMinDay() {
-        return mMinDate.get(Calendar.DAY_OF_MONTH);
-    }
-
-    @Override
-    public int getMaxDay() {
-        return mMaxDate.get(Calendar.DAY_OF_MONTH);
     }
 
     @Override
