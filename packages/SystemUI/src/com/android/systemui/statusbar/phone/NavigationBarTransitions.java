@@ -84,7 +84,7 @@ public final class NavigationBarTransitions extends BarTransitions {
         applyBackButtonQuiescentAlpha(mode, animate);
 
         // apply to lights out
-        applyLightsOut(mode == MODE_LIGHTS_OUT, animate, force);
+        applyLightsOut(isLightsOut(mode), animate, force);
     }
 
     private float alphaForMode(int mode) {
