@@ -16,15 +16,20 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.ActionListener;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -39,9 +44,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class WifiAccessPointController {
-    private static final String TAG = "WifiAccessPointController";
-    private static final boolean DEBUG = false;
+public class AccessPointController {
+    private static final String TAG = "AccessPointController";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    // This string extra specifies a network to open the connect dialog on, so the user can enter
+    // network credentials.  This is used by quick settings for secured networks.
+    private static final String EXTRA_START_CONNECT_SSID = "wifi_start_connect_ssid";
 
     private static final int[] ICONS = {
         R.drawable.ic_qs_wifi_0,
@@ -54,13 +63,26 @@ public class WifiAccessPointController {
     private final Context mContext;
     private final ArrayList<AccessPointCallback> mCallbacks = new ArrayList<AccessPointCallback>();
     private final WifiManager mWifiManager;
+    private final UserManager mUserManager;
     private final Receiver mReceiver = new Receiver();
 
     private boolean mScanning;
+    private int mCurrentUser;
 
-    public WifiAccessPointController(Context context) {
+    public AccessPointController(Context context) {
         mContext = context;
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mCurrentUser = ActivityManager.getCurrentUser();
+    }
+
+    public boolean canConfigWifi() {
+        return !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_WIFI,
+                new UserHandle(mCurrentUser));
+    }
+
+    void onUserSwitched(int newUserId) {
+        mCurrentUser = newUserId;
     }
 
     public void addCallback(AccessPointCallback callback) {
@@ -81,22 +103,31 @@ public class WifiAccessPointController {
         if (mScanning) return;
         if (DEBUG) Log.d(TAG, "scan!");
         mScanning = mWifiManager.startScan();
+        // Grab current networks immediately while we wait for scan.
+        updateAccessPoints();
     }
 
-    public void connect(AccessPoint ap) {
-        if (ap == null || ap.networkId < 0) return;
+    public boolean connect(AccessPoint ap) {
+        if (ap == null) return false;
         if (DEBUG) Log.d(TAG, "connect networkId=" + ap.networkId);
-        mWifiManager.connect(ap.networkId, new ActionListener() {
-            @Override
-            public void onSuccess() {
-                if (DEBUG) Log.d(TAG, "connect success");
+        if (ap.networkId < 0) {
+            // Unknown network, need to add it.
+            if (ap.hasSecurity) {
+                Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                intent.putExtra(EXTRA_START_CONNECT_SSID, ap.ssid);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivity(intent);
+                return true;
+            } else {
+                WifiConfiguration config = new WifiConfiguration();
+                config.SSID = "\"" + ap.ssid + "\"";
+                config.allowedKeyManagement.set(KeyMgmt.NONE);
+                mWifiManager.connect(config, mConnectListener);
             }
-
-            @Override
-            public void onFailure(int reason) {
-                if (DEBUG) Log.d(TAG, "connect failure reason=" + reason);
-            }
-        });
+        } else {
+            mWifiManager.connect(ap.networkId, mConnectListener);
+        }
+        return false;
     }
 
     private void fireCallback(AccessPoint[] aps) {
@@ -139,22 +170,39 @@ public class WifiAccessPointController {
             }
             final String ssid = scanResult.SSID;
             if (TextUtils.isEmpty(ssid) || ssids.contains(ssid)) continue;
-            if (!configured.containsKey(ssid)) continue;
             ssids.add(ssid);
             final WifiConfiguration config = configured.get(ssid);
             final int level = WifiManager.calculateSignalLevel(scanResult.level, ICONS.length);
             final AccessPoint ap = new AccessPoint();
+            ap.isConfigured = config != null;
             ap.networkId = config != null ? config.networkId : AccessPoint.NO_NETWORK;
             ap.ssid = ssid;
             ap.iconId = ICONS[level];
             ap.isConnected = ap.networkId != AccessPoint.NO_NETWORK
                     && ap.networkId == connectedNetworkId;
             ap.level = level;
+            // Based on Settings AccessPoint#getSecurity, keep up to date
+            // with better methods of determining no security or not.
+            ap.hasSecurity = scanResult.capabilities.contains("WEP")
+                    || scanResult.capabilities.contains("PSK")
+                    || scanResult.capabilities.contains("EAP");
             aps.add(ap);
         }
         Collections.sort(aps, mByStrength);
         fireCallback(aps.toArray(new AccessPoint[aps.size()]));
     }
+
+    private final ActionListener mConnectListener = new ActionListener() {
+        @Override
+        public void onSuccess() {
+            if (DEBUG) Log.d(TAG, "connect success");
+        }
+
+        @Override
+        public void onFailure(int reason) {
+            if (DEBUG) Log.d(TAG, "connect failure reason=" + reason);
+        }
+    };
 
     private final Comparator<AccessPoint> mByStrength = new Comparator<AccessPoint> () {
         @Override
@@ -163,7 +211,7 @@ public class WifiAccessPointController {
         }
 
         private int score(AccessPoint ap) {
-            return ap.level + (ap.isConnected ? 10 : 0);
+            return ap.level + (ap.isConnected ? 20 : 0) + (ap.isConfigured ? 10 : 0);
         }
     };
 

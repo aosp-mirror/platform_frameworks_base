@@ -39,11 +39,13 @@ public interface NetworkController {
     void addAccessPointCallback(AccessPointCallback callback);
     void removeAccessPointCallback(AccessPointCallback callback);
     void scanForAccessPoints();
-    void connect(AccessPoint ap);
+    boolean connect(AccessPoint ap);
     boolean isMobileDataSupported();
     boolean isMobileDataEnabled();
     void setMobileDataEnabled(boolean enabled);
     DataUsageInfo getDataUsageInfo();
+    boolean canConfigWifi();
+    void onUserSwitched(int newUserId);
 
     public interface AccessPointCallback {
         void onAccessPointsChanged(AccessPoint[] accessPoints);
@@ -56,6 +58,8 @@ public interface NetworkController {
         public int iconId;
         public String ssid;
         public boolean isConnected;
+        public boolean isConfigured;
+        public boolean hasSecurity;
         public int level;  // 0 - 5
     }
 
