@@ -17,11 +17,13 @@
 package android.service.notification;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Slog;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -32,7 +34,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.Objects;
+
+import com.android.internal.R;
 
 /**
  * Persisted configuration for zen mode.
@@ -461,20 +466,34 @@ public class ZenModeConfig implements Parcelable {
         return downtime;
     }
 
-    public static Condition toTimeCondition(int minutesFromNow) {
+    public static Condition toTimeCondition(Context context, int minutesFromNow) {
         final long now = System.currentTimeMillis();
         final long millis = minutesFromNow == 0 ? ZERO_VALUE_MS : minutesFromNow * MINUTES_MS;
-        return toTimeCondition(now + millis, minutesFromNow);
+        return toTimeCondition(context, now + millis, minutesFromNow, now);
     }
 
-    public static Condition toTimeCondition(long time, int minutes) {
-        final int num = minutes < 60 ? minutes : Math.round(minutes / 60f);
-        final int resId = minutes < 60
-                ? com.android.internal.R.plurals.zen_mode_duration_minutes
-                : com.android.internal.R.plurals.zen_mode_duration_hours;
-        final String caption = Resources.getSystem().getQuantityString(resId, num, num);
+    public static Condition toTimeCondition(Context context, long time, int minutes, long now) {
+        final int num, summaryResId, line1ResId;
+        if (minutes < 60) {
+            // display as minutes
+            num = minutes;
+            summaryResId = R.plurals.zen_mode_duration_minutes_summary;
+            line1ResId = R.plurals.zen_mode_duration_minutes;
+        } else {
+            // display as hours
+            num =  Math.round(minutes / 60f);
+            summaryResId = com.android.internal.R.plurals.zen_mode_duration_hours_summary;
+            line1ResId = com.android.internal.R.plurals.zen_mode_duration_hours;
+        }
+        final String skeleton = DateFormat.is24HourFormat(context) ? "Hm" : "hma";
+        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        final CharSequence formattedTime = DateFormat.format(pattern, time);
+        final Resources res = context.getResources();
+        final String summary = res.getQuantityString(summaryResId, num, num, formattedTime);
+        final String line1 = res.getQuantityString(line1ResId, num, num, formattedTime);
+        final String line2 = res.getString(R.string.zen_mode_until, formattedTime);
         final Uri id = toCountdownConditionId(time);
-        return new Condition(id, caption, "", "", 0, Condition.STATE_TRUE,
+        return new Condition(id, summary, line1, line2, 0, Condition.STATE_TRUE,
                 Condition.FLAG_RELEVANT_NOW);
     }
 
