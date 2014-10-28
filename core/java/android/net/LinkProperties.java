@@ -493,16 +493,16 @@ public final class LinkProperties implements Parcelable {
     /**
      * Removes a stacked link.
      *
-     * If there a stacked link with the same interfacename as link, it is
+     * If there is a stacked link with the given interface name, it is
      * removed. Otherwise, nothing changes.
      *
-     * @param link The link to remove.
+     * @param iface The interface name of the link to remove.
      * @return true if the link was removed, false otherwise.
      * @hide
      */
-    public boolean removeStackedLink(LinkProperties link) {
-        if (link != null && link.getInterfaceName() != null) {
-            LinkProperties removed = mStackedLinks.remove(link.getInterfaceName());
+    public boolean removeStackedLink(String iface) {
+        if (iface != null) {
+            LinkProperties removed = mStackedLinks.remove(iface);
             return removed != null;
         }
         return false;

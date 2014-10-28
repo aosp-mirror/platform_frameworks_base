@@ -338,14 +338,14 @@ public class LinkPropertiesTest extends TestCase {
             assertFalse("newname".equals(link.getInterfaceName()));
         }
 
-        assertTrue(rmnet0.removeStackedLink(clat4));
+        assertTrue(rmnet0.removeStackedLink("clat4"));
         assertEquals(0, rmnet0.getStackedLinks().size());
         assertEquals(1, rmnet0.getAddresses().size());
         assertEquals(1, rmnet0.getLinkAddresses().size());
         assertEquals(1, rmnet0.getAllAddresses().size());
         assertEquals(1, rmnet0.getAllLinkAddresses().size());
 
-        assertFalse(rmnet0.removeStackedLink(clat4));
+        assertFalse(rmnet0.removeStackedLink("clat4"));
     }
 
     private LinkAddress getFirstLinkAddress(LinkProperties lp) {
@@ -370,7 +370,7 @@ public class LinkPropertiesTest extends TestCase {
         assertTrue(stacked.hasGlobalIPv6Address());
         assertFalse(lp.hasIPv4Address());
         assertFalse(lp.hasGlobalIPv6Address());
-        lp.removeStackedLink(stacked);
+        lp.removeStackedLink("stacked");
         assertFalse(lp.hasIPv4Address());
         assertFalse(lp.hasGlobalIPv6Address());
 
