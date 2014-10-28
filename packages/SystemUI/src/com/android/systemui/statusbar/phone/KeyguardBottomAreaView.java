@@ -477,6 +477,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         public void onScreenTurnedOff(int why) {
             updateLockIcon();
         }
+
+        @Override
+        public void onKeyguardVisibilityChanged(boolean showing) {
+            updateLockIcon();
+        }
     };
 
     public void setKeyguardIndicationController(
