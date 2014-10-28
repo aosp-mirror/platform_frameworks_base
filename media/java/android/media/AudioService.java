@@ -248,7 +248,7 @@ public class AudioService extends IAudioService.Stub {
     private final int[][] SOUND_EFFECT_FILES_MAP = new int[AudioManager.NUM_SOUND_EFFECTS][2];
 
    /** @hide Maximum volume index values for audio streams */
-    private static final int[] MAX_STREAM_VOLUME = new int[] {
+    private static int[] MAX_STREAM_VOLUME = new int[] {
         5,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         7,  // STREAM_RING
@@ -260,6 +260,20 @@ public class AudioService extends IAudioService.Stub {
         15, // STREAM_DTMF
         15  // STREAM_TTS
     };
+
+    private static int[] DEFAULT_STREAM_VOLUME = new int[] {
+        4,  // STREAM_VOICE_CALL
+        7,  // STREAM_SYSTEM
+        5,  // STREAM_RING
+        11, // STREAM_MUSIC
+        6,  // STREAM_ALARM
+        5,  // STREAM_NOTIFICATION
+        7,  // STREAM_BLUETOOTH_SCO
+        7,  // STREAM_SYSTEM_ENFORCED
+        11, // STREAM_DTMF
+        11  // STREAM_TTS
+    };
+
     /* mStreamVolumeAlias[] indicates for each stream if it uses the volume settings
      * of another stream: This avoids multiplying the volume settings for hidden
      * stream types that follow other stream behavior for volume settings
@@ -541,12 +555,18 @@ public class AudioService extends IAudioService.Stub {
         mHasVibrator = vibrator == null ? false : vibrator.hasVibrator();
 
        // Intialized volume
-        MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = SystemProperties.getInt(
-            "ro.config.vc_call_vol_steps",
-           MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
-        MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = SystemProperties.getInt(
-            "ro.config.media_vol_steps",
-           MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]);
+        int maxVolume = SystemProperties.getInt("ro.config.vc_call_vol_steps",
+                MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]);
+        if (maxVolume != MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]) {
+            MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = maxVolume;
+            DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = (maxVolume * 3) / 4;
+        }
+        maxVolume = SystemProperties.getInt("ro.config.media_vol_steps",
+                MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]);
+        if (maxVolume != MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]) {
+            MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = maxVolume;
+            DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = (maxVolume * 3) / 4;
+        }
 
         sSoundEffectVolumeDb = context.getResources().getInteger(
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
@@ -1623,6 +1643,10 @@ public class AudioService extends IAudioService.Stub {
 
     protected static int getMaxStreamVolume(int streamType) {
         return MAX_STREAM_VOLUME[streamType];
+    }
+
+    public static int getDefaultStreamVolume(int streamType) {
+        return DEFAULT_STREAM_VOLUME[streamType];
     }
 
     /** @see AudioManager#getStreamVolume(int) */
@@ -3356,7 +3380,7 @@ public class AudioService extends IAudioService.Stub {
                 // only be stale values
                 if ((mStreamType == AudioSystem.STREAM_SYSTEM) ||
                         (mStreamType == AudioSystem.STREAM_SYSTEM_ENFORCED)) {
-                    int index = 10 * AudioManager.DEFAULT_STREAM_VOLUME[mStreamType];
+                    int index = 10 * DEFAULT_STREAM_VOLUME[mStreamType];
                     synchronized (mCameraSoundForced) {
                         if (mCameraSoundForced) {
                             index = mIndexMax;
@@ -3380,7 +3404,7 @@ public class AudioService extends IAudioService.Stub {
                     // if no volume stored for current stream and device, use default volume if default
                     // device, continue otherwise
                     int defaultIndex = (device == AudioSystem.DEVICE_OUT_DEFAULT) ?
-                                            AudioManager.DEFAULT_STREAM_VOLUME[mStreamType] : -1;
+                                            DEFAULT_STREAM_VOLUME[mStreamType] : -1;
                     int index = Settings.System.getIntForUser(
                             mContentResolver, name, defaultIndex, UserHandle.USER_CURRENT);
                     if (index == -1) {
