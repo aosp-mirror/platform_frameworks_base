@@ -21,22 +21,15 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
-import com.android.internal.content.PackageHelper;
+import android.test.AndroidTestCase;
+import android.util.ArraySet;
+import android.util.Log;
+
 import com.android.internal.os.AtomicFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashSet;
-
-import android.os.Debug;
-import android.os.Environment;
-import android.os.IBinder;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.storage.IMountService;
-import android.test.AndroidTestCase;
-import android.util.Log;
 
 public class PackageManagerSettingsTests extends AndroidTestCase {
 
@@ -182,11 +175,11 @@ public class PackageManagerSettingsTests extends AndroidTestCase {
         assertEquals(COMPONENT_ENABLED_STATE_ENABLED, ps.getEnabled(1));
 
         // Enable/Disable a component
-        HashSet<String> components = new HashSet<String>();
+        ArraySet<String> components = new ArraySet<String>();
         String component1 = PACKAGE_NAME_1 + "/.Component1";
         components.add(component1);
         ps.setDisabledComponents(components, 0);
-        HashSet<String> componentsDisabled = ps.getDisabledComponents(0);
+        ArraySet<String> componentsDisabled = ps.getDisabledComponents(0);
         assertEquals(1, componentsDisabled.size());
         assertEquals(component1, componentsDisabled.toArray()[0]);
         boolean hasEnabled =
