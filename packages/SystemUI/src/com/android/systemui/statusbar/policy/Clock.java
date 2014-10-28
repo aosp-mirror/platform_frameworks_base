@@ -149,7 +149,7 @@ public class Clock extends TextView implements DemoMode {
         final char MAGIC2 = '\uEF01';
 
         SimpleDateFormat sdf;
-        String format = is24 ? d.timeFormat24 : d.timeFormat12;
+        String format = is24 ? d.timeFormat_Hm : d.timeFormat_hm;
         if (!format.equals(mClockFormatString)) {
             /*
              * Search for an unquoted "a" in the format string, so we can
