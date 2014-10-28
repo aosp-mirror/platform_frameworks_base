@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -808,7 +857,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.LoadInvitationsResult.html">Invitations.LoadInvitationsResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when invitations have been loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when invitations have been loaded.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -857,7 +911,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.html#getInvitationInboxIntent(com.google.android.gms.common.api.GoogleApiClient)">getInvitationInboxIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Returns an intent that will let the user see and manage any outstanding invitations.</div>
+        <div class="jd-descrdiv">
+          Returns an intent that will let the user see and manage any outstanding invitations.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -875,7 +934,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.html#loadInvitations(com.google.android.gms.common.api.GoogleApiClient, int)">loadInvitations</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int sortOrder)</nobr>
         
-        <div class="jd-descrdiv">Asynchronously load the list of invitations for the current game.</div>
+        <div class="jd-descrdiv">
+          Asynchronously load the list of invitations for the current game.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -893,7 +957,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.html#loadInvitations(com.google.android.gms.common.api.GoogleApiClient)">loadInvitations</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
 
-        <div class="jd-descrdiv">Asynchronously load the list of invitations for the current game.</div>
+        <div class="jd-descrdiv">
+          Asynchronously load the list of invitations for the current game.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -911,7 +980,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.html#registerInvitationListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.multiplayer.OnInvitationReceivedListener)">registerInvitationListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/multiplayer/OnInvitationReceivedListener.html">OnInvitationReceivedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Register a listener to intercept incoming invitations for the currently signed-in user.</div>
+        <div class="jd-descrdiv">
+          Register a listener to intercept incoming invitations for the currently signed-in user.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -929,7 +1003,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitations.html#unregisterInvitationListener(com.google.android.gms.common.api.GoogleApiClient)">unregisterInvitationListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Unregisters this client's invitation listener, if any.</div>
+        <div class="jd-descrdiv">
+          Unregisters this client's invitation listener, if any.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1005,6 +1084,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will let the user see and manage any outstanding invitations. Note
  that this must be invoked using <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code> so that
  the identity of the calling package can be established.
@@ -1059,6 +1141,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of invitations for the current game.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1111,6 +1196,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of invitations for the current game. Invitations are returned
  sorted by most recent first.
  <p>
@@ -1158,6 +1246,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Register a listener to intercept incoming invitations for the currently signed-in user. If a
  listener is registered by this method, the incoming invitation will not generate a status bar
  notification as long as this client remains connected.
@@ -1211,6 +1302,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Unregisters this client's invitation listener, if any. Any new invitations will generate
  status bar notifications as normal.
  <p>

@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -837,7 +886,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#getApplicationMetadata(com.google.android.gms.common.api.GoogleApiClient)">getApplicationMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
         
-        <div class="jd-descrdiv">Returns the metadata for the currently running receiver application, if any.</div>
+        <div class="jd-descrdiv">
+          Returns the metadata for the currently running receiver application, if any.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -855,7 +909,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#getApplicationStatus(com.google.android.gms.common.api.GoogleApiClient)">getApplicationStatus</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
         
-        <div class="jd-descrdiv">Returns the current receiver application status, if any.</div>
+        <div class="jd-descrdiv">
+          Returns the current receiver application status, if any.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -873,7 +932,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#getVolume(com.google.android.gms.common.api.GoogleApiClient)">getVolume</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
         
-        <div class="jd-descrdiv">Returns the device's volume, in the range [0.0, 1.0].</div>
+        <div class="jd-descrdiv">
+          Returns the device's volume, in the range [0.0, 1.0].
+
+
+
+        </div>
   
   </td></tr>
 
@@ -891,7 +955,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#isMute(com.google.android.gms.common.api.GoogleApiClient)">isMute</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
         
-        <div class="jd-descrdiv">Returns the device's mute state.</div>
+        <div class="jd-descrdiv">
+          Returns the device's mute state.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -909,7 +978,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#joinApplication(com.google.android.gms.common.api.GoogleApiClient)">joinApplication</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
         
-        <div class="jd-descrdiv">Joins (connects to) the currently running application on the receiver.</div>
+        <div class="jd-descrdiv">
+          Joins (connects to) the currently running application on the receiver.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -927,7 +1001,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#joinApplication(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">joinApplication</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String applicationId, String sessionId)</nobr>
         
-        <div class="jd-descrdiv">Joins (connects to) an application on the receiver.</div>
+        <div class="jd-descrdiv">
+          Joins (connects to) an application on the receiver.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -945,7 +1024,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#joinApplication(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">joinApplication</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String applicationId)</nobr>
         
-        <div class="jd-descrdiv">Joins (connects to) the currently running application on the receiver.</div>
+        <div class="jd-descrdiv">
+          Joins (connects to) the currently running application on the receiver.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -963,7 +1047,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#launchApplication(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, com.google.android.gms.cast.LaunchOptions)">launchApplication</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String applicationId, <a href="/reference/com/google/android/gms/cast/LaunchOptions.html">LaunchOptions</a> launchOptions)</nobr>
         
-        <div class="jd-descrdiv">Launches an application on the receiver.</div>
+        <div class="jd-descrdiv">
+          Launches an application on the receiver.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -981,7 +1070,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#launchApplication(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">launchApplication</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String applicationId)</nobr>
         
-        <div class="jd-descrdiv">Launches an application on the receiver.</div>
+        <div class="jd-descrdiv">
+          Launches an application on the receiver.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -999,11 +1093,16 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#launchApplication(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean)">launchApplication</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String applicationId, boolean relaunchIfRunning)</nobr>
 
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     Use
  <code><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#launchApplication(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, com.google.android.gms.cast.LaunchOptions)">launchApplication(GoogleApiClient, String, LaunchOptions)</a></code>.
-</em></div>
+</em>
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1021,7 +1120,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#leaveApplication(com.google.android.gms.common.api.GoogleApiClient)">leaveApplication</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
         
-        <div class="jd-descrdiv">Leaves (disconnects from) the receiver application.</div>
+        <div class="jd-descrdiv">
+          Leaves (disconnects from) the receiver application.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1039,7 +1143,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#removeMessageReceivedCallbacks(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">removeMessageReceivedCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String namespace)</nobr>
         
-        <div class="jd-descrdiv">Removes a <code><a href="/reference/com/google/android/gms/cast/Cast.MessageReceivedCallback.html">Cast.MessageReceivedCallback</a></code> from this controller for a given namespace.</div>
+        <div class="jd-descrdiv">
+          Removes a <code><a href="/reference/com/google/android/gms/cast/Cast.MessageReceivedCallback.html">Cast.MessageReceivedCallback</a></code> from this controller for a given namespace.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1057,7 +1166,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#requestStatus(com.google.android.gms.common.api.GoogleApiClient)">requestStatus</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
         
-        <div class="jd-descrdiv">Requests the receiver's current status.</div>
+        <div class="jd-descrdiv">
+          Requests the receiver's current status.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1075,7 +1189,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#sendMessage(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">sendMessage</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String namespace, String message)</nobr>
         
-        <div class="jd-descrdiv">Sends a message to the currently connected application.</div>
+        <div class="jd-descrdiv">
+          Sends a message to the currently connected application.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1093,8 +1212,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#setMessageReceivedCallbacks(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, com.google.android.gms.cast.Cast.MessageReceivedCallback)">setMessageReceivedCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String namespace, <a href="/reference/com/google/android/gms/cast/Cast.MessageReceivedCallback.html">Cast.MessageReceivedCallback</a> callbacks)</nobr>
         
-        <div class="jd-descrdiv">Sets a new <code><a href="/reference/com/google/android/gms/cast/Cast.MessageReceivedCallback.html">Cast.MessageReceivedCallback</a></code> listener on this controller for a given
- namespace.</div>
+        <div class="jd-descrdiv">
+          Sets a new <code><a href="/reference/com/google/android/gms/cast/Cast.MessageReceivedCallback.html">Cast.MessageReceivedCallback</a></code> listener on this controller for a given
+ namespace.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1112,7 +1236,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#setMute(com.google.android.gms.common.api.GoogleApiClient, boolean)">setMute</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, boolean mute)</nobr>
         
-        <div class="jd-descrdiv">Mutes or unmutes the device's audio.</div>
+        <div class="jd-descrdiv">
+          Mutes or unmutes the device's audio.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1130,7 +1259,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#setVolume(com.google.android.gms.common.api.GoogleApiClient, double)">setVolume</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, double volume)</nobr>
         
-        <div class="jd-descrdiv">Sets the device volume.</div>
+        <div class="jd-descrdiv">
+          Sets the device volume.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1148,7 +1282,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#stopApplication(com.google.android.gms.common.api.GoogleApiClient)">stopApplication</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
         
-        <div class="jd-descrdiv">Stops any running receiver application(s).</div>
+        <div class="jd-descrdiv">
+          Stops any running receiver application(s).
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1166,8 +1305,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#stopApplication(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">stopApplication</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String sessionId)</nobr>
         
-        <div class="jd-descrdiv">Stops the currently running receiver application, optionally doing so only if its session
- ID matches the supplied one.</div>
+        <div class="jd-descrdiv">
+          Stops the currently running receiver application, optionally doing so only if its session
+ ID matches the supplied one.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1243,6 +1387,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the metadata for the currently running receiver application, if any.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1297,6 +1444,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the current receiver application status, if any. Message text is localized to the
  Google Cast device's locale.</p></div>
   <div class="jd-tagdata">
@@ -1353,6 +1503,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the device's volume, in the range [0.0, 1.0].</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1402,6 +1555,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the device's mute state.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1451,6 +1607,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Joins (connects to) the currently running application on the receiver. The previous
  <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> will be canceled with the <code><a href="/reference/com/google/android/gms/cast/Cast.ApplicationConnectionResult.html">Cast.ApplicationConnectionResult</a></code>'s
  status code being <code><a href="/reference/com/google/android/gms/cast/CastStatusCodes.html#CANCELED">CANCELED</a></code>.</p></div>
@@ -1497,6 +1656,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Joins (connects to) an application on the receiver. The previous <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code>
  will be canceled with the <code><a href="/reference/com/google/android/gms/cast/Cast.ApplicationConnectionResult.html">Cast.ApplicationConnectionResult</a></code>'s status code being
  <code><a href="/reference/com/google/android/gms/cast/CastStatusCodes.html#CANCELED">CANCELED</a></code>.</p></div>
@@ -1553,6 +1715,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Joins (connects to) the currently running application on the receiver. The previous
  <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> will be canceled with the <code><a href="/reference/com/google/android/gms/cast/Cast.ApplicationConnectionResult.html">Cast.ApplicationConnectionResult</a></code>'s
  status code being <code><a href="/reference/com/google/android/gms/cast/CastStatusCodes.html#CANCELED">CANCELED</a></code>.</p></div>
@@ -1603,6 +1768,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Launches an application on the receiver. The previous <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> will be
  canceled with the <code><a href="/reference/com/google/android/gms/cast/Cast.ApplicationConnectionResult.html">Cast.ApplicationConnectionResult</a></code>'s status code being
@@ -1658,6 +1826,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Launches an application on the receiver. If the application is already running, it is
  joined (not relaunched). The previous <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> will be canceled with the
  <code><a href="/reference/com/google/android/gms/cast/Cast.ApplicationConnectionResult.html">Cast.ApplicationConnectionResult</a></code>'s status code being <code><a href="/reference/com/google/android/gms/cast/CastStatusCodes.html#CANCELED">CANCELED</a></code>.</p></div>
@@ -1707,6 +1878,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -1768,6 +1942,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Leaves (disconnects from) the receiver application. If there is no currently active
  application session, this method does nothing. If this method is called while
  <code><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#stopApplication(com.google.android.gms.common.api.GoogleApiClient)">stopApplication(GoogleApiClient)</a></code> is pending, then this method does nothing. The <code><a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></code>'s
@@ -1816,6 +1993,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes a <code><a href="/reference/com/google/android/gms/cast/Cast.MessageReceivedCallback.html">Cast.MessageReceivedCallback</a></code> from this controller for a given namespace.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1874,6 +2054,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Requests the receiver's current status.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
@@ -1917,6 +2100,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sends a message to the currently connected application.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1971,6 +2157,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets a new <code><a href="/reference/com/google/android/gms/cast/Cast.MessageReceivedCallback.html">Cast.MessageReceivedCallback</a></code> listener on this controller for a given
  namespace. The new listener will replace an existing listener for a given
  <code>namespace</code>. Messages received by the controller for the given <code>namespace</code>
@@ -2045,6 +2234,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Mutes or unmutes the device's audio.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2102,6 +2294,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the device volume. If <code>volume</code> is outside of the range [0.0, 1.0], then the
  value will be clipped.</p></div>
   <div class="jd-tagdata">
@@ -2164,6 +2359,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Stops any running receiver application(s). If this method is called while
  <code><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#leaveApplication(com.google.android.gms.common.api.GoogleApiClient)">leaveApplication(GoogleApiClient)</a></code> is pending, then this method does nothing. The
  <code><a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></code>'s status code will be <code><a href="/reference/com/google/android/gms/cast/CastStatusCodes.html#INVALID_REQUEST">INVALID_REQUEST</a></code>.</p></div>
@@ -2211,6 +2409,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Stops the currently running receiver application, optionally doing so only if its session
  ID matches the supplied one. If this method is called while
  <code><a href="/reference/com/google/android/gms/cast/Cast.CastApi.html#leaveApplication(com.google.android.gms.common.api.GoogleApiClient)">leaveApplication(GoogleApiClient)</a></code> is pending, then this method does nothing. The

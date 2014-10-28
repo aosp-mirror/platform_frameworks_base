@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -129,7 +142,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <body class="gc-documentation google
-  develop">
+  develop reference">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -139,6 +152,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -361,7 +378,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -724,6 +770,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <div id="jd-content" class="api apilevel-">
 
 
+  <div class="jd-descr">
+    Contains the Google Fit APIs.
+
+  </div>
+
+
+
+
 
 
 
@@ -732,37 +786,79 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Interfaces</h2>
     <div class="jd-sumtable">
 
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/BleApi.html">BleApi</a></td>
-              <td class="jd-descrcol" width="100%">The Google Fit Bluetooth Low Energy API provides methods for scanning, claiming, and using
- Bluetooth smart devices in Google Fit.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/ConfigApi.html">ConfigApi</a></td>
-              <td class="jd-descrcol" width="100%">The Google Fit Configuration API provides methods for accessing platform configuration and
- metadata.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></td>
-              <td class="jd-descrcol" width="100%">The Google Fit History API provides methods for inserting, deleting and reading data from the
- user's Google Fit history.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">RecordingApi</a></td>
-              <td class="jd-descrcol" width="100%">The Recording API allows applications to request background collection of sensor data by
- creating <code><a href="/reference/com/google/android/gms/fitness/data/Subscription.html">subscriptions</a></code>.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">SensorsApi</a></td>
-              <td class="jd-descrcol" width="100%">The Google Fit Sensors API provides methods for finding and registering to real time data streams
- of sensor data.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html">SessionsApi</a></td>
-              <td class="jd-descrcol" width="100%">The Google Fit Sessions API provides methods for managing <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Sessions</a></code>.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/BleApi.html">BleApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          API for scanning, claiming, and using Bluetooth Low Energy devices in Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/ConfigApi.html">ConfigApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          API for accessing custom data types and settings in Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          API for inserting, deleting, and reading data in Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/RecordingApi.html">RecordingApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          API which enables low-power, always-on background collection of sensor
+ data into the Google Fit store.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">SensorsApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          API which exposes different sources of fitness data in local and connected devices,
+ and delivers live events to listeners.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html">SessionsApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          API for creating and managing <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">sessions</a></code> of user activity in Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
 
 
@@ -771,39 +867,67 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Classes</h2>
     <div class="jd-sumtable">
 
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html">Fitness</a></td>
-              <td class="jd-descrcol" width="100%">The main entry point to Google Fit APIs.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html">FitnessActivities</a></td>
-              <td class="jd-descrcol" width="100%">Constants representing different user activities.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessIntents.html">FitnessIntents</a></td>
-              <td class="jd-descrcol" width="100%">Useful constants and methods for dealing with intents in the Fitness platform.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessScopes.html">FitnessScopes</a></td>
-              <td class="jd-descrcol" width="100%">OAuth 2.0 scopes for use with Google Fit.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html">FitnessStatusCodes</a></td>
-              <td class="jd-descrcol" width="100%">Google Fit specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
-&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/ViewDataIntentBuilder.html">ViewDataIntentBuilder</a></td>
-              <td class="jd-descrcol" width="100%">Builder of intents to view data stored in Google Fit, for a particular
- <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/ViewSessionIntentBuilder.html">ViewSessionIntentBuilder</a></td>
-              <td class="jd-descrcol" width="100%">Builder of intents to view <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">sessions</a></code>
- stored in Google Fit.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/Fitness.html">Fitness</a></td>
+        <td class="jd-descrcol" width="100%">
+          The main entry point to Google Fit APIs.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html">FitnessActivities</a></td>
+        <td class="jd-descrcol" width="100%">
+          Constants representing different user activities, such as walking, running, and cycling.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html">FitnessStatusCodes</a></td>
+        <td class="jd-descrcol" width="100%">
+          Google Fit specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
+&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/HistoryApi.ViewIntentBuilder.html">HistoryApi.ViewIntentBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder of intents to view data stored in Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/SessionsApi.ViewIntentBuilder.html">SessionsApi.ViewIntentBuilder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder of intents to view <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">sessions</a></code> stored in Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
 
 

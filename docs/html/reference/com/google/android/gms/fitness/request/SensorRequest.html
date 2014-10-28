@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -778,6 +824,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -812,12 +861,12 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Request for registering for real time updates from a <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.  Use this
+<p itemprop="articleBody">Request for registering for live updates from a <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.  Use this
  request to specify the data source or data type to register to, the sampling rate,
  the fastest reporting interval, and the maximum desired delivery latency.  Example usage:
  <pre>
      new SensorRequest.Builder()
-         .setDataType(DataTypes.HEART_RATE_BPM)
+         .setDataType(DataType.TYPE_HEART_RATE_BPM)
          .setSamplingRate(10, TimeUnit.SECONDS)  // sample every 10s
          .build();
  </pre>
@@ -869,7 +918,12 @@ Summary:
 
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html">SensorRequest.Builder</a></td>
-      <td class="jd-descrcol" width="100%">Builder used to create new SensorRequests.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Builder used to create new SensorRequests.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -894,24 +948,39 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#ACCURACY_MODE_DEFAULT">ACCURACY_MODE_DEFAULT</a></td>
-        <td class="jd-descrcol" width="100%">The default Accuracy Mode that offers a balance between accuracy of data collection and
- battery usage.</td>
+        <td class="jd-descrcol" width="100%">
+          The default Accuracy Mode that offers a balance between accuracy of data collection and
+ battery usage.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#ACCURACY_MODE_HIGH">ACCURACY_MODE_HIGH</a></td>
-        <td class="jd-descrcol" width="100%">An Accuracy Mode representation that indicates that the application requires high accuracy
- data and expects the extra battery usage.</td>
+        <td class="jd-descrcol" width="100%">
+          An Accuracy Mode representation that indicates that the application requires high accuracy
+ data and expects the extra battery usage.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#ACCURACY_MODE_LOW">ACCURACY_MODE_LOW</a></td>
-        <td class="jd-descrcol" width="100%">An Accuracy Mode representation that indicates that the application requires low accuracy
- data, improving battery life.</td>
+        <td class="jd-descrcol" width="100%">
+          An Accuracy Mode representation that indicates that the application requires low accuracy
+ data, improving battery life.
+
+
+
+        </td>
     </tr>
 
 
@@ -967,7 +1036,150 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#fromLocationRequest(com.google.android.gms.fitness.data.DataSource, com.google.android.gms.location.LocationRequest)">fromLocationRequest</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a> dataSource, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> locationRequest)</nobr>
 
-        <div class="jd-descrdiv">Returns a SensorRequest for location updates corresponding to the given LocationRequest.</div>
+        <div class="jd-descrdiv">
+          Returns a SensorRequest for location updates corresponding to the given LocationRequest.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getAccuracyMode()">getAccuracyMode</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the accuracy mode for this request.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getDataSource()">getDataSource</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the specified data source for this request.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getDataType()">getDataType</a></span>()</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the specified data type for this request.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getFastestRate(java.util.concurrent.TimeUnit)">getFastestRate</a></span>(TimeUnit timeUnit)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the fastest rate for this request, in the given time unit.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getMaxDeliveryLatency(java.util.concurrent.TimeUnit)">getMaxDeliveryLatency</a></span>(TimeUnit timeUnit)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the max delivery latency for this request, in the given time unit.
+
+
+
+        </div>
+
+  </td></tr>
+
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getSamplingRate(java.util.concurrent.TimeUnit)">getSamplingRate</a></span>(TimeUnit timeUnit)</nobr>
+
+        <div class="jd-descrdiv">
+          Returns the sampling rate for this request, in the given time unit.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1269,6 +1481,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The default Accuracy Mode that offers a balance between accuracy of data collection and
  battery usage.
 </p></div>
@@ -1309,6 +1524,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>An Accuracy Mode representation that indicates that the application requires high accuracy
  data and expects the extra battery usage.
 </p></div>
@@ -1348,6 +1566,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>An Accuracy Mode representation that indicates that the application requires low accuracy
  data, improving battery life.
@@ -1412,6 +1633,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1441,6 +1665,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a SensorRequest for location updates corresponding to the given LocationRequest.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1455,6 +1682,216 @@ From class
 </td>
         </tr>
       </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getAccuracyMode()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        int
+      </span>
+      <span class="sympad">getAccuracyMode</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the accuracy mode for this request.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getDataSource()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a>
+      </span>
+      <span class="sympad">getDataSource</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the specified data source for this request.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the specified data source, or <code>null</code> if only a data type was specified
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getDataType()"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
+      </span>
+      <span class="sympad">getDataType</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the specified data type for this request.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the specified data type, or <code>null</code> if only a data source was specified
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getFastestRate(java.util.concurrent.TimeUnit)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getFastestRate</span>
+      <span class="normal">(TimeUnit timeUnit)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the fastest rate for this request, in the given time unit.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getMaxDeliveryLatency(java.util.concurrent.TimeUnit)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getMaxDeliveryLatency</span>
+      <span class="normal">(TimeUnit timeUnit)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the max delivery latency for this request, in the given time unit.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="getSamplingRate(java.util.concurrent.TimeUnit)"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getSamplingRate</span>
+      <span class="normal">(TimeUnit timeUnit)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the sampling rate for this request, in the given time unit.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the sampling rate, negative if unspecified
+</li></ul>
   </div>
 
     </div>
@@ -1484,6 +1921,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1512,6 +1952,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

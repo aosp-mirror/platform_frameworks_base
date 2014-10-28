@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -772,6 +818,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -938,8 +987,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#dispatch()">dispatch</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Manually dispatches queued events (tracking pixels, etc) if a network connection is
- available.</div>
+        <div class="jd-descrdiv">
+          Manually dispatches queued events (tracking pixels, etc) if a network connection is
+ available.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -957,7 +1011,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#getDataLayer()">getDataLayer</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the data layer object that is used by the tag manager.</div>
+        <div class="jd-descrdiv">
+          Returns the data layer object that is used by the tag manager.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -975,7 +1034,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#getInstance(android.content.Context)">getInstance</a></span>(Context context)</nobr>
 
-        <div class="jd-descrdiv">Get the singleton instance of the <code><a href="/reference/com/google/android/gms/tagmanager/TagManager.html">TagManager</a></code> class, creating it if necessary.</div>
+        <div class="jd-descrdiv">
+          Get the singleton instance of the <code><a href="/reference/com/google/android/gms/tagmanager/TagManager.html">TagManager</a></code> class, creating it if necessary.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -993,11 +1057,16 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#loadContainerDefaultOnly(java.lang.String, int, android.os.Handler)">loadContainerDefaultOnly</a></span>(String containerId, int defaultContainerResourceId, Handler handler)</nobr>
 
-        <div class="jd-descrdiv"><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
+        <div class="jd-descrdiv">
+          <p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as either of the following happens:
  <ul>
    <li>the default container is loaded, or
-   <li>no default container is found.</div>
+   <li>no default container is found.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1015,11 +1084,16 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#loadContainerDefaultOnly(java.lang.String, int)">loadContainerDefaultOnly</a></span>(String containerId, int defaultContainerResourceId)</nobr>
 
-        <div class="jd-descrdiv"><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
+        <div class="jd-descrdiv">
+          <p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as either of the following happens:
  <ul>
    <li>the default container is loaded, or
-   <li>no default container is found.</div>
+   <li>no default container is found.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1037,7 +1111,8 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#loadContainerPreferFresh(java.lang.String, int)">loadContainerPreferFresh</a></span>(String containerId, int defaultContainerResourceId)</nobr>
 
-        <div class="jd-descrdiv"><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
+        <div class="jd-descrdiv">
+          <p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as one of the following happens:
  <ul>
    <li>a saved container which has been recently refreshed is loaded,
@@ -1045,7 +1120,11 @@ Summary:
    <li>a timeout occurs (as specified in
      <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#await(long, java.util.concurrent.TimeUnit)">await(long, java.util.concurrent.TimeUnit)</a></code>,
       or
-     <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)">setResultCallback(com.google.android.gms.common.api.ResultCallback, long, java.util.concurrent.TimeUnit)</a></code>.</div>
+     <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)">setResultCallback(com.google.android.gms.common.api.ResultCallback, long, java.util.concurrent.TimeUnit)</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1063,7 +1142,8 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#loadContainerPreferFresh(java.lang.String, int, android.os.Handler)">loadContainerPreferFresh</a></span>(String containerId, int defaultContainerResourceId, Handler handler)</nobr>
 
-        <div class="jd-descrdiv"><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
+        <div class="jd-descrdiv">
+          <p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as one of the following happens:
  <ul>
    <li>a saved container which has been recently refreshed is loaded,
@@ -1071,7 +1151,11 @@ Summary:
    <li>a timeout occurs (as specified in
      <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#await(long, java.util.concurrent.TimeUnit)">await(long, java.util.concurrent.TimeUnit)</a></code>,
       or
-     <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)">setResultCallback(com.google.android.gms.common.api.ResultCallback, long, java.util.concurrent.TimeUnit)</a></code>.</div>
+     <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)">setResultCallback(com.google.android.gms.common.api.ResultCallback, long, java.util.concurrent.TimeUnit)</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1089,7 +1173,8 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#loadContainerPreferNonDefault(java.lang.String, int)">loadContainerPreferNonDefault</a></span>(String containerId, int defaultContainerResourceId)</nobr>
 
-        <div class="jd-descrdiv"><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
+        <div class="jd-descrdiv">
+          <p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as one of the following happens:
  <ul>
    <li>a saved container is loaded, or
@@ -1098,7 +1183,11 @@ Summary:
    <li>a timeout occurs (as specified in
      <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#await(long, java.util.concurrent.TimeUnit)">await(long, java.util.concurrent.TimeUnit)</a></code>,
       or
-     <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)">setResultCallback(com.google.android.gms.common.api.ResultCallback, long, java.util.concurrent.TimeUnit)</a></code>.</div>
+     <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)">setResultCallback(com.google.android.gms.common.api.ResultCallback, long, java.util.concurrent.TimeUnit)</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1116,7 +1205,8 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#loadContainerPreferNonDefault(java.lang.String, int, android.os.Handler)">loadContainerPreferNonDefault</a></span>(String containerId, int defaultContainerResourceId, Handler handler)</nobr>
 
-        <div class="jd-descrdiv"><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
+        <div class="jd-descrdiv">
+          <p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as one of the following happens:
  <ul>
    <li>a saved container is loaded,
@@ -1125,7 +1215,11 @@ Summary:
    <li>a timeout occurs (as specified in
      <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#await(long, java.util.concurrent.TimeUnit)">await(long, java.util.concurrent.TimeUnit)</a></code>,
       or
-     <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)">setResultCallback(com.google.android.gms.common.api.ResultCallback, long, java.util.concurrent.TimeUnit)</a></code>.</div>
+     <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)">setResultCallback(com.google.android.gms.common.api.ResultCallback, long, java.util.concurrent.TimeUnit)</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1143,7 +1237,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/TagManager.html#setVerboseLoggingEnabled(boolean)">setVerboseLoggingEnabled</a></span>(boolean enableVerboseLogging)</nobr>
 
-        <div class="jd-descrdiv">Sets whether or not verbose logging is enabled.</div>
+        <div class="jd-descrdiv">
+          Sets whether or not verbose logging is enabled.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1429,6 +1528,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Manually dispatches queued events (tracking pixels, etc) if a network connection is
  available. Dispatching after significant application events can help to ensure
  accurate reporting. Calling dispatch frequently can cause excessive battery drain and should
@@ -1462,6 +1564,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the data layer object that is used by the tag manager.
 </p></div>
 
@@ -1492,6 +1597,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Get the singleton instance of the <code><a href="/reference/com/google/android/gms/tagmanager/TagManager.html">TagManager</a></code> class, creating it if necessary.
 </p></div>
 
@@ -1521,6 +1629,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as either of the following happens:
@@ -1593,6 +1704,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as either of the following happens:
  <ul>
@@ -1660,6 +1774,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as one of the following happens:
@@ -1738,6 +1855,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as one of the following happens:
@@ -1819,6 +1939,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as one of the following happens:
  <ul>
@@ -1887,6 +2010,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>The <code><a href="/reference/com/google/android/gms/tagmanager/ContainerHolder.html">ContainerHolder</a></code> will be available from the returned <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> as
  soon as one of the following happens:
@@ -1961,6 +2087,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether or not verbose logging is enabled.  By default, verbose logging is not enabled.
 </p></div>

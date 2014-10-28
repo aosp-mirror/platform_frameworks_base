@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -781,6 +827,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -864,16 +913,26 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdSize.html#AUTO_HEIGHT">AUTO_HEIGHT</a></td>
-        <td class="jd-descrcol" width="100%">Constant that will cause the height of the ad to scale based on the height of the device in
- the current orientation.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant that will cause the height of the ad to scale based on the height of the device in
+ the current orientation.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdSize.html#FULL_WIDTH">FULL_WIDTH</a></td>
-        <td class="jd-descrcol" width="100%">Constant that will cause the width of the ad to match the width of the device in the current
- orientation.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant that will cause the width of the ad to match the width of the device in the current
+ orientation.
+
+
+
+        </td>
     </tr>
     
     
@@ -898,7 +957,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdSize.html#BANNER">BANNER</a></td>
-          <td class="jd-descrcol" width="100%">Mobile Marketing Association (MMA) banner ad size (320x50 density-independent pixels).</td>
+          <td class="jd-descrcol" width="100%">
+            Mobile Marketing Association (MMA) banner ad size (320x50 density-independent pixels).
+
+
+
+          </td>
       </tr>
       
     
@@ -909,7 +973,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdSize.html#FULL_BANNER">FULL_BANNER</a></td>
-          <td class="jd-descrcol" width="100%">Interactive Advertising Bureau (IAB) full banner ad size (468x60 density-independent pixels).</td>
+          <td class="jd-descrcol" width="100%">
+            Interactive Advertising Bureau (IAB) full banner ad size (468x60 density-independent pixels).
+
+
+
+          </td>
       </tr>
       
     
@@ -920,7 +989,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdSize.html#LARGE_BANNER">LARGE_BANNER</a></td>
-          <td class="jd-descrcol" width="100%">Large banner ad size (320x100 density-independent pixels).</td>
+          <td class="jd-descrcol" width="100%">
+            Large banner ad size (320x100 density-independent pixels).
+
+
+
+          </td>
       </tr>
 
 
@@ -931,7 +1005,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdSize.html#LEADERBOARD">LEADERBOARD</a></td>
-          <td class="jd-descrcol" width="100%">Interactive Advertising Bureau (IAB) leaderboard ad size (728x90 density-independent pixels).</td>
+          <td class="jd-descrcol" width="100%">
+            Interactive Advertising Bureau (IAB) leaderboard ad size (728x90 density-independent pixels).
+
+
+
+          </td>
       </tr>
       
     
@@ -942,8 +1021,13 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdSize.html#MEDIUM_RECTANGLE">MEDIUM_RECTANGLE</a></td>
-          <td class="jd-descrcol" width="100%">Interactive Advertising Bureau (IAB) medium rectangle ad size (300x250 density-independent
- pixels).</td>
+          <td class="jd-descrcol" width="100%">
+            Interactive Advertising Bureau (IAB) medium rectangle ad size (300x250 density-independent
+ pixels).
+
+
+
+          </td>
       </tr>
       
     
@@ -954,7 +1038,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdSize.html#SMART_BANNER">SMART_BANNER</a></td>
-          <td class="jd-descrcol" width="100%">A dynamically sized banner that is full-width and auto-height.</td>
+          <td class="jd-descrcol" width="100%">
+            A dynamically sized banner that is full-width and auto-height.
+
+
+
+          </td>
       </tr>
       
     
@@ -965,7 +1054,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdSize.html#WIDE_SKYSCRAPER">WIDE_SKYSCRAPER</a></td>
-          <td class="jd-descrcol" width="100%">IAB wide skyscraper ad size (160x600 density-independent pixels).</td>
+          <td class="jd-descrcol" width="100%">
+            IAB wide skyscraper ad size (160x600 density-independent pixels).
+
+
+
+          </td>
       </tr>
       
     
@@ -996,7 +1090,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdSize.html#AdSize(int, int)">AdSize</a></span>(int width, int height)</nobr>
         
-        <div class="jd-descrdiv">Create a new <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code>.</div>
+        <div class="jd-descrdiv">
+          Create a new <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1027,7 +1126,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdSize.html#equals(java.lang.Object)">equals</a></span>(Object other)</nobr>
         
-        <div class="jd-descrdiv">Compares this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> with the specified object and indicates if they are equal.</div>
+        <div class="jd-descrdiv">
+          Compares this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> with the specified object and indicates if they are equal.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1045,7 +1149,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdSize.html#getHeight()">getHeight</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the height of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in density-independent pixels.</div>
+        <div class="jd-descrdiv">
+          Returns the height of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in density-independent pixels.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1063,7 +1172,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdSize.html#getHeightInPixels(android.content.Context)">getHeightInPixels</a></span>(Context context)</nobr>
         
-        <div class="jd-descrdiv">Returns the height of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in physical pixels.</div>
+        <div class="jd-descrdiv">
+          Returns the height of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in physical pixels.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1081,7 +1195,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdSize.html#getWidth()">getWidth</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the width of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in density-independent pixels.</div>
+        <div class="jd-descrdiv">
+          Returns the width of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in density-independent pixels.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1099,7 +1218,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdSize.html#getWidthInPixels(android.content.Context)">getWidthInPixels</a></span>(Context context)</nobr>
         
-        <div class="jd-descrdiv">Returns the width of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in physical pixels.</div>
+        <div class="jd-descrdiv">
+          Returns the width of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in physical pixels.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1133,7 +1257,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdSize.html#isAutoHeight()">isAutoHeight</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns whether this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> is auto-height.</div>
+        <div class="jd-descrdiv">
+          Returns whether this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> is auto-height.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1151,7 +1280,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdSize.html#isFullWidth()">isFullWidth</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns whether this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> is full-width.</div>
+        <div class="jd-descrdiv">
+          Returns whether this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> is full-width.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1437,6 +1571,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant that will cause the height of the ad to scale based on the height of the device in
  the current orientation. An <code>AUTO_HEIGHT</code> ad determines its height during
  initialization of the <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code> and never changes after that.
@@ -1478,6 +1615,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant that will cause the width of the ad to match the width of the device in the current
  orientation. A <code>FULL_WIDTH</code> ad determines its width during initialization of the
  <code><a href="/reference/com/google/android/gms/ads/AdView.html">AdView</a></code> and never changes after that.
@@ -1529,6 +1669,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Mobile Marketing Association (MMA) banner ad size (320x50 density-independent pixels). </p></div>
 
     
@@ -1557,6 +1700,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Interactive Advertising Bureau (IAB) full banner ad size (468x60 density-independent pixels).
 </p></div>
 
@@ -1585,6 +1731,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Large banner ad size (320x100 density-independent pixels).
 </p></div>
@@ -1615,6 +1764,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Interactive Advertising Bureau (IAB) leaderboard ad size (728x90 density-independent pixels).
 </p></div>
 
@@ -1644,6 +1796,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Interactive Advertising Bureau (IAB) medium rectangle ad size (300x250 density-independent
  pixels).
 </p></div>
@@ -1674,6 +1829,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A dynamically sized banner that is full-width and auto-height. </p></div>
 
     
@@ -1702,6 +1860,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>IAB wide skyscraper ad size (160x600 density-independent pixels). This size is currently not
  supported by the Google Mobile Ads network; this is intended for mediation ad networks only.
 </p></div>
@@ -1744,6 +1905,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Create a new <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1811,6 +1975,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Compares this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> with the specified object and indicates if they are equal.
 </p></div>
 
@@ -1841,6 +2008,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the height of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in density-independent pixels.
 </p></div>
 
@@ -1871,6 +2041,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the height of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in physical pixels.
 </p></div>
 
@@ -1901,6 +2074,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the width of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in density-independent pixels.
 </p></div>
 
@@ -1931,6 +2107,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the width of this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> in physical pixels.
 </p></div>
 
@@ -1961,6 +2140,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1990,6 +2172,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> is auto-height.
 </p></div>
 
@@ -2020,6 +2205,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether this <code><a href="/reference/com/google/android/gms/ads/AdSize.html">AdSize</a></code> is full-width.
 </p></div>
 
@@ -2050,6 +2238,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>

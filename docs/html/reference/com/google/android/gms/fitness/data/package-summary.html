@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -129,7 +142,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <body class="gc-documentation google
-  develop">
+  develop reference">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -139,6 +152,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -361,7 +378,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -724,6 +770,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <div id="jd-content" class="api apilevel-">
 
 
+  <div class="jd-descr">
+    Contains the Google Fit data model.
+
+  </div>
+
+
+
+
 
 
 
@@ -735,78 +789,159 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Classes</h2>
     <div class="jd-sumtable">
 
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/AggregateDataTypes.html">AggregateDataTypes</a></td>
-              <td class="jd-descrcol" width="100%">Definition of data types in the <code>com.google</code> namespace which represent aggregates of other
- <code><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html">data types</a></code> over a time period.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/BleDevice.html">BleDevice</a></td>
-              <td class="jd-descrcol" width="100%">Representation of a BLE Device (such as a heart rate monitor) that broadcasts information
- about its on board sensors.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Bucket.html">Bucket</a></td>
-              <td class="jd-descrcol" width="100%">A bucket represents a time interval over which aggregated data is computed.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></td>
-              <td class="jd-descrcol" width="100%">Represents a single data point in a <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type's</a></code> stream from a particular
- <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSet.html">DataSet</a></td>
-              <td class="jd-descrcol" width="100%">Represents a fixed set of <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">data points</a></code> in a <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type's</a></code> stream
- from a particular <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a></td>
-              <td class="jd-descrcol" width="100%">Definition of a unique source of sensor data.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.Builder.html">DataSource.Builder</a></td>
-              <td class="jd-descrcol" width="100%">A builder that can be used to construct new data source objects.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></td>
-              <td class="jd-descrcol" width="100%">The data type defines the schema for a stream of data being collected by, inserted into, or
- queried from Google Fit.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataTypes.html">DataTypes</a></td>
-              <td class="jd-descrcol" width="100%">Definition of data types in the <code>com.google</code> namespace.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Device.html">Device</a></td>
-              <td class="jd-descrcol" width="100%">Representation of an integrated device (such as a phone or a wearable) that can hold sensors.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Field.html">Field</a></td>
-              <td class="jd-descrcol" width="100%">A field represents one dimension of a data type.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Fields.html">Fields</a></td>
-              <td class="jd-descrcol" width="100%">Definition of fields used by one or more <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></code>.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></td>
-              <td class="jd-descrcol" width="100%">A Session represents a time interval with associated metadata.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Session.Builder.html">Session.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create new Sessions.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Subscription.html">Subscription</a></td>
-              <td class="jd-descrcol" width="100%">Subscription for persistent storage of data from a given <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code> or for a
- given <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Value.html">Value</a></td>
-              <td class="jd-descrcol" width="100%">Holder object for the value of a single field in a <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">data point</a></code>.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/BleDevice.html">BleDevice</a></td>
+        <td class="jd-descrcol" width="100%">
+          Representation of a BLE Device (such as a heart rate monitor) that broadcasts information
+ about its on board sensors.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Bucket.html">Bucket</a></td>
+        <td class="jd-descrcol" width="100%">
+          A bucket represents a time interval over which aggregated data is computed.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></td>
+        <td class="jd-descrcol" width="100%">
+          Represents a single data point in a <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type's</a></code> stream from a particular
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSet.html">DataSet</a></td>
+        <td class="jd-descrcol" width="100%">
+          Represents a fixed set of <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">data points</a></code> in a <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type's</a></code> stream
+ from a particular <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a></td>
+        <td class="jd-descrcol" width="100%">
+          Definition of a unique source of sensor data.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataSource.Builder.html">DataSource.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          A builder that can be used to construct new data source objects.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></td>
+        <td class="jd-descrcol" width="100%">
+          The data type defines the schema for a stream of data being collected by, inserted into, or
+ queried from Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Device.html">Device</a></td>
+        <td class="jd-descrcol" width="100%">
+          Representation of an integrated device (such as a phone or a wearable) that can hold sensors.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Field.html">Field</a></td>
+        <td class="jd-descrcol" width="100%">
+          A field represents one dimension of a data type.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></td>
+        <td class="jd-descrcol" width="100%">
+          A Session represents a time interval with associated metadata.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Session.Builder.html">Session.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder used to create new Sessions.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Subscription.html">Subscription</a></td>
+        <td class="jd-descrcol" width="100%">
+          Subscription for persistent storage of data from a given <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code> or for a
+ given <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Value.html">Value</a></td>
+        <td class="jd-descrcol" width="100%">
+          Holder object for the value of a single <code><a href="/reference/com/google/android/gms/fitness/data/Field.html">field</a></code> in a <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">data point</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
 
 

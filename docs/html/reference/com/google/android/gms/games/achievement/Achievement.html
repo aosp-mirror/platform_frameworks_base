@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -785,7 +831,10 @@ Summary:
         <a href="/reference/com/google/android/gms/common/data/Freezable.html">Freezable</a>&lt;T&gt;
 
 
-  
+
+
+
+
 
 
 </div><!-- end header -->
@@ -830,12 +879,22 @@ Summary:
       <div id="subclasses-indirect-summary"
               style="display: none;"
               >
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/AchievementEntity.html">AchievementEntity</a></td>
-              <td class="jd-descrcol" width="100%">Data object representing a set of Achievement data.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/AchievementEntity.html">AchievementEntity</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data object representing a set of Achievement data.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
       </div>
   </div>
 </td></tr></table>
@@ -894,35 +953,60 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_HIDDEN">STATE_HIDDEN</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState()</a></code> indicating a hidden achievement.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState()</a></code> indicating a hidden achievement.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_REVEALED">STATE_REVEALED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState()</a></code> indicating a revealed achievement.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState()</a></code> indicating a revealed achievement.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_UNLOCKED">STATE_UNLOCKED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState()</a></code> indicating an unlocked achievement.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState()</a></code> indicating an unlocked achievement.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getType()">getType()</a></code> indicating an incremental achievement.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getType()">getType()</a></code> indicating an incremental achievement.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_STANDARD">TYPE_STANDARD</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getType()">getType()</a></code> indicating a standard achievement.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getType()">getType()</a></code> indicating a standard achievement.
+
+
+
+        </td>
     </tr>
     
     
@@ -959,14 +1043,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1010,7 +1104,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getAchievementId()">getAchievementId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the ID of this achievement.</div>
+        <div class="jd-descrdiv">
+          Retrieves the ID of this achievement.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1028,8 +1127,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getCurrentSteps()">getCurrentSteps</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the number of steps this user has gone toward unlocking this achievement; only
- applicable for <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.</div>
+        <div class="jd-descrdiv">
+          Retrieves the number of steps this user has gone toward unlocking this achievement; only
+ applicable for <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1047,7 +1151,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getDescription()">getDescription</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the description for this achievement.</div>
+        <div class="jd-descrdiv">
+          Retrieves the description for this achievement.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1065,7 +1174,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(CharArrayBuffer dataOut)</nobr>
         
-        <div class="jd-descrdiv">Loads the achievement description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
+        <div class="jd-descrdiv">
+          Loads the achievement description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1083,8 +1197,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getFormattedCurrentSteps(android.database.CharArrayBuffer)">getFormattedCurrentSteps</a></span>(CharArrayBuffer dataOut)</nobr>
         
-        <div class="jd-descrdiv">Retrieves the number of steps this user has gone toward unlocking this achievement (formatted
- for the user's locale) into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
+        <div class="jd-descrdiv">
+          Retrieves the number of steps this user has gone toward unlocking this achievement (formatted
+ for the user's locale) into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1102,9 +1221,14 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getFormattedCurrentSteps()">getFormattedCurrentSteps</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the number of steps this user has gone toward unlocking this achievement (formatted
+        <div class="jd-descrdiv">
+          Retrieves the number of steps this user has gone toward unlocking this achievement (formatted
  for the user's locale); only applicable for <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code>
- achievement types.</div>
+ achievement types.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1122,9 +1246,14 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getFormattedTotalSteps(android.database.CharArrayBuffer)">getFormattedTotalSteps</a></span>(CharArrayBuffer dataOut)</nobr>
         
-        <div class="jd-descrdiv">Loads the total number of steps necessary to unlock this achievement (formatted for the
+        <div class="jd-descrdiv">
+          Loads the total number of steps necessary to unlock this achievement (formatted for the
  user's locale) into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>; only applicable for
- <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.</div>
+ <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1142,8 +1271,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getFormattedTotalSteps()">getFormattedTotalSteps</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the total number of steps necessary to unlock this achievement, formatted for the
- user's locale; only applicable for <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.</div>
+        <div class="jd-descrdiv">
+          Retrieves the total number of steps necessary to unlock this achievement, formatted for the
+ user's locale; only applicable for <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1161,8 +1295,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getLastUpdatedTimestamp()">getLastUpdatedTimestamp</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the timestamp (in millseconds since epoch) at which this achievement was last
- updated.</div>
+        <div class="jd-descrdiv">
+          Retrieves the timestamp (in millseconds since epoch) at which this achievement was last
+ updated.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1180,7 +1319,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getName(android.database.CharArrayBuffer)">getName</a></span>(CharArrayBuffer dataOut)</nobr>
         
-        <div class="jd-descrdiv">Loads the achievement name into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
+        <div class="jd-descrdiv">
+          Loads the achievement name into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1198,7 +1342,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getName()">getName</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the name of this achievement.</div>
+        <div class="jd-descrdiv">
+          Retrieves the name of this achievement.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1216,7 +1365,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getPlayer()">getPlayer</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the player information associated with this achievement.</div>
+        <div class="jd-descrdiv">
+          Retrieves the player information associated with this achievement.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1234,7 +1388,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getRevealedImageUri()">getRevealedImageUri</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves a URI that can be used to load the achievement's revealed image icon.</div>
+        <div class="jd-descrdiv">
+          Retrieves a URI that can be used to load the achievement's revealed image icon.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1252,8 +1411,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the state of the achievement - one of <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_UNLOCKED">STATE_UNLOCKED</a></code>,
- <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_REVEALED">STATE_REVEALED</a></code>, or <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_HIDDEN">STATE_HIDDEN</a></code>.</div>
+        <div class="jd-descrdiv">
+          Retrieves the state of the achievement - one of <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_UNLOCKED">STATE_UNLOCKED</a></code>,
+ <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_REVEALED">STATE_REVEALED</a></code>, or <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_HIDDEN">STATE_HIDDEN</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1271,8 +1435,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getTotalSteps()">getTotalSteps</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the total number of steps necessary to unlock this achievement; only applicable for
- <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.</div>
+        <div class="jd-descrdiv">
+          Retrieves the total number of steps necessary to unlock this achievement; only applicable for
+ <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1290,8 +1459,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getType()">getType</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves the type of this achievement - one of <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_STANDARD">TYPE_STANDARD</a></code> or
- <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code>.</div>
+        <div class="jd-descrdiv">
+          Retrieves the type of this achievement - one of <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_STANDARD">TYPE_STANDARD</a></code> or
+ <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1309,7 +1483,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getUnlockedImageUri()">getUnlockedImageUri</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieves a URI that can be used to load the achievement's unlocked image icon.</div>
+        <div class="jd-descrdiv">
+          Retrieves a URI that can be used to load the achievement's unlocked image icon.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1327,7 +1506,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getXpValue()">getXpValue</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the XP value of this achievement.</div>
+        <div class="jd-descrdiv">
+          Retrieves the XP value of this achievement.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1437,7 +1621,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
+        <div class="jd-descrdiv">
+          Freeze a volatile representation into an immutable representation.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1455,7 +1644,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
+        <div class="jd-descrdiv">
+          Check to see if this object is valid for use.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1515,6 +1709,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState()</a></code> indicating a hidden achievement.
 </p></div>
 
@@ -1554,6 +1751,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState()</a></code> indicating a revealed achievement.
 </p></div>
 
@@ -1593,6 +1793,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getState()">getState()</a></code> indicating an unlocked achievement.
 </p></div>
 
@@ -1632,6 +1835,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getType()">getType()</a></code> indicating an incremental achievement.
 </p></div>
 
@@ -1671,6 +1877,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#getType()">getType()</a></code> indicating a standard achievement.
 </p></div>
 
@@ -1733,6 +1942,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the ID of this achievement.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1767,6 +1979,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the number of steps this user has gone toward unlocking this achievement; only
  applicable for <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.</p></div>
   <div class="jd-tagdata">
@@ -1802,6 +2017,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the description for this achievement.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1836,6 +2054,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Loads the achievement description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1875,6 +2096,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the number of steps this user has gone toward unlocking this achievement (formatted
  for the user's locale) into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -1915,6 +2139,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the number of steps this user has gone toward unlocking this achievement (formatted
  for the user's locale); only applicable for <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code>
  achievement types.</p></div>
@@ -1951,6 +2178,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Loads the total number of steps necessary to unlock this achievement (formatted for the
  user's locale) into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>; only applicable for
  <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.</p></div>
@@ -1992,6 +2222,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the total number of steps necessary to unlock this achievement, formatted for the
  user's locale; only applicable for <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.</p></div>
   <div class="jd-tagdata">
@@ -2027,6 +2260,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the timestamp (in millseconds since epoch) at which this achievement was last
  updated. If the achievement has never been updated, this will return -1.</p></div>
   <div class="jd-tagdata">
@@ -2062,6 +2298,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Loads the achievement name into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2101,6 +2340,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the name of this achievement.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2135,6 +2377,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the player information associated with this achievement.
  <p>
  Note that this object is a volatile representation, so it is not safe to cache the output of
@@ -2172,6 +2417,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a URI that can be used to load the achievement's revealed image icon. Returns null
  if the achievement has no revealed image.
  <p/>
@@ -2210,6 +2458,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the state of the achievement - one of <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_UNLOCKED">STATE_UNLOCKED</a></code>,
  <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_REVEALED">STATE_REVEALED</a></code>, or <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#STATE_HIDDEN">STATE_HIDDEN</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2245,6 +2496,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the total number of steps necessary to unlock this achievement; only applicable for
  <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code> achievement types.</p></div>
   <div class="jd-tagdata">
@@ -2280,6 +2534,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the type of this achievement - one of <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_STANDARD">TYPE_STANDARD</a></code> or
  <code><a href="/reference/com/google/android/gms/games/achievement/Achievement.html#TYPE_INCREMENTAL">TYPE_INCREMENTAL</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2315,6 +2572,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a URI that can be used to load the achievement's unlocked image icon. Returns null
  if the achievement has no unlocked image.
  <p/>
@@ -2352,6 +2612,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the XP value of this achievement.</p></div>
   <div class="jd-tagdata">

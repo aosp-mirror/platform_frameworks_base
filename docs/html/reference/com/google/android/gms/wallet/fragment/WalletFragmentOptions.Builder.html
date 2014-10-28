@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -772,6 +818,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -895,7 +944,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentOptions.Builder.html#setEnvironment(int)">setEnvironment</a></span>(int environment)</nobr>
 
-        <div class="jd-descrdiv">Sets the Google Wallet environment to use.</div>
+        <div class="jd-descrdiv">
+          Sets the Google Wallet environment to use.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -913,8 +967,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentOptions.Builder.html#setFragmentStyle(int)">setFragmentStyle</a></span>(int styleResourceId)</nobr>
 
-        <div class="jd-descrdiv">Sets a set of attributes to customize the look and feel of the UI components of a
- <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html">WalletFragment</a></code>.</div>
+        <div class="jd-descrdiv">
+          Sets a set of attributes to customize the look and feel of the UI components of a
+ <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html">WalletFragment</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -932,8 +991,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentOptions.Builder.html#setFragmentStyle(com.google.android.gms.wallet.fragment.WalletFragmentStyle)">setFragmentStyle</a></span>(<a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentStyle.html">WalletFragmentStyle</a> fragmentStyle)</nobr>
 
-        <div class="jd-descrdiv">Sets a set of attributes to customize the look and feel of the UI components of a
- <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html">WalletFragment</a></code>.</div>
+        <div class="jd-descrdiv">
+          Sets a set of attributes to customize the look and feel of the UI components of a
+ <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html">WalletFragment</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -951,7 +1015,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentOptions.Builder.html#setMode(int)">setMode</a></span>(int mode)</nobr>
 
-        <div class="jd-descrdiv">Sets the mode of the wallet fragment.</div>
+        <div class="jd-descrdiv">
+          Sets the mode of the wallet fragment.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -969,9 +1038,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentOptions.Builder.html#setTheme(int)">setTheme</a></span>(int theme)</nobr>
 
-        <div class="jd-descrdiv">Sets a theme for the Wallet selector on Android OS with
+        <div class="jd-descrdiv">
+          Sets a theme for the Wallet selector on Android OS with
  <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
- >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.</div>
+ >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1257,6 +1331,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1285,6 +1362,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the Google Wallet environment to use. Specify
  <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_SANDBOX">ENVIRONMENT_SANDBOX</a></code> until you have applied for and been granted
@@ -1322,6 +1402,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets a set of attributes to customize the look and feel of the UI components of a
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html">WalletFragment</a></code>.
@@ -1373,6 +1456,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets a set of attributes to customize the look and feel of the UI components of a
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html">WalletFragment</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -1407,6 +1493,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the mode of the wallet fragment.
  Supported modes are defined by <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentMode.html">WalletFragmentMode</a></code>.
@@ -1443,6 +1532,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets a theme for the Wallet selector on Android OS with
  <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>

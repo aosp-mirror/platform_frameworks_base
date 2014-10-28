@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -129,7 +142,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <body class="gc-documentation google
-  develop">
+  develop reference">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -139,6 +152,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -361,7 +378,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -729,42 +775,97 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   
+
+
+
     <h2>Interfaces</h2>
     <div class="jd-sumtable">
     
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognitionApi.html">ActivityRecognitionApi</a></td>
-              <td class="jd-descrcol" width="100%">The main entry point for interacting with activity recognition.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></td>
-              <td class="jd-descrcol" width="100%">The main entry point for interacting with the fused location provider.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a></td>
-              <td class="jd-descrcol" width="100%">Represents a geographical region, also known as a geofence.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/GeofencingApi.html">GeofencingApi</a></td>
-              <td class="jd-descrcol" width="100%">The main entry point for interacting with the geofencing APIs.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.OnAddGeofencesResultListener.html">LocationClient.OnAddGeofencesResultListener</a></td>
-              <td class="jd-descrcol" width="100%">The listener for receiving callbacks when the operation to add geofences
- completes.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a></td>
-              <td class="jd-descrcol" width="100%">The listener for receiving callbacks when the operation to remove
- geofences completes.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a></td>
-              <td class="jd-descrcol" width="100%">Used for receiving notifications from the <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></code> when the location
- has changed.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognitionApi.html">ActivityRecognitionApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          The main entry point for interacting with activity recognition.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          The main entry point for interacting with the fused location provider.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a></td>
+        <td class="jd-descrcol" width="100%">
+          Represents a geographical region, also known as a geofence.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/GeofencingApi.html">GeofencingApi</a></td>
+        <td class="jd-descrcol" width="100%">
+          The main entry point for interacting with the geofencing APIs.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.OnAddGeofencesResultListener.html">LocationClient.OnAddGeofencesResultListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          The listener for receiving callbacks when the operation to add geofences
+ completes.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html">LocationClient.OnRemoveGeofencesResultListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          The listener for receiving callbacks when the operation to remove
+ geofences completes.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Used for receiving notifications from the <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></code> when the location
+ has changed.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
   
 
@@ -773,63 +874,143 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Classes</h2>
     <div class="jd-sumtable">
     
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognition.html">ActivityRecognition</a></td>
-              <td class="jd-descrcol" width="100%">The main entry point for activity recognition integration.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html">ActivityRecognitionClient</a></td>
-              <td class="jd-descrcol" width="100%"><em>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognition.html">ActivityRecognition</a></td>
+        <td class="jd-descrcol" width="100%">
+          The main entry point for activity recognition integration.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html">ActivityRecognitionClient</a></td>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This class is deprecated.
     Use <code><a href="/reference/com/google/android/gms/location/ActivityRecognition.html">ActivityRecognition</a></code>.
-</em>&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html">ActivityRecognitionResult</a></td>
-              <td class="jd-descrcol" width="100%">Result of an activity recognition.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html">DetectedActivity</a></td>
-              <td class="jd-descrcol" width="100%">The detected activity of the device with an an associated confidence.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a></td>
-              <td class="jd-descrcol" width="100%">A builder that builds <code><a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a></code>.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/GeofenceStatusCodes.html">GeofenceStatusCodes</a></td>
-              <td class="jd-descrcol" width="100%">Geofence specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
-&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/GeofencingEvent.html">GeofencingEvent</a></td>
-              <td class="jd-descrcol" width="100%">Represents an event from the <code><a href="/reference/com/google/android/gms/location/GeofencingApi.html">GeofencingApi</a></code> API.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></td>
-              <td class="jd-descrcol" width="100%"><em>
+</em>&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognitionResult.html">ActivityRecognitionResult</a></td>
+        <td class="jd-descrcol" width="100%">
+          Result of an activity recognition.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/DetectedActivity.html">DetectedActivity</a></td>
+        <td class="jd-descrcol" width="100%">
+          The detected activity of the device with an an associated confidence.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          A builder that builds <code><a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/GeofenceStatusCodes.html">GeofenceStatusCodes</a></td>
+        <td class="jd-descrcol" width="100%">
+          Geofence specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
+&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/GeofencingEvent.html">GeofencingEvent</a></td>
+        <td class="jd-descrcol" width="100%">
+          Represents an event from the <code><a href="/reference/com/google/android/gms/location/GeofencingApi.html">GeofencingApi</a></code> API.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></td>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This class is deprecated.
     Use <code><a href="/reference/com/google/android/gms/location/LocationServices.html">LocationServices</a></code>.
-</em>&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a></td>
-              <td class="jd-descrcol" width="100%">A data object that contains quality of service parameters for requests to
- the <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></code>.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationServices.html">LocationServices</a></td>
-              <td class="jd-descrcol" width="100%">The main entry point for location services integration.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationStatusCodes.html">LocationStatusCodes</a></td>
-              <td class="jd-descrcol" width="100%"><em>
+</em>&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          A data object that contains quality of service parameters for requests to
+ the <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html">FusedLocationProviderApi</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationServices.html">LocationServices</a></td>
+        <td class="jd-descrcol" width="100%">
+          The main entry point for location services integration.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationStatusCodes.html">LocationStatusCodes</a></td>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This class is deprecated.
     Use <code><a href="/reference/com/google/android/gms/location/GeofenceStatusCodes.html">GeofenceStatusCodes</a></code>.
-</em>&nbsp;</td>
-          </tr>
+</em>&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
   
 

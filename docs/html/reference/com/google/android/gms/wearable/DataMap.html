@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -778,6 +824,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -864,7 +913,12 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataMap.html#TAG">TAG</a></td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -929,7 +983,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#arrayListFromBundleArrayList(java.util.ArrayList<android.os.Bundle>)">arrayListFromBundleArrayList</a></span>(ArrayList&lt;Bundle&gt; bundleArrayList)</nobr>
 
-        <div class="jd-descrdiv">Returns an ArrayList of DataMaps from an ArrayList of Bundles.</div>
+        <div class="jd-descrdiv">
+          Returns an ArrayList of DataMaps from an ArrayList of Bundles.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -947,7 +1006,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#clear()">clear</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Removes all elements from the mapping of this DataMap.</div>
+        <div class="jd-descrdiv">
+          Removes all elements from the mapping of this DataMap.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -965,8 +1029,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#containsKey(java.lang.String)">containsKey</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns true if the given key is contained in the mapping
- of this DataMap.</div>
+        <div class="jd-descrdiv">
+          Returns true if the given key is contained in the mapping
+ of this DataMap.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -984,8 +1053,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#equals(java.lang.Object)">equals</a></span>(Object o)</nobr>
 
-        <div class="jd-descrdiv">Returns true if the given Object is a DataMap equivalent to
- this one.</div>
+        <div class="jd-descrdiv">
+          Returns true if the given Object is a DataMap equivalent to
+ this one.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1003,7 +1077,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#fromBundle(android.os.Bundle)">fromBundle</a></span>(Bundle bundle)</nobr>
 
-        <div class="jd-descrdiv">Returns a DataMap from a Bundle.</div>
+        <div class="jd-descrdiv">
+          Returns a DataMap from a Bundle.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1021,7 +1100,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#fromByteArray(byte[])">fromByteArray</a></span>(byte[] bytes)</nobr>
 
-        <div class="jd-descrdiv">Returns a DataMap from a byte[].</div>
+        <div class="jd-descrdiv">
+          Returns a DataMap from a byte[].
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1039,7 +1123,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#get(java.lang.String)">get</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the entry with the given key as an object.</div>
+        <div class="jd-descrdiv">
+          Returns the entry with the given key as an object.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1057,9 +1146,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getAsset(java.lang.String)">getAsset</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1077,8 +1171,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getBoolean(java.lang.String)">getBoolean</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or false if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or false if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1096,8 +1195,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getBoolean(java.lang.String, boolean)">getBoolean</a></span>(String key, boolean defaultValue)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or defaultValue if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or defaultValue if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1115,8 +1219,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getByte(java.lang.String)">getByte</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or (byte) 0 if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or (byte) 0 if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1134,8 +1243,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getByte(java.lang.String, byte)">getByte</a></span>(String key, byte defaultValue)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or defaultValue if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or defaultValue if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1153,9 +1267,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getByteArray(java.lang.String)">getByteArray</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1173,9 +1292,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getDataMap(java.lang.String)">getDataMap</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1193,9 +1317,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getDataMapArrayList(java.lang.String)">getDataMapArrayList</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1213,8 +1342,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getDouble(java.lang.String)">getDouble</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or 0.0 if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or 0.0 if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1232,8 +1366,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getDouble(java.lang.String, double)">getDouble</a></span>(String key, double defaultValue)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or defaultValue if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or defaultValue if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1251,8 +1390,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getFloat(java.lang.String)">getFloat</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or 0.0f if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or 0.0f if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1270,8 +1414,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getFloat(java.lang.String, float)">getFloat</a></span>(String key, float defaultValue)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or defaultValue if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or defaultValue if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1289,9 +1438,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getFloatArray(java.lang.String)">getFloatArray</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1309,8 +1463,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getInt(java.lang.String, int)">getInt</a></span>(String key, int defaultValue)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or defaultValue if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or defaultValue if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1328,8 +1487,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getInt(java.lang.String)">getInt</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or 0 if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or 0 if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1347,9 +1511,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getIntegerArrayList(java.lang.String)">getIntegerArrayList</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1367,8 +1536,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getLong(java.lang.String)">getLong</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or 0L if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or 0L if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1386,8 +1560,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getLong(java.lang.String, long)">getLong</a></span>(String key, long defaultValue)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or defaultValue if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or defaultValue if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1405,9 +1584,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getLongArray(java.lang.String)">getLongArray</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1425,8 +1609,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getString(java.lang.String, java.lang.String)">getString</a></span>(String key, String defaultValue)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or defaultValue if
- no mapping of the desired type exists for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or defaultValue if
+ no mapping of the desired type exists for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1444,9 +1633,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getString(java.lang.String)">getString</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1464,9 +1658,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getStringArray(java.lang.String)">getStringArray</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1484,9 +1683,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getStringArrayList(java.lang.String)">getStringArrayList</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns the value associated with the given key, or null if
+        <div class="jd-descrdiv">
+          Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
- value is explicitly associated with the key.</div>
+ value is explicitly associated with the key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1520,7 +1724,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#isEmpty()">isEmpty</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns true if the mapping of this DataMap is empty, false otherwise.</div>
+        <div class="jd-descrdiv">
+          Returns true if the mapping of this DataMap is empty, false otherwise.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1538,7 +1747,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#keySet()">keySet</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns a Set containing the Strings used as keys in this DataMap.</div>
+        <div class="jd-descrdiv">
+          Returns a Set containing the Strings used as keys in this DataMap.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1556,7 +1770,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putAll(com.google.android.gms.wearable.DataMap)">putAll</a></span>(<a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a> dataMap)</nobr>
 
-        <div class="jd-descrdiv">Inserts all mappings from the given DataMap into this DataMap.</div>
+        <div class="jd-descrdiv">
+          Inserts all mappings from the given DataMap into this DataMap.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1574,8 +1793,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putAsset(java.lang.String, com.google.android.gms.wearable.Asset)">putAsset</a></span>(String key, <a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a> value)</nobr>
 
-        <div class="jd-descrdiv">Inserts an Asset into the mapping of this DataMap, replacing
- any existing Asset for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts an Asset into the mapping of this DataMap, replacing
+ any existing Asset for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1593,8 +1817,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putBoolean(java.lang.String, boolean)">putBoolean</a></span>(String key, boolean value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a Boolean value into the mapping of this DataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a Boolean value into the mapping of this DataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1612,8 +1841,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putByte(java.lang.String, byte)">putByte</a></span>(String key, byte value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a byte value into the mapping of this DataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a byte value into the mapping of this DataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1631,8 +1865,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putByteArray(java.lang.String, byte[])">putByteArray</a></span>(String key, byte[] value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a byte array value into the mapping of this dataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a byte array value into the mapping of this dataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1650,8 +1889,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putDataMap(java.lang.String, com.google.android.gms.wearable.DataMap)">putDataMap</a></span>(String key, <a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a> value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a DataMap into the mapping of this DataMap, replacing
- any existing DataMap for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a DataMap into the mapping of this DataMap, replacing
+ any existing DataMap for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1669,8 +1913,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putDataMapArrayList(java.lang.String, java.util.ArrayList<com.google.android.gms.wearable.DataMap>)">putDataMapArrayList</a></span>(String key, ArrayList&lt;<a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a>&gt; value)</nobr>
 
-        <div class="jd-descrdiv">Inserts an ArrayList<DataMap> value into the mapping of this DataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts an ArrayList<DataMap> value into the mapping of this DataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1688,8 +1937,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putDouble(java.lang.String, double)">putDouble</a></span>(String key, double value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a double value into the mapping of this DataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a double value into the mapping of this DataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1707,8 +1961,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putFloat(java.lang.String, float)">putFloat</a></span>(String key, float value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a float value into the mapping of this dataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a float value into the mapping of this dataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1726,8 +1985,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putFloatArray(java.lang.String, float[])">putFloatArray</a></span>(String key, float[] value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a float array value into the mapping of this dataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a float array value into the mapping of this dataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1745,8 +2009,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putInt(java.lang.String, int)">putInt</a></span>(String key, int value)</nobr>
 
-        <div class="jd-descrdiv">Inserts an int value into the mapping of this DataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts an int value into the mapping of this DataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1764,8 +2033,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putIntegerArrayList(java.lang.String, java.util.ArrayList<java.lang.Integer>)">putIntegerArrayList</a></span>(String key, ArrayList&lt;Integer&gt; value)</nobr>
 
-        <div class="jd-descrdiv">Inserts an ArrayList<Integer> value into the mapping of this dataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts an ArrayList<Integer> value into the mapping of this dataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1783,8 +2057,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putLong(java.lang.String, long)">putLong</a></span>(String key, long value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a long value into the mapping of this DataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a long value into the mapping of this DataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1802,8 +2081,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putLongArray(java.lang.String, long[])">putLongArray</a></span>(String key, long[] value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a long array value into the mapping of this dataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a long array value into the mapping of this dataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1821,8 +2105,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putString(java.lang.String, java.lang.String)">putString</a></span>(String key, String value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a String value into the mapping of this DataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a String value into the mapping of this DataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1840,8 +2129,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putStringArray(java.lang.String, java.lang.String[])">putStringArray</a></span>(String key, String[] value)</nobr>
 
-        <div class="jd-descrdiv">Inserts a String array value into the mapping of this dataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts a String array value into the mapping of this dataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1859,8 +2153,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putStringArrayList(java.lang.String, java.util.ArrayList<java.lang.String>)">putStringArrayList</a></span>(String key, ArrayList&lt;String&gt; value)</nobr>
 
-        <div class="jd-descrdiv">Inserts an ArrayList<String> value into the mapping of this dataMap, replacing
- any existing value for the given key.</div>
+        <div class="jd-descrdiv">
+          Inserts an ArrayList<String> value into the mapping of this dataMap, replacing
+ any existing value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1878,7 +2177,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#remove(java.lang.String)">remove</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Removes any entry with the given key from the mapping of this dataMap.</div>
+        <div class="jd-descrdiv">
+          Removes any entry with the given key from the mapping of this dataMap.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1896,7 +2200,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#size()">size</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the number of key-value pairs in this map.</div>
+        <div class="jd-descrdiv">
+          Returns the number of key-value pairs in this map.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1914,7 +2223,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#toBundle()">toBundle</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns a Bundle containing all the elements on this DataMap.</div>
+        <div class="jd-descrdiv">
+          Returns a Bundle containing all the elements on this DataMap.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1932,7 +2246,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#toByteArray()">toByteArray</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns a serialized <code>byte[]</code> representing this DataMap.</div>
+        <div class="jd-descrdiv">
+          Returns a serialized <code>byte[]</code> representing this DataMap.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -2218,6 +2537,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
 
@@ -2270,6 +2592,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2314,6 +2639,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns an ArrayList of DataMaps from an ArrayList of Bundles.
  Any elements in the Bundles not supported by DataMap will be dropped.</p></div>
   <div class="jd-tagdata">
@@ -2349,6 +2677,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes all elements from the mapping of this DataMap.
 </p></div>
 
@@ -2378,6 +2709,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the given key is contained in the mapping
  of this DataMap.</p></div>
@@ -2423,6 +2757,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the given Object is a DataMap equivalent to
  this one.
 </p></div>
@@ -2453,6 +2790,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a DataMap from a Bundle. The input Bundle is expected to contain
  only elements supported by DataMap. Any elements in the Bundle not
@@ -2489,6 +2829,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a DataMap from a byte[].</p></div>
   <div class="jd-tagdata">
@@ -2533,6 +2876,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the entry with the given key as an object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2575,6 +2921,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
@@ -2621,6 +2970,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or false if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -2664,6 +3016,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
@@ -2713,6 +3068,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or (byte) 0 if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -2756,6 +3114,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
@@ -2805,6 +3166,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -2849,6 +3213,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
@@ -2895,6 +3262,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -2940,6 +3310,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or 0.0 if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -2983,6 +3356,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
@@ -3032,6 +3408,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or 0.0f if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3075,6 +3454,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
@@ -3124,6 +3506,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3168,6 +3553,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
@@ -3217,6 +3605,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or 0 if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3260,6 +3651,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
@@ -3306,6 +3700,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or 0L if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3349,6 +3746,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
@@ -3398,6 +3798,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3442,6 +3845,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
@@ -3492,6 +3898,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3536,6 +3945,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
@@ -3582,6 +3994,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3627,6 +4042,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3655,6 +4073,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the mapping of this DataMap is empty, false otherwise.
 </p></div>
@@ -3685,6 +4106,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a Set containing the Strings used as keys in this DataMap.</p></div>
   <div class="jd-tagdata">
@@ -3719,6 +4143,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Inserts all mappings from the given DataMap into this DataMap.</p></div>
   <div class="jd-tagdata">
@@ -3758,6 +4185,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an Asset into the mapping of this DataMap, replacing
  any existing Asset for the given key.  Either key or value may be null.</p></div>
@@ -3803,6 +4233,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a Boolean value into the mapping of this DataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -3846,6 +4279,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a byte value into the mapping of this DataMap, replacing
  any existing value for the given key.</p></div>
@@ -3891,6 +4327,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a byte array value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -3934,6 +4373,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a DataMap into the mapping of this DataMap, replacing
  any existing DataMap for the given key.  Either key or value may be null.</p></div>
@@ -3979,6 +4421,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an ArrayList<DataMap> value into the mapping of this DataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4022,6 +4467,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a double value into the mapping of this DataMap, replacing
  any existing value for the given key.</p></div>
@@ -4067,6 +4515,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a float value into the mapping of this dataMap, replacing
  any existing value for the given key.</p></div>
   <div class="jd-tagdata">
@@ -4110,6 +4561,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a float array value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
@@ -4155,6 +4609,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an int value into the mapping of this DataMap, replacing
  any existing value for the given key.</p></div>
   <div class="jd-tagdata">
@@ -4198,6 +4655,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an ArrayList<Integer> value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
@@ -4243,6 +4703,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a long value into the mapping of this DataMap, replacing
  any existing value for the given key.</p></div>
   <div class="jd-tagdata">
@@ -4286,6 +4749,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a long array value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
@@ -4331,6 +4797,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a String value into the mapping of this DataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4374,6 +4843,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a String array value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
@@ -4419,6 +4891,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an ArrayList<String> value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4463,6 +4938,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes any entry with the given key from the mapping of this dataMap.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -4502,6 +4980,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the number of key-value pairs in this map.
 </p></div>
 
@@ -4531,6 +5012,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a Bundle containing all the elements on this DataMap. A data map converted in this
  way should only be read after converting it with <code><a href="/reference/com/google/android/gms/wearable/DataMap.html#fromBundle(android.os.Bundle)">fromBundle(Bundle)</a></code>.</p></div>
@@ -4567,6 +5051,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a serialized <code>byte[]</code> representing this DataMap.
 </p></div>
 
@@ -4596,6 +5083,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
