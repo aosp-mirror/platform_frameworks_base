@@ -1984,6 +1984,9 @@
   <java-symbol type="string" name="zen_mode_forever" />
   <java-symbol type="plurals" name="zen_mode_duration_minutes" />
   <java-symbol type="plurals" name="zen_mode_duration_hours" />
+  <java-symbol type="plurals" name="zen_mode_duration_minutes_summary" />
+  <java-symbol type="plurals" name="zen_mode_duration_hours_summary" />
+  <java-symbol type="string" name="zen_mode_until" />
 
   <java-symbol type="string" name="item_is_selected" />
   <java-symbol type="string" name="day_of_week_label_typeface" />
