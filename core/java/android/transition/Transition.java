@@ -1790,6 +1790,10 @@ public abstract class Transition implements Cloneable {
 
     private static boolean isValueChanged(TransitionValues oldValues, TransitionValues newValues,
             String key) {
+        if (oldValues.values.containsKey(key) != newValues.values.containsKey(key)) {
+            // The transition didn't care about this particular value, so we don't care, either.
+            return false;
+        }
         Object oldValue = oldValues.values.get(key);
         Object newValue = newValues.values.get(key);
         boolean changed;
