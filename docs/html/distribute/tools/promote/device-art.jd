@@ -428,7 +428,7 @@ feature image or screenshots for your Google Play app listing.</p>
               g_currentImage = img;
               createFrame();
               // Send the event to Analytics
-              _gaq.push(['_trackEvent', 'Distribute', 'Create Device Art', g_currentDevice.title]);
+              ga('send', 'event', 'Distribute', 'Create Device Art', g_currentDevice.title);
             });
           });
         });
