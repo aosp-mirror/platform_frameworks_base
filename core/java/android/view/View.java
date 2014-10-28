@@ -16353,6 +16353,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (tintInfo.mHasTintMode) {
                     mBackground.setTintMode(tintInfo.mTintMode);
                 }
+
+                // The drawable (or one of its children) may not have been
+                // stateful before applying the tint, so let's try again.
+                if (mBackground.isStateful()) {
+                    mBackground.setState(getDrawableState());
+                }
             }
         }
     }
