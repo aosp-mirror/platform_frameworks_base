@@ -84,8 +84,7 @@ namespace uirenderer {
 #define PROGRAM_HAS_COLORS 42
 
 #define PROGRAM_HAS_DEBUG_HIGHLIGHT 43
-#define PROGRAM_EMULATE_STENCIL 44
-#define PROGRAM_HAS_ROUND_RECT_CLIP 45
+#define PROGRAM_HAS_ROUND_RECT_CLIP 44
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -161,7 +160,6 @@ struct ProgramDescription {
     float gamma;
 
     bool hasDebugHighlight;
-    bool emulateStencil;
     bool hasRoundRectClip;
 
     /**
@@ -204,7 +202,6 @@ struct ProgramDescription {
         gamma = 2.2f;
 
         hasDebugHighlight = false;
-        emulateStencil = false;
         hasRoundRectClip = false;
     }
 
@@ -272,7 +269,6 @@ struct ProgramDescription {
         if (isSimpleGradient) key |= programid(0x1) << PROGRAM_IS_SIMPLE_GRADIENT;
         if (hasColors) key |= programid(0x1) << PROGRAM_HAS_COLORS;
         if (hasDebugHighlight) key |= programid(0x1) << PROGRAM_HAS_DEBUG_HIGHLIGHT;
-        if (emulateStencil) key |= programid(0x1) << PROGRAM_EMULATE_STENCIL;
         if (hasRoundRectClip) key |= programid(0x1) << PROGRAM_HAS_ROUND_RECT_CLIP;
         return key;
     }

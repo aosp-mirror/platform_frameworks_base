@@ -129,14 +129,6 @@ public:
     virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
     virtual void finish();
 
-    void setCountOverdrawEnabled(bool enabled) {
-        mCountOverdraw = enabled;
-    }
-
-    float getOverdraw() {
-        return mCountOverdraw ? mOverdraw : 0.0f;
-    }
-
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
     void pushLayerUpdate(Layer* layer);
@@ -1004,11 +996,6 @@ private:
     // No-ops start/endTiling when set
     bool mSuppressTiling;
     bool mFirstFrameAfterResize;
-
-    // If true, this renderer will setup drawing to emulate
-    // an increment stencil buffer in the color buffer
-    bool mCountOverdraw;
-    float mOverdraw;
 
     bool mSkipOutlineClip;
 
