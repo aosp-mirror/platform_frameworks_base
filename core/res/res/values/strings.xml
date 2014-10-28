@@ -4873,17 +4873,32 @@
     <!-- [CHAR_LIMIT=NONE] Zen mode: Condition summary for built-in downtime condition, if active -->
     <string name="downtime_condition_summary">Until your downtime ends at <xliff:g id="formattedTime" example="10.00 PM">%1$s</xliff:g></string>
 
-    <!-- Zen mode condition: time duration in minutes. [CHAR LIMIT=NONE] -->
+    <!-- Zen mode condition - summary: time duration in minutes. [CHAR LIMIT=NONE] -->
+    <plurals name="zen_mode_duration_minutes_summary">
+        <item quantity="one">For one minute (until <xliff:g id="formattedTime" example="10:00 PM">%1$s</xliff:g>)</item>
+        <item quantity="other">For %1$d minutes (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
+    </plurals>
+
+    <!-- Zen mode condition - summary: time duration in hours. [CHAR LIMIT=NONE] -->
+    <plurals name="zen_mode_duration_hours_summary">
+        <item quantity="one">For one hour (until <xliff:g id="formattedTime" example="10:00 PM">%1$s</xliff:g>)</item>
+        <item quantity="other">For %1$d hours (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
+    </plurals>
+
+    <!-- Zen mode condition - line one: time duration in minutes. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_minutes">
         <item quantity="one">For one minute</item>
         <item quantity="other">For %d minutes</item>
     </plurals>
 
-    <!-- Zen mode condition: time duration in hours. [CHAR LIMIT=NONE] -->
+    <!-- Zen mode condition - line one: time duration in hours. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_hours">
         <item quantity="one">For one hour</item>
         <item quantity="other">For %d hours</item>
     </plurals>
+
+    <!-- Zen mode condition - line two: ending time. [CHAR LIMIT=NONE] -->
+    <string name="zen_mode_until">Until <xliff:g id="formattedTime" example="10:00 PM">%1$s</xliff:g></string>
 
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_forever">Indefinitely</string>
