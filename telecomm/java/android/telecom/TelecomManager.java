@@ -684,6 +684,11 @@ public class TelecomManager {
      * {@link TelephonyManager#CALL_STATE_RINGING}
      * {@link TelephonyManager#CALL_STATE_OFFHOOK}
      * {@link TelephonyManager#CALL_STATE_IDLE}
+     *
+     * Note that this API does not require the
+     * {@link android.Manifest.permission#READ_PHONE_STATE} permission. This is intentional, to
+     * preserve the behavior of {@link TelephonyManager#getCallState()}, which also did not require
+     * the permission.
      * @hide
      */
     @SystemApi
