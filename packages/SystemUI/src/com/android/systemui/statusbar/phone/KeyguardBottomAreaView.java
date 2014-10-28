@@ -133,7 +133,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             if (action == ACTION_CLICK) {
                 if (host == mLockIcon) {
                     mPhoneStatusBar.animateCollapsePanels(
-                            CommandQueue.FLAG_EXCLUDE_NONE, true /* force */);
+                            CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
                     return true;
                 } else if (host == mCameraImageView) {
                     launchCamera();
