@@ -508,4 +508,10 @@
     <dimen name="fake_shadow_inset">1dp</dimen>
 
     <dimen name="fake_shadow_size">8dp</dimen>
+
+    <!-- Padding between signal cluster and battery icon -->
+    <dimen name="signal_cluster_battery_padding">7dp</dimen>
+
+    <!-- Padding for signal cluster and battery icon when there are not icons in signal cluster -->
+    <dimen name="no_signal_cluster_battery_padding">3dp</dimen>
 </resources>
