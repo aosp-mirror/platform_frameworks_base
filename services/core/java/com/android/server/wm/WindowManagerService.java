@@ -6049,6 +6049,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         while (true) {
             if (retryCount++ > 0) {
+                // Reset max/min layers on retries so we don't accidentally take a screenshot of a
+                // layer based on the previous try.
+                maxLayer = 0;
+                minLayer = Integer.MAX_VALUE;
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -6071,7 +6075,17 @@ public class WindowManagerService extends IWindowManager.Stub
                             continue;
                         }
                     } else if (ws.mIsWallpaper) {
-                        // Fall through.
+                        if (appWin == null) {
+                            // We have not ran across the target window yet, so it is probably
+                            // behind the wallpaper. This can happen when the keyguard is up and
+                            // all windows are moved behind the wallpaper. We don't want to
+                            // include the wallpaper layer in the screenshot as it will coverup
+                            // the layer of the target window.
+                            continue;
+                        }
+                        // Fall through. The target window is in front of the wallpaper. For this
+                        // case we want to include the wallpaper layer in the screenshot because
+                        // the target window might have some transparent areas.
                     } else if (appToken != null) {
                         if (ws.mAppToken == null || ws.mAppToken.token != appToken) {
                             // This app window is of no interest if it is not associated with the
