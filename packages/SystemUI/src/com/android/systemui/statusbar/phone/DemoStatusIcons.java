@@ -122,8 +122,13 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
             }
             String cast = args.getString("cast");
             if (cast != null) {
-                int iconId = cast.equals("cast") ? R.drawable.stat_sys_cast : 0;
+                int iconId = cast.equals("show") ? R.drawable.stat_sys_cast : 0;
                 updateSlot("cast", null, iconId);
+            }
+            String hotspot = args.getString("hotspot");
+            if (hotspot != null) {
+                int iconId = hotspot.equals("show") ? R.drawable.stat_sys_hotspot : 0;
+                updateSlot("hotspot", null, iconId);
             }
         }
     }
