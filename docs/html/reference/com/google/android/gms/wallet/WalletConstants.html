@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -772,6 +818,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -855,181 +904,296 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ACTION_ENABLE_WALLET_OPTIMIZATION">ACTION_ENABLE_WALLET_OPTIMIZATION</a></td>
-        <td class="jd-descrcol" width="100%">Name of an action to use in an IntentFilter for a BroadcastReceiver that is a signal from
+        <td class="jd-descrcol" width="100%">
+          Name of an action to use in an IntentFilter for a BroadcastReceiver that is a signal from
  your application that it uses Wallet, and thus the system should make the appropriate
- optimizations.</td>
+ optimizations.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_PRODUCTION">ENVIRONMENT_PRODUCTION</a></td>
-        <td class="jd-descrcol" width="100%">Environment constant for running in production with the most stringent application / merchant
- requirements.</td>
+        <td class="jd-descrcol" width="100%">
+          Environment constant for running in production with the most stringent application / merchant
+ requirements.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_SANDBOX">ENVIRONMENT_SANDBOX</a></td>
-        <td class="jd-descrcol" width="100%">Environment constant for running in sandbox with relaxed application / merchant requirements.</td>
+        <td class="jd-descrcol" width="100%">
+          Environment constant for running in sandbox with relaxed application / merchant requirements.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_STRICT_SANDBOX">ENVIRONMENT_STRICT_SANDBOX</a></td>
-        <td class="jd-descrcol" width="100%">Environment constant for running in sandbox with more stringent application / merchant
- requirements.</td>
+        <td class="jd-descrcol" width="100%">
+          Environment constant for running in sandbox with more stringent application / merchant
+ requirements.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ERROR_CODE_AUTHENTICATION_FAILURE">ERROR_CODE_AUTHENTICATION_FAILURE</a></td>
-        <td class="jd-descrcol" width="100%">Not immediately recoverable error.</td>
+        <td class="jd-descrcol" width="100%">
+          Not immediately recoverable error.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ERROR_CODE_BUYER_ACCOUNT_ERROR">ERROR_CODE_BUYER_ACCOUNT_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">Not immediately recoverable error.</td>
+        <td class="jd-descrcol" width="100%">
+          Not immediately recoverable error.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ERROR_CODE_INVALID_PARAMETERS">ERROR_CODE_INVALID_PARAMETERS</a></td>
-        <td class="jd-descrcol" width="100%">Not immediately recoverable error.</td>
+        <td class="jd-descrcol" width="100%">
+          Not immediately recoverable error.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ERROR_CODE_INVALID_TRANSACTION">ERROR_CODE_INVALID_TRANSACTION</a></td>
-        <td class="jd-descrcol" width="100%">Not immediately recoverable error.</td>
+        <td class="jd-descrcol" width="100%">
+          Not immediately recoverable error.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ERROR_CODE_MERCHANT_ACCOUNT_ERROR">ERROR_CODE_MERCHANT_ACCOUNT_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">Not immediately recoverable error.</td>
+        <td class="jd-descrcol" width="100%">
+          Not immediately recoverable error.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ERROR_CODE_SERVICE_UNAVAILABLE">ERROR_CODE_SERVICE_UNAVAILABLE</a></td>
-        <td class="jd-descrcol" width="100%">Not immediately recoverable error.</td>
+        <td class="jd-descrcol" width="100%">
+          Not immediately recoverable error.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ERROR_CODE_SPENDING_LIMIT_EXCEEDED">ERROR_CODE_SPENDING_LIMIT_EXCEEDED</a></td>
-        <td class="jd-descrcol" width="100%">Recoverable error.</td>
+        <td class="jd-descrcol" width="100%">
+          Recoverable error.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ERROR_CODE_UNKNOWN">ERROR_CODE_UNKNOWN</a></td>
-        <td class="jd-descrcol" width="100%">Not immediately recoverable error.</td>
+        <td class="jd-descrcol" width="100%">
+          Not immediately recoverable error.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ERROR_CODE_UNSUPPORTED_API_VERSION">ERROR_CODE_UNSUPPORTED_API_VERSION</a></td>
-        <td class="jd-descrcol" width="100%">Not immediately recoverable error.</td>
+        <td class="jd-descrcol" width="100%">
+          Not immediately recoverable error.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#EXTRA_ERROR_CODE">EXTRA_ERROR_CODE</a></td>
-        <td class="jd-descrcol" width="100%">Extra for retrieving an error code from the Intent passed to onActivityResult
-</td>
+        <td class="jd-descrcol" width="100%">
+          Extra for retrieving an error code from the Intent passed to onActivityResult
+
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#EXTRA_FULL_WALLET">EXTRA_FULL_WALLET</a></td>
-        <td class="jd-descrcol" width="100%">Extra for retrieving a <code><a href="/reference/com/google/android/gms/wallet/FullWallet.html">FullWallet</a></code> from the Intent passed to onActivityResult
-</td>
+        <td class="jd-descrcol" width="100%">
+          Extra for retrieving a <code><a href="/reference/com/google/android/gms/wallet/FullWallet.html">FullWallet</a></code> from the Intent passed to onActivityResult
+
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#EXTRA_IS_USER_PREAUTHORIZED">EXTRA_IS_USER_PREAUTHORIZED</a></td>
-        <td class="jd-descrcol" width="100%">Extra for retrieving a boolean indicating if the user has pre-authorized your app or not
-</td>
+        <td class="jd-descrcol" width="100%">
+          Extra for retrieving a boolean indicating if the user has pre-authorized your app or not
+
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#EXTRA_MASKED_WALLET">EXTRA_MASKED_WALLET</a></td>
-        <td class="jd-descrcol" width="100%">Extra for retrieving a <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code> from the Intent passed to onActivityResult
-</td>
+        <td class="jd-descrcol" width="100%">
+          Extra for retrieving a <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code> from the Intent passed to onActivityResult
+
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#EXTRA_MASKED_WALLET_REQUEST">EXTRA_MASKED_WALLET_REQUEST</a></td>
-        <td class="jd-descrcol" width="100%">Extra for retrieving the masked wallet request from the Bundle passed to
+        <td class="jd-descrcol" width="100%">
+          Extra for retrieving the masked wallet request from the Bundle passed to
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.OnStateChangedListener.html#onStateChanged(com.google.android.gms.wallet.fragment.WalletFragment, int, int, android.os.Bundle)">onStateChanged(WalletFragment, int, int, android.os.Bundle)</a></code>
- when transitioning to <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentState.html#PROCESSING">PROCESSING</a></code>.</td>
+ when transitioning to <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentState.html#PROCESSING">PROCESSING</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#RESULT_ERROR">RESULT_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">Response code passed to onActivityResult in the case of an error</td>
+        <td class="jd-descrcol" width="100%">
+          Response code passed to onActivityResult in the case of an error
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_DARK">THEME_DARK</a></td>
-        <td class="jd-descrcol" width="100%">Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a dark
+        <td class="jd-descrcol" width="100%">
+          Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a dark
  theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
- >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.</td>
+ >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_HOLO_DARK">THEME_HOLO_DARK</a></td>
-        <td class="jd-descrcol" width="100%"><em>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This constant is deprecated.
     use <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_DARK">THEME_DARK</a></code>
-</em></td>
+</em>
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_HOLO_LIGHT">THEME_HOLO_LIGHT</a></td>
-        <td class="jd-descrcol" width="100%"><em>
+        <td class="jd-descrcol" width="100%">
+          <em>
       This constant is deprecated.
     use <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_LIGHT">THEME_LIGHT</a></code>
-</em></td>
+</em>
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#THEME_LIGHT">THEME_LIGHT</a></td>
-        <td class="jd-descrcol" width="100%">Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a light
+        <td class="jd-descrcol" width="100%">
+          Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a light
  theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
- >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.</td>
+ >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>.
+
+
+
+        </td>
     </tr>
     
     
@@ -1312,6 +1476,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Name of an action to use in an IntentFilter for a BroadcastReceiver that is a signal from
  your application that it uses Wallet, and thus the system should make the appropriate
  optimizations. Example of using the action:
@@ -1363,6 +1530,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Environment constant for running in production with the most stringent application / merchant
  requirements.
 
@@ -1409,6 +1579,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Environment constant for running in sandbox with relaxed application / merchant requirements.
  This environment is suggested for early development and for easily testing the Wallet SDK.
 
@@ -1455,6 +1628,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Environment constant for running in sandbox with more stringent application / merchant
  requirements. This environment is suggested when finishing integration with the Wallet SDK
  and imposes the same requirements as <code><a href="/reference/com/google/android/gms/wallet/WalletConstants.html#ENVIRONMENT_PRODUCTION">ENVIRONMENT_PRODUCTION</a></code>.
@@ -1496,6 +1672,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Not immediately recoverable error.
  There was a failure in retrieving an authentication token for the buyer's Google Account.
  This could be because Google's <code><a href="/reference/android/accounts/AbstractAccountAuthenticator.html">AbstractAccountAuthenticator</a></code> is not
@@ -1545,6 +1724,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Not immediately recoverable error.
  There are problems with the buyer's account (e.g closed account, unsupported country)
 </p></div>
@@ -1585,6 +1767,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Not immediately recoverable error.
  The request had missing or invalid parameters.
 </p></div>
@@ -1625,6 +1810,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Not immediately recoverable error.
  loadFullWallet or changeMaskedWallet was called outside the context of a transaction. For
  example, loadFullWallet was called without a successful call to loadMaskedWallet.
@@ -1666,6 +1854,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Not immediately recoverable error.
  There is a problem with the merchant Google Wallet account.
 </p></div>
@@ -1706,6 +1897,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Not immediately recoverable error.
  The InstantBuy service is temporarily off-line for all requests.
 </p></div>
@@ -1746,6 +1940,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Recoverable error.
  The payment amount in the request put the buyer over their spending limit. The buyer may
  still be able to use Google Wallet for a smaller purchase.
@@ -1787,6 +1984,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Not immediately recoverable error.
  An unknown type of error has occurred.
 </p></div>
@@ -1827,6 +2027,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Not immediately recoverable error.
  The server API version of the request is no longer supported. This error is not recoverable
  and should be treated as fatal.
@@ -1868,6 +2071,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Extra for retrieving an error code from the Intent passed to onActivityResult
 </p></div>
 
@@ -1906,6 +2112,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Extra for retrieving a <code><a href="/reference/com/google/android/gms/wallet/FullWallet.html">FullWallet</a></code> from the Intent passed to onActivityResult
 </p></div>
 
@@ -1944,6 +2153,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Extra for retrieving a boolean indicating if the user has pre-authorized your app or not
 </p></div>
 
@@ -1982,6 +2194,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Extra for retrieving a <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code> from the Intent passed to onActivityResult
 </p></div>
 
@@ -2019,6 +2234,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Extra for retrieving the masked wallet request from the Bundle passed to
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.OnStateChangedListener.html#onStateChanged(com.google.android.gms.wallet.fragment.WalletFragment, int, int, android.os.Bundle)">onStateChanged(WalletFragment, int, int, android.os.Bundle)</a></code>
@@ -2060,6 +2278,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Response code passed to onActivityResult in the case of an error</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
@@ -2103,6 +2324,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a dark
  theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>
  >= <code><a href="/reference/android/os/Build.VERSION_CODES.html#HONEYCOMB">HONEYCOMB</a></code>. This will provide the dark version of
@@ -2144,6 +2368,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This constant is deprecated.</strong><br/>
@@ -2189,6 +2416,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This constant is deprecated.</strong><br/>
@@ -2234,6 +2464,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Theme constant passed to <code><a href="/reference/com/google/android/gms/wallet/Wallet.WalletOptions.Builder.html#setTheme(int)">setTheme(int)</a></code> to use a light
  theme for Wallet on Android OS with <code><a href="/reference/android/os/Build.VERSION.html#SDK_INT">SDK_INT</a></code>

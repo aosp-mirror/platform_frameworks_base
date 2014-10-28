@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -129,7 +142,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <body class="gc-documentation google
-  develop">
+  develop reference">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -139,6 +152,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -361,7 +378,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -724,6 +770,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <div id="jd-content" class="api apilevel-">
 
 
+  <div class="jd-descr">
+    Contains request objects used in Google Fit API methods.
+
+  </div>
+
+
+
+
 
 
 
@@ -732,17 +786,22 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Interfaces</h2>
     <div class="jd-sumtable">
 
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/BleScanCallback.html">BleScanCallback</a></td>
-              <td class="jd-descrcol" width="100%">Callback for BLE Scans.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataSourceListener.html">DataSourceListener</a></td>
-              <td class="jd-descrcol" width="100%">Listener for data source events, used by clients wanting to subscribe to real-time data stream
- updates.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/OnDataPointListener.html">OnDataPointListener</a></td>
+        <td class="jd-descrcol" width="100%">
+          Listener used to register to live data updates from a <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
 
 
@@ -751,86 +810,200 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <h2>Classes</h2>
     <div class="jd-sumtable">
 
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataDeleteRequest.html">DataDeleteRequest</a></td>
-              <td class="jd-descrcol" width="100%">A request to delete data and sessions added by the app from the Google Fit store in the time
- interval specified.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataDeleteRequest.Builder.html">DataDeleteRequest.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create new DataDeleteRequests.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataInsertRequest.html">DataInsertRequest</a></td>
-              <td class="jd-descrcol" width="100%">A request for inserting data into the Google Fit store.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataInsertRequest.Builder.html">DataInsertRequest.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create new DataInsertRequests.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.html">DataReadRequest</a></td>
-              <td class="jd-descrcol" width="100%">Request for reading data from Google Fit.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html">DataReadRequest.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create new DataReadRequests.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.html">DataSourcesRequest</a></td>
-              <td class="jd-descrcol" width="100%">Request for finding <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data sources</a></code> in Google Fit.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html">DataSourcesRequest.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create new DataSourceRequests.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataTypeCreateRequest.html">DataTypeCreateRequest</a></td>
-              <td class="jd-descrcol" width="100%">A request for inserting an application-specific data type into the Google Fit store.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataTypeCreateRequest.Builder.html">DataTypeCreateRequest.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create new DataTypeInsertRequests.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a></td>
-              <td class="jd-descrcol" width="100%">Request for registering for real time updates from a <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html">SensorRequest.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create new SensorRequests.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SessionInsertRequest.html">SessionInsertRequest</a></td>
-              <td class="jd-descrcol" width="100%">A request for inserting a <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and associated <code><a href="/reference/com/google/android/gms/fitness/data/DataSet.html">DataSet</a></code> and/or aggregated
- <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></code> into the Google Fit store.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SessionInsertRequest.Builder.html">SessionInsertRequest.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create new SessionInsertRequest.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.html">SessionReadRequest</a></td>
-              <td class="jd-descrcol" width="100%">Request for reading <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> data from Google Fit.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html">SessionReadRequest.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create a new SessionReadRequest.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/StartBleScanRequest.html">StartBleScanRequest</a></td>
-              <td class="jd-descrcol" width="100%">Request for finding <code><a href="/reference/com/google/android/gms/fitness/data/BleDevice.html">BleDevice</a></code>s around the user.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/StartBleScanRequest.Builder.html">StartBleScanRequest.Builder</a></td>
-              <td class="jd-descrcol" width="100%">Builder used to create new DataSourceRequests.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/UnclaimBleDeviceRequest.html">UnclaimBleDeviceRequest</a></td>
-              <td class="jd-descrcol" width="100%">Request for claiming a BLE device on behalf of the user in Google Fit.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/BleScanCallback.html">BleScanCallback</a></td>
+        <td class="jd-descrcol" width="100%">
+          Callback for BLE Scans.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataDeleteRequest.html">DataDeleteRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          A request to delete data and sessions added by the app from the Google Fit store in the time
+ interval specified.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataDeleteRequest.Builder.html">DataDeleteRequest.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder used to create new DataDeleteRequests.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.html">DataReadRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          Request for reading data from Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder.html">DataReadRequest.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder used to create new DataReadRequests.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.html">DataSourcesRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          Request for finding <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data sources</a></code> in Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataSourcesRequest.Builder.html">DataSourcesRequest.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder used to create new DataSourceRequests.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataTypeCreateRequest.html">DataTypeCreateRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          A request for inserting an application-specific data type into the Google Fit store.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/DataTypeCreateRequest.Builder.html">DataTypeCreateRequest.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder used to create new DataTypeInsertRequests.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          Request for registering for live updates from a <code><a href="/reference/com/google/android/gms/fitness/data/DataSource.html">data source</a></code>.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html">SensorRequest.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder used to create new SensorRequests.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SessionInsertRequest.html">SessionInsertRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          A request for inserting a <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and associated <code><a href="/reference/com/google/android/gms/fitness/data/DataSet.html">DataSet</a></code> and/or aggregated
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></code> into the Google Fit store.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SessionInsertRequest.Builder.html">SessionInsertRequest.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder used to create new SessionInsertRequest.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.html">SessionReadRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          Request for reading <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> data from Google Fit.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html">SessionReadRequest.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder used to create a new SessionReadRequest.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/StartBleScanRequest.html">StartBleScanRequest</a></td>
+        <td class="jd-descrcol" width="100%">
+          Request for finding <code><a href="/reference/com/google/android/gms/fitness/data/BleDevice.html">BLE devices</a></code> around the user.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/StartBleScanRequest.Builder.html">StartBleScanRequest.Builder</a></td>
+        <td class="jd-descrcol" width="100%">
+          Builder used to create new DataSourceRequests.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
     </div>
 
 

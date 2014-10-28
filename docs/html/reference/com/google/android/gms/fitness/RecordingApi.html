@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -764,13 +813,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The Recording API allows applications to request background collection of sensor data by
- creating <code><a href="/reference/com/google/android/gms/fitness/data/Subscription.html">subscriptions</a></code>.  Subscriptions are active when the requesting app
- is not running, and persisted through system restarts.  Collected data can be queried using the
- <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">History API</a></code>.
+<p itemprop="articleBody">API which enables low-power, always-on background collection of sensor
+ data into the Google Fit store.  Sensor <code><a href="/reference/com/google/android/gms/fitness/data/Subscription.html">subscriptions</a></code> are active when the
+ requesting app is not running, and persisted through system restarts.  Collected data can be
+ queried using the <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">History API</a></code>.
  <p>
  Unlike the <code><a href="/reference/com/google/android/gms/fitness/SensorsApi.html">Sensors API</a></code>, the Recording API does not support delivery of
- real-time sensor events.  When real time data is needed (such as when the app is open in the
+ live sensor events.  When live data is needed (such as when the app is open in the
  foreground), a separate registration should be created with the Sensors API.  An app can have
  both an active subscription and an active registration at the same time.  Unlike registrations,
  subscriptions don't need to be removed and re-added periodically.
@@ -861,7 +910,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/RecordingApi.html#listSubscriptions(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.DataType)">listSubscriptions</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a> dataType)</nobr>
 
-        <div class="jd-descrdiv">Reads all existing subscriptions for the current application.</div>
+        <div class="jd-descrdiv">
+          Reads all existing subscriptions for the current application to a particular data type.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -879,7 +933,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/RecordingApi.html#listSubscriptions(com.google.android.gms.common.api.GoogleApiClient)">listSubscriptions</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
 
-        <div class="jd-descrdiv">Reads all existing subscriptions for the current application.</div>
+        <div class="jd-descrdiv">
+          Reads all existing subscriptions for the current application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -897,8 +956,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/RecordingApi.html#subscribe(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.DataSource)">subscribe</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a> dataSource)</nobr>
 
-        <div class="jd-descrdiv">Subscribe to background collection of data from a specific source on behalf of the current
- application.</div>
+        <div class="jd-descrdiv">
+          Subscribe to background collection of data from a specific source on behalf of the current
+ application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -916,8 +980,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/RecordingApi.html#subscribe(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.DataType)">subscribe</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a> dataType)</nobr>
 
-        <div class="jd-descrdiv">Subscribe to background collection of data of a specific type on behalf of the current
- application.</div>
+        <div class="jd-descrdiv">
+          Subscribe to background collection of data of a specific type on behalf of the current
+ application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -935,8 +1004,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/RecordingApi.html#unsubscribe(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.DataSource)">unsubscribe</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a> dataSource)</nobr>
 
-        <div class="jd-descrdiv">Unsubscribes from background data collection for the current application for a particular
- DataSource.</div>
+        <div class="jd-descrdiv">
+          Unsubscribes from background data collection for the current application for a particular
+ data source.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -954,8 +1028,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/RecordingApi.html#unsubscribe(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.DataType)">unsubscribe</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a> dataType)</nobr>
 
-        <div class="jd-descrdiv">Unsubscribes from background data collection for the current application for a particular
- DataType.</div>
+        <div class="jd-descrdiv">
+          Unsubscribes from background data collection for the current application for a particular
+ data type.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -973,7 +1052,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/RecordingApi.html#unsubscribe(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.Subscription)">unsubscribe</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/Subscription.html">Subscription</a> subscription)</nobr>
 
-        <div class="jd-descrdiv">Unsubscribes from background data collection for the current application.</div>
+        <div class="jd-descrdiv">
+          Unsubscribes from background data collection for the current application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1049,7 +1133,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Reads all existing subscriptions for the current application.</p></div>
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Reads all existing subscriptions for the current application to a particular data type.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1097,6 +1184,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads all existing subscriptions for the current application.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1140,6 +1230,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Subscribe to background collection of data from a specific source on behalf of the current
  application.
@@ -1195,6 +1288,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Subscribe to background collection of data of a specific type on behalf of the current
  application.
  <p>
@@ -1208,10 +1304,19 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  are persisted to the Google Fit store, and can be queried via the
  <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">History Api</a></code>.
  <p>
- If after the subscription is added the data source becomes unavailable (it may be
- disconnected or disabled, for instance), the subscription remains active.  Once the data
- source becomes available again, new data points (and any data points that were batched
- while disconnected) are inserted.</p></div>
+ Note that not all data sources are available at all times (external devices may go
+ offline, for instance).  If no data sources matching the subscription are currently
+ available, the request will succeed silently and
+ <code><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#SUCCESS_NO_DATA_SOURCES">SUCCESS_NO_DATA_SOURCES</a></code> will be returned.  Once data
+ sources become available, recording of data will start.
+ <p>
+ If after the subscription is added the data source becomes
+ unavailable, the subscription remains active, and recording resumes once the data source
+ becomes available again.  Data points from the time interval when the data source was
+ unavailable may or may not be recorded, depending on whether batching is supported.
+ <p>
+ If the requested subscription already exists, the request will be a no-op and
+ <code><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#SUCCESS_ALREADY_SUBSCRIBED">SUCCESS_ALREADY_SUBSCRIBED</a></code> will be returned.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1255,8 +1360,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Unsubscribes from background data collection for the current application for a particular
- DataSource.  Should be called when the application no longer wishes to record data.</p></div>
+ data source.  Should be called when the application no longer wishes to record data.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1308,8 +1416,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Unsubscribes from background data collection for the current application for a particular
- DataType. Should be called when the application no longer wishes to record data.</p></div>
+ data type. Should be called when the application no longer wishes to record data.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1361,6 +1472,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Unsubscribes from background data collection for the current application.  Should
  be called when the application no longer wishes to record data.</p></div>

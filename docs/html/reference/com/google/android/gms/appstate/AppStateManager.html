@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -778,6 +824,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -856,8 +905,13 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateConflictResult.html">AppStateManager.StateConflictResult</a></td>
-      <td class="jd-descrcol" width="100%">Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when a conflict is detected while loading app
- state.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when a conflict is detected while loading app
+ state.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -869,7 +923,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateDeletedResult.html">AppStateManager.StateDeletedResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when app state data has been deleted.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when app state data has been deleted.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -881,7 +940,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateListResult.html">AppStateManager.StateListResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when app state data has been loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when app state data has been loaded.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -893,7 +957,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateLoadedResult.html">AppStateManager.StateLoadedResult</a></td>
-      <td class="jd-descrcol" width="100%">Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when app state data has been loaded successfully.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result retrieved from <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></code> when app state data has been loaded successfully.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -905,7 +974,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.StateResult.html">AppStateManager.StateResult</a></td>
-      <td class="jd-descrcol" width="100%">Result of an operation that could potentially generate a state conflict.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result of an operation that could potentially generate a state conflict.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -939,7 +1013,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/common/api/Api.html">Api</a>&lt;<a href="/reference/com/google/android/gms/common/api/Api.ApiOptions.NoOptions.html">Api.ApiOptions.NoOptions</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#API">API</a></td>
-          <td class="jd-descrcol" width="100%">Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable AppState features.</td>
+          <td class="jd-descrcol" width="100%">
+            Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable AppState features.
+
+
+
+          </td>
       </tr>
       
     
@@ -950,7 +1029,12 @@ Summary:
           final
           <a href="/reference/com/google/android/gms/common/api/Scope.html">Scope</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#SCOPE_APP_STATE">SCOPE_APP_STATE</a></td>
-          <td class="jd-descrcol" width="100%">Scope for using the App State service.</td>
+          <td class="jd-descrcol" width="100%">
+            Scope for using the App State service.
+
+
+
+          </td>
       </tr>
       
     
@@ -985,7 +1069,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#delete(com.google.android.gms.common.api.GoogleApiClient, int)">delete</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, int stateKey)</nobr>
         
-        <div class="jd-descrdiv">Delete the state data for the current app.</div>
+        <div class="jd-descrdiv">
+          Delete the state data for the current app.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1003,7 +1092,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#getMaxNumKeys(com.google.android.gms.common.api.GoogleApiClient)">getMaxNumKeys</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient)</nobr>
         
-        <div class="jd-descrdiv">Gets the maximum number of keys that an app can store data in simultaneously.</div>
+        <div class="jd-descrdiv">
+          Gets the maximum number of keys that an app can store data in simultaneously.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1021,7 +1115,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#getMaxStateSize(com.google.android.gms.common.api.GoogleApiClient)">getMaxStateSize</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient)</nobr>
         
-        <div class="jd-descrdiv">Gets the maximum app state size per state key in bytes.</div>
+        <div class="jd-descrdiv">
+          Gets the maximum app state size per state key in bytes.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1039,7 +1138,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#list(com.google.android.gms.common.api.GoogleApiClient)">list</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient)</nobr>
         
-        <div class="jd-descrdiv">Asynchronously lists all the saved states for the current app.</div>
+        <div class="jd-descrdiv">
+          Asynchronously lists all the saved states for the current app.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1057,7 +1161,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#load(com.google.android.gms.common.api.GoogleApiClient, int)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, int stateKey)</nobr>
         
-        <div class="jd-descrdiv">Asynchronously loads saved state for the current app.</div>
+        <div class="jd-descrdiv">
+          Asynchronously loads saved state for the current app.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1075,7 +1184,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#resolve(com.google.android.gms.common.api.GoogleApiClient, int, java.lang.String, byte[])">resolve</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, int stateKey, String resolvedVersion, byte[] resolvedData)</nobr>
         
-        <div class="jd-descrdiv">Resolve a previously detected conflict in app state data.</div>
+        <div class="jd-descrdiv">
+          Resolve a previously detected conflict in app state data.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1093,7 +1207,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#signOut(com.google.android.gms.common.api.GoogleApiClient)">signOut</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient)</nobr>
         
-        <div class="jd-descrdiv">Asynchronously signs the current user out.</div>
+        <div class="jd-descrdiv">
+          Asynchronously signs the current user out.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1111,7 +1230,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#update(com.google.android.gms.common.api.GoogleApiClient, int, byte[])">update</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, int stateKey, byte[] data)</nobr>
         
-        <div class="jd-descrdiv">Updates app state for the current app.</div>
+        <div class="jd-descrdiv">
+          Updates app state for the current app.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1129,7 +1253,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#updateImmediate(com.google.android.gms.common.api.GoogleApiClient, int, byte[])">updateImmediate</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> googleApiClient, int stateKey, byte[] data)</nobr>
         
-        <div class="jd-descrdiv">Updates app state for the current app.</div>
+        <div class="jd-descrdiv">
+          Updates app state for the current app.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1402,6 +1531,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Token to pass to <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addApi(com.google.android.gms.common.api.Api<? extends com.google.android.gms.common.api.Api.ApiOptions.NotRequiredOptions>)">addApi(Api<? extends Api.ApiOptions.NotRequiredOptions>)</a></code> to enable AppState features. </p></div>
 
     
@@ -1430,6 +1562,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Scope for using the App State service.
 </p></div>
 
@@ -1479,6 +1614,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Delete the state data for the current app. This method will delete all data associated with
  the provided key, as well as removing the key itself.
  <p>
@@ -1535,6 +1673,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the maximum number of keys that an app can store data in simultaneously.
  <p>
  If the service cannot be reached for some reason, this will return
@@ -1585,6 +1726,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the maximum app state size per state key in bytes. Guaranteed to be at least 256 KB. May
  increase in the future.
  <p>
@@ -1636,6 +1780,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously lists all the saved states for the current app.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#API">API</a></code><br>
@@ -1682,6 +1829,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously loads saved state for the current app.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#API">API</a></code><br>
@@ -1733,6 +1883,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Resolve a previously detected conflict in app state data. Note that it is still possible to
  receive a conflict callback after this call. This will occur if data on the server continues
  to change. In this case, resolution should be retried until a successful status is returned.
@@ -1798,6 +1951,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously signs the current user out.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/appstate/AppStateManager.html#API">API</a></code><br>
@@ -1844,6 +2000,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Updates app state for the current app. The data provided here is developer-specified and can
  be in any format appropriate for the app. This method updates the local copy of the app state
  and syncs the changes to the server. If the local data conflicts with the data on the server,
@@ -1904,6 +2063,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Updates app state for the current app. The data provided here is developer-specified and can
  be in any format appropriate for the app. This method will attempt to update the data on the
  server immediately. The results of this operation will be returned via a PendingResult.

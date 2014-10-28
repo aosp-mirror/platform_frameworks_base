@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -799,6 +845,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -912,14 +961,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
     
     
@@ -950,7 +1009,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -988,7 +1052,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#MarkerOptions()">MarkerOptions</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Creates a new set of marker options.</div>
+        <div class="jd-descrdiv">
+          Creates a new set of marker options.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1019,7 +1088,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#alpha(float)">alpha</a></span>(float alpha)</nobr>
         
-        <div class="jd-descrdiv">Sets the alpha (opacity) of the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the alpha (opacity) of the marker.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1037,7 +1111,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#anchor(float, float)">anchor</a></span>(float u, float v)</nobr>
         
-        <div class="jd-descrdiv">Specifies the anchor to be at a particular point in the marker image.</div>
+        <div class="jd-descrdiv">
+          Specifies the anchor to be at a particular point in the marker image.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1071,7 +1150,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#draggable(boolean)">draggable</a></span>(boolean draggable)</nobr>
         
-        <div class="jd-descrdiv">Sets the draggability for the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the draggability for the marker.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1089,8 +1173,13 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#flat(boolean)">flat</a></span>(boolean flat)</nobr>
         
-        <div class="jd-descrdiv">Sets whether this marker should be flat against the map <code>true</code> or a billboard facing
- the camera <code>false</code>.</div>
+        <div class="jd-descrdiv">
+          Sets whether this marker should be flat against the map <code>true</code> or a billboard facing
+ the camera <code>false</code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1108,7 +1197,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getAlpha()">getAlpha</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the alpha set for this MarkerOptions object.</div>
+        <div class="jd-descrdiv">
+          Gets the alpha set for this MarkerOptions object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1126,7 +1220,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getAnchorU()">getAnchorU</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Horizontal distance, normalized to [0, 1], of the anchor from the left edge.</div>
+        <div class="jd-descrdiv">
+          Horizontal distance, normalized to [0, 1], of the anchor from the left edge.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1144,7 +1243,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getAnchorV()">getAnchorV</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Vertical distance, normalized to [0, 1], of the anchor from the top edge.</div>
+        <div class="jd-descrdiv">
+          Vertical distance, normalized to [0, 1], of the anchor from the top edge.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1162,7 +1266,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getIcon()">getIcon</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the custom icon set for this MarkerOptions object.</div>
+        <div class="jd-descrdiv">
+          Gets the custom icon set for this MarkerOptions object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1180,7 +1289,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getInfoWindowAnchorU()">getInfoWindowAnchorU</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Horizontal distance, normalized to [0, 1], of the info window anchor from the left edge.</div>
+        <div class="jd-descrdiv">
+          Horizontal distance, normalized to [0, 1], of the info window anchor from the left edge.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1198,7 +1312,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getInfoWindowAnchorV()">getInfoWindowAnchorV</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Vertical distance, normalized to [0, 1], of the info window anchor from the top edge.</div>
+        <div class="jd-descrdiv">
+          Vertical distance, normalized to [0, 1], of the info window anchor from the top edge.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1216,7 +1335,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getPosition()">getPosition</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the position set for this MarkerOptions object.</div>
+        <div class="jd-descrdiv">
+          Returns the position set for this MarkerOptions object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1234,7 +1358,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getRotation()">getRotation</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the rotation set for this MarkerOptions object.</div>
+        <div class="jd-descrdiv">
+          Gets the rotation set for this MarkerOptions object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1252,7 +1381,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getSnippet()">getSnippet</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the snippet set for this MarkerOptions object.</div>
+        <div class="jd-descrdiv">
+          Gets the snippet set for this MarkerOptions object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1270,7 +1404,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#getTitle()">getTitle</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the title set for this MarkerOptions object.</div>
+        <div class="jd-descrdiv">
+          Gets the title set for this MarkerOptions object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1288,7 +1427,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#icon(com.google.android.gms.maps.model.BitmapDescriptor)">icon</a></span>(<a href="/reference/com/google/android/gms/maps/model/BitmapDescriptor.html">BitmapDescriptor</a> icon)</nobr>
         
-        <div class="jd-descrdiv">Sets the icon for the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the icon for the marker.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1306,7 +1450,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#infoWindowAnchor(float, float)">infoWindowAnchor</a></span>(float u, float v)</nobr>
         
-        <div class="jd-descrdiv">Specifies the anchor point of the info window on the marker image.</div>
+        <div class="jd-descrdiv">
+          Specifies the anchor point of the info window on the marker image.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1324,7 +1473,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#isDraggable()">isDraggable</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the draggability setting for this MarkerOptions object.</div>
+        <div class="jd-descrdiv">
+          Gets the draggability setting for this MarkerOptions object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1342,7 +1496,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#isFlat()">isFlat</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the flat setting for this MarkerOptions object.</div>
+        <div class="jd-descrdiv">
+          Gets the flat setting for this MarkerOptions object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1360,7 +1519,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#isVisible()">isVisible</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the visibility setting for this MarkerOptions object.</div>
+        <div class="jd-descrdiv">
+          Gets the visibility setting for this MarkerOptions object.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1378,7 +1542,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#position(com.google.android.gms.maps.model.LatLng)">position</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> position)</nobr>
         
-        <div class="jd-descrdiv">Sets the location for the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the location for the marker.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1396,7 +1565,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#rotation(float)">rotation</a></span>(float rotation)</nobr>
         
-        <div class="jd-descrdiv">Sets the rotation of the marker in degrees clockwise about the marker's anchor point.</div>
+        <div class="jd-descrdiv">
+          Sets the rotation of the marker in degrees clockwise about the marker's anchor point.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1414,7 +1588,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#snippet(java.lang.String)">snippet</a></span>(String snippet)</nobr>
         
-        <div class="jd-descrdiv">Sets the snippet for the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the snippet for the marker.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1432,7 +1611,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#title(java.lang.String)">title</a></span>(String title)</nobr>
         
-        <div class="jd-descrdiv">Sets the title for the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the title for the marker.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1450,7 +1634,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#visible(boolean)">visible</a></span>(boolean visible)</nobr>
         
-        <div class="jd-descrdiv">Sets the visibility for the marker.</div>
+        <div class="jd-descrdiv">
+          Sets the visibility for the marker.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1804,6 +1993,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new set of marker options.
 </p></div>
 
@@ -1849,6 +2041,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the alpha (opacity) of the marker. This is a value from 0 to 1, where 0 means the marker
  is completely transparent and 1 means the marker is completely opaque.</p></div>
   <div class="jd-tagdata">
@@ -1884,6 +2079,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the anchor to be at a particular point in the marker image.
  <p>
  The anchor specifies the point in the icon image that is anchored to the marker's
@@ -1958,6 +2156,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1987,6 +2188,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the draggability for the marker.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2021,6 +2225,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether this marker should be flat against the map <code>true</code> or a billboard facing
  the camera <code>false</code>. If the marker is flat against the map, it will remain stuck to the
  map as the camera rotates and tilts but will still remain the same size as the camera zooms,
@@ -2059,6 +2266,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the alpha set for this MarkerOptions object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2093,6 +2303,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Horizontal distance, normalized to [0, 1], of the anchor from the left edge.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2127,6 +2340,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Vertical distance, normalized to [0, 1], of the anchor from the top edge.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2161,6 +2377,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the custom icon set for this MarkerOptions object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2196,6 +2415,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Horizontal distance, normalized to [0, 1], of the info window anchor from the left edge.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2230,6 +2452,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Vertical distance, normalized to [0, 1], of the info window anchor from the top edge.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2264,6 +2489,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the position set for this MarkerOptions object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2298,6 +2526,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the rotation set for this MarkerOptions object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2332,6 +2563,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the snippet set for this MarkerOptions object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2366,6 +2600,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the title set for this MarkerOptions object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2400,6 +2637,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the icon for the marker.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2443,6 +2683,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the anchor point of the info window on the marker image. This is specified in the
  same coordinate system as the anchor. See <code><a href="/reference/com/google/android/gms/maps/model/MarkerOptions.html#anchor(float, float)">anchor(float, float)</a></code> for more details.
  The default is the top middle of the image.</p></div>
@@ -2494,6 +2737,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the draggability setting for this MarkerOptions object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2528,6 +2774,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the flat setting for this MarkerOptions object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2563,6 +2812,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the visibility setting for this MarkerOptions object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2597,6 +2849,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the location for the marker.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2631,6 +2886,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the rotation of the marker in degrees clockwise about the marker's anchor point. The
  axis of rotation is perpendicular to the marker. A rotation of 0 corresponds to the default
  position of the marker. When the marker is flat on the map, the default position is North
@@ -2670,6 +2928,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the snippet for the marker.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2704,6 +2965,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the title for the marker.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2738,6 +3002,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the visibility for the marker.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2772,6 +3039,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
