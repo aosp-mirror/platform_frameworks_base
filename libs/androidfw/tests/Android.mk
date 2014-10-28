@@ -51,6 +51,7 @@ include $(BUILD_HOST_NATIVE_TEST)
 # ==========================================================
 # Build the device tests: libandroidfw_tests
 # ==========================================================
+ifneq ($(SDK_ONLY),true)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libandroidfw_tests
@@ -66,3 +67,5 @@ LOCAL_SHARED_LIBRARIES := \
     libui \
 
 include $(BUILD_NATIVE_TEST)
+endif # Not SDK_ONLY
+
