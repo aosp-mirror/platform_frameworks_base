@@ -263,6 +263,11 @@ public class TaskViewHeader extends FrameLayout {
         }
     }
 
+    /** Resets the state tracking that the user has not interacted with the stack after a certain time. */
+    void resetNoUserInteractionState() {
+        mDismissButton.setVisibility(View.INVISIBLE);
+    }
+
     @Override
     protected int[] onCreateDrawableState(int extraSpace) {
 

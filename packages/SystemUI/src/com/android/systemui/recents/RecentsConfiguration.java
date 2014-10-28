@@ -115,8 +115,8 @@ public class RecentsConfiguration {
     public boolean launchedWithAltTab;
     public boolean launchedWithNoRecentTasks;
     public boolean launchedFromAppWithThumbnail;
-    public boolean launchedFromAppWithScreenshot;
     public boolean launchedFromHome;
+    public boolean launchedReuseTaskStackViews;
     public int launchedToTaskId;
 
     /** Misc **/
@@ -308,6 +308,7 @@ public class RecentsConfiguration {
         launchedWithNoRecentTasks = false;
         launchedFromAppWithThumbnail = false;
         launchedFromHome = false;
+        launchedReuseTaskStackViews = false;
         launchedToTaskId = -1;
     }
 

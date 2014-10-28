@@ -260,6 +260,7 @@ public class RecentsTaskLoader {
     private static final String TAG = "RecentsTaskLoader";
 
     static RecentsTaskLoader sInstance;
+    public static final int ALL_TASKS = -1;
 
     SystemServicesProxy mSystemServicesProxy;
     DrawableLruCache mApplicationIconCache;
@@ -326,10 +327,9 @@ public class RecentsTaskLoader {
 
     /** Gets the list of recent tasks, ordered from back to front. */
     private static List<ActivityManager.RecentTaskInfo> getRecentTasks(SystemServicesProxy ssp,
-            boolean isTopTaskHome) {
-        RecentsConfiguration config = RecentsConfiguration.getInstance();
+            int numTasksToLoad, boolean isTopTaskHome) {
         List<ActivityManager.RecentTaskInfo> tasks =
-                ssp.getRecentTasks(config.maxNumTasksToLoad, UserHandle.CURRENT.getIdentifier(),
+                ssp.getRecentTasks(numTasksToLoad, UserHandle.CURRENT.getIdentifier(),
                         isTopTaskHome);
         Collections.reverse(tasks);
         return tasks;
@@ -416,7 +416,8 @@ public class RecentsTaskLoader {
         ArrayList<Task.TaskKey> taskKeys = new ArrayList<Task.TaskKey>();
         ArrayList<Task> tasksToLoad = new ArrayList<Task>();
         TaskStack stack = getTaskStack(mSystemServicesProxy, context.getResources(),
-                -1, preloadCount, true, isTopTaskHome, taskKeys, tasksToLoad);
+                -1, preloadCount, RecentsTaskLoader.ALL_TASKS, true, isTopTaskHome, taskKeys,
+                tasksToLoad);
         SpaceNode root = new SpaceNode();
         root.setStack(stack);
 
@@ -428,10 +429,10 @@ public class RecentsTaskLoader {
     }
 
     /** Preloads the set of recent tasks (not including thumbnails). */
-    public void preload(Context context) {
+    public void preload(Context context, int numTasksToPreload) {
         ArrayList<Task> tasksToLoad = new ArrayList<Task>();
         getTaskStack(mSystemServicesProxy, context.getResources(),
-                -1, -1, true, true, null, tasksToLoad);
+                -1, -1, numTasksToPreload, true, true, null, tasksToLoad);
 
         // Start the task loader and add all the tasks we need to load
         mLoadQueue.addTasks(tasksToLoad);
@@ -440,11 +441,13 @@ public class RecentsTaskLoader {
 
     /** Creates a lightweight stack of the current recent tasks, without thumbnails and icons. */
     public synchronized TaskStack getTaskStack(SystemServicesProxy ssp, Resources res,
-            int preloadTaskId, int preloadTaskCount,
+            int preloadTaskId, int preloadTaskCount, int loadTaskCount,
             boolean loadTaskThumbnails, boolean isTopTaskHome,
             List<Task.TaskKey> taskKeysOut, List<Task> tasksToLoadOut) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
-        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp, isTopTaskHome);
+        List<ActivityManager.RecentTaskInfo> tasks = getRecentTasks(ssp,
+                (loadTaskCount == ALL_TASKS ? config.maxNumTasksToLoad : loadTaskCount),
+                isTopTaskHome);
         HashMap<Task.ComponentNameKey, ActivityInfoHandle> activityInfoCache =
                 new HashMap<Task.ComponentNameKey, ActivityInfoHandle>();
         ArrayList<Task> tasksToAdd = new ArrayList<Task>();
