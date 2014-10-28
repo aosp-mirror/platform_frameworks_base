@@ -78,14 +78,16 @@ next.link=list-iab-products.html
 <ol>
 <li>Copy the {@code IInAppBillingService.aidl} file to your Android project.
   <ul>
-  <li>If you are using Eclipse: Import the {@code IInAppBillingService.aidl} file into your {@code /src} directory.</li>
-  <li>If you are developing in a non-Eclipse environment: Create the following directory {@code /src/com/android/vending/billing} and copy the {@code IInAppBillingService.aidl} file into this directory.</li>
+  <li>In Android Studio: Create a directory named {@code aidl} under {@code src/main}, add a new
+  package {@code com.android.vending.billing} in this directory, and import the
+  {@code IInAppBillingService.aidl} file into this package.</li>
+  <li>In Eclipse: Import the {@code IInAppBillingService.aidl} file into your {@code /src} directory.</li>
+  <li>In other dev environments: Create the following directory {@code /src/com/android/vending/billing} and copy the {@code IInAppBillingService.aidl} file into this directory.</li>
   </ul>
 </li>
 <li>Build your application. You should see a generated file named {@code IInAppBillingService.java} in the {@code /gen} directory of your project.</li>
 <li>Add the helper classes from the {@code /util} directory of the {@code TrivialDrive} sample to your project.  Remember to change the package name declarations in those files accordingly so that your project compiles correctly.</li>
 </ol>
-
 <p>Your project should now contain the In-app Billing Version 3 library.</p>
 
 <h2 id="SetPermission">Set the Billing Permission</h2>
@@ -106,7 +108,7 @@ IabHelper mHelper;
 public void onCreate(Bundle savedInstanceState) {
    // ...
    String base64EncodedPublicKey;
-   
+
    // compute your public key and store it in base64EncodedPublicKey
    mHelper = new IabHelper(this, base64EncodedPublicKey);
 }
@@ -120,15 +122,15 @@ mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
       if (!result.isSuccess()) {
          // Oh noes, there was a problem.
          Log.d(TAG, "Problem setting up In-app Billing: " + result);
-      }            
-         // Hooray, IAB is fully set up!  
+      }
+         // Hooray, IAB is fully set up!
    }
 });
 </pre>
 
 <p>If the setup completed successfully, you can now use the {@code mHelper} reference to communicate with the Google Play service. When your application is launched, it is a good practice to query Google Play to find out what in-app items are owned by a user. This is covered further in the <a href="{@docRoot}training/in-app-billing/purchase-iab-products.html#QueryPurchases">Query Purchased Items</a> section.</p>
 
-<p class="note"><strong>Important:</strong> Remember to unbind from the In-app Billing service when you are done with your activity. If you don’t unbind, the open service connection could cause your device’s performance to degrade. To unbind and free your system resources, call the {@code IabHelper}'s {@code dispose} method when your {@code Activity} gets destroyed.</p>
+<p class="note"><strong>Important:</strong> Remember to unbind from the In-app Billing service when you are done with your activity. If you don’t unbind, the open service connection could cause your device’s performance to degrade. To unbind and free your system resources, call the {@code IabHelper}'s {@code dispose} method when your {@code Activity} is destroyed.</p>
 
 <pre>
 &#64;Override
