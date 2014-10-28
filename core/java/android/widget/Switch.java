@@ -39,6 +39,7 @@ import android.util.FloatProperty;
 import android.util.MathUtils;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SoundEffectConstants;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
@@ -797,6 +798,7 @@ public class Switch extends CompoundButton {
         // Commit the change if the event is up and not canceled and the switch
         // has not been disabled during the drag.
         final boolean commitChange = ev.getAction() == MotionEvent.ACTION_UP && isEnabled();
+        final boolean oldState = isChecked();
         final boolean newState;
         if (commitChange) {
             mVelocityTracker.computeCurrentVelocity(1000);
@@ -807,10 +809,14 @@ public class Switch extends CompoundButton {
                 newState = getTargetCheckedState();
             }
         } else {
-            newState = isChecked();
+            newState = oldState;
         }
 
-        setChecked(newState);
+        if (newState != oldState) {
+            playSoundEffect(SoundEffectConstants.CLICK);
+            setChecked(newState);
+        }
+
         cancelSuperTouch(ev);
     }
 
