@@ -172,8 +172,11 @@ public abstract class DisplayManagerInternal {
         // If true, enables automatic brightness control.
         public boolean useAutoBrightness;
 
-        //If true, scales the brightness to half of desired.
+        // If true, scales the brightness to half of desired.
         public boolean lowPowerMode;
+
+        // If true, applies a brightness boost.
+        public boolean boostScreenBrightness;
 
         // If true, prevents the screen from completely turning on if it is currently off.
         // The display does not enter a "ready" state if this flag is true and screen on is
@@ -216,6 +219,7 @@ public abstract class DisplayManagerInternal {
             useAutoBrightness = other.useAutoBrightness;
             blockScreenOn = other.blockScreenOn;
             lowPowerMode = other.lowPowerMode;
+            boostScreenBrightness = other.boostScreenBrightness;
             dozeScreenBrightness = other.dozeScreenBrightness;
             dozeScreenState = other.dozeScreenState;
         }
@@ -235,6 +239,7 @@ public abstract class DisplayManagerInternal {
                     && useAutoBrightness == other.useAutoBrightness
                     && blockScreenOn == other.blockScreenOn
                     && lowPowerMode == other.lowPowerMode
+                    && boostScreenBrightness == other.boostScreenBrightness
                     && dozeScreenBrightness == other.dozeScreenBrightness
                     && dozeScreenState == other.dozeScreenState;
         }
@@ -253,6 +258,7 @@ public abstract class DisplayManagerInternal {
                     + ", useAutoBrightness=" + useAutoBrightness
                     + ", blockScreenOn=" + blockScreenOn
                     + ", lowPowerMode=" + lowPowerMode
+                    + ", boostScreenBrightness=" + boostScreenBrightness
                     + ", dozeScreenBrightness=" + dozeScreenBrightness
                     + ", dozeScreenState=" + Display.stateToString(dozeScreenState);
         }
