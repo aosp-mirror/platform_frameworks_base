@@ -2616,7 +2616,7 @@ package android.accessibilityservice {
     field public static final int CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS = 8; // 0x8
     field public static final int CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION = 2; // 0x2
     field public static final int CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT = 1; // 0x1
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.accessibilityservice.AccessibilityServiceInfo> CREATOR;
     field public static final int DEFAULT = 1; // 0x1
     field public static final int FEEDBACK_ALL_MASK = -1; // 0xffffffff
     field public static final int FEEDBACK_AUDIBLE = 4; // 0x4
@@ -2662,7 +2662,7 @@ package android.accounts {
     ctor public Account(android.os.Parcel);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.accounts.Account> CREATOR;
     field public final java.lang.String name;
     field public final java.lang.String type;
   }
@@ -2679,7 +2679,7 @@ package android.accounts {
     method public void onRequestContinued();
     method public void onResult(android.os.Bundle);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.accounts.AccountAuthenticatorResponse> CREATOR;
   }
 
   public class AccountManager {
@@ -2771,7 +2771,7 @@ package android.accounts {
     method public int describeContents();
     method public static android.accounts.AuthenticatorDescription newKey(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.accounts.AuthenticatorDescription> CREATOR;
     field public final int accountPreferencesId;
     field public final boolean customTokens;
     field public final int iconId;
@@ -3530,7 +3530,7 @@ package android.app {
     method public int describeContents();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.ActivityManager.MemoryInfo> CREATOR;
     field public long availMem;
     field public boolean lowMemory;
     field public long threshold;
@@ -3543,7 +3543,7 @@ package android.app {
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CRASHED = 1; // 0x1
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.ActivityManager.ProcessErrorStateInfo> CREATOR;
     field public static final int NOT_RESPONDING = 2; // 0x2
     field public static final int NO_ERROR = 0; // 0x0
     field public int condition;
@@ -3562,7 +3562,7 @@ package android.app {
     method public int describeContents();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.ActivityManager.RecentTaskInfo> CREATOR;
     field public int affiliatedTaskId;
     field public android.content.Intent baseIntent;
     field public java.lang.CharSequence description;
@@ -3578,7 +3578,7 @@ package android.app {
     method public int describeContents();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.ActivityManager.RunningAppProcessInfo> CREATOR;
     field public static final int IMPORTANCE_BACKGROUND = 400; // 0x190
     field public static final int IMPORTANCE_EMPTY = 500; // 0x1f4
     field public static final int IMPORTANCE_FOREGROUND = 100; // 0x64
@@ -3606,7 +3606,7 @@ package android.app {
     method public int describeContents();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.ActivityManager.RunningServiceInfo> CREATOR;
     field public static final int FLAG_FOREGROUND = 2; // 0x2
     field public static final int FLAG_PERSISTENT_PROCESS = 8; // 0x8
     field public static final int FLAG_STARTED = 1; // 0x1
@@ -3632,7 +3632,7 @@ package android.app {
     method public int describeContents();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.ActivityManager.RunningTaskInfo> CREATOR;
     field public android.content.ComponentName baseActivity;
     field public java.lang.CharSequence description;
     field public int id;
@@ -3654,7 +3654,7 @@ package android.app {
     method public int getPrimaryColor();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.ActivityManager.TaskDescription> CREATOR;
   }
 
   public class ActivityOptions {
@@ -3697,7 +3697,7 @@ package android.app {
     method public android.app.PendingIntent getShowIntent();
     method public long getTriggerTime();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.AlarmManager.AlarmClockInfo> CREATOR;
   }
 
   public class AlertDialog extends android.app.Dialog implements android.content.DialogInterface {
@@ -3834,7 +3834,7 @@ package android.app {
     method public static android.content.ComponentName getErrorReportReceiver(android.content.Context, java.lang.String, int);
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.ApplicationErrorReport> CREATOR;
     field public static final int TYPE_ANR = 2; // 0x2
     field public static final int TYPE_BATTERY = 3; // 0x3
     field public static final int TYPE_CRASH = 1; // 0x1
@@ -4215,7 +4215,7 @@ package android.app {
   public static class Fragment.SavedState implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.ClassLoaderCreator CREATOR;
+    field public static final android.os.Parcelable.ClassLoaderCreator<android.app.Fragment.SavedState> CREATOR;
   }
 
   public deprecated class FragmentBreadCrumbs extends android.view.ViewGroup implements android.app.FragmentManager.OnBackStackChangedListener {
@@ -4563,7 +4563,7 @@ package android.app {
     field public static final java.lang.String CATEGORY_SYSTEM = "sys";
     field public static final java.lang.String CATEGORY_TRANSPORT = "transport";
     field public static final int COLOR_DEFAULT = 0; // 0x0
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.Notification> CREATOR;
     field public static final int DEFAULT_ALL = -1; // 0xffffffff
     field public static final int DEFAULT_LIGHTS = 4; // 0x4
     field public static final int DEFAULT_SOUND = 1; // 0x1
@@ -4648,7 +4648,7 @@ package android.app {
     method public android.os.Bundle getExtras();
     method public android.app.RemoteInput[] getRemoteInputs();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.Notification.Action> CREATOR;
     field public android.app.PendingIntent actionIntent;
     field public int icon;
     field public java.lang.CharSequence title;
@@ -4851,7 +4851,7 @@ package android.app {
     method public void send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler, java.lang.String) throws android.app.PendingIntent.CanceledException;
     method public static void writePendingIntentOrNullToParcel(android.app.PendingIntent, android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.PendingIntent> CREATOR;
     field public static final int FLAG_CANCEL_CURRENT = 268435456; // 0x10000000
     field public static final int FLAG_NO_CREATE = 536870912; // 0x20000000
     field public static final int FLAG_ONE_SHOT = 1073741824; // 0x40000000
@@ -4914,7 +4914,7 @@ package android.app {
     method public java.lang.String getResultKey();
     method public static android.os.Bundle getResultsFromIntent(android.content.Intent);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.RemoteInput> CREATOR;
     field public static final java.lang.String EXTRA_RESULTS_DATA = "android.remoteinput.resultsData";
     field public static final java.lang.String RESULTS_CLIP_LABEL = "android.remoteinput.results";
   }
@@ -5029,7 +5029,7 @@ package android.app {
     method public boolean shouldRewriteQueryFromData();
     method public boolean shouldRewriteQueryFromText();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.SearchableInfo> CREATOR;
   }
 
   public abstract class Service extends android.content.ContextWrapper implements android.content.ComponentCallbacks2 {
@@ -5175,7 +5175,7 @@ package android.app {
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public android.graphics.drawable.Drawable loadThumbnail(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.WallpaperInfo> CREATOR;
   }
 
   public class WallpaperManager {
@@ -5230,7 +5230,7 @@ package android.app.admin {
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public boolean usesPolicy(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.admin.DeviceAdminInfo> CREATOR;
     field public static final int USES_ENCRYPTED_STORAGE = 7; // 0x7
     field public static final int USES_POLICY_DISABLE_CAMERA = 8; // 0x8
     field public static final int USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9; // 0x9
@@ -5522,7 +5522,7 @@ package android.app.job {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int BACKOFF_POLICY_EXPONENTIAL = 1; // 0x1
     field public static final int BACKOFF_POLICY_LINEAR = 0; // 0x0
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.job.JobInfo> CREATOR;
     field public static final long DEFAULT_INITIAL_BACKOFF_MILLIS = 30000L; // 0x7530L
     field public static final long MAX_BACKOFF_DELAY_MILLIS = 18000000L; // 0x112a880L
     field public static final int NETWORK_TYPE_ANY = 1; // 0x1
@@ -5550,7 +5550,7 @@ package android.app.job {
     method public int getJobId();
     method public boolean isOverrideDeadlineExpired();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.job.JobParameters> CREATOR;
   }
 
   public abstract class JobScheduler {
@@ -5586,7 +5586,7 @@ package android.app.usage {
     method public long getLastTimeStamp();
     method public long getTotalTimeActive();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.usage.ConfigurationStats> CREATOR;
   }
 
   public final class UsageEvents implements android.os.Parcelable {
@@ -5594,7 +5594,7 @@ package android.app.usage {
     method public boolean getNextEvent(android.app.usage.UsageEvents.Event);
     method public boolean hasNextEvent();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.usage.UsageEvents> CREATOR;
   }
 
   public static final class UsageEvents.Event {
@@ -5620,7 +5620,7 @@ package android.app.usage {
     method public java.lang.String getPackageName();
     method public long getTotalTimeInForeground();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.app.usage.UsageStats> CREATOR;
   }
 
   public final class UsageStatsManager {
@@ -5737,7 +5737,7 @@ package android.appwidget {
     method public final java.lang.String loadLabel(android.content.pm.PackageManager);
     method public final android.graphics.drawable.Drawable loadPreviewImage(android.content.Context, int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.appwidget.AppWidgetProviderInfo> CREATOR;
     field public static final int RESIZE_BOTH = 3; // 0x3
     field public static final int RESIZE_HORIZONTAL = 1; // 0x1
     field public static final int RESIZE_NONE = 0; // 0x0
@@ -6078,7 +6078,7 @@ package android.bluetooth {
     method public int getMajorDeviceClass();
     method public boolean hasService(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothClass> CREATOR;
   }
 
   public static class BluetoothClass.Device {
@@ -6191,7 +6191,7 @@ package android.bluetooth {
     field public static final int BOND_BONDED = 12; // 0xc
     field public static final int BOND_BONDING = 11; // 0xb
     field public static final int BOND_NONE = 10; // 0xa
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothDevice> CREATOR;
     field public static final int DEVICE_TYPE_CLASSIC = 1; // 0x1
     field public static final int DEVICE_TYPE_DUAL = 3; // 0x3
     field public static final int DEVICE_TYPE_LE = 2; // 0x2
@@ -6309,7 +6309,7 @@ package android.bluetooth {
     field public static final int WRITE_TYPE_DEFAULT = 2; // 0x2
     field public static final int WRITE_TYPE_NO_RESPONSE = 1; // 0x1
     field public static final int WRITE_TYPE_SIGNED = 4; // 0x4
-    field protected java.util.List mDescriptors;
+    field protected java.util.List<android.bluetooth.BluetoothGattDescriptor> mDescriptors;
   }
 
   public class BluetoothGattDescriptor {
@@ -6372,8 +6372,8 @@ package android.bluetooth {
     method public java.util.UUID getUuid();
     field public static final int SERVICE_TYPE_PRIMARY = 0; // 0x0
     field public static final int SERVICE_TYPE_SECONDARY = 1; // 0x1
-    field protected java.util.List mCharacteristics;
-    field protected java.util.List mIncludedServices;
+    field protected java.util.List<android.bluetooth.BluetoothGattCharacteristic> mCharacteristics;
+    field protected java.util.List<android.bluetooth.BluetoothGattService> mIncludedServices;
   }
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
@@ -6431,7 +6431,7 @@ package android.bluetooth {
     method public java.lang.String getName();
     method public int getRole();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothHealthAppConfiguration> CREATOR;
   }
 
   public abstract class BluetoothHealthCallback {
@@ -6508,7 +6508,7 @@ package android.bluetooth.le {
     method public java.util.Map<android.os.ParcelUuid, byte[]> getServiceData();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.bluetooth.le.AdvertiseData> CREATOR;
   }
 
   public static final class AdvertiseData.Builder {
@@ -6535,7 +6535,7 @@ package android.bluetooth.le {
     field public static final int ADVERTISE_TX_POWER_LOW = 1; // 0x1
     field public static final int ADVERTISE_TX_POWER_MEDIUM = 2; // 0x2
     field public static final int ADVERTISE_TX_POWER_ULTRA_LOW = 0; // 0x0
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.bluetooth.le.AdvertiseSettings> CREATOR;
   }
 
   public static final class AdvertiseSettings.Builder {
@@ -6585,7 +6585,7 @@ package android.bluetooth.le {
     method public android.os.ParcelUuid getServiceUuidMask();
     method public boolean matches(android.bluetooth.le.ScanResult);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.bluetooth.le.ScanFilter> CREATOR;
   }
 
   public static final class ScanFilter.Builder {
@@ -6621,7 +6621,7 @@ package android.bluetooth.le {
     method public android.bluetooth.le.ScanRecord getScanRecord();
     method public long getTimestampNanos();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.bluetooth.le.ScanResult> CREATOR;
   }
 
   public final class ScanSettings implements android.os.Parcelable {
@@ -6632,7 +6632,7 @@ package android.bluetooth.le {
     method public int getScanResultType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALLBACK_TYPE_ALL_MATCHES = 1; // 0x1
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.bluetooth.le.ScanSettings> CREATOR;
     field public static final int SCAN_MODE_BALANCED = 1; // 0x1
     field public static final int SCAN_MODE_LOW_LATENCY = 2; // 0x2
     field public static final int SCAN_MODE_LOW_POWER = 0; // 0x0
@@ -6757,7 +6757,7 @@ package android.content {
     method public static android.content.ClipData newRawUri(java.lang.CharSequence, android.net.Uri);
     method public static android.content.ClipData newUri(android.content.ContentResolver, java.lang.CharSequence, android.net.Uri);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.ClipData> CREATOR;
   }
 
   public static class ClipData.Item {
@@ -6787,7 +6787,7 @@ package android.content {
     method public int getMimeTypeCount();
     method public boolean hasMimeType(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.ClipDescription> CREATOR;
     field public static final java.lang.String MIMETYPE_TEXT_HTML = "text/html";
     field public static final java.lang.String MIMETYPE_TEXT_INTENT = "text/vnd.android.intent";
     field public static final java.lang.String MIMETYPE_TEXT_PLAIN = "text/plain";
@@ -6844,7 +6844,7 @@ package android.content {
     method public static android.content.ComponentName unflattenFromString(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
     method public static void writeToParcel(android.content.ComponentName, android.os.Parcel);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.ComponentName> CREATOR;
   }
 
   public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
@@ -6928,7 +6928,7 @@ package android.content {
     method public java.lang.String[] resolveSelectionArgsBackReferences(android.content.ContentProviderResult[], int);
     method public android.content.ContentValues resolveValueBackReferences(android.content.ContentProviderResult[], int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.ContentProviderOperation> CREATOR;
   }
 
   public static class ContentProviderOperation.Builder {
@@ -6949,7 +6949,7 @@ package android.content {
     ctor public ContentProviderResult(android.os.Parcel);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.ContentProviderResult> CREATOR;
     field public final java.lang.Integer count;
     field public final android.net.Uri uri;
   }
@@ -7084,7 +7084,7 @@ package android.content {
     method public int size();
     method public java.util.Set<java.util.Map.Entry<java.lang.String, java.lang.Object>> valueSet();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.ContentValues> CREATOR;
     field public static final java.lang.String TAG = "ContentValues";
   }
 
@@ -7700,7 +7700,7 @@ package android.content {
     field public static final java.lang.String CATEGORY_TAB = "android.intent.category.TAB";
     field public static final java.lang.String CATEGORY_TEST = "android.intent.category.TEST";
     field public static final java.lang.String CATEGORY_UNIT_TEST = "android.intent.category.UNIT_TEST";
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.Intent> CREATOR;
     field public static final java.lang.String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
     field public static final java.lang.String EXTRA_ALLOW_MULTIPLE = "android.intent.extra.ALLOW_MULTIPLE";
     field public static final deprecated java.lang.String EXTRA_ALLOW_REPLACE = "android.intent.extra.ALLOW_REPLACE";
@@ -7808,7 +7808,7 @@ package android.content {
     method public int describeContents();
     method public static android.content.Intent.ShortcutIconResource fromContext(android.content.Context, int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.Intent.ShortcutIconResource> CREATOR;
     field public java.lang.String packageName;
     field public java.lang.String resourceName;
   }
@@ -7867,7 +7867,7 @@ package android.content {
     method public final java.util.Iterator<java.lang.String> typesIterator();
     method public final void writeToParcel(android.os.Parcel, int);
     method public void writeToXml(org.xmlpull.v1.XmlSerializer) throws java.io.IOException;
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.IntentFilter> CREATOR;
     field public static final int MATCH_ADJUSTMENT_MASK = 65535; // 0xffff
     field public static final int MATCH_ADJUSTMENT_NORMAL = 32768; // 0x8000
     field public static final int MATCH_CATEGORY_EMPTY = 1048576; // 0x100000
@@ -7909,7 +7909,7 @@ package android.content {
     method public void sendIntent(android.content.Context, int, android.content.Intent, android.content.IntentSender.OnFinished, android.os.Handler, java.lang.String) throws android.content.IntentSender.SendIntentException;
     method public static void writeIntentSenderOrNullToParcel(android.content.IntentSender, android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.IntentSender> CREATOR;
   }
 
   public static abstract interface IntentSender.OnFinished {
@@ -7986,7 +7986,7 @@ package android.content {
     ctor public PeriodicSync(android.accounts.Account, java.lang.String, android.os.Bundle, long);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.PeriodicSync> CREATOR;
     field public final android.accounts.Account account;
     field public final java.lang.String authority;
     field public final android.os.Bundle extras;
@@ -8027,7 +8027,7 @@ package android.content {
     method public void setTitle(java.lang.String);
     method public void setType(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.RestrictionEntry> CREATOR;
     field public static final int TYPE_BOOLEAN = 1; // 0x1
     field public static final int TYPE_CHOICE = 2; // 0x2
     field public static final int TYPE_INTEGER = 5; // 0x5
@@ -8135,7 +8135,7 @@ package android.content {
     method public static android.content.SyncAdapterType newKey(java.lang.String, java.lang.String);
     method public boolean supportsUploading();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.SyncAdapterType> CREATOR;
     field public final java.lang.String accountType;
     field public final java.lang.String authority;
     field public final boolean isKey;
@@ -8157,7 +8157,7 @@ package android.content {
   public class SyncRequest implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.SyncRequest> CREATOR;
   }
 
   public static class SyncRequest.Builder {
@@ -8186,7 +8186,7 @@ package android.content {
     method public java.lang.String toDebugString();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.content.SyncResult ALREADY_IN_PROGRESS;
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.SyncResult> CREATOR;
     field public boolean databaseError;
     field public long delayUntil;
     field public boolean fullSyncRequested;
@@ -8204,7 +8204,7 @@ package android.content {
     method public void clear();
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.SyncStats> CREATOR;
     field public long numAuthExceptions;
     field public long numConflictDetectedExceptions;
     field public long numDeletes;
@@ -8234,7 +8234,7 @@ package android.content {
     method public boolean isReadPermission();
     method public boolean isWritePermission();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.UriPermission> CREATOR;
     field public static final long INVALID_TIME = -9223372036854775808L; // 0x8000000000000000L
   }
 
@@ -8263,7 +8263,7 @@ package android.content.pm {
     field public static final int CONFIG_SMALLEST_SCREEN_SIZE = 2048; // 0x800
     field public static final int CONFIG_TOUCHSCREEN = 8; // 0x8
     field public static final int CONFIG_UI_MODE = 512; // 0x200
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.ActivityInfo> CREATOR;
     field public static final int DOCUMENT_LAUNCH_ALWAYS = 2; // 0x2
     field public static final int DOCUMENT_LAUNCH_INTO_EXISTING = 1; // 0x1
     field public static final int DOCUMENT_LAUNCH_NEVER = 3; // 0x3
@@ -8329,7 +8329,7 @@ package android.content.pm {
     method public int describeContents();
     method public void dump(android.util.Printer, java.lang.String);
     method public java.lang.CharSequence loadDescription(android.content.pm.PackageManager);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.ApplicationInfo> CREATOR;
     field public static final int FLAG_ALLOW_BACKUP = 32768; // 0x8000
     field public static final int FLAG_ALLOW_CLEAR_USER_DATA = 64; // 0x40
     field public static final int FLAG_ALLOW_TASK_REPARENTING = 32; // 0x20
@@ -8409,7 +8409,7 @@ package android.content.pm {
     method public int describeContents();
     method public java.lang.String getGlEsVersion();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.ConfigurationInfo> CREATOR;
     field public static final int GL_ES_VERSION_UNDEFINED = 0; // 0x0
     field public static final int INPUT_FEATURE_FIVE_WAY_NAV = 2; // 0x2
     field public static final int INPUT_FEATURE_HARD_KEYBOARD = 1; // 0x1
@@ -8425,7 +8425,7 @@ package android.content.pm {
     ctor public FeatureGroupInfo(android.content.pm.FeatureGroupInfo);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.FeatureGroupInfo> CREATOR;
     field public android.content.pm.FeatureInfo[] features;
   }
 
@@ -8435,7 +8435,7 @@ package android.content.pm {
     method public int describeContents();
     method public java.lang.String getGlEsVersion();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.FeatureInfo> CREATOR;
     field public static final int FLAG_REQUIRED = 1; // 0x1
     field public static final int GL_ES_VERSION_UNDEFINED = 0; // 0x0
     field public int flags;
@@ -8447,7 +8447,7 @@ package android.content.pm {
     ctor public InstrumentationInfo();
     ctor public InstrumentationInfo(android.content.pm.InstrumentationInfo);
     method public int describeContents();
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.InstrumentationInfo> CREATOR;
     field public java.lang.String dataDir;
     field public boolean functionalTest;
     field public boolean handleProfiling;
@@ -8469,7 +8469,7 @@ package android.content.pm {
     method public java.lang.String getSourcePackage();
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.LabeledIntent> CREATOR;
   }
 
   public class LauncherActivityInfo {
@@ -8508,7 +8508,7 @@ package android.content.pm {
     ctor public PackageInfo();
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.PackageInfo> CREATOR;
     field public static final int INSTALL_LOCATION_AUTO = 0; // 0x0
     field public static final int INSTALL_LOCATION_INTERNAL_ONLY = 1; // 0x1
     field public static final int INSTALL_LOCATION_PREFER_EXTERNAL = 2; // 0x2
@@ -8601,7 +8601,7 @@ package android.content.pm {
     method public int getSessionId();
     method public boolean isActive();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.SessionInfo> CREATOR;
   }
 
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
@@ -8615,7 +8615,7 @@ package android.content.pm {
     method public void setReferrerUri(android.net.Uri);
     method public void setSize(long);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.PackageInstaller.SessionParams> CREATOR;
     field public static final int MODE_FULL_INSTALL = 1; // 0x1
     field public static final int MODE_INHERIT_EXISTING = 2; // 0x2
   }
@@ -8849,7 +8849,7 @@ package android.content.pm {
     ctor public PackageStats(android.content.pm.PackageStats);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.PackageStats> CREATOR;
     field public long cacheSize;
     field public long codeSize;
     field public long dataSize;
@@ -8866,7 +8866,7 @@ package android.content.pm {
     ctor public PathPermission(android.os.Parcel);
     method public java.lang.String getReadPermission();
     method public java.lang.String getWritePermission();
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.PathPermission> CREATOR;
   }
 
   public class PermissionGroupInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -8874,7 +8874,7 @@ package android.content.pm {
     ctor public PermissionGroupInfo(android.content.pm.PermissionGroupInfo);
     method public int describeContents();
     method public java.lang.CharSequence loadDescription(android.content.pm.PackageManager);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.PermissionGroupInfo> CREATOR;
     field public static final int FLAG_PERSONAL_INFO = 1; // 0x1
     field public int descriptionRes;
     field public int flags;
@@ -8887,7 +8887,7 @@ package android.content.pm {
     ctor public PermissionInfo(android.content.pm.PermissionInfo);
     method public int describeContents();
     method public java.lang.CharSequence loadDescription(android.content.pm.PackageManager);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.PermissionInfo> CREATOR;
     field public static final int FLAG_COSTS_MONEY = 1; // 0x1
     field public static final int PROTECTION_DANGEROUS = 1; // 0x1
     field public static final int PROTECTION_FLAG_APPOP = 64; // 0x40
@@ -8910,7 +8910,7 @@ package android.content.pm {
     ctor public ProviderInfo(android.content.pm.ProviderInfo);
     method public int describeContents();
     method public void dump(android.util.Printer, java.lang.String);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.ProviderInfo> CREATOR;
     field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public java.lang.String authority;
     field public int flags;
@@ -8933,7 +8933,7 @@ package android.content.pm {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.ResolveInfo> CREATOR;
     field public android.content.pm.ActivityInfo activityInfo;
     field public android.content.IntentFilter filter;
     field public int icon;
@@ -8959,7 +8959,7 @@ package android.content.pm {
     ctor public ServiceInfo(android.content.pm.ServiceInfo);
     method public int describeContents();
     method public void dump(android.util.Printer, java.lang.String);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.ServiceInfo> CREATOR;
     field public static final int FLAG_ISOLATED_PROCESS = 2; // 0x2
     field public static final int FLAG_SINGLE_USER = 1073741824; // 0x40000000
     field public static final int FLAG_STOP_WITH_TASK = 1; // 0x1
@@ -8976,7 +8976,7 @@ package android.content.pm {
     method public char[] toChars(char[], int[]);
     method public java.lang.String toCharsString();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.pm.Signature> CREATOR;
   }
 
 }
@@ -8997,7 +8997,7 @@ package android.content.res {
     method public android.os.ParcelFileDescriptor getParcelFileDescriptor();
     method public long getStartOffset();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.res.AssetFileDescriptor> CREATOR;
     field public static final long UNKNOWN_LENGTH = -1L; // 0xffffffffffffffffL
   }
 
@@ -9049,7 +9049,7 @@ package android.content.res {
     method public static android.content.res.ColorStateList valueOf(int);
     method public android.content.res.ColorStateList withAlpha(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.res.ColorStateList> CREATOR;
   }
 
   public final class Configuration implements java.lang.Comparable android.os.Parcelable {
@@ -9069,7 +9069,7 @@ package android.content.res {
     method public void setToDefaults();
     method public int updateFrom(android.content.res.Configuration);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.res.Configuration> CREATOR;
     field public static final int DENSITY_DPI_UNDEFINED = 0; // 0x0
     field public static final int HARDKEYBOARDHIDDEN_NO = 1; // 0x1
     field public static final int HARDKEYBOARDHIDDEN_UNDEFINED = 0; // 0x0
@@ -9151,7 +9151,7 @@ package android.content.res {
   public class ObbInfo implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.content.res.ObbInfo> CREATOR;
     field public static final int OBB_OVERLAY = 1; // 0x1
     field public java.lang.String filename;
     field public int flags;
@@ -9327,7 +9327,7 @@ package android.database {
     field protected deprecated java.lang.Long mCurrentRowID;
     field protected int mPos;
     field protected deprecated int mRowIdColumnIndex;
-    field protected deprecated java.util.HashMap mUpdatedRows;
+    field protected deprecated java.util.HashMap<java.lang.Long, java.util.Map<java.lang.String, java.lang.Object>> mUpdatedRows;
   }
 
   protected static class AbstractCursor.SelfContentObserver extends android.database.ContentObserver {
@@ -9491,7 +9491,7 @@ package android.database {
     method public boolean setNumColumns(int);
     method public void setStartPosition(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.database.CursorWindow> CREATOR;
   }
 
   public class CursorWrapper implements android.database.Cursor {
@@ -9680,7 +9680,7 @@ package android.database {
     method public void registerObserver(T);
     method public void unregisterAll();
     method public void unregisterObserver(T);
-    field protected final java.util.ArrayList mObservers;
+    field protected final java.util.ArrayList<T> mObservers;
   }
 
   public class SQLException extends java.lang.RuntimeException {
@@ -10209,7 +10209,7 @@ package android.gesture {
     method public android.graphics.Path toPath(int, int, int, int);
     method public android.graphics.Path toPath(android.graphics.Path, int, int, int, int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.gesture.Gesture> CREATOR;
   }
 
   public final class GestureLibraries {
@@ -10441,7 +10441,7 @@ package android.graphics {
     method public final void setPremultiplied(boolean);
     method public void setWidth(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.graphics.Bitmap> CREATOR;
     field public static final int DENSITY_NONE = 0; // 0x0
   }
 
@@ -11245,7 +11245,7 @@ package android.graphics {
     method public void readFromParcel(android.os.Parcel);
     method public void set(int, int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.graphics.Point> CREATOR;
     field public int x;
     field public int y;
   }
@@ -11264,7 +11264,7 @@ package android.graphics {
     method public final void set(float, float);
     method public final void set(android.graphics.PointF);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.graphics.PointF> CREATOR;
     field public float x;
     field public float y;
   }
@@ -11348,7 +11348,7 @@ package android.graphics {
     method public void union(int, int);
     method public final int width();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.graphics.Rect> CREATOR;
     field public int bottom;
     field public int left;
     field public int right;
@@ -11390,7 +11390,7 @@ package android.graphics {
     method public void union(float, float);
     method public final float width();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.graphics.RectF> CREATOR;
     field public float bottom;
     field public float left;
     field public float right;
@@ -11430,7 +11430,7 @@ package android.graphics {
     method public void translate(int, int, android.graphics.Region);
     method public final boolean union(android.graphics.Rect);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.graphics.Region> CREATOR;
   }
 
   public static final class Region.Op extends java.lang.Enum {
@@ -12560,70 +12560,70 @@ package android.hardware.camera2 {
     method public T get(android.hardware.camera2.CameraCharacteristics.Key<T>);
     method public java.util.List<android.hardware.camera2.CaptureRequest.Key<?>> getAvailableCaptureRequestKeys();
     method public java.util.List<android.hardware.camera2.CaptureResult.Key<?>> getAvailableCaptureResultKeys();
-    field public static final android.hardware.camera2.CameraCharacteristics.Key COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AE_AVAILABLE_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AE_COMPENSATION_RANGE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AE_COMPENSATION_STEP;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AF_AVAILABLE_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AVAILABLE_EFFECTS;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AVAILABLE_SCENE_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_AWB_AVAILABLE_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_MAX_REGIONS_AE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_MAX_REGIONS_AF;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key CONTROL_MAX_REGIONS_AWB;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key EDGE_AVAILABLE_EDGE_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key FLASH_INFO_AVAILABLE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key INFO_SUPPORTED_HARDWARE_LEVEL;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key JPEG_AVAILABLE_THUMBNAIL_SIZES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_FACING;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_AVAILABLE_APERTURES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_AVAILABLE_FILTER_DENSITIES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_AVAILABLE_FOCAL_LENGTHS;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_FOCUS_DISTANCE_CALIBRATION;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_HYPERFOCAL_DISTANCE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_AVAILABLE_CAPABILITIES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_PROC;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_PROC_STALLING;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_MAX_NUM_OUTPUT_RAW;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_PARTIAL_RESULT_COUNT;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key REQUEST_PIPELINE_MAX_DEPTH;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SCALER_CROPPING_TYPE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SCALER_STREAM_CONFIGURATION_MAP;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_AVAILABLE_TEST_PATTERN_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_BLACK_LEVEL_PATTERN;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_CALIBRATION_TRANSFORM1;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_CALIBRATION_TRANSFORM2;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_COLOR_TRANSFORM1;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_COLOR_TRANSFORM2;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_FORWARD_MATRIX1;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_FORWARD_MATRIX2;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_ACTIVE_ARRAY_SIZE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_COLOR_FILTER_ARRANGEMENT;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_EXPOSURE_TIME_RANGE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_MAX_FRAME_DURATION;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_PHYSICAL_SIZE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_PIXEL_ARRAY_SIZE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_SENSITIVITY_RANGE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_TIMESTAMP_SOURCE;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_INFO_WHITE_LEVEL;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_MAX_ANALOG_SENSITIVITY;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_ORIENTATION;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_REFERENCE_ILLUMINANT1;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SENSOR_REFERENCE_ILLUMINANT2;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key STATISTICS_INFO_MAX_FACE_COUNT;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key SYNC_MAX_LATENCY;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key TONEMAP_AVAILABLE_TONE_MAP_MODES;
-    field public static final android.hardware.camera2.CameraCharacteristics.Key TONEMAP_MAX_CURVE_POINTS;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AE_AVAILABLE_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Range<java.lang.Integer>[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Range<java.lang.Integer>> CONTROL_AE_COMPENSATION_RANGE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Rational> CONTROL_AE_COMPENSATION_STEP;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AF_AVAILABLE_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AVAILABLE_EFFECTS;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AVAILABLE_SCENE_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> CONTROL_AWB_AVAILABLE_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> CONTROL_MAX_REGIONS_AE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> CONTROL_MAX_REGIONS_AF;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> CONTROL_MAX_REGIONS_AWB;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> EDGE_AVAILABLE_EDGE_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Boolean> FLASH_INFO_AVAILABLE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> HOT_PIXEL_AVAILABLE_HOT_PIXEL_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> INFO_SUPPORTED_HARDWARE_LEVEL;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> LENS_FACING;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<float[]> LENS_INFO_AVAILABLE_APERTURES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<float[]> LENS_INFO_AVAILABLE_FILTER_DENSITIES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<float[]> LENS_INFO_AVAILABLE_FOCAL_LENGTHS;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> LENS_INFO_FOCUS_DISTANCE_CALIBRATION;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> LENS_INFO_HYPERFOCAL_DISTANCE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> LENS_INFO_MINIMUM_FOCUS_DISTANCE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> NOISE_REDUCTION_AVAILABLE_NOISE_REDUCTION_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> REQUEST_AVAILABLE_CAPABILITIES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_OUTPUT_PROC;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_OUTPUT_PROC_STALLING;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_MAX_NUM_OUTPUT_RAW;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_PARTIAL_RESULT_COUNT;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Byte> REQUEST_PIPELINE_MAX_DEPTH;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SCALER_CROPPING_TYPE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SENSOR_AVAILABLE_TEST_PATTERN_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.BlackLevelPattern> SENSOR_BLACK_LEVEL_PATTERN;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM1;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_CALIBRATION_TRANSFORM2;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM1;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_COLOR_TRANSFORM2;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX1;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.ColorSpaceTransform> SENSOR_FORWARD_MATRIX2;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.graphics.Rect> SENSOR_INFO_ACTIVE_ARRAY_SIZE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SENSOR_INFO_COLOR_FILTER_ARRANGEMENT;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Range<java.lang.Long>> SENSOR_INFO_EXPOSURE_TIME_RANGE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Long> SENSOR_INFO_MAX_FRAME_DURATION;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.SizeF> SENSOR_INFO_PHYSICAL_SIZE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SENSOR_INFO_PIXEL_ARRAY_SIZE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Range<java.lang.Integer>> SENSOR_INFO_SENSITIVITY_RANGE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SENSOR_INFO_TIMESTAMP_SOURCE;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SENSOR_INFO_WHITE_LEVEL;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SENSOR_MAX_ANALOG_SENSITIVITY;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SENSOR_ORIENTATION;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SENSOR_REFERENCE_ILLUMINANT1;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Byte> SENSOR_REFERENCE_ILLUMINANT2;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<boolean[]> STATISTICS_INFO_AVAILABLE_HOT_PIXEL_MAP_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> STATISTICS_INFO_MAX_FACE_COUNT;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SYNC_MAX_LATENCY;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> TONEMAP_AVAILABLE_TONE_MAP_MODES;
+    field public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> TONEMAP_MAX_CURVE_POINTS;
   }
 
   public static final class CameraCharacteristics.Key {
@@ -12866,56 +12866,56 @@ package android.hardware.camera2 {
     method public T get(android.hardware.camera2.CaptureRequest.Key<T>);
     method public java.lang.Object getTag();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.hardware.camera2.CaptureRequest.Key BLACK_LEVEL_LOCK;
-    field public static final android.hardware.camera2.CaptureRequest.Key COLOR_CORRECTION_ABERRATION_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key COLOR_CORRECTION_GAINS;
-    field public static final android.hardware.camera2.CaptureRequest.Key COLOR_CORRECTION_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key COLOR_CORRECTION_TRANSFORM;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AE_ANTIBANDING_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AE_EXPOSURE_COMPENSATION;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AE_LOCK;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AE_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AE_PRECAPTURE_TRIGGER;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AE_REGIONS;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AE_TARGET_FPS_RANGE;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AF_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AF_REGIONS;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AF_TRIGGER;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AWB_LOCK;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AWB_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_AWB_REGIONS;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_CAPTURE_INTENT;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_EFFECT_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_SCENE_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key CONTROL_VIDEO_STABILIZATION_MODE;
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final android.hardware.camera2.CaptureRequest.Key EDGE_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key FLASH_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key HOT_PIXEL_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key JPEG_GPS_LOCATION;
-    field public static final android.hardware.camera2.CaptureRequest.Key JPEG_ORIENTATION;
-    field public static final android.hardware.camera2.CaptureRequest.Key JPEG_QUALITY;
-    field public static final android.hardware.camera2.CaptureRequest.Key JPEG_THUMBNAIL_QUALITY;
-    field public static final android.hardware.camera2.CaptureRequest.Key JPEG_THUMBNAIL_SIZE;
-    field public static final android.hardware.camera2.CaptureRequest.Key LENS_APERTURE;
-    field public static final android.hardware.camera2.CaptureRequest.Key LENS_FILTER_DENSITY;
-    field public static final android.hardware.camera2.CaptureRequest.Key LENS_FOCAL_LENGTH;
-    field public static final android.hardware.camera2.CaptureRequest.Key LENS_FOCUS_DISTANCE;
-    field public static final android.hardware.camera2.CaptureRequest.Key LENS_OPTICAL_STABILIZATION_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key NOISE_REDUCTION_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key SCALER_CROP_REGION;
-    field public static final android.hardware.camera2.CaptureRequest.Key SENSOR_EXPOSURE_TIME;
-    field public static final android.hardware.camera2.CaptureRequest.Key SENSOR_FRAME_DURATION;
-    field public static final android.hardware.camera2.CaptureRequest.Key SENSOR_SENSITIVITY;
-    field public static final android.hardware.camera2.CaptureRequest.Key SENSOR_TEST_PATTERN_DATA;
-    field public static final android.hardware.camera2.CaptureRequest.Key SENSOR_TEST_PATTERN_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key SHADING_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key STATISTICS_FACE_DETECT_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key STATISTICS_HOT_PIXEL_MAP_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key STATISTICS_LENS_SHADING_MAP_MODE;
-    field public static final android.hardware.camera2.CaptureRequest.Key TONEMAP_CURVE;
-    field public static final android.hardware.camera2.CaptureRequest.Key TONEMAP_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Boolean> BLACK_LEVEL_LOCK;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> COLOR_CORRECTION_ABERRATION_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.hardware.camera2.params.RggbChannelVector> COLOR_CORRECTION_GAINS;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> COLOR_CORRECTION_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.hardware.camera2.params.ColorSpaceTransform> COLOR_CORRECTION_TRANSFORM;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_AE_ANTIBANDING_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_AE_EXPOSURE_COMPENSATION;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Boolean> CONTROL_AE_LOCK;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_AE_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_AE_PRECAPTURE_TRIGGER;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AE_REGIONS;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.util.Range<java.lang.Integer>> CONTROL_AE_TARGET_FPS_RANGE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_AF_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AF_REGIONS;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_AF_TRIGGER;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Boolean> CONTROL_AWB_LOCK;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_AWB_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AWB_REGIONS;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_CAPTURE_INTENT;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_EFFECT_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_SCENE_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> CONTROL_VIDEO_STABILIZATION_MODE;
+    field public static final android.os.Parcelable.Creator<android.hardware.camera2.CaptureRequest> CREATOR;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> EDGE_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> FLASH_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> HOT_PIXEL_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.location.Location> JPEG_GPS_LOCATION;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> JPEG_ORIENTATION;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Byte> JPEG_QUALITY;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Byte> JPEG_THUMBNAIL_QUALITY;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.util.Size> JPEG_THUMBNAIL_SIZE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Float> LENS_APERTURE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Float> LENS_FILTER_DENSITY;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Float> LENS_FOCAL_LENGTH;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Float> LENS_FOCUS_DISTANCE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> LENS_OPTICAL_STABILIZATION_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> NOISE_REDUCTION_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.graphics.Rect> SCALER_CROP_REGION;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Long> SENSOR_EXPOSURE_TIME;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Long> SENSOR_FRAME_DURATION;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> SENSOR_SENSITIVITY;
+    field public static final android.hardware.camera2.CaptureRequest.Key<int[]> SENSOR_TEST_PATTERN_DATA;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> SENSOR_TEST_PATTERN_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> SHADING_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> STATISTICS_FACE_DETECT_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Boolean> STATISTICS_HOT_PIXEL_MAP_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> STATISTICS_LENS_SHADING_MAP_MODE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<android.hardware.camera2.params.TonemapCurve> TONEMAP_CURVE;
+    field public static final android.hardware.camera2.CaptureRequest.Key<java.lang.Integer> TONEMAP_MODE;
   }
 
   public static final class CaptureRequest.Builder {
@@ -12938,71 +12938,71 @@ package android.hardware.camera2 {
     method public long getFrameNumber();
     method public android.hardware.camera2.CaptureRequest getRequest();
     method public int getSequenceId();
-    field public static final android.hardware.camera2.CaptureResult.Key BLACK_LEVEL_LOCK;
-    field public static final android.hardware.camera2.CaptureResult.Key COLOR_CORRECTION_ABERRATION_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key COLOR_CORRECTION_GAINS;
-    field public static final android.hardware.camera2.CaptureResult.Key COLOR_CORRECTION_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key COLOR_CORRECTION_TRANSFORM;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AE_ANTIBANDING_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AE_EXPOSURE_COMPENSATION;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AE_LOCK;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AE_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AE_PRECAPTURE_TRIGGER;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AE_REGIONS;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AE_STATE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AE_TARGET_FPS_RANGE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AF_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AF_REGIONS;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AF_STATE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AF_TRIGGER;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AWB_LOCK;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AWB_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AWB_REGIONS;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_AWB_STATE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_CAPTURE_INTENT;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_EFFECT_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_SCENE_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key CONTROL_VIDEO_STABILIZATION_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key EDGE_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key FLASH_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key FLASH_STATE;
-    field public static final android.hardware.camera2.CaptureResult.Key HOT_PIXEL_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key JPEG_GPS_LOCATION;
-    field public static final android.hardware.camera2.CaptureResult.Key JPEG_ORIENTATION;
-    field public static final android.hardware.camera2.CaptureResult.Key JPEG_QUALITY;
-    field public static final android.hardware.camera2.CaptureResult.Key JPEG_THUMBNAIL_QUALITY;
-    field public static final android.hardware.camera2.CaptureResult.Key JPEG_THUMBNAIL_SIZE;
-    field public static final android.hardware.camera2.CaptureResult.Key LENS_APERTURE;
-    field public static final android.hardware.camera2.CaptureResult.Key LENS_FILTER_DENSITY;
-    field public static final android.hardware.camera2.CaptureResult.Key LENS_FOCAL_LENGTH;
-    field public static final android.hardware.camera2.CaptureResult.Key LENS_FOCUS_DISTANCE;
-    field public static final android.hardware.camera2.CaptureResult.Key LENS_FOCUS_RANGE;
-    field public static final android.hardware.camera2.CaptureResult.Key LENS_OPTICAL_STABILIZATION_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key LENS_STATE;
-    field public static final android.hardware.camera2.CaptureResult.Key NOISE_REDUCTION_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key REQUEST_PIPELINE_DEPTH;
-    field public static final android.hardware.camera2.CaptureResult.Key SCALER_CROP_REGION;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_EXPOSURE_TIME;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_FRAME_DURATION;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_GREEN_SPLIT;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_NEUTRAL_COLOR_POINT;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_NOISE_PROFILE;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_ROLLING_SHUTTER_SKEW;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_SENSITIVITY;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_TEST_PATTERN_DATA;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_TEST_PATTERN_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key SENSOR_TIMESTAMP;
-    field public static final android.hardware.camera2.CaptureResult.Key SHADING_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_FACES;
-    field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_FACE_DETECT_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_HOT_PIXEL_MAP;
-    field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_HOT_PIXEL_MAP_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_LENS_SHADING_CORRECTION_MAP;
-    field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_LENS_SHADING_MAP_MODE;
-    field public static final android.hardware.camera2.CaptureResult.Key STATISTICS_SCENE_FLICKER;
-    field public static final android.hardware.camera2.CaptureResult.Key TONEMAP_CURVE;
-    field public static final android.hardware.camera2.CaptureResult.Key TONEMAP_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Boolean> BLACK_LEVEL_LOCK;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> COLOR_CORRECTION_ABERRATION_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.hardware.camera2.params.RggbChannelVector> COLOR_CORRECTION_GAINS;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> COLOR_CORRECTION_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.hardware.camera2.params.ColorSpaceTransform> COLOR_CORRECTION_TRANSFORM;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AE_ANTIBANDING_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AE_EXPOSURE_COMPENSATION;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Boolean> CONTROL_AE_LOCK;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AE_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AE_PRECAPTURE_TRIGGER;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AE_REGIONS;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AE_STATE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.util.Range<java.lang.Integer>> CONTROL_AE_TARGET_FPS_RANGE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AF_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AF_REGIONS;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AF_STATE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AF_TRIGGER;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Boolean> CONTROL_AWB_LOCK;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AWB_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.hardware.camera2.params.MeteringRectangle[]> CONTROL_AWB_REGIONS;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_AWB_STATE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_CAPTURE_INTENT;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_EFFECT_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_SCENE_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> CONTROL_VIDEO_STABILIZATION_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> EDGE_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> FLASH_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> FLASH_STATE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> HOT_PIXEL_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.location.Location> JPEG_GPS_LOCATION;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> JPEG_ORIENTATION;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Byte> JPEG_QUALITY;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Byte> JPEG_THUMBNAIL_QUALITY;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.util.Size> JPEG_THUMBNAIL_SIZE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Float> LENS_APERTURE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Float> LENS_FILTER_DENSITY;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Float> LENS_FOCAL_LENGTH;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Float> LENS_FOCUS_DISTANCE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.util.Pair<java.lang.Float, java.lang.Float>> LENS_FOCUS_RANGE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> LENS_OPTICAL_STABILIZATION_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> LENS_STATE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> NOISE_REDUCTION_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Byte> REQUEST_PIPELINE_DEPTH;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.graphics.Rect> SCALER_CROP_REGION;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Long> SENSOR_EXPOSURE_TIME;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Long> SENSOR_FRAME_DURATION;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Float> SENSOR_GREEN_SPLIT;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.util.Rational[]> SENSOR_NEUTRAL_COLOR_POINT;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.util.Pair<java.lang.Double, java.lang.Double>[]> SENSOR_NOISE_PROFILE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Long> SENSOR_ROLLING_SHUTTER_SKEW;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> SENSOR_SENSITIVITY;
+    field public static final android.hardware.camera2.CaptureResult.Key<int[]> SENSOR_TEST_PATTERN_DATA;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> SENSOR_TEST_PATTERN_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Long> SENSOR_TIMESTAMP;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> SHADING_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.hardware.camera2.params.Face[]> STATISTICS_FACES;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> STATISTICS_FACE_DETECT_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.graphics.Point[]> STATISTICS_HOT_PIXEL_MAP;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Boolean> STATISTICS_HOT_PIXEL_MAP_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.hardware.camera2.params.LensShadingMap> STATISTICS_LENS_SHADING_CORRECTION_MAP;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> STATISTICS_LENS_SHADING_MAP_MODE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> STATISTICS_SCENE_FLICKER;
+    field public static final android.hardware.camera2.CaptureResult.Key<android.hardware.camera2.params.TonemapCurve> TONEMAP_CURVE;
+    field public static final android.hardware.camera2.CaptureResult.Key<java.lang.Integer> TONEMAP_MODE;
   }
 
   public static final class CaptureResult.Key {
@@ -13205,7 +13205,7 @@ package android.hardware.usb {
     method public java.lang.String getUri();
     method public java.lang.String getVersion();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.hardware.usb.UsbAccessory> CREATOR;
   }
 
   public class UsbConfiguration implements android.os.Parcelable {
@@ -13218,7 +13218,7 @@ package android.hardware.usb {
     method public boolean isRemoteWakeup();
     method public boolean isSelfPowered();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.hardware.usb.UsbConfiguration> CREATOR;
   }
 
   public final class UsbConstants {
@@ -13277,7 +13277,7 @@ package android.hardware.usb {
     method public java.lang.String getSerialNumber();
     method public int getVendorId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.hardware.usb.UsbDevice> CREATOR;
   }
 
   public class UsbDeviceConnection {
@@ -13306,7 +13306,7 @@ package android.hardware.usb {
     method public int getMaxPacketSize();
     method public int getType();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.hardware.usb.UsbEndpoint> CREATOR;
   }
 
   public class UsbInterface implements android.os.Parcelable {
@@ -13320,7 +13320,7 @@ package android.hardware.usb {
     method public int getInterfaceSubclass();
     method public java.lang.String getName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.hardware.usb.UsbInterface> CREATOR;
   }
 
   public class UsbManager {
@@ -13677,7 +13677,7 @@ package android.location {
     method public void setThoroughfare(java.lang.String);
     method public void setUrl(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.location.Address> CREATOR;
   }
 
   public class Criteria implements android.os.Parcelable {
@@ -13710,7 +13710,7 @@ package android.location {
     field public static final int ACCURACY_HIGH = 3; // 0x3
     field public static final int ACCURACY_LOW = 1; // 0x1
     field public static final int ACCURACY_MEDIUM = 2; // 0x2
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.location.Criteria> CREATOR;
     field public static final int NO_REQUIREMENT = 0; // 0x0
     field public static final int POWER_HIGH = 3; // 0x3
     field public static final int POWER_LOW = 1; // 0x1
@@ -13796,7 +13796,7 @@ package android.location {
     method public void setSpeed(float);
     method public void setTime(long);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.location.Location> CREATOR;
     field public static final int FORMAT_DEGREES = 0; // 0x0
     field public static final int FORMAT_MINUTES = 1; // 0x1
     field public static final int FORMAT_SECONDS = 2; // 0x2
@@ -13906,7 +13906,7 @@ package android.media {
     field public static final int CONTENT_TYPE_SONIFICATION = 4; // 0x4
     field public static final int CONTENT_TYPE_SPEECH = 1; // 0x1
     field public static final int CONTENT_TYPE_UNKNOWN = 0; // 0x0
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.AudioAttributes> CREATOR;
     field public static final int FLAG_AUDIBILITY_ENFORCED = 1; // 0x1
     field public static final int FLAG_HW_AV_SYNC = 16; // 0x10
     field public static final int USAGE_ALARM = 4; // 0x4
@@ -14778,7 +14778,7 @@ package android.media {
     method public java.lang.CharSequence getSubtitle();
     method public java.lang.CharSequence getTitle();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.MediaDescription> CREATOR;
   }
 
   public static class MediaDescription.Builder {
@@ -14978,7 +14978,7 @@ package android.media {
     method public java.util.Set<java.lang.String> keySet();
     method public int size();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.MediaMetadata> CREATOR;
     field public static final java.lang.String METADATA_KEY_ALBUM = "android.media.metadata.ALBUM";
     field public static final java.lang.String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
     field public static final java.lang.String METADATA_KEY_ALBUM_ARTIST = "android.media.metadata.ALBUM_ARTIST";
@@ -15479,7 +15479,7 @@ package android.media {
     method public static android.media.Rating newThumbRating(boolean);
     method public static android.media.Rating newUnratedRating(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.Rating> CREATOR;
     field public static final int RATING_3_STARS = 3; // 0x3
     field public static final int RATING_4_STARS = 4; // 0x4
     field public static final int RATING_5_STARS = 5; // 0x5
@@ -16129,7 +16129,7 @@ package android.media.browse {
     method public boolean isBrowsable();
     method public boolean isPlayable();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.browse.MediaBrowser.MediaItem> CREATOR;
     field public static final int FLAG_BROWSABLE = 1; // 0x1
     field public static final int FLAG_PLAYABLE = 2; // 0x2
   }
@@ -16569,14 +16569,14 @@ package android.media.session {
     method public android.media.MediaDescription getDescription();
     method public long getQueueId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.session.MediaSession.QueueItem> CREATOR;
     field public static final int UNKNOWN_ID = -1; // 0xffffffff
   }
 
   public static final class MediaSession.Token implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.session.MediaSession.Token> CREATOR;
   }
 
   public final class MediaSessionManager {
@@ -16615,7 +16615,7 @@ package android.media.session {
     field public static final long ACTION_SKIP_TO_PREVIOUS = 16L; // 0x10L
     field public static final long ACTION_SKIP_TO_QUEUE_ITEM = 4096L; // 0x1000L
     field public static final long ACTION_STOP = 1L; // 0x1L
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.session.PlaybackState> CREATOR;
     field public static final long PLAYBACK_POSITION_UNKNOWN = -1L; // 0xffffffffffffffffL
     field public static final int STATE_BUFFERING = 6; // 0x6
     field public static final int STATE_CONNECTING = 8; // 0x8
@@ -16652,7 +16652,7 @@ package android.media.session {
     method public int getIcon();
     method public java.lang.CharSequence getName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.session.PlaybackState.CustomAction> CREATOR;
   }
 
   public static final class PlaybackState.CustomAction.Builder {
@@ -16821,7 +16821,7 @@ package android.media.tv {
     method public android.graphics.drawable.Drawable loadIcon(android.content.Context);
     method public java.lang.CharSequence loadLabel(android.content.Context);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.tv.TvInputInfo> CREATOR;
     field public static final java.lang.String EXTRA_INPUT_ID = "android.media.tv.extra.INPUT_ID";
     field public static final int TYPE_COMPONENT = 1004; // 0x3ec
     field public static final int TYPE_COMPOSITE = 1001; // 0x3e9
@@ -16919,7 +16919,7 @@ package android.media.tv {
     method public final int getVideoHeight();
     method public final int getVideoWidth();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.tv.TvTrackInfo> CREATOR;
     field public static final int TYPE_AUDIO = 0; // 0x0
     field public static final int TYPE_SUBTITLE = 2; // 0x2
     field public static final int TYPE_VIDEO = 1; // 0x1
@@ -17191,7 +17191,7 @@ package android.net {
     method public int getPrefixLength();
     method public byte[] getRawAddress();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.IpPrefix> CREATOR;
   }
 
   public class LinkAddress implements android.os.Parcelable {
@@ -17201,7 +17201,7 @@ package android.net {
     method public int getPrefixLength();
     method public int getScope();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.LinkAddress> CREATOR;
   }
 
   public final class LinkProperties implements android.os.Parcelable {
@@ -17213,7 +17213,7 @@ package android.net {
     method public java.util.List<android.net.LinkAddress> getLinkAddresses();
     method public java.util.List<android.net.RouteInfo> getRoutes();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.LinkProperties> CREATOR;
   }
 
   public class LocalServerSocket {
@@ -17293,7 +17293,7 @@ package android.net {
     method public javax.net.SocketFactory getSocketFactory();
     method public java.net.URLConnection openConnection(java.net.URL) throws java.io.IOException;
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.Network> CREATOR;
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
@@ -17304,7 +17304,7 @@ package android.net {
     method public boolean hasCapability(int);
     method public boolean hasTransport(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.NetworkCapabilities> CREATOR;
     field public static final int NET_CAPABILITY_CBS = 5; // 0x5
     field public static final int NET_CAPABILITY_DUN = 2; // 0x2
     field public static final int NET_CAPABILITY_EIMS = 10; // 0xa
@@ -17378,7 +17378,7 @@ package android.net {
   public class NetworkRequest implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.NetworkRequest> CREATOR;
   }
 
   public static class NetworkRequest.Builder {
@@ -17415,7 +17415,7 @@ package android.net {
     method public android.net.Uri getPacFileUrl();
     method public int getPort();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.ProxyInfo> CREATOR;
   }
 
   public abstract class PskKeyManager {
@@ -17439,7 +17439,7 @@ package android.net {
     method public boolean isDefaultRoute();
     method public boolean matches(java.net.InetAddress);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.RouteInfo> CREATOR;
   }
 
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
@@ -17538,7 +17538,7 @@ package android.net {
     method public abstract java.lang.String toString();
     method public static android.net.Uri withAppendedPath(android.net.Uri, java.lang.String);
     method public static void writeToParcel(android.os.Parcel, android.net.Uri);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.Uri> CREATOR;
     field public static final android.net.Uri EMPTY;
   }
 
@@ -17812,7 +17812,7 @@ package android.net.nsd {
     method public void setServiceName(java.lang.String);
     method public void setServiceType(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.nsd.NsdServiceInfo> CREATOR;
   }
 
 }
@@ -17977,7 +17977,7 @@ package android.net.sip {
     method public java.lang.String getUriString();
     method public java.lang.String getUserName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.sip.SipProfile> CREATOR;
   }
 
   public static class SipProfile.Builder {
@@ -18176,7 +18176,7 @@ package android.net.wifi {
     method public void setPhase2Method(int);
     method public void setSubjectMatch(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.wifi.WifiEnterpriseConfig> CREATOR;
   }
 
   public static final class WifiEnterpriseConfig.Eap {
@@ -18312,7 +18312,7 @@ package android.net.wifi {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field public java.lang.String BSSID;
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.wifi.WpsInfo> CREATOR;
     field public static final int DISPLAY = 1; // 0x1
     field public static final int INVALID = 4; // 0x4
     field public static final int KEYPAD = 2; // 0x2
@@ -18331,7 +18331,7 @@ package android.net.wifi.p2p {
     ctor public WifiP2pConfig(android.net.wifi.p2p.WifiP2pConfig);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.wifi.p2p.WifiP2pConfig> CREATOR;
     field public java.lang.String deviceAddress;
     field public int groupOwnerIntent;
     field public android.net.wifi.WpsInfo wps;
@@ -18349,7 +18349,7 @@ package android.net.wifi.p2p {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int AVAILABLE = 3; // 0x3
     field public static final int CONNECTED = 0; // 0x0
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.wifi.p2p.WifiP2pDevice> CREATOR;
     field public static final int FAILED = 2; // 0x2
     field public static final int INVITED = 1; // 0x1
     field public static final int UNAVAILABLE = 4; // 0x4
@@ -18367,7 +18367,7 @@ package android.net.wifi.p2p {
     method public android.net.wifi.p2p.WifiP2pDevice get(java.lang.String);
     method public java.util.Collection<android.net.wifi.p2p.WifiP2pDevice> getDeviceList();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.wifi.p2p.WifiP2pDeviceList> CREATOR;
   }
 
   public class WifiP2pGroup implements android.os.Parcelable {
@@ -18381,7 +18381,7 @@ package android.net.wifi.p2p {
     method public java.lang.String getPassphrase();
     method public boolean isGroupOwner();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.wifi.p2p.WifiP2pGroup> CREATOR;
   }
 
   public class WifiP2pInfo implements android.os.Parcelable {
@@ -18389,7 +18389,7 @@ package android.net.wifi.p2p {
     ctor public WifiP2pInfo(android.net.wifi.p2p.WifiP2pInfo);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.net.wifi.p2p.WifiP2pInfo> CREATOR;
     field public boolean groupFormed;
     field public java.net.InetAddress groupOwnerAddress;
     field public boolean isGroupOwner;
@@ -18536,7 +18536,7 @@ package android.nfc {
     method public android.nfc.NdefRecord[] getRecords();
     method public byte[] toByteArray();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.nfc.NdefMessage> CREATOR;
   }
 
   public final class NdefRecord implements android.os.Parcelable {
@@ -18557,7 +18557,7 @@ package android.nfc {
     method public java.lang.String toMimeType();
     method public android.net.Uri toUri();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.nfc.NdefRecord> CREATOR;
     field public static final byte[] RTD_ALTERNATIVE_CARRIER;
     field public static final byte[] RTD_HANDOVER_CARRIER;
     field public static final byte[] RTD_HANDOVER_REQUEST;
@@ -18641,7 +18641,7 @@ package android.nfc {
     method public byte[] getId();
     method public java.lang.String[] getTechList();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.nfc.Tag> CREATOR;
   }
 
   public class TagLostException extends java.io.IOException {
@@ -21726,7 +21726,7 @@ package android.os {
     method public void readFromParcel(android.os.Parcel);
     method public void setClassLoader(java.lang.ClassLoader);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.Bundle> CREATOR;
     field public static final android.os.Bundle EMPTY;
   }
 
@@ -21854,7 +21854,7 @@ package android.os {
     method public int getTotalSwappablePss();
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.Debug.MemoryInfo> CREATOR;
     field public int dalvikPrivateDirty;
     field public int dalvikPss;
     field public int dalvikSharedDirty;
@@ -21895,7 +21895,7 @@ package android.os {
     method public java.lang.String getText(int);
     method public long getTimeMillis();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.DropBoxManager.Entry> CREATOR;
   }
 
   public class Environment {
@@ -22081,7 +22081,7 @@ package android.os {
     method public void setData(android.os.Bundle);
     method public void setTarget(android.os.Handler);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.Message> CREATOR;
     field public int arg1;
     field public int arg2;
     field public java.lang.Object obj;
@@ -22108,7 +22108,7 @@ package android.os {
     method public void send(android.os.Message) throws android.os.RemoteException;
     method public static void writeMessengerOrNullToParcel(android.os.Messenger, android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.Messenger> CREATOR;
   }
 
   public class NetworkOnMainThreadException extends java.lang.RuntimeException {
@@ -22227,7 +22227,7 @@ package android.os {
     method public final void writeTypedArray(T[], int);
     method public final void writeTypedList(java.util.List<T>);
     method public final void writeValue(java.lang.Object);
-    field public static final android.os.Parcelable.Creator STRING_CREATOR;
+    field public static final android.os.Parcelable.Creator<java.lang.String> STRING_CREATOR;
   }
 
   public class ParcelFileDescriptor implements java.io.Closeable android.os.Parcelable {
@@ -22255,7 +22255,7 @@ package android.os {
     method public static android.os.ParcelFileDescriptor open(java.io.File, int, android.os.Handler, android.os.ParcelFileDescriptor.OnCloseListener) throws java.io.IOException;
     method public static int parseMode(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.ParcelFileDescriptor> CREATOR;
     field public static final int MODE_APPEND = 33554432; // 0x2000000
     field public static final int MODE_CREATE = 134217728; // 0x8000000
     field public static final int MODE_READ_ONLY = 268435456; // 0x10000000
@@ -22293,7 +22293,7 @@ package android.os {
     method public static android.os.ParcelUuid fromString(java.lang.String);
     method public java.util.UUID getUuid();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.ParcelUuid> CREATOR;
   }
 
   public abstract interface Parcelable {
@@ -22320,7 +22320,7 @@ package android.os {
     method public final int getType();
     method public boolean match(java.lang.String);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.PatternMatcher> CREATOR;
     field public static final int PATTERN_LITERAL = 0; // 0x0
     field public static final int PATTERN_PREFIX = 1; // 0x1
     field public static final int PATTERN_SIMPLE_GLOB = 2; // 0x2
@@ -22335,7 +22335,7 @@ package android.os {
     method public android.os.PersistableBundle getPersistableBundle(java.lang.String);
     method public void putPersistableBundle(java.lang.String, android.os.PersistableBundle);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.PersistableBundle> CREATOR;
     field public static final android.os.PersistableBundle EMPTY;
   }
 
@@ -22439,7 +22439,7 @@ package android.os {
     method protected void onReceiveResult(int, android.os.Bundle);
     method public void send(int, android.os.Bundle);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.ResultReceiver> CREATOR;
   }
 
   public class StatFs {
@@ -22551,7 +22551,7 @@ package android.os {
     method public static android.os.UserHandle readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     method public static void writeToParcel(android.os.UserHandle, android.os.Parcel);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.UserHandle> CREATOR;
   }
 
   public class UserManager {
@@ -22618,7 +22618,7 @@ package android.os {
     method public boolean remove(android.os.WorkSource);
     method public void set(android.os.WorkSource);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.os.WorkSource> CREATOR;
   }
 
 }
@@ -22823,7 +22823,7 @@ package android.preference {
   public static class Preference.BaseSavedState extends android.view.AbsSavedState {
     ctor public Preference.BaseSavedState(android.os.Parcel);
     ctor public Preference.BaseSavedState(android.os.Parcelable);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.preference.Preference.BaseSavedState> CREATOR;
   }
 
   public static abstract interface Preference.OnPreferenceChangeListener {
@@ -22883,7 +22883,7 @@ package android.preference {
     method public java.lang.CharSequence getTitle(android.content.res.Resources);
     method public void readFromParcel(android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.preference.PreferenceActivity.Header> CREATOR;
     field public java.lang.CharSequence breadCrumbShortTitle;
     field public int breadCrumbShortTitleRes;
     field public java.lang.CharSequence breadCrumbTitle;
@@ -23035,7 +23035,7 @@ package android.print {
     method public int getStart();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.print.PageRange ALL_PAGES;
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.print.PageRange> CREATOR;
   }
 
   public final class PrintAttributes implements android.os.Parcelable {
@@ -23047,7 +23047,7 @@ package android.print {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int COLOR_MODE_COLOR = 2; // 0x2
     field public static final int COLOR_MODE_MONOCHROME = 1; // 0x1
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.print.PrintAttributes> CREATOR;
   }
 
   public static final class PrintAttributes.Builder {
@@ -23201,7 +23201,7 @@ package android.print {
     field public static final int CONTENT_TYPE_DOCUMENT = 0; // 0x0
     field public static final int CONTENT_TYPE_PHOTO = 1; // 0x1
     field public static final int CONTENT_TYPE_UNKNOWN = -1; // 0xffffffff
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.print.PrintDocumentInfo> CREATOR;
     field public static final int PAGE_COUNT_UNKNOWN = -1; // 0xffffffff
   }
 
@@ -23228,7 +23228,7 @@ package android.print {
   public final class PrintJobId implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.print.PrintJobId> CREATOR;
   }
 
   public final class PrintJobInfo implements android.os.Parcelable {
@@ -23242,7 +23242,7 @@ package android.print {
     method public android.print.PrinterId getPrinterId();
     method public int getState();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.print.PrintJobInfo> CREATOR;
     field public static final int STATE_BLOCKED = 4; // 0x4
     field public static final int STATE_CANCELED = 7; // 0x7
     field public static final int STATE_COMPLETED = 5; // 0x5
@@ -23275,7 +23275,7 @@ package android.print {
     method public android.print.PrintAttributes.Margins getMinMargins();
     method public java.util.List<android.print.PrintAttributes.Resolution> getResolutions();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.print.PrinterCapabilitiesInfo> CREATOR;
   }
 
   public static final class PrinterCapabilitiesInfo.Builder {
@@ -23291,7 +23291,7 @@ package android.print {
     method public int describeContents();
     method public java.lang.String getLocalId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.print.PrinterId> CREATOR;
   }
 
   public final class PrinterInfo implements android.os.Parcelable {
@@ -23302,7 +23302,7 @@ package android.print {
     method public java.lang.String getName();
     method public int getStatus();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.print.PrinterInfo> CREATOR;
     field public static final int STATUS_BUSY = 2; // 0x2
     field public static final int STATUS_IDLE = 1; // 0x1
     field public static final int STATUS_UNAVAILABLE = 3; // 0x3
@@ -27218,7 +27218,7 @@ package android.service.notification {
     method public java.lang.String[] getOrderedKeys();
     method public boolean getRanking(java.lang.String, android.service.notification.NotificationListenerService.Ranking);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.service.notification.NotificationListenerService.RankingMap> CREATOR;
   }
 
   public class StatusBarNotification implements android.os.Parcelable {
@@ -27238,7 +27238,7 @@ package android.service.notification {
     method public boolean isClearable();
     method public boolean isOngoing();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.service.notification.StatusBarNotification> CREATOR;
   }
 
 }
@@ -27654,7 +27654,7 @@ package android.speech.tts {
     method public int getQuality();
     method public boolean isNetworkConnectionRequired();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.speech.tts.Voice> CREATOR;
     field public static final int LATENCY_HIGH = 400; // 0x190
     field public static final int LATENCY_LOW = 200; // 0xc8
     field public static final int LATENCY_NORMAL = 300; // 0x12c
@@ -28309,7 +28309,7 @@ package android.telecom {
     ctor public AudioState(android.telecom.AudioState);
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telecom.AudioState> CREATOR;
     field public static final int ROUTE_BLUETOOTH = 2; // 0x2
     field public static final int ROUTE_EARPIECE = 1; // 0x1
     field public static final int ROUTE_SPEAKER = 8; // 0x8
@@ -28412,7 +28412,7 @@ package android.telecom {
     method public android.net.Uri getAddress();
     method public android.os.Bundle getExtras();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telecom.ConnectionRequest> CREATOR;
   }
 
   public abstract class ConnectionService extends android.app.Service {
@@ -28444,7 +28444,7 @@ package android.telecom {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int BUSY = 7; // 0x7
     field public static final int CANCELED = 4; // 0x4
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telecom.DisconnectCause> CREATOR;
     field public static final int ERROR = 1; // 0x1
     field public static final int LOCAL = 2; // 0x2
     field public static final int MISSED = 5; // 0x5
@@ -28462,7 +28462,7 @@ package android.telecom {
     method public android.net.Uri getOriginalAddress();
     method public boolean isEmpty();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telecom.GatewayInfo> CREATOR;
   }
 
   public class PhoneAccount implements android.os.Parcelable {
@@ -28484,7 +28484,7 @@ package android.telecom {
     field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1
     field public static final int CAPABILITY_PLACE_EMERGENCY_CALLS = 16; // 0x10
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telecom.PhoneAccount> CREATOR;
     field public static final int NO_COLOR = -1; // 0xffffffff
     field public static final java.lang.String SCHEME_SIP = "sip";
     field public static final java.lang.String SCHEME_TEL = "tel";
@@ -28510,7 +28510,7 @@ package android.telecom {
     method public android.content.ComponentName getComponentName();
     method public java.lang.String getId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telecom.PhoneAccountHandle> CREATOR;
   }
 
   public final class PhoneCapabilities {
@@ -28610,7 +28610,7 @@ package android.telecom {
     method public java.lang.CharSequence getLabel();
     method public android.content.ComponentName getPackageName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telecom.StatusHints> CREATOR;
   }
 
   public class TelecomManager {
@@ -28657,7 +28657,7 @@ package android.telephony {
     method public int getNetworkId();
     method public int getSystemId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellIdentityCdma> CREATOR;
   }
 
   public final class CellIdentityGsm implements android.os.Parcelable {
@@ -28668,7 +28668,7 @@ package android.telephony {
     method public int getMnc();
     method public deprecated int getPsc();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellIdentityGsm> CREATOR;
   }
 
   public final class CellIdentityLte implements android.os.Parcelable {
@@ -28679,7 +28679,7 @@ package android.telephony {
     method public int getPci();
     method public int getTac();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellIdentityLte> CREATOR;
   }
 
   public final class CellIdentityWcdma implements android.os.Parcelable {
@@ -28690,7 +28690,7 @@ package android.telephony {
     method public int getMnc();
     method public int getPsc();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellIdentityWcdma> CREATOR;
   }
 
   public abstract class CellInfo implements android.os.Parcelable {
@@ -28698,35 +28698,35 @@ package android.telephony {
     method public long getTimeStamp();
     method public boolean isRegistered();
     method public abstract void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellInfo> CREATOR;
   }
 
   public final class CellInfoCdma extends android.telephony.CellInfo implements android.os.Parcelable {
     method public android.telephony.CellIdentityCdma getCellIdentity();
     method public android.telephony.CellSignalStrengthCdma getCellSignalStrength();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellInfoCdma> CREATOR;
   }
 
   public final class CellInfoGsm extends android.telephony.CellInfo implements android.os.Parcelable {
     method public android.telephony.CellIdentityGsm getCellIdentity();
     method public android.telephony.CellSignalStrengthGsm getCellSignalStrength();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellInfoGsm> CREATOR;
   }
 
   public final class CellInfoLte extends android.telephony.CellInfo implements android.os.Parcelable {
     method public android.telephony.CellIdentityLte getCellIdentity();
     method public android.telephony.CellSignalStrengthLte getCellSignalStrength();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellInfoLte> CREATOR;
   }
 
   public final class CellInfoWcdma extends android.telephony.CellInfo implements android.os.Parcelable {
     method public android.telephony.CellIdentityWcdma getCellIdentity();
     method public android.telephony.CellSignalStrengthWcdma getCellSignalStrength();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellInfoWcdma> CREATOR;
   }
 
   public abstract class CellLocation {
@@ -28758,7 +28758,7 @@ package android.telephony {
     method public int getLevel();
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellSignalStrengthCdma> CREATOR;
   }
 
   public final class CellSignalStrengthGsm extends android.telephony.CellSignalStrength implements android.os.Parcelable {
@@ -28769,7 +28769,7 @@ package android.telephony {
     method public int getLevel();
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellSignalStrengthGsm> CREATOR;
   }
 
   public final class CellSignalStrengthLte extends android.telephony.CellSignalStrength implements android.os.Parcelable {
@@ -28781,7 +28781,7 @@ package android.telephony {
     method public int getTimingAdvance();
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellSignalStrengthLte> CREATOR;
   }
 
   public final class CellSignalStrengthWcdma extends android.telephony.CellSignalStrength implements android.os.Parcelable {
@@ -28792,7 +28792,7 @@ package android.telephony {
     method public int getLevel();
     method public int hashCode();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.CellSignalStrengthWcdma> CREATOR;
   }
 
   public class IccOpenLogicalChannelResponse implements android.os.Parcelable {
@@ -28801,7 +28801,7 @@ package android.telephony {
     method public byte[] getSelectResponse();
     method public int getStatus();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.IccOpenLogicalChannelResponse> CREATOR;
     field public static final int INVALID_CHANNEL = -1; // 0xffffffff
     field public static final int STATUS_MISSING_RESOURCE = 2; // 0x2
     field public static final int STATUS_NO_ERROR = 1; // 0x1
@@ -28823,7 +28823,7 @@ package android.telephony {
     method public deprecated void setCid(int);
     method public deprecated void setRssi(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.NeighboringCellInfo> CREATOR;
     field public static final int UNKNOWN_CID = -1; // 0xffffffff
     field public static final int UNKNOWN_RSSI = 99; // 0x63
   }
@@ -28930,7 +28930,7 @@ package android.telephony {
     method public void setStateOff();
     method public void setStateOutOfService();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.ServiceState> CREATOR;
     field public static final int STATE_EMERGENCY_ONLY = 2; // 0x2
     field public static final int STATE_IN_SERVICE = 0; // 0x0
     field public static final int STATE_OUT_OF_SERVICE = 1; // 0x1
@@ -29080,7 +29080,7 @@ package android.telephony {
     method public android.graphics.drawable.BitmapDrawable getIconDrawable();
     method public java.lang.String getLabel();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.SubInfoRecord> CREATOR;
     field public int color;
     field public int dataRoaming;
     field public java.lang.String displayName;
@@ -30451,7 +30451,7 @@ package android.text {
     field public static final int CAP_MODE_CHARACTERS = 4096; // 0x1000
     field public static final int CAP_MODE_SENTENCES = 16384; // 0x4000
     field public static final int CAP_MODE_WORDS = 8192; // 0x2000
-    field public static final android.os.Parcelable.Creator CHAR_SEQUENCE_CREATOR;
+    field public static final android.os.Parcelable.Creator<java.lang.CharSequence> CHAR_SEQUENCE_CREATOR;
   }
 
   public static abstract interface TextUtils.EllipsizeCallback {
@@ -31175,7 +31175,7 @@ package android.text.style {
     method public void updateDrawState(android.text.TextPaint);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String ACTION_SUGGESTION_PICKED = "android.text.style.SUGGESTION_PICKED";
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.text.style.SuggestionSpan> CREATOR;
     field public static final int FLAG_AUTO_CORRECTION = 4; // 0x4
     field public static final int FLAG_EASY_CORRECT = 1; // 0x1
     field public static final int FLAG_MISSPELLED = 2; // 0x2
@@ -31756,7 +31756,7 @@ package android.transition {
 
   public class TransitionValues {
     ctor public TransitionValues();
-    field public final java.util.Map values;
+    field public final java.util.Map<java.lang.String, java.lang.Object> values;
     field public android.view.View view;
   }
 
@@ -32464,7 +32464,7 @@ package android.view {
     method public int describeContents();
     method public final android.os.Parcelable getSuperState();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.AbsSavedState> CREATOR;
     field public static final android.view.AbsSavedState EMPTY_STATE;
   }
 
@@ -32597,7 +32597,7 @@ package android.view {
     field public static final int ACTION_DRAG_LOCATION = 2; // 0x2
     field public static final int ACTION_DRAG_STARTED = 1; // 0x1
     field public static final int ACTION_DROP = 3; // 0x3
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.DragEvent> CREATOR;
   }
 
   public class FocusFinder {
@@ -32734,7 +32734,7 @@ package android.view {
     method public boolean isVirtual();
     method public boolean supportsSource(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.InputDevice> CREATOR;
     field public static final int KEYBOARD_TYPE_ALPHABETIC = 2; // 0x2
     field public static final int KEYBOARD_TYPE_NONE = 0; // 0x0
     field public static final int KEYBOARD_TYPE_NON_ALPHABETIC = 1; // 0x1
@@ -32788,7 +32788,7 @@ package android.view {
     method public abstract long getEventTime();
     method public abstract int getSource();
     method public boolean isFromSource(int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.InputEvent> CREATOR;
   }
 
   public final class InputQueue {
@@ -32820,7 +32820,7 @@ package android.view {
     field public static final deprecated int BUILT_IN_KEYBOARD = 0; // 0x0
     field public static final int COMBINING_ACCENT = -2147483648; // 0x80000000
     field public static final int COMBINING_ACCENT_MASK = 2147483647; // 0x7fffffff
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.KeyCharacterMap> CREATOR;
     field public static final int FULL = 4; // 0x4
     field public static final char HEX_INPUT = 61184; // 0xef00 '\uef00'
     field public static final int MODIFIER_BEHAVIOR_CHORDED = 0; // 0x0
@@ -32912,7 +32912,7 @@ package android.view {
     field public static final int ACTION_DOWN = 0; // 0x0
     field public static final int ACTION_MULTIPLE = 2; // 0x2
     field public static final int ACTION_UP = 1; // 0x1
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.KeyEvent> CREATOR;
     field public static final int FLAG_CANCELED = 32; // 0x20
     field public static final int FLAG_CANCELED_LONG_PRESS = 256; // 0x100
     field public static final int FLAG_EDITOR_ACTION = 16; // 0x10
@@ -33512,7 +33512,7 @@ package android.view {
     field public static final int BUTTON_PRIMARY = 1; // 0x1
     field public static final int BUTTON_SECONDARY = 2; // 0x2
     field public static final int BUTTON_TERTIARY = 4; // 0x4
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.MotionEvent> CREATOR;
     field public static final int EDGE_BOTTOM = 2; // 0x2
     field public static final int EDGE_LEFT = 4; // 0x4
     field public static final int EDGE_RIGHT = 8; // 0x8
@@ -33639,7 +33639,7 @@ package android.view {
     method public deprecated void unlockCanvas(android.graphics.Canvas);
     method public void unlockCanvasAndPost(android.graphics.Canvas);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.Surface> CREATOR;
     field public static final int ROTATION_0 = 0; // 0x0
     field public static final int ROTATION_180 = 2; // 0x2
     field public static final int ROTATION_270 = 3; // 0x3
@@ -34233,7 +34233,7 @@ package android.view {
     field public static final int ACCESSIBILITY_LIVE_REGION_ASSERTIVE = 2; // 0x2
     field public static final int ACCESSIBILITY_LIVE_REGION_NONE = 0; // 0x0
     field public static final int ACCESSIBILITY_LIVE_REGION_POLITE = 1; // 0x1
-    field public static final android.util.Property ALPHA;
+    field public static final android.util.Property<android.view.View, java.lang.Float> ALPHA;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
     field public static final int DRAWING_CACHE_QUALITY_LOW = 524288; // 0x80000
@@ -34299,11 +34299,11 @@ package android.view {
     field protected static final int[] PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     field protected static final int[] PRESSED_STATE_SET;
     field protected static final int[] PRESSED_WINDOW_FOCUSED_STATE_SET;
-    field public static final android.util.Property ROTATION;
-    field public static final android.util.Property ROTATION_X;
-    field public static final android.util.Property ROTATION_Y;
-    field public static final android.util.Property SCALE_X;
-    field public static final android.util.Property SCALE_Y;
+    field public static final android.util.Property<android.view.View, java.lang.Float> ROTATION;
+    field public static final android.util.Property<android.view.View, java.lang.Float> ROTATION_X;
+    field public static final android.util.Property<android.view.View, java.lang.Float> ROTATION_Y;
+    field public static final android.util.Property<android.view.View, java.lang.Float> SCALE_X;
+    field public static final android.util.Property<android.view.View, java.lang.Float> SCALE_Y;
     field public static final int SCREEN_STATE_OFF = 0; // 0x0
     field public static final int SCREEN_STATE_ON = 1; // 0x1
     field public static final int SCROLLBARS_INSIDE_INSET = 16777216; // 0x1000000
@@ -34344,15 +34344,15 @@ package android.view {
     field public static final int TEXT_DIRECTION_LOCALE = 5; // 0x5
     field public static final int TEXT_DIRECTION_LTR = 3; // 0x3
     field public static final int TEXT_DIRECTION_RTL = 4; // 0x4
-    field public static final android.util.Property TRANSLATION_X;
-    field public static final android.util.Property TRANSLATION_Y;
-    field public static final android.util.Property TRANSLATION_Z;
+    field public static final android.util.Property<android.view.View, java.lang.Float> TRANSLATION_X;
+    field public static final android.util.Property<android.view.View, java.lang.Float> TRANSLATION_Y;
+    field public static final android.util.Property<android.view.View, java.lang.Float> TRANSLATION_Z;
     field protected static final java.lang.String VIEW_LOG_TAG = "View";
     field public static final int VISIBLE = 0; // 0x0
     field protected static final int[] WINDOW_FOCUSED_STATE_SET;
-    field public static final android.util.Property X;
-    field public static final android.util.Property Y;
-    field public static final android.util.Property Z;
+    field public static final android.util.Property<android.view.View, java.lang.Float> X;
+    field public static final android.util.Property<android.view.View, java.lang.Float> Y;
+    field public static final android.util.Property<android.view.View, java.lang.Float> Z;
   }
 
   public static class View.AccessibilityDelegate {
@@ -34371,7 +34371,7 @@ package android.view {
   public static class View.BaseSavedState extends android.view.AbsSavedState {
     ctor public View.BaseSavedState(android.os.Parcel);
     ctor public View.BaseSavedState(android.os.Parcelable);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.View.BaseSavedState> CREATOR;
   }
 
   public static class View.DragShadowBuilder {
@@ -35068,7 +35068,7 @@ package android.view {
   public final class WindowAnimationFrameStats extends android.view.FrameStats implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.WindowAnimationFrameStats> CREATOR;
   }
 
   public final class WindowContentFrameStats extends android.view.FrameStats implements android.os.Parcelable {
@@ -35076,7 +35076,7 @@ package android.view {
     method public long getFramePostedTimeNano(int);
     method public long getFrameReadyTimeNano(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.WindowContentFrameStats> CREATOR;
   }
 
   public class WindowId implements android.os.Parcelable {
@@ -35085,7 +35085,7 @@ package android.view {
     method public void registerFocusObserver(android.view.WindowId.FocusObserver);
     method public void unregisterFocusObserver(android.view.WindowId.FocusObserver);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.WindowId> CREATOR;
   }
 
   public static abstract class WindowId.FocusObserver {
@@ -35150,7 +35150,7 @@ package android.view {
     field public static final float BRIGHTNESS_OVERRIDE_FULL = 1.0f;
     field public static final float BRIGHTNESS_OVERRIDE_NONE = -1.0f;
     field public static final float BRIGHTNESS_OVERRIDE_OFF = 0.0f;
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.WindowManager.LayoutParams> CREATOR;
     field public static final int DIM_AMOUNT_CHANGED = 32; // 0x20
     field public static final int FIRST_APPLICATION_WINDOW = 1; // 0x1
     field public static final int FIRST_SUB_WINDOW = 1000; // 0x3e8
@@ -35298,7 +35298,7 @@ package android.view.accessibility {
     field public static final int CONTENT_CHANGE_TYPE_SUBTREE = 1; // 0x1
     field public static final int CONTENT_CHANGE_TYPE_TEXT = 2; // 0x2
     field public static final int CONTENT_CHANGE_TYPE_UNDEFINED = 0; // 0x0
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.accessibility.AccessibilityEvent> CREATOR;
     field public static final int INVALID_POSITION = -1; // 0xffffffff
     field public static final deprecated int MAX_TEXT_LENGTH = 500; // 0x1f4
     field public static final int TYPES_ALL_MASK = -1; // 0xffffffff
@@ -35490,7 +35490,7 @@ package android.view.accessibility {
     field public static final int ACTION_SELECT = 4; // 0x4
     field public static final int ACTION_SET_SELECTION = 131072; // 0x20000
     field public static final int ACTION_SET_TEXT = 2097152; // 0x200000
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.accessibility.AccessibilityNodeInfo> CREATOR;
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
     field public static final int FOCUS_INPUT = 1; // 0x1
     field public static final int MOVEMENT_GRANULARITY_CHARACTER = 1; // 0x1
@@ -35637,7 +35637,7 @@ package android.view.accessibility {
     method public static android.view.accessibility.AccessibilityWindowInfo obtain(android.view.accessibility.AccessibilityWindowInfo);
     method public void recycle();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.accessibility.AccessibilityWindowInfo> CREATOR;
     field public static final int TYPE_ACCESSIBILITY_OVERLAY = 4; // 0x4
     field public static final int TYPE_APPLICATION = 1; // 0x1
     field public static final int TYPE_INPUT_METHOD = 2; // 0x2
@@ -36004,7 +36004,7 @@ package android.view.inputmethod {
     method public int getPosition();
     method public java.lang.CharSequence getText();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.inputmethod.CompletionInfo> CREATOR;
   }
 
   public final class CorrectionInfo implements android.os.Parcelable {
@@ -36014,7 +36014,7 @@ package android.view.inputmethod {
     method public int getOffset();
     method public java.lang.CharSequence getOldText();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.inputmethod.CorrectionInfo> CREATOR;
   }
 
   public final class CursorAnchorInfo implements android.os.Parcelable {
@@ -36033,7 +36033,7 @@ package android.view.inputmethod {
     method public int getSelectionEnd();
     method public int getSelectionStart();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.inputmethod.CursorAnchorInfo> CREATOR;
     field public static final int FLAG_HAS_INVISIBLE_REGION = 2; // 0x2
     field public static final int FLAG_HAS_VISIBLE_REGION = 1; // 0x1
     field public static final int FLAG_IS_RTL = 4; // 0x4
@@ -36056,7 +36056,7 @@ package android.view.inputmethod {
     method public void dump(android.util.Printer, java.lang.String);
     method public final void makeCompatible(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.inputmethod.EditorInfo> CREATOR;
     field public static final int IME_ACTION_DONE = 6; // 0x6
     field public static final int IME_ACTION_GO = 2; // 0x2
     field public static final int IME_ACTION_NEXT = 5; // 0x5
@@ -36094,7 +36094,7 @@ package android.view.inputmethod {
     ctor public ExtractedText();
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.inputmethod.ExtractedText> CREATOR;
     field public static final int FLAG_SELECTING = 2; // 0x2
     field public static final int FLAG_SINGLE_LINE = 1; // 0x1
     field public int flags;
@@ -36110,7 +36110,7 @@ package android.view.inputmethod {
     ctor public ExtractedTextRequest();
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.inputmethod.ExtractedTextRequest> CREATOR;
     field public int flags;
     field public int hintMaxChars;
     field public int hintMaxLines;
@@ -36126,7 +36126,7 @@ package android.view.inputmethod {
     method public int getPid();
     method public int getUid();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.inputmethod.InputBinding> CREATOR;
   }
 
   public abstract interface InputConnection {
@@ -36224,7 +36224,7 @@ package android.view.inputmethod {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodInfo> CREATOR;
   }
 
   public final class InputMethodManager {
@@ -36311,7 +36311,7 @@ package android.view.inputmethod {
     method public boolean isAuxiliary();
     method public boolean overridesImplicitlyEnabledSubtype();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.inputmethod.InputMethodSubtype> CREATOR;
   }
 
   public static class InputMethodSubtype.InputMethodSubtypeBuilder {
@@ -36341,7 +36341,7 @@ package android.view.textservice {
     method public int getSuggestionsCount();
     method public android.view.textservice.SuggestionsInfo getSuggestionsInfoAt(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.textservice.SentenceSuggestionsInfo> CREATOR;
   }
 
   public final class SpellCheckerInfo implements android.os.Parcelable {
@@ -36356,7 +36356,7 @@ package android.view.textservice {
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.textservice.SpellCheckerInfo> CREATOR;
   }
 
   public class SpellCheckerSession {
@@ -36385,7 +36385,7 @@ package android.view.textservice {
     method public java.lang.String getLocale();
     method public int getNameResId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.textservice.SpellCheckerSubtype> CREATOR;
   }
 
   public final class SuggestionsInfo implements android.os.Parcelable {
@@ -36400,7 +36400,7 @@ package android.view.textservice {
     method public int getSuggestionsCount();
     method public void setCookieAndSequence(int, int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.textservice.SuggestionsInfo> CREATOR;
     field public static final int RESULT_ATTR_HAS_RECOMMENDED_SUGGESTIONS = 4; // 0x4
     field public static final int RESULT_ATTR_IN_THE_DICTIONARY = 1; // 0x1
     field public static final int RESULT_ATTR_LOOKS_LIKE_TYPO = 2; // 0x2
@@ -36417,7 +36417,7 @@ package android.view.textservice {
     method public int getSequence();
     method public java.lang.String getText();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.view.textservice.TextInfo> CREATOR;
   }
 
   public final class TextServicesManager {
@@ -38696,7 +38696,7 @@ package android.widget {
     method public void showNext(int);
     method public void showPrevious(int);
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.widget.RemoteViews> CREATOR;
   }
 
   public static class RemoteViews.ActionException extends java.lang.RuntimeException {
@@ -39394,7 +39394,7 @@ package android.widget {
   }
 
   public static class TextView.SavedState extends android.view.View.BaseSavedState {
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.widget.TextView.SavedState> CREATOR;
   }
 
   public class TimePicker extends android.widget.FrameLayout {
@@ -41120,7 +41120,7 @@ package java.lang {
     method public static java.lang.Boolean valueOf(boolean);
     field public static final java.lang.Boolean FALSE;
     field public static final java.lang.Boolean TRUE;
-    field public static final java.lang.Class TYPE;
+    field public static final java.lang.Class<java.lang.Boolean> TYPE;
   }
 
   public final class Byte extends java.lang.Number implements java.lang.Comparable {
@@ -41142,7 +41142,7 @@ package java.lang {
     field public static final byte MAX_VALUE = 127; // 0x7f
     field public static final byte MIN_VALUE = -128; // 0xffffff80
     field public static final int SIZE = 8; // 0x8
-    field public static final java.lang.Class TYPE;
+    field public static final java.lang.Class<java.lang.Byte> TYPE;
   }
 
   public abstract interface CharSequence {
@@ -41298,7 +41298,7 @@ package java.lang {
     field public static final byte START_PUNCTUATION = 21; // 0x15
     field public static final byte SURROGATE = 19; // 0x13
     field public static final byte TITLECASE_LETTER = 3; // 0x3
-    field public static final java.lang.Class TYPE;
+    field public static final java.lang.Class<java.lang.Character> TYPE;
     field public static final byte UNASSIGNED = 0; // 0x0
     field public static final byte UPPERCASE_LETTER = 1; // 0x1
   }
@@ -41694,7 +41694,7 @@ package java.lang {
     field public static final double NaN = (0.0/0.0);
     field public static final double POSITIVE_INFINITY = (1.0/0.0);
     field public static final int SIZE = 64; // 0x40
-    field public static final java.lang.Class TYPE;
+    field public static final java.lang.Class<java.lang.Double> TYPE;
   }
 
   public abstract class Enum implements java.lang.Comparable java.io.Serializable {
@@ -41768,7 +41768,7 @@ package java.lang {
     field public static final float NaN = (0.0f/0.0f);
     field public static final float POSITIVE_INFINITY = (1.0f/0.0f);
     field public static final int SIZE = 32; // 0x20
-    field public static final java.lang.Class TYPE;
+    field public static final java.lang.Class<java.lang.Float> TYPE;
   }
 
   public class IllegalAccessError extends java.lang.IncompatibleClassChangeError {
@@ -41866,7 +41866,7 @@ package java.lang {
     field public static final int MAX_VALUE = 2147483647; // 0x7fffffff
     field public static final int MIN_VALUE = -2147483648; // 0x80000000
     field public static final int SIZE = 32; // 0x20
-    field public static final java.lang.Class TYPE;
+    field public static final java.lang.Class<java.lang.Integer> TYPE;
   }
 
   public class InternalError extends java.lang.VirtualMachineError {
@@ -41925,7 +41925,7 @@ package java.lang {
     field public static final long MAX_VALUE = 9223372036854775807L; // 0x7fffffffffffffffL
     field public static final long MIN_VALUE = -9223372036854775808L; // 0x8000000000000000L
     field public static final int SIZE = 64; // 0x40
-    field public static final java.lang.Class TYPE;
+    field public static final java.lang.Class<java.lang.Long> TYPE;
   }
 
   public final class Math {
@@ -42233,7 +42233,7 @@ package java.lang {
     field public static final short MAX_VALUE = 32767; // 0x7fff
     field public static final short MIN_VALUE = -32768; // 0xffff8000
     field public static final int SIZE = 16; // 0x10
-    field public static final java.lang.Class TYPE;
+    field public static final java.lang.Class<java.lang.Short> TYPE;
   }
 
   public class StackOverflowError extends java.lang.VirtualMachineError {
@@ -42387,7 +42387,7 @@ package java.lang {
     method public static java.lang.String valueOf(long);
     method public static java.lang.String valueOf(java.lang.Object);
     method public static java.lang.String valueOf(boolean);
-    field public static final java.util.Comparator CASE_INSENSITIVE_ORDER;
+    field public static final java.util.Comparator<java.lang.String> CASE_INSENSITIVE_ORDER;
   }
 
   public final class StringBuffer extends java.lang.AbstractStringBuilder implements java.lang.Appendable java.lang.CharSequence java.io.Serializable {
@@ -42674,7 +42674,7 @@ package java.lang {
   }
 
   public final class Void {
-    field public static final java.lang.Class TYPE;
+    field public static final java.lang.Class<java.lang.Void> TYPE;
   }
 
 }
@@ -49159,9 +49159,9 @@ package java.util {
     method public java.util.ResourceBundle newBundle(java.lang.String, java.util.Locale, java.lang.String, java.lang.ClassLoader, boolean) throws java.io.IOException, java.lang.IllegalAccessException, java.lang.InstantiationException;
     method public java.lang.String toBundleName(java.lang.String, java.util.Locale);
     method public final java.lang.String toResourceName(java.lang.String, java.lang.String);
-    field public static final java.util.List FORMAT_CLASS;
-    field public static final java.util.List FORMAT_DEFAULT;
-    field public static final java.util.List FORMAT_PROPERTIES;
+    field public static final java.util.List<java.lang.String> FORMAT_CLASS;
+    field public static final java.util.List<java.lang.String> FORMAT_DEFAULT;
+    field public static final java.util.List<java.lang.String> FORMAT_PROPERTIES;
     field public static final long TTL_DONT_CACHE = -1L; // 0xffffffffffffffffL
     field public static final long TTL_NO_EXPIRATION_CONTROL = -2L; // 0xfffffffffffffffeL
   }
@@ -50751,7 +50751,7 @@ package java.util.jar {
     method public java.lang.Object remove(java.lang.Object);
     method public int size();
     method public java.util.Collection<java.lang.Object> values();
-    field protected java.util.Map map;
+    field protected java.util.Map<java.lang.Object, java.lang.Object> map;
   }
 
   public static class Attributes.Name {
@@ -54572,9 +54572,9 @@ package junit.framework {
     method public void startTest(junit.framework.Test);
     method public synchronized void stop();
     method public synchronized boolean wasSuccessful();
-    field protected java.util.Vector fErrors;
-    field protected java.util.Vector fFailures;
-    field protected java.util.Vector fListeners;
+    field protected java.util.Vector<junit.framework.TestFailure> fErrors;
+    field protected java.util.Vector<junit.framework.TestFailure> fFailures;
+    field protected java.util.Vector<junit.framework.TestListener> fListeners;
     field protected int fRunTests;
   }
 
@@ -56785,10 +56785,10 @@ package org.apache.http.impl.conn.tsccm {
     method public void shutdown();
     field protected org.apache.http.impl.conn.IdleConnectionHandler idleConnHandler;
     field protected volatile boolean isShutDown;
-    field protected java.util.Set issuedConnections;
+    field protected java.util.Set<org.apache.http.impl.conn.tsccm.BasicPoolEntryRef> issuedConnections;
     field protected int numConnections;
     field protected final java.util.concurrent.locks.Lock poolLock;
-    field protected java.lang.ref.ReferenceQueue refQueue;
+    field protected java.lang.ref.ReferenceQueue<java.lang.Object> refQueue;
   }
 
   public deprecated class BasicPoolEntry extends org.apache.http.impl.conn.AbstractPoolEntry {
@@ -56827,11 +56827,11 @@ package org.apache.http.impl.conn.tsccm {
     method protected org.apache.http.impl.conn.tsccm.WaitingThread newWaitingThread(java.util.concurrent.locks.Condition, org.apache.http.impl.conn.tsccm.RouteSpecificPool);
     method protected void notifyWaitingThread(org.apache.http.impl.conn.tsccm.RouteSpecificPool);
     method public org.apache.http.impl.conn.tsccm.PoolEntryRequest requestPoolEntry(org.apache.http.conn.routing.HttpRoute, java.lang.Object);
-    field protected java.util.Queue freeConnections;
+    field protected java.util.Queue<org.apache.http.impl.conn.tsccm.BasicPoolEntry> freeConnections;
     field protected final int maxTotalConnections;
     field protected final org.apache.http.conn.ClientConnectionOperator operator;
-    field protected final java.util.Map routeToPool;
-    field protected java.util.Queue waitingThreads;
+    field protected final java.util.Map<org.apache.http.conn.routing.HttpRoute, org.apache.http.impl.conn.tsccm.RouteSpecificPool> routeToPool;
+    field protected java.util.Queue<org.apache.http.impl.conn.tsccm.WaitingThread> waitingThreads;
   }
 
   public abstract deprecated interface PoolEntryRequest {
@@ -56848,7 +56848,7 @@ package org.apache.http.impl.conn.tsccm {
     method public void run();
     method public void shutdown();
     field protected final org.apache.http.impl.conn.tsccm.RefQueueHandler refHandler;
-    field protected final java.lang.ref.ReferenceQueue refQueue;
+    field protected final java.lang.ref.ReferenceQueue<?> refQueue;
     field protected volatile java.lang.Thread workerThread;
   }
 
@@ -56868,11 +56868,11 @@ package org.apache.http.impl.conn.tsccm {
     method public org.apache.http.impl.conn.tsccm.WaitingThread nextThread();
     method public void queueThread(org.apache.http.impl.conn.tsccm.WaitingThread);
     method public void removeThread(org.apache.http.impl.conn.tsccm.WaitingThread);
-    field protected final java.util.LinkedList freeEntries;
+    field protected final java.util.LinkedList<org.apache.http.impl.conn.tsccm.BasicPoolEntry> freeEntries;
     field protected final int maxEntries;
     field protected int numEntries;
     field protected final org.apache.http.conn.routing.HttpRoute route;
-    field protected final java.util.Queue waitingThreads;
+    field protected final java.util.Queue<org.apache.http.impl.conn.tsccm.WaitingThread> waitingThreads;
   }
 
   public deprecated class ThreadSafeClientConnManager implements org.apache.http.conn.ClientConnectionManager {
@@ -59164,7 +59164,7 @@ package org.xmlpull.v1 {
     method public void setValidating(boolean);
     field public static final java.lang.String PROPERTY_NAME = "org.xmlpull.v1.XmlPullParserFactory";
     field protected java.lang.String classNamesLocation;
-    field protected java.util.HashMap features;
+    field protected java.util.HashMap<java.lang.String, java.lang.Boolean> features;
     field protected java.util.ArrayList parserClasses;
     field protected java.util.ArrayList serializerClasses;
   }
