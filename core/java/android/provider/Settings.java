@@ -3017,7 +3017,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.NETSTATS_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.NETSTATS_GLOBAL_ALERT_BYTES);
             MOVED_TO_GLOBAL.add(Settings.Global.NETSTATS_POLL_INTERVAL);
-            MOVED_TO_GLOBAL.add(Settings.Global.NETSTATS_REPORT_XT_OVER_DEV);
             MOVED_TO_GLOBAL.add(Settings.Global.NETSTATS_SAMPLE_ENABLED);
             MOVED_TO_GLOBAL.add(Settings.Global.NETSTATS_TIME_CACHE_MAX_AGE);
             MOVED_TO_GLOBAL.add(Settings.Global.NETSTATS_UID_BUCKET_DURATION);
@@ -5462,8 +5461,6 @@ public final class Settings {
        public static final String NETSTATS_GLOBAL_ALERT_BYTES = "netstats_global_alert_bytes";
        /** {@hide} */
        public static final String NETSTATS_SAMPLE_ENABLED = "netstats_sample_enabled";
-       /** {@hide} */
-       public static final String NETSTATS_REPORT_XT_OVER_DEV = "netstats_report_xt_over_dev";
 
        /** {@hide} */
        public static final String NETSTATS_DEV_BUCKET_DURATION = "netstats_dev_bucket_duration";
