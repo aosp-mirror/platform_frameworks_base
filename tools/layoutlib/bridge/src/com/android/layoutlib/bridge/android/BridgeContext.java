@@ -115,7 +115,7 @@ public final class BridgeContext extends Context {
     private int mDynamicIdGenerator = 0x02030000; // Base id for R.style in custom namespace
 
     // cache for TypedArray generated from IStyleResourceValue object
-    private Map<int[], Map<Integer, TypedArray>> mTypedArrayCache;
+    private Map<int[], Map<Integer, BridgeTypedArray>> mTypedArrayCache;
     private BridgeInflater mBridgeInflater;
 
     private BridgeContentResolver mContentResolver;
@@ -467,7 +467,7 @@ public final class BridgeContext extends Context {
 
 
     @Override
-    public final TypedArray obtainStyledAttributes(int[] attrs) {
+    public final BridgeTypedArray obtainStyledAttributes(int[] attrs) {
         // No style is specified here, so create the typed array based on the default theme
         // and the styles already applied to it. A null value of style indicates that the default
         // theme should be used.
@@ -475,7 +475,7 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public final TypedArray obtainStyledAttributes(int resid, int[] attrs)
+    public final BridgeTypedArray obtainStyledAttributes(int resid, int[] attrs)
             throws Resources.NotFoundException {
         // get the StyleResourceValue based on the resId;
         StyleResourceValue style = getStyleByDynamicId(resid);
@@ -485,9 +485,9 @@ public final class BridgeContext extends Context {
         }
 
         if (mTypedArrayCache == null) {
-            mTypedArrayCache = new HashMap<int[], Map<Integer,TypedArray>>();
+            mTypedArrayCache = new HashMap<int[], Map<Integer,BridgeTypedArray>>();
 
-            Map<Integer, TypedArray> map = new HashMap<Integer, TypedArray>();
+            Map<Integer, BridgeTypedArray> map = new HashMap<Integer, BridgeTypedArray>();
             mTypedArrayCache.put(attrs, map);
 
             BridgeTypedArray ta = createStyleBasedTypedArray(style, attrs);
@@ -497,14 +497,14 @@ public final class BridgeContext extends Context {
         }
 
         // get the 2nd map
-        Map<Integer, TypedArray> map = mTypedArrayCache.get(attrs);
+        Map<Integer, BridgeTypedArray> map = mTypedArrayCache.get(attrs);
         if (map == null) {
-            map = new HashMap<Integer, TypedArray>();
+            map = new HashMap<Integer, BridgeTypedArray>();
             mTypedArrayCache.put(attrs, map);
         }
 
         // get the array from the 2nd map
-        TypedArray ta = map.get(resid);
+        BridgeTypedArray ta = map.get(resid);
 
         if (ta == null) {
             ta = createStyleBasedTypedArray(style, attrs);
@@ -515,12 +515,12 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public final TypedArray obtainStyledAttributes(AttributeSet set, int[] attrs) {
+    public final BridgeTypedArray obtainStyledAttributes(AttributeSet set, int[] attrs) {
         return obtainStyledAttributes(set, attrs, 0, 0);
     }
 
     @Override
-    public TypedArray obtainStyledAttributes(AttributeSet set, int[] attrs,
+    public BridgeTypedArray obtainStyledAttributes(AttributeSet set, int[] attrs,
             int defStyleAttr, int defStyleRes) {
 
         Map<String, String> defaultPropMap = null;
