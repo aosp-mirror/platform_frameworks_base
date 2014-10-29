@@ -66,6 +66,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String ACTION_SHOW_BATTERY_SETTINGS = "PNW.batterySettings";
     private static final String ACTION_START_SAVER = "PNW.startSaver";
     private static final String ACTION_STOP_SAVER = "PNW.stopSaver";
+    private static final String ACTION_DISMISSED_WARNING = "PNW.dismissedWarning";
 
     private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -180,6 +181,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 .setContentTitle(mContext.getString(R.string.battery_low_title))
                 .setContentText(mContext.getString(textRes, percentage))
                 .setOnlyAlertOnce(true)
+                .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
                 .setPriority(Notification.PRIORITY_MAX)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setColor(mContext.getResources().getColor(
@@ -374,6 +376,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_SHOW_BATTERY_SETTINGS);
             filter.addAction(ACTION_START_SAVER);
             filter.addAction(ACTION_STOP_SAVER);
+            filter.addAction(ACTION_DISMISSED_WARNING);
             mContext.registerReceiverAsUser(this, UserHandle.ALL, filter, null, mHandler);
         }
 
@@ -391,6 +394,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 dismissSaverNotification();
                 dismissLowBatteryNotification();
                 setSaverMode(false);
+            } else if (action.equals(ACTION_DISMISSED_WARNING)) {
+                dismissLowBatteryWarning();
             }
         }
     }
