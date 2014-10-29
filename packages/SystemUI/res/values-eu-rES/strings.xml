@@ -275,8 +275,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Abisua: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"Ikusitako azken pantailak erakusten dira hemen"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Aplikazioaren informazioa"</string>
-    <!-- no translation found for recents_lock_to_app_button_label (6942899049072506044) -->
-    <skip />
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"pantaila-ainguratzea"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"bilatu"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Ezin izan da hasi <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Kargatuta"</string>
@@ -300,7 +299,7 @@
     <string name="phone_hint" msgid="3101468054914424646">"Telefonoa irekitzeko, pasatu hatza eskuinera."</string>
     <string name="camera_hint" msgid="5241441720959174226">"Kamera irekitzeko, pasatu hatza ezkerrera."</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Bat ere ez"</string>
-    <string name="interruption_level_priority" msgid="6517366750688942030">"Lehentasuna"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Lehentas."</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Guztiak"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> guztiz kargatu arte)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Aldatu erabiltzailea"</string>
