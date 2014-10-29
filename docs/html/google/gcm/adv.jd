@@ -261,7 +261,7 @@ is either a &quot;send-to-sync&quot; (collapsible) message or a &quot;message wi
 payload&quot; (non-collapsible message). These concepts are described in more
 detail in the following sections.</p>
 
-<h3 id="s2s"><strong>Send-to-sync messages</strong></h3>
+<h3 id="s2s">Send-to-sync messages</h3>
 
 <p>A send-to-sync (collapsible) message is often a &quot;tickle&quot; that tells
 a mobile application to sync data from the server. For example, suppose you have
@@ -288,6 +288,7 @@ and B4, and so on. If you exceed this number GCM will only keep 4 collapse keys,
 guarantees about which ones they will be.</p>
 
 <h3 id="payload">Messages with payload</h3>
+
 <p>Unlike a send-to-sync message, every &quot;message with payload&quot;
 (non-collapsible message) is delivered. The payload the message contains can be
 up to 4kb. For example, here is a JSON-formatted message in an IM application in
