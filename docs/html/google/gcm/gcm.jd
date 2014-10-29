@@ -21,7 +21,7 @@ page.title=Overview
 </div>
 </div>
 
-<p>Google Cloud Messaging for Android (GCM) is a free service that helps
+<p>Google Cloud Messaging (GCM) for Android is a free service that helps
 developers  send data from servers to their Android applications on  Android
 devices, and upstream messages from the user's device back to the cloud.
 This could be a lightweight message telling the Android application
