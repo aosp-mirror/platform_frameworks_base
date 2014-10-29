@@ -155,9 +155,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected HeadsUpNotificationView mHeadsUpNotificationView;
     protected int mHeadsUpNotificationDecay;
 
-    // used to notify status bar for suppressing notification LED
-    protected boolean mPanelSlightlyVisible;
-
     // Search panel
     protected SearchPanelView mSearchPanelView;
 
@@ -169,6 +166,20 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     // on-screen navigation buttons
     protected NavigationBarView mNavigationBarView = null;
+
+    protected Boolean mScreenOn;
+
+    // The second field is a bit different from the first one because it only listens to screen on/
+    // screen of events from Keyguard. We need this so we don't have a race condition with the
+    // broadcast. In the future, we should remove the first field altogether and rename the second
+    // field.
+    protected boolean mScreenOnFromKeyguard;
+
+    protected boolean mVisible;
+
+    // mScreenOnFromKeyguard && mVisible.
+    private boolean mVisibleToUser;
+
     private Locale mLocale;
     private float mFontScale;
 
@@ -1589,28 +1600,41 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    protected void visibilityChanged(boolean visible) {
+        if (mVisible != visible) {
+            mVisible = visible;
+            if (!visible) {
+                dismissPopups();
+            }
+        }
+        updateVisibleToUser();
+    }
+
+    protected void updateVisibleToUser() {
+        boolean oldVisibleToUser = mVisibleToUser;
+        mVisibleToUser = mVisible && mScreenOnFromKeyguard;
+
+        if (oldVisibleToUser != mVisibleToUser) {
+            handleVisibleToUserChanged(mVisibleToUser);
+        }
+    }
+
     /**
-     * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
+     * The LEDs are turned off when the notification panel is shown, even just a little bit.
      * This was added last-minute and is inconsistent with the way the rest of the notifications
      * are handled, because the notification isn't really cancelled.  The lights are just
      * turned off.  If any other notifications happen, the lights will turn back on.  Steve says
      * this is what he wants. (see bug 1131461)
      */
-    protected void visibilityChanged(boolean visible) {
-        if (mPanelSlightlyVisible != visible) {
-            mPanelSlightlyVisible = visible;
-            if (!visible) {
-                dismissPopups();
+    protected void handleVisibleToUserChanged(boolean visibleToUser) {
+        try {
+            if (visibleToUser) {
+                mBarService.onPanelRevealed();
+            } else {
+                mBarService.onPanelHidden();
             }
-            try {
-                if (visible) {
-                    mBarService.onPanelRevealed();
-                } else {
-                    mBarService.onPanelHidden();
-                }
-            } catch (RemoteException ex) {
-                // Won't fail unless the world has ended.
-            }
+        } catch (RemoteException ex) {
+            // Won't fail unless the world has ended.
         }
     }
 

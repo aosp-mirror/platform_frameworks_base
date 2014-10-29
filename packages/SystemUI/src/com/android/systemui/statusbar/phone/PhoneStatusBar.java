@@ -55,7 +55,6 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.Xfermode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
@@ -98,7 +97,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -409,13 +407,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
     private int mNavigationBarMode;
-    private Boolean mScreenOn;
-
-    // The second field is a bit different from the first one because it only listens to screen on/
-    // screen of events from Keyguard. We need this so we don't have a race condition with the
-    // broadcast. In the future, we should remove the first field altogether and rename the second
-    // field.
-    private boolean mScreenOnFromKeyguard;
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     private ScrimController mScrimController;
@@ -429,7 +420,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }};
 
-    private boolean mVisible;
     private boolean mWaitingForKeyguardExit;
     private boolean mDozing;
     private boolean mScrimSrcModeEnabled;
@@ -3077,7 +3067,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 notifyNavigationBarScreenOn(false);
                 notifyHeadsUpScreenOn(false);
                 finishBarAnimations();
-                stopNotificationLogging();
                 resetUserExpandedStates();
             }
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
@@ -3085,7 +3074,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
                 repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
-                startNotificationLoggingIfScreenOnAndVisible();
             }
             else if (ACTION_DEMO.equals(action)) {
                 Bundle bundle = intent.getExtras();
@@ -3274,14 +3262,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // Visibility reporting
 
     @Override
-    protected void visibilityChanged(boolean visible) {
-        mVisible = visible;
-        if (visible) {
-            startNotificationLoggingIfScreenOnAndVisible();
+    protected void handleVisibleToUserChanged(boolean visibleToUser) {
+        if (visibleToUser) {
+            super.handleVisibleToUserChanged(visibleToUser);
+            startNotificationLogging();
         } else {
             stopNotificationLogging();
+            super.handleVisibleToUserChanged(visibleToUser);
         }
-        super.visibilityChanged(visible);
     }
 
     private void stopNotificationLogging() {
@@ -3296,17 +3284,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setChildLocationsChangedListener(null);
     }
 
-    private void startNotificationLoggingIfScreenOnAndVisible() {
-        if (mVisible && mScreenOn) {
-            mStackScroller.setChildLocationsChangedListener(mNotificationLocationsChangedListener);
-            // Some transitions like mScreenOn=false -> mScreenOn=true don't
-            // cause the scroller to emit child location events. Hence generate
-            // one ourselves to guarantee that we're reporting visible
-            // notifications.
-            // (Note that in cases where the scroller does emit events, this
-            // additional event doesn't break anything.)
-            mNotificationLocationsChangedListener.onChildLocationsChanged(mStackScroller);
-        }
+    private void startNotificationLogging() {
+        mStackScroller.setChildLocationsChangedListener(mNotificationLocationsChangedListener);
+        // Some transitions like mVisibleToUser=false -> mVisibleToUser=true don't
+        // cause the scroller to emit child location events. Hence generate
+        // one ourselves to guarantee that we're reporting visible
+        // notifications.
+        // (Note that in cases where the scroller does emit events, this
+        // additional event doesn't break anything.)
+        mNotificationLocationsChangedListener.onChildLocationsChanged(mStackScroller);
     }
 
     private void logNotificationVisibilityChanges(
@@ -3944,6 +3930,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mScreenOnFromKeyguard = false;
         mScreenOnComingFromTouch = false;
         mStackScroller.setAnimationsEnabled(false);
+        updateVisibleToUser();
     }
 
     public void onScreenTurnedOn() {
@@ -3951,6 +3938,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mStackScroller.setAnimationsEnabled(true);
         mNotificationPanel.onScreenTurnedOn();
         mNotificationPanel.setTouchDisabled(false);
+        updateVisibleToUser();
     }
 
     /**
