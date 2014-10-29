@@ -94,8 +94,9 @@
 
                 <TextView
                     android:id="@+id/date"
-                    android:layout_width="90dp"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:singleLine="true"
                     android:ellipsize="end"
                     android:textAlignment="viewStart"
@@ -104,8 +105,9 @@
 
                 <TextView
                     android:id="@+id/size"
-                    android:layout_width="90dp"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:layout_marginStart="8dp"
                     android:singleLine="true"
                     android:ellipsize="end"
@@ -117,7 +119,7 @@
                     android:id="@android:id/summary"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
                     android:layout_marginStart="8dp"
                     android:singleLine="true"
                     android:ellipsize="end"
