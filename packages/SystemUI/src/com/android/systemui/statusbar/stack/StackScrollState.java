@@ -236,6 +236,8 @@ public class StackScrollState {
         public static final int LOCATION_MAIN_AREA = 0x08;
         public static final int LOCATION_BOTTOM_STACK_PEEKING = 0x10;
         public static final int LOCATION_BOTTOM_STACK_HIDDEN = 0x20;
+        /** The view isn't layouted at all. */
+        public static final int LOCATION_GONE = 0x40;
 
         float alpha;
         float yTranslation;
