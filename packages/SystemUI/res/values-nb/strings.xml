@@ -31,7 +31,7 @@
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen varslinger"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktiviteter"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Varslinger"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Varsler"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batterikapasiteten er lav"</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> gjenværende"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"<xliff:g id="NUMBER">%d%%</xliff:g> gjenstår. Batterisparing er på."</string>
@@ -48,7 +48,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Roter skjerm automatisk"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"DEMPET"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
-    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Varslinger"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Varsler"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth tilknyttet"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Konfigurer inndatametoder"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Fysisk tastatur"</string>
@@ -148,7 +148,7 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flymodus."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri – <xliff:g id="NUMBER">%d</xliff:g> prosent."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systeminnstillinger."</string>
-    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Varslinger."</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Varsler."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Fjern varsling"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS er aktivert."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Henting av GPS-signal."</string>
