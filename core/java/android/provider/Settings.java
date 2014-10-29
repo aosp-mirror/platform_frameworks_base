@@ -787,11 +787,10 @@ public final class Settings {
      * <p>
      * Output: Nothing.
      * @see android.service.notification.NotificationListenerService
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_LISTENER_SETTINGS
-            = "android.settings.NOTIFICATION_LISTENER_SETTINGS";
+            = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
 
     /**
      * @hide
@@ -4738,8 +4737,8 @@ public final class Settings {
         public static final String SMS_DEFAULT_APPLICATION = "sms_default_application";
 
         /**
-         * Name of a package that the current user has explicitly allowed to see all of that
-         * user's notifications.
+         * Names of the packages that the current user has explicitly allowed to
+         * see all of the user's notifications, separated by ':'.
          *
          * @hide
          */
