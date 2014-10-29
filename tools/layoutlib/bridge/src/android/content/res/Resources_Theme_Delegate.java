@@ -39,9 +39,6 @@ import android.util.TypedValue;
  */
 public class Resources_Theme_Delegate {
 
-    // Whether to use the Theme.mThemeResId as primary theme.
-    boolean force;
-
     // ---- delegate manager ----
 
     private static final DelegateManager<Resources_Theme_Delegate> sManager =
@@ -111,14 +108,29 @@ public class Resources_Theme_Delegate {
     // ---- private helper methods ----
 
     private static boolean setupResources(Theme thisTheme) {
-        Resources_Theme_Delegate themeDelegate = sManager.getDelegate(thisTheme.getNativeTheme());
-        StyleResourceValue style = resolveStyle(thisTheme.getAppliedStyleResId());
-        if (style != null) {
-            RenderSessionImpl.getCurrentContext().getRenderResources()
-                    .applyStyle(style, themeDelegate.force);
-            return true;
+        // Key is a space-separated list of theme ids applied that have been merged into the
+        // BridgeContext's theme to make thisTheme.
+        String[] appliedStyles = thisTheme.getKey().split(" ");
+        boolean changed = false;
+        for (String s : appliedStyles) {
+            if (s.isEmpty()) {
+                continue;
+            }
+            // See the definition of force parameter in Theme.applyStyle().
+            boolean force = false;
+            if (s.charAt(s.length() - 1) == '!') {
+                force = true;
+                s = s.substring(0, s.length() - 1);
+            }
+            int styleId = Integer.parseInt(s, 16);
+            StyleResourceValue style = resolveStyle(styleId);
+            if (style != null) {
+                RenderSessionImpl.getCurrentContext().getRenderResources().applyStyle(style, force);
+                changed = true;
+            }
+
         }
-        return false;
+        return changed;
     }
 
     private static void restoreResources(boolean changed) {
