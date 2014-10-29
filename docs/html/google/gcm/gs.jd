@@ -25,12 +25,12 @@ page.tags="cloud","push","messaging"
 </div>
 </div>
 
-<p>This document tells you how to get started setting up a GCM
-implementation.
+<p>This document tells you how to get started setting up a Google Cloud Messaging
+(GCM) implementation.
 Before you begin, make sure to <a href="/google/play-services/setup.html">set up
 the Google Play Services SDK</a>. You need this SDK to use the
-<a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
-{@code GoogleCloudMessaging}</a> methods.</p>
+<a href="{@docRoot}reference/com/google/android/gms/gcm/package-summary.html">
+GCM APIs</a>.</p>
 
 <h2 id="create-proj">Creating a Google API project</h2>
 <p>To create a Google API project:</p>
