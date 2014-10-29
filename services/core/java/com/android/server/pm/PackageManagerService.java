@@ -333,6 +333,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     final DisplayMetrics mMetrics;
     final int mDefParseFlags;
     final String[] mSeparateProcesses;
+    final boolean mIsUpgrade;
 
     // This is where all application persistent data goes.
     final File mAppDataDir;
@@ -1760,7 +1761,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // If this is first boot after an OTA, and a normal boot, then
             // we need to clear code cache directories.
-            if (!Build.FINGERPRINT.equals(mSettings.mFingerprint) && !onlyCore) {
+            mIsUpgrade = !Build.FINGERPRINT.equals(mSettings.mFingerprint);
+            if (mIsUpgrade && !onlyCore) {
                 Slog.i(TAG, "Build fingerprint changed; clearing code caches");
                 for (String pkgName : mSettings.mPackages.keySet()) {
                     deleteCodeCacheDirsLI(pkgName);
@@ -1798,6 +1800,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public boolean isOnlyCoreApps() {
         return mOnlyCore;
+    }
+
+    @Override
+    public boolean isUpgrade() {
+        return mIsUpgrade;
     }
 
     private String getRequiredVerifierLPr() {
