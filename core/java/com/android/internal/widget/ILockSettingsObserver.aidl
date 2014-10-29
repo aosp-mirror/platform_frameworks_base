@@ -18,5 +18,14 @@ package com.android.internal.widget;
 
 /** {@hide} */
 oneway interface ILockSettingsObserver {
+    /**
+     * Called when a lock setting has changed.
+     *
+     * Note: Impementations of this should do as little work as possible, because this may be
+     * called synchronously while writing a setting.
+     *
+     * @param key the key of the setting that has changed or {@code null} if any may have changed.
+     * @param userId the user whose setting has changed.
+     */
     void onLockSettingChanged(in String key, in int userId);
 }

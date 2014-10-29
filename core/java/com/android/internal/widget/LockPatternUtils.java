@@ -65,6 +65,13 @@ public class LockPatternUtils {
     private static final boolean DEBUG = false;
 
     /**
+     * If true, LockPatternUtils will cache its values in-process. While this leads to faster reads,
+     * it can cause problems because writes to to the settings are no longer synchronous
+     * across all processes.
+     */
+    private static final boolean ENABLE_CLIENT_CACHE = false;
+
+    /**
      * The maximum number of incorrect attempts before the user is prevented
      * from trying again for {@link #FAILED_ATTEMPT_TIMEOUT_MS}.
      */
@@ -207,8 +214,13 @@ public class LockPatternUtils {
 
     private ILockSettings getLockSettings() {
         if (mLockSettingsService == null) {
-            mLockSettingsService = LockPatternUtilsCache.getInstance(
-                    ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings")));
+            ILockSettings service = ILockSettings.Stub.asInterface(
+                    ServiceManager.getService("lock_settings"));
+            if (ENABLE_CLIENT_CACHE) {
+                mLockSettingsService = LockPatternUtilsCache.getInstance(service);
+            } else {
+                mLockSettingsService = service;
+            }
         }
         return mLockSettingsService;
     }

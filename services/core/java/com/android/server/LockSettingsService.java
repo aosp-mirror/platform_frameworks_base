@@ -49,6 +49,7 @@ import android.util.Slog;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.ILockSettingsObserver;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockPatternUtilsCache;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -348,6 +349,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         final byte[] hash = LockPatternUtils.patternToHash(
                 LockPatternUtils.stringToPattern(pattern));
         mStorage.writePatternHash(hash, userId);
+        notifyObservers(LockPatternUtilsCache.HAS_LOCK_PATTERN_CACHE_KEY, userId);
     }
 
     @Override
@@ -357,6 +359,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         maybeUpdateKeystore(password, userId);
 
         mStorage.writePasswordHash(mLockPatternUtils.passwordToHash(password, userId), userId);
+        notifyObservers(LockPatternUtilsCache.HAS_LOCK_PASSWORD_CACHE_KEY, userId);
     }
 
     @Override
