@@ -639,10 +639,10 @@ public abstract class PanelView extends FrameLayout {
         }
 
         mExpandedHeight = Math.max(0, mExpandedHeight);
-        onHeightUpdated(mExpandedHeight);
         mExpandedFraction = Math.min(1f, fhWithoutOverExpansion == 0
                 ? 0
                 : mExpandedHeight / fhWithoutOverExpansion);
+        onHeightUpdated(mExpandedHeight);
         notifyBarPanelExpansionChanged();
     }
 
