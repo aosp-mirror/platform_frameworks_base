@@ -1772,7 +1772,7 @@
     <string name="lock_to_app_start" msgid="6643342070839862795">"画面を固定しました"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"画面固定を解除しました"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"オフライン再生を解除する前にPINの入力を求める"</string>
-    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"オフライン再生を解除する前にロック解除パターンの入力を求める"</string>
+    <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"画面固定を解除する前にロック解除パターンの入力を求める"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"オフライン再生を解除する前にパスワードの入力を求める"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンス、バイブレーション、ほとんどのバックグラウンドデータを制限します。同期を使用するメールやメッセージなどのアプリは起動しないと更新されない場合があります。\n\nバッテリーセーバーは、端末の充電中は自動的にOFFになります。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>にダウンロードが終わるまで"</string>
