@@ -673,6 +673,12 @@ public class ProgressBar extends View {
                 if (tintInfo.mHasIndeterminateTintMode) {
                     mIndeterminateDrawable.setTintMode(tintInfo.mIndeterminateTintMode);
                 }
+
+                // The drawable (or one of its children) may not have been
+                // stateful before applying the tint, so let's try again.
+                if (mIndeterminateDrawable.isStateful()) {
+                    mIndeterminateDrawable.setState(getDrawableState());
+                }
             }
         }
     }
@@ -781,6 +787,12 @@ public class ProgressBar extends View {
                 if (mProgressTintInfo.mHasProgressTintMode) {
                     target.setTintMode(mProgressTintInfo.mProgressTintMode);
                 }
+
+                // The drawable (or one of its children) may not have been
+                // stateful before applying the tint, so let's try again.
+                if (target.isStateful()) {
+                    target.setState(getDrawableState());
+                }
             }
         }
     }
@@ -800,6 +812,12 @@ public class ProgressBar extends View {
                 if (mProgressTintInfo.mHasProgressBackgroundTintMode) {
                     target.setTintMode(mProgressTintInfo.mProgressBackgroundTintMode);
                 }
+
+                // The drawable (or one of its children) may not have been
+                // stateful before applying the tint, so let's try again.
+                if (target.isStateful()) {
+                    target.setState(getDrawableState());
+                }
             }
         }
     }
@@ -818,6 +836,12 @@ public class ProgressBar extends View {
                 }
                 if (mProgressTintInfo.mHasSecondaryProgressTintMode) {
                     target.setTintMode(mProgressTintInfo.mSecondaryProgressTintMode);
+                }
+
+                // The drawable (or one of its children) may not have been
+                // stateful before applying the tint, so let's try again.
+                if (target.isStateful()) {
+                    target.setState(getDrawableState());
                 }
             }
         }
