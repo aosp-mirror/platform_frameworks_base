@@ -72,6 +72,10 @@ public class DozeParameters {
         return getInt("doze.pulse.duration.in", R.integer.doze_pulse_duration_in);
     }
 
+    public int getPulseInDelay() {
+        return getInt("doze.pulse.delay.in", R.integer.doze_pulse_delay_in);
+    }
+
     public int getPulseVisibleDuration() {
         return getInt("doze.pulse.duration.visible", R.integer.doze_pulse_duration_visible);
     }
