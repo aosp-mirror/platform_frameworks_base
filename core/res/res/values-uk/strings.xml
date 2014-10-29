@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Дозволяє програмі читати з файлової системи кеш-пам’яті та писати в неї."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"здійснювати й отримувати дзвінки через протокол SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Додаток зможе здійснювати й отримувати дзвінки через протокол SIP."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"реєстрація нових телекомунікаційних з’єднань"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"Додаток може реєструвати нові телекомунікаційні з’єднання."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"керування телекомунікаційними з’єднаннями"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Додаток може керувати телекомунікаційними з’єднаннями."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"взаємодіяти з екраном вхідного дзвінка"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Додаток може контролювати, коли та як користувач бачить екран вхідного дзвінка."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"взаємодіяти з телефонними службами"</string>
@@ -1772,6 +1776,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Запитувати пароль перед відкріпленням"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Щоб подовжити час роботи акумулятора, функція заощадження заряду акумулятора знизить продуктивність пристрою й обмежить вібрацію та більшість фонових даних. Електронна пошта, повідомлення й інші додатки, які синхронізуються, можуть не оновлюватися, доки ви їх не відкриєте.\n\nФункція заощадження заряду акумулятора автоматично вимкнеться, коли пристрій заряджатиметься."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Термін простою закінчується о <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Протягом хвилини"</item>
     <item quantity="other" msgid="6924190729213550991">"Протягом %d хв"</item>
@@ -1780,5 +1788,7 @@
     <item quantity="one" msgid="3480040795582254384">"Протягом години"</item>
     <item quantity="other" msgid="5408537517529822157">"Протягом %d год"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Без обмежень"</string>
 </resources>

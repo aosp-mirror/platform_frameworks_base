@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Umožňuje aplikácii čítať a zapisovať do súborového systému vyrovnávacej pamäte."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"uskutočňovanie/príjem hovorov SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Umožňuje aplikácii uskutočňovať a prijímať hovory SIP."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"registrácia nových pripojení telefonických sietí"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"Povoľuje aplikácii registrovať nové pripojenia telekomunikačnej siete."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"správa pripojení telefonických sietí"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Povoľuje aplikácii spravovať pripojenia telekomunikačnej siete."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interakcia s obrazovkou hovoru"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Umožňuje aplikácii ovládať, kedy a ako sa používateľovi zobrazí obrazovka hovoru."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"komunikovať s telefonickými službami"</string>
@@ -1772,6 +1776,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred uvoľnením požiadať o heslo"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Na predĺženie výdrže batérie šetrič batérie znižuje výkonnosť zariadenia a obmedzuje vibrácie a prenos údajov na pozadí. E-mail, správy a ďalšie aplikácie, ktoré používajú synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokým o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí výpadok"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Na jednu minútu"</item>
     <item quantity="other" msgid="6924190729213550991">"Na %d min"</item>
@@ -1780,5 +1788,7 @@
     <item quantity="one" msgid="3480040795582254384">"Na 1 h"</item>
     <item quantity="other" msgid="5408537517529822157">"Na %d h"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Natrvalo"</string>
 </resources>

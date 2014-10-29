@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ឲ្យ​កម្មវិធី​អាន និង​សរសេរ​ប្រព័ន្ធ​ឯកសារ​ឃ្លាំង​សម្ងាត់។"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"បង្កើត/ទទួល ការ​ហៅ SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"​ឲ្យ​​កម្មវិធី បង្កើត និង​ទទួល​ការ​ហៅ SIP ។"</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"ចុះ​ឈ្មោះ​ភ្ជាប់​ទូរគមនាគមន៍​ថ្មី"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"ឲ្យ​កម្មវិធី​ចុះ​ឈ្មោះ​ការ​ភ្ជាប់​ទូរគមនាគមន៍​ថ្មី។"</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"គ្រប់គ្រង​ការ​ភ្ជាប់​ទូរគមនាគមន៍"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​ការ​ភ្ជាប់​ទូរគមនាគមន៍។"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ទាក់ទង​ជា​មួយ​អេក្រង់​ហៅ​ចូល"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ឲ្យ​កម្មវិធី​ពិនិត្យ​ពេលវេលា និង​វិធី​ដែល​អ្នកប្រើ​មើល​ឃើញ​អេក្រង់​ហៅ​ចូល។"</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ទាក់ទង​ជា​មួយ​សេវាកម្ម​ទូរស័ព្ទ"</string>
@@ -1774,6 +1778,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ដើម្បី​បង្កើន​អាយុ​ថ្ម កម្មវិធី​សន្សំ​ថ្ម​កាត់​បន្ថយ​ការអនុវត្ត​ឧបករណ៍​របស់​អ្នក​ ហើយ​​កម្រិត​ការ​ញ័រ និង​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ។ អ៊ីមែល, ការ​ផ្ញើ​សារ និង​កម្មវិធី​ផ្សេងៗ​ទៀត​ដែល​ផ្អែក​លើ​ការ​ធ្វើ​សម​កាល​កម្ម​​​មិន​អាច​ធ្វើ​បច្ចុប្បន្នភាព​លុះ​ត្រា​តែ​អ្នក​បើក​ពួកវា។\n\nកម្មវិធី​សន្សំ​ថ្ម​បិទ​ដោយ​ស្វ័យ​ប្រវត្តិ​ពេល​ឧបករណ៍​របស់​អ្នក​កំពុង​បញ្ចូល​ថ្ម។"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"រហូត​ដល់ម៉ោង​សម្រាក ឬរវល់​របស់​អ្នក​បញ្ចប់​នៅ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"សម្រាប់​មួយ​នាទី"</item>
     <item quantity="other" msgid="6924190729213550991">"សម្រាប់ %d នាទី"</item>
@@ -1782,5 +1790,7 @@
     <item quantity="one" msgid="3480040795582254384">"សម្រាប់​មួយ​ម៉ោង"</item>
     <item quantity="other" msgid="5408537517529822157">"សម្រាប់ %d ម៉ោង"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"គ្មាន​​កំណត់"</string>
 </resources>
