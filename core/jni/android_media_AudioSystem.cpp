@@ -390,7 +390,7 @@ android_media_AudioSystem_setMasterMute(JNIEnv *env, jobject thiz, jboolean mute
     return (jint) check_AudioSystem_Command(AudioSystem::setMasterMute(mute));
 }
 
-static jfloat
+static jboolean
 android_media_AudioSystem_getMasterMute(JNIEnv *env, jobject thiz)
 {
     bool mute;
