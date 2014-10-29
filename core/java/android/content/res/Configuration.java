@@ -1371,7 +1371,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             }
         }
 
-        if (!config.locale.getLanguage().isEmpty()) {
+        if (config.locale != null && !config.locale.getLanguage().isEmpty()) {
             parts.add(localeToResourceQualifier(config.locale));
         }
 
