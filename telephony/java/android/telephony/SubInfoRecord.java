@@ -29,98 +29,138 @@ public class SubInfoRecord implements Parcelable {
      * Subscription Identifier, this is a device unique number
      * and not an index into an array
      */
-    public int subId;
-    /** The GID for a SIM that maybe associated with this subscription, empty if unknown */
-    public String iccId;
+    private int mId;
+
     /**
-     * The slot identifier for that currently contains the subscription
+     * The GID for a SIM that maybe associated with this subscription, empty if unknown
+     */
+    private String mIccId;
+
+    /**
+     * The index of the slot that currently contains the subscription
      * and not necessarily unique and maybe INVALID_SLOT_ID if unknown
      */
-    public int slotId;
+    private int mSimSlotIndex;
+
     /**
-     * The string displayed to the user that identifies this subscription
+     * The name displayed to the user that identifies this subscription
      */
-    public String displayName;
+    private CharSequence mDisplayName;
+
     /**
      * The source of the name, NAME_SOURCE_UNDEFINED, NAME_SOURCE_DEFAULT_SOURCE,
      * NAME_SOURCE_SIM_SOURCE or NAME_SOURCE_USER_INPUT.
      */
-    public int nameSource;
+    private int mNameSource;
+
     /**
      * The color to be used for when displaying to the user
      */
-    public int color;
+    private int mColor;
+
     /**
      * A number presented to the user identify this subscription
      */
-    public String number;
-    /**
-     * How to display the phone number, DISPLAY_NUMBER_NONE, DISPLAY_NUMBER_FIRST,
-     * DISPLAY_NUMBER_LAST
-     */
-    public int displayNumberFormat;
+    private String mNumber;
+
     /**
      * Data roaming state, DATA_RAOMING_ENABLE, DATA_RAOMING_DISABLE
      */
-    public int dataRoaming;
+    private int mDataRoaming;
+
     /**
      * SIM Icon resource identifiers. FIXME: Check with MTK what it really is
      */
-    public int[] simIconRes;
+    private int[] mSimIconRes;
+
     /**
      * Mobile Country Code
      */
-    public int mcc;
+    private int mMcc;
+
     /**
      * Mobile Network Code
      */
-    public int mnc;
+    private int mMnc;
 
+    /**
+     * @hide
     public SubInfoRecord() {
-        this.subId = SubscriptionManager.INVALID_SUB_ID;
-        this.iccId = "";
-        this.slotId = SubscriptionManager.INVALID_SLOT_ID;
-        this.displayName = "";
-        this.nameSource = 0;
-        this.color = 0;
-        this.number = "";
-        this.displayNumberFormat = 0;
-        this.dataRoaming = 0;
-        this.simIconRes = new int[2];
-        this.mcc = 0;
-        this.mnc = 0;
+        this.mId = SubscriptionManager.INVALID_SUB_ID;
+        this.mIccId = "";
+        this.mSimSlotIndex = SubscriptionManager.INVALID_SLOT_ID;
+        this.mDisplayName = "";
+        this.mNameSource = 0;
+        this.mColor = 0;
+        this.mNumber = "";
+        this.mDataRoaming = 0;
+        this.mSimIconRes = new int[2];
+        this.mMcc = 0;
+        this.mMnc = 0;
     }
+     */
 
-    public SubInfoRecord(int subId, String iccId, int slotId, String displayName, int nameSource,
-            int color, String number, int displayFormat, int roaming, int[] iconRes,
-            int mcc, int mnc) {
-        this.subId = subId;
-        this.iccId = iccId;
-        this.slotId = slotId;
-        this.displayName = displayName;
-        this.nameSource = nameSource;
-        this.color = color;
-        this.number = number;
-        this.displayNumberFormat = displayFormat;
-        this.dataRoaming = roaming;
-        this.simIconRes = iconRes;
-        this.mcc = mcc;
-        this.mnc = mnc;
+    /**
+     * @hide
+     */
+    public SubInfoRecord(int id, String iccId, int simSlotIndex, CharSequence displayName,
+            int nameSource, int color, String number, int roaming, int[] iconRes, int mcc,
+            int mnc) {
+        this.mId = id;
+        this.mIccId = iccId;
+        this.mSimSlotIndex = simSlotIndex;
+        this.mDisplayName = displayName;
+        this.mNameSource = nameSource;
+        this.mColor = color;
+        this.mNumber = number;
+        this.mDataRoaming = roaming;
+        this.mSimIconRes = iconRes;
+        this.mMcc = mcc;
+        this.mMnc = mnc;
     }
 
     /**
-     * Returns the string displayed to the user that identifies this subscription
+     * Returns the subscription ID.
      */
-    public String getLabel() {
-        return this.displayName;
+    public int getSubscriptionId() {
+        return this.mId;
     }
 
     /**
-     * Return the icon used to identify this SIM.
-     * TODO: return the correct drawable.
+     * Returns the ICC ID.
      */
-    public BitmapDrawable getIconDrawable() {
-        return new BitmapDrawable();
+    public String getIccId() {
+        return this.mIccId;
+    }
+
+    /**
+     * Returns the slot index of this Subscription's SIM card.
+     */
+    public int getSimSlotIndex() {
+        return this.mSimSlotIndex;
+    }
+
+    /**
+     * Returns the name displayed to the user that identifies this subscription
+     */
+    public CharSequence getDisplayName() {
+        return this.mDisplayName;
+    }
+
+    /**
+     * Sets the name displayed to the user that identifies this subscription
+     * @hide
+     */
+    public void setDisplayName(CharSequence name) {
+        this.mDisplayName = name;
+    }
+
+    /**
+     * Return the source of the name, eg NAME_SOURCE_UNDEFINED, NAME_SOURCE_DEFAULT_SOURCE,
+     * NAME_SOURCE_SIM_SOURCE or NAME_SOURCE_USER_INPUT.
+     */
+    public int getNameSource() {
+        return this.mNameSource;
     }
 
     /**
@@ -130,28 +170,70 @@ public class SubInfoRecord implements Parcelable {
     public int getColor() {
         // Note: This color is currently an index into a list of drawables, but this is soon to
         // change.
-        return this.color;
+        return this.mColor;
+    }
+
+    /**
+     * Sets the color displayed to the user that identifies this subscription
+     * @hide
+     */
+    public void setColor(int color) {
+        this.mColor = color;
+    }
+
+    /**
+     * Returns the number of this subscription.
+     */
+    public String getNumber() {
+        return mNumber;
+    }
+
+    /**
+     * Return the data roaming value.
+     */
+    public int getDataRoaming() {
+        return this.mDataRoaming;
+    }
+
+    /**
+     * Return the icon used to identify this subscription.
+     */
+    public BitmapDrawable getIcon() {
+        return new BitmapDrawable();
+    }
+
+    /**
+     * Returns the MCC.
+     */
+    public int getMcc() {
+        return this.mMcc;
+    }
+
+    /**
+     * Returns the MNC.
+     */
+    public int getMnc() {
+        return this.mMnc;
     }
 
     public static final Parcelable.Creator<SubInfoRecord> CREATOR = new Parcelable.Creator<SubInfoRecord>() {
         @Override
         public SubInfoRecord createFromParcel(Parcel source) {
-            int subId = source.readInt();
+            int id = source.readInt();
             String iccId = source.readString();
-            int slotId = source.readInt();
+            int simSlotIndex = source.readInt();
             String displayName = source.readString();
             int nameSource = source.readInt();
             int color = source.readInt();
             String number = source.readString();
-            int displayNumberFormat = source.readInt();
             int dataRoaming = source.readInt();
             int[] iconRes = new int[2];
             source.readIntArray(iconRes);
             int mcc = source.readInt();
             int mnc = source.readInt();
 
-            return new SubInfoRecord(subId, iccId, slotId, displayName, nameSource, color, number,
-                displayNumberFormat, dataRoaming, iconRes, mcc, mnc);
+            return new SubInfoRecord(id, iccId, simSlotIndex, displayName, nameSource, color, number,
+                    dataRoaming, iconRes, mcc, mnc);
         }
 
         @Override
@@ -162,18 +244,17 @@ public class SubInfoRecord implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(subId);
-        dest.writeString(iccId);
-        dest.writeInt(slotId);
-        dest.writeString(displayName);
-        dest.writeInt(nameSource);
-        dest.writeInt(color);
-        dest.writeString(number);
-        dest.writeInt(displayNumberFormat);
-        dest.writeInt(dataRoaming);
-        dest.writeIntArray(simIconRes);
-        dest.writeInt(mcc);
-        dest.writeInt(mnc);
+        dest.writeInt(mId);
+        dest.writeString(mIccId);
+        dest.writeInt(mSimSlotIndex);
+        dest.writeString(mDisplayName.toString());
+        dest.writeInt(mNameSource);
+        dest.writeInt(mColor);
+        dest.writeString(mNumber.toString());
+        dest.writeInt(mDataRoaming);
+        dest.writeIntArray(mSimIconRes);
+        dest.writeInt(mMcc);
+        dest.writeInt(mMnc);
     }
 
     @Override
@@ -183,10 +264,9 @@ public class SubInfoRecord implements Parcelable {
 
     @Override
     public String toString() {
-        return "{mSubId=" + subId + ", mIccId=" + iccId + " mSlotId=" + slotId
-                + " mDisplayName=" + displayName + " mNameSource=" + nameSource
-                + " mColor=" + color + " mNumber=" + number
-                + " mDisplayNumberFormat=" + displayNumberFormat + " mDataRoaming=" + dataRoaming
-                + " mSimIconRes=" + simIconRes + " mMcc " + mcc + " mMnc " + mnc + "}";
+        return "{id=" + mId + ", iccId=" + mIccId + " simSlotIndex=" + mSimSlotIndex
+                + " displayName=" + mDisplayName + " nameSource=" + mNameSource + " color=" + mColor
+                + " number=" + mNumber + " dataRoaming=" + mDataRoaming + " simIconRes=" + mSimIconRes
+                + " mcc " + mMcc + " mnc " + mMnc + "}";
     }
 }
