@@ -22,6 +22,7 @@ import android.os.Parcelable;
 
 /**
  * A Parcelable class for Subscription Information.
+ * @hide
  */
 public class SubInfoRecord implements Parcelable {
 
