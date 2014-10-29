@@ -265,18 +265,21 @@ void JNISoundTriggerCallback::onRecognitionEvent(struct sound_trigger_recognitio
                                 event->capture_session, event->capture_delay_ms,
                                 event->capture_preamble_ms, event->trigger_in_data,
                                 jAudioFormat, jData, jExtras);
-        env->DeleteLocalRef(jAudioFormat);
-        env->DeleteLocalRef(jData);
+        env->DeleteLocalRef(jExtras);
     } else {
         jEvent = env->NewObject(gRecognitionEventClass, gRecognitionEventCstor,
                                 event->status, event->model, event->capture_available,
                                 event->capture_session, event->capture_delay_ms,
                                 event->capture_preamble_ms, event->trigger_in_data,
                                 jAudioFormat, jData);
-        env->DeleteLocalRef(jAudioFormat);
-        env->DeleteLocalRef(jData);
     }
 
+    if (jAudioFormat != NULL) {
+        env->DeleteLocalRef(jAudioFormat);
+    }
+    if (jData != NULL) {
+        env->DeleteLocalRef(jData);
+    }
 
     env->CallStaticVoidMethod(mClass, gPostEventFromNative, mObject,
                               SOUNDTRIGGER_EVENT_RECOGNITION, 0, 0, jEvent);
