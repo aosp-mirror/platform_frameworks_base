@@ -109,7 +109,12 @@ public final class WebViewFactory {
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
                 Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "providerClass.newInstance()");
                 try {
-                    sProviderInstance = providerClass.newInstance();
+                    try {
+                        sProviderInstance = providerClass.getConstructor(WebViewDelegate.class)
+                                .newInstance(new WebViewDelegate());
+                    } catch (Exception e) {
+                        sProviderInstance = providerClass.newInstance();
+                    }
                     if (DEBUG) Log.v(LOGTAG, "Loaded provider: " + sProviderInstance);
                     return sProviderInstance;
                 } catch (Exception e) {
