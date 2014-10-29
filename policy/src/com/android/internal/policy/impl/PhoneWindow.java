@@ -1332,6 +1332,22 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public final void setElevation(float elevation) {
+        mElevation = elevation;
+        if (mDecor != null) {
+            mDecor.setElevation(elevation);
+        }
+    }
+
+    @Override
+    public final void setClipToOutline(boolean clipToOutline) {
+        mClipToOutline = clipToOutline;
+        if (mDecor != null) {
+            mDecor.setClipToOutline(clipToOutline);
+        }
+    }
+
+    @Override
     public final void setBackgroundDrawable(Drawable drawable) {
         if (drawable != mBackgroundDrawable || mBackgroundResource != 0) {
             mBackgroundResource = 0;
