@@ -104,6 +104,7 @@ public class Toolbar extends ViewGroup {
     private ImageView mLogoView;
 
     private Drawable mCollapseIcon;
+    private CharSequence mCollapseDescription;
     private ImageButton mCollapseButtonView;
     View mExpandedActionView;
 
@@ -238,6 +239,7 @@ public class Toolbar extends ViewGroup {
         }
 
         mCollapseIcon = a.getDrawable(R.styleable.Toolbar_collapseIcon);
+        mCollapseDescription = a.getText(R.styleable.Toolbar_collapseContentDescription);
 
         final CharSequence title = a.getText(R.styleable.Toolbar_title);
         if (!TextUtils.isEmpty(title)) {
@@ -998,6 +1000,7 @@ public class Toolbar extends ViewGroup {
         if (mCollapseButtonView == null) {
             mCollapseButtonView = new ImageButton(getContext(), null, 0, mNavButtonStyle);
             mCollapseButtonView.setImageDrawable(mCollapseIcon);
+            mCollapseButtonView.setContentDescription(mCollapseDescription);
             final LayoutParams lp = generateDefaultLayoutParams();
             lp.gravity = Gravity.START | (mButtonGravity & Gravity.VERTICAL_GRAVITY_MASK);
             lp.mViewType = LayoutParams.EXPANDED;
