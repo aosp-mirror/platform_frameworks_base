@@ -59,6 +59,7 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Display;
@@ -112,6 +113,9 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean MULTIUSER_DEBUG = false;
+
+    // STOPSHIP disable once we resolve b/18102199
+    private static final boolean ACTION_BUTTONS_DEBUG = true;
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
@@ -324,6 +328,9 @@ public abstract class BaseStatusBar extends SystemUI implements
                     parent != null && parent instanceof ViewGroup) {
                 ViewGroup actionGroup = (ViewGroup) parent;
                 index = actionGroup.indexOfChild(view);
+            }
+            if (NOTIFICATION_CLICK_DEBUG) {
+                Log.d(TAG, "Clicked on button " + index + " for " + key);
             }
             try {
                 mBarService.onNotificationActionClick(key, index);
@@ -1515,6 +1522,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         public void onClick(final View v) {
+            if (NOTIFICATION_CLICK_DEBUG) {
+                Log.d(TAG, "Clicked on content of " + mNotificationKey);
+            }
             final boolean keyguardShowing = mStatusBarKeyguardViewManager.isShowing();
             final boolean afterKeyguardGone = mIntent.isActivity()
                     && PreviewInflater.wouldLaunchResolverActivity(mContext, mIntent.getIntent(),
