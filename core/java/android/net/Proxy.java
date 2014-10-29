@@ -23,18 +23,9 @@ import android.net.ProxyInfo;
 import android.text.TextUtils;
 import android.util.Log;
 
-
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.protocol.HttpContext;
-
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.URI;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,8 +35,6 @@ import java.util.regex.Pattern;
  */
 public final class Proxy {
 
-    // Set to true to enable extra debugging.
-    private static final boolean DEBUG = false;
     private static final String TAG = "Proxy";
 
     private static final ProxySelector sDefaultProxySelector;
@@ -196,30 +185,6 @@ public final class Proxy {
             return Integer.parseInt(System.getProperty("http.proxyPort"));
         } catch (NumberFormatException e) {
             return -1;
-        }
-    }
-
-    /**
-     * Returns the preferred proxy to be used by clients. This is a wrapper
-     * around {@link android.net.Proxy#getHost()}.
-     *
-     * @param context the context which will be passed to
-     * {@link android.net.Proxy#getHost()}
-     * @param url the target URL for the request
-     * @note Calling this method requires permission
-     * android.permission.ACCESS_NETWORK_STATE
-     * @return The preferred proxy to be used by clients, or null if there
-     * is no proxy.
-     * {@hide}
-     */
-    public static final HttpHost getPreferredHttpHost(Context context,
-            String url) {
-        java.net.Proxy prefProxy = getProxy(context, url);
-        if (prefProxy.equals(java.net.Proxy.NO_PROXY)) {
-            return null;
-        } else {
-            InetSocketAddress sa = (InetSocketAddress)prefProxy.address();
-            return new HttpHost(sa.getHostName(), sa.getPort(), "http");
         }
     }
 
