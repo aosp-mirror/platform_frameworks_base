@@ -194,22 +194,22 @@ It includes a white controller on black background and a black controller on whi
 
 <p>There are a some special things games should include in the Android manifest.</p>
 
-<h3 id="Launcher">Show your game in the launcher</h3>
+<h3 id="Launcher">Show your game on the home screen</h3>
 <p>
-  The Android TV launcher home screen displays games in a separate row from regular apps.
-  To make your game appear in the list of games, add the
-  <a href="{@docRoot}guide/topics/manifest/meta-data-element.html"
-  ><code>&lt;meta-data></code></a> tag in your app manifest with <code>android:name</code>
-  set to <code>"isGame"</code> and <code>android:value</code>
-  set to <code>"true"</code>. For example:
+  The Android TV home screen displays games in a separate row from regular apps.
+  To make your game appear in the list of games, set the
+  <a href="{@docRoot}guide/topics/manifest/application-element.html#isGame">
+  {@code android:isGame}</a> attribute to <code>"true"</code> in your app manifest's
+  <a href="{@docRoot}guide/topics/manifest/application-element.html"><code>&lt;application&gt;</code>
+  </a> tag. For example:
 </p>
 
 <pre class="fragment">
-&lt;application&gt;
-  ...
-  &lt;meta-data android:name="isGame" android:value="true" &gt;
-  ...
-&lt;/application&gt;
+&lt;application
+    ...
+    android:isGame="true"
+    ...
+&gt;
 </pre>
 
 
