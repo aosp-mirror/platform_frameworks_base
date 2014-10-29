@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.Resources.Theme;
+import android.util.AttributeSet;
 
 /**
  * Delegate providing alternate implementation to static methods in {@link AnimatorInflater}.
@@ -47,5 +48,12 @@ public class AnimatorInflater_Delegate {
         // animation altogether.
         // TODO: Remove this override when Path.approximate() is supported.
         return new FakeAnimator();
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static ValueAnimator loadAnimator(Resources res, Theme theme,
+            AttributeSet attrs, ValueAnimator anim, float pathErrorScale)
+            throws NotFoundException {
+        return anim;
     }
 }
