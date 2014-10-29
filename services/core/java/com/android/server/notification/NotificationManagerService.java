@@ -41,6 +41,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -657,7 +658,7 @@ public class NotificationManagerService extends SystemService {
         }
     };
 
-    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mPackageIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
@@ -673,6 +674,8 @@ public class NotificationManagerService extends SystemService {
                     || (packageChanged=action.equals(Intent.ACTION_PACKAGE_CHANGED))
                     || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
                     || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
+                int changeUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                        UserHandle.USER_ALL);
                 String pkgList[] = null;
                 boolean queryReplace = queryRemove &&
                         intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
@@ -693,8 +696,10 @@ public class NotificationManagerService extends SystemService {
                     if (packageChanged) {
                         // We cancel notifications for packages which have just been disabled
                         try {
-                            final int enabled = getContext().getPackageManager()
-                                    .getApplicationEnabledSetting(pkgName);
+                            final IPackageManager pm = AppGlobals.getPackageManager();
+                            final int enabled = pm.getApplicationEnabledSetting(pkgName,
+                                    changeUserId != UserHandle.USER_ALL ? changeUserId :
+                                    UserHandle.USER_OWNER);
                             if (enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                                     || enabled == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT) {
                                 cancelNotifications = false;
@@ -705,6 +710,8 @@ public class NotificationManagerService extends SystemService {
                             if (DBG) {
                                 Slog.i(TAG, "Exception trying to look up app enabled setting", e);
                             }
+                        } catch (RemoteException e) {
+                            // Failed to talk to PackageManagerService Should never happen!
                         }
                     }
                     pkgList = new String[]{pkgName};
@@ -714,13 +721,22 @@ public class NotificationManagerService extends SystemService {
                     for (String pkgName : pkgList) {
                         if (cancelNotifications) {
                             cancelAllNotificationsInt(MY_UID, MY_PID, pkgName, 0, 0, !queryRestart,
-                                    UserHandle.USER_ALL, REASON_PACKAGE_CHANGED, null);
+                                    changeUserId, REASON_PACKAGE_CHANGED, null);
                         }
                     }
                 }
                 mListeners.onPackagesChanged(queryReplace, pkgList);
                 mConditionProviders.onPackagesChanged(queryReplace, pkgList);
-            } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+            }
+        }
+    };
+
+    private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 // Keep track of screen on/off state, but do not turn off the notification light
                 // until user passes through the lock screen or views the notification.
                 mScreenOn = true;
@@ -903,6 +919,7 @@ public class NotificationManagerService extends SystemService {
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         getContext().registerReceiver(mIntentReceiver, filter);
+
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
@@ -910,9 +927,12 @@ public class NotificationManagerService extends SystemService {
         pkgFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
         pkgFilter.addDataScheme("package");
-        getContext().registerReceiver(mIntentReceiver, pkgFilter);
+        getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL, pkgFilter, null,
+                null);
+
         IntentFilter sdFilter = new IntentFilter(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
-        getContext().registerReceiver(mIntentReceiver, sdFilter);
+        getContext().registerReceiverAsUser(mPackageIntentReceiver, UserHandle.ALL, sdFilter, null,
+                null);
 
         mSettingsObserver = new SettingsObserver(mHandler);
 
