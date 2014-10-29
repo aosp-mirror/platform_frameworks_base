@@ -28,6 +28,7 @@ import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeHost;
@@ -70,9 +71,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private Runnable mOnAnimationFinished;
     private boolean mAnimationStarted;
     private boolean mDozing;
+    private boolean mPulsingOut;
     private DozeHost.PulseCallback mPulseCallback;
     private final Interpolator mInterpolator = new DecelerateInterpolator();
     private final Interpolator mLinearOutSlowInInterpolator;
+    private final Interpolator mPulseInInterpolator = PhoneStatusBar.ALPHA_OUT;
+    private final Interpolator mPulseOutInterpolator = PhoneStatusBar.ALPHA_IN;
     private BackDropView mBackDropView;
     private boolean mScrimSrcEnabled;
 
@@ -130,14 +134,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         scheduleUpdate();
     }
 
-    public void setDozing(boolean dozing) {
+    public void setDozing(boolean dozing, boolean animate) {
         if (mDozing == dozing) return;
         mDozing = dozing;
         if (!mDozing) {
             cancelPulsing();
-            mAnimateChange = true;
-        } else {
-            mAnimateChange = false;
+            mAnimateChange = animate;
         }
         scheduleUpdate();
     }
@@ -181,6 +183,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     }
 
     private void pulseFinished() {
+        mPulsingOut = false;
         if (mPulseCallback != null) {
             mPulseCallback.onPulseFinished();
             mPulseCallback = null;
@@ -220,8 +223,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         } else if (mBouncerShowing) {
             setScrimInFrontColor(SCRIM_IN_FRONT_ALPHA);
             setScrimBehindColor(0f);
+        } else if (mDozing && isPulsing() && !mPulsingOut) {
+            setScrimInFrontColor(0);
+            setScrimBehindColor(SCRIM_BEHIND_ALPHA_KEYGUARD);
         } else if (mDozing) {
             setScrimInFrontColor(1);
+            setScrimBehindColor(SCRIM_BEHIND_ALPHA_KEYGUARD);
         } else {
             float fraction = Math.max(0, Math.min(mFraction, 1));
             setScrimInFrontColor(0f);
@@ -276,7 +283,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
     private void startScrimAnimation(final ScrimView scrim, int targetColor) {
         int current = Color.alpha(scrim.getScrimColor());
         int target = Color.alpha(targetColor);
-        if (current == targetColor) {
+        if (current == target) {
             return;
         }
         ValueAnimator anim = ValueAnimator.ofInt(current, target);
@@ -287,9 +294,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
                 scrim.setScrimColor(Color.argb(value, 0, 0, 0));
             }
         });
-        anim.setInterpolator(mAnimateKeyguardFadingOut
-                ? mLinearOutSlowInInterpolator
-                : mInterpolator);
+        anim.setInterpolator(getInterpolator());
         anim.setStartDelay(mAnimationDelay);
         anim.setDuration(mDurationOverride != -1 ? mDurationOverride : ANIMATION_DURATION);
         anim.addListener(new AnimatorListenerAdapter() {
@@ -305,6 +310,18 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
         anim.start();
         scrim.setTag(TAG_KEY_ANIM, anim);
         mAnimationStarted = true;
+    }
+
+    private Interpolator getInterpolator() {
+       if (mAnimateKeyguardFadingOut) {
+           return mLinearOutSlowInInterpolator;
+       } else if (isPulsing() && !mPulsingOut) {
+           return mPulseInInterpolator;
+       } else if (isPulsing()) {
+           return mPulseOutInterpolator;
+       } else {
+           return mInterpolator;
+       }
     }
 
     @Override
@@ -332,10 +349,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
             if (!mDozing) return;
             DozeLog.tracePulseStart();
             mDurationOverride = mDozeParameters.getPulseInDuration();
-            mAnimationDelay = 0;
+            mAnimationDelay = mDozeParameters.getPulseInDelay();
             mAnimateChange = true;
             mOnAnimationFinished = mPulseInFinished;
-            setScrimColor(mScrimInFront, 0);
+            scheduleUpdate();
 
             // Signal that the pulse is ready to turn the screen on and draw.
             pulseStarted();
@@ -357,10 +374,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener {
             if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
             mDurationOverride = mDozeParameters.getPulseOutDuration();
-            mAnimationDelay = 0;
             mAnimateChange = true;
             mOnAnimationFinished = mPulseOutFinished;
-            setScrimColor(mScrimInFront, 1);
+            mPulsingOut = true;
+            scheduleUpdate();
         }
     };
 
