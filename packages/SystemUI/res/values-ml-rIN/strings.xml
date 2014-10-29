@@ -275,8 +275,7 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> മുന്നറിയിപ്പ്"</string>
     <string name="recents_empty_message" msgid="8682129509540827999">"നിങ്ങളുടെ പുതിയ സ്ക്രീനുകൾ ഇവിടെ ദൃശ്യമാകുന്നു"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"അപ്ലിക്കേഷൻ വിവരം"</string>
-    <!-- no translation found for recents_lock_to_app_button_label (6942899049072506044) -->
-    <skip />
+    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"സ്ക്രീൻ പിൻ ചെയ്യൽ"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"തിരയുക"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> ആരംഭിക്കാനായില്ല."</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ചാർജ്ജുചെയ്‌തു"</string>
