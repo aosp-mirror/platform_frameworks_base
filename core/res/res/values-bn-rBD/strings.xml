@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ক্যাশে ফাইল সিস্টেম পড়তে ও লিখতে অ্যাপ্লিকেশানকে অনুমতি দেয়৷"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP কল করুন/গ্রহণ করুন"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"অ্যাপ্লিকেশানকে SIP কল করতে ও গ্রহণ করতে অনুমতি দেয়।"</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"নতুন টেলিকম সংযোগ নিবন্ধিত করুন"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"নতুন টেলিকম সংযোগ নিবন্ধিত করতে অ্যাপ্লিকেশানটিকে অনুমোদিত করে৷"</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"টেলিকম সংযোগগুলি পরিচালনা করুন"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"টেলিকম সংযোগগুলি পরিচালনা করতে  অ্যাপ্লিকেশানটিকে অনুমোদিত করে৷"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"কলে-থাকা স্ক্রীণের সাথে ইন্টারঅ্যাক্ট করে"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ব্যবহারকারী কখন এবং কীভাবে কলে-থাকা স্ক্রীণটিকে দেখতে পাবেন, অ্যাপ্লিকেশানটিকে তা নিয়ন্ত্রণ করতে দেয়৷"</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"টেলিফোন পরিষেবার সাথে ইন্টারঅ্যাক্ট করুন"</string>
@@ -1772,6 +1776,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"আনপিন করার আগে পাসওয়ার্ড চান"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ব্যাটারির আয়ু বাড়াতে সহায়তার জন্য, ব্যাটারি সঞ্চয়কারী আপনার ডিভাইসের কার্য-সম্পাদনা কমিয়ে আনবে এবং কম্পন ও পশ্চাদভূমি ডেটাকে সীমিত করবে। ইমেল, বার্তাপ্রেরণ ও অন্যান্য অ্যাপ্লিকেশান, যেগুলি সিঙ্ক হওয়ার উপর নির্ভরশীল সেগুলিকে আপনি না খোলা পর্যন্ত সেগুলি আপডেট নাও হতে পারে।\n\nআপনার ডিভাইস চার্জ হওয়ার সময় ব্যাটারি সঞ্চয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>টার সময়ে আপনার ডাউনটাইম শেষ হওয়া পর্যন্ত"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"এক মিনিটের জন্য"</item>
     <item quantity="other" msgid="6924190729213550991">"%d মিনিটের জন্য"</item>
@@ -1780,5 +1788,7 @@
     <item quantity="one" msgid="3480040795582254384">"এক ঘন্টার জন্য"</item>
     <item quantity="other" msgid="5408537517529822157">"%d ঘন্টার জন্য"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"অনির্দিষ্টভাবে"</string>
 </resources>

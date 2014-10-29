@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"कॅशे filesystem वाचण्यासाठी आणि लिहिण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कॉल करा/प्राप्त करा"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"अॅपला SIP कॉल करण्‍याची आणि प्राप्त करण्‍याची अनुमती देते."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"नवीन टेलिकॉम कनेक्शनची नोंदणी करा"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"नवीन टेलिकॉम कनेक्शनची नोंदणी करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"टेलिकॉम कनेक्शन व्यवस्थापित करा"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"टेलिकॉम कनेक्शन व्यवस्थापित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"कॉल-मधील स्‍क्रीनशी परस्‍परसंवाद करा"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"वापरकर्ता कॉल-मधील स्‍क्रीन केव्‍हा आणि कशी पाहतो ते नियंत्रित करण्‍याची अ‍ॅपला अनुमती देते."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"टेलिफोनी सेवांशी परस्परसंवाद साधा"</string>
@@ -1772,6 +1776,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"बॅटरीचे आयुष्य सुधारण्यात मदत होण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि अन्य अॅप्स आपण ते उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"आपला कार्य न करण्याचा कालावधी <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता समाप्त होईपर्यंत"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"एक मिनिटासाठी"</item>
     <item quantity="other" msgid="6924190729213550991">"%d मिनिटांसाठी"</item>
@@ -1780,5 +1788,7 @@
     <item quantity="one" msgid="3480040795582254384">"एका तासासाठी"</item>
     <item quantity="other" msgid="5408537517529822157">"%d तासांसाठी"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"अनिश्‍चितपणे"</string>
 </resources>

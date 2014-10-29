@@ -926,6 +926,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Колдонмого кэш файл тутумун окуу жана жазуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP чалууларын жасоо/кабыл алуу"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Колдонмонун SIP чалууларын жасап жана кабыл алуусуна жол ачат."</string>
+    <!-- no translation found for permlab_register_provider (2654513709546459553) -->
+    <skip />
+    <!-- no translation found for permdesc_register_provider (7571533832018681544) -->
+    <skip />
+    <!-- no translation found for permlab_connection_manager (1116193254522105375) -->
+    <skip />
+    <!-- no translation found for permdesc_connection_manager (5925480810356483565) -->
+    <skip />
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"чалуу экраны менен байланыштыруу"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Колдонмого чалуу экраны качан жана кандай көрүнө тургандыгын башкаруу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефония кызматтары"</string>
@@ -2252,6 +2260,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Бошотуудан мурун сырсөз суралсын"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Батарея өмүрүн узартууга жардамдашуу үчүн, батарея үнөмдөгүч түзмөгүңүздүн өндүрүмдүүлүгүн азайтып, дирилдөөнү жана көпчүлүк фон дайындарын чектейт. Email, билдирүү жазуу жана башка шайкештирүүгө көз каранды колдонмолор, аларды ачмайыңызча жаңыртылбашы мүмкүн.\n\nТүзмөгүңүз кубатталып жатканда батарея үнөмдөгүч автоматтык түрдө өчөт."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Иштебей турган абал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> аяктамайынча"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Бир мүнөткө"</item>
     <item quantity="other" msgid="6924190729213550991">"%d мүнөткө"</item>
@@ -2260,5 +2272,7 @@
     <item quantity="one" msgid="3480040795582254384">"Бир саатка"</item>
     <item quantity="other" msgid="5408537517529822157">"%d саатка"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Белгисиз"</string>
 </resources>

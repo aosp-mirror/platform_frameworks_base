@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"केस फाइल प्रणालीलाई पढ्न र लेख्‍नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कलहरू प्राप्त/बनाउन"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP कलहरू बनाउन र प्राप्त गर्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"नयाँ दूरसंचार जडान दर्ता गर्नुहोस्"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"अनुप्रयोग लाई नयाँ दूरसंचार सम्पर्क दर्ता गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"दूरसंचार जडान व्यवस्थापन गर्नुहोस्"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"अनुप्रयोग लाई टेलिकम जडान व्यवस्थापन गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"आगमन कल स्क्रिन संग अन्तर्क्रिया गर्नुहोस्"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"कहिले र कसरी प्रयोगकर्ताले आगमन कल स्क्रीन हेर्न सक्दछ भनेर नियन्त्रण गर्न अनुप्रयोगलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"टेलिफोनी सेवा अन्तरक्रिया"</string>
@@ -1780,6 +1784,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ब्याट्री जीवन सुधार्न, ब्याट्री बचतले आफ्नो उपकरणको प्रदर्शन र कम्पनको सीमा र सबैभन्दा पृष्ठभूमि डेटा कम गर्छ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जसले तपाईं तिनीहरूलाई नखोले सम्म समिकरण अद्यावधिक नगर्न सक्छ भनि भर पर्छ।\n\nब्याट्री बचतले तपाईँको उपकरण चार्ज हुँदै बेला तपाईँको उपकरण स्वचालित बन्द गर्छ।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"तपाईँको <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> डाउनटाइम समाप्त हुँदा सम्म"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"एक मिनेटको लागि"</item>
     <item quantity="other" msgid="6924190729213550991">"%d मिनेटको लागि"</item>
@@ -1788,5 +1796,7 @@
     <item quantity="one" msgid="3480040795582254384">"एक घण्टाको लागि"</item>
     <item quantity="other" msgid="5408537517529822157">"%d घण्टाको लागि"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"अनिश्चित"</string>
 </resources>
