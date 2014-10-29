@@ -63,6 +63,9 @@ public class NetworkAgentInfo {
     public final Messenger messenger;
     public final AsyncChannel asyncChannel;
 
+    // Used by ConnectivityService to keep track of 464xlat.
+    public Nat464Xlat clatd;
+
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
             NetworkMisc misc) {
