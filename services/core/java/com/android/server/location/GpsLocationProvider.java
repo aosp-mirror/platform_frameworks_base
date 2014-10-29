@@ -880,7 +880,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
-                GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(mContext, mProperties);
+                GpsXtraDownloader xtraDownloader = new GpsXtraDownloader(mProperties);
                 byte[] data = xtraDownloader.downloadXtraData();
                 if (data != null) {
                     if (DEBUG) {
