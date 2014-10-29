@@ -418,10 +418,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   pid_t pid = fork();
 
   if (pid == 0) {
-    if (!is_system_server && dataDir == NULL) {
-        ALOGE("Application private dir cannot be null");
-        RuntimeAbort(env);
-    }
     // The child process.
     gMallocLeakZygoteChild = 1;
 
@@ -440,6 +436,14 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     if (use_native_bridge) {
       ScopedUtfChars isa_string(env, instructionSet);
       use_native_bridge = android::NeedsNativeBridge(isa_string.c_str());
+    }
+    if (use_native_bridge && dataDir == NULL) {
+      // dataDir should never be null if we need to use a native bridge.
+      // In general, dataDir will never be null for normal applications. It can only happen in
+      // special cases (for isolated processes which are not associated with any app). These are
+      // launched by the framework and should not be emulated anyway.
+      use_native_bridge = false;
+      ALOGW("Native bridge will not be used because dataDir == NULL.");
     }
 
     if (!MountEmulatedStorage(uid, mount_external, use_native_bridge)) {
