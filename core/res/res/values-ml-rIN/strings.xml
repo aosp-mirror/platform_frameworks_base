@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"കാഷെ ഫയൽ സിസ്‌റ്റം റീഡുചെയ്യുന്നതിനും റൈറ്റുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP കോളുകൾ വിളിക്കുക/സ്വീകരിക്കുക"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP കോളുകൾ വിളിക്കാനും സ്വീകരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"പുതിയ ടെലികോം കണക്ഷൻ രജിസ്‌റ്റർ ചെയ്യുക"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"പുതിയ ടെലികോം കണക്ഷനുകൾ രജിസ്‌റ്റർ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"ടെലികോം കണക്ഷനുകൾ നിയന്ത്രിക്കുക"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"ടെലികോം കണക്ഷനുകൾ നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ഇൻ-കോൾ സ്‌ക്രീനുമായി സംവദിക്കുക"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ഉപയോക്താവ് ഇൻ-കോൾ സ്‌ക്രീൻ എപ്പോൾ, എങ്ങനെ കാണുന്നുവെന്നത് നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ടെലിഫോണി സേവനങ്ങൾ ഉപയോഗിച്ച് സംവദിക്കുക"</string>
@@ -1772,6 +1776,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല ഡാറ്റയെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ യാന്ത്രികമായി ഓഫാകും."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ന് നിങ്ങളുടെ കാലാവധി അവസാനിക്കുന്നതുവരെ"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ഒരു മിനിറ്റ് ദൈർഘ്യം"</item>
     <item quantity="other" msgid="6924190729213550991">"%d മിനിറ്റ് ദൈർഘ്യം"</item>
@@ -1780,5 +1788,7 @@
     <item quantity="one" msgid="3480040795582254384">"ഒരു മണിക്കൂർ ദൈർഘ്യം"</item>
     <item quantity="other" msgid="5408537517529822157">"%d മണിക്കൂർ ദൈർഘ്യം"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"അവ്യക്തം"</string>
 </resources>

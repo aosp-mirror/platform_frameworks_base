@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permite á aplicación ler e escribir no sistema de ficheiros da caché."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"facer/recibir chamadas SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Permite que a aplicación faga e reciba chamadas SIP."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"rexistrar nova conexión de telecomunicacións"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"Permite que a aplicación rexistre novas conexións de telecomunicacións."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"xestionar conexións de telecomunicacións"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Permite que a aplicación xestione conexións de telecomunicacións."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interactuar cunha pantalla de chamada"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Permite á aplicación controlar cando e como ve o usuario a pantalla de chamada."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"interactuar cos servizos de telefonía"</string>
@@ -1772,6 +1776,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar un contrasinal antes de soltar a pantalla"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Para axudar a mellorar a duración da batería, o aforro de batería reduce o rendemento do dispositivo e restrinxe a vibración e a maioría dos datos en segundo plano. É posible que o correo, as mensaxes e outras aplicacións que se sincronizan con frecuencia, non se actualicen a menos que as abras.\n\nO aforro de batería desactívase automaticamente durante a carga do dispositivo."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Ata que remate o tempo de inactividade ás <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Durante un minuto"</item>
     <item quantity="other" msgid="6924190729213550991">"Durante %d minutos"</item>
@@ -1780,5 +1788,7 @@
     <item quantity="one" msgid="3480040795582254384">"Durante unha hora"</item>
     <item quantity="other" msgid="5408537517529822157">"Durante %d horas"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidamente"</string>
 </resources>

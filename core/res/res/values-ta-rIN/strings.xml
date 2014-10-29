@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"தற்காலிகச் சேமிப்பு கோப்பு அமைப்பைப் படிக்க மற்றும் எழுத, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP அழைப்புகளைச் செய்தல்/பெறுதல்"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP அழைப்புகளைச் செய்ய/பெற, பயன்பாட்டை அனுமதிக்கிறது."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"புதிய தொலைத்தொடர்பு இணைப்பைப் பதிவுசெய்"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"புதிய தொலைத்தொடர்பு இணைப்புகளைப் பதிவுசெய்ய, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"தொலைத்தொடர்பு இணைப்புகளை நிர்வகி"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"தொலைத்தொடர்பு இணைப்புகளை நிர்வகிக்க, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"உள்வரும் அழைப்பிற்கான திரையுடன் ஊடாடுதல்"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"உள்வரும் அழைப்பிற்கான திரையைப் பயனர் எப்போது மற்றும் எப்படிக் காணவேண்டும் என்பதைக் கட்டுப்படுத்துவதற்குப் பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"டெலிஃபோனி சேவைகளுடனான ஊடாடல்"</string>
@@ -1772,6 +1776,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"பேட்டரியின் ஆயுட்காலத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வுறுவதையும் பெரும்பாலான பின்புலத் தரவையும் வரம்பிடுகிறது. ஒத்திசைவைச் சார்ந்திருக்கும் மின்னஞ்சல், மெசேஜ், மேலும் பிற பயன்பாடுகளைத் திறக்கும் வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nசாதனம் சார்ஜ் ஆகும் போது, பேட்டரி சேமிப்பான் தானாகவே முடக்கப்படும்."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> முடியும் வரை"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ஒரு நிமிடம்"</item>
     <item quantity="other" msgid="6924190729213550991">"%d நிமிடங்கள்"</item>
@@ -1780,5 +1788,7 @@
     <item quantity="one" msgid="3480040795582254384">"ஒரு மணி நேரம்"</item>
     <item quantity="other" msgid="5408537517529822157">"%d மணிநேரம்"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"வரையறையற்றது"</string>
 </resources>
