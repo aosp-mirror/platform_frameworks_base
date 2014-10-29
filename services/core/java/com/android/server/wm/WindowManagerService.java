@@ -2487,7 +2487,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            win.mWinAnimator.mEnterAnimationPending = true;
+            final WindowStateAnimator winAnimator = win.mWinAnimator;
+            winAnimator.mEnterAnimationPending = true;
+            winAnimator.mEnteringAnimation = true;
 
             if (displayContent.isDefaultDisplay) {
                 mPolicy.getContentInsetHintLw(attrs, outContentInsets);
@@ -3099,6 +3101,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (oldVisibility == View.GONE) {
                     winAnimator.mEnterAnimationPending = true;
                 }
+                winAnimator.mEnteringAnimation = true;
                 if (toBeDisplayed) {
                     if (win.isDrawnLw() && okToDisplay()) {
                         winAnimator.applyEnterAnimationLocked();
@@ -3167,6 +3170,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             } else {
                 winAnimator.mEnterAnimationPending = false;
+                winAnimator.mEnteringAnimation = false;
                 if (winAnimator.mSurfaceControl != null) {
                     if (DEBUG_VISIBILITY) Slog.i(TAG, "Relayout invis " + win
                             + ": mExiting=" + win.mExiting);

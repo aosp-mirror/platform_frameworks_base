@@ -3014,6 +3014,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_INVALIDATE_WORLD = 23;
     private final static int MSG_WINDOW_MOVED = 24;
     private final static int MSG_SYNTHESIZE_INPUT_EVENT = 25;
+    private final static int MSG_DISPATCH_WINDOW_SHOWN = 26;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -3063,6 +3064,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_WINDOW_MOVED";
                 case MSG_SYNTHESIZE_INPUT_EVENT:
                     return "MSG_SYNTHESIZE_INPUT_EVENT";
+                case MSG_DISPATCH_WINDOW_SHOWN:
+                    return "MSG_DISPATCH_WINDOW_SHOWN";
             }
             return super.getMessageName(message);
         }
@@ -3291,6 +3294,9 @@ public final class ViewRootImpl implements ViewParent,
                     invalidateWorld(mView);
                 }
             } break;
+            case MSG_DISPATCH_WINDOW_SHOWN: {
+                handleDispatchWindowShown();
+            }
             }
         }
     }
@@ -5137,6 +5143,10 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    public void handleDispatchWindowShown() {
+        mAttachInfo.mTreeObserver.dispatchOnWindowShown();
+    }
+
     public void getLastTouchPoint(Point outLocation) {
         outLocation.x = (int) mLastTouchPoint.x;
         outLocation.y = (int) mLastTouchPoint.y;
@@ -5997,6 +6007,10 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.sendMessage(msg);
     }
 
+    public void dispatchWindowShown() {
+        mHandler.sendEmptyMessage(MSG_DISPATCH_WINDOW_SHOWN);
+    }
+
     public void dispatchCloseSystemDialogs(String reason) {
         Message msg = Message.obtain();
         msg.what = MSG_CLOSE_SYSTEM_DIALOGS;
@@ -6505,6 +6519,14 @@ public final class ViewRootImpl implements ViewParent,
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchDoneAnimating();
+            }
+        }
+
+        @Override
+        public void dispatchWindowShown() {
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
+            if (viewAncestor != null) {
+                viewAncestor.dispatchWindowShown();
             }
         }
     }
