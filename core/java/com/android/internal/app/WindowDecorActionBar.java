@@ -876,7 +876,7 @@ public class WindowDecorActionBar extends ActionBar implements
             currentTheme.resolveAttribute(com.android.internal.R.attr.actionBarWidgetTheme,
                     outValue, true);
             final int targetThemeRes = outValue.resourceId;
-            
+
             if (targetThemeRes != 0 && mContext.getThemeResId() != targetThemeRes) {
                 mThemedContext = new ContextThemeWrapper(mContext, targetThemeRes);
             } else {
@@ -885,7 +885,7 @@ public class WindowDecorActionBar extends ActionBar implements
         }
         return mThemedContext;
     }
-    
+
     @Override
     public boolean isTitleTruncated() {
         return mDecorToolbar != null && mDecorToolbar.isTitleTruncated();
@@ -933,14 +933,17 @@ public class WindowDecorActionBar extends ActionBar implements
     }
 
     /**
-     * @hide 
+     * @hide
      */
     public class ActionModeImpl extends ActionMode implements MenuBuilder.Callback {
+        private final Context mActionModeContext;
+        private final MenuBuilder mMenu;
+
         private ActionMode.Callback mCallback;
-        private MenuBuilder mMenu;
         private WeakReference<View> mCustomView;
-        
+
         public ActionModeImpl(Context context, ActionMode.Callback callback) {
+            mActionModeContext = context;
             mCallback = callback;
             mMenu = new MenuBuilder(context)
                     .setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
@@ -949,7 +952,7 @@ public class WindowDecorActionBar extends ActionBar implements
 
         @Override
         public MenuInflater getMenuInflater() {
-            return new MenuInflater(getThemedContext());
+            return new MenuInflater(mActionModeContext);
         }
 
         @Override
@@ -1042,7 +1045,7 @@ public class WindowDecorActionBar extends ActionBar implements
         public CharSequence getSubtitle() {
             return mContextView.getSubtitle();
         }
-        
+
         @Override
         public void setTitleOptionalHint(boolean titleOptional) {
             super.setTitleOptionalHint(titleOptional);
