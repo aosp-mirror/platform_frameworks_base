@@ -4910,9 +4910,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (position >= headerViewsCount && position < footerViewsStart) {
                         // The view will be rebound to new data, clear any
                         // system-managed transient state.
-                        if (child.isAccessibilityFocused()) {
-                            child.clearAccessibilityFocus();
-                        }
+                        child.clearAccessibilityFocus();
                         mRecycler.addScrapView(child, position);
                     }
                 }
@@ -4933,9 +4931,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     if (position >= headerViewsCount && position < footerViewsStart) {
                         // The view will be rebound to new data, clear any
                         // system-managed transient state.
-                        if (child.isAccessibilityFocused()) {
-                            child.clearAccessibilityFocus();
-                        }
+                        child.clearAccessibilityFocus();
                         mRecycler.addScrapView(child, position);
                     }
                 }
@@ -6776,9 +6772,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         private void clearAccessibilityFromScrap(View view) {
-            if (view.isAccessibilityFocused()) {
-                view.clearAccessibilityFocus();
-            }
+            view.clearAccessibilityFocus();
             view.setAccessibilityDelegate(null);
         }
 
