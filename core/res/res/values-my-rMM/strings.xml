@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"appအား ဖိုင်စနစ်၏ကက်ရှကို ဖတ် နှင့် ရေး ခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်နှင့် လက်ခံနိုင်ရန် app ကို ခွင့်ပြုပါ။"</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"တယ်လီကွမ် ဆက်သွယ်မှု အသစ်ကို မှတ်ပုံတင်ရန်"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"appအား တယ်လီကွမ် ဆက်သွယ်မှု အသစ်ကို မှတ်ပုံတင်ခွင့် ပြုပါ။"</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"တယ်လီကွမ် ဆက်သွယ်မှုများကို စီမံရန်"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"appအား တယ်လီကွမ် ဆက်သွယ်မှုများကို စီမံခွင့် ပြုပါ။"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ခေါ်ဆိုမှု-အဝင် မျက်နှာပြင်နဲ့ တုံ့ပြန်လုပ်ကိုင်ရန်"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"appအား အသုံးပြုသူက ခေါ်ဆိုမှုအဝင် မျက်နှာပြင် ဘယ်အချိန်မှာ ဘယ်လို မြင်ရမှာကို ထိန်းချုပ်ခွင့်ပေးရန်"</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"တယ်လီဖုန်း ဝန်ဆောင်မှုများနှင့် အပြန်အလှန် တုံ့ပြန်မှု"</string>
@@ -1777,11 +1781,17 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ပင်မဖြုတ်မီမှာ စကားဝှက်ကို မေးကြည့်ရန်"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန်အတွက်၊ ဘက်ထရီချွေတာရေးအပိုင်းမှ သင့် စက်ပစ္စည်း၏ဆောင်ရွက်ချက်များကို လျော့ချပေးပြီး တုန်ခါမှုနှင့် နောက်ခံအချက်အလက်အများစုကို ကန့်သတ်ပေးသည်။ အီးမေး၊ စာပို့ခြင်း နှင့် တခြားapp များကို သင်ဖွင့်မထားပါက အချိန်နှင့်တပြေးညီ ညှိမပေးပါ။ \n\n စက်ပစ္စည်း အားသွင်းနေစဉ် ဘက်ထရီချွေတာရေးအပိုင်းသည် အလိုအလျောက်ပင် အလုပ်မလုပ်ပါ။"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"သင်၏ စက်ရပ်ချိန် <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> မှာ ပြီးဆုံးသည့် အထိ။"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"တစ်မိနစ် အတွင်း"</item>
     <item quantity="other" msgid="6924190729213550991">"%d မိနစ် အတွင်း"</item>
   </plurals>
     <!-- String.format failed for translation -->
     <!-- no translation found for zen_mode_duration_hours:other (5408537517529822157) -->
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"အကန့်အသတ်မရှိစွာ"</string>
 </resources>

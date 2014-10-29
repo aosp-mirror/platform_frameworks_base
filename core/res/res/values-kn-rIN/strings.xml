@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"ನಿಮ್ಮದೇ ಸಂಪರ್ಕದ ಕಾರ್ಡ್ ಮಾರ್ಪಡಿಸಿ"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ ನಿಮ್ಮ ಹೆಸರು ಹಾಗೂ ಸಂಪರ್ಕ ಮಾಹಿತಿಯಂತಹ, ವೈಯಕ್ತಿಕ ಪ್ರೊಫೈಲ್ ಮಾಹಿತಿಯನ್ನು ಬದಲಿಸಲು ಅಥವಾ ಸೇರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಅಂದರೆ, ಅಪ್ಲಿಕೇಶನ್‍ ನಿಮ್ಮನ್ನು ಗುರುತಿಸಬಹುದು ಮತ್ತು ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಮಾಹಿತಿಯನ್ನು ಇತರರಿಗೆ ಕಳುಹಿಸಬಹುದು ಎಂದರ್ಥ."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"ದೇಹದ ಸಂವೇದಗಳು (ಹೃದಯದ ರೇಟ್‌ ಮಾನಿಟರ್‌ಗಳಂತಹ)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"ನಿಮ್ಮ ಹೃದಯ ಬಡಿತದಂತಹ ನಿಮ್ಮ ದೈಹಿಕ ಸ್ಥಿತಿಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುವ ಸೆನ್ಸಾರ್ಸ್‌ಗಳಿಂದ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"ನಿಮ್ಮ ಹೃದಯ ಬಡಿತದಂತಹ ನಿಮ್ಮ ದೈಹಿಕ ಸ್ಥಿತಿಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುವ ಸೆನ್ಸರ್‌‌ಗಳಿಂದ ಡೇಟಾ ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"ನಿಮ್ಮ ಸಾಮಾಜಿಕ ಸ್ಟ್ರೀಮ್ ಓದಿರಿ"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"ನೀವು ಮತ್ತು ನಿಮ್ಮ ಸ್ನೇಹಿತರ ಸಾಮಾಜಿಕ ನವೀಕರಣಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಮತ್ತು ಸಿಂಕ್ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಮಾಹಿತಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳುವಾಗ ಜಾಗರೂಕರಾಗಿರಿ -- ಇದು ಗೌಪ್ಯತೆಯನ್ನು ಲೆಕ್ಕಿಸದೆಯೇ, ಸಾಮಾಜಿಕ ನೆಟ್‍‍ವರ್ಕ್‌ಗಳಲ್ಲಿ ನೀವು ಮತ್ತು ನಿಮ್ಮ ಸ್ನೇಹಿತರ ನಡುವೆ ನಡೆದಿರುವ ಸಂವಹನವನ್ನು ಓದಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಗಮನಿಸಿ: ಈ ಅನುಮತಿಯನ್ನು ಎಲ್ಲಾ ಸಾಮಾಜಿಕ ನೆಟ್‍‍ವರ್ಕ್‌ಗಳಲ್ಲಿ ಜಾರಿಗೊಳಿಸದೇ ಇರಬಹುದು."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"ನಿಮ್ಮ ಸಾಮಾಜಿಕ ಸ್ಟ್ರೀಮ್‌ನಲ್ಲಿ ಬರೆಯಿರಿ"</string>
@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ಕ್ಯಾಷ್‌ ಫೈಲ್‌ ವ್ಯವಸ್ಥೆಯನ್ನು ಓದಲು ಮತ್ತು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"ಹೊಸ ಟೆಲಿಕಾಂ ಸಂಪರ್ಕವನ್ನು ನೋಂದಣಿ ಮಾಡಿ"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"ಹೊಸ ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಣಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ಒಳ-ಕರೆ ಪರದೆಯ ಮೂಲಕ ಸಂವಹನ ನಡೆಸಿ"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ಬಳಕೆದಾರರು ಒಳ-ಕರೆಯ ಪರದೆಯನ್ನು ಯಾವಾಗ ಮತ್ತು ಹೇಗೆ ನೋಡುತ್ತಾರೆ ಎಂಬುದನ್ನು ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ಟೆಲಿಫೋನಿ ಸೇವೆಗಳೊಂದಿಗೆ ಸಂವಾದ ನಡೆಸಿ"</string>
@@ -1777,6 +1781,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳಿ"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕುಂಠಿತಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್‌‌ ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ. ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನೀವು ತೆರೆಯುವವರೆಗೆ ಅವುಗಳನ್ನು ನವೀಕರಿಸಲಾಗುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆಫ್ ಆಗುತ್ತದೆ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ನಿಮ್ಮ ಅಲಭ್ಯತೆ ಕೊನೆಗೊಳ್ಳುವವರೆಗೆ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ಒಂದು ನಿಮಿಷದವರೆಗೆ"</item>
     <item quantity="other" msgid="6924190729213550991">"%d ನಿಮಿಷಗಳವರೆಗೆ"</item>
@@ -1785,5 +1793,7 @@
     <item quantity="one" msgid="3480040795582254384">"ಒಂದು ಗಂಟೆಯವರೆಗೆ"</item>
     <item quantity="other" msgid="5408537517529822157">"%d ಗಂಟೆಗಳವರೆಗೆ"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"ಅನಿರ್ದಿಷ್ಟವಾಗಿ"</string>
 </resources>

@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Апп нь кеш файлсистемийг унших бичих боломжтой."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP дуудлага хийх/хүлээн авах"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Апп-д SIP дуудлага хийх болон хүлээн авахыг зөвшөөрөх."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"шинэ телеком холболтуудыг бүртгэх"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"Апп-д шинэ телеком холболтуудыг бүртгэхийг зөвшөөрнө."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"телеком холболтуудыг удирдах."</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Апп-д телеком холболтуудыг удирдахыг зөвшөөрнө."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"дуудлагын дэлгэцтэй харьцах"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Апп-д дуудлагын дэлгэцийг хэрэглэгчид хэзээ хэрхэн харуулахыг удирдахыг зөвшөөрнө."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефоны үйлчилгээтэй харилцах"</string>
@@ -1777,6 +1781,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Батерейны ашиглалтыг уртасгахын тулд батерей хэмнэгч нь таны төхөөрөмжийн ажиллагааг бууруулж, чичрэлт болон далд датаны ихэнх хувийг хязгаарлана. Имэйл, зурвас гэх мэт синк хийгддэг бусад апп-ууд таныг нээхээс нааш шинэчлэгдэхгүй байж болно.\n\nТаныг төхөөрөмжөө цэнэглэх үед батерей хэмнэгч автоматаар унтарна."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Таны уйтгартай байдал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-д дуусах хүртэл"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Нэг минутын турш"</item>
     <item quantity="other" msgid="6924190729213550991">"%d минутын турш"</item>
@@ -1785,5 +1793,7 @@
     <item quantity="one" msgid="3480040795582254384">"Нэг цагийн турш"</item>
     <item quantity="other" msgid="5408537517529822157">"%d цагийн турш"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Тодорхойгүй"</string>
 </resources>

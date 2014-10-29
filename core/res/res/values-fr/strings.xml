@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permet à l\'application d\'obtenir des droits en lecture/écriture concernant le système de fichiers du cache."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"effectuer/recevoir des appels SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Autorise l\'application à effectuer et à recevoir des appels SIP."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"enregistrer des nouvelles connexions de télécommunication"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"Permettre à l\'application d\'enregistrer de nouvelles connexions de télécommunication"</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"gérer les connexions de télécommunication"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Permettre à l\'application de gérer les connexions de télécommunication"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"contrôler l\'écran d\'appel"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Permet à l\'application de contrôler quand et comment l\'écran d\'appel s\'affiche."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"interagir avec des services de téléphonie"</string>
@@ -1777,6 +1781,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demander le mot de passe avant d\'annuler l\'épinglage"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Pour optimiser l\'autonomie de la batterie, l\'économiseur de batterie réduit les performances de votre appareil et limite les données en arrière-plan. Vous devrez peut-être ouvrir manuellement vos applications d\'e-mail, de messagerie instantanée et autres applications synchronisées pour les mettre à jour.\n\nL\'économiseur de batterie s\'éteint automatiquement lorsque votre appareil est en charge."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Jusqu\'à ce que le temps d\'arrêt se termine à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Pendant une minute"</item>
     <item quantity="other" msgid="6924190729213550991">"Pendant %d minutes"</item>
@@ -1785,5 +1793,7 @@
     <item quantity="one" msgid="3480040795582254384">"Pendant une heure"</item>
     <item quantity="other" msgid="5408537517529822157">"Pendant %d heures"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Indéfiniment"</string>
 </resources>

@@ -494,7 +494,7 @@
     <string name="permlab_writeProfile" msgid="907793628777397643">"zeure kontaktu-txartela aldatzea"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Gailuan gordetako profil pertsonalaren informazioa aldatzeko baimena ematen dio; esaterako, zure izena eta harremanetan jartzeko informazioa. Horrek esan nahi du aplikazioak identifikatu egin zaitzakeela eta zure profil-informazioa besteei bidal diezaiekeela."</string>
     <string name="permlab_bodySensors" msgid="4871091374767171066">"Gorputzaren sentsoreak (adibidez, bihotz-erritmoaren monitoreak)"</string>
-    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Zure egoera fisikoa kontrolatzen duten sentsoreetako datuak (adibidez, maiztasun kardiakoa) atzitzea baimentzen die aplikazioei."</string>
+    <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Zure egoera fisikoa kontrolatzen duten sentsoreetako datuak (adibidez, bihotz-maiztasuna) atzitzea baimentzen die aplikazioei."</string>
     <string name="permlab_readSocialStream" product="default" msgid="1268920956152419170">"irakurri sare sozialetako korronteak"</string>
     <string name="permdesc_readSocialStream" product="default" msgid="4255706027172050872">"Zure eta zure lagunen sare sozialetako eguneratzeak atzitzeko baimena ematen die aplikazioei. Kontuz partekatu informazioa; baimen honekin aplikazioak zure eta zure lagunen arteko sare sozialetako komunikazioak irakur ditzake, isilpekotasuna kontuan izan gabe. Oharra: baliteke baimen hori sare sozial guztiek ez aplikatzea."</string>
     <string name="permlab_writeSocialStream" product="default" msgid="3504179222493235645">"idatzi sare sozialetako korronteetan"</string>
@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Cachearen fitxategi-sistema irakurtzea eta bertan idaztea baimentzen die aplikazioei."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"Egin/Jaso SIP deiak"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP deiak egitea eta jasotzea baimentzen die aplikazioei."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"erregistratu telekomunikabideekiko konexioak"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"Telekomunikabideekiko konexioak erregistratzea baimentzen die aplikazioei."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"kudeatu telekomunikabideekiko konexioak"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Telekomunikabideekiko konexioak kudeatzea baimentzen die aplikazioei."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"Deiak abian direnean pantaila erabiltzea"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Erabiltzaileak deiaren pantaila noiz eta nola ikusten duen kontrolatzea baimentzen die aplikazioei."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"Elkarreragin telefono-zerbitzuekin"</string>
@@ -1777,6 +1781,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Eskatu pasahitza aingura kendu aurretik"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Bateriak gehiago iraun dezan, bateria aurrezteko aukerak gailuaren errendimendua murrizten du, eta dardara eta atzeko planoko datu gehienak mugatzen ditu. Baliteke posta elektronikoa, mezuak eta sinkronizatzen diren beste aplikazio batzuk ez eguneratzea, ireki ezean.\n\nBateria aurrezteko aukera automatikoki desaktibatzen da gailua kargatzen ari denean."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> arte iraungo du jarduerarik gabeko aldiak"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Minutu batez"</item>
     <item quantity="other" msgid="6924190729213550991">"%d minutuz"</item>
@@ -1785,5 +1793,7 @@
     <item quantity="one" msgid="3480040795582254384">"Ordubetez"</item>
     <item quantity="other" msgid="5408537517529822157">"%d orduz"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Mugagabea"</string>
 </resources>

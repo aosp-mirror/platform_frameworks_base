@@ -716,6 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Mengizinkan apl membaca dan menulis pada sistem file cache."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"lakukan/terima panggilan SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Izinkan aplikasi melakukan dan menerima panggilan SIP."</string>
+    <string name="permlab_register_provider" msgid="2654513709546459553">"daftarkan sambungan telekomunikasi baru"</string>
+    <string name="permdesc_register_provider" msgid="7571533832018681544">"Mengizinkan aplikasi untuk mendaftarkan sambungan telekomunikasi baru."</string>
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"kelola sambungan telekomunikasi"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"Mengizinkan aplikasi untuk mengelola sambungan telekomunikasi."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"berinteraksi dengan layar dalam panggilan"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Memungkinkan aplikasi mengontrol kapan dan bagaimana pengguna melihat layar dalam panggilan."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"berinteraksi dengan layanan telepon"</string>
@@ -1777,6 +1781,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Meminta sandi sebelum melepas sematan"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Guna membantu meningkatkan masa pakai baterai, penghemat baterai mengurangi kinerja perangkat dan membatasi getaran serta sebagian besar data latar belakang. Email, perpesanan, dan aplikasi lain yang bergantung pada sinkronisasi mungkin tidak akan diperbarui kecuali Anda membukanya.\n\nPenghemat baterai dinonaktifkan secara otomatis saat perangkat diisi daya."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Hingga waktu perbaikan Anda berakhir pukul <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Selama satu menit"</item>
     <item quantity="other" msgid="6924190729213550991">"Selama %d menit"</item>
@@ -1785,5 +1793,7 @@
     <item quantity="one" msgid="3480040795582254384">"Selama satu jam"</item>
     <item quantity="other" msgid="5408537517529822157">"Selama %d jam"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Tidak ditentukan"</string>
 </resources>

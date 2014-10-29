@@ -716,6 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານ ແລະຂຽນ ລະບົບໄຟລ໌ແຄດ."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"ຮັບສາຍ/ໂທອອກ ຜ່ານ SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ອະນຸຍາດ​ໃຫ້ແອັບຯ​ສາມາດ​ຮັບສາຍ ແລະໂທອອກ​ຜ່ານ SIP ໄດ້"</string>
+    <!-- no translation found for permlab_register_provider (2654513709546459553) -->
+    <skip />
+    <!-- no translation found for permdesc_register_provider (7571533832018681544) -->
+    <skip />
+    <!-- no translation found for permlab_connection_manager (1116193254522105375) -->
+    <skip />
+    <!-- no translation found for permdesc_connection_manager (5925480810356483565) -->
+    <skip />
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ໂຕ້​ຕອບ​ກັບ​ໜ້າ​ຈໍ​ການ​ໂທ"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ອະນຸຍາດ​ໃຫ້​ແອັບຯ​ຄວບຄຸມ​ເວລາ ແລະ​ວິທີ​ການ​ທີ່​ຜູ່ໃຊ້​ເຫັນ​ໜ້າ​ຈໍ​ການ​ໂທ​ໄດ້."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ສັ່ງ​ບໍ​ລິ​ການ​ໂທ​ລະ​ສັບ"</string>
@@ -1777,6 +1785,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ເພື່ອ​ຊ່ວຍ​ປັບ​ປຸງ​ອາ​ຍຸ​ແບັດ​ເຕ​ີ​ຣີ, ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​​ຂອງ​ອຸ​ປະ​ກອນ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນເຕືອນ ຮວມ​ເຖິງຂໍ້​ມູນ​ພື້ນຫຼັງ​ສ່ວນ​ໃຫຍ່​ນຳ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ ແລະ​ແອັບຯ​ອື່ນໆ​ທີ່​ອີງ​ອາ​ໃສ​ການ​ຊິ້ງ​ຂໍ້​ມູນ​ອາດບໍ່​ມີ​ການ​ອັບ​ເດດ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ເປີດ​ພວກ​ມັນ​ຂຶ້ນ​ມາ.\n\n​ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະ​ປິດ​ໂດຍ​ອັດ​ຕະ​ໂນ​ມັດ​ເມື່ອ​ມີ​ອຸ​ປະ​ກອນ​ຖືກ​ສາກ​ໄຟ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ຈົນ​ກວ່າ​ດາວ​ທາມ​ຂອງ​ທ່ານ​ຈະ​ສິ້ນ​ສຸດ​ທີ່ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ເປັນ​ເວລາ​ນຶ່ງ​ນາ​ທີ"</item>
     <item quantity="other" msgid="6924190729213550991">"ເປັນ​ເວລາ %d ນາ​ທີ"</item>
@@ -1785,5 +1797,7 @@
     <item quantity="one" msgid="3480040795582254384">"ເປັນ​ເວລາ​ນຶ່ງ​ຊົ່ວ​ໂມງ"</item>
     <item quantity="other" msgid="5408537517529822157">"ເປັນ​ເວລາ %d ຊົ່ວ​ໂມງ"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"ຢ່າງ​ບໍ່​ມີ​ກຳນົດ"</string>
 </resources>

@@ -716,6 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Ilova kesh fayl tizimini o‘qishi va unga yozishi mumkin."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP qo‘ng‘iroqlarini amalga oshirish/qabul qilish"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Ilovaga SIP qo‘ng‘iroqlarini amalga oshirish va qabul qilish uchun ruxsat beradi."</string>
+    <!-- no translation found for permlab_register_provider (2654513709546459553) -->
+    <skip />
+    <!-- no translation found for permdesc_register_provider (7571533832018681544) -->
+    <skip />
+    <!-- no translation found for permlab_connection_manager (1116193254522105375) -->
+    <skip />
+    <!-- no translation found for permdesc_connection_manager (5925480810356483565) -->
+    <skip />
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"suhbat vaqtida ekranni boshqarish"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Ilova suhbat vaqtida ekranni boshqarishi mumkin."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"telefoniya xizmatlarini bilan aloqa qilish"</string>
@@ -1777,6 +1785,10 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bo‘shatishdan oldin parol so‘ralsin"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi va orqa fonda internetdan foydalanishni cheklaydi. Sinxronlanib turishi lozim bo‘lgan e-pochta, xabar almashinuv va boshqa ilovalar esa ishga tushirilmaguncha yangilanmaydi.\n\nQurilmani quvvat oldirish uchun energiya manbayiga ulashingiz bilanoq, quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Tanaffus vaqti tugaguncha – <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
+    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"1 daqiqa"</item>
     <item quantity="other" msgid="6924190729213550991">"%d daqiqa"</item>
@@ -1785,5 +1797,7 @@
     <item quantity="one" msgid="3480040795582254384">"1 soat"</item>
     <item quantity="other" msgid="5408537517529822157">"%d soat"</item>
   </plurals>
+    <!-- no translation found for zen_mode_until (7336308492289875088) -->
+    <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Uzluksiz ravishda"</string>
 </resources>
