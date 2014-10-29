@@ -402,6 +402,7 @@ package android {
     field public static final int closeIcon = 16843905; // 0x1010481
     field public static final int codes = 16843330; // 0x1010242
     field public static final int collapseColumns = 16843083; // 0x101014b
+    field public static final int collapseContentDescription = 16844034; // 0x1010502
     field public static final int color = 16843173; // 0x10101a5
     field public static final int colorAccent = 16843829; // 0x1010435
     field public static final int colorActivatedHighlight = 16843664; // 0x1010390
