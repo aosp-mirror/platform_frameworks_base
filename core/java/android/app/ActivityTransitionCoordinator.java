@@ -638,6 +638,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         if (decorView != null) {
             decorView.getLocationOnScreen(decorLoc);
         }
+        Matrix tempMatrix = new Matrix();
         for (String name: names) {
             Bundle sharedElementBundle = state.getBundle(name);
             if (sharedElementBundle != null) {
@@ -647,7 +648,7 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
                     snapshot = mListener.onCreateSnapshotView(context, parcelable);
                 }
                 if (snapshot != null) {
-                    setSharedElementState(snapshot, name, state, null, null, decorLoc);
+                    setSharedElementState(snapshot, name, state, tempMatrix, null, decorLoc);
                 }
                 snapshots.add(snapshot);
             }
