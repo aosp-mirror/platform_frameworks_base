@@ -477,6 +477,7 @@ public class StackStateAnimator {
                 if (newEndValue == 0 && !mWasCancelled) {
                     child.setVisibility(View.INVISIBLE);
                 }
+                // remove the tag when the animation is finished
                 child.setTag(TAG_ANIMATOR_ALPHA, null);
                 child.setTag(TAG_START_ALPHA, null);
                 child.setTag(TAG_END_ALPHA, null);
@@ -498,13 +499,7 @@ public class StackStateAnimator {
             animator.setStartDelay(delay);
         }
         animator.addListener(getGlobalAnimationFinishedListener());
-        // remove the tag when the animation is finished
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
 
-            }
-        });
         startAnimator(animator);
         child.setTag(TAG_ANIMATOR_ALPHA, animator);
         child.setTag(TAG_START_ALPHA, child.getAlpha());
