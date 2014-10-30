@@ -163,7 +163,7 @@ public final class BridgeResources extends Resources {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            return ResourceHelper.getDrawable(value.getSecond(), mContext);
+            return ResourceHelper.getDrawable(value.getSecond(), mContext, theme);
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
