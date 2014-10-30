@@ -40,6 +40,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Debug;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.view.Display;
@@ -140,6 +141,11 @@ class WindowStateAnimator {
     // Set to true if, when the window gets displayed, it should perform
     // an enter animation.
     boolean mEnterAnimationPending;
+
+    /** Used to indicate that this window is undergoing an enter animation. Used for system
+     * windows to make the callback to View.dispatchOnWindowShownCallback(). Set when the
+     * window is first added or shown, cleared when the callback has been made. */
+    boolean mEnteringAnimation;
 
     boolean keyguardGoingAwayAnimation;
 
@@ -426,6 +432,14 @@ class WindowStateAnimator {
         final int N = mWin.mChildWindows.size();
         for (int i=0; i<N; i++) {
             mWin.mChildWindows.get(i).mWinAnimator.finishExit();
+        }
+
+        if (mEnteringAnimation && mWin.mAppToken == null) {
+            try {
+                mEnteringAnimation = false;
+                mWin.mClient.dispatchWindowShown();
+            } catch (RemoteException e) {
+            }
         }
 
         if (!mWin.mExiting) {
