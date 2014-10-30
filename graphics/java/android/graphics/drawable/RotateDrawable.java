@@ -427,19 +427,22 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
             return;
         }
 
-        final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.RotateDrawable);
-        try {
-            updateStateFromTypedArray(a);
-            verifyRequiredAttributes(a);
-        } catch (XmlPullParserException e) {
-            throw new RuntimeException(e);
-        } finally {
-            a.recycle();
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.RotateDrawable);
+            try {
+                updateStateFromTypedArray(a);
+                verifyRequiredAttributes(a);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            } finally {
+                a.recycle();
+            }
         }
 
         if (state.mDrawable != null && state.mDrawable.canApplyTheme()) {
             state.mDrawable.applyTheme(t);
         }
+
     }
 
     private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
