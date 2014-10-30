@@ -22,7 +22,8 @@ import android.os.Parcelable;
 import java.util.Locale;
 
 /**
- *  Encapsulates all audio states during a call.
+ *  Encapsulates the telecom audio state, including the current audio routing, supported audio
+ *  routing and mute.
  */
 public final class AudioState implements Parcelable {
     /** Direct the audio stream through the device's earpiece. */
@@ -53,10 +54,10 @@ public final class AudioState implements Parcelable {
     /** True if the call is muted, false otherwise. */
     public final boolean isMuted;
 
-    /** The route to use for the audio stream. */
+    /** The current audio route being used. */
     public final int route;
 
-    /** Bit vector of all routes supported by this call. */
+    /** Bit mask of all routes supported by this call. */
     public final int supportedRouteMask;
 
     public AudioState(boolean isMuted, int route, int supportedRouteMask) {
