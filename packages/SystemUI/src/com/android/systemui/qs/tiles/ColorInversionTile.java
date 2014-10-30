@@ -88,7 +88,8 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         state.visible = enabled || mUsageTracker.isRecentlyUsed();
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
-        state.iconId = enabled ? R.drawable.ic_qs_inversion_on : R.drawable.ic_qs_inversion_off;
+        state.icon = ResourceIcon.get(enabled ? R.drawable.ic_qs_inversion_on
+                : R.drawable.ic_qs_inversion_off);
     }
 
     @Override
