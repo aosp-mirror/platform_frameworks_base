@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -805,6 +851,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -884,7 +933,12 @@ Summary:
 
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/LaunchOptions.Builder.html">LaunchOptions.Builder</a></td>
-      <td class="jd-descrcol" width="100%">A builder for <code><a href="/reference/com/google/android/gms/cast/LaunchOptions.html">LaunchOptions</a></code> objects.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        A builder for <code><a href="/reference/com/google/android/gms/cast/LaunchOptions.html">LaunchOptions</a></code> objects.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -932,14 +986,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -970,7 +1034,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -997,7 +1066,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           Creator&lt;<a href="/reference/com/google/android/gms/cast/LaunchOptions.html">LaunchOptions</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/LaunchOptions.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+
+
+
+
+          </td>
       </tr>
 
 
@@ -1089,7 +1163,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/LaunchOptions.html#getLanguage()">getLanguage</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the language, or <code>null</code> if none was specified.</div>
+        <div class="jd-descrdiv">
+          Returns the language, or <code>null</code> if none was specified.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1107,7 +1186,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/LaunchOptions.html#getRelaunchIfRunning()">getRelaunchIfRunning</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the "relaunch if running" flag.</div>
+        <div class="jd-descrdiv">
+          Returns the "relaunch if running" flag.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1125,7 +1209,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/LaunchOptions.html#hashCode()">hashCode</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Overridden to return a hashcode of the device ID.</div>
+        <div class="jd-descrdiv">
+          Overridden to return a hashcode of the device ID.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1143,7 +1232,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/LaunchOptions.html#setLanguage(java.lang.String)">setLanguage</a></span>(String language)</nobr>
 
-        <div class="jd-descrdiv">Sets the language to be used by the receiver application.</div>
+        <div class="jd-descrdiv">
+          Sets the language to be used by the receiver application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1161,7 +1255,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/LaunchOptions.html#setRelaunchIfRunning(boolean)">setRelaunchIfRunning</a></span>(boolean relaunchIfRunning)</nobr>
 
-        <div class="jd-descrdiv">Sets the "relaunch if running" flag.</div>
+        <div class="jd-descrdiv">
+          Sets the "relaunch if running" flag.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1179,7 +1278,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/LaunchOptions.html#toString()">toString</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns a string representation of this object.</div>
+        <div class="jd-descrdiv">
+          Returns a string representation of this object.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1528,6 +1632,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
 
@@ -1567,6 +1674,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -1612,6 +1722,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1641,6 +1754,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1669,6 +1785,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the language, or <code>null</code> if none was specified.
 </p></div>
@@ -1700,6 +1819,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the "relaunch if running" flag.
 </p></div>
 
@@ -1730,6 +1852,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Overridden to return a hashcode of the device ID.
 </p></div>
 
@@ -1759,6 +1884,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the language to be used by the receiver application. If not specified, the sender
  device's default language is used.</p></div>
@@ -1800,6 +1928,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the "relaunch if running" flag. If the flag is set, the receiver application will be
  relaunched even if it is already running. The flag is not set by default.
 </p></div>
@@ -1831,6 +1962,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a string representation of this object.
 </p></div>
 
@@ -1860,6 +1994,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

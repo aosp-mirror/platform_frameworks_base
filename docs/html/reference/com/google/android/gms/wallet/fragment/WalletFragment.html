@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -815,6 +861,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -949,7 +998,12 @@ Summary:
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.OnStateChangedListener.html">WalletFragment.OnStateChangedListener</a></td>
-      <td class="jd-descrcol" width="100%">&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        &nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -1001,49 +1055,84 @@ android.content.ComponentCallbacks2
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_BACKGROUND</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_COMPLETE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_MODERATE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_RUNNING_CRITICAL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_RUNNING_LOW</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_RUNNING_MODERATE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TRIM_MEMORY_UI_HIDDEN</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1112,7 +1201,12 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html#getState()">getState</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the current state of the fragment.</div>
+        <div class="jd-descrdiv">
+          Returns the current state of the fragment.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1130,7 +1224,12 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html#initialize(com.google.android.gms.wallet.fragment.WalletFragmentInitParams)">initialize</a></span>(<a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentInitParams.html">WalletFragmentInitParams</a> initParams)</nobr>
 
-        <div class="jd-descrdiv">Initializes the fragment.</div>
+        <div class="jd-descrdiv">
+          Initializes the fragment.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1148,7 +1247,12 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html#newInstance(com.google.android.gms.wallet.fragment.WalletFragmentOptions)">newInstance</a></span>(<a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentOptions.html">WalletFragmentOptions</a> options)</nobr>
 
-        <div class="jd-descrdiv">Creates a Wallet fragment with the given <code>options</code>.</div>
+        <div class="jd-descrdiv">
+          Creates a Wallet fragment with the given <code>options</code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1326,8 +1430,13 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html#setEnabled(boolean)">setEnabled</a></span>(boolean enabled)</nobr>
 
-        <div class="jd-descrdiv">Sets a boolean that will enable or disable the fragment's UI components when it's in
- <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentState.html#READY">READY</a></code>.</div>
+        <div class="jd-descrdiv">
+          Sets a boolean that will enable or disable the fragment's UI components when it's in
+ <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentState.html#READY">READY</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1345,7 +1454,12 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html#setOnStateChangedListener(com.google.android.gms.wallet.fragment.WalletFragment.OnStateChangedListener)">setOnStateChangedListener</a></span>(<a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.OnStateChangedListener.html">WalletFragment.OnStateChangedListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Sets a listener to receive state transition callbacks.</div>
+        <div class="jd-descrdiv">
+          Sets a listener to receive state transition callbacks.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1363,7 +1477,12 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html#updateMaskedWallet(com.google.android.gms.wallet.MaskedWallet)">updateMaskedWallet</a></span>(<a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a> maskedWallet)</nobr>
 
-        <div class="jd-descrdiv">Modifies the <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code>.</div>
+        <div class="jd-descrdiv">
+          Modifies the <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1381,7 +1500,12 @@ android.content.ComponentCallbacks2
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html#updateMaskedWalletRequest(com.google.android.gms.wallet.MaskedWalletRequest)">updateMaskedWalletRequest</a></span>(<a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.html">MaskedWalletRequest</a> request)</nobr>
 
-        <div class="jd-descrdiv">Modifies the <code><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.html">MaskedWalletRequest</a></code>.</div>
+        <div class="jd-descrdiv">
+          Modifies the <code><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.html">MaskedWalletRequest</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -2551,7 +2675,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setEnterSharedElementTransitionCallback</span>(SharedElementCallback arg0)</nobr>
+        <span class="sympad">setEnterSharedElementCallback</span>(SharedElementCallback arg0)</nobr>
 
   </td></tr>
 
@@ -2583,7 +2707,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setExitSharedElementTransitionCallback</span>(SharedElementCallback arg0)</nobr>
+        <span class="sympad">setExitSharedElementCallback</span>(SharedElementCallback arg0)</nobr>
 
   </td></tr>
 
@@ -3267,6 +3391,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3311,6 +3438,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the current state of the fragment. See <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentState.html">WalletFragmentState</a></code> for list of
  possible values. Note that <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentState.html#UNKNOWN">UNKNOWN</a></code> may be returned under the
  following circumstances:
@@ -3347,6 +3477,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Initializes the fragment. This must be called exactly once. Any further invocations after
  the first will be ignored.
 </p></div>
@@ -3378,6 +3511,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Creates a Wallet fragment with the given <code>options</code>.
 </p></div>
 
@@ -3408,6 +3544,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3436,6 +3575,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -3466,6 +3608,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3494,6 +3639,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -3524,6 +3672,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3552,6 +3703,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -3582,6 +3736,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3610,6 +3767,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -3640,6 +3800,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3669,6 +3832,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3697,6 +3863,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets a boolean that will enable or disable the fragment's UI components when it's in
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragmentState.html#READY">READY</a></code>. The UI components can not be disabled in other states
@@ -3731,6 +3900,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets a listener to receive state transition callbacks.
 </p></div>
 
@@ -3760,6 +3932,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Modifies the <code><a href="/reference/com/google/android/gms/wallet/MaskedWallet.html">MaskedWallet</a></code>. This should be called after
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html#initialize(com.google.android.gms.wallet.fragment.WalletFragmentInitParams)">initialize(WalletFragmentInitParams)</a></code>. Any non-null <code>maskedWallet</code>
@@ -3793,6 +3968,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Modifies the <code><a href="/reference/com/google/android/gms/wallet/MaskedWalletRequest.html">MaskedWalletRequest</a></code>. This should be called after
  <code><a href="/reference/com/google/android/gms/wallet/fragment/WalletFragment.html#initialize(com.google.android.gms.wallet.fragment.WalletFragmentInitParams)">initialize(WalletFragmentInitParams)</a></code>. Any non-null <code>request</code> passed in here

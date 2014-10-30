@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -775,6 +821,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -863,7 +912,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs">AdsAttrs</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a AdsAttrs.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a AdsAttrs.
+
+
+
+          </td>
       </tr>
 
     
@@ -874,7 +928,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs_adSize">AdsAttrs_adSize</a></td>
-          <td class="jd-descrcol" width="100%"><p>The size of the ad.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The size of the ad.
+
+
+
+          </td>
       </tr>
 
     
@@ -885,7 +944,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs_adSizes">AdsAttrs_adSizes</a></td>
-          <td class="jd-descrcol" width="100%"><p>A comma-separated list of the supported ad sizes.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>A comma-separated list of the supported ad sizes.
+
+
+
+          </td>
       </tr>
 
     
@@ -896,7 +960,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AdsAttrs_adUnitId">AdsAttrs_adUnitId</a></td>
-          <td class="jd-descrcol" width="100%"><p>The ad unit ID.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The ad unit ID.
+
+
+
+          </td>
       </tr>
 
     
@@ -907,7 +976,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#AppDataSearch">AppDataSearch</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a AppDataSearch.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a AppDataSearch.
+
+
+
+          </td>
       </tr>
 
     
@@ -918,7 +992,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus">Corpus</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a Corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a Corpus.
+
+
+
+          </td>
       </tr>
 
     
@@ -929,8 +1008,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_contentProviderUri">Corpus_contentProviderUri</a></td>
-          <td class="jd-descrcol" width="100%"><p>The URI of the content provider that the index should crawl to get the data for this
-    corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The URI of the content provider that the index should crawl to get the data for this
+    corpus.
+
+
+
+          </td>
       </tr>
 
     
@@ -941,7 +1025,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_corpusId">Corpus_corpusId</a></td>
-          <td class="jd-descrcol" width="100%"><p>The ID of the corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The ID of the corpus.
+
+
+
+          </td>
       </tr>
 
     
@@ -952,7 +1041,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_corpusVersion">Corpus_corpusVersion</a></td>
-          <td class="jd-descrcol" width="100%"><p>The version of the corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The version of the corpus.
+
+
+
+          </td>
       </tr>
 
     
@@ -963,7 +1057,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_schemaOrgType">Corpus_schemaOrgType</a></td>
-          <td class="jd-descrcol" width="100%"><p>schema.org type of documents in this corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>schema.org type of documents in this corpus.
+
+
+
+          </td>
       </tr>
 
     
@@ -974,7 +1073,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Corpus_trimmable">Corpus_trimmable</a></td>
-          <td class="jd-descrcol" width="100%"><p>Indicates if documents from this corpus can be trimmed when the index reaches its quota.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Indicates if documents from this corpus can be trimmed when the index reaches its quota.
+
+
+
+          </td>
       </tr>
 
     
@@ -985,7 +1089,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#FeatureParam">FeatureParam</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a FeatureParam.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a FeatureParam.
+
+
+
+          </td>
       </tr>
 
     
@@ -996,7 +1105,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#FeatureParam_paramName">FeatureParam_paramName</a></td>
-          <td class="jd-descrcol" width="100%"><p>The name of this parameter.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The name of this parameter.
+
+
+
+          </td>
       </tr>
 
     
@@ -1007,7 +1121,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#FeatureParam_paramValue">FeatureParam_paramValue</a></td>
-          <td class="jd-descrcol" width="100%"><p>The value of this parameter.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The value of this parameter.
+
+
+
+          </td>
       </tr>
 
     
@@ -1018,7 +1137,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch">GlobalSearch</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a GlobalSearch.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a GlobalSearch.
+
+
+
+          </td>
       </tr>
 
     
@@ -1029,7 +1153,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchCorpus">GlobalSearchCorpus</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a GlobalSearchCorpus.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a GlobalSearchCorpus.
+
+
+
+          </td>
       </tr>
 
     
@@ -1040,7 +1169,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchCorpus_allowShortcuts">GlobalSearchCorpus_allowShortcuts</a></td>
-          <td class="jd-descrcol" width="100%"><p>Whether or not global search is enabled for this corpus.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Whether or not global search is enabled for this corpus.
+
+
+
+          </td>
       </tr>
 
     
@@ -1051,7 +1185,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection">GlobalSearchSection</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a GlobalSearchSection.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a GlobalSearchSection.
+
+
+
+          </td>
       </tr>
 
     
@@ -1062,7 +1201,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection_sectionContent">GlobalSearchSection_sectionContent</a></td>
-          <td class="jd-descrcol" width="100%"><p>The content of this global search section.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The content of this global search section.
+
+
+
+          </td>
       </tr>
 
     
@@ -1073,7 +1217,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearchSection_sectionType">GlobalSearchSection_sectionType</a></td>
-          <td class="jd-descrcol" width="100%"><p>The type of global search section for this mapping.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The type of global search section for this mapping.
+
+
+
+          </td>
       </tr>
 
     
@@ -1084,7 +1233,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentAction">GlobalSearch_defaultIntentAction</a></td>
-          <td class="jd-descrcol" width="100%"><p>The default value for the global search section <code>default_intent_action</code>.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The default value for the global search section <code>default_intent_action</code>.
+
+
+
+          </td>
       </tr>
 
     
@@ -1095,7 +1249,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentActivity">GlobalSearch_defaultIntentActivity</a></td>
-          <td class="jd-descrcol" width="100%"><p>The default value for the global search section <code>default_intent_aactivity</code>.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The default value for the global search section <code>default_intent_aactivity</code>.
+
+
+
+          </td>
       </tr>
 
     
@@ -1106,7 +1265,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_defaultIntentData">GlobalSearch_defaultIntentData</a></td>
-          <td class="jd-descrcol" width="100%"><p>The default value for the global search section <code>default_intent_data</code>.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The default value for the global search section <code>default_intent_data</code>.
+
+
+
+          </td>
       </tr>
 
     
@@ -1117,7 +1281,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchEnabled">GlobalSearch_searchEnabled</a></td>
-          <td class="jd-descrcol" width="100%"><p>Whether or not global search is enabled for this app.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Whether or not global search is enabled for this app.
+
+
+
+          </td>
       </tr>
 
     
@@ -1128,7 +1297,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_searchLabel">GlobalSearch_searchLabel</a></td>
-          <td class="jd-descrcol" width="100%"><p>A localized string to identify this app's data within the global search app.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>A localized string to identify this app's data within the global search app.
+
+
+
+          </td>
       </tr>
 
     
@@ -1139,7 +1313,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#GlobalSearch_settingsDescription">GlobalSearch_settingsDescription</a></td>
-          <td class="jd-descrcol" width="100%"><p>A localized string to describe this apps data within the global search apps settings.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>A localized string to describe this apps data within the global search apps settings.
+
+
+
+          </td>
       </tr>
 
     
@@ -1150,7 +1329,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus">IMECorpus</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a IMECorpus.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a IMECorpus.
+
+
+
+          </td>
       </tr>
 
     
@@ -1161,7 +1345,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_inputEnabled">IMECorpus_inputEnabled</a></td>
-          <td class="jd-descrcol" width="100%"><p>Whether or not this corpus could be useful input for IME.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Whether or not this corpus could be useful input for IME.
+
+
+
+          </td>
       </tr>
 
     
@@ -1172,7 +1361,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_sourceClass">IMECorpus_sourceClass</a></td>
-          <td class="jd-descrcol" width="100%"><p>Class of the source.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Class of the source.
+
+
+
+          </td>
       </tr>
 
     
@@ -1183,7 +1377,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_toAddressesSection">IMECorpus_toAddressesSection</a></td>
-          <td class="jd-descrcol" width="100%"><p>Sections containing entities communicated with in a given document.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Sections containing entities communicated with in a given document.
+
+
+
+          </td>
       </tr>
 
     
@@ -1194,9 +1393,14 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputSection">IMECorpus_userInputSection</a></td>
-          <td class="jd-descrcol" width="100%"><p>If this section is non-empty, the document is considered to be input by the user if
+          <td class="jd-descrcol" width="100%">
+            <p>If this section is non-empty, the document is considered to be input by the user if
         either <code><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></code> is not set or the content of this section is equal to that
-        value.</td>
+        value.
+
+
+
+          </td>
       </tr>
 
     
@@ -1207,7 +1411,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputTag">IMECorpus_userInputTag</a></td>
-          <td class="jd-descrcol" width="100%"><p>Tag name for documents that contain data input by the user.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Tag name for documents that contain data input by the user.
+
+
+
+          </td>
       </tr>
 
     
@@ -1218,8 +1427,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#IMECorpus_userInputValue">IMECorpus_userInputValue</a></td>
-          <td class="jd-descrcol" width="100%"><p>If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
-        to be considered input by user.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
+        to be considered input by user.
+
+
+
+          </td>
       </tr>
 
     
@@ -1230,7 +1444,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a MapAttrs.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a MapAttrs.
+
+
+
+          </td>
       </tr>
 
     
@@ -1241,8 +1460,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraBearing">MapAttrs_cameraBearing</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraBearing">cameraBearing</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraBearing">cameraBearing</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1253,8 +1477,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraTargetLat">MapAttrs_cameraTargetLat</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLat">cameraTargetLat</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLat">cameraTargetLat</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1265,8 +1494,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraTargetLng">MapAttrs_cameraTargetLng</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLng">cameraTargetLng</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLng">cameraTargetLng</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1277,8 +1511,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraTilt">MapAttrs_cameraTilt</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTilt">cameraTilt</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTilt">cameraTilt</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1289,8 +1528,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_cameraZoom">MapAttrs_cameraZoom</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraZoom">cameraZoom</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraZoom">cameraZoom</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1301,8 +1545,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_mapType">MapAttrs_mapType</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#mapType">mapType</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#mapType">mapType</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1313,8 +1562,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiCompass">MapAttrs_uiCompass</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiCompass">uiCompass</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiCompass">uiCompass</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1325,8 +1579,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiRotateGestures">MapAttrs_uiRotateGestures</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiRotateGestures">uiRotateGestures</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiRotateGestures">uiRotateGestures</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1337,8 +1596,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiScrollGestures">MapAttrs_uiScrollGestures</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiScrollGestures">uiScrollGestures</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiScrollGestures">uiScrollGestures</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1349,8 +1613,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiTiltGestures">MapAttrs_uiTiltGestures</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiTiltGestures">uiTiltGestures</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiTiltGestures">uiTiltGestures</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1361,8 +1630,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiZoomControls">MapAttrs_uiZoomControls</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomControls">uiZoomControls</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomControls">uiZoomControls</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1373,8 +1647,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_uiZoomGestures">MapAttrs_uiZoomGestures</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomGestures">uiZoomGestures</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomGestures">uiZoomGestures</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1385,8 +1664,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_useViewLifecycle">MapAttrs_useViewLifecycle</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#useViewLifecycle">useViewLifecycle</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#useViewLifecycle">useViewLifecycle</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1397,8 +1681,13 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs_zOrderOnTop">MapAttrs_zOrderOnTop</a></td>
-          <td class="jd-descrcol" width="100%"><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#zOrderOnTop">zOrderOnTop</a></code>
-          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#zOrderOnTop">zOrderOnTop</a></code>
+          attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
+
+
+
+          </td>
       </tr>
 
     
@@ -1409,7 +1698,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section">Section</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a Section.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a Section.
+
+
+
+          </td>
       </tr>
 
     
@@ -1420,7 +1714,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature">SectionFeature</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a SectionFeature.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a SectionFeature.
+
+
+
+          </td>
       </tr>
 
     
@@ -1431,7 +1730,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#SectionFeature_featureType">SectionFeature_featureType</a></td>
-          <td class="jd-descrcol" width="100%"><p>The type of this feature.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The type of this feature.
+
+
+
+          </td>
       </tr>
 
     
@@ -1442,7 +1746,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_indexPrefixes">Section_indexPrefixes</a></td>
-          <td class="jd-descrcol" width="100%"><p>Indicates if this section should support prefix matching.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Indicates if this section should support prefix matching.
+
+
+
+          </td>
       </tr>
 
     
@@ -1453,7 +1762,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_noIndex">Section_noIndex</a></td>
-          <td class="jd-descrcol" width="100%"><p>Indicates if this section should not be indexed.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Indicates if this section should not be indexed.
+
+
+
+          </td>
       </tr>
 
     
@@ -1464,7 +1778,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_schemaOrgProperty">Section_schemaOrgProperty</a></td>
-          <td class="jd-descrcol" width="100%"><p>Section corresponds to this schema.org property.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Section corresponds to this schema.org property.
+
+
+
+          </td>
       </tr>
 
     
@@ -1475,7 +1794,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionFormat">Section_sectionFormat</a></td>
-          <td class="jd-descrcol" width="100%"><p>The format of the section.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The format of the section.
+
+
+
+          </td>
       </tr>
 
     
@@ -1486,7 +1810,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionId">Section_sectionId</a></td>
-          <td class="jd-descrcol" width="100%"><p>The ID of the section.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The ID of the section.
+
+
+
+          </td>
       </tr>
 
     
@@ -1497,7 +1826,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_sectionWeight">Section_sectionWeight</a></td>
-          <td class="jd-descrcol" width="100%"><p>The weight of the section.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>The weight of the section.
+
+
+
+          </td>
       </tr>
 
     
@@ -1508,7 +1842,12 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#Section_subsectionSeparator">Section_subsectionSeparator</a></td>
-          <td class="jd-descrcol" width="100%"><p>Subsection separator.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Subsection separator.
+
+
+
+          </td>
       </tr>
 
     
@@ -1519,7 +1858,12 @@ Summary:
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions">WalletFragmentOptions</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a WalletFragmentOptions.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a WalletFragmentOptions.
+
+
+
+          </td>
       </tr>
 
     
@@ -1530,10 +1874,15 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_appTheme">WalletFragmentOptions_appTheme</a></td>
-          <td class="jd-descrcol" width="100%"><p>Theme to be used for the Wallet selector
+          <td class="jd-descrcol" width="100%">
+            <p>Theme to be used for the Wallet selector
 
 
-          <p>Must be one of the following constant values.</td>
+          <p>Must be one of the following constant values.
+
+
+
+          </td>
       </tr>
 
 
@@ -1544,10 +1893,15 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_environment">WalletFragmentOptions_environment</a></td>
-          <td class="jd-descrcol" width="100%"><p>Google Wallet environment to use
+          <td class="jd-descrcol" width="100%">
+            <p>Google Wallet environment to use
 
 
-          <p>Must be one of the following constant values.</td>
+          <p>Must be one of the following constant values.
+
+
+
+          </td>
       </tr>
 
 
@@ -1558,10 +1912,15 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentMode">WalletFragmentOptions_fragmentMode</a></td>
-          <td class="jd-descrcol" width="100%"><p>Fragment mode
+          <td class="jd-descrcol" width="100%">
+            <p>Fragment mode
 
 
-          <p>Must be one of the following constant values.</td>
+          <p>Must be one of the following constant values.
+
+
+
+          </td>
       </tr>
 
     
@@ -1572,11 +1931,16 @@ Summary:
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentOptions_fragmentStyle">WalletFragmentOptions_fragmentStyle</a></td>
-          <td class="jd-descrcol" width="100%"><p>A style resource specifing attributes to customize the look and feel of WalletFragment
+          <td class="jd-descrcol" width="100%">
+            <p>A style resource specifing attributes to customize the look and feel of WalletFragment
 
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1587,7 +1951,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle">WalletFragmentStyle</a></td>
-          <td class="jd-descrcol" width="100%">Attributes that can be used with a WalletFragmentStyle.</td>
+          <td class="jd-descrcol" width="100%">
+            Attributes that can be used with a WalletFragmentStyle.
+
+
+
+          </td>
       </tr>
       
     
@@ -1598,7 +1967,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonAppearance">WalletFragmentStyle_buyButtonAppearance</a></td>
-          <td class="jd-descrcol" width="100%"><p>Appearance of the buy button.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Appearance of the buy button.
+
+
+
+          </td>
       </tr>
       
     
@@ -1609,7 +1983,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonHeight">WalletFragmentStyle_buyButtonHeight</a></td>
-          <td class="jd-descrcol" width="100%"><p>Height of the buy button.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Height of the buy button.
+
+
+
+          </td>
       </tr>
       
     
@@ -1620,7 +1999,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonText">WalletFragmentStyle_buyButtonText</a></td>
-          <td class="jd-descrcol" width="100%"><p>Text on the buy button.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Text on the buy button.
+
+
+
+          </td>
       </tr>
       
     
@@ -1631,7 +2015,12 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_buyButtonWidth">WalletFragmentStyle_buyButtonWidth</a></td>
-          <td class="jd-descrcol" width="100%"><p>Width of the buy button.</td>
+          <td class="jd-descrcol" width="100%">
+            <p>Width of the buy button.
+
+
+
+          </td>
       </tr>
       
     
@@ -1642,11 +2031,16 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsBackground">WalletFragmentStyle_maskedWalletDetailsBackground</a></td>
-          <td class="jd-descrcol" width="100%"><p>Masked wallet details background
+          <td class="jd-descrcol" width="100%">
+            <p>Masked wallet details background
 
 
           <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1657,11 +2051,16 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonBackground">WalletFragmentStyle_maskedWalletDetailsButtonBackground</a></td>
-          <td class="jd-descrcol" width="100%"><p>"Change" button background in masked wallet details view
+          <td class="jd-descrcol" width="100%">
+            <p>"Change" button background in masked wallet details view
 
 
           <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1672,11 +2071,16 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance">WalletFragmentStyle_maskedWalletDetailsButtonTextAppearance</a></td>
-          <td class="jd-descrcol" width="100%"><p>TextAppearance for the "Change" button in masked wallet details view
+          <td class="jd-descrcol" width="100%">
+            <p>TextAppearance for the "Change" button in masked wallet details view
 
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1687,11 +2091,16 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsHeaderTextAppearance">WalletFragmentStyle_maskedWalletDetailsHeaderTextAppearance</a></td>
-          <td class="jd-descrcol" width="100%"><p>TextAppearance for headers describing masked wallet details
+          <td class="jd-descrcol" width="100%">
+            <p>TextAppearance for headers describing masked wallet details
 
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
       
     
@@ -1702,10 +2111,15 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsLogoImageType">WalletFragmentStyle_maskedWalletDetailsLogoImageType</a></td>
-          <td class="jd-descrcol" width="100%"><p>Type of the wallet logo image in masked wallet details view
+          <td class="jd-descrcol" width="100%">
+            <p>Type of the wallet logo image in masked wallet details view
 
 
-          <p>Must be one of the following constant values.</td>
+          <p>Must be one of the following constant values.
+
+
+
+          </td>
       </tr>
       
     
@@ -1716,11 +2130,16 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsLogoTextColor">WalletFragmentStyle_maskedWalletDetailsLogoTextColor</a></td>
-          <td class="jd-descrcol" width="100%"><p>Color of the Google Wallet logo text in masked wallet details view
+          <td class="jd-descrcol" width="100%">
+            <p>Color of the Google Wallet logo text in masked wallet details view
 
 
           <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
-"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".</td>
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -1731,11 +2150,16 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
           int</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/R.styleable.html#WalletFragmentStyle_maskedWalletDetailsTextAppearance">WalletFragmentStyle_maskedWalletDetailsTextAppearance</a></td>
-          <td class="jd-descrcol" width="100%"><p>TextAppearance for masked wallet details
+          <td class="jd-descrcol" width="100%">
+            <p>TextAppearance for masked wallet details
 
 
           <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
-or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".</td>
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+
+
+
+          </td>
       </tr>
 
 
@@ -2041,6 +2465,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a AdsAttrs.
            <p>Includes the following attributes:</p>
            <table>
@@ -2085,6 +2512,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The size of the ad. It must be one of BANNER, FULL_BANNER, LEADERBOARD,
     MEDIUM_RECTANGLE, SMART_BANNER, WIDE_SKYSCRAPER, or
     &lt;width&gt;x&lt;height&gt;.
@@ -2124,6 +2554,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>A comma-separated list of the supported ad sizes. The sizes must be one of
     BANNER, FULL_BANNER, LEADERBOARD, MEDIUM_RECTANGLE, SMART_BANNER,
@@ -2165,6 +2598,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The ad unit ID.
 
 
@@ -2202,6 +2638,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a AppDataSearch.
 </p></div>
 
@@ -2231,6 +2670,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a Corpus.
            <p>Includes the following attributes:</p>
            <table>
@@ -2279,6 +2721,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The URI of the content provider that the index should crawl to get the data for this
     corpus. Required. This string must not change between configurations.
 
@@ -2318,6 +2763,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The ID of the corpus. Required. This string must not change between configurations.
 
 
@@ -2355,6 +2803,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The version of the corpus. Optional; defaults to <code>"0"</code>. This string must not change
       between configurations.
 
@@ -2394,6 +2845,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>schema.org type of documents in this corpus. Optional.
 
 
@@ -2431,6 +2885,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Indicates if documents from this corpus can be trimmed when the index reaches its quota.
       Optional; defaults to <code>true</code>.
 
@@ -2470,6 +2927,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a FeatureParam.
            <p>Includes the following attributes:</p>
            <table>
@@ -2511,6 +2971,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The name of this parameter. Required.
 
 
@@ -2548,6 +3011,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The value of this parameter. Optional.
 
 
@@ -2585,6 +3051,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a GlobalSearch.
            <p>Includes the following attributes:</p>
            <table>
@@ -2635,6 +3104,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a GlobalSearchCorpus.
            <p>Includes the following attributes:</p>
            <table>
@@ -2675,6 +3147,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>Whether or not global search is enabled for this corpus. Optional; defaults to
       <code>true</code>. If set to <code>false</code>, it will be treated as if the <code>GlobalSearchCorpus</code>
@@ -2723,6 +3198,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a GlobalSearchSection.
            <p>Includes the following attributes:</p>
            <table>
@@ -2765,6 +3243,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The content of this global search section. This is a global search section template string.
       It should contain a reference to a string which can change between configurations.
 
@@ -2804,6 +3285,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The type of global search section for this mapping.
 
 
@@ -2851,6 +3335,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The default value for the global search section <code>default_intent_action</code>. Optional.
       This string must not change between configurations.
 
@@ -2890,6 +3377,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The default value for the global search section <code>default_intent_aactivity</code>. Optional.
       This string must not change between configurations.
 
@@ -2929,6 +3419,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The default value for the global search section <code>default_intent_data</code>. Optional.
       This string must not change between configurations.
 
@@ -2968,6 +3461,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Whether or not global search is enabled for this app. Optional; defaults to <code>true</code>.
       If set to <code>false</code>, it will be treated as if the <code>GlobalSearch</code> element did not
       exist.
@@ -3008,6 +3504,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>A localized string to identify this app's data within the global search app. Required.
 
 
@@ -3045,6 +3544,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>A localized string to describe this apps data within the global search apps settings.
       Optional.
 
@@ -3084,6 +3586,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a IMECorpus.
            <p>Includes the following attributes:</p>
            <table>
@@ -3136,6 +3641,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Whether or not this corpus could be useful input for IME. Optional; defaults to
         <code>true</code>. If set to <code>false</code>, it will be treated as if the <code>IMECorpus</code>
         element did not exist.
@@ -3176,6 +3684,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Class of the source. One of the following: email, contact, and instant-message.
 
 
@@ -3217,6 +3728,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Sections containing entities communicated with in a given document.
         Entities can be names, email addresses or phone numbers.
 
@@ -3255,6 +3769,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>If this section is non-empty, the document is considered to be input by the user if
         either <code><a href="/reference/com/google/android/gms/R.attr.html#userInputValue">userInputValue</a></code> is not set or the content of this section is equal to that
@@ -3296,6 +3813,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Tag name for documents that contain data input by the user. Optional.
 
 
@@ -3332,6 +3852,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>If set, <code><a href="/reference/com/google/android/gms/R.attr.html#userInputSection">userInputSection</a></code> contents needs to equal this value for the document
         to be considered input by user.
@@ -3371,6 +3894,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a MapAttrs.
            <p>Includes the following attributes:</p>
@@ -3425,6 +3951,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraBearing">cameraBearing</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -3461,6 +3990,9 @@ containing a value of this type.</p></div>
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLat">cameraTargetLat</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
@@ -3499,6 +4031,9 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTargetLng">cameraTargetLng</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -3535,6 +4070,9 @@ containing a value of this type.</p></div>
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraTilt">cameraTilt</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
@@ -3573,6 +4111,9 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#cameraZoom">cameraZoom</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -3609,6 +4150,9 @@ containing a value of this type.</p></div>
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#mapType">mapType</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
@@ -3653,6 +4197,9 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiCompass">uiCompass</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -3689,6 +4236,9 @@ containing a value of this type.</p></div>
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiRotateGestures">uiRotateGestures</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
@@ -3727,6 +4277,9 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiScrollGestures">uiScrollGestures</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -3763,6 +4316,9 @@ containing a value of this type.</p></div>
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiTiltGestures">uiTiltGestures</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
@@ -3801,6 +4357,9 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomControls">uiZoomControls</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -3837,6 +4396,9 @@ containing a value of this type.</p></div>
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#uiZoomGestures">uiZoomGestures</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
@@ -3875,6 +4437,9 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#useViewLifecycle">useViewLifecycle</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -3912,6 +4477,9 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>This symbol is the offset where the <code><a href="/reference/com/google/android/gms/R.attr.html#zOrderOnTop">zOrderOnTop</a></code>
           attribute's value can be found in the <code><a href="/reference/com/google/android/gms/R.styleable.html#MapAttrs">MapAttrs</a></code> array.
 
@@ -3948,6 +4516,9 @@ containing a value of this type.</p></div>
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a Section.
            <p>Includes the following attributes:</p>
@@ -3997,6 +4568,9 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a SectionFeature.
            <p>Includes the following attributes:</p>
            <table>
@@ -4036,6 +4610,9 @@ containing a value of this type.</p></div>
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>The type of this feature. Required.
 
@@ -4089,6 +4666,9 @@ containing a value of this type.</p></div>
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Indicates if this section should support prefix matching. Optional; defaults to
       <code>false</code>.
 
@@ -4128,6 +4708,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Indicates if this section should not be indexed. Optional; defaults to <code>false</code>.
 
 
@@ -4165,6 +4748,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Section corresponds to this schema.org property. Optional.
 
 
@@ -4202,6 +4788,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The format of the section. Optional; default to <code>plain</code>.
 
 
@@ -4244,6 +4833,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The ID of the section. Required. This string must not change between configurations.
 
 
@@ -4281,6 +4873,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>The weight of the section. Optional; defaults to 1.
 
 
@@ -4318,6 +4913,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Subsection separator. Optional. If not provided, the section is not split into
       subsections.
 
@@ -4357,6 +4955,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a WalletFragmentOptions.
            <p>Includes the following attributes:</p>
            <table>
@@ -4400,6 +5001,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Theme to be used for the Wallet selector
 
 
@@ -4440,6 +5044,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Google Wallet environment to use
 
 
@@ -4481,6 +5088,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Fragment mode
 
 
@@ -4521,6 +5131,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>A style resource specifing attributes to customize the look and feel of WalletFragment
 
 
@@ -4554,6 +5167,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Attributes that can be used with a WalletFragmentStyle.
            <p>Includes the following attributes:</p>
            <table>
@@ -4606,6 +5222,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Appearance of the buy button. Must be one of "classic", "grayscale" and "monochrome"
 
 
@@ -4647,6 +5266,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Height of the buy button. This includes an 8dp padding (4dp on each side) used for
              pressed and focused states of the button. The value can be a specific height, e.g.
              "48dp", or special values "match_parent" and "wrap_content".
@@ -4698,6 +5320,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Text on the buy button. Must be one of "buy_with_google", "buy_now" and "book_now"
 
 
@@ -4739,6 +5364,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Width of the buy button. This includes an 8dp padding (4dp on each side) used for
              pressed and focused states of the button. The value can be a specific width, e.g.
              "300dp", or special values "match_parent" and "wrap_content".
@@ -4790,6 +5418,9 @@ containing a value of this type.
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Masked wallet details background
 
 
@@ -4824,6 +5455,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>"Change" button background in masked wallet details view
 
@@ -4860,6 +5494,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>TextAppearance for the "Change" button in masked wallet details view
 
 
@@ -4893,6 +5530,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>TextAppearance for headers describing masked wallet details
 
 
@@ -4926,6 +5566,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Type of the wallet logo image in masked wallet details view
 
 
@@ -4966,6 +5609,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p><p>Color of the Google Wallet logo text in masked wallet details view
 
 
@@ -5003,6 +5649,9 @@ containing a value of this type.
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p><p>TextAppearance for masked wallet details
 
@@ -5049,6 +5698,9 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>

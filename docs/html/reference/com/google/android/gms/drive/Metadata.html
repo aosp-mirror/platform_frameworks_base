@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -790,6 +836,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -873,14 +922,24 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_AVAILABLE_LOCALLY">CONTENT_AVAILABLE_LOCALLY</a></td>
-        <td class="jd-descrcol" width="100%">The content is available on the device.</td>
+        <td class="jd-descrcol" width="100%">
+          The content is available on the device.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_NOT_AVAILABLE_LOCALLY">CONTENT_NOT_AVAILABLE_LOCALLY</a></td>
-        <td class="jd-descrcol" width="100%">The content is not available on the device.</td>
+        <td class="jd-descrcol" width="100%">
+          The content is not available on the device.
+
+
+
+        </td>
     </tr>
 
 
@@ -945,7 +1004,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getAlternateLink()">getAlternateLink</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns a link for opening the file using a relevant Google editor or viewer.</div>
+        <div class="jd-descrdiv">
+          Returns a link for opening the file using a relevant Google editor or viewer.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -963,9 +1027,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getContentAvailability()">getContentAvailability</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns <code><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_NOT_AVAILABLE_LOCALLY">CONTENT_NOT_AVAILABLE_LOCALLY</a></code> when the content is not available on
+        <div class="jd-descrdiv">
+          Returns <code><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_NOT_AVAILABLE_LOCALLY">CONTENT_NOT_AVAILABLE_LOCALLY</a></code> when the content is not available on
  the device or <code><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_AVAILABLE_LOCALLY">CONTENT_AVAILABLE_LOCALLY</a></code> when the content is available on the
- device.</div>
+ device.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -983,7 +1052,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getCreatedDate()">getCreatedDate</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the create time for this resource.</div>
+        <div class="jd-descrdiv">
+          Returns the create time for this resource.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1001,7 +1075,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getDescription()">getDescription</a></span>()</nobr>
         
-        <div class="jd-descrdiv">A short description of the file.</div>
+        <div class="jd-descrdiv">
+          A short description of the file.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1019,7 +1098,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getDriveId()">getDriveId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the id of the resource </div>
+        <div class="jd-descrdiv">
+          Returns the id of the resource
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1037,7 +1121,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getEmbedLink()">getEmbedLink</a></span>()</nobr>
         
-        <div class="jd-descrdiv">A link for embedding the file.</div>
+        <div class="jd-descrdiv">
+          A link for embedding the file.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1055,7 +1144,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getFileExtension()">getFileExtension</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The file extension used when downloading this file.</div>
+        <div class="jd-descrdiv">
+          The file extension used when downloading this file.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1073,7 +1167,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getFileSize()">getFileSize</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The size of the file in bytes.</div>
+        <div class="jd-descrdiv">
+          The size of the file in bytes.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1091,7 +1190,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getLastViewedByMeDate()">getLastViewedByMeDate</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the last time this resource was viewed by the user.</div>
+        <div class="jd-descrdiv">
+          Returns the last time this resource was viewed by the user.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1109,7 +1213,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getMimeType()">getMimeType</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the MIME type of the resource </div>
+        <div class="jd-descrdiv">
+          Returns the MIME type of the resource
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1127,7 +1236,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getModifiedByMeDate()">getModifiedByMeDate</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the last time this resource was modified by the user.</div>
+        <div class="jd-descrdiv">
+          Returns the last time this resource was modified by the user.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1145,7 +1259,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getModifiedDate()">getModifiedDate</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the last time this resource was modified by anyone.</div>
+        <div class="jd-descrdiv">
+          Returns the last time this resource was modified by anyone.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1163,8 +1282,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getOriginalFilename()">getOriginalFilename</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The original filename if the file was uploaded manually, or the original title if the file
- was inserted through the API.</div>
+        <div class="jd-descrdiv">
+          The original filename if the file was uploaded manually, or the original title if the file
+ was inserted through the API.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1182,7 +1306,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getQuotaBytesUsed()">getQuotaBytesUsed</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The number of quota bytes used by this file.</div>
+        <div class="jd-descrdiv">
+          The number of quota bytes used by this file.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1200,7 +1329,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getSharedWithMeDate()">getSharedWithMeDate</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the time at which this resource was shared with the user.</div>
+        <div class="jd-descrdiv">
+          Returns the time at which this resource was shared with the user.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1218,7 +1352,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getTitle()">getTitle</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the title of the resource </div>
+        <div class="jd-descrdiv">
+          Returns the title of the resource
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1236,8 +1375,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getWebContentLink()">getWebContentLink</a></span>()</nobr>
         
-        <div class="jd-descrdiv">A link for downloading the content of the file in a browser using cookie based
- authentication.</div>
+        <div class="jd-descrdiv">
+          A link for downloading the content of the file in a browser using cookie based
+ authentication.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1255,8 +1399,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#getWebViewLink()">getWebViewLink</a></span>()</nobr>
         
-        <div class="jd-descrdiv">A link only available on public folders for viewing their static web assets (HTML, CSS, JS,
- etc) via Google Drive's Website Hosting.</div>
+        <div class="jd-descrdiv">
+          A link only available on public folders for viewing their static web assets (HTML, CSS, JS,
+ etc) via Google Drive's Website Hosting.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1274,7 +1423,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isEditable()">isEditable</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns true if this resource can be edited by the current user.</div>
+        <div class="jd-descrdiv">
+          Returns true if this resource can be edited by the current user.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1292,7 +1446,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isFolder()">isFolder</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns true if this Metadata is for a folder.</div>
+        <div class="jd-descrdiv">
+          Returns true if this Metadata is for a folder.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1310,7 +1469,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isInAppFolder()">isInAppFolder</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns true if this resource is in the Application Folder.</div>
+        <div class="jd-descrdiv">
+          Returns true if this resource is in the Application Folder.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1328,7 +1492,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isPinnable()">isPinnable</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns true if the file can be pinned.</div>
+        <div class="jd-descrdiv">
+          Returns true if the file can be pinned.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1346,8 +1515,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isPinned()">isPinned</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns true if this resource has been pinned (a request has been made to make the content
- available offline).</div>
+        <div class="jd-descrdiv">
+          Returns true if this resource has been pinned (a request has been made to make the content
+ available offline).
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1365,7 +1539,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isRestricted()">isRestricted</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Whether viewers are prevented from downloading this file.</div>
+        <div class="jd-descrdiv">
+          Whether viewers are prevented from downloading this file.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1383,7 +1562,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isShared()">isShared</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns true if this resource is a shared resource.</div>
+        <div class="jd-descrdiv">
+          Returns true if this resource is a shared resource.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1401,7 +1585,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isStarred()">isStarred</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns true if this resource is starred by the user.</div>
+        <div class="jd-descrdiv">
+          Returns true if this resource is starred by the user.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1419,7 +1608,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isTrashed()">isTrashed</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns true if this resource has been trashed.</div>
+        <div class="jd-descrdiv">
+          Returns true if this resource has been trashed.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1437,7 +1631,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/Metadata.html#isViewed()">isViewed</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Whether this file has been viewed by this user.</div>
+        <div class="jd-descrdiv">
+          Whether this file has been viewed by this user.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1691,7 +1890,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
+        <div class="jd-descrdiv">
+          Freeze a volatile representation into an immutable representation.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1709,7 +1913,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
+        <div class="jd-descrdiv">
+          Check to see if this object is valid for use.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1769,6 +1978,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The content is available on the device.
 </p></div>
 
@@ -1807,6 +2019,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>The content is not available on the device.
 </p></div>
@@ -1862,6 +2077,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1906,6 +2124,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a link for opening the file using a relevant Google editor or viewer.
 </p></div>
 
@@ -1935,6 +2156,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns <code><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_NOT_AVAILABLE_LOCALLY">CONTENT_NOT_AVAILABLE_LOCALLY</a></code> when the content is not available on
  the device or <code><a href="/reference/com/google/android/gms/drive/Metadata.html#CONTENT_AVAILABLE_LOCALLY">CONTENT_AVAILABLE_LOCALLY</a></code> when the content is available on the
@@ -1968,6 +2192,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the create time for this resource.
 </p></div>
 
@@ -1997,6 +2224,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A short description of the file.
 </p></div>
@@ -2028,6 +2258,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the id of the resource </p></div>
 
     </div>
@@ -2056,6 +2289,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A link for embedding the file.
 </p></div>
@@ -2087,6 +2323,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The file extension used when downloading this file.
 </p></div>
 
@@ -2116,6 +2355,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>The size of the file in bytes.
 
@@ -2149,6 +2391,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the last time this resource was viewed by the user.
 </p></div>
 
@@ -2179,6 +2424,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the MIME type of the resource </p></div>
 
     </div>
@@ -2207,6 +2455,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the last time this resource was modified by the user.
 </p></div>
@@ -2238,6 +2489,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the last time this resource was modified by anyone.
 </p></div>
 
@@ -2267,6 +2521,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>The original filename if the file was uploaded manually, or the original title if the file
  was inserted through the API.
@@ -2299,6 +2556,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>The number of quota bytes used by this file.
 </p></div>
 
@@ -2329,6 +2589,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the time at which this resource was shared with the user.
 </p></div>
 
@@ -2359,6 +2622,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the title of the resource </p></div>
 
     </div>
@@ -2388,6 +2654,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A link for downloading the content of the file in a browser using cookie based
  authentication.
 </p></div>
@@ -2419,6 +2688,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A link only available on public folders for viewing their static web assets (HTML, CSS, JS,
  etc) via Google Drive's Website Hosting.
 </p></div>
@@ -2450,6 +2722,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource can be edited by the current user.
 </p></div>
 
@@ -2480,6 +2755,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if this Metadata is for a folder.
 </p></div>
 
@@ -2510,6 +2788,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource is in the Application Folder.
 
  <p> The App Folder contains hidden files stored in a user's Drive that are only
@@ -2544,6 +2825,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the file can be pinned.  Not all shortcut app MIME types are pinnable.
 </p></div>
 
@@ -2574,6 +2858,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource has been pinned (a request has been made to make the content
  available offline).
 </p></div>
@@ -2605,6 +2892,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Whether viewers are prevented from downloading this file.
 </p></div>
 
@@ -2634,6 +2924,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource is a shared resource.
 </p></div>
@@ -2665,6 +2958,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource is starred by the user.
 </p></div>
 
@@ -2695,6 +2991,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if this resource has been trashed.
 </p></div>
 
@@ -2724,6 +3023,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Whether this file has been viewed by this user.
 </p></div>

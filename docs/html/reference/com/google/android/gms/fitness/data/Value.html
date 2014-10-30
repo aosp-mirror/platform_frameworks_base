@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -799,6 +845,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -833,9 +882,9 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Holder object for the value of a single field in a <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">data point</a></code>.  Values are not
- constructed directly; a value for each field of the <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code> is created
- for each data point.
+<p itemprop="articleBody">Holder object for the value of a single <code><a href="/reference/com/google/android/gms/fitness/data/Field.html">field</a></code> in a <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">data point</a></code>.
+ Values are not constructed directly; a value for each field of the <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code>
+ is created for each data point.
  <p>
  A field value has a particular format, and should be set and read using the
  format-specific methods.  For instance, a float value should be set via <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#setFloat(float)">setFloat(float)</a></code>
@@ -912,14 +961,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -950,7 +1009,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -977,7 +1041,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           Creator&lt;<a href="/reference/com/google/android/gms/fitness/data/Value.html">Value</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/data/Value.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+
+
+
+
+          </td>
       </tr>
 
 
@@ -1012,7 +1081,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#asFloat()">asFloat</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the value of this object as a float.</div>
+        <div class="jd-descrdiv">
+          Returns the value of this object as a float.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1030,7 +1104,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#asInt()">asInt</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the value of this object as an int.</div>
+        <div class="jd-descrdiv">
+          Returns the value of this object as an int.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1080,8 +1159,13 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#getFormat()">getFormat</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the format of this value, which matches the appropriate field in the
- <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code> definition.</div>
+        <div class="jd-descrdiv">
+          Returns the format of this value, which matches the appropriate field in the
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code> definition.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1115,7 +1199,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#isSet()">isSet</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns <code>true</code> if this object's value has been set by calling one of the setters.</div>
+        <div class="jd-descrdiv">
+          Returns <code>true</code> if this object's value has been set by calling one of the setters.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1133,7 +1222,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#setFloat(float)">setFloat</a></span>(float value)</nobr>
 
-        <div class="jd-descrdiv">Updates this value object to represent a float value.</div>
+        <div class="jd-descrdiv">
+          Updates this value object to represent a float value.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1151,7 +1245,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/data/Value.html#setInt(int)">setInt</a></span>(int value)</nobr>
 
-        <div class="jd-descrdiv">Updates this value object to represent an int value.</div>
+        <div class="jd-descrdiv">
+          Updates this value object to represent an int value.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1516,6 +1615,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
 
@@ -1564,6 +1666,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value of this object as a float.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
@@ -1602,6 +1707,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value of this object as an int.</p></div>
   <div class="jd-tagdata">
@@ -1642,6 +1750,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1671,6 +1782,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1699,6 +1813,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the format of this value, which matches the appropriate field in the
  <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">data type</a></code> definition.</p></div>
@@ -1735,6 +1852,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1763,6 +1883,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns <code>true</code> if this object's value has been set by calling one of the setters.
 </p></div>
@@ -1793,6 +1916,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Updates this value object to represent a float value.  Any previous values associated
  with this object are erased.</p></div>
@@ -1834,6 +1960,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Updates this value object to represent an int value.  Any previous values are
  erased.</p></div>
   <div class="jd-tagdata">
@@ -1874,6 +2003,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1902,6 +2034,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

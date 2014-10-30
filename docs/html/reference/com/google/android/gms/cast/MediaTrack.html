@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -778,6 +824,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -857,7 +906,12 @@ Summary:
 
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.Builder.html">MediaTrack.Builder</a></td>
-      <td class="jd-descrcol" width="100%">A builder for <code><a href="/reference/com/google/android/gms/cast/MediaTrack.html">MediaTrack</a></code> objects.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        A builder for <code><a href="/reference/com/google/android/gms/cast/MediaTrack.html">MediaTrack</a></code> objects.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -882,77 +936,132 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#SUBTYPE_CAPTIONS">SUBTYPE_CAPTIONS</a></td>
-        <td class="jd-descrcol" width="100%">A media track subtype indicating closed captions.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track subtype indicating closed captions.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#SUBTYPE_CHAPTERS">SUBTYPE_CHAPTERS</a></td>
-        <td class="jd-descrcol" width="100%">A media track subtype indicating chapters.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track subtype indicating chapters.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#SUBTYPE_DESCRIPTIONS">SUBTYPE_DESCRIPTIONS</a></td>
-        <td class="jd-descrcol" width="100%">A media track subtype indicating descriptions.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track subtype indicating descriptions.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#SUBTYPE_METADATA">SUBTYPE_METADATA</a></td>
-        <td class="jd-descrcol" width="100%">A media track subtype indicating metadata.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track subtype indicating metadata.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#SUBTYPE_NONE">SUBTYPE_NONE</a></td>
-        <td class="jd-descrcol" width="100%">A media track subtype indicating no subtype.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track subtype indicating no subtype.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#SUBTYPE_SUBTITLES">SUBTYPE_SUBTITLES</a></td>
-        <td class="jd-descrcol" width="100%">A media track subtype indicating subtitles.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track subtype indicating subtitles.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#SUBTYPE_UNKNOWN">SUBTYPE_UNKNOWN</a></td>
-        <td class="jd-descrcol" width="100%">A media track subtype indicating an unknown subtype.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track subtype indicating an unknown subtype.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#TYPE_AUDIO">TYPE_AUDIO</a></td>
-        <td class="jd-descrcol" width="100%">A media track type indicating an audio track.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track type indicating an audio track.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#TYPE_TEXT">TYPE_TEXT</a></td>
-        <td class="jd-descrcol" width="100%">A media track type indicating a text track.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track type indicating a text track.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#TYPE_UNKNOWN">TYPE_UNKNOWN</a></td>
-        <td class="jd-descrcol" width="100%">A media track type indicating an unknown track type.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track type indicating an unknown track type.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#TYPE_VIDEO">TYPE_VIDEO</a></td>
-        <td class="jd-descrcol" width="100%">A media track type indicating a video track.</td>
+        <td class="jd-descrcol" width="100%">
+          A media track type indicating a video track.
+
+
+
+        </td>
     </tr>
 
 
@@ -1008,7 +1117,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#getContentId()">getContentId</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the content ID of the media track.</div>
+        <div class="jd-descrdiv">
+          Returns the content ID of the media track.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1026,8 +1140,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#getContentType()">getContentType</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the content type (MIME type) of the media track, or <code>null</code> if none was
- specified.</div>
+        <div class="jd-descrdiv">
+          Returns the content type (MIME type) of the media track, or <code>null</code> if none was
+ specified.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1045,8 +1164,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#getCustomData()">getCustomData</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the custom data object for this media track, or <code>null</code> if none was
- specified.</div>
+        <div class="jd-descrdiv">
+          Returns the custom data object for this media track, or <code>null</code> if none was
+ specified.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1064,7 +1188,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#getId()">getId</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the unique ID of the media track.</div>
+        <div class="jd-descrdiv">
+          Returns the unique ID of the media track.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1082,9 +1211,14 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#getLanguage()">getLanguage</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the language of this media track in
+        <div class="jd-descrdiv">
+          Returns the language of this media track in
  <code><a href="http://tools.ietf.org/html/rfc5646">RFC-5464</a></code> format, or
- <code>null</code> if none was specified.</div>
+ <code>null</code> if none was specified.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1102,7 +1236,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#getName()">getName</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the name of the media track, or <code>null</code> if none was specified.</div>
+        <div class="jd-descrdiv">
+          Returns the name of the media track, or <code>null</code> if none was specified.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1120,7 +1259,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#getSubtype()">getSubtype</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the subtype of this media track; one of the <code>SUBTYPE_</code> constants.</div>
+        <div class="jd-descrdiv">
+          Returns the subtype of this media track; one of the <code>SUBTYPE_</code> constants.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1138,7 +1282,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#getType()">getType</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the type of the track; one of the <code>TYPE_</code> constants.</div>
+        <div class="jd-descrdiv">
+          Returns the type of the track; one of the <code>TYPE_</code> constants.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1172,7 +1321,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#setContentId(java.lang.String)">setContentId</a></span>(String contentId)</nobr>
 
-        <div class="jd-descrdiv">Sets the content ID for the media track.</div>
+        <div class="jd-descrdiv">
+          Sets the content ID for the media track.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1190,7 +1344,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/MediaTrack.html#setContentType(java.lang.String)">setContentType</a></span>(String contentType)</nobr>
 
-        <div class="jd-descrdiv">Sets the content type (MIME type) of the media track.</div>
+        <div class="jd-descrdiv">
+          Sets the content type (MIME type) of the media track.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1460,6 +1619,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media track subtype indicating closed captions. </p></div>
 
 
@@ -1497,6 +1659,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A media track subtype indicating chapters. </p></div>
 
@@ -1536,6 +1701,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media track subtype indicating descriptions. </p></div>
 
 
@@ -1573,6 +1741,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A media track subtype indicating metadata. </p></div>
 
@@ -1612,6 +1783,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media track subtype indicating no subtype. </p></div>
 
 
@@ -1649,6 +1823,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A media track subtype indicating subtitles. </p></div>
 
@@ -1688,6 +1865,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media track subtype indicating an unknown subtype. </p></div>
 
 
@@ -1725,6 +1905,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A media track type indicating an audio track. </p></div>
 
@@ -1764,6 +1947,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media track type indicating a text track. </p></div>
 
 
@@ -1802,6 +1988,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A media track type indicating an unknown track type. </p></div>
 
 
@@ -1839,6 +2028,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>A media track type indicating a video track. </p></div>
 
@@ -1901,6 +2093,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1929,6 +2124,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the content ID of the media track.
 </p></div>
@@ -1959,6 +2157,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the content type (MIME type) of the media track, or <code>null</code> if none was
  specified.
@@ -1991,6 +2192,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the custom data object for this media track, or <code>null</code> if none was
  specified.
 </p></div>
@@ -2022,6 +2226,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the unique ID of the media track.
 </p></div>
 
@@ -2051,6 +2258,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the language of this media track in
  <code><a href="http://tools.ietf.org/html/rfc5646">RFC-5464</a></code> format, or
@@ -2084,6 +2294,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the name of the media track, or <code>null</code> if none was specified.
 </p></div>
 
@@ -2113,6 +2326,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns the subtype of this media track; one of the <code>SUBTYPE_</code> constants.
 </p></div>
@@ -2144,6 +2360,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the type of the track; one of the <code>TYPE_</code> constants.
 </p></div>
 
@@ -2174,6 +2393,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2202,6 +2424,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the content ID for the media track.
 </p></div>
@@ -2232,6 +2457,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the content type (MIME type) of the media track.
 </p></div>

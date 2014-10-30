@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -830,6 +876,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -961,28 +1010,48 @@ android.support.v4.app.DialogFragment
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">STYLE_NORMAL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">STYLE_NO_FRAME</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">STYLE_NO_INPUT</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">STYLE_NO_TITLE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1061,8 +1130,13 @@ android.support.v4.app.DialogFragment
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/SupportErrorDialogFragment.html#newInstance(android.app.Dialog, android.content.DialogInterface.OnCancelListener)">newInstance</a></span>(Dialog dialog, DialogInterface.OnCancelListener cancelListener)</nobr>
 
-        <div class="jd-descrdiv">Create a <code><a href="/reference/android/support/v4/app/DialogFragment.html">DialogFragment</a></code> for displaying the
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> with an OnCancelListener.</div>
+        <div class="jd-descrdiv">
+          Create a <code><a href="/reference/android/support/v4/app/DialogFragment.html">DialogFragment</a></code> for displaying the
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> with an OnCancelListener.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1080,8 +1154,13 @@ android.support.v4.app.DialogFragment
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/SupportErrorDialogFragment.html#newInstance(android.app.Dialog)">newInstance</a></span>(Dialog dialog)</nobr>
 
-        <div class="jd-descrdiv">Create a <code><a href="/reference/android/support/v4/app/DialogFragment.html">DialogFragment</a></code> for displaying the
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code>.</div>
+        <div class="jd-descrdiv">
+          Create a <code><a href="/reference/android/support/v4/app/DialogFragment.html">DialogFragment</a></code> for displaying the
+ <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1115,9 +1194,14 @@ android.support.v4.app.DialogFragment
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/SupportErrorDialogFragment.html#onCreateDialog(android.os.Bundle)">onCreateDialog</a></span>(Bundle savedInstanceState)</nobr>
 
-        <div class="jd-descrdiv">Returns a <code><a href="/reference/android/app/Dialog.html">Dialog</a></code> created by
+        <div class="jd-descrdiv">
+          Returns a <code><a href="/reference/android/app/Dialog.html">Dialog</a></code> created by
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> with the provided
- errorCode, activity, request code, and cancel listener.</div>
+ errorCode, activity, request code, and cancel listener.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -2713,7 +2797,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setEnterSharedElementTransitionCallback</span>(SharedElementCallback arg0)</nobr>
+        <span class="sympad">setEnterSharedElementCallback</span>(SharedElementCallback arg0)</nobr>
 
   </td></tr>
 
@@ -2745,7 +2829,7 @@ From class
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">setExitSharedElementTransitionCallback</span>(SharedElementCallback arg0)</nobr>
+        <span class="sympad">setExitSharedElementCallback</span>(SharedElementCallback arg0)</nobr>
 
   </td></tr>
 
@@ -3439,6 +3523,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3482,6 +3569,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Create a <code><a href="/reference/android/support/v4/app/DialogFragment.html">DialogFragment</a></code> for displaying the
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> with an OnCancelListener.</p></div>
@@ -3533,6 +3623,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Create a <code><a href="/reference/android/support/v4/app/DialogFragment.html">DialogFragment</a></code> for displaying the
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -3578,6 +3671,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3606,6 +3702,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a <code><a href="/reference/android/app/Dialog.html">Dialog</a></code> created by
  <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> with the provided
@@ -3647,6 +3746,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

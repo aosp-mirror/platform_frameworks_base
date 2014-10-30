@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -775,6 +821,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -856,7 +905,12 @@ Summary:
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/Container.FunctionCallMacroCallback.html">Container.FunctionCallMacroCallback</a></td>
-      <td class="jd-descrcol" width="100%">Callback that is provided by the application to calculate the value of a custom macro.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Callback that is provided by the application to calculate the value of a custom macro.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -868,7 +922,12 @@ Summary:
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/tagmanager/Container.FunctionCallTagCallback.html">Container.FunctionCallTagCallback</a></td>
-      <td class="jd-descrcol" width="100%">Callback that is provided by the application to execute a custom tag.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Callback that is provided by the application to execute a custom tag.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -917,7 +976,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#getBoolean(java.lang.String)">getBoolean</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns a boolean representing the configuration value for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns a boolean representing the configuration value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -935,7 +999,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#getContainerId()">getContainerId</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the container id.</div>
+        <div class="jd-descrdiv">
+          Returns the container id.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -953,7 +1022,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#getDouble(java.lang.String)">getDouble</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns a double representing the configuration value for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns a double representing the configuration value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -971,8 +1045,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#getLastRefreshTime()">getLastRefreshTime</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns the last time (in milliseconds since midnight, January 1, 1970 UTC) that this
- container was refreshed from the network.</div>
+        <div class="jd-descrdiv">
+          Returns the last time (in milliseconds since midnight, January 1, 1970 UTC) that this
+ container was refreshed from the network.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -990,7 +1069,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#getLong(java.lang.String)">getLong</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns a long representing the configuration value for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns a long representing the configuration value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1008,7 +1092,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#getString(java.lang.String)">getString</a></span>(String key)</nobr>
 
-        <div class="jd-descrdiv">Returns a string representing the configuration value for the given key.</div>
+        <div class="jd-descrdiv">
+          Returns a string representing the configuration value for the given key.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1026,7 +1115,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#isDefault()">isDefault</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Returns whether this is a default container, or one refreshed from the server.</div>
+        <div class="jd-descrdiv">
+          Returns whether this is a default container, or one refreshed from the server.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1044,7 +1138,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#registerFunctionCallMacroCallback(java.lang.String, com.google.android.gms.tagmanager.Container.FunctionCallMacroCallback)">registerFunctionCallMacroCallback</a></span>(String customMacroName, <a href="/reference/com/google/android/gms/tagmanager/Container.FunctionCallMacroCallback.html">Container.FunctionCallMacroCallback</a> customMacroCallback)</nobr>
 
-        <div class="jd-descrdiv">Registers the given macro callback to handle a given function call macro.</div>
+        <div class="jd-descrdiv">
+          Registers the given macro callback to handle a given function call macro.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1062,7 +1161,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#registerFunctionCallTagCallback(java.lang.String, com.google.android.gms.tagmanager.Container.FunctionCallTagCallback)">registerFunctionCallTagCallback</a></span>(String customTagName, <a href="/reference/com/google/android/gms/tagmanager/Container.FunctionCallTagCallback.html">Container.FunctionCallTagCallback</a> customTagCallback)</nobr>
 
-        <div class="jd-descrdiv">Registers the tag callback to handle a given function call tag.</div>
+        <div class="jd-descrdiv">
+          Registers the tag callback to handle a given function call tag.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1080,7 +1184,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#unregisterFunctionCallMacroCallback(java.lang.String)">unregisterFunctionCallMacroCallback</a></span>(String customMacroName)</nobr>
 
-        <div class="jd-descrdiv">Unregisters any macro callback for the given macro.</div>
+        <div class="jd-descrdiv">
+          Unregisters any macro callback for the given macro.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1098,7 +1207,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/tagmanager/Container.html#unregisterFunctionCallTagCallback(java.lang.String)">unregisterFunctionCallTagCallback</a></span>(String customTagName)</nobr>
 
-        <div class="jd-descrdiv">Unregisters any tag callback for the given tag.</div>
+        <div class="jd-descrdiv">
+          Unregisters any tag callback for the given tag.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1384,6 +1498,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a boolean representing the configuration value for the given key. If the container
  has no value for this key, false will be returned.
 </p></div>
@@ -1415,6 +1532,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the container id.
 </p></div>
 
@@ -1444,6 +1564,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a double representing the configuration value for the given key. If the container has
  no value for this key, 0 will be returned.
@@ -1476,6 +1599,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the last time (in milliseconds since midnight, January 1, 1970 UTC) that this
  container was refreshed from the network.
 </p></div>
@@ -1506,6 +1632,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Returns a long representing the configuration value for the given key. If the container has
  no value for this key, 0 will be returned.
@@ -1538,6 +1667,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a string representing the configuration value for the given key. If the container has
  no value for this key, an empty string will be returned.
 </p></div>
@@ -1569,6 +1701,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether this is a default container, or one refreshed from the server.
 </p></div>
 
@@ -1598,6 +1733,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Registers the given macro callback to handle a given function call macro.</p></div>
   <div class="jd-tagdata">
@@ -1642,6 +1780,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Registers the tag callback to handle a given function call tag.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1685,6 +1826,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Unregisters any macro callback for the given macro.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1723,6 +1867,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Unregisters any tag callback for the given tag.</p></div>
   <div class="jd-tagdata">

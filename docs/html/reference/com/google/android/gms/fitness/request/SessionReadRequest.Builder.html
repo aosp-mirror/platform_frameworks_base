@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -775,6 +821,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -907,7 +956,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#build()">build</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Finishes building and returns the request.</div>
+        <div class="jd-descrdiv">
+          Finishes building and returns the request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -925,8 +979,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#enableServerQueries()">enableServerQueries</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Enable querying the Google Fit server to fetch query results,
- in case the local store doesn't have data for the full requested time range.</div>
+        <div class="jd-descrdiv">
+          Enable querying the Google Fit server to fetch query results,
+ in case the local store doesn't have data for the full requested time range.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -944,7 +1003,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#excludePackage(java.lang.String)">excludePackage</a></span>(String appPackageName)</nobr>
 
-        <div class="jd-descrdiv">Exclude sessions from a particular package name from the read result.</div>
+        <div class="jd-descrdiv">
+          Exclude sessions from a particular package name from the read result.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -962,8 +1026,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#read(com.google.android.gms.fitness.data.DataType)">read</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a> dataType)</nobr>
 
-        <div class="jd-descrdiv">Reads data from the default data source of the given <code>dataType</code> for each
- session selected by this request.</div>
+        <div class="jd-descrdiv">
+          Reads data from the default data source of the given <code>dataType</code> for each
+ session selected by this request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -981,7 +1050,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#read(com.google.android.gms.fitness.data.DataSource)">read</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a> dataSource)</nobr>
 
-        <div class="jd-descrdiv">Reads data from a given <code>dataSource</code> for each session selected by this request.</div>
+        <div class="jd-descrdiv">
+          Reads data from a given <code>dataSource</code> for each session selected by this request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -999,7 +1073,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#readSessionsFromAllApps()">readSessionsFromAllApps</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Enables reading sessions inserted by any app.</div>
+        <div class="jd-descrdiv">
+          Enables reading sessions inserted by any app.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1017,7 +1096,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#setSessionId(java.lang.String)">setSessionId</a></span>(String sessionId)</nobr>
 
-        <div class="jd-descrdiv">Adds an optional session identifier to this request.</div>
+        <div class="jd-descrdiv">
+          Adds an optional session identifier to this request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1035,7 +1119,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#setSessionName(java.lang.String)">setSessionName</a></span>(String sessionName)</nobr>
 
-        <div class="jd-descrdiv">Adds an optional session name to this request.</div>
+        <div class="jd-descrdiv">
+          Adds an optional session name to this request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1051,29 +1140,15 @@ Summary:
             <a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html">SessionReadRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#setTimeInterval(long, long)">setTimeInterval</a></span>(long startTimeMillis, long endTimeMillis)</nobr>
-
-        <div class="jd-descrdiv">Sets the time range for the sessions we want to select in our query,
- in milliseconds since epoch.</div>
-
-  </td></tr>
-
-
-
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            <a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html">SessionReadRequest.Builder</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#setTimeInterval(long, long, java.util.concurrent.TimeUnit)">setTimeInterval</a></span>(long startTime, long endTime, TimeUnit timeUnit)</nobr>
 
-        <div class="jd-descrdiv">Sets the time range for the sessions we want to select in our query,
- in a specific <code><a href="/reference/java/util/concurrent/TimeUnit.html">TimeUnit</a></code>.</div>
+        <div class="jd-descrdiv">
+          Sets the time range for the sessions we want to select in our query,
+ in a specific <code><a href="/reference/java/util/concurrent/TimeUnit.html">TimeUnit</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1351,6 +1426,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1394,6 +1472,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Finishes building and returns the request.</p></div>
   <div class="jd-tagdata">
@@ -1440,6 +1521,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Enable querying the Google Fit server to fetch query results,
  in case the local store doesn't have data for the full requested time range.
  Server results will be combined with local results.
@@ -1478,6 +1562,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Exclude sessions from a particular package name from the read result.  This method
  can be used in combination with <code><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#readSessionsFromAllApps()">readSessionsFromAllApps()</a></code> to exclude sessions
  from apps that are not of interest (for instance, sessions you have written yourself).
@@ -1512,6 +1599,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Reads data from the default data source of the given <code>dataType</code> for each
  session selected by this request.  The default data source may be aggregated or merged.
@@ -1561,6 +1651,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads data from a given <code>dataSource</code> for each session selected by this request.
  The read data will be returned as a separate
  <code><a href="/reference/com/google/android/gms/fitness/data/DataSet.html">DataSet</a></code> for each returned session.
@@ -1608,6 +1701,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Enables reading sessions inserted by any app.  If not set, only sessions added by the
  calling app will be returned.
 </p></div>
@@ -1638,6 +1734,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Adds an optional session identifier to this request.  If specified,
  only the session with the exact identifier is selected.
@@ -1682,6 +1781,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Adds an optional session name to this request.  If specified,
  only sessions with the exact name are selected.
  <p/>
@@ -1693,60 +1795,6 @@ From class
         <tr>
           <th>sessionName</td>
           <td>the name of the session we want data for
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="setTimeInterval(long, long)"></A>
-
-<div class="jd-details api apilevel-">
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public
-
-
-
-
-        <a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html">SessionReadRequest.Builder</a>
-      </span>
-      <span class="sympad">setTimeInterval</span>
-      <span class="normal">(long startTimeMillis, long endTimeMillis)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-
-
-
-      </div>
-    <div class="jd-details-descr">
-
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the time range for the sessions we want to select in our query,
- in milliseconds since epoch.
- </p>
- Defined start and end times are required for every read query.  All sessions that fall
- in the specified time interval are returned.  Session
- <code><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#setSessionName(java.lang.String)">name</a></code> and
- <code><a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.Builder.html#setSessionId(java.lang.String)">identifier</a></code> can be used to further restrict the
- returned sessions.
- <p/>For a session to be returned, it has to fall completely within the interval
- specified in the query.  Overlapping sessions with start and/or end times outside the
- interval will not be returned.  Ongoing sessions (with no end time specified yet)
- whose start time falls within the interval are returned.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>startTimeMillis</td>
-          <td>a start time, in milliseconds since epoch, inclusive</td>
-        </tr>
-        <tr>
-          <th>endTimeMillis</td>
-          <td>an end time, in milliseconds since epoch, inclusive
 </td>
         </tr>
       </table>
@@ -1778,6 +1826,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the time range for the sessions we want to select in our query,
  in a specific <code><a href="/reference/java/util/concurrent/TimeUnit.html">TimeUnit</a></code>.
