@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"‏<xliff:g id="APP">%s</xliff:g> מנסה ליצור חיבור VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"אם תמשיך, אתה מעניק לאפליקציה הרשאה לעכב את כל התנועה ברשת. "<b>" אל תקבל אלא אם כן אתה סומך על האפליקציה. "</b>" אחרת, אתה חושף את הנתונים שלך לסכנה של פגיעה על-ידי תוכנה זדונית."</string>
-    <string name="accept" msgid="2889226408765810173">"אני סומך על אפליקציה זו."</string>
+    <string name="prompt" msgid="3183836924226407828">"בקשת חיבור"</string>
+    <string name="warning" msgid="809658604548412033">"‏<xliff:g id="APP">%s</xliff:g> רוצה להגדיר חיבור VPN שיאפשר לו לפקח על תעבורת הרשת. אשר את הבקשה רק אם אתה נותן אמון במקור. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; מופיע בחלק העליון של המסך כאשר VPN פעיל."</string>
     <string name="legacy_title" msgid="192936250066580964">"‏VPN מחובר"</string>
     <string name="configure" msgid="4905518375574791375">"הגדר"</string>
     <string name="disconnect" msgid="971412338304200056">"נתק"</string>

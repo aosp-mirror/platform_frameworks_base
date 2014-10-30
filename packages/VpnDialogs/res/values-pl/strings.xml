@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"Aplikacja <xliff:g id="APP">%s</xliff:g> próbuje nawiązać połączenie VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"Kontynuując, udzielasz aplikacji pozwolenia na przechwytywanie całego ruchu sieciowego. "<b>"NIE rób tego, jeśli nie ufasz tej aplikacji."</b>" W przeciwnym razie ryzykujesz, że bezpieczeństwo Twoich danych zostanie naruszone przez złośliwe oprogramowanie."</string>
-    <string name="accept" msgid="2889226408765810173">"Ufam tej aplikacji"</string>
+    <string name="prompt" msgid="3183836924226407828">"Żądanie połączenia"</string>
+    <string name="warning" msgid="809658604548412033">"Aplikacja <xliff:g id="APP">%s</xliff:g> chce utworzyć połączenie VPN, które pozwoli jej na monitorowanie ruchu sieciowego. Zaakceptuj, tylko jeśli masz zaufanie do źródła. Gdy sieć VPN jest aktywna, u góry ekranu pojawia się &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;."</string>
     <string name="legacy_title" msgid="192936250066580964">"Połączono z VPN"</string>
     <string name="configure" msgid="4905518375574791375">"Konfiguruj"</string>
     <string name="disconnect" msgid="971412338304200056">"Rozłącz"</string>

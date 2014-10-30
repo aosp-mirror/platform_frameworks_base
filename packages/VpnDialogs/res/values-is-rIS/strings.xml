@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> tilraunir til að koma á VPN-tengingu."</string>
-    <string name="warning" msgid="5470743576660160079">"Með því að halda áfram veitir þú forritinu heimild til að grípa inn í alla gagnaumferð. "<b>"EKKI leyfa þetta nema þú treystir forritinu."</b>" Annars hættir þú á að spilliforrit stofni gögnunum þínum í hættu."</string>
-    <string name="accept" msgid="2889226408765810173">"Ég treysti þessu forriti."</string>
+    <string name="prompt" msgid="3183836924226407828">"Beiðni um tengingu"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> vill setja upp VPN-tengingu til þess að geta fylgst með netumferð. Samþykktu þetta aðeins ef þú treystir upprunanum. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; birtist efst á skjánum þegar VPN er virkt."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN er tengt"</string>
     <string name="configure" msgid="4905518375574791375">"Stilla"</string>
     <string name="disconnect" msgid="971412338304200056">"Aftengja"</string>

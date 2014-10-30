@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"A(z) <xliff:g id="APP">%s</xliff:g> megpróbál létrehozni egy VPN-kapcsolatot."</string>
-    <string name="warning" msgid="5470743576660160079">"A folytatással engedélyt ad az alkalmazásnak a hálózati adatforgalom elfogására. "<b>"Csak akkor fogadja el, ha megbízik az alkalmazásban. "</b>"Ellenkező esetben fennállhat annak a kockázata, hogy egy rosszindulatú program feltöri adatait."</string>
-    <string name="accept" msgid="2889226408765810173">"Bízom ebben az alkalmazásban."</string>
+    <string name="prompt" msgid="3183836924226407828">"Kapcsolódási kérés"</string>
+    <string name="warning" msgid="809658604548412033">"A(z) <xliff:g id="APP">%s</xliff:g> VPN kapcsolatot akar beállítani, amelynek segítségével figyelheti a hálózati forgalmat. Csak akkor fogadja el, ha megbízik a forrásban. &lt;br /&gt; &lt;br /&gt; Amikor a VPN aktív, &lt;img src=vpn_icon /&gt; ikon jelenik meg a képernyő tetején."</string>
     <string name="legacy_title" msgid="192936250066580964">"A VPN csatlakoztatva van"</string>
     <string name="configure" msgid="4905518375574791375">"Konfigurálás"</string>
     <string name="disconnect" msgid="971412338304200056">"Kapcsolat bontása"</string>
