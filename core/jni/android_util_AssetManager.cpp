@@ -1095,7 +1095,7 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
         // coming from, first XML attributes, then XML style, then default
         // style, and finally the theme.
         value.dataType = Res_value::TYPE_NULL;
-        value.data = 0;
+        value.data = Res_value::DATA_NULL_UNDEFINED;
         typeSetFlags = 0;
         config.density = 0;
 
@@ -1157,6 +1157,7 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
             DEBUG_STYLES(ALOGI("-> Setting to @null!"));
             value.dataType = Res_value::TYPE_NULL;
+            value.data = Res_value::DATA_NULL_UNDEFINED;
             block = -1;
         }
 
@@ -1319,7 +1320,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         // coming from, first XML attributes, then XML style, then default
         // style, and finally the theme.
         value.dataType = Res_value::TYPE_NULL;
-        value.data = 0;
+        value.data = Res_value::DATA_NULL_UNDEFINED;
         typeSetFlags = 0;
         config.density = 0;
 
@@ -1403,6 +1404,7 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
             DEBUG_STYLES(ALOGI("-> Setting to @null!"));
             value.dataType = Res_value::TYPE_NULL;
+            value.data = Res_value::DATA_NULL_UNDEFINED;
             block = kXmlBlock;
         }
 
@@ -1512,7 +1514,7 @@ static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, job
 
         // Try to find a value for this attribute...
         value.dataType = Res_value::TYPE_NULL;
-        value.data = 0;
+        value.data = Res_value::DATA_NULL_UNDEFINED;
         typeSetFlags = 0;
         config.density = 0;
 
@@ -1548,6 +1550,7 @@ static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, job
         // Deal with the special @null value -- it turns back to TYPE_NULL.
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
             value.dataType = Res_value::TYPE_NULL;
+            value.data = Res_value::DATA_NULL_UNDEFINED;
         }
 
         //printf("Attribute 0x%08x: final type=0x%x, data=0x%08x\n", curIdent, value.dataType, value.data);
@@ -1661,6 +1664,7 @@ static jint android_content_AssetManager_retrieveArray(JNIEnv* env, jobject claz
         // Deal with the special @null value -- it turns back to TYPE_NULL.
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
             value.dataType = Res_value::TYPE_NULL;
+            value.data = Res_value::DATA_NULL_UNDEFINED;
         }
 
         //printf("Attribute 0x%08x: final type=0x%x, data=0x%08x\n", curIdent, value.dataType, value.data);
