@@ -48,6 +48,7 @@ import android.view.accessibility.CaptioningManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -250,7 +251,12 @@ public abstract class TvInputService extends Service {
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
         private Rect mOverlayFrame;
+
+        private Object mLock = new Object();
+        // @GuardedBy("mLock")
         private ITvInputSessionCallback mSessionCallback;
+        // @GuardedBy("mLock")
+        private List<Runnable> mPendingActions = new ArrayList<>();
 
         /**
          * Creates a new Session.
@@ -295,11 +301,12 @@ public abstract class TvInputService extends Service {
          * @param eventArgs Optional arguments of the event.
          * @hide
          */
+        @SystemApi
         public void notifySessionEvent(final String eventType, final Bundle eventArgs) {
             if (eventType == null) {
                 throw new IllegalArgumentException("eventType should not be null.");
             }
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -318,7 +325,7 @@ public abstract class TvInputService extends Service {
          * @param channelUri The URI of a channel.
          */
         public void notifyChannelRetuned(final Uri channelUri) {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -355,7 +362,7 @@ public abstract class TvInputService extends Service {
             trackIdSet.clear();
 
             // TODO: Validate the track list.
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -383,7 +390,7 @@ public abstract class TvInputService extends Service {
          * @see #onSelectTrack
          */
         public void notifyTrackSelected(final int type, final String trackId) {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -404,7 +411,7 @@ public abstract class TvInputService extends Service {
          * @see #notifyVideoUnavailable
          */
         public void notifyVideoAvailable() {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -436,7 +443,7 @@ public abstract class TvInputService extends Service {
                     || reason > TvInputManager.VIDEO_UNAVAILABLE_REASON_END) {
                 throw new IllegalArgumentException("Unknown reason: " + reason);
             }
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -475,7 +482,7 @@ public abstract class TvInputService extends Service {
          * @see TvInputManager
          */
         public void notifyContentAllowed() {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -515,7 +522,7 @@ public abstract class TvInputService extends Service {
          * @see TvInputManager
          */
         public void notifyContentBlocked(final TvContentRating rating) {
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -544,7 +551,7 @@ public abstract class TvInputService extends Service {
             if (left > right || top > bottm) {
                 throw new IllegalArgumentException("Invalid parameter");
             }
-            runOnMainThread(new Runnable() {
+            executeOrPostRunnable(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -852,6 +859,10 @@ public abstract class TvInputService extends Service {
                 mSurface.release();
                 mSurface = null;
             }
+            synchronized(mLock) {
+                mSessionCallback = null;
+                mPendingActions.clear();
+            }
         }
 
         /**
@@ -1059,17 +1070,29 @@ public abstract class TvInputService extends Service {
             }
         }
 
-        private void setSessionCallback(ITvInputSessionCallback callback) {
-            mSessionCallback = callback;
+        private void initialize(ITvInputSessionCallback callback) {
+            synchronized(mLock) {
+                mSessionCallback = callback;
+                for (Runnable runnable : mPendingActions) {
+                    runnable.run();
+                }
+                mPendingActions.clear();
+            }
         }
 
-        private final void runOnMainThread(Runnable action) {
-            if (mHandler.getLooper().isCurrentThread() && mSessionCallback != null) {
-                action.run();
-            } else {
-                // Posts the runnable if this is not called from the main thread or the session
-                // is not initialized yet.
-                mHandler.post(action);
+        private final void executeOrPostRunnable(Runnable action) {
+            synchronized(mLock) {
+                if (mSessionCallback == null) {
+                    // The session is not initialized yet.
+                    mPendingActions.add(action);
+                } else {
+                    if (mHandler.getLooper().isCurrentThread()) {
+                        action.run();
+                    } else {
+                        // Posts the runnable if this is not called from the main thread
+                        mHandler.post(action);
+                    }
+                }
             }
         }
     }
@@ -1125,13 +1148,15 @@ public abstract class TvInputService extends Service {
                 mHardwareSession = session;
                 SomeArgs args = SomeArgs.obtain();
                 if (session != null) {
-                    args.arg1 = mProxySession;
-                    args.arg2 = mProxySessionCallback;
-                    args.arg3 = session.getToken();
+                    args.arg1 = HardwareSession.this;
+                    args.arg2 = mProxySession;
+                    args.arg3 = mProxySessionCallback;
+                    args.arg4 = session.getToken();
                 } else {
                     args.arg1 = null;
-                    args.arg2 = mProxySessionCallback;
-                    args.arg3 = null;
+                    args.arg2 = null;
+                    args.arg3 = mProxySessionCallback;
+                    args.arg4 = null;
                     onRelease();
                 }
                 mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED, args)
@@ -1269,7 +1294,6 @@ public abstract class TvInputService extends Service {
                         }
                         return;
                     }
-                    sessionImpl.setSessionCallback(cb);
                     ITvInputSession stub = new ITvInputSessionWrapper(TvInputService.this,
                             sessionImpl, channel);
                     if (sessionImpl instanceof HardwareSession) {
@@ -1300,9 +1324,10 @@ public abstract class TvInputService extends Service {
                                 proxySession.mHardwareSessionCallback, mServiceHandler);
                     } else {
                         SomeArgs someArgs = SomeArgs.obtain();
-                        someArgs.arg1 = stub;
-                        someArgs.arg2 = cb;
-                        someArgs.arg3 = null;
+                        someArgs.arg1 = sessionImpl;
+                        someArgs.arg2 = stub;
+                        someArgs.arg3 = cb;
+                        someArgs.arg4 = null;
                         mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED,
                                 someArgs).sendToTarget();
                     }
@@ -1310,13 +1335,17 @@ public abstract class TvInputService extends Service {
                 }
                 case DO_NOTIFY_SESSION_CREATED: {
                     SomeArgs args = (SomeArgs) msg.obj;
-                    ITvInputSession stub = (ITvInputSession) args.arg1;
-                    ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg2;
-                    IBinder hardwareSessionToken = (IBinder) args.arg3;
+                    Session sessionImpl = (Session) args.arg1;
+                    ITvInputSession stub = (ITvInputSession) args.arg2;
+                    ITvInputSessionCallback cb = (ITvInputSessionCallback) args.arg3;
+                    IBinder hardwareSessionToken = (IBinder) args.arg4;
                     try {
                         cb.onSessionCreated(stub, hardwareSessionToken);
                     } catch (RemoteException e) {
                         Log.e(TAG, "error in onSessionCreated");
+                    }
+                    if (sessionImpl != null) {
+                        sessionImpl.initialize(cb);
                     }
                     args.recycle();
                     return;
