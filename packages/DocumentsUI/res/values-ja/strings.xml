@@ -30,6 +30,12 @@
     <string name="menu_share" msgid="3075149983979628146">"共有"</string>
     <string name="menu_delete" msgid="8138799623850614177">"削除"</string>
     <string name="menu_select" msgid="8711270657353563424">"「<xliff:g id="DIRECTORY">^1</xliff:g>」を選択"</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"内部ストレージを表示"</string>
+    <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SDカードを表示"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"内部ストレージを非表示"</string>
+    <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SDカードを非表示"</string>
+    <string name="menu_file_size_show" msgid="3240323619260823076">"ファイルサイズを表示"</string>
+    <string name="menu_file_size_hide" msgid="8881975928502581042">"ファイルサイズを非表示"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g>件選択済み"</string>
     <string name="sort_name" msgid="9183560467917256779">"名前順"</string>
     <string name="sort_date" msgid="586080032956151448">"更新日順"</string>
@@ -45,9 +51,6 @@
     <string name="root_type_shortcut" msgid="3318760609471618093">"ショートカット"</string>
     <string name="root_type_device" msgid="7121342474653483538">"端末"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"その他のアプリ"</string>
-    <string name="pref_advanced_devices" msgid="903257239609301276">"端末の詳細設定を表示"</string>
-    <string name="pref_file_size" msgid="2826879315743961459">"ファイルのサイズを表示"</string>
-    <string name="pref_device_size" msgid="3542106883278997222">"端末のサイズを表示"</string>
     <string name="empty" msgid="7858882803708117596">"アイテムがありません"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"ファイルを開けません"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"一部のドキュメントを削除できません"</string>
