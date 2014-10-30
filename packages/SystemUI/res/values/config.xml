@@ -224,13 +224,16 @@
     <integer name="doze_pickup_vibration_threshold">2000</integer>
 
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
-    <integer name="doze_pulse_duration_in">1000</integer>
+    <integer name="doze_pulse_duration_in">900</integer>
+
+    <!-- Doze: pulse parameter - delay for fading so the screen can wake up before -->
+    <integer name="doze_pulse_delay_in">200</integer>
 
     <!-- Doze: pulse parameter - once faded in, how long does it stay visible? -->
     <integer name="doze_pulse_duration_visible">3000</integer>
 
     <!-- Doze: pulse parameter - how long does it take to fade out? -->
-    <integer name="doze_pulse_duration_out">1000</integer>
+    <integer name="doze_pulse_duration_out">600</integer>
 
     <!-- Doze: alpha to apply to small icons when dozing -->
     <integer name="doze_small_icon_alpha">222</integer><!-- 87% of 0xff -->
