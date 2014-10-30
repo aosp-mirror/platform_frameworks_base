@@ -361,7 +361,7 @@ public class VectorDrawable extends Drawable {
 
     @Override
     public boolean canApplyTheme() {
-        return super.canApplyTheme() || mVectorState != null && mVectorState.canApplyTheme();
+        return (mVectorState != null && mVectorState.canApplyTheme()) || super.canApplyTheme();
     }
 
     @Override
@@ -750,8 +750,8 @@ public class VectorDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
-            return super.canApplyTheme() || mThemeAttrs != null
-                    || (mVPathRenderer != null && mVPathRenderer.canApplyTheme());
+            return mThemeAttrs != null || (mVPathRenderer != null && mVPathRenderer.canApplyTheme())
+                    || super.canApplyTheme();
         }
 
         public VectorDrawableState() {

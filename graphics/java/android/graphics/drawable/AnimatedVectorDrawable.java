@@ -316,9 +316,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
     @Override
     public boolean canApplyTheme() {
-        return super.canApplyTheme() || mAnimatedVectorState != null
-                && mAnimatedVectorState.mVectorDrawable != null
-                && mAnimatedVectorState.mVectorDrawable.canApplyTheme();
+        return (mAnimatedVectorState != null && mAnimatedVectorState.canApplyTheme())
+                || super.canApplyTheme();
     }
 
     @Override
@@ -371,6 +370,12 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
             } else {
                 mVectorDrawable = new VectorDrawable();
             }
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            return (mVectorDrawable != null && mVectorDrawable.canApplyTheme())
+                    || super.canApplyTheme();
         }
 
         @Override
