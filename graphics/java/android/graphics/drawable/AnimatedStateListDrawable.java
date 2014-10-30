@@ -361,7 +361,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         super.applyTheme(theme);
 
         final AnimatedStateListState state = mState;
-        if (state == null || !state.canApplyTheme()) {
+        if (state == null || state.mAnimThemeAttrs == null) {
             return;
         }
 

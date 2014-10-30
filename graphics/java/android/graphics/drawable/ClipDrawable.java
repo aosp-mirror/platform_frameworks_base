@@ -148,7 +148,7 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         super.applyTheme(t);
 
         final ClipState state = mState;
-        if (state == null) {
+        if (state == null || state.mThemeAttrs == null) {
             return;
         }
 
