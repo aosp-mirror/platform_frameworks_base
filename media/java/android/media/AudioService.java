@@ -2574,13 +2574,17 @@ public class AudioService extends IAudioService.Stub {
                             if (mScoAudioState == SCO_STATE_INACTIVE) {
                                 mScoAudioMode = scoAudioMode;
                                 if (scoAudioMode == SCO_MODE_UNDEFINED) {
-                                    mScoAudioMode = new Integer(Settings.Global.getInt(
-                                                            mContentResolver,
-                                                            "bluetooth_sco_channel_"+
-                                                            mBluetoothHeadsetDevice.getAddress(),
-                                                            SCO_MODE_VIRTUAL_CALL));
-                                    if (mScoAudioMode > SCO_MODE_MAX || mScoAudioMode < 0) {
-                                        mScoAudioMode = SCO_MODE_VIRTUAL_CALL;
+                                    if (mBluetoothHeadsetDevice != null) {
+                                        mScoAudioMode = new Integer(Settings.Global.getInt(
+                                                                mContentResolver,
+                                                                "bluetooth_sco_channel_"+
+                                                                mBluetoothHeadsetDevice.getAddress(),
+                                                                SCO_MODE_VIRTUAL_CALL));
+                                        if (mScoAudioMode > SCO_MODE_MAX || mScoAudioMode < 0) {
+                                            mScoAudioMode = SCO_MODE_VIRTUAL_CALL;
+                                        }
+                                    } else {
+                                        mScoAudioMode = SCO_MODE_RAW;
                                     }
                                 }
                                 if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
