@@ -1252,14 +1252,7 @@ public class ListPopupWindow {
             final boolean wasForwarding = mForwarding;
             final boolean forwarding;
             if (wasForwarding) {
-                if (mWasLongPress) {
-                    // If we started forwarding as a result of a long-press,
-                    // just silently stop forwarding events so that the window
-                    // stays open.
-                    forwarding = onTouchForwarded(event);
-                } else {
-                    forwarding = onTouchForwarded(event) || !onForwardingStopped();
-                }
+                forwarding = onTouchForwarded(event) || !onForwardingStopped();
             } else {
                 forwarding = onTouchObserved(event) && onForwardingStarted();
 
