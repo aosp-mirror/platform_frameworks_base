@@ -17,8 +17,8 @@
 package android.telecom;
 
 /**
- * Defines capabilities a phone call can support, such as conference calling and video telephony.
- * Also defines properties of a phone call, such as whether it is using VoLTE technology.
+ * Defines capabilities for {@link Connection}s and {@link Conference}s such as hold, swap, and
+ * merge.
  */
 public final class PhoneCapabilities {
     /** Call can currently be put on hold or unheld. */
@@ -28,15 +28,22 @@ public final class PhoneCapabilities {
     public static final int SUPPORT_HOLD       = 0x00000002;
 
     /**
-     * Calls within a conference can be merged. Some connection services create a conference call
-     * only after two calls have been merged.  However, a conference call can also be added the
-     * moment there are more than one call. CDMA calls are implemented in this way because the call
-     * actions are more limited when more than one call exists. This flag allows merge to be exposed
-     * as a capability on the conference call instead of individual calls.
+     * Calls within a conference can be merged. A {@link ConnectionService} has the option to
+     * add a {@link Conference} call before the child {@link Connection}s are merged. This is how
+     * CDMA-based {@link Connection}s are implemented. For these unmerged {@link Conference}s, this
+     * capability allows a merge button to be shown while the conference call is in the foreground
+     * of the in-call UI.
+     * <p>
+     * This is only intended for use by a {@link Conference}.
      */
     public static final int MERGE_CONFERENCE   = 0x00000004;
 
-    /** Calls withing a conference can be swapped between foreground and background. */
+    /**
+     * Calls within a conference can be swapped between foreground and background.
+     * See {@link #MERGE_CONFERENCE} for additional information.
+     * <p>
+     * This is only intended for use by a {@link Conference}.
+     */
     public static final int SWAP_CONFERENCE    = 0x00000008;
 
     /** Call currently supports adding another call to this one. */
@@ -49,8 +56,8 @@ public final class PhoneCapabilities {
     public static final int MUTE               = 0x00000040;
 
     /**
-     * Call supports conference call management. This capability only applies to conference calls
-     * which can have other calls as children.
+     * Call supports conference call management. This capability only applies to {@link Conference}
+     * calls which can have {@link Connection}s as children.
      */
     public static final int MANAGE_CONFERENCE = 0x00000080;
 
