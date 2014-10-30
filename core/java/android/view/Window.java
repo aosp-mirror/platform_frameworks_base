@@ -1074,17 +1074,36 @@ public abstract class Window {
     public abstract void onConfigurationChanged(Configuration newConfig);
 
     /**
+     * Sets the window elevation.
+     *
+     * @param elevation The window elevation.
+     * @see View#setElevation(float)
+     * @see android.R.styleable#Window_windowElevation
+     */
+    public void setElevation(float elevation) {}
+
+    /**
+     * Sets whether window content should be clipped to the outline of the
+     * window background.
+     *
+     * @param clipToOutline Whether window content should be clipped to the
+     *                      outline of the window background.
+     * @see View#setClipToOutline(boolean)
+     * @see android.R.styleable#Window_windowClipToOutline
+     */
+    public void setClipToOutline(boolean clipToOutline) {}
+
+    /**
      * Change the background of this window to a Drawable resource. Setting the
      * background to null will make the window be opaque. To make the window
      * transparent, you can use an empty drawable (for instance a ColorDrawable
      * with the color 0 or the system drawable android:drawable/empty.)
      *
-     * @param resid The resource identifier of a drawable resource which will be
-     *              installed as the new background.
+     * @param resId The resource identifier of a drawable resource which will
+     *              be installed as the new background.
      */
-    public void setBackgroundDrawableResource(int resid)
-    {
-        setBackgroundDrawable(mContext.getDrawable(resid));
+    public void setBackgroundDrawableResource(int resId) {
+        setBackgroundDrawable(mContext.getDrawable(resId));
     }
 
     /**
