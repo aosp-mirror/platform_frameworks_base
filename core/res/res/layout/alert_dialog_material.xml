@@ -99,7 +99,8 @@
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
         android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:paddingBottom="8dp"
+        android:gravity="bottom">
         <Button android:id="@+id/button3"
             style="?attr/buttonBarNeutralButtonStyle"
             android:layout_width="wrap_content"

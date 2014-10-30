@@ -2589,6 +2589,13 @@
 
     <!-- @hide -->
     <public-padding type="attr" name="private_resource_pad" end="0x01010500" />
+
+    <!-- ===============================================================
+         Resources added in version 22 of the platform
+         =============================================================== -->
+    <eat-comment />
+
     <public type="attr" name="resizeClip"/>
+    <public type="attr" name="collapseContentDescription"/>
 
 </resources>
