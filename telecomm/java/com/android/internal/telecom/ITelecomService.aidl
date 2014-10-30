@@ -18,6 +18,7 @@ package com.android.internal.telecom;
 
 import android.content.ComponentName;
 import android.telecom.PhoneAccountHandle;
+import android.net.Uri;
 import android.os.Bundle;
 import android.telecom.PhoneAccount;
 
@@ -172,6 +173,11 @@ interface ITelecomService {
      * @see TelecomServiceImpl#handleMmi
      */
     boolean handlePinMmiForPhoneAccount(in PhoneAccountHandle accountHandle, String dialString);
+
+    /**
+     * @see TelecomServiceImpl#getAdnUriForPhoneAccount
+     */
+    Uri getAdnUriForPhoneAccount(in PhoneAccountHandle accountHandle);
 
     /**
      * @see TelecomServiceImpl#isTtySupported
