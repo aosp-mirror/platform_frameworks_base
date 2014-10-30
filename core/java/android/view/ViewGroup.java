@@ -4250,9 +4250,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             clearChildFocus = true;
         }
 
-        if (view.isAccessibilityFocused()) {
-            view.clearAccessibilityFocus();
-        }
+        view.clearAccessibilityFocus();
 
         cancelTouchTarget(view);
         cancelHoverTarget(view);
@@ -4345,9 +4343,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 clearChildFocus = true;
             }
 
-            if (view.isAccessibilityFocused()) {
-                view.clearAccessibilityFocus();
-            }
+            view.clearAccessibilityFocus();
 
             cancelTouchTarget(view);
             cancelHoverTarget(view);
@@ -4432,9 +4428,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 clearChildFocus = true;
             }
 
-            if (view.isAccessibilityFocused()) {
-                view.clearAccessibilityFocus();
-            }
+            view.clearAccessibilityFocus();
 
             cancelTouchTarget(view);
             cancelHoverTarget(view);
