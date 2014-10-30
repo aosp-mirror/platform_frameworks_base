@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Sisestage allpool oma seadme krüpteerimise parool. Seda kasutatakse ka varukoopiate arhiivi krüpteerimiseks."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Sisestage parool kõikide varundatud andmete krüpteerimise jaoks. Kui jätate selle tühjaks, siis kasutatakse teie praegust varunduse parooli:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Kui soovite kõik varundusandmed krüpteerida, siis sisestage allpool parool:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Kuna seade on krüpteeritud, siis peate krüpteerima ka varukoopia. Sisestage all parool:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Kui taasteandmed on krüpteeritud, siis sisestage allpool parool."</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Algab varundamine ..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Varundamine jõudis lõpule"</string>

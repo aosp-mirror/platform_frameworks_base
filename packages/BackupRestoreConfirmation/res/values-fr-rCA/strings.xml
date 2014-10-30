@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Veuillez saisir le mot de passe de chiffrement de l\'appareil ci-dessous. Il permettra également de chiffrer les archives de sauvegarde."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Veuillez saisir un mot de passe à utiliser pour chiffrer les données de sauvegarde complète. Si ce champ n\'est pas renseigné, votre mot de passe de sauvegarde actuel sera utilisé :"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Si vous souhaitez chiffrer l\'ensemble des données de sauvegarde, veuillez saisir un mot de passe ci-dessous :"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Votre appareil est chiffré. Vous devez donc chiffrer votre sauvegarde. Veuillez entrer un mot de passe ci-dessous :"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Si les données de restauration sont chiffrées, veuillez saisir le mot de passe ci-dessous :"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Démarrage de la sauvegarde…"</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Sauvegarde terminée."</string>
