@@ -16,9 +16,14 @@
 
 package android.telecom;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources.NotFoundException;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Parcel;
@@ -121,6 +126,8 @@ public class PhoneAccount implements Parcelable {
     private final Uri mSubscriptionAddress;
     private final int mCapabilities;
     private final int mIconResId;
+    private final String mIconPackageName;
+    private final Bitmap mIconBitmap;
     private final int mColor;
     private final CharSequence mLabel;
     private final CharSequence mShortDescription;
@@ -135,6 +142,8 @@ public class PhoneAccount implements Parcelable {
         private Uri mSubscriptionAddress;
         private int mCapabilities;
         private int mIconResId;
+        private String mIconPackageName;
+        private Bitmap mIconBitmap;
         private int mColor = NO_COLOR;
         private CharSequence mLabel;
         private CharSequence mShortDescription;
@@ -160,6 +169,8 @@ public class PhoneAccount implements Parcelable {
             mSubscriptionAddress = phoneAccount.getSubscriptionAddress();
             mCapabilities = phoneAccount.getCapabilities();
             mIconResId = phoneAccount.getIconResId();
+            mIconPackageName = phoneAccount.getIconPackageName();
+            mIconBitmap = phoneAccount.getIconBitmap();
             mColor = phoneAccount.getColor();
             mLabel = phoneAccount.getLabel();
             mShortDescription = phoneAccount.getShortDescription();
@@ -210,6 +221,34 @@ public class PhoneAccount implements Parcelable {
             return this;
         }
 
+        /**
+         * Sets the icon package name. See {@link PhoneAccount#getIconPackageName}.
+         *
+         * @param value The name of the package from which to load the icon.
+         * @return The builder.
+         */
+        public Builder setIconPackageName(String value) {
+            this.mIconPackageName = value;
+            return this;
+        }
+
+        /**
+         * Sets the icon bitmap. See {@link PhoneAccount#getIconBitmap}.
+         *
+         * @param value The icon bitmap.
+         * @return The builder.
+         */
+        public Builder setIconBitmap(Bitmap value) {
+            this.mIconBitmap = value;
+            return this;
+        }
+
+        /**
+         * Sets the color. See {@link PhoneAccount#getColor}.
+         *
+         * @param value The resource ID of the icon.
+         * @return The builder.
+         */
         public Builder setColor(int value) {
             this.mColor = value;
             return this;
@@ -274,6 +313,8 @@ public class PhoneAccount implements Parcelable {
                     mSubscriptionAddress,
                     mCapabilities,
                     mIconResId,
+                    mIconPackageName,
+                    mIconBitmap,
                     mColor,
                     mLabel,
                     mShortDescription,
@@ -287,6 +328,8 @@ public class PhoneAccount implements Parcelable {
             Uri subscriptionAddress,
             int capabilities,
             int iconResId,
+            String iconPackageName,
+            Bitmap iconBitmap,
             int color,
             CharSequence label,
             CharSequence shortDescription,
@@ -296,6 +339,8 @@ public class PhoneAccount implements Parcelable {
         mSubscriptionAddress = subscriptionAddress;
         mCapabilities = capabilities;
         mIconResId = iconResId;
+        mIconPackageName = iconPackageName;
+        mIconBitmap = iconBitmap;
         mColor = color;
         mLabel = label;
         mShortDescription = shortDescription;
@@ -420,13 +465,32 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
-     * The icon resource ID for the icon of this {@code PhoneAccount}. Telecom will search for the
-     * icon using the package name specified in the {@link PhoneAccountHandle}.
+     * The icon resource ID for the icon of this {@code PhoneAccount}.
+     * <p>
+     * Creators of a {@code PhoneAccount} who possess the icon in static resources should prefer
+     * this method of indicating the icon rather than using {@link #getIconBitmap()}, since it
+     * leads to less resource usage.
+     * <p>
+     * Clients wishing to display a {@code PhoneAccount} should use {@link #getIcon(Context)}.
      *
      * @return A resource ID.
      */
     public int getIconResId() {
         return mIconResId;
+    }
+
+    /**
+     * The package name from which to load the icon of this {@code PhoneAccount}.
+     * <p>
+     * If this property is {@code null}, the resource {@link #getIconResId()} will be loaded from
+     * the package in the {@link ComponentName} of the {@link #getAccountHandle()}.
+     * <p>
+     * Clients wishing to display a {@code PhoneAccount} should use {@link #getIcon(Context)}.
+     *
+     * @return A package name.
+     */
+    public String getIconPackageName() {
+        return mIconPackageName;
     }
 
     /**
@@ -439,35 +503,51 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
-     * An icon to represent this {@code PhoneAccount} in a user interface.
+     * A literal icon bitmap to represent this {@code PhoneAccount} in a user interface.
+     * <p>
+     * If this property is specified, it is to be considered the preferred icon. Otherwise, the
+     * resource specified by {@link #getIconResId()} should be used.
+     * <p>
+     * Clients wishing to display a {@code PhoneAccount} should use {@link #getIcon(Context)}.
+     *
+     * @return A bitmap.
+     */
+    public Bitmap getIconBitmap() {
+        return mIconBitmap;
+    }
+
+    /**
+     * Builds and returns an icon {@code Drawable} to represent this {@code PhoneAccount} in a user
+     * interface. Uses the properties {@link #getIconResId()}, {@link #getIconPackageName()}, and
+     * {@link #getIconBitmap()} as necessary.
+     *
+     * @param context A {@code Context} to use for loading {@code Drawable}s.
      *
      * @return An icon for this {@code PhoneAccount}.
      */
     public Drawable getIcon(Context context) {
-        return getIcon(context, mIconResId);
-    }
-
-    private Drawable getIcon(Context context, int resId) {
-        if (resId == 0) {
-            return null;
+        if (mIconBitmap != null) {
+            return new BitmapDrawable(context.getResources(), mIconBitmap);
         }
 
-        Context packageContext;
-        try {
-            packageContext = context.createPackageContext(
-                    mAccountHandle.getComponentName().getPackageName(), 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(this, "Cannot find package %s",
-                    mAccountHandle.getComponentName().getPackageName());
-            return null;
+        if (mIconResId != 0) {
+            String packageName = mIconPackageName == null
+                    ? mAccountHandle.getComponentName().getPackageName()
+                    : mIconPackageName;
+
+            try {
+                Context packageContext = context.createPackageContext(packageName, 0);
+                try {
+                    return packageContext.getDrawable(mIconResId);
+                } catch (NotFoundException | MissingResourceException e) {
+                    Log.e(this, e, "Cannot find icon %d in package %s", mIconResId, packageName);
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(this, "Cannot find package %s", packageName);
+            }
         }
-        try {
-            return packageContext.getDrawable(resId);
-        } catch (NotFoundException|MissingResourceException e) {
-            Log.e(this, e, "Cannot find icon %d in package %s",
-                    resId, mAccountHandle.getComponentName().getPackageName());
-            return null;
-        }
+
+        return new ColorDrawable(Color.TRANSPARENT);
     }
 
     //
@@ -486,6 +566,8 @@ public class PhoneAccount implements Parcelable {
         out.writeParcelable(mSubscriptionAddress, 0);
         out.writeInt(mCapabilities);
         out.writeInt(mIconResId);
+        out.writeString(mIconPackageName);
+        out.writeParcelable(mIconBitmap, 0);
         out.writeInt(mColor);
         out.writeCharSequence(mLabel);
         out.writeCharSequence(mShortDescription);
@@ -513,6 +595,8 @@ public class PhoneAccount implements Parcelable {
         mSubscriptionAddress = in.readParcelable(getClass().getClassLoader());
         mCapabilities = in.readInt();
         mIconResId = in.readInt();
+        mIconPackageName = in.readString();
+        mIconBitmap = in.readParcelable(getClass().getClassLoader());
         mColor = in.readInt();
         mLabel = in.readCharSequence();
         mShortDescription = in.readCharSequence();

@@ -28473,6 +28473,8 @@ package android.telecom {
     method public int getCapabilities();
     method public int getColor();
     method public android.graphics.drawable.Drawable getIcon(android.content.Context);
+    method public android.graphics.Bitmap getIconBitmap();
+    method public java.lang.String getIconPackageName();
     method public int getIconResId();
     method public java.lang.CharSequence getLabel();
     method public java.lang.CharSequence getShortDescription();
@@ -28498,6 +28500,8 @@ package android.telecom {
     method public android.telecom.PhoneAccount.Builder setAddress(android.net.Uri);
     method public android.telecom.PhoneAccount.Builder setCapabilities(int);
     method public android.telecom.PhoneAccount.Builder setColor(int);
+    method public android.telecom.PhoneAccount.Builder setIconBitmap(android.graphics.Bitmap);
+    method public android.telecom.PhoneAccount.Builder setIconPackageName(java.lang.String);
     method public android.telecom.PhoneAccount.Builder setIconResId(int);
     method public android.telecom.PhoneAccount.Builder setShortDescription(java.lang.CharSequence);
     method public android.telecom.PhoneAccount.Builder setSubscriptionAddress(android.net.Uri);
