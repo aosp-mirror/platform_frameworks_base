@@ -1324,7 +1324,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public Rect surfaceInsets = new Rect();
+        public final Rect surfaceInsets = new Rect();
     
         /**
          * The desired bitmap format.  May be one of the constants in
