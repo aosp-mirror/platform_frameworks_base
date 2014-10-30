@@ -115,7 +115,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     public static final boolean MULTIUSER_DEBUG = false;
 
     // STOPSHIP disable once we resolve b/18102199
-    private static final boolean ACTION_BUTTONS_DEBUG = true;
+    private static final boolean NOTIFICATION_CLICK_DEBUG = true;
 
     protected static final int MSG_SHOW_RECENT_APPS = 1019;
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
