@@ -58,7 +58,8 @@ public class Resources_Theme_Delegate {
             Resources thisResources, Theme thisTheme,
             int[] attrs) {
         boolean changed = setupResources(thisTheme);
-        TypedArray ta = RenderSessionImpl.getCurrentContext().obtainStyledAttributes(attrs);
+        BridgeTypedArray ta = RenderSessionImpl.getCurrentContext().obtainStyledAttributes(attrs);
+        ta.setTheme(thisTheme);
         restoreResources(changed);
         return ta;
     }
@@ -69,7 +70,9 @@ public class Resources_Theme_Delegate {
             int resid, int[] attrs)
             throws NotFoundException {
         boolean changed = setupResources(thisTheme);
-        TypedArray ta = RenderSessionImpl.getCurrentContext().obtainStyledAttributes(resid, attrs);
+        BridgeTypedArray ta = RenderSessionImpl.getCurrentContext().obtainStyledAttributes(resid,
+                attrs);
+        ta.setTheme(thisTheme);
         restoreResources(changed);
         return ta;
     }
@@ -79,8 +82,9 @@ public class Resources_Theme_Delegate {
             Resources thisResources, Theme thisTheme,
             AttributeSet set, int[] attrs, int defStyleAttr, int defStyleRes) {
         boolean changed = setupResources(thisTheme);
-        TypedArray ta = RenderSessionImpl.getCurrentContext().obtainStyledAttributes(set, attrs,
-                defStyleAttr, defStyleRes);
+        BridgeTypedArray ta = RenderSessionImpl.getCurrentContext().obtainStyledAttributes(set,
+                attrs, defStyleAttr, defStyleRes);
+        ta.setTheme(thisTheme);
         restoreResources(changed);
         return ta;
     }
@@ -91,8 +95,8 @@ public class Resources_Theme_Delegate {
             int resid, TypedValue outValue,
             boolean resolveRefs) {
         boolean changed = setupResources(thisTheme);
-        boolean found =  RenderSessionImpl.getCurrentContext().resolveThemeAttribute(
-                resid, outValue, resolveRefs);
+        boolean found =  RenderSessionImpl.getCurrentContext().resolveThemeAttribute(resid,
+                outValue, resolveRefs);
         restoreResources(changed);
         return found;
     }

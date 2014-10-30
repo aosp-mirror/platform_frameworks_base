@@ -32,6 +32,7 @@ import com.android.resources.ResourceType;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.res.Resources.Theme;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -113,6 +114,13 @@ public final class BridgeTypedArray extends TypedArray {
                 mIndices[index++] = i;
             }
         }
+    }
+
+    /**
+     * Set the theme to be used for inflating drawables.
+     */
+    public void setTheme(Theme theme) {
+        mTheme = theme;
     }
 
     /**
@@ -663,7 +671,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         ResourceValue value = mResourceData[index];
-        return ResourceHelper.getDrawable(value, mContext);
+        return ResourceHelper.getDrawable(value, mContext, mTheme);
     }
 
 
