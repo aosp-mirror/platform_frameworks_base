@@ -1854,23 +1854,23 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public void stopClatd() throws IllegalStateException {
+    public void stopClatd(String interfaceName) throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         try {
-            mConnector.execute("clatd", "stop");
+            mConnector.execute("clatd", "stop", interfaceName);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
     }
 
     @Override
-    public boolean isClatdStarted() {
+    public boolean isClatdStarted(String interfaceName) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final NativeDaemonEvent event;
         try {
-            event = mConnector.execute("clatd", "status");
+            event = mConnector.execute("clatd", "status", interfaceName);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
