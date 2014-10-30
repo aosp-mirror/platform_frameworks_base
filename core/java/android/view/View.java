@@ -3229,6 +3229,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         private ArrayList<OnLayoutChangeListener> mOnLayoutChangeListeners;
 
+        protected OnScrollChangeListener mOnScrollChangeListener;
+
         /**
          * Listeners for attach events.
          */
@@ -4603,6 +4605,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         mListenerInfo = new ListenerInfo();
         return mListenerInfo;
+    }
+
+    /**
+     * Register a callback to be invoked when the scroll position of this view
+     * changed.
+     *
+     * @param l The callback that will run.
+     * @hide Only used internally.
+     */
+    public void setOnScrollChangeListener(OnScrollChangeListener l) {
+        getListenerInfo().mOnScrollChangeListener = l;
     }
 
     /**
@@ -9794,6 +9807,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (ai != null) {
             ai.mViewScrollChanged = true;
         }
+
+        if (mListenerInfo != null && mListenerInfo.mOnScrollChangeListener != null) {
+            mListenerInfo.mOnScrollChangeListener.onScrollChange(this, l, t, oldl, oldt);
+        }
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the scroll
+     * position of a view changes.
+     *
+     * @hide Only used internally.
+     */
+    public interface OnScrollChangeListener {
+        /**
+         * Called when the scroll position of a view changes.
+         *
+         * @param v The view whose scroll position has changed.
+         * @param scrollX Current horizontal scroll origin.
+         * @param scrollY Current vertical scroll origin.
+         * @param oldScrollX Previous horizontal scroll origin.
+         * @param oldScrollY Previous vertical scroll origin.
+         */
+        void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY);
     }
 
     /**
