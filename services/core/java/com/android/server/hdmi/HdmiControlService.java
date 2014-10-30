@@ -90,6 +90,8 @@ import java.util.Locale;
  */
 public final class HdmiControlService extends SystemService {
     private static final String TAG = "HdmiControlService";
+    private final Locale HONG_KONG = new Locale("zh", "HK");
+    private final Locale MACAU = new Locale("zh", "MO");
 
     static final String PERMISSION = "android.permission.HDMI_CEC";
 
@@ -146,11 +148,23 @@ public final class HdmiControlService extends SystemService {
                     }
                     break;
                 case Intent.ACTION_CONFIGURATION_CHANGED:
-                    String language = Locale.getDefault().getISO3Language();
+                    String language = getMenuLanguage();
                     if (!mLanguage.equals(language)) {
                         onLanguageChanged(language);
                     }
                     break;
+            }
+        }
+
+        private String getMenuLanguage() {
+            Locale locale = Locale.getDefault();
+            if (locale.equals(Locale.TAIWAN) || locale.equals(HONG_KONG) || locale.equals(MACAU)) {
+                // Android always returns "zho" for all Chinese variants.
+                // Use "bibliographic" code defined in CEC639-2 for traditional
+                // Chinese used in Taiwan/Hong Kong/Macau.
+                return "chi";
+            } else {
+                return locale.getISO3Language();
             }
         }
     }
