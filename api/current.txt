@@ -28769,6 +28769,7 @@ package android.telephony {
     field public static final int MMS_ERROR_RETRY = 6; // 0x6
     field public static final int MMS_ERROR_UNABLE_CONNECT_MMS = 3; // 0x3
     field public static final int MMS_ERROR_UNSPECIFIED = 1; // 0x1
+    field public static final java.lang.String MMS_SHOW_CELL_BROADCAST_APP_LINKS = "config_cellBroadcastAppLinks";
     field public static final int RESULT_ERROR_GENERIC_FAILURE = 1; // 0x1
     field public static final int RESULT_ERROR_NO_SERVICE = 4; // 0x4
     field public static final int RESULT_ERROR_NULL_PDU = 3; // 0x3
