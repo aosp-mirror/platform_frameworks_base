@@ -38,6 +38,7 @@ import android.view.ViewTreeObserver;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 final class BackStackState implements Parcelable {
     final int[] mOps;
@@ -1055,7 +1056,7 @@ final class BackStackRecord extends FragmentTransaction implements
     }
 
     private static ArrayList<View> captureExitingViews(Transition exitTransition,
-            Fragment outFragment, ArrayMap<String, View> namedViews) {
+            Fragment outFragment, ArrayMap<String, View> namedViews, View nonExistentView) {
         ArrayList<View> viewList = null;
         if (exitTransition != null) {
             viewList = new ArrayList<View>();
@@ -1064,7 +1065,10 @@ final class BackStackRecord extends FragmentTransaction implements
             if (namedViews != null) {
                 viewList.removeAll(namedViews.values());
             }
-            addTargets(exitTransition, viewList);
+            if (!viewList.isEmpty()) {
+                viewList.add(nonExistentView);
+                addTargets(exitTransition, viewList);
+            }
         }
         return viewList;
     }
@@ -1132,11 +1136,8 @@ final class BackStackRecord extends FragmentTransaction implements
                             namedViews = mapSharedElementsIn(state, isBack, inFragment);
                             removeTargets(sharedElementTransition, sharedElementTargets);
                             sharedElementTargets.clear();
-                            if (namedViews.isEmpty()) {
-                                sharedElementTargets.add(state.nonExistentView);
-                            } else {
-                                sharedElementTargets.addAll(namedViews.values());
-                            }
+                            sharedElementTargets.add(state.nonExistentView);
+                            sharedElementTargets.addAll(namedViews.values());
 
                             addTargets(sharedElementTransition, sharedElementTargets);
 
@@ -1153,6 +1154,9 @@ final class BackStackRecord extends FragmentTransaction implements
                                 if (namedViews != null) {
                                     enteringViews.removeAll(namedViews.values());
                                 }
+                                enteringViews.add(state.nonExistentView);
+                                // We added this earlier to prevent any views being targeted.
+                                enterTransition.removeTarget(state.nonExistentView);
                                 addTargets(enterTransition, enteringViews);
                             }
                             setSharedElementEpicenter(enterTransition, state);
@@ -1293,11 +1297,8 @@ final class BackStackRecord extends FragmentTransaction implements
             ArrayList<View> sharedElementTargets = new ArrayList<View>();
             if (sharedElementTransition != null) {
                 namedViews = remapSharedElements(state, outFragment, isBack);
-                if (namedViews.isEmpty()) {
-                    sharedElementTargets.add(state.nonExistentView);
-                } else {
-                    sharedElementTargets.addAll(namedViews.values());
-                }
+                sharedElementTargets.add(state.nonExistentView);
+                sharedElementTargets.addAll(namedViews.values());
                 addTargets(sharedElementTransition, sharedElementTargets);
 
                 // Notify the start of the transition.
@@ -1310,7 +1311,7 @@ final class BackStackRecord extends FragmentTransaction implements
             }
 
             ArrayList<View> exitingViews = captureExitingViews(exitTransition, outFragment,
-                    namedViews);
+                    namedViews, state.nonExistentView);
             if (exitingViews == null || exitingViews.isEmpty()) {
                 exitTransition = null;
             }
@@ -1388,18 +1389,67 @@ final class BackStackRecord extends FragmentTransaction implements
         }
     }
 
-    private static void removeTargets(Transition transition, ArrayList<View> views) {
-        int numViews = views.size();
-        for (int i = 0; i < numViews; i++) {
-            transition.removeTarget(views.get(i));
+    /**
+     * This method removes the views from transitions that target ONLY those views.
+     * The views list should match those added in addTargets and should contain
+     * one view that is not in the view hierarchy (state.nonExistentView).
+     */
+    public static void removeTargets(Transition transition, ArrayList<View> views) {
+        if (transition instanceof TransitionSet) {
+            TransitionSet set = (TransitionSet) transition;
+            int numTransitions = set.getTransitionCount();
+            for (int i = 0; i < numTransitions; i++) {
+                Transition child = set.getTransitionAt(i);
+                removeTargets(child, views);
+            }
+        } else if (!hasSimpleTarget(transition)) {
+            List<View> targets = transition.getTargets();
+            if (targets != null && targets.size() == views.size() &&
+                    targets.containsAll(views)) {
+                // We have an exact match. We must have added these earlier in addTargets
+                for (int i = views.size() - 1; i >= 0; i--) {
+                    transition.removeTarget(views.get(i));
+                }
+            }
         }
     }
 
-    private static void addTargets(Transition transition, ArrayList<View> views) {
-        int numViews = views.size();
-        for (int i = 0; i < numViews; i++) {
-            transition.addTarget(views.get(i));
+    /**
+     * This method adds views as targets to the transition, but only if the transition
+     * doesn't already have a target. It is best for views to contain one View object
+     * that does not exist in the view hierarchy (state.nonExistentView) so that
+     * when they are removed later, a list match will suffice to remove the targets.
+     * Otherwise, if you happened to have targeted the exact views for the transition,
+     * the removeTargets call will remove them unexpectedly.
+     */
+    public static void addTargets(Transition transition, ArrayList<View> views) {
+        if (transition instanceof TransitionSet) {
+            TransitionSet set = (TransitionSet) transition;
+            int numTransitions = set.getTransitionCount();
+            for (int i = 0; i < numTransitions; i++) {
+                Transition child = set.getTransitionAt(i);
+                addTargets(child, views);
+            }
+        } else if (!hasSimpleTarget(transition)) {
+            List<View> targets = transition.getTargets();
+            if (isNullOrEmpty(targets)) {
+                // We can just add the target views
+                int numViews = views.size();
+                for (int i = 0; i < numViews; i++) {
+                    transition.addTarget(views.get(i));
+                }
+            }
         }
+    }
+
+    private static boolean hasSimpleTarget(Transition transition) {
+        return !isNullOrEmpty(transition.getTargetIds()) ||
+                !isNullOrEmpty(transition.getTargetNames()) ||
+                !isNullOrEmpty(transition.getTargetTypes());
+    }
+
+    private static boolean isNullOrEmpty(List list) {
+        return list == null || list.isEmpty();
     }
 
     /**
