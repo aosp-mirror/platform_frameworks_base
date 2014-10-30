@@ -284,7 +284,7 @@ public abstract class PanelView extends FrameLayout {
                                 || mInitialOffsetOnTouch == 0f)) {
                     mTouchSlopExceeded = true;
                     if (waitForTouchSlop && !mTracking) {
-                        if (!mJustPeeked) {
+                        if (!mJustPeeked && mInitialOffsetOnTouch != 0f) {
                             mInitialOffsetOnTouch = mExpandedHeight;
                             mInitialTouchX = x;
                             mInitialTouchY = y;
