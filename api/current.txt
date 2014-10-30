@@ -9260,6 +9260,7 @@ package android.content.res {
     method public int getType(int);
     method public boolean getValue(int, android.util.TypedValue);
     method public boolean hasValue(int);
+    method public boolean hasValueOrEmpty(int);
     method public int length();
     method public android.util.TypedValue peekValue(int);
     method public void recycle();
@@ -32172,6 +32173,8 @@ package android.util {
     field public static final int COMPLEX_UNIT_PX = 0; // 0x0
     field public static final int COMPLEX_UNIT_SHIFT = 0; // 0x0
     field public static final int COMPLEX_UNIT_SP = 2; // 0x2
+    field public static final int DATA_NULL_EMPTY = 1; // 0x1
+    field public static final int DATA_NULL_UNDEFINED = 0; // 0x0
     field public static final int DENSITY_DEFAULT = 0; // 0x0
     field public static final int DENSITY_NONE = 65535; // 0xffff
     field public static final int TYPE_ATTRIBUTE = 2; // 0x2
