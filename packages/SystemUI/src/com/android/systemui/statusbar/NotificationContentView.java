@@ -27,11 +27,11 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-
 import com.android.systemui.R;
 
 /**
@@ -60,6 +60,16 @@ public class NotificationContentView extends FrameLayout {
     private boolean mDark;
 
     private final Paint mFadePaint = new Paint();
+    private boolean mAnimate;
+    private ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
+            = new ViewTreeObserver.OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            mAnimate = true;
+            getViewTreeObserver().removeOnPreDrawListener(this);
+            return true;
+        }
+    };
 
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -71,6 +81,12 @@ public class NotificationContentView extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateClipping();
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        updateVisibility();
     }
 
     public void reset() {
@@ -117,9 +133,31 @@ public class NotificationContentView extends FrameLayout {
         selectLayout(false /* animate */, true /* force */);
     }
 
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+        updateVisibility();
+    }
+
+    private void updateVisibility() {
+        setVisible(isShown());
+    }
+
+    private void setVisible(final boolean isVisible) {
+        if (isVisible) {
+
+            // We only animate if we are drawn at least once, otherwise the view might animate when
+            // it's shown the first time
+            getViewTreeObserver().addOnPreDrawListener(mEnableAnimationPredrawListener);
+        } else {
+            getViewTreeObserver().removeOnPreDrawListener(mEnableAnimationPredrawListener);
+            mAnimate = false;
+        }
+    }
+
     public void setActualHeight(int actualHeight) {
         mActualHeight = actualHeight;
-        selectLayout(true /* animate */, false /* force */);
+        selectLayout(mAnimate /* animate */, false /* force */);
         updateClipping();
     }
 

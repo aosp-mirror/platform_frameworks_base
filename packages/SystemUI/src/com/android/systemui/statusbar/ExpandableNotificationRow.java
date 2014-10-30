@@ -23,10 +23,8 @@ import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
-
 import android.widget.ImageView;
 import com.android.systemui.R;
 
