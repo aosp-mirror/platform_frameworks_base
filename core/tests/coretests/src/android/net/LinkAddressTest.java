@@ -33,8 +33,11 @@ import android.test.AndroidTestCase;
 import static android.test.MoreAsserts.assertNotEqual;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import static android.system.OsConstants.IFA_F_DADFAILED;
 import static android.system.OsConstants.IFA_F_DEPRECATED;
+import static android.system.OsConstants.IFA_F_OPTIMISTIC;
 import static android.system.OsConstants.IFA_F_PERMANENT;
+import static android.system.OsConstants.IFA_F_TEMPORARY;
 import static android.system.OsConstants.IFA_F_TENTATIVE;
 import static android.system.OsConstants.RT_SCOPE_HOST;
 import static android.system.OsConstants.RT_SCOPE_LINK;
@@ -339,5 +342,74 @@ public class LinkAddressTest extends AndroidTestCase {
 
         l = new LinkAddress(V4 + "/28", IFA_F_PERMANENT, RT_SCOPE_LINK);
         assertParcelingIsLossless(l);
+    }
+
+    private void assertGlobalPreferred(LinkAddress l, String msg) {
+        assertTrue(msg, l.isGlobalPreferred());
+    }
+
+    private void assertNotGlobalPreferred(LinkAddress l, String msg) {
+        assertFalse(msg, l.isGlobalPreferred());
+    }
+
+    public void testIsGlobalPreferred() {
+        LinkAddress l;
+
+        l = new LinkAddress(V4_ADDRESS, 32, 0, RT_SCOPE_UNIVERSE);
+        assertGlobalPreferred(l, "v4,global,noflags");
+
+        l = new LinkAddress("10.10.1.7/23", 0, RT_SCOPE_UNIVERSE);
+        assertGlobalPreferred(l, "v4-rfc1918,global,noflags");
+
+        l = new LinkAddress("10.10.1.7/23", 0, RT_SCOPE_SITE);
+        assertNotGlobalPreferred(l, "v4-rfc1918,site-local,noflags");
+
+        l = new LinkAddress("127.0.0.7/8", 0, RT_SCOPE_HOST);
+        assertNotGlobalPreferred(l, "v4-localhost,node-local,noflags");
+
+        l = new LinkAddress(V6_ADDRESS, 64, 0, RT_SCOPE_UNIVERSE);
+        assertGlobalPreferred(l, "v6,global,noflags");
+
+        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_PERMANENT, RT_SCOPE_UNIVERSE);
+        assertGlobalPreferred(l, "v6,global,permanent");
+
+        // IPv6 ULAs are not acceptable "global preferred" addresses.
+        l = new LinkAddress("fc12::1/64", 0, RT_SCOPE_UNIVERSE);
+        assertNotGlobalPreferred(l, "v6,ula1,noflags");
+
+        l = new LinkAddress("fd34::1/64", 0, RT_SCOPE_UNIVERSE);
+        assertNotGlobalPreferred(l, "v6,ula2,noflags");
+
+        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_TEMPORARY, RT_SCOPE_UNIVERSE);
+        assertGlobalPreferred(l, "v6,global,tempaddr");
+
+        l = new LinkAddress(V6_ADDRESS, 64, (IFA_F_TEMPORARY|IFA_F_DADFAILED),
+                            RT_SCOPE_UNIVERSE);
+        assertNotGlobalPreferred(l, "v6,global,tempaddr+dadfailed");
+
+        l = new LinkAddress(V6_ADDRESS, 64, (IFA_F_TEMPORARY|IFA_F_DEPRECATED),
+                            RT_SCOPE_UNIVERSE);
+        assertNotGlobalPreferred(l, "v6,global,tempaddr+deprecated");
+
+        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_TEMPORARY, RT_SCOPE_SITE);
+        assertNotGlobalPreferred(l, "v6,site-local,tempaddr");
+
+        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_TEMPORARY, RT_SCOPE_LINK);
+        assertNotGlobalPreferred(l, "v6,link-local,tempaddr");
+
+        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_TEMPORARY, RT_SCOPE_HOST);
+        assertNotGlobalPreferred(l, "v6,node-local,tempaddr");
+
+        l = new LinkAddress("::1/128", IFA_F_PERMANENT, RT_SCOPE_HOST);
+        assertNotGlobalPreferred(l, "v6-localhost,node-local,permanent");
+
+        l = new LinkAddress(V6_ADDRESS, 64, (IFA_F_TEMPORARY|IFA_F_TENTATIVE),
+                            RT_SCOPE_UNIVERSE);
+        assertNotGlobalPreferred(l, "v6,global,tempaddr+tentative");
+
+        l = new LinkAddress(V6_ADDRESS, 64,
+                            (IFA_F_TEMPORARY|IFA_F_TENTATIVE|IFA_F_OPTIMISTIC),
+                            RT_SCOPE_UNIVERSE);
+        assertGlobalPreferred(l, "v6,global,tempaddr+optimistic");
     }
 }
