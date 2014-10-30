@@ -37,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
@@ -589,9 +590,10 @@ public class AlertController {
             mScrollView.removeView(mMessageView);
 
             if (mListView != null) {
-                final int childIndex = mScrollView.indexOfChild(mScrollView);
-                contentPanel.removeViewAt(childIndex);
-                contentPanel.addView(mListView, childIndex,
+                final ViewGroup scrollParent = (ViewGroup) mScrollView.getParent();
+                final int childIndex = scrollParent.indexOfChild(mScrollView);
+                scrollParent.removeViewAt(childIndex);
+                scrollParent.addView(mListView, childIndex,
                         new LayoutParams(MATCH_PARENT, MATCH_PARENT));
             } else {
                 contentPanel.setVisibility(View.GONE);
