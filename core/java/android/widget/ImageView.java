@@ -527,6 +527,12 @@ public class ImageView extends View {
             if (mHasDrawableTintMode) {
                 mDrawable.setTintMode(mDrawableTintMode);
             }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mDrawable.isStateful()) {
+                mDrawable.setState(getDrawableState());
+            }
         }
     }
 
@@ -820,6 +826,7 @@ public class ImageView extends View {
             mDrawableHeight = d.getIntrinsicHeight();
             applyImageTint();
             applyColorMod();
+
             configureBounds();
         } else {
             mDrawableWidth = mDrawableHeight = -1;
