@@ -1012,7 +1012,7 @@ public class NotificationPanelView extends PanelView implements
                         ? View.VISIBLE
                         : View.INVISIBLE);
         if (mKeyguardUserSwitcher != null && mQsExpanded && !mStackScrollerOverscrolling) {
-            mKeyguardUserSwitcher.hide(true /* animate */);
+            mKeyguardUserSwitcher.hideIfNotSimple(true /* animate */);
         }
     }
 
