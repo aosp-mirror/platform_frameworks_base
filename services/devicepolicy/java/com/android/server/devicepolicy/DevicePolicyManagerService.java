@@ -3912,7 +3912,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int n = policy.mAdminList.size();
         for (int i = 0; i < n; i++) {
             ActiveAdmin admin = policy.mAdminList.get(i);
-            if (profileOwner.equals(admin.info)) {
+            if (profileOwner.equals(admin.info.getComponent())) {
                 return admin;
             }
         }
