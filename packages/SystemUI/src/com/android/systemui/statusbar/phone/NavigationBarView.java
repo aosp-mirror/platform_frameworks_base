@@ -33,12 +33,14 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import com.android.systemui.R;
@@ -503,15 +505,31 @@ public class NavigationBarView extends LinearLayout {
             // We swap all children of the 90 and 270 degree layouts, since they are vertical
             View rotation90 = mRotatedViews[Surface.ROTATION_90];
             swapChildrenOrderIfVertical(rotation90.findViewById(R.id.nav_buttons));
+            adjustExtraKeyGravity(rotation90, isLayoutRtl);
 
             View rotation270 = mRotatedViews[Surface.ROTATION_270];
             if (rotation90 != rotation270) {
                 swapChildrenOrderIfVertical(rotation270.findViewById(R.id.nav_buttons));
+                adjustExtraKeyGravity(rotation270, isLayoutRtl);
             }
             mIsLayoutRtl = isLayoutRtl;
         }
     }
 
+    private void adjustExtraKeyGravity(View navBar, boolean isLayoutRtl) {
+        View menu = navBar.findViewById(R.id.menu);
+        View imeSwitcher = navBar.findViewById(R.id.ime_switcher);
+        if (menu != null) {
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) menu.getLayoutParams();
+            lp.gravity = isLayoutRtl ? Gravity.BOTTOM : Gravity.TOP;
+            menu.setLayoutParams(lp);
+        }
+        if (imeSwitcher != null) {
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) imeSwitcher.getLayoutParams();
+            lp.gravity = isLayoutRtl ? Gravity.BOTTOM : Gravity.TOP;
+            imeSwitcher.setLayoutParams(lp);
+        }
+    }
 
     /**
      * Swaps the children order of a LinearLayout if it's orientation is Vertical
