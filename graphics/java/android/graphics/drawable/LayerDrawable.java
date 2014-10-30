@@ -275,7 +275,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public boolean canApplyTheme() {
-        return super.canApplyTheme() || mLayerState != null && mLayerState.canApplyTheme();
+        return (mLayerState != null && mLayerState.canApplyTheme()) || super.canApplyTheme();
     }
 
     /**
@@ -1020,7 +1020,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
 
         @Override
         public boolean canApplyTheme() {
-            if (mThemeAttrs != null) {
+            if (mThemeAttrs != null || super.canApplyTheme()) {
                 return true;
             }
 
