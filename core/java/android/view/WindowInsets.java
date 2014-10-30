@@ -340,7 +340,6 @@ public final class WindowInsets {
             int right, int bottom) {
         final WindowInsets result = new WindowInsets(this);
         result.mSystemWindowInsets = new Rect(left, top, right, bottom);
-        result.mSystemWindowInsetsConsumed = !hasSystemWindowInsets();
         return result;
     }
 
