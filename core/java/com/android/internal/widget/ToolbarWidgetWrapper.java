@@ -657,4 +657,36 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
         mToolbar.restoreHierarchyState(toolbarStates);
     }
 
+    @Override
+    public void setBackgroundDrawable(Drawable d) {
+        //noinspection deprecation
+        mToolbar.setBackgroundDrawable(d);
+    }
+
+    @Override
+    public int getHeight() {
+        return mToolbar.getHeight();
+    }
+
+    @Override
+    public void setVisibility(int visible) {
+        mToolbar.setVisibility(visible);
+    }
+
+    @Override
+    public int getVisibility() {
+        return mToolbar.getVisibility();
+    }
+
+    @Override
+    public void setMenuCallbacks(MenuPresenter.Callback presenterCallback,
+            MenuBuilder.Callback menuBuilderCallback) {
+        mToolbar.setMenuCallbacks(presenterCallback, menuBuilderCallback);
+    }
+
+    @Override
+    public Menu getMenu() {
+        return mToolbar.getMenu();
+    }
+
 }

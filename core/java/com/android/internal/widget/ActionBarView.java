@@ -1341,6 +1341,22 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         updateHomeAccessibility(mUpGoerFive.isEnabled());
     }
 
+    @Override
+    public void setMenuCallbacks(MenuPresenter.Callback presenterCallback,
+            MenuBuilder.Callback menuBuilderCallback) {
+        if (mActionMenuPresenter != null) {
+            mActionMenuPresenter.setCallback(presenterCallback);
+        }
+        if (mOptionsMenu != null) {
+            mOptionsMenu.setCallback(menuBuilderCallback);
+        }
+    }
+
+    @Override
+    public Menu getMenu() {
+        return mOptionsMenu;
+    }
+
     static class SavedState extends BaseSavedState {
         int expandedMenuItemId;
         boolean isOverflowOpen;
