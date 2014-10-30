@@ -158,6 +158,11 @@ public class WifiScanner {
         public int reportEvents;
         /** defines number of bssids to cache from each scan */
         public int numBssidsPerScan;
+        /**
+         * defines number of scans to cache; use it with REPORT_EVENT_AFTER_BUFFER_FULL
+         * to wake up at fixed interval
+         */
+        public int maxScansToCache;
 
         /** Implement the Parcelable interface {@hide} */
         public int describeContents() {
@@ -170,6 +175,7 @@ public class WifiScanner {
             dest.writeInt(periodInMs);
             dest.writeInt(reportEvents);
             dest.writeInt(numBssidsPerScan);
+            dest.writeInt(maxScansToCache);
 
             if (channels != null) {
                 dest.writeInt(channels.length);
@@ -194,6 +200,7 @@ public class WifiScanner {
                         settings.periodInMs = in.readInt();
                         settings.reportEvents = in.readInt();
                         settings.numBssidsPerScan = in.readInt();
+                        settings.maxScansToCache = in.readInt();
                         int num_channels = in.readInt();
                         settings.channels = new ChannelSpec[num_channels];
                         for (int i = 0; i < num_channels; i++) {
@@ -215,8 +222,143 @@ public class WifiScanner {
 
     }
 
-    /** @hide */
+    /**
+     * all the information garnered from a single scan
+     */
+    public static class ScanData implements Parcelable {
+        /** scan identifier */
+        private int mId;
+        /** additional information about scan
+         * 0 => no special issues encountered in the scan
+         * non-zero => scan was truncated, so results may not be complete
+         */
+        private int mFlags;
+        /** all scan results discovered in this scan, sorted by timestamp in ascending order */
+        private ScanResult mResults[];
+
+        ScanData() {}
+
+        public ScanData(int id, int flags, ScanResult[] results) {
+            mId = id;
+            mFlags = flags;
+            mResults = results;
+        }
+
+        public ScanData(ScanData s) {
+            mId = s.mId;
+            mFlags = s.mFlags;
+            mResults = new ScanResult[s.mResults.length];
+            for (int i = 0; i < s.mResults.length; i++) {
+                ScanResult result = s.mResults[i];
+                WifiSsid wifiSsid = WifiSsid.createFromAsciiEncoded(result.SSID);
+                ScanResult newResult = new ScanResult(wifiSsid, result.BSSID, "",
+                        result.level, result.frequency, result.timestamp);
+                mResults[i] = newResult;
+            }
+        }
+
+        public int getId() {
+            return mId;
+        }
+
+        public int getFlags() {
+            return mFlags;
+        }
+
+        public ScanResult[] getResults() {
+            return mResults;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public void writeToParcel(Parcel dest, int flags) {
+            if (mResults != null) {
+                dest.writeInt(mId);
+                dest.writeInt(mFlags);
+                dest.writeInt(mResults.length);
+                for (int i = 0; i < mResults.length; i++) {
+                    ScanResult result = mResults[i];
+                    result.writeToParcel(dest, flags);
+                }
+            } else {
+                dest.writeInt(0);
+            }
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<ScanData> CREATOR =
+                new Creator<ScanData>() {
+                    public ScanData createFromParcel(Parcel in) {
+                        int id = in.readInt();
+                        int flags = in.readInt();
+                        int n = in.readInt();
+                        ScanResult results[] = new ScanResult[n];
+                        for (int i = 0; i < n; i++) {
+                            results[i] = ScanResult.CREATOR.createFromParcel(in);
+                        }
+                        return new ScanData(id, flags, results);
+                    }
+
+                    public ScanData[] newArray(int size) {
+                        return new ScanData[size];
+                    }
+                };
+    }
+
+    public static class ParcelableScanData implements Parcelable {
+
+        public ScanData mResults[];
+
+        public ParcelableScanData(ScanData[] results) {
+            mResults = results;
+        }
+
+        public ScanData[] getResults() {
+            return mResults;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public int describeContents() {
+            return 0;
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public void writeToParcel(Parcel dest, int flags) {
+            if (mResults != null) {
+                dest.writeInt(mResults.length);
+                for (int i = 0; i < mResults.length; i++) {
+                    ScanData result = mResults[i];
+                    result.writeToParcel(dest, flags);
+                }
+            } else {
+                dest.writeInt(0);
+            }
+        }
+
+        /** Implement the Parcelable interface {@hide} */
+        public static final Creator<ParcelableScanData> CREATOR =
+                new Creator<ParcelableScanData>() {
+                    public ParcelableScanData createFromParcel(Parcel in) {
+                        int n = in.readInt();
+                        ScanData results[] = new ScanData[n];
+                        for (int i = 0; i < n; i++) {
+                            results[i] = ScanData.CREATOR.createFromParcel(in);
+                        }
+                        return new ParcelableScanData(results);
+                    }
+
+                    public ParcelableScanData[] newArray(int size) {
+                        return new ParcelableScanData[size];
+                    }
+                };
+    }
+
     public static class ParcelableScanResults implements Parcelable {
+
         public ScanResult mResults[];
 
         public ParcelableScanResults(ScanResult[] results) {
@@ -264,7 +406,8 @@ public class WifiScanner {
     }
 
     /**
-     * interface to get scan events on; specify this on {@link #startBackgroundScan}
+     * interface to get scan events on; specify this on {@link #startBackgroundScan} or
+     * {@link #startScan}
      */
     public interface ScanListener extends ActionListener {
         /**
@@ -273,9 +416,9 @@ public class WifiScanner {
          */
         public void onPeriodChanged(int periodInMs);
         /**
-         * reports results retrieved from background scan
+         * reports results retrieved from background scan and single shot scans
          */
-        public void onResults(ScanResult[] results);
+        public void onResults(ScanData[] results);
         /**
          * reports full scan result for each access point found in scan
          */
@@ -303,13 +446,36 @@ public class WifiScanner {
         sAsyncChannel.sendMessage(CMD_STOP_BACKGROUND_SCAN, 0, removeListener(listener));
     }
     /**
-     * retrieves currently available scan results
+     * reports currently available scan results on appropriate listeners
+     * @return true if all scan results were reported correctly
      */
-    public ScanResult[] getScanResults() {
+    public boolean getScanResults() {
         validateChannel();
         Message reply = sAsyncChannel.sendMessageSynchronously(CMD_GET_SCAN_RESULTS, 0);
-        ScanResult[] results = (ScanResult[]) reply.obj;
-        return results;
+        return reply.what == CMD_OP_SUCCEEDED;
+    }
+
+    /**
+     * starts a single scan and reports results asynchronously
+     * @param settings specifies various parameters for the scan; for more information look at
+     * {@link ScanSettings}
+     * @param listener specifies the object to report events to. This object is also treated as a
+     *                 key for this scan, and must also be specified to cancel the scan. Multiple
+     *                 scans should also not share this object.
+     */
+    public void startScan(ScanSettings settings, ScanListener listener) {
+        validateChannel();
+        sAsyncChannel.sendMessage(CMD_START_SINGLE_SCAN, 0, putListener(listener), settings);
+    }
+
+    /**
+     * stops an ongoing single shot scan; only useful after {@link #startScan} if onResults()
+     * hasn't been called on the listener, ignored otherwise
+     * @param listener
+     */
+    public void stopScan(ScanListener listener) {
+        validateChannel();
+        sAsyncChannel.sendMessage(CMD_STOP_SINGLE_SCAN, 0, removeListener(listener));
     }
 
     /** specifies information about an access point of interest */
@@ -593,6 +759,12 @@ public class WifiScanner {
     public static final int CMD_PERIOD_CHANGED              = BASE + 19;
     /** @hide */
     public static final int CMD_FULL_SCAN_RESULT            = BASE + 20;
+    /** @hide */
+    public static final int CMD_START_SINGLE_SCAN           = BASE + 21;
+    /** @hide */
+    public static final int CMD_STOP_SINGLE_SCAN            = BASE + 22;
+    /** @hide */
+    public static final int CMD_SINGLE_SCAN_COMPLETED       = BASE + 23;
 
     private Context mContext;
     private IWifiScanner mService;
@@ -800,7 +972,7 @@ public class WifiScanner {
                     break;
                 case CMD_SCAN_RESULT :
                     ((ScanListener) listener).onResults(
-                            ((ParcelableScanResults) msg.obj).getResults());
+                            ((ParcelableScanData) msg.obj).getResults());
                     return;
                 case CMD_FULL_SCAN_RESULT :
                     ScanResult result = (ScanResult) msg.obj;
@@ -821,6 +993,10 @@ public class WifiScanner {
                     ((WifiChangeListener) listener).onQuiescence(
                             ((ParcelableScanResults) msg.obj).getResults());
                     return;
+                case CMD_SINGLE_SCAN_COMPLETED:
+                    Log.d(TAG, "removing listener for single scan");
+                    removeListener(msg.arg2);
+                    break;
                 default:
                     if (DBG) Log.d(TAG, "Ignoring message " + msg.what);
                     return;
