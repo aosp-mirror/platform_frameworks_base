@@ -4639,7 +4639,14 @@ bool ResTable::stringToValue(Res_value* outValue, String16* outString,
 
         // It's a reference!
         if (len == 5 && s[1]=='n' && s[2]=='u' && s[3]=='l' && s[4]=='l') {
+            // Special case @null as undefined. This will be converted by
+            // AssetManager to TYPE_NULL with data DATA_NULL_UNDEFINED.
             outValue->data = 0;
+            return true;
+        } else if (len == 6 && s[1]=='e' && s[2]=='m' && s[3]=='p' && s[4]=='t' && s[5]=='y') {
+            // Special case @empty as explicitly defined empty value.
+            outValue->dataType = Res_value::TYPE_NULL;
+            outValue->data = Res_value::DATA_NULL_EMPTY;
             return true;
         } else {
             bool createIfNotFound = false;
@@ -6251,7 +6258,14 @@ String8 ResTable::normalizeForOutput( const char *input )
 void ResTable::print_value(const Package* pkg, const Res_value& value) const
 {
     if (value.dataType == Res_value::TYPE_NULL) {
-        printf("(null)\n");
+        if (value.data == Res_value::DATA_NULL_UNDEFINED) {
+            printf("(null)\n");
+        } else if (value.data == Res_value::DATA_NULL_EMPTY) {
+            printf("(null empty)\n");
+        } else {
+            // This should never happen.
+            printf("(null) 0x%08x\n", value.data);
+        }
     } else if (value.dataType == Res_value::TYPE_REFERENCE) {
         printf("(reference) 0x%08x\n", value.data);
     } else if (value.dataType == Res_value::TYPE_DYNAMIC_REFERENCE) {
