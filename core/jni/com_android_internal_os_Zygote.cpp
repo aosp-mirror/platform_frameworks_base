@@ -418,10 +418,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
   pid_t pid = fork();
 
   if (pid == 0) {
-    if (!is_system_server && dataDir == NULL) {
-        ALOGE("Application private dir cannot be null");
-        RuntimeAbort(env);
-    }
     // The child process.
     gMallocLeakZygoteChild = 1;
 
