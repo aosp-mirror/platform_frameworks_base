@@ -106,11 +106,10 @@ bool EglManager::hasEglContext() {
 void EglManager::requireGlContext() {
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY, "No EGL context");
 
-    // We don't care *WHAT* surface is active, just that one is active to give
-    // us access to the GL context
-    if (mCurrentSurface == EGL_NO_SURFACE) {
-        usePBufferSurface();
-    }
+    // We can't be certain about the state of the current surface (whether
+    // or not it is destroyed, for example), so err on the side of using
+    // the pbuffer surface which we fully control
+    usePBufferSurface();
 }
 
 void EglManager::loadConfig() {
