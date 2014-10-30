@@ -1915,7 +1915,14 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @return Whether the specified motion event is actually happening over the content.
      */
     private boolean isInContentBounds(MotionEvent event) {
-        return event.getY() < getHeight() - getEmptyBottomMargin();
+        return isInContentBounds(event.getY());
+    }
+
+    /**
+     * @return Whether a y coordinate is inside the content.
+     */
+    public boolean isInContentBounds(float y) {
+        return y < getHeight() - getEmptyBottomMargin();
     }
 
     private void setIsBeingDragged(boolean isDragged) {
