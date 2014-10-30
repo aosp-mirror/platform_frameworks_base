@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -848,8 +897,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingApi.html#addGeofences(com.google.android.gms.common.api.GoogleApiClient, java.util.List<com.google.android.gms.location.Geofence>, android.app.PendingIntent)">addGeofences</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, List&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt; geofences, PendingIntent pendingIntent)</nobr>
 
-        <div class="jd-descrdiv">Sets alerts to be notified when the device enters or exits one of the
- specified geofences.</div>
+        <div class="jd-descrdiv">
+          Sets alerts to be notified when the device enters or exits one of the
+ specified geofences.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -867,7 +921,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingApi.html#removeGeofences(com.google.android.gms.common.api.GoogleApiClient, java.util.List<java.lang.String>)">removeGeofences</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, List&lt;String&gt; geofenceRequestIds)</nobr>
 
-        <div class="jd-descrdiv">Removes geofences by their request IDs.</div>
+        <div class="jd-descrdiv">
+          Removes geofences by their request IDs.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -885,7 +944,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingApi.html#removeGeofences(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">removeGeofences</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent pendingIntent)</nobr>
 
-        <div class="jd-descrdiv">Removes all geofences associated with the given <code>pendingIntent</code>.</div>
+        <div class="jd-descrdiv">
+          Removes all geofences associated with the given <code>pendingIntent</code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -960,6 +1024,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets alerts to be notified when the device enters or exits one of the
  specified geofences. If an existing geofence with the same request ID is
@@ -1060,6 +1127,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes geofences by their request IDs. Request ID is specified when you
  create a <code><a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a></code> by calling
  <code><a href="/reference/com/google/android/gms/location/Geofence.Builder.html#setRequestId(java.lang.String)">setRequestId(String)</a></code>.
@@ -1135,6 +1205,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Removes all geofences associated with the given <code>pendingIntent</code>.
  <p>

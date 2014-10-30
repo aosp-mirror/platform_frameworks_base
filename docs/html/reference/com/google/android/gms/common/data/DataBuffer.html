@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -793,6 +839,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -877,85 +926,221 @@ Summary:
       <div id="subclasses-direct-summary"
               style="display: none;"
               >
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of achievements.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of app states.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataEventBuffer.html">DataEventBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure holding references to a set of events.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure holding reference to a set of <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/event/EventBuffer.html">EventBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of events.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of games.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/GameRequestBuffer.html">GameRequestBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Request details.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Invitation data.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing Leaderboard data.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing LeaderboardScore data.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></td>
-              <td class="jd-descrcol" width="100%">A data buffer that points to Metadata entries.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/MilestoneBuffer.html">MilestoneBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing quest
- milestone data.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a></code> objects.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantBuffer.html">ParticipantBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing match participant data.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> objects.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of players.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/QuestBuffer.html">QuestBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Quest details.&nbsp;</td>
-          </tr>
-        <tr class=" api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataBuffer.html">SnapshotMetadataBuffer</a></td>
-              <td class="jd-descrcol" width="100%">Data structure providing access to a list of snapshots.&nbsp;</td>
-          </tr>
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchBuffer.html">TurnBasedMatchBuffer</a></td>
-              <td class="jd-descrcol" width="100%"><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing TurnBasedMatch details.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/achievement/AchievementBuffer.html">AchievementBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of achievements.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appstate/AppStateBuffer.html">AppStateBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of app states.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataEventBuffer.html">DataEventBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure holding references to a set of events.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataItemBuffer.html">DataItemBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure holding reference to a set of <code><a href="/reference/com/google/android/gms/wearable/DataItem.html">DataItem</a></code>s.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/event/EventBuffer.html">EventBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of events.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/GameBuffer.html">GameBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of games.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/request/GameRequestBuffer.html">GameRequestBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Request details.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationBuffer.html">InvitationBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Invitation data.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardBuffer.html">LeaderboardBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing Leaderboard data.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardScoreBuffer.html">LeaderboardScoreBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> containing LeaderboardScore data.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataBuffer.html">MetadataBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          A data buffer that points to Metadata entries.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/MilestoneBuffer.html">MilestoneBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing quest
+ milestone data.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/moments/MomentBuffer.html">MomentBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/moments/Moment.html">Moment</a></code> objects.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/ParticipantBuffer.html">ParticipantBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing match participant data.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of <code><a href="/reference/com/google/android/gms/plus/model/people/Person.html">Person</a></code> objects.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/PlayerBuffer.html">PlayerBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of players.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/QuestBuffer.html">QuestBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing Quest details.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class=" api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/snapshot/SnapshotMetadataBuffer.html">SnapshotMetadataBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data structure providing access to a list of snapshots.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchBuffer.html">TurnBasedMatchBuffer</a></td>
+        <td class="jd-descrcol" width="100%">
+          <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code> implementation containing TurnBasedMatch details.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
       </div>
   </div>
 </td></tr></table>
@@ -1041,10 +1226,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#close()">close</a></span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     use <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> instead
-</em></div>
+</em>
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1078,7 +1268,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#get(int)">get</a></span>(int position)</nobr>
         
-        <div class="jd-descrdiv">Get the item at the specified position.</div>
+        <div class="jd-descrdiv">
+          Get the item at the specified position.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1112,10 +1307,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#isClosed()">isClosed</a></span>()</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     <code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release()</a></code> is idempotent, and so is safe to call multiple times
-</em></div>
+</em>
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1149,7 +1349,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#release()">release</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Releases resources used by the buffer.</div>
+        <div class="jd-descrdiv">
+          Releases resources used by the buffer.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1167,8 +1372,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBuffer.html#singleRefIterator()">singleRefIterator</a></span>()</nobr>
 
-        <div class="jd-descrdiv">In order to use this one should correctly override setDataRow(int)
- in his DataBufferRef implementation.</div>
+        <div class="jd-descrdiv">
+          In order to use this one should correctly override setDataRow(int)
+ in his DataBufferRef implementation.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1537,6 +1747,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -1572,6 +1785,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1601,6 +1817,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Get the item at the specified position. Note that the objects returned from subsequent
  invocations of this method for the same position may not be identical objects, but will be
  equal in value. In other words:
@@ -1650,6 +1869,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1678,6 +1900,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -1713,6 +1938,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1741,6 +1969,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Releases resources used by the buffer. This method is idempotent.
 </p></div>
@@ -1771,6 +2002,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>In order to use this one should correctly override setDataRow(int)
  in his DataBufferRef implementation.

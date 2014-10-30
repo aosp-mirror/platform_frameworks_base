@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -764,23 +813,23 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The Google Fit Sessions API provides methods for managing <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Sessions</a></code>.
+<p itemprop="articleBody">API for creating and managing <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">sessions</a></code> of user activity in Google Fit.
  Sessions are a way of storing user-visible groups of related stream data in a useful and
  shareable manner, and allow for easy querying of the data in a detailed or aggregated fashion.
  <p>
- The <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#startSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.Session)">startSession(GoogleApiClient, com.google.android.gms.fitness.data.Session)</a></code> and
- <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">stopSession(GoogleApiClient, String, String)</a></code> methods mark the time range of the session.
+ The <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#startSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.Session)">startSession(GoogleApiClient, Session)</a></code> and
+ <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">stopSession(GoogleApiClient, String)</a></code> methods mark the time range of the session.
  Data inserted using the <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html">HistoryApi</a></code> during the period where the session is in progress
  will be associated with that Session once it is stopped.
  <p>
  Another way of adding sessions is with
- <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#insertSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionInsertRequest)">insertSession(GoogleApiClient, com.google.android.gms.fitness.request.SessionInsertRequest)</a></code>.  This is designed for bulk
+ <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#insertSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionInsertRequest)">insertSession(GoogleApiClient, SessionInsertRequest)</a></code>.  This is designed for bulk
  insertion when importing a user's historic data into Google Fit; for live sessions use the
  previous API.  All data in Google Fit that falls within the time range of an inserted session
  will be implicitly associated with that session.
  <p>
  Once a session has been saved, it can be retrieved using
- <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#readSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionReadRequest)">readSession(GoogleApiClient, com.google.android.gms.fitness.request.SessionReadRequest)</a></code>.
+ <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#readSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionReadRequest)">readSession(GoogleApiClient, SessionReadRequest)</a></code>.
  <p>
  Clients can register to be notified of sessions, and remove existing registrations, using
  <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#registerForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">registerForSessions(GoogleApiClient, PendingIntent)</a></code> and
@@ -788,7 +837,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  sessions when they are started and stopped.
  <p>
  Deleting sessions is handled like any other data deletion, via
- <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html#deleteData(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataDeleteRequest)">deleteData(GoogleApiClient, com.google.android.gms.fitness.request.DataDeleteRequest)</a></code>.
+ <code><a href="/reference/com/google/android/gms/fitness/HistoryApi.html#deleteData(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.DataDeleteRequest)">deleteData(GoogleApiClient, DataDeleteRequest)</a></code>.
  <p>
  The Sessions API should be accessed via the <code><a href="/reference/com/google/android/gms/fitness/Fitness.html">Fitness</a></code> entry point.  Example:
  <pre>
@@ -802,13 +851,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
          .setName(sessionName)
          .setIdentifier(identifier)
          .setDescription(description)
-         .setStartTimeMillis(startTime.getMillis())
+         .setStartTimeMillis(startTime.getMillis(), TimeUnit.MILLISECONDS)
          .build();
 
-     PendingResult&lt;Status&gt; pendingResult = Fitness.SessionsApi.startSession(
-         client, session);
-
-     Status status = pendingResult.await();
+     PendingResult&lt;Status&gt; pendingResult
+         = Fitness.SessionsApi.startSession(client, session);
  </pre>
 </p>
 
@@ -837,6 +884,31 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <h2>Summary</h2>
+
+
+
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
+
+
+
+    <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+
+
+
+
+        class</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/SessionsApi.ViewIntentBuilder.html">SessionsApi.ViewIntentBuilder</a></td>
+      <td class="jd-descrcol" width="100%">
+        Builder of intents to view <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">sessions</a></code> stored in Google Fit.&nbsp;
+
+
+
+      </td>
+    </tr>
+
+
 
 
 
@@ -882,8 +954,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#insertSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionInsertRequest)">insertSession</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SessionInsertRequest.html">SessionInsertRequest</a> request)</nobr>
 
-        <div class="jd-descrdiv">Inserts specified <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and corresponding data into the user's Google Fit store
- on behalf of the current application.</div>
+        <div class="jd-descrdiv">
+          Inserts specified <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and corresponding data into the user's Google Fit store
+ on behalf of the current application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -901,8 +978,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#readSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.request.SessionReadRequest)">readSession</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/request/SessionReadRequest.html">SessionReadRequest</a> request)</nobr>
 
-        <div class="jd-descrdiv">Reads data from the user's Google Fit store of the specific type(s) and for the specific
- session(s) selected from the request parameters.</div>
+        <div class="jd-descrdiv">
+          Reads data from the user's Google Fit store of the specific type(s) and for the specific
+ session(s) selected from the request parameters.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -920,7 +1002,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#registerForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">registerForSessions</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent intent)</nobr>
 
-        <div class="jd-descrdiv">Registers for notifications of session start and end events using a PendingIntent.</div>
+        <div class="jd-descrdiv">
+          Registers for notifications of session start and end events using a PendingIntent.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -938,7 +1025,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#startSession(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.fitness.data.Session)">startSession</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a> session)</nobr>
 
-        <div class="jd-descrdiv">Starts a new active session for the current application.</div>
+        <div class="jd-descrdiv">
+          Starts a new active session for the current application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -954,9 +1046,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html">SessionStopResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">stopSession</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String name, String identifier)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">stopSession</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String identifier)</nobr>
 
-        <div class="jd-descrdiv">Stops active sessions for the current application.</div>
+        <div class="jd-descrdiv">
+          Stops active sessions for the current application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -974,7 +1071,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/SessionsApi.html#unregisterForSessions(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">unregisterForSessions</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent intent)</nobr>
 
-        <div class="jd-descrdiv">Unregisters for notifications of session start & end events using a PendingIntent.</div>
+        <div class="jd-descrdiv">
+          Unregisters from session start and end notifications using a <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1050,9 +1152,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Inserts specified <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and corresponding data into the user's Google Fit store
  on behalf of the current application.  Useful for bulk upload of a previously recorded
- Session.</p></div>
+ session.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1063,7 +1168,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </tr>
         <tr>
           <th>request</td>
-          <td>the <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and its associated data that we are adding, which includes
+          <td>the <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Session</a></code> and its associated data, which includes
       details of the session and data set for data source(s).
 </td>
         </tr>
@@ -1097,6 +1202,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads data from the user's Google Fit store of the specific type(s) and for the specific
  session(s) selected from the request parameters.</p></div>
   <div class="jd-tagdata">
@@ -1109,8 +1217,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </tr>
         <tr>
           <th>request</td>
-          <td>a built request specifying the specific session or time interval and/or
-      data type we are interested in reading.</td>
+          <td>a built request specifying the specific session, time interval and/or
+      data type for the query</td>
         </tr>
       </table>
   </div>
@@ -1148,6 +1256,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Registers for notifications of session start and end events using a PendingIntent.
  <p>
  The application specifies a PendingIntent callback (typically an IntentService) which will be
@@ -1155,15 +1266,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
  application can use <code><a href="/reference/com/google/android/gms/fitness/data/Session.html#extract(android.content.Intent)">extract(android.content.Intent)</a></code> to extract the Session
  from the intent.  In addition, the following Intent extras can be used:
  <ul>
-     <li><code><a href="/reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_START_TIME">EXTRA_START_TIME</a></code> set to the Session's start time.
-     <li><code><a href="/reference/com/google/android/gms/fitness/FitnessIntents.html#EXTRA_END_TIME">EXTRA_END_TIME</a></code> optionally set to the Session's end time if
+     <li><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#EXTRA_START_TIME">EXTRA_START_TIME</a></code> set to the Session's start time.
+     <li><code><a href="/reference/com/google/android/gms/fitness/Fitness.html#EXTRA_END_TIME">EXTRA_END_TIME</a></code> optionally set to the Session's end time if
          the session has ended.
  </ul>
  <p>
  Finally, the Intent's type will be set to
- <code><a href="/reference/com/google/android/gms/fitness/FitnessIntents.html#MIME_TYPE_ACTIVITY_PREFIX">MIME_TYPE_ACTIVITY_PREFIX</a></code> followed by the name of the activity
+ <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#MIME_TYPE_PREFIX">MIME_TYPE_PREFIX</a></code> followed by the name of the activity
  associated with this session, and can be computed by
- <code><a href="/reference/com/google/android/gms/fitness/FitnessIntents.html#getActivityMimeType(int)">getActivityMimeType(int)</a></code>.</p></div>
+ <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getMimeType(java.lang.String)">getMimeType(String)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1206,6 +1317,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Starts a new active session for the current application.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1239,7 +1353,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </div>
 
 
-<A NAME="stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)"></A>
+<A NAME="stopSession(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)"></A>
 
 <div class="jd-details api apilevel-">
     <h4 class="jd-details-title">
@@ -1252,7 +1366,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/fitness/result/SessionStopResult.html">SessionStopResult</a>&gt;
       </span>
       <span class="sympad">stopSession</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String name, String identifier)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, String identifier)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1261,6 +1375,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Stops active sessions for the current application.  The active sessions to be stopped are
  chosen as per the specifications in the input request.</p></div>
@@ -1272,12 +1389,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <td>an existing GoogleApiClient.  Must be connected at the time of this call.</td>
         </tr>
         <tr>
-          <th>name</td>
-          <td>the name of the session to stop.</td>
-        </tr>
-        <tr>
           <th>identifier</td>
-          <td>the identifier of the session to stop.</td>
+          <td>the identifier of the session to stop.  If <code>null</code> is passed all
+     active sessions will be stopped.</td>
         </tr>
       </table>
   </div>
@@ -1323,7 +1437,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
-  <div class="jd-tagdata jd-tagdescr"><p>Unregisters for notifications of session start & end events using a PendingIntent.</p></div>
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>Unregisters from session start and end notifications using a <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">

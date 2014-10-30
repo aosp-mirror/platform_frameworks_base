@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -775,6 +821,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -907,7 +956,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#build()">build</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Finishes building and returns the request.</div>
+        <div class="jd-descrdiv">
+          Finishes building and returns the request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -925,7 +979,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setAccuracyMode(int)">setAccuracyMode</a></span>(int accuracyMode)</nobr>
 
-        <div class="jd-descrdiv">Sets the accuracy policy (mode) expected by the application.</div>
+        <div class="jd-descrdiv">
+          Sets the accuracy policy (mode) expected by the application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -943,7 +1002,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setDataSource(com.google.android.gms.fitness.data.DataSource)">setDataSource</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a> dataSource)</nobr>
 
-        <div class="jd-descrdiv">Sets the specific data source for this registration.</div>
+        <div class="jd-descrdiv">
+          Sets the specific data source for this registration.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -961,7 +1025,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setDataType(com.google.android.gms.fitness.data.DataType)">setDataType</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a> dataType)</nobr>
 
-        <div class="jd-descrdiv">Sets the data type for the request.</div>
+        <div class="jd-descrdiv">
+          Sets the data type for the request.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -979,7 +1048,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setFastestRate(int, java.util.concurrent.TimeUnit)">setFastestRate</a></span>(int fastestInterval, TimeUnit unit)</nobr>
 
-        <div class="jd-descrdiv">Sets the fastest interval between two consecutive data points, in the given unit.</div>
+        <div class="jd-descrdiv">
+          Sets the fastest interval between two consecutive data points, in the given unit.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -997,8 +1071,13 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setMaxDeliveryLatency(int, java.util.concurrent.TimeUnit)">setMaxDeliveryLatency</a></span>(int interval, TimeUnit unit)</nobr>
 
-        <div class="jd-descrdiv">Sets the maximum latency between a data point being detected and reported to the
- application.</div>
+        <div class="jd-descrdiv">
+          Sets the maximum latency between a data point being detected and reported to the
+ application.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1016,7 +1095,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setSamplingRate(long, java.util.concurrent.TimeUnit)">setSamplingRate</a></span>(long interval, TimeUnit unit)</nobr>
 
-        <div class="jd-descrdiv">Sets the desired interval between two consecutive data points, in the given unit.</div>
+        <div class="jd-descrdiv">
+          Sets the desired interval between two consecutive data points, in the given unit.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1034,7 +1118,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setTimeout(long, java.util.concurrent.TimeUnit)">setTimeout</a></span>(long timeout, TimeUnit timeUnit)</nobr>
 
-        <div class="jd-descrdiv">Sets the timeout for the registration for the sensor request to expire.</div>
+        <div class="jd-descrdiv">
+          Sets the timeout for the registration for the sensor request to expire.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1312,6 +1401,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1356,6 +1448,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Finishes building and returns the request.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
@@ -1396,10 +1491,13 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the accuracy policy (mode) expected by the application.  The Accuracy mode is passed
  along to the underlying data source.  Setting this value has a direct impact in battery
- usage: i.e. a high accuracy can improve the quality of the data collected at a higher
- battery consumption.
+ usage: i.e. a high accuracy can improve the quality of the data collected at the
+ expense of higher battery consumption.
  <p>
  The accuracy mode is a hint to the system.  If no accuracy is specified, or if the
  underlying data source does not support it, a balanced policy is used.
@@ -1446,6 +1544,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the specific data source for this registration.  Either this method or
  <code><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setDataType(com.google.android.gms.fitness.data.DataType)">setDataType(DataType)</a></code> must be called to specify the data source for each
  request.</p></div>
@@ -1454,7 +1555,7 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>dataSource</td>
-          <td>the data source from which we want to receive real time events
+          <td>the data source from which we want to receive live events
 </td>
         </tr>
       </table>
@@ -1487,6 +1588,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the data type for the request.  This can be used instead of
  <code><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html#setDataSource(com.google.android.gms.fitness.data.DataSource)">setDataSource(DataSource)</a></code> to use a default data source for the request, based
  on the data type and the available data sources.
@@ -1497,7 +1601,7 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>dataType</td>
-          <td>the data type for which we want to receive real time events
+          <td>the data type for which we want to receive live events
 </td>
         </tr>
       </table>
@@ -1530,13 +1634,16 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the fastest interval between two consecutive data points, in the given unit.
  The system will not deliver data points faster than this rate, even if they're
  passively available from other applications. Example:
  <pre>
      builder.setFastestRate(5, TimeUnit.SECONDS)
  </pre>
- If the sampling rate is unspecified, a default rate will be used.  The default rate is
+ If the fastest rate is unspecified, a default rate will be used.  The default rate is
  data type specific.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1581,10 +1688,14 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the maximum latency between a data point being detected and reported to the
  application.  The max delivery latency is passed along to the underlying data source and
  used to enable batching.  Batching can save battery by reducing the number of times the
- AP is awaken, and the number of network transfers for companion data sources.
+ Application Processor is awaken, and the number of network transfers for external data
+ sources.
  <p>
  The max latency is a hint to the system, and events can be received faster or slower
  than the specified interval.  If no interval is specified, or if the underlying data
@@ -1637,6 +1748,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the desired interval between two consecutive data points, in the given unit.  This
  is only a hint to the system.  Events may be received faster or slower than the specified
  rate (usually faster).  Example:
@@ -1688,9 +1802,12 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the timeout for the registration for the sensor request to expire. Registration
  for this sensor request will automatically expire after this time and app
- will stop getting real-time sensor updates.
+ will stop getting live sensor updates.
  <p>
  This timeout is intended to avoid situations where an app fails to unregister from a
  sensor request. If apps do not set a timeout value, a default timeout will be chosen

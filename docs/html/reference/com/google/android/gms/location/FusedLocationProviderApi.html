@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -822,16 +871,26 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#KEY_LOCATION_CHANGED">KEY_LOCATION_CHANGED</a></td>
-        <td class="jd-descrcol" width="100%">Key used for a Bundle extra holding a Location value when a location change is broadcast
- using a PendingIntent.</td>
+        <td class="jd-descrcol" width="100%">
+          Key used for a Bundle extra holding a Location value when a location change is broadcast
+ using a PendingIntent.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#KEY_MOCK_LOCATION">KEY_MOCK_LOCATION</a></td>
-        <td class="jd-descrcol" width="100%">Key used for the Bundle extra in Location object holding a boolean indicating whether
- the location was set using <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#setMockLocation(com.google.android.gms.common.api.GoogleApiClient, android.location.Location)">setMockLocation(GoogleApiClient, Location)</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Key used for the Bundle extra in Location object holding a boolean indicating whether
+ the location was set using <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#setMockLocation(com.google.android.gms.common.api.GoogleApiClient, android.location.Location)">setMockLocation(GoogleApiClient, Location)</a></code>.
+
+
+
+        </td>
     </tr>
 
 
@@ -871,7 +930,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#getLastLocation(com.google.android.gms.common.api.GoogleApiClient)">getLastLocation</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client)</nobr>
 
-        <div class="jd-descrdiv">Returns the best most recent location currently available.</div>
+        <div class="jd-descrdiv">
+          Returns the best most recent location currently available.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -889,7 +953,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#removeLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationListener)">removeLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Removes all location updates for the given location listener.</div>
+        <div class="jd-descrdiv">
+          Removes all location updates for the given location listener.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -907,7 +976,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#removeLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, android.app.PendingIntent)">removeLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, PendingIntent callbackIntent)</nobr>
 
-        <div class="jd-descrdiv">Removes all location updates for the given pending intent.</div>
+        <div class="jd-descrdiv">
+          Removes all location updates for the given pending intent.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -925,7 +999,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener, android.os.Looper)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener, Looper looper)</nobr>
 
-        <div class="jd-descrdiv">Requests location updates with a callback on the specified Looper thread.</div>
+        <div class="jd-descrdiv">
+          Requests location updates with a callback on the specified Looper thread.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -943,7 +1022,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Requests location updates.</div>
+        <div class="jd-descrdiv">
+          Requests location updates.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -961,7 +1045,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#requestLocationUpdates(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.location.LocationRequest, android.app.PendingIntent)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, PendingIntent callbackIntent)</nobr>
 
-        <div class="jd-descrdiv">Requests location updates with a callback on the specified PendingIntent.</div>
+        <div class="jd-descrdiv">
+          Requests location updates with a callback on the specified PendingIntent.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -979,7 +1068,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#setMockLocation(com.google.android.gms.common.api.GoogleApiClient, android.location.Location)">setMockLocation</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, Location mockLocation)</nobr>
 
-        <div class="jd-descrdiv">Sets the mock location to be used for the location provider.</div>
+        <div class="jd-descrdiv">
+          Sets the mock location to be used for the location provider.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -997,7 +1091,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#setMockMode(com.google.android.gms.common.api.GoogleApiClient, boolean)">setMockMode</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> client, boolean isMockMode)</nobr>
 
-        <div class="jd-descrdiv">Sets whether or not the location provider is in mock mode.</div>
+        <div class="jd-descrdiv">
+          Sets whether or not the location provider is in mock mode.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1057,6 +1156,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Key used for a Bundle extra holding a Location value when a location change is broadcast
  using a PendingIntent.
 </p></div>
@@ -1095,6 +1197,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Key used for the Bundle extra in Location object holding a boolean indicating whether
  the location was set using <code><a href="/reference/com/google/android/gms/location/FusedLocationProviderApi.html#setMockLocation(com.google.android.gms.common.api.GoogleApiClient, android.location.Location)">setMockLocation(GoogleApiClient, Location)</a></code>.  If the value is false this
@@ -1159,6 +1264,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the best most recent location currently available.
  <p>
  If a location is not available, which should happen very rarely, null will be returned. The
@@ -1204,6 +1312,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Removes all location updates for the given location listener.</p></div>
   <div class="jd-tagdata">
@@ -1255,6 +1366,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Removes all location updates for the given pending intent.
 
@@ -1308,6 +1422,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Requests location updates with a callback on the specified Looper thread.
  <p>
@@ -1380,6 +1497,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Requests location updates.
  <p>
  This method is suited for the foreground use cases, more specifically
@@ -1449,6 +1569,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Requests location updates with a callback on the specified PendingIntent.
  <p>
  This method is suited for the background use cases, more specifically
@@ -1514,6 +1637,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets the mock location to be used for the location provider.  This location will be used
  in place of any actual locations from the underlying providers (network or gps).
@@ -1583,6 +1709,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether or not the location provider is in mock mode.
 

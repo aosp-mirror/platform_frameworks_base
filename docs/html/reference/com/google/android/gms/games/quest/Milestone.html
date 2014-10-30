@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -788,6 +834,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -830,12 +879,22 @@ Summary:
       <div id="subclasses-indirect-summary"
               style="display: none;"
               >
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/MilestoneEntity.html">MilestoneEntity</a></td>
-              <td class="jd-descrcol" width="100%">Data object representing the data for a milestone.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/MilestoneEntity.html">MilestoneEntity</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data object representing the data for a milestone.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
       </div>
   </div>
 </td></tr></table>
@@ -894,28 +953,48 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_CLAIMED">STATE_CLAIMED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by server indicating the milestone was successfully claimed.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by server indicating the milestone was successfully claimed.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_COMPLETED_NOT_CLAIMED">STATE_COMPLETED_NOT_CLAIMED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by server indicating the milestone has not been claimed yet.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by server indicating the milestone has not been claimed yet.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_NOT_COMPLETED">STATE_NOT_COMPLETED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by server indicating the player has not completed the milestone.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by server indicating the player has not completed the milestone.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_NOT_STARTED">STATE_NOT_STARTED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by server when the milestone has not been started.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by server when the milestone has not been started.
+
+
+
+        </td>
     </tr>
 
 
@@ -952,14 +1031,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1003,7 +1092,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getCompletionRewardData()">getCompletionRewardData</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the completion reward data for this milestone.</div>
+        <div class="jd-descrdiv">
+          Retrieves the completion reward data for this milestone.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1021,8 +1115,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getCurrentProgress()">getCurrentProgress</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the current progress of <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getTargetProgress()">getTargetProgress()</a></code> required to complete the
- milestone.</div>
+        <div class="jd-descrdiv">
+          Retrieves the current progress of <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getTargetProgress()">getTargetProgress()</a></code> required to complete the
+ milestone.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1040,7 +1139,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getEventId()">getEventId</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieve the ID of the associated event.</div>
+        <div class="jd-descrdiv">
+          Retrieve the ID of the associated event.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1058,7 +1162,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getMilestoneId()">getMilestoneId</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the ID of this milestone.</div>
+        <div class="jd-descrdiv">
+          Retrieves the ID of this milestone.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1076,8 +1185,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getState()">getState</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the state of the milestone - one of <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_COMPLETED_NOT_CLAIMED">STATE_COMPLETED_NOT_CLAIMED</a></code>,
- <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_CLAIMED">STATE_CLAIMED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_NOT_COMPLETED">STATE_NOT_COMPLETED</a></code>, or <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_NOT_STARTED">STATE_NOT_STARTED</a></code>.</div>
+        <div class="jd-descrdiv">
+          Retrieves the state of the milestone - one of <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_COMPLETED_NOT_CLAIMED">STATE_COMPLETED_NOT_CLAIMED</a></code>,
+ <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_CLAIMED">STATE_CLAIMED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_NOT_COMPLETED">STATE_NOT_COMPLETED</a></code>, or <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_NOT_STARTED">STATE_NOT_STARTED</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1095,8 +1209,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getTargetProgress()">getTargetProgress</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the number of increments of the event associated with the milestone
- <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getEventId()">getEventId()</a></code> required to complete the milestone.</div>
+        <div class="jd-descrdiv">
+          Retrieves the number of increments of the event associated with the milestone
+ <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getEventId()">getEventId()</a></code> required to complete the milestone.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1206,7 +1325,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
+        <div class="jd-descrdiv">
+          Freeze a volatile representation into an immutable representation.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1224,7 +1348,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
+        <div class="jd-descrdiv">
+          Check to see if this object is valid for use.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1284,6 +1413,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by server indicating the milestone was successfully claimed.
 </p></div>
 
@@ -1322,6 +1454,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by server indicating the milestone has not been claimed yet.
 </p></div>
@@ -1362,6 +1497,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by server indicating the player has not completed the milestone.
 </p></div>
 
@@ -1400,6 +1538,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by server when the milestone has not been started.
 </p></div>
@@ -1463,6 +1604,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the completion reward data for this milestone.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1496,6 +1640,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the current progress of <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getTargetProgress()">getTargetProgress()</a></code> required to complete the
  milestone.
@@ -1541,6 +1688,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieve the ID of the associated event. Increments to this event will increase the user's
  progress toward this milestone when the milestone is in the <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_NOT_COMPLETED">STATE_NOT_COMPLETED</a></code>
  state.</p></div>
@@ -1577,6 +1727,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the ID of this milestone.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1610,6 +1763,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the state of the milestone - one of <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_COMPLETED_NOT_CLAIMED">STATE_COMPLETED_NOT_CLAIMED</a></code>,
  <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_CLAIMED">STATE_CLAIMED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_NOT_COMPLETED">STATE_NOT_COMPLETED</a></code>, or <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_NOT_STARTED">STATE_NOT_STARTED</a></code>.</p></div>
@@ -1645,6 +1801,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the number of increments of the event associated with the milestone
  <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#getEventId()">getEventId()</a></code> required to complete the milestone.</p></div>

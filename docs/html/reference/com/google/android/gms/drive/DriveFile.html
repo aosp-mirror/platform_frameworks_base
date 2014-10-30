@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -777,6 +823,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -849,7 +898,12 @@ Summary:
         
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.DownloadProgressListener.html">DriveFile.DownloadProgressListener</a></td>
-      <td class="jd-descrcol" width="100%">A listener that listens for progress events on an active contents download.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        A listener that listens for progress events on an active contents download.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -874,21 +928,36 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_READ_ONLY">MODE_READ_ONLY</a></td>
-        <td class="jd-descrcol" width="100%">A mode that opens the contents only for reading.</td>
+        <td class="jd-descrcol" width="100%">
+          A mode that opens the contents only for reading.
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_READ_WRITE">MODE_READ_WRITE</a></td>
-        <td class="jd-descrcol" width="100%">A mode that opens the contents for reading and writing.</td>
+        <td class="jd-descrcol" width="100%">
+          A mode that opens the contents for reading and writing.
+
+
+
+        </td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_WRITE_ONLY">MODE_WRITE_ONLY</a></td>
-        <td class="jd-descrcol" width="100%">A mode that opens the contents only for writing.</td>
+        <td class="jd-descrcol" width="100%">
+          A mode that opens the contents only for writing.
+
+
+
+        </td>
     </tr>
     
     
@@ -928,10 +997,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFile.html#commitAndCloseContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents, com.google.android.gms.drive.MetadataChangeSet)">commitAndCloseContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</nobr>
 
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     Use <code><a href="/reference/com/google/android/gms/drive/DriveContents.html#commit(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">commit(GoogleApiClient, MetadataChangeSet)</a></code> instead.
-</em></div>
+</em>
+
+
+
+        </div>
 
   </td></tr>
 
@@ -949,10 +1023,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFile.html#commitAndCloseContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">commitAndCloseContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     Use <code><a href="/reference/com/google/android/gms/drive/DriveContents.html#commit(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">commit(GoogleApiClient, MetadataChangeSet)</a></code> instead.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -970,10 +1049,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFile.html#discardContents(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.Contents)">discardContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a> contents)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     Use <code><a href="/reference/com/google/android/gms/drive/DriveContents.html#discard(com.google.android.gms.common.api.GoogleApiClient)">discard(GoogleApiClient)</a></code> instead.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -991,7 +1075,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFile.html#open(com.google.android.gms.common.api.GoogleApiClient, int, com.google.android.gms.drive.DriveFile.DownloadProgressListener)">open</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int mode, <a href="/reference/com/google/android/gms/drive/DriveFile.DownloadProgressListener.html">DriveFile.DownloadProgressListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Opens the <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> that are associated with this file for read and/or write.</div>
+        <div class="jd-descrdiv">
+          Opens the <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> that are associated with this file for read and/or write.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1009,10 +1098,15 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveFile.html#openContents(com.google.android.gms.common.api.GoogleApiClient, int, com.google.android.gms.drive.DriveFile.DownloadProgressListener)">openContents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int mode, <a href="/reference/com/google/android/gms/drive/DriveFile.DownloadProgressListener.html">DriveFile.DownloadProgressListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     Use <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#open(com.google.android.gms.common.api.GoogleApiClient, int, com.google.android.gms.drive.DriveFile.DownloadProgressListener)">open(GoogleApiClient, int, DownloadProgressListener)</a></code> instead.
-</em></div>
+</em>
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1064,7 +1158,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">addChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/ChangeListener.html">ChangeListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Adds a new listener for changes on this resource.</div>
+        <div class="jd-descrdiv">
+          Adds a new listener for changes on this resource.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1082,10 +1181,15 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.DriveEvent.Listener<com.google.android.gms.drive.events.ChangeEvent>)">addChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/DriveEvent.Listener.html">Listener</a>&lt;<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a>&gt; listener)</nobr>
 
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     Use <code><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">addChangeListener(GoogleApiClient, ChangeListener)</a></code>
-</em></div>
+</em>
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1103,8 +1207,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeSubscription(com.google.android.gms.common.api.GoogleApiClient)">addChangeSubscription</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
 
-        <div class="jd-descrdiv">Adds a change subscription for this resource that will deliver events to the application
- event service.</div>
+        <div class="jd-descrdiv">
+          Adds a change subscription for this resource that will deliver events to the application
+ event service.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1122,7 +1231,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#getDriveId()">getDriveId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the DriveId that uniquely identifies this resource.</div>
+        <div class="jd-descrdiv">
+          Returns the DriveId that uniquely identifies this resource.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1140,7 +1254,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#getMetadata(com.google.android.gms.common.api.GoogleApiClient)">getMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
         
-        <div class="jd-descrdiv">Retrieves the Metadata associated with this resource.</div>
+        <div class="jd-descrdiv">
+          Retrieves the Metadata associated with this resource.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1158,8 +1277,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#listParents(com.google.android.gms.common.api.GoogleApiClient)">listParents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
 
-        <div class="jd-descrdiv">Retrieves a collection of metadata for all of the parents of this resource that the calling
- app has been authorized to view.</div>
+        <div class="jd-descrdiv">
+          Retrieves a collection of metadata for all of the parents of this resource that the calling
+ app has been authorized to view.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1177,10 +1301,15 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#removeChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.DriveEvent.Listener<com.google.android.gms.drive.events.ChangeEvent>)">removeChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/DriveEvent.Listener.html">Listener</a>&lt;<a href="/reference/com/google/android/gms/drive/events/ChangeEvent.html">ChangeEvent</a>&gt; listener)</nobr>
 
-        <div class="jd-descrdiv"><em>
+        <div class="jd-descrdiv">
+          <em>
       This method is deprecated.
     Use <code><a href="/reference/com/google/android/gms/drive/DriveResource.html#removeChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">removeChangeListener(GoogleApiClient, ChangeListener)</a></code>
-</em></div>
+</em>
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1198,8 +1327,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#removeChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">removeChangeListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/events/ChangeListener.html">ChangeListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Removes a listener for changes on this resource that was previously added by
- <code><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">addChangeListener(GoogleApiClient, ChangeListener)</a></code>.</div>
+        <div class="jd-descrdiv">
+          Removes a listener for changes on this resource that was previously added by
+ <code><a href="/reference/com/google/android/gms/drive/DriveResource.html#addChangeListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.events.ChangeListener)">addChangeListener(GoogleApiClient, ChangeListener)</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1217,7 +1351,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#removeChangeSubscription(com.google.android.gms.common.api.GoogleApiClient)">removeChangeSubscription</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
 
-        <div class="jd-descrdiv">Removes any existing change subscription for this resource.</div>
+        <div class="jd-descrdiv">
+          Removes any existing change subscription for this resource.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1235,7 +1374,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#setParents(com.google.android.gms.common.api.GoogleApiClient, java.util.Set<com.google.android.gms.drive.DriveId>)">setParents</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, Set&lt;<a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a>&gt; parentIds)</nobr>
 
-        <div class="jd-descrdiv">Sets the parents of this resource.</div>
+        <div class="jd-descrdiv">
+          Sets the parents of this resource.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1253,8 +1397,13 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/DriveResource.html#updateMetadata(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.MetadataChangeSet)">updateMetadata</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a> changeSet)</nobr>
         
-        <div class="jd-descrdiv">Updates the Metadata that is associated with this resource with the changes described
- in the <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></code>.</div>
+        <div class="jd-descrdiv">
+          Updates the Metadata that is associated with this resource with the changes described
+ in the <code><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html">MetadataChangeSet</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1314,6 +1463,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A mode that opens the contents only for reading.
 </p></div>
 
@@ -1353,6 +1505,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A mode that opens the contents for reading and writing.
 </p></div>
 
@@ -1392,6 +1547,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>A mode that opens the contents only for writing.
 </p></div>
 
@@ -1453,6 +1611,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -1487,6 +1648,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -1521,6 +1685,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>
@@ -1556,6 +1723,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Opens the <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> that are associated with this file for read and/or write.
  The returned file is a temporary copy available only to this app. The contents are returned
  when they are available on the device in their entirety. To listen for progress, provide a
@@ -1623,6 +1793,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
       <p>
   <p class="caution"><strong>
       This method is deprecated.</strong><br/>

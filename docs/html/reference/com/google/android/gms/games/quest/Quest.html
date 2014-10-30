@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -791,6 +837,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -833,12 +882,22 @@ Summary:
       <div id="subclasses-indirect-summary"
               style="display: none;"
               >
+
   <table class="jd-sumtable-expando">
-        <tr class="alt-color api apilevel-" >
-              <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/QuestEntity.html">QuestEntity</a></td>
-              <td class="jd-descrcol" width="100%">Data object representing the data for a quest.&nbsp;</td>
-          </tr>
+
+      <tr class="alt-color api apilevel-" >
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/QuestEntity.html">QuestEntity</a></td>
+        <td class="jd-descrcol" width="100%">
+          Data object representing the data for a quest.&nbsp;
+
+
+
+        </td>
+      </tr>
+
+
   </table>
+
       </div>
   </div>
 </td></tr></table>
@@ -897,52 +956,87 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the player has accepted the quest.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the player has accepted the quest.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the player has completed the quest.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the player has completed the quest.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_EXPIRED">STATE_EXPIRED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the quest is over and this player
- never accepted the quest.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the quest is over and this player
+ never accepted the quest.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the quest is over and this player
- did not complete the quest.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the quest is over and this player
+ did not complete the quest.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_OPEN">STATE_OPEN</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating players can now accept this quest.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating players can now accept this quest.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_UPCOMING">STATE_UPCOMING</a></td>
-        <td class="jd-descrcol" width="100%">Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the quest happens in the future,
- so it is visible to the UI, but players can't accept it yet.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the quest happens in the future,
+ so it is visible to the UI, but players can't accept it yet.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">long</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quest.html#UNSET_QUEST_TIMESTAMP">UNSET_QUEST_TIMESTAMP</a></td>
-        <td class="jd-descrcol" width="100%">The default value for Quest related timestamps when they aren't set by the server.</td>
+        <td class="jd-descrcol" width="100%">
+          The default value for Quest related timestamps when they aren't set by the server.
+
+
+
+        </td>
     </tr>
 
 
@@ -979,14 +1073,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -1015,7 +1119,12 @@ android.os.Parcelable
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quest.html#QUEST_STATE_ALL">QUEST_STATE_ALL</a></td>
-          <td class="jd-descrcol" width="100%">Array of all the valid state constants.</td>
+          <td class="jd-descrcol" width="100%">
+            Array of all the valid state constants.
+
+
+
+          </td>
       </tr>
 
 
@@ -1026,7 +1135,12 @@ android.os.Parcelable
           final
           String[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quest.html#QUEST_STATE_NON_TERMINAL">QUEST_STATE_NON_TERMINAL</a></td>
-          <td class="jd-descrcol" width="100%"></td>
+          <td class="jd-descrcol" width="100%">
+
+
+
+
+          </td>
       </tr>
 
 
@@ -1061,8 +1175,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getAcceptedTimestamp()">getAcceptedTimestamp</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the timestamp (in milliseconds since epoch) at which this quest was accepted
- by the player.</div>
+        <div class="jd-descrdiv">
+          Retrieves the timestamp (in milliseconds since epoch) at which this quest was accepted
+ by the player.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1080,7 +1199,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getBannerImageUri()">getBannerImageUri</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves a URI that can be used to load the quest's banner image.</div>
+        <div class="jd-descrdiv">
+          Retrieves a URI that can be used to load the quest's banner image.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1098,7 +1222,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getCurrentMilestone()">getCurrentMilestone</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the latest milestone information associated with this quest.</div>
+        <div class="jd-descrdiv">
+          Retrieves the latest milestone information associated with this quest.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1116,7 +1245,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getDescription()">getDescription</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the description for this quest.</div>
+        <div class="jd-descrdiv">
+          Retrieves the description for this quest.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1134,7 +1268,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(CharArrayBuffer dataOut)</nobr>
 
-        <div class="jd-descrdiv">Loads the quest description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
+        <div class="jd-descrdiv">
+          Loads the quest description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1152,8 +1291,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getEndTimestamp()">getEndTimestamp</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Timestamp at which this quest will change to STATE_EXPIRED if not accepted,
- or change to STATE_FAILED if accepted but not completed.</div>
+        <div class="jd-descrdiv">
+          Timestamp at which this quest will change to STATE_EXPIRED if not accepted,
+ or change to STATE_FAILED if accepted but not completed.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1171,7 +1315,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getGame()">getGame</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the game metadata associated with this quest.</div>
+        <div class="jd-descrdiv">
+          Retrieves the game metadata associated with this quest.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1189,7 +1338,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getIconImageUri()">getIconImageUri</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves a URI that can be used to load the quest's icon image.</div>
+        <div class="jd-descrdiv">
+          Retrieves a URI that can be used to load the quest's icon image.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1207,8 +1361,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getLastUpdatedTimestamp()">getLastUpdatedTimestamp</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the timestamp (in milliseconds since epoch) at which this quest was last
- updated.</div>
+        <div class="jd-descrdiv">
+          Retrieves the timestamp (in milliseconds since epoch) at which this quest was last
+ updated.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1226,7 +1385,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getName(android.database.CharArrayBuffer)">getName</a></span>(CharArrayBuffer dataOut)</nobr>
 
-        <div class="jd-descrdiv">Loads the quest name into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</div>
+        <div class="jd-descrdiv">
+          Loads the quest name into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1244,7 +1408,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getName()">getName</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the name of this quest.</div>
+        <div class="jd-descrdiv">
+          Retrieves the name of this quest.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1262,7 +1431,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getQuestId()">getQuestId</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the ID of this quest.</div>
+        <div class="jd-descrdiv">
+          Retrieves the ID of this quest.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1280,8 +1454,13 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getStartTimestamp()">getStartTimestamp</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the timestamp (in milliseconds since epoch) at which this quest will be available
- for players to accept.</div>
+        <div class="jd-descrdiv">
+          Retrieves the timestamp (in milliseconds since epoch) at which this quest will be available
+ for players to accept.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1299,9 +1478,14 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Retrieves the state of the quest - one of <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_UPCOMING">STATE_UPCOMING</a></code>,
+        <div class="jd-descrdiv">
+          Retrieves the state of the quest - one of <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_UPCOMING">STATE_UPCOMING</a></code>,
  <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_OPEN">STATE_OPEN</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_EXPIRED">STATE_EXPIRED</a></code>,
- <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code>.</div>
+ <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1319,7 +1503,12 @@ android.os.Parcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quest.html#isEndingSoon()">isEndingSoon</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Indicates whether the quest will be expiring soon</div>
+        <div class="jd-descrdiv">
+          Indicates whether the quest will be expiring soon
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1429,7 +1618,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
+        <div class="jd-descrdiv">
+          Freeze a volatile representation into an immutable representation.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1447,7 +1641,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
+        <div class="jd-descrdiv">
+          Check to see if this object is valid for use.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1507,6 +1706,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the player has accepted the quest.
 </p></div>
 
@@ -1546,6 +1748,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the player has completed the quest.
 </p></div>
 
@@ -1584,6 +1789,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the quest is over and this player
  never accepted the quest.
@@ -1625,6 +1833,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the quest is over and this player
  did not complete the quest.
 </p></div>
@@ -1665,6 +1876,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating players can now accept this quest.
 </p></div>
 
@@ -1703,6 +1917,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned by <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getState()">getState()</a></code> indicating the quest happens in the future,
  so it is visible to the UI, but players can't accept it yet.
@@ -1743,6 +1960,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>The default value for Quest related timestamps when they aren't set by the server.
 </p></div>
@@ -1793,6 +2013,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Array of all the valid state constants.
 </p></div>
 
@@ -1821,6 +2044,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
@@ -1870,6 +2096,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the timestamp (in milliseconds since epoch) at which this quest was accepted
  by the player. If the quest has never been accepted, this will return
  <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#UNSET_QUEST_TIMESTAMP">UNSET_QUEST_TIMESTAMP</a></code>. If you are looking for the time that a quest is available
@@ -1907,6 +2136,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a URI that can be used to load the quest's banner image. Returns null
  if the quest has no banner image.
@@ -1947,6 +2179,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the latest milestone information associated with this quest.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1981,6 +2216,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the description for this quest.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2014,6 +2252,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Loads the quest description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2054,6 +2295,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Timestamp at which this quest will change to STATE_EXPIRED if not accepted,
  or change to STATE_FAILED if accepted but not completed.</p></div>
   <div class="jd-tagdata">
@@ -2089,6 +2333,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the game metadata associated with this quest.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2122,6 +2369,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves a URI that can be used to load the quest's icon image. Returns null
  if the quest has no icon image.
@@ -2162,6 +2412,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the timestamp (in milliseconds since epoch) at which this quest was last
  updated. If the quest has never been updated, this will return
  <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#UNSET_QUEST_TIMESTAMP">UNSET_QUEST_TIMESTAMP</a></code>.</p></div>
@@ -2197,6 +2450,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Loads the quest name into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2237,6 +2493,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the name of this quest.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2271,6 +2530,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the ID of this quest.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2304,6 +2566,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the timestamp (in milliseconds since epoch) at which this quest will be available
  for players to accept. If you are looking for the time that a quest was accepted by the
@@ -2341,6 +2606,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the state of the quest - one of <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_UPCOMING">STATE_UPCOMING</a></code>,
  <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_OPEN">STATE_OPEN</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_EXPIRED">STATE_EXPIRED</a></code>,
  <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code>, <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code>.</p></div>
@@ -2376,6 +2644,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the quest will be expiring soon</p></div>
   <div class="jd-tagdata">

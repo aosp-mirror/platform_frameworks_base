@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -791,6 +837,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -884,110 +933,209 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#AGGREGATION_NOT_SUPPORTED">AGGREGATION_NOT_SUPPORTED</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that a read request specified an un-supported data type as input for
- aggregation.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that a read request specified an un-supported data type as input for
+ aggregation.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#API_EXCEPTION">API_EXCEPTION</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that an API call to Google backend failed,
- due to possible network issues.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that an API call to Google backend failed,
+ due to possible network issues.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#APP_MISMATCH">APP_MISMATCH</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that the app tried to insert data form the wrong app.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that the app tried to insert data form the wrong app.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#APP_NOT_FIT_ENABLED">APP_NOT_FIT_ENABLED</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that an app was not found in the list of connected apps in Google Fit.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that an app was not found in the list of connected apps in Google Fit.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#CONFLICTING_DATA_TYPE">CONFLICTING_DATA_TYPE</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that the app attempted to insert a conflicting DataType, i.e.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that the app attempted to insert a conflicting DataType, i.e.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#DATA_TYPE_NOT_FOUND">DATA_TYPE_NOT_FOUND</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that the requested data type was not found.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that the requested data type was not found.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#DISABLED_BLUETOOTH">DISABLED_BLUETOOTH</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that Bluetooth is currently disabled.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that Bluetooth is currently disabled.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#EQUIVALENT_SESSION_ENDED">EQUIVALENT_SESSION_ENDED</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that a session could not be started because an equivalent session has
- already ended.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that a session could not be started because an equivalent session has
+ already ended.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#INCONSISTENT_DATA_TYPE">INCONSISTENT_DATA_TYPE</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that the app attempted to insert a DataType whose name does not match
- the app's package name.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that the app attempted to insert a DataType whose name does not match
+ the app's package name.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#MISSING_BLE_PERMISSION">MISSING_BLE_PERMISSION</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that the app is missing the required Bluetooth permissions in its
- manifest.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that the app is missing the required Bluetooth permissions in its
+ manifest.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#NEEDS_OAUTH_PERMISSIONS">NEEDS_OAUTH_PERMISSIONS</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that the request is missing desired OAuth permissions.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that the request is missing desired OAuth permissions.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#SUCCESS_ALREADY_SUBSCRIBED">SUCCESS_ALREADY_SUBSCRIBED</a></td>
+        <td class="jd-descrcol" width="100%">
+          The subscribe request succeeded, but the subscription already existed, so it was a no-op.
+
+
+
+        </td>
+    </tr>
+
+
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#SUCCESS_NO_DATA_SOURCES">SUCCESS_NO_DATA_SOURCES</a></td>
+        <td class="jd-descrcol" width="100%">
+          The subscribe request succeeded, but no data sources are currently available that match it.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#TRANSIENT_ERROR">TRANSIENT_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that there was a transient error accessing Google Fit services.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that there was a transient error accessing Google Fit services.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#UNKNOWN_AUTH_ERROR">UNKNOWN_AUTH_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that an unknown error occurred while trying to obtain an OAuth token.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that an unknown error occurred while trying to obtain an OAuth token.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#UNSUPPORTED_ACCOUNT">UNSUPPORTED_ACCOUNT</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that the account is not supported.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that the account is not supported.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html#UNSUPPORTED_PLATFORM">UNSUPPORTED_PLATFORM</a></td>
-        <td class="jd-descrcol" width="100%">Status code denotes that the operation is not supported by Google Fit.</td>
+        <td class="jd-descrcol" width="100%">
+          Status code denotes that the operation is not supported by Google Fit.
+
+
+
+        </td>
     </tr>
 
 
@@ -1024,119 +1172,204 @@ Summary:
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#CANCELED">CANCELED</a></td>
-        <td class="jd-descrcol" width="100%">The result was canceled either due to client disconnect or <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          The result was canceled either due to client disconnect or <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#DEVELOPER_ERROR">DEVELOPER_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">The application is misconfigured.</td>
+        <td class="jd-descrcol" width="100%">
+          The application is misconfigured.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#ERROR">ERROR</a></td>
-        <td class="jd-descrcol" width="100%">The operation failed with no more detailed information.</td>
+        <td class="jd-descrcol" width="100%">
+          The operation failed with no more detailed information.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INTERNAL_ERROR">INTERNAL_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">An internal error occurred.</td>
+        <td class="jd-descrcol" width="100%">
+          An internal error occurred.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INTERRUPTED">INTERRUPTED</a></td>
-        <td class="jd-descrcol" width="100%">A blocking call was interrupted while waiting and did not run to completion.</td>
+        <td class="jd-descrcol" width="100%">
+          A blocking call was interrupted while waiting and did not run to completion.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INVALID_ACCOUNT">INVALID_ACCOUNT</a></td>
-        <td class="jd-descrcol" width="100%">The client attempted to connect to the service with an invalid account name specified.</td>
+        <td class="jd-descrcol" width="100%">
+          The client attempted to connect to the service with an invalid account name specified.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#LICENSE_CHECK_FAILED">LICENSE_CHECK_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">The application is not licensed to the user.</td>
+        <td class="jd-descrcol" width="100%">
+          The application is not licensed to the user.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#NETWORK_ERROR">NETWORK_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">A network error occurred.</td>
+        <td class="jd-descrcol" width="100%">
+          A network error occurred.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#RESOLUTION_REQUIRED">RESOLUTION_REQUIRED</a></td>
-        <td class="jd-descrcol" width="100%">Completing the connection requires some form of resolution.</td>
+        <td class="jd-descrcol" width="100%">
+          Completing the connection requires some form of resolution.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SERVICE_DISABLED">SERVICE_DISABLED</a></td>
-        <td class="jd-descrcol" width="100%">The installed version of Google Play services has been disabled on this device.</td>
+        <td class="jd-descrcol" width="100%">
+          The installed version of Google Play services has been disabled on this device.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SERVICE_INVALID">SERVICE_INVALID</a></td>
-        <td class="jd-descrcol" width="100%">The version of the Google Play services installed on this device is not authentic.</td>
+        <td class="jd-descrcol" width="100%">
+          The version of the Google Play services installed on this device is not authentic.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SERVICE_MISSING">SERVICE_MISSING</a></td>
-        <td class="jd-descrcol" width="100%">Google Play services is missing on this device.</td>
+        <td class="jd-descrcol" width="100%">
+          Google Play services is missing on this device.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SERVICE_VERSION_UPDATE_REQUIRED">SERVICE_VERSION_UPDATE_REQUIRED</a></td>
-        <td class="jd-descrcol" width="100%">The installed version of Google Play services is out of date.</td>
+        <td class="jd-descrcol" width="100%">
+          The installed version of Google Play services is out of date.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SIGN_IN_REQUIRED">SIGN_IN_REQUIRED</a></td>
-        <td class="jd-descrcol" width="100%">The client attempted to connect to the service but the user is not signed in.</td>
+        <td class="jd-descrcol" width="100%">
+          The client attempted to connect to the service but the user is not signed in.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SUCCESS">SUCCESS</a></td>
-        <td class="jd-descrcol" width="100%">The operation was successful.</td>
+        <td class="jd-descrcol" width="100%">
+          The operation was successful.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SUCCESS_CACHE">SUCCESS_CACHE</a></td>
-        <td class="jd-descrcol" width="100%">The operation was successful, but was used the device's cache.</td>
+        <td class="jd-descrcol" width="100%">
+          The operation was successful, but was used the device's cache.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#TIMEOUT">TIMEOUT</a></td>
-        <td class="jd-descrcol" width="100%">Timed out while awaiting the result.</td>
+        <td class="jd-descrcol" width="100%">
+          Timed out while awaiting the result.
+
+
+
+        </td>
     </tr>
 
 
@@ -1490,6 +1723,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that a read request specified an un-supported data type as input for
  aggregation.
 </p></div>
@@ -1529,6 +1765,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that an API call to Google backend failed,
  due to possible network issues.
@@ -1570,6 +1809,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that the app tried to insert data form the wrong app.
 </p></div>
 
@@ -1608,6 +1850,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that an app was not found in the list of connected apps in Google Fit.
  Signifies that either access to the app was already revoked, or the app is not registered
@@ -1650,6 +1895,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that the app attempted to insert a conflicting DataType, i.e. there is an
  existing DataType with the same name and different fields.
 </p></div>
@@ -1690,6 +1938,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that the requested data type was not found.
 </p></div>
 
@@ -1729,6 +1980,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that Bluetooth is currently disabled.
 </p></div>
 
@@ -1767,6 +2021,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that a session could not be started because an equivalent session has
  already ended.
@@ -1808,6 +2065,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that the app attempted to insert a DataType whose name does not match
  the app's package name.
 </p></div>
@@ -1847,6 +2107,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that the app is missing the required Bluetooth permissions in its
  manifest.
@@ -1888,6 +2151,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that the request is missing desired OAuth permissions.
  <p>
  If an app does not have the required OAuth access for a specific API request,
@@ -1927,6 +2193,91 @@ From class
 
 
 
+<A NAME="SUCCESS_ALREADY_SUBSCRIBED"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        SUCCESS_ALREADY_SUBSCRIBED
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The subscribe request succeeded, but the subscription already existed, so it was a no-op.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                -5001
+                (0xffffec77)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="SUCCESS_NO_DATA_SOURCES"></A>
+
+<div class="jd-details api apilevel-">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+        final
+        int
+      </span>
+        SUCCESS_NO_DATA_SOURCES
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+
+
+
+  <div class="jd-tagdata jd-tagdescr"><p>The subscribe request succeeded, but no data sources are currently available that match it.
+ Recording of data will start when data sources become available.
+</p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                -5000
+                (0xffffec78)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
 <A NAME="TRANSIENT_ERROR"></A>
 
 <div class="jd-details api apilevel-">
@@ -1946,6 +2297,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that there was a transient error accessing Google Fit services.
  Clients may retry.
@@ -1987,6 +2341,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that an unknown error occurred while trying to obtain an OAuth token.
 </p></div>
 
@@ -2026,6 +2383,9 @@ From class
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that the account is not supported.
 </p></div>
 
@@ -2064,6 +2424,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Status code denotes that the operation is not supported by Google Fit.
 </p></div>
@@ -2118,6 +2481,9 @@ From class
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 

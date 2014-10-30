@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -738,6 +784,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -808,7 +857,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.AcceptQuestResult.html">Quests.AcceptQuestResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when accepting a quest.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when accepting a quest.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -820,7 +874,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.ClaimMilestoneResult.html">Quests.ClaimMilestoneResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when claiming a milestone.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when claiming a milestone.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -832,7 +891,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.LoadQuestsResult.html">Quests.LoadQuestsResult</a></td>
-      <td class="jd-descrcol" width="100%">Result delivered when quest data has been loaded.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        Result delivered when quest data has been loaded.&nbsp;
+
+
+
+      </td>
     </tr>
 
 
@@ -857,95 +921,155 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#EXTRA_QUEST">EXTRA_QUEST</a></td>
-        <td class="jd-descrcol" width="100%">Intent extra used to pass a <code><a href="/reference/com/google/android/gms/games/quest/Quest.html">Quest</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Intent extra used to pass a <code><a href="/reference/com/google/android/gms/games/quest/Quest.html">Quest</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ACCEPTED">SELECT_ACCEPTED</a></td>
-        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code> state to the QuestBuffer
- returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code> state to the QuestBuffer
+ returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_COMPLETED">SELECT_COMPLETED</a></td>
-        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code> state to the QuestBuffer
- returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code> state to the QuestBuffer
+ returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_COMPLETED_UNCLAIMED">SELECT_COMPLETED_UNCLAIMED</a></td>
-        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code> state that have at least
+        <td class="jd-descrcol" width="100%">
+          Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code> state that have at least
  one milestone in the <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_COMPLETED_NOT_CLAIMED">STATE_COMPLETED_NOT_CLAIMED</a></code> state to the QuestBuffer
- returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.</td>
+ returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ENDING_SOON">SELECT_ENDING_SOON</a></td>
-        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code> state that have been marked
+        <td class="jd-descrcol" width="100%">
+          Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code> state that have been marked
  as ending soon <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#isEndingSoon()">isEndingSoon()</a></code> returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and
- <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.</td>
+ <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_EXPIRED">SELECT_EXPIRED</a></td>
-        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_EXPIRED">STATE_EXPIRED</a></code> state to the QuestBuffer
- returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_EXPIRED">STATE_EXPIRED</a></code> state to the QuestBuffer
+ returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_FAILED">SELECT_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code> state to the QuestBuffer
- returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code> state to the QuestBuffer
+ returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_OPEN">SELECT_OPEN</a></td>
-        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_OPEN">STATE_OPEN</a></code> state to the QuestBuffer returned
- by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_OPEN">STATE_OPEN</a></code> state to the QuestBuffer returned
+ by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_RECENTLY_FAILED">SELECT_RECENTLY_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code> state with a
- <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getLastUpdatedTimestamp()">getLastUpdatedTimestamp()</a></code> no older than 7 days ago.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code> state with a
+ <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getLastUpdatedTimestamp()">getLastUpdatedTimestamp()</a></code> no older than 7 days ago.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_UPCOMING">SELECT_UPCOMING</a></td>
-        <td class="jd-descrcol" width="100%">Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_UPCOMING">STATE_UPCOMING</a></code> state to the QuestBuffer
- returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.</td>
+        <td class="jd-descrcol" width="100%">
+          Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_UPCOMING">STATE_UPCOMING</a></code> state to the QuestBuffer
+ returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
+
+
+
+        </td>
     </tr>
 
 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SORT_ORDER_ENDING_SOON_FIRST">SORT_ORDER_ENDING_SOON_FIRST</a></td>
-        <td class="jd-descrcol" width="100%">Sort requests with the quests ending soon first.</td>
+        <td class="jd-descrcol" width="100%">
+          Sort requests with the quests ending soon first.
+
+
+
+        </td>
     </tr>
 
 
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SORT_ORDER_RECENTLY_UPDATED_FIRST">SORT_ORDER_RECENTLY_UPDATED_FIRST</a></td>
-        <td class="jd-descrcol" width="100%">Sort requests with the recently updated quests first.</td>
+        <td class="jd-descrcol" width="100%">
+          Sort requests with the recently updated quests first.
+
+
+
+        </td>
     </tr>
 
 
@@ -970,7 +1094,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           final
           int[]</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/quest/Quests.html#SELECT_ALL_QUESTS">SELECT_ALL_QUESTS</a></td>
-          <td class="jd-descrcol" width="100%">Array of all the valid state selector constants.</td>
+          <td class="jd-descrcol" width="100%">
+            Array of all the valid state selector constants.
+
+
+
+          </td>
       </tr>
 
 
@@ -1005,7 +1134,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#accept(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">accept</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String questId)</nobr>
 
-        <div class="jd-descrdiv">Asynchronously accept the quest.</div>
+        <div class="jd-descrdiv">
+          Asynchronously accept the quest.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1023,7 +1157,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#claim(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, java.lang.String)">claim</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String questId, String milestoneId)</nobr>
 
-        <div class="jd-descrdiv">Asynchronously claim the milestone.</div>
+        <div class="jd-descrdiv">
+          Asynchronously claim the milestone.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1041,7 +1180,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestIntent(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">getQuestIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String questId)</nobr>
 
-        <div class="jd-descrdiv">Get an intent to view a single quest.</div>
+        <div class="jd-descrdiv">
+          Get an intent to view a single quest.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1059,7 +1203,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int[] questSelectors)</nobr>
 
-        <div class="jd-descrdiv">Get an intent to view a list of quests.</div>
+        <div class="jd-descrdiv">
+          Get an intent to view a list of quests.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1077,8 +1226,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int[] questSelectors, int sortOrder, boolean forceReload)</nobr>
 
-        <div class="jd-descrdiv">Asynchronously load the quest data for the currently signed-in player and game into
- a single result, including only quests in the provided state array.</div>
+        <div class="jd-descrdiv">
+          Asynchronously load the quest data for the currently signed-in player and game into
+ a single result, including only quests in the provided state array.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1096,7 +1250,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#loadByIds(com.google.android.gms.common.api.GoogleApiClient, boolean, java.lang.String...)">loadByIds</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, boolean forceReload, String... questIds)</nobr>
 
-        <div class="jd-descrdiv">Asynchronously load single quest data for the currently signed-in player and game.</div>
+        <div class="jd-descrdiv">
+          Asynchronously load single quest data for the currently signed-in player and game.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1114,7 +1273,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#registerQuestUpdateListener(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.games.quest.QuestUpdateListener)">registerQuestUpdateListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, <a href="/reference/com/google/android/gms/games/quest/QuestUpdateListener.html">QuestUpdateListener</a> listener)</nobr>
 
-        <div class="jd-descrdiv">Register a listener to listen for updates on <code><a href="/reference/com/google/android/gms/games/quest/Quest.html">Quest</a></code> instances.</div>
+        <div class="jd-descrdiv">
+          Register a listener to listen for updates on <code><a href="/reference/com/google/android/gms/games/quest/Quest.html">Quest</a></code> instances.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1132,7 +1296,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#showStateChangedPopup(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">showStateChangedPopup</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String questId)</nobr>
 
-        <div class="jd-descrdiv">Show the default popup for certain quest states.</div>
+        <div class="jd-descrdiv">
+          Show the default popup for certain quest states.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1150,7 +1319,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/quest/Quests.html#unregisterQuestUpdateListener(com.google.android.gms.common.api.GoogleApiClient)">unregisterQuestUpdateListener</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient)</nobr>
 
-        <div class="jd-descrdiv">Unregisters this client's quest update listener, if any.</div>
+        <div class="jd-descrdiv">
+          Unregisters this client's quest update listener, if any.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1210,6 +1384,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Intent extra used to pass a <code><a href="/reference/com/google/android/gms/games/quest/Quest.html">Quest</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
@@ -1252,6 +1429,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code> state to the QuestBuffer
  returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
 </p></div>
@@ -1292,6 +1472,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code> state to the QuestBuffer
  returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
 </p></div>
@@ -1331,6 +1514,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_COMPLETED">STATE_COMPLETED</a></code> state that have at least
  one milestone in the <code><a href="/reference/com/google/android/gms/games/quest/Milestone.html#STATE_COMPLETED_NOT_CLAIMED">STATE_COMPLETED_NOT_CLAIMED</a></code> state to the QuestBuffer
@@ -1375,6 +1561,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code> state that have been marked
  as ending soon <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#isEndingSoon()">isEndingSoon()</a></code> returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and
  <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>. This is a subset of <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_ACCEPTED">STATE_ACCEPTED</a></code>, so the two
@@ -1417,6 +1606,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_EXPIRED">STATE_EXPIRED</a></code> state to the QuestBuffer
  returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
 </p></div>
@@ -1456,6 +1648,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code> state to the QuestBuffer
  returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
@@ -1497,6 +1692,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_OPEN">STATE_OPEN</a></code> state to the QuestBuffer returned
  by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
 </p></div>
@@ -1536,6 +1734,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_FAILED">STATE_FAILED</a></code> state with a
  <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#getLastUpdatedTimestamp()">getLastUpdatedTimestamp()</a></code> no older than 7 days ago. In simple terms, it will
@@ -1580,6 +1781,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Constant used to add quests in the <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_UPCOMING">STATE_UPCOMING</a></code> state to the QuestBuffer
  returned by <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#load(com.google.android.gms.common.api.GoogleApiClient, int[], int, boolean)">load(GoogleApiClient, int[], int, boolean)</a></code> and <code><a href="/reference/com/google/android/gms/games/quest/Quests.html#getQuestsIntent(com.google.android.gms.common.api.GoogleApiClient, int[])">getQuestsIntent(GoogleApiClient, int[])</a></code>.
 </p></div>
@@ -1620,6 +1824,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sort requests with the quests ending soon first.
 </p></div>
 
@@ -1658,6 +1865,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Sort requests with the recently updated quests first.
 </p></div>
@@ -1708,6 +1918,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Array of all the valid state selector constants.
 </p></div>
 
@@ -1756,6 +1969,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously accept the quest. This enters the player into an <code><a href="/reference/com/google/android/gms/games/quest/Quest.html#STATE_OPEN">STATE_OPEN</a></code>
  quest and will start tracking their progress towards the milestone goal.
@@ -1809,6 +2025,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously claim the milestone. This method informs Google Play Games services that the
  player has completed the milestone on this device, and prevents the milestone from being
@@ -1870,6 +2089,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Get an intent to view a single quest. Note that this must be invoked using
  <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code> so that the identity of the
  calling package can be established.
@@ -1925,6 +2147,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Get an intent to view a list of quests. Note that this must be invoked using
  <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code> so that the identity of the
@@ -2003,6 +2228,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the quest data for the currently signed-in player and game into
  a single result, including only quests in the provided state array.
  <p/>
@@ -2074,6 +2302,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load single quest data for the currently signed-in player and game.
  <p/>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br/>
@@ -2133,6 +2364,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Register a listener to listen for updates on <code><a href="/reference/com/google/android/gms/games/quest/Quest.html">Quest</a></code> instances.
  <p/>
  Note that only one quest listener may be active at a time. Calling this method while
@@ -2182,6 +2416,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Show the default popup for certain quest states. Call this from the onAccepted and onComplete
  callbacks. We currently only support popups for quest in either the
@@ -2238,6 +2475,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Unregisters this client's quest update listener, if any.
  <p/>

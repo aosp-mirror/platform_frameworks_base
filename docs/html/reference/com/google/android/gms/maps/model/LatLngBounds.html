@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -805,6 +851,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -883,7 +932,12 @@ Summary:
         
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.Builder.html">LatLngBounds.Builder</a></td>
-      <td class="jd-descrcol" width="100%">This is a builder that is able to create a minimum bound based on a set of LatLng points.&nbsp;</td>
+      <td class="jd-descrcol" width="100%">
+        This is a builder that is able to create a minimum bound based on a set of LatLng points.&nbsp;
+
+
+
+      </td>
     </tr>
     
     
@@ -931,14 +985,24 @@ android.os.Parcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
     
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
     
     
@@ -969,7 +1033,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%"></td>
+        <td class="jd-descrcol" width="100%">
+
+
+
+
+        </td>
     </tr>
 
 
@@ -996,7 +1065,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           <a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html#northeast">northeast</a></td>
-          <td class="jd-descrcol" width="100%">Northeast corner of the bound.</td>
+          <td class="jd-descrcol" width="100%">
+            Northeast corner of the bound.
+
+
+
+          </td>
       </tr>
       
     
@@ -1007,7 +1081,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           final
           <a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html#southwest">southwest</a></td>
-          <td class="jd-descrcol" width="100%">Southwest corner of the bound.</td>
+          <td class="jd-descrcol" width="100%">
+            Southwest corner of the bound.
+
+
+
+          </td>
       </tr>
       
     
@@ -1038,7 +1117,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html#LatLngBounds(com.google.android.gms.maps.model.LatLng, com.google.android.gms.maps.model.LatLng)">LatLngBounds</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> southwest, <a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> northeast)</nobr>
         
-        <div class="jd-descrdiv">Creates a new bounds based on a southwest and a northeast corner.</div>
+        <div class="jd-descrdiv">
+          Creates a new bounds based on a southwest and a northeast corner.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1069,7 +1153,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html#builder()">builder</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Creates a new builder.</div>
+        <div class="jd-descrdiv">
+          Creates a new builder.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1087,7 +1176,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html#contains(com.google.android.gms.maps.model.LatLng)">contains</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> point)</nobr>
         
-        <div class="jd-descrdiv">Returns whether this contains the given <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</div>
+        <div class="jd-descrdiv">
+          Returns whether this contains the given <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1137,7 +1231,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html#getCenter()">getCenter</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns the center of this LatLngBounds.</div>
+        <div class="jd-descrdiv">
+          Returns the center of this LatLngBounds.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1171,8 +1270,13 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html#including(com.google.android.gms.maps.model.LatLng)">including</a></span>(<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a> point)</nobr>
         
-        <div class="jd-descrdiv">Returns a new <code><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a></code> that extends this LatLngBounds to include the given
- <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</div>
+        <div class="jd-descrdiv">
+          Returns a new <code><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a></code> that extends this LatLngBounds to include the given
+ <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1537,6 +1641,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Northeast corner of the bound. </p></div>
 
     
@@ -1565,6 +1672,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Southwest corner of the bound. </p></div>
 
     
@@ -1605,6 +1715,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new bounds based on a southwest and a northeast corner.
  <p>
  The bounds conceptually includes all points where:
@@ -1682,6 +1795,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Creates a new builder. </p></div>
 
     </div>
@@ -1711,6 +1827,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns whether this contains the given <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1754,6 +1873,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1783,6 +1905,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1812,6 +1937,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns the center of this LatLngBounds. The center is simply the average of the coordinates
  (taking into account if it crosses the antimeridian). This is approximately the geographical
  center (it would be exact if the Earth were a perfect sphere).  It will not necessarily be
@@ -1849,6 +1977,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1878,6 +2009,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a new <code><a href="/reference/com/google/android/gms/maps/model/LatLngBounds.html">LatLngBounds</a></code> that extends this LatLngBounds to include the given
  <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>. This will return the smallest LatLngBounds that contains both this and the
  extra point.
@@ -1928,6 +2062,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1957,6 +2094,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>

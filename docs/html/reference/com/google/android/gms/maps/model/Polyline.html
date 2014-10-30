@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -775,6 +821,9 @@ Summary:
   
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -969,7 +1018,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#getColor()">getColor</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the color of this polyline.</div>
+        <div class="jd-descrdiv">
+          Gets the color of this polyline.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -987,7 +1041,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#getId()">getId</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets this polyline's id.</div>
+        <div class="jd-descrdiv">
+          Gets this polyline's id.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1005,7 +1064,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#getPoints()">getPoints</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Returns a snapshot of the vertices of this polyline at this time .</div>
+        <div class="jd-descrdiv">
+          Returns a snapshot of the vertices of this polyline at this time .
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1023,7 +1087,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#getWidth()">getWidth</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the width of this polyline.</div>
+        <div class="jd-descrdiv">
+          Gets the width of this polyline.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1041,7 +1110,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#getZIndex()">getZIndex</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the zIndex of this polyline.</div>
+        <div class="jd-descrdiv">
+          Gets the zIndex of this polyline.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1075,7 +1149,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#isGeodesic()">isGeodesic</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets whether each segment of the line is drawn as a geodesic or not.</div>
+        <div class="jd-descrdiv">
+          Gets whether each segment of the line is drawn as a geodesic or not.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1093,7 +1172,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#isVisible()">isVisible</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the visibility of this polyline.</div>
+        <div class="jd-descrdiv">
+          Gets the visibility of this polyline.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1111,7 +1195,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#remove()">remove</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Removes this polyline from the map.</div>
+        <div class="jd-descrdiv">
+          Removes this polyline from the map.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1129,7 +1218,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#setColor(int)">setColor</a></span>(int color)</nobr>
         
-        <div class="jd-descrdiv">Sets the color of this polyline.</div>
+        <div class="jd-descrdiv">
+          Sets the color of this polyline.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1147,7 +1241,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#setGeodesic(boolean)">setGeodesic</a></span>(boolean geodesic)</nobr>
         
-        <div class="jd-descrdiv">Sets whether to draw each segment of the line as a geodesic or not.</div>
+        <div class="jd-descrdiv">
+          Sets whether to draw each segment of the line as a geodesic or not.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1165,7 +1264,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#setPoints(java.util.List<com.google.android.gms.maps.model.LatLng>)">setPoints</a></span>(List&lt;<a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a>&gt; points)</nobr>
         
-        <div class="jd-descrdiv">Sets the points of this polyline.</div>
+        <div class="jd-descrdiv">
+          Sets the points of this polyline.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1183,7 +1287,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#setVisible(boolean)">setVisible</a></span>(boolean visible)</nobr>
         
-        <div class="jd-descrdiv">Sets the visibility of this polyline.</div>
+        <div class="jd-descrdiv">
+          Sets the visibility of this polyline.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1201,7 +1310,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#setWidth(float)">setWidth</a></span>(float width)</nobr>
         
-        <div class="jd-descrdiv">Sets the width of this polyline.</div>
+        <div class="jd-descrdiv">
+          Sets the width of this polyline.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1219,7 +1333,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/model/Polyline.html#setZIndex(float)">setZIndex</a></span>(float zIndex)</nobr>
         
-        <div class="jd-descrdiv">Sets the zIndex of this polyline.</div>
+        <div class="jd-descrdiv">
+          Sets the zIndex of this polyline.
+
+
+
+        </div>
   
   </td></tr>
 
@@ -1497,6 +1616,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1541,6 +1663,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1570,6 +1695,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the color of this polyline.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1604,6 +1732,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets this polyline's id. The id will be unique amongst all Polylines on a map.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1638,6 +1769,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Returns a snapshot of the vertices of this polyline at this time . The list returned is a
  copy of the list of vertices and so changes to the polyline's vertices will not be reflected
  by this list, nor will changes to this list be reflected by the polyline. To change the
@@ -1671,6 +1805,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the width of this polyline.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1705,6 +1842,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the zIndex of this polyline.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1739,6 +1879,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1768,6 +1911,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets whether each segment of the line is drawn as a geodesic or not.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1803,6 +1949,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Gets the visibility of this polyline.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1837,6 +1986,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Removes this polyline from the map. After a polyline has been removed, the behavior of all
  its methods is undefined.
 </p></div>
@@ -1868,6 +2020,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the color of this polyline.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1907,6 +2062,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets whether to draw each segment of the line as a geodesic or not.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1947,6 +2105,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the points of this polyline. This method will take a copy of the points, so further
  mutations to <code>points</code> will have no effect on this polyline.</p></div>
   <div class="jd-tagdata">
@@ -1987,6 +2148,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the visibility of this polyline. When not visible, a polyline is not drawn, but it keeps
  all its other properties.</p></div>
   <div class="jd-tagdata">
@@ -2027,6 +2191,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the width of this polyline.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2066,6 +2233,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the zIndex of this polyline. Polylines with higher zIndices are drawn above those with
  lower indices.</p></div>
   <div class="jd-tagdata">

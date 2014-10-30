@@ -84,6 +84,17 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <html>
 <head>
 
@@ -113,6 +124,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 <script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
 
+
+
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -128,7 +141,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </head>
 
 <body class="gc-documentation google
-  develop" itemscope itemtype="http://schema.org/Article">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
@@ -138,6 +151,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
+
+
+
+
       <div class="wrap" id="header-wrap">
         <div class="col-3 logo">
           <a href="/index.html">
@@ -360,7 +377,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <!-- Secondary x-nav -->
     <div id="nav-x">
-        <div class="wrap">
+        <div class="wrap" style="position:relative;z-index:1">
+
+
+            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
+              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
+              <div class="card-bg helpouts-card-bg"></div>
+              <div class="card-info">
+                <div class="helpouts-description">
+                  <div class="text">Help developers solve problems<br/>
+                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+            <script>
+              var textA = "LEARN MORE";
+              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
+              var textB = "SIGN UP NOW";
+              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
+
+              if (Math.floor(1/Math.random()) > 1) {
+                $("a#helpoutsLink").attr('href', linkA);
+                $("span#helpoutsLinkText").text(textA);
+              } else {
+                $("a#helpoutsLink").attr('href', linkB);
+                $("span#helpoutsLinkText").text(textB);
+              }
+            </script>
+
+
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
                   zh-tw-lang="訓練課程"
@@ -771,6 +817,9 @@ Summary:
 
 
 
+
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
@@ -882,7 +931,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventInterstitial.html#requestInterstitialAd(android.content.Context, com.google.android.gms.ads.mediation.customevent.CustomEventInterstitialListener, java.lang.String, com.google.android.gms.ads.mediation.MediationAdRequest, android.os.Bundle)">requestInterstitialAd</a></span>(Context context, <a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventInterstitialListener.html">CustomEventInterstitialListener</a> listener, String serverParameter, <a href="/reference/com/google/android/gms/ads/mediation/MediationAdRequest.html">MediationAdRequest</a> mediationAdRequest, Bundle customEventExtras)</nobr>
 
-        <div class="jd-descrdiv">Called by the mediation library to request an interstitial.</div>
+        <div class="jd-descrdiv">
+          Called by the mediation library to request an interstitial.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -900,7 +954,12 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventInterstitial.html#showInterstitial()">showInterstitial</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Show the interstitial.</div>
+        <div class="jd-descrdiv">
+          Show the interstitial.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -952,7 +1011,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEvent.html#onDestroy()">onDestroy</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Tears down the adapter control.</div>
+        <div class="jd-descrdiv">
+          Tears down the adapter control.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -970,7 +1034,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEvent.html#onPause()">onPause</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Called when the application calls <code><a href="/reference/com/google/android/gms/ads/AdView.html#pause()">pause()</a></code>.</div>
+        <div class="jd-descrdiv">
+          Called when the application calls <code><a href="/reference/com/google/android/gms/ads/AdView.html#pause()">pause()</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -988,7 +1057,12 @@ From interface
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEvent.html#onResume()">onResume</a></span>()</nobr>
 
-        <div class="jd-descrdiv">Called when the application calls <code><a href="/reference/com/google/android/gms/ads/AdView.html#resume()">resume()</a></code>.</div>
+        <div class="jd-descrdiv">
+          Called when the application calls <code><a href="/reference/com/google/android/gms/ads/AdView.html#resume()">resume()</a></code>.
+
+
+
+        </div>
 
   </td></tr>
 
@@ -1064,6 +1138,9 @@ From interface
       </div>
     <div class="jd-details-descr">
 
+
+
+
   <div class="jd-tagdata jd-tagdescr"><p>Called by the mediation library to request an interstitial.
 
  <p>If the request is successful, <code><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventInterstitialListener.html#onAdLoaded()">onAdLoaded()</a></code> should be
@@ -1132,6 +1209,9 @@ From interface
 
       </div>
     <div class="jd-details-descr">
+
+
+
 
   <div class="jd-tagdata jd-tagdescr"><p>Show the interstitial. This may be called any time after a call to <code><a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEventInterstitialListener.html#onAdLoaded()">onAdLoaded()</a></code>.
 </p></div>
