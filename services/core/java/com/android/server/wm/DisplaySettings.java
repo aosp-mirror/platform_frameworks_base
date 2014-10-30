@@ -66,6 +66,9 @@ public class DisplaySettings {
 
     public void getOverscanLocked(String name, Rect outRect) {
         Entry entry = mEntries.get(name);
+        if (entry == null && mEntries.size() == 1) {
+            entry = mEntries.values().iterator().next();
+        }
         if (entry != null) {
             outRect.left = entry.overscanLeft;
             outRect.top = entry.overscanTop;
