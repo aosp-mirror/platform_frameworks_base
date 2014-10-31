@@ -81,7 +81,6 @@ public:
 
     ANDROID_API void runWithGlContext(RenderTask* task);
 
-    static void enqueueDestroyLayer(Layer* layer);
     ANDROID_API DeferredLayerUpdater* createTextureLayer();
     ANDROID_API void buildLayer(RenderNode* node);
     ANDROID_API bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);
@@ -97,6 +96,7 @@ public:
     ANDROID_API void notifyFramePending();
 
     ANDROID_API void dumpProfileInfo(int fd);
+    ANDROID_API static void outputLogBuffer(int fd);
 
     ANDROID_API void setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size);
 
@@ -113,6 +113,8 @@ private:
 
     void post(RenderTask* task);
     void* postAndWait(MethodInvokeRenderTask* task);
+
+    static void* staticPostAndWait(MethodInvokeRenderTask* task);
 
     // Friend class to help with bridging
     friend class RenderProxyBridge;

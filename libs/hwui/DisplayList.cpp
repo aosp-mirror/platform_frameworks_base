@@ -61,10 +61,6 @@ void DisplayListData::cleanupResources() {
         caches.resourceCache.decrementRefcountLocked(sourcePaths.itemAt(i));
     }
 
-    for (size_t i = 0; i < layers.size(); i++) {
-        caches.resourceCache.decrementRefcountLocked(layers.itemAt(i));
-    }
-
     caches.resourceCache.unlock();
 
     for (size_t i = 0; i < paints.size(); i++) {
@@ -86,7 +82,6 @@ void DisplayListData::cleanupResources() {
     paints.clear();
     regions.clear();
     paths.clear();
-    layers.clear();
 }
 
 size_t DisplayListData::addChild(DrawRenderNodeOp* op) {
