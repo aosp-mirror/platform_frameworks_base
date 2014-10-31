@@ -44,9 +44,14 @@ public final class ViewTreeObserver {
     private CopyOnWriteArray<OnComputeInternalInsetsListener> mOnComputeInternalInsetsListeners;
     private CopyOnWriteArray<OnScrollChangedListener> mOnScrollChangedListeners;
     private CopyOnWriteArray<OnPreDrawListener> mOnPreDrawListeners;
+    private CopyOnWriteArray<OnWindowShownListener> mOnWindowShownListeners;
 
     // These listeners cannot be mutated during dispatch
     private ArrayList<OnDrawListener> mOnDrawListeners;
+
+    /** Remains false until #dispatchOnWindowShown() is called. If a listener registers after
+     * that the listener will be immediately called. */
+    private boolean mWindowShown;
 
     private boolean mAlive = true;
 
@@ -171,6 +176,19 @@ public final class ViewTreeObserver {
          * has been scrolled.
          */
         public void onScrollChanged();
+    }
+
+    /**
+     * Interface definition for a callback noting when a system window has been displayed.
+     * This is only used for non-Activity windows. Activity windows can use
+     * Activity.onEnterAnimationComplete() to get the same signal.
+     * @hide
+     */
+    public interface OnWindowShownListener {
+        /**
+         * Callback method to be invoked when a non-activity window is fully shown.
+         */
+        void onWindowShown();
     }
 
     /**
@@ -375,6 +393,14 @@ public final class ViewTreeObserver {
             }
         }
 
+        if (observer.mOnWindowShownListeners != null) {
+            if (mOnWindowShownListeners != null) {
+                mOnWindowShownListeners.addAll(observer.mOnWindowShownListeners);
+            } else {
+                mOnWindowShownListeners = observer.mOnWindowShownListeners;
+            }
+        }
+
         observer.kill();
     }
 
@@ -565,6 +591,45 @@ public final class ViewTreeObserver {
             return;
         }
         mOnPreDrawListeners.remove(victim);
+    }
+
+    /**
+     * Register a callback to be invoked when the view tree window has been shown
+     *
+     * @param listener The callback to add
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     * @hide
+     */
+    public void addOnWindowShownListener(OnWindowShownListener listener) {
+        checkIsAlive();
+
+        if (mOnWindowShownListeners == null) {
+            mOnWindowShownListeners = new CopyOnWriteArray<OnWindowShownListener>();
+        }
+
+        mOnWindowShownListeners.add(listener);
+        if (mWindowShown) {
+            listener.onWindowShown();
+        }
+    }
+
+    /**
+     * Remove a previously installed window shown callback
+     *
+     * @param victim The callback to remove
+     *
+     * @throws IllegalStateException If {@link #isAlive()} returns false
+     *
+     * @see #addOnWindowShownListener(OnWindowShownListener)
+     * @hide
+     */
+    public void removeOnWindowShownListener(OnWindowShownListener victim) {
+        checkIsAlive();
+        if (mOnWindowShownListeners == null) {
+            return;
+        }
+        mOnWindowShownListeners.remove(victim);
     }
 
     /**
@@ -851,6 +916,27 @@ public final class ViewTreeObserver {
             }
         }
         return cancelDraw;
+    }
+
+    /**
+     * Notifies registered listeners that the window is now shown
+     * @hide
+     */
+    @SuppressWarnings("unchecked")
+    public final void dispatchOnWindowShown() {
+        mWindowShown = true;
+        final CopyOnWriteArray<OnWindowShownListener> listeners = mOnWindowShownListeners;
+        if (listeners != null && listeners.size() > 0) {
+            CopyOnWriteArray.Access<OnWindowShownListener> access = listeners.start();
+            try {
+                int count = access.size();
+                for (int i = 0; i < count; i++) {
+                    access.get(i).onWindowShown();
+                }
+            } finally {
+                listeners.end();
+            }
+        }
     }
 
     /**
