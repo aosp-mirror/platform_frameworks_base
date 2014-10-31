@@ -41,8 +41,9 @@ import java.util.UUID;
  */
 final class RemoteConnectionService {
 
+    // Note: Casting null to avoid ambiguous constructor reference.
     private static final RemoteConnection NULL_CONNECTION =
-            new RemoteConnection("NULL", null, null);
+            new RemoteConnection("NULL", null, (ConnectionRequest) null);
 
     private static final RemoteConference NULL_CONFERENCE =
             new RemoteConference("NULL", null);
@@ -285,6 +286,15 @@ final class RemoteConnectionService {
                 findConferenceForAction(callId, "setConferenceableConnections")
                         .setConferenceableConnections(conferenceable);
             }
+        }
+
+        @Override
+        public void addExistingConnection(String callId, ParcelableConnection connection) {
+            // TODO: add contents of this method
+            RemoteConnection remoteConnction = new RemoteConnection(callId,
+                    mOutgoingConnectionServiceRpc, connection);
+
+            mOurConnectionServiceImpl.addRemoteExistingConnection(remoteConnction);
         }
     };
 
