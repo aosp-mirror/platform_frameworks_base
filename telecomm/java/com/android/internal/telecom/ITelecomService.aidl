@@ -169,6 +169,11 @@ interface ITelecomService {
     boolean handlePinMmi(String dialString);
 
     /**
+     * @see TelecomServiceImpl#handleMmi
+     */
+    boolean handlePinMmiForPhoneAccount(in PhoneAccountHandle accountHandle, String dialString);
+
+    /**
      * @see TelecomServiceImpl#isTtySupported
      */
     boolean isTtySupported();
