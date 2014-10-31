@@ -347,24 +347,62 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             throws XmlPullParserException, IOException {
         final TypedArray a = obtainAttributes(
                 r, theme, attrs, R.styleable.AnimatedStateListDrawable);
-
         super.inflateWithAttributes(r, parser, a, R.styleable.AnimatedStateListDrawable_visible);
-
-        final StateListState stateListState = getStateListState();
-        stateListState.setVariablePadding(a.getBoolean(
-                R.styleable.AnimatedStateListDrawable_variablePadding, false));
-        stateListState.setConstantSize(a.getBoolean(
-                R.styleable.AnimatedStateListDrawable_constantSize, false));
-        stateListState.setEnterFadeDuration(a.getInt(
-                R.styleable.AnimatedStateListDrawable_enterFadeDuration, 0));
-        stateListState.setExitFadeDuration(a.getInt(
-                R.styleable.AnimatedStateListDrawable_exitFadeDuration, 0));
-
-        setDither(a.getBoolean(R.styleable.AnimatedStateListDrawable_dither, true));
-        setAutoMirrored(a.getBoolean(R.styleable.AnimatedStateListDrawable_autoMirrored, false));
-
+        updateStateFromTypedArray(a);
         a.recycle();
 
+        inflateChildElements(r, parser, attrs, theme);
+
+        init();
+    }
+
+    @Override
+    public void applyTheme(@Nullable Theme theme) {
+        super.applyTheme(theme);
+
+        final AnimatedStateListState state = mState;
+        if (state == null || !state.canApplyTheme()) {
+            return;
+        }
+
+        final TypedArray a = theme.resolveAttributes(
+                state.mAnimThemeAttrs, R.styleable.AnimatedRotateDrawable);
+        updateStateFromTypedArray(a);
+        a.recycle();
+
+        init();
+    }
+
+    private void updateStateFromTypedArray(TypedArray a) {
+        final AnimatedStateListState state = mState;
+
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
+        state.mAnimThemeAttrs = a.extractThemeAttrs();
+
+        state.setVariablePadding(a.getBoolean(
+                R.styleable.AnimatedStateListDrawable_variablePadding, state.mVariablePadding));
+        state.setConstantSize(a.getBoolean(
+                R.styleable.AnimatedStateListDrawable_constantSize, state.mConstantSize));
+        state.setEnterFadeDuration(a.getInt(
+                R.styleable.AnimatedStateListDrawable_enterFadeDuration, state.mEnterFadeDuration));
+        state.setExitFadeDuration(a.getInt(
+                R.styleable.AnimatedStateListDrawable_exitFadeDuration, state.mExitFadeDuration));
+
+        setDither(a.getBoolean(
+                R.styleable.AnimatedStateListDrawable_dither, state.mDither));
+        setAutoMirrored(a.getBoolean(
+                R.styleable.AnimatedStateListDrawable_autoMirrored, state.mAutoMirrored));
+    }
+
+    private void init() {
+        onStateChange(getState());
+    }
+
+    private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
+            Theme theme) throws XmlPullParserException, IOException {
         int type;
 
         final int innerDepth = parser.getDepth() + 1;
@@ -386,8 +424,6 @@ public class AnimatedStateListDrawable extends StateListDrawable {
                 parseTransition(r, parser, attrs, theme);
             }
         }
-
-        onStateChange(getState());
     }
 
     private int parseTransition(@NonNull Resources r, @NonNull XmlPullParser parser,
@@ -507,6 +543,8 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         private static final int REVERSE_SHIFT = 32;
         private static final int REVERSE_MASK = 0x1;
 
+        int[] mAnimThemeAttrs;
+
         final LongSparseLongArray mTransitions;
         final SparseIntArray mStateIds;
 
@@ -515,6 +553,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             super(orig, owner, res);
 
             if (orig != null) {
+                mAnimThemeAttrs = orig.mAnimThemeAttrs;
                 mTransitions = orig.mTransitions.clone();
                 mStateIds = orig.mStateIds.clone();
             } else {
@@ -563,6 +602,11 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         boolean isTransitionReversed(int fromId, int toId) {
             final long keyFromTo = generateTransitionKey(fromId, toId);
             return (mTransitions.get(keyFromTo, -1) >> REVERSE_SHIFT & REVERSE_MASK) == 1;
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            return mAnimThemeAttrs != null || super.canApplyTheme();
         }
 
         @Override

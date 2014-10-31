@@ -117,26 +117,48 @@ public class StateListDrawable extends DrawableContainer {
     @Override
     public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme)
             throws XmlPullParserException, IOException {
-
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.StateListDrawable);
-
-        super.inflateWithAttributes(r, parser, a,
-                R.styleable.StateListDrawable_visible);
-
-        mStateListState.setVariablePadding(a.getBoolean(
-                R.styleable.StateListDrawable_variablePadding, false));
-        mStateListState.setConstantSize(a.getBoolean(
-                R.styleable.StateListDrawable_constantSize, false));
-        mStateListState.setEnterFadeDuration(a.getInt(
-                R.styleable.StateListDrawable_enterFadeDuration, 0));
-        mStateListState.setExitFadeDuration(a.getInt(
-                R.styleable.StateListDrawable_exitFadeDuration, 0));
-
-        setDither(a.getBoolean(R.styleable.StateListDrawable_dither, DEFAULT_DITHER));
-        setAutoMirrored(a.getBoolean(R.styleable.StateListDrawable_autoMirrored, false));
-
+        super.inflateWithAttributes(r, parser, a, R.styleable.StateListDrawable_visible);
+        updateStateFromTypedArray(a);
         a.recycle();
 
+        inflateChildElements(r, parser, attrs, theme);
+
+        onStateChange(getState());
+    }
+
+    /**
+     * Updates the constant state from the values in the typed array.
+     */
+    private void updateStateFromTypedArray(TypedArray a) {
+        final StateListState state = mStateListState;
+
+        // Account for any configuration changes.
+        state.mChangingConfigurations |= a.getChangingConfigurations();
+
+        // Extract the theme attributes, if any.
+        state.mThemeAttrs = a.extractThemeAttrs();
+
+        state.mVariablePadding = a.getBoolean(
+                R.styleable.StateListDrawable_variablePadding, state.mVariablePadding);
+        state.mConstantSize = a.getBoolean(
+                R.styleable.StateListDrawable_constantSize, state.mConstantSize);
+        state.mEnterFadeDuration = a.getInt(
+                R.styleable.StateListDrawable_enterFadeDuration, state.mEnterFadeDuration);
+        state.mExitFadeDuration = a.getInt(
+                R.styleable.StateListDrawable_exitFadeDuration, state.mExitFadeDuration);
+        state.mDither = a.getBoolean(
+                R.styleable.StateListDrawable_dither, state.mDither);
+        state.mAutoMirrored = a.getBoolean(
+                R.styleable.StateListDrawable_autoMirrored, state.mAutoMirrored);
+    }
+
+    /**
+     * Inflates child elements from XML.
+     */
+    private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
+            Theme theme) throws XmlPullParserException, IOException {
+        final StateListState state = mStateListState;
         final int innerDepth = parser.getDepth() + 1;
         int type;
         int depth;
@@ -185,10 +207,8 @@ public class StateListDrawable extends DrawableContainer {
                 dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
             }
 
-            mStateListState.addStateSet(states, dr);
+            state.addStateSet(states, dr);
         }
-
-        onStateChange(getState());
     }
 
     StateListState getStateListState() {
@@ -282,6 +302,7 @@ public class StateListDrawable extends DrawableContainer {
     }
 
     static class StateListState extends DrawableContainerState {
+        int[] mThemeAttrs;
         int[][] mStateSets;
 
         StateListState(StateListState orig, StateListDrawable owner, Resources res) {
@@ -298,7 +319,11 @@ public class StateListDrawable extends DrawableContainer {
                         mStateSets[i] = set.clone();
                     }
                 }
+
+                mThemeAttrs = orig.mThemeAttrs;
+                mStateSets = Arrays.copyOf(orig.mStateSets, orig.mStateSets.length);
             } else {
+                mThemeAttrs = null;
                 mStateSets = new int[getCapacity()][];
             }
         }
@@ -328,6 +353,11 @@ public class StateListDrawable extends DrawableContainer {
         @Override
         public Drawable newDrawable(Resources res) {
             return new StateListDrawable(this, res);
+        }
+
+        @Override
+        public boolean canApplyTheme() {
+            return mThemeAttrs != null || super.canApplyTheme();
         }
 
         @Override
