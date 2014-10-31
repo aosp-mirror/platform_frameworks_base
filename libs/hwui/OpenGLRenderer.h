@@ -140,7 +140,6 @@ public:
 
     void pushLayerUpdate(Layer* layer);
     void cancelLayerUpdate(Layer* layer);
-    void clearLayerUpdates();
     void flushLayerUpdates();
     void markLayersAsBuildLayers();
 
@@ -982,7 +981,7 @@ private:
     // List of rectangles to clear after saveLayer() is invoked
     Vector<Rect*> mLayers;
     // List of layers to update at the beginning of a frame
-    Vector<Layer*> mLayerUpdates;
+    Vector< sp<Layer> > mLayerUpdates;
 
     // The following fields are used to setup drawing
     // Used to describe the shaders to generate

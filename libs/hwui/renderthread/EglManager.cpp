@@ -73,7 +73,8 @@ EglManager::EglManager(RenderThread& thread)
         , mAllowPreserveBuffer(load_dirty_regions_property())
         , mCurrentSurface(EGL_NO_SURFACE)
         , mAtlasMap(NULL)
-        , mAtlasMapSize(0) {
+        , mAtlasMapSize(0)
+        , mInFrame(false) {
     mCanSetPreserveBuffer = mAllowPreserveBuffer;
     ALOGD("Use EGL_SWAP_BEHAVIOR_PRESERVED: %s", mAllowPreserveBuffer ? "true" : "false");
 }
@@ -105,10 +106,12 @@ bool EglManager::hasEglContext() {
 void EglManager::requireGlContext() {
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY, "No EGL context");
 
-    // We can't be certain about the state of the current surface (whether
-    // or not it is destroyed, for example), so err on the side of using
-    // the pbuffer surface which we fully control
-    usePBufferSurface();
+    if (!mInFrame) {
+        // We can't be certain about the state of the current surface (whether
+        // or not it is destroyed, for example), so err on the side of using
+        // the pbuffer surface which we fully control
+        usePBufferSurface();
+    }
 }
 
 void EglManager::loadConfig() {
@@ -251,9 +254,11 @@ void EglManager::beginFrame(EGLSurface surface, EGLint* width, EGLint* height) {
         eglQuerySurface(mEglDisplay, surface, EGL_HEIGHT, height);
     }
     eglBeginFrame(mEglDisplay, surface);
+    mInFrame = true;
 }
 
 bool EglManager::swapBuffers(EGLSurface surface) {
+    mInFrame = false;
     eglSwapBuffers(mEglDisplay, surface);
     EGLint err = eglGetError();
     if (CC_LIKELY(err == EGL_SUCCESS)) {
@@ -270,6 +275,10 @@ bool EglManager::swapBuffers(EGLSurface surface) {
             err, egl_error_str(err));
     // Impossible to hit this, but the compiler doesn't know that
     return false;
+}
+
+void EglManager::cancelFrame() {
+    mInFrame = false;
 }
 
 bool EglManager::setPreserveBuffer(EGLSurface surface, bool preserve) {
