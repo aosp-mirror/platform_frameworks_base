@@ -36,4 +36,11 @@ public class DismissView extends StackScrollerDecorView {
     public void setOnButtonClickListener(OnClickListener listener) {
         mContent.setOnClickListener(listener);
     }
+
+    public boolean isOnEmptySpace(float touchX, float touchY) {
+        return touchX < mContent.getX()
+                || touchX > mContent.getX() + mContent.getWidth()
+                || touchY < mContent.getY()
+                || touchY > mContent.getY() + mContent.getHeight();
+    }
 }
