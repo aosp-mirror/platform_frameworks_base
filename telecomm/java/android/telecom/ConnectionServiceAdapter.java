@@ -344,4 +344,20 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             }
         }
     }
+
+    /**
+     * Informs telecom of an existing connection which was added by the {@link ConnectionService}.
+     *
+     * @param callId The unique ID of the call being added.
+     * @param connection The connection.
+     */
+    void addExistingConnection(String callId, ParcelableConnection connection) {
+        Log.v(this, "addExistingConnection: %s", callId);
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.addExistingConnection(callId, connection);
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
 }

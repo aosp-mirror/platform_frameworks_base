@@ -57,6 +57,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_ADDRESS = 18;
     private static final int MSG_SET_CALLER_DISPLAY_NAME = 19;
     private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 20;
+    private static final int MSG_ADD_EXISTING_CONNECTION = 21;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -194,6 +195,16 @@ final class ConnectionServiceAdapterServant {
                     try {
                         mDelegate.setConferenceableConnections(
                                 (String) args.arg1, (List<String>) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_ADD_EXISTING_CONNECTION: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.addExistingConnection(
+                                (String) args.arg1, (ParcelableConnection) args.arg2);
                     } finally {
                         args.recycle();
                     }
@@ -344,6 +355,15 @@ final class ConnectionServiceAdapterServant {
             args.arg1 = connectionId;
             args.arg2 = conferenceableConnectionIds;
             mHandler.obtainMessage(MSG_SET_CONFERENCEABLE_CONNECTIONS, args).sendToTarget();
+        }
+
+        @Override
+        public final void addExistingConnection(
+                String connectionId, ParcelableConnection connection) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = connectionId;
+            args.arg2 = connection;
+            mHandler.obtainMessage(MSG_ADD_EXISTING_CONNECTION, args).sendToTarget();
         }
     };
 
