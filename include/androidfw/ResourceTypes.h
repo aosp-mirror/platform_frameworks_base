@@ -253,7 +253,8 @@ struct Res_value
         
     // Type of the data value.
     enum {
-        // Contains no data.
+        // The 'data' is either 0 or 1, specifying this resource is either
+        // undefined or empty, respectively.
         TYPE_NULL = 0x00,
         // The 'data' holds a ResTable_ref, a reference to another resource
         // table entry.
@@ -349,6 +350,14 @@ struct Res_value
         // precision.  The top bit is the sign.
         COMPLEX_MANTISSA_SHIFT = 8,
         COMPLEX_MANTISSA_MASK = 0xffffff
+    };
+
+    // Possible data values for TYPE_NULL.
+    enum {
+        // The value is not defined.
+        DATA_NULL_UNDEFINED = 0,
+        // The value is explicitly defined as empty.
+        DATA_NULL_EMPTY = 1
     };
 
     // The data for this item, as interpreted according to dataType.
