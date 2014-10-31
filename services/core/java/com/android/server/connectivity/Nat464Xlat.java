@@ -91,8 +91,9 @@ public class Nat464Xlat extends BaseNetworkObserver {
         final boolean connected = nai.networkInfo.isConnected();
         final boolean hasIPv4Address =
                 (nai.linkProperties != null) ? nai.linkProperties.hasIPv4Address() : false;
-        // Only support clat on mobile for now.
-        return netType == TYPE_MOBILE && connected && !hasIPv4Address;
+        // Only support clat on mobile and wifi for now, because these are the only IPv6-only
+        // networks we can connect to.
+        return connected && !hasIPv4Address && (netType == TYPE_MOBILE || netType == TYPE_WIFI);
     }
 
     /**
