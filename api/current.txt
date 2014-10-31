@@ -34969,12 +34969,14 @@ package android.view {
     method public void setCallback(android.view.Window.Callback);
     method public abstract void setChildDrawable(int, android.graphics.drawable.Drawable);
     method public abstract void setChildInt(int, int);
+    method public void setClipToOutline(boolean);
     method public void setContainer(android.view.Window);
     method public abstract void setContentView(int);
     method public abstract void setContentView(android.view.View);
     method public abstract void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method protected void setDefaultWindowFormat(int);
     method public void setDimAmount(float);
+    method public void setElevation(float);
     method public void setEnterTransition(android.transition.Transition);
     method public void setExitTransition(android.transition.Transition);
     method public abstract void setFeatureDrawable(int, android.graphics.drawable.Drawable);
