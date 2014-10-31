@@ -168,7 +168,7 @@ void RenderThread::initializeDisplayEventReceiver() {
 void RenderThread::initThreadLocals() {
     initializeDisplayEventReceiver();
     mEglManager = new EglManager(*this);
-    mRenderState = new RenderState();
+    mRenderState = new RenderState(*this);
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {

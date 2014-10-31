@@ -236,6 +236,8 @@ void CanvasContext::draw() {
 
     if (status & DrawGlInfo::kStatusDrew) {
         swapBuffers();
+    } else {
+        mEglManager.cancelFrame();
     }
 
     profiler().finishFrame();

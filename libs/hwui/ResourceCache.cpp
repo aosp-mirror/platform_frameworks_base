@@ -75,10 +75,6 @@ void ResourceCache::incrementRefcount(const Res_png_9patch* patchResource) {
     incrementRefcount((void*) patchResource, kNinePatch);
 }
 
-void ResourceCache::incrementRefcount(Layer* layerResource) {
-    incrementRefcount((void*) layerResource, kLayer);
-}
-
 void ResourceCache::incrementRefcountLocked(void* resource, ResourceType resourceType) {
     ssize_t index = mCache->indexOfKey(resource);
     ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
@@ -103,10 +99,6 @@ void ResourceCache::incrementRefcountLocked(const Res_png_9patch* patchResource)
     incrementRefcountLocked((void*) patchResource, kNinePatch);
 }
 
-void ResourceCache::incrementRefcountLocked(Layer* layerResource) {
-    incrementRefcountLocked((void*) layerResource, kLayer);
-}
-
 void ResourceCache::decrementRefcount(void* resource) {
     Mutex::Autolock _l(mLock);
     decrementRefcountLocked(resource);
@@ -124,10 +116,6 @@ void ResourceCache::decrementRefcount(const SkPath* pathResource) {
 
 void ResourceCache::decrementRefcount(const Res_png_9patch* patchResource) {
     decrementRefcount((void*) patchResource);
-}
-
-void ResourceCache::decrementRefcount(Layer* layerResource) {
-    decrementRefcount((void*) layerResource);
 }
 
 void ResourceCache::decrementRefcountLocked(void* resource) {
@@ -155,10 +143,6 @@ void ResourceCache::decrementRefcountLocked(const SkPath* pathResource) {
 
 void ResourceCache::decrementRefcountLocked(const Res_png_9patch* patchResource) {
     decrementRefcountLocked((void*) patchResource);
-}
-
-void ResourceCache::decrementRefcountLocked(Layer* layerResource) {
-    decrementRefcountLocked((void*) layerResource);
 }
 
 void ResourceCache::destructor(SkPath* resource) {
@@ -274,7 +258,7 @@ void ResourceCache::deleteResourceReferenceLocked(const void* resource, Resource
     if (ref->recycled && ref->resourceType == kBitmap) {
         ((SkBitmap*) resource)->setPixels(NULL, NULL);
     }
-    if (ref->destroyed || ref->resourceType == kLayer) {
+    if (ref->destroyed) {
         switch (ref->resourceType) {
             case kBitmap: {
                 SkBitmap* bitmap = (SkBitmap*) resource;
@@ -303,11 +287,6 @@ void ResourceCache::deleteResourceReferenceLocked(const void* resource, Resource
                     int8_t* patch = (int8_t*) resource;
                     delete[] patch;
                 }
-            }
-            break;
-            case kLayer: {
-                Layer* layer = (Layer*) resource;
-                Caches::getInstance().deleteLayerDeferred(layer);
             }
             break;
         }
