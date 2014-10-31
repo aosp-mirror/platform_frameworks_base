@@ -191,7 +191,8 @@ public class ThreadedRenderer extends HardwareRenderer {
         final float lightX = width / 2.0f;
         mWidth = width;
         mHeight = height;
-        if (surfaceInsets != null && !surfaceInsets.isEmpty()) {
+        if (surfaceInsets != null && (surfaceInsets.left != 0 || surfaceInsets.right != 0
+                || surfaceInsets.top != 0 || surfaceInsets.bottom != 0)) {
             mHasInsets = true;
             mInsetLeft = surfaceInsets.left;
             mInsetTop = surfaceInsets.top;
