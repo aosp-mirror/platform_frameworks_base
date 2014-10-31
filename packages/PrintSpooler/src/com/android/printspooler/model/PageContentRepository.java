@@ -463,7 +463,8 @@ public final class PageContentRepository {
                     }
                     Intent intent = new Intent(PdfManipulationService.ACTION_GET_RENDERER);
                     intent.setClass(mContext, PdfManipulationService.class);
-                    intent.setData(Uri.fromParts("fake-scheme", String.valueOf(hashCode()), null));
+                    intent.setData(Uri.fromParts("fake-scheme", String.valueOf(
+                            AsyncRenderer.this.hashCode()), null));
                     mContext.bindService(intent, AsyncRenderer.this, Context.BIND_AUTO_CREATE);
                     mBoundToService = true;
                 }
