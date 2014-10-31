@@ -156,9 +156,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     public void resetHeight() {
+        super.resetHeight();
         mMaxExpandHeight = 0;
         mWasReset = true;
-        mActualHeight = 0;
         onHeightReset();
         requestLayout();
     }
