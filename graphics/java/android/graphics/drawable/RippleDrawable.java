@@ -473,7 +473,7 @@ public class RippleDrawable extends LayerDrawable {
 
     @Override
     public boolean canApplyTheme() {
-        return super.canApplyTheme() || mState != null && mState.canApplyTheme();
+        return (mState != null && mState.canApplyTheme()) || super.canApplyTheme();
     }
 
     @Override

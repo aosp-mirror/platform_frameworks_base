@@ -600,11 +600,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         Drawable[] mDrawables;
         int mNumChildren;
 
-        boolean mVariablePadding;
+        boolean mVariablePadding = false;
         boolean mPaddingChecked;
         Rect mConstantPadding;
 
-        boolean mConstantSize;
+        boolean mConstantSize = false;
         boolean mComputedConstantSize;
         int mConstantWidth;
         int mConstantHeight;
@@ -625,8 +625,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         boolean mMutated;
         int mLayoutDirection;
 
-        int mEnterFadeDuration;
-        int mExitFadeDuration;
+        int mEnterFadeDuration = 0;
+        int mExitFadeDuration = 0;
 
         boolean mAutoMirrored;
 

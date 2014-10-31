@@ -1089,7 +1089,7 @@ public class GradientDrawable extends Drawable {
 
     @Override
     public boolean canApplyTheme() {
-        return super.canApplyTheme() || mGradientState != null && mGradientState.canApplyTheme();
+        return (mGradientState != null && mGradientState.canApplyTheme()) || super.canApplyTheme();
     }
 
     private void applyThemeChildElements(Theme t) {
@@ -1632,7 +1632,7 @@ public class GradientDrawable extends Drawable {
         public boolean canApplyTheme() {
             return mThemeAttrs != null || mAttrSize != null || mAttrGradient != null
                     || mAttrSolid != null || mAttrStroke != null || mAttrCorners != null
-                    || mAttrPadding != null;
+                    || mAttrPadding != null || super.canApplyTheme();
         }
 
         @Override
