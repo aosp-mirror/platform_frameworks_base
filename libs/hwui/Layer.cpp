@@ -35,6 +35,9 @@ Layer::Layer(Type layerType, RenderState& renderState, const uint32_t layerWidth
         , renderState(renderState)
         , texture(caches)
         , type(layerType) {
+    // TODO: This is a violation of Android's typical ref counting, but it
+    // preserves the old inc/dec ref locations. This should be changed...
+    incStrong(0);
     mesh = NULL;
     meshElementCount = 0;
     cacheable = true;
@@ -53,20 +56,14 @@ Layer::Layer(Type layerType, RenderState& renderState, const uint32_t layerWidth
     forceFilter = false;
     deferredList = NULL;
     convexMask = NULL;
-    caches.resourceCache.incrementRefcount(this);
     rendererLightPosDirty = true;
     wasBuildLayered = false;
-    if (!isTextureLayer()) {
-        // track only non-texture layer lifecycles in renderstate,
-        // because texture layers are destroyed via finalizer
-        renderState.registerLayer(this);
-    }
+    renderState.registerLayer(this);
 }
 
 Layer::~Layer() {
-    if (!isTextureLayer()) {
-        renderState.unregisterLayer(this);
-    }
+    renderState.requireGLContext();
+    renderState.unregisterLayer(this);
     SkSafeUnref(colorFilter);
     removeFbo();
     deleteTexture();
@@ -290,6 +287,10 @@ void Layer::render(const OpenGLRenderer& rootRenderer) {
 
     deferredUpdateScheduled = false;
     renderNode = NULL;
+}
+
+void Layer::postDecStrong() {
+    renderState.postDecStrong(this);
 }
 
 }; // namespace uirenderer

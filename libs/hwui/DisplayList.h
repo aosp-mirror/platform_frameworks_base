@@ -147,7 +147,6 @@ public:
     Vector<const SkPath*> paths;
     SortedVector<const SkPath*> sourcePaths;
     Vector<const SkRegion*> regions;
-    Vector<Layer*> layers;
     Vector<Functor*> functors;
 
     const Vector<Chunk>& getChunks() const {
@@ -157,11 +156,7 @@ public:
     size_t addChild(DrawRenderNodeOp* childOp);
     const Vector<DrawRenderNodeOp*>& children() { return mChildren; }
 
-    void refProperty(CanvasPropertyPrimitive* prop) {
-        mReferenceHolders.push(prop);
-    }
-
-    void refProperty(CanvasPropertyPaint* prop) {
+    void ref(VirtualLightRefBase* prop) {
         mReferenceHolders.push(prop);
     }
 
