@@ -895,6 +895,7 @@ public class TelecomManager {
      * Processes the specified dial string as an MMI code.
      * MMI codes are any sequence of characters entered into the dialpad that contain a "*" or "#".
      * Some of these sequences launch special behavior through handled by Telephony.
+     * This method uses the default subscription.
      * <p>
      * Requires that the method-caller be set as the system dialer app.
      * </p>
@@ -907,6 +908,31 @@ public class TelecomManager {
         if (service != null) {
             try {
                 return service.handlePinMmi(dialString);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error calling ITelecomService#handlePinMmi", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Processes the specified dial string as an MMI code.
+     * MMI codes are any sequence of characters entered into the dialpad that contain a "*" or "#".
+     * Some of these sequences launch special behavior through handled by Telephony.
+     * <p>
+     * Requires that the method-caller be set as the system dialer app.
+     * </p>
+     *
+     * @param accountHandle The handle for the account the MMI code should apply to.
+     * @param dialString The digits to dial.
+     * @return True if the digits were processed as an MMI code, false otherwise.
+     *
+     */
+    public boolean handleMmi(PhoneAccountHandle accountHandle, String dialString) {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.handlePinMmiForPhoneAccount(accountHandle, dialString);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling ITelecomService#handlePinMmi", e);
             }
