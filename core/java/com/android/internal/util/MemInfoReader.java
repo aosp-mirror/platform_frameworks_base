@@ -106,4 +106,8 @@ public final class MemInfoReader {
     public long getZramTotalSizeKb() {
         return mInfos[Debug.MEMINFO_ZRAM_TOTAL];
     }
+
+    public long[] getRawInfo() {
+        return mInfos;
+    }
 }
