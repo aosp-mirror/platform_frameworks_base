@@ -31,7 +31,17 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Provides access to Telecom-related functionality.
+ * Provides access to information about active calls and registration/call-management functionality.
+ * Apps can use methods in this class to determine the current call state. Apps can also register new
+ * {@link PhoneAccount}s and get a listing of existing {@link PhoneAccount}s.
+ * <p>
+ * Apps do not instantiate this class directly; instead, they retrieve a reference to an instance
+ * through {@link Context#getSystemService Context.getSystemService(Context.TELECOM_SERVICE)}.
+ * <p>
+ * Note that access to some telecom information is permission-protected. Your app cannot access the
+ * protected information or gain access to protected functionality unless it has the appropriate
+ * permissions declared in its manifest file. Where permissions apply, they are noted in the method
+ * descriptions.
  */
 public class TelecomManager {
 
@@ -583,7 +593,16 @@ public class TelecomManager {
     }
 
     /**
-     * Register a {@link PhoneAccount} for use by the system.
+     * Register a {@link PhoneAccount} for use by the system. When registering
+     * {@link PhoneAccount}s, existing registrations will be overwritten if the
+     * {@link PhoneAccountHandle} matches that of a {@link PhoneAccount} which is already
+     * registered. Once registered, the {@link PhoneAccount} is listed to the user as an option
+     * when placing calls. The user may still need to enable the {@link PhoneAccount} within
+     * the phone app settings before the account is usable.
+     * <p>
+     * A {@link SecurityException} will be thrown if an app tries to register a
+     * {@link PhoneAccountHandle} where the package name specified within
+     * {@link PhoneAccountHandle#getComponentName()} does not match the package name of the app.
      *
      * @param account The complete {@link PhoneAccount}.
      */
