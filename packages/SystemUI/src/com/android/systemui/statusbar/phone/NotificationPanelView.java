@@ -536,6 +536,14 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
+    @Override
+    protected boolean isInContentBounds(float x, float y) {
+        float yTransformed = y - mNotificationStackScroller.getY();
+        float stackScrollerX = mNotificationStackScroller.getX();
+        return mNotificationStackScroller.isInContentBounds(yTransformed) && stackScrollerX < x
+                && x < stackScrollerX + mNotificationStackScroller.getWidth();
+    }
+
     private void resetDownStates(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             mOnlyAffordanceInThisMotion = false;
