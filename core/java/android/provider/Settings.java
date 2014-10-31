@@ -872,8 +872,9 @@ public final class Settings {
 
     /**
      * Activity Action: Show battery saver settings.
-     *
-     * @hide
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_BATTERY_SAVER_SETTINGS
