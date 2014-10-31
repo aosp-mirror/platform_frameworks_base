@@ -1019,10 +1019,10 @@ please see themes_device_defaults.xml.
         <item name="textAppearance">@style/TextAppearance.Material</item>
         <item name="textAppearanceInverse">@style/TextAppearance.Material.Inverse</item>
 
-        <item name="listPreferredItemPaddingLeft">16dip</item>
-        <item name="listPreferredItemPaddingRight">16dip</item>
-        <item name="listPreferredItemPaddingStart">16dip</item>
-        <item name="listPreferredItemPaddingEnd">16dip</item>
+        <item name="listPreferredItemPaddingLeft">24dip</item>
+        <item name="listPreferredItemPaddingRight">24dip</item>
+        <item name="listPreferredItemPaddingStart">24dip</item>
+        <item name="listPreferredItemPaddingEnd">24dip</item>
 
         <item name="listDivider">@null</item>
 
@@ -1135,10 +1135,10 @@ please see themes_device_defaults.xml.
         <item name="textAppearance">@style/TextAppearance.Material</item>
         <item name="textAppearanceInverse">@style/TextAppearance.Material.Inverse</item>
 
-        <item name="listPreferredItemPaddingLeft">16dip</item>
-        <item name="listPreferredItemPaddingRight">16dip</item>
-        <item name="listPreferredItemPaddingStart">16dip</item>
-        <item name="listPreferredItemPaddingEnd">16dip</item>
+        <item name="listPreferredItemPaddingLeft">24dip</item>
+        <item name="listPreferredItemPaddingRight">24dip</item>
+        <item name="listPreferredItemPaddingStart">24dip</item>
+        <item name="listPreferredItemPaddingEnd">24dip</item>
 
         <item name="listDivider">@null</item>
 
