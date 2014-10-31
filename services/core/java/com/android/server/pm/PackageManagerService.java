@@ -3266,7 +3266,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         if (DEBUG_PREFERRED) {
                             Slog.v(TAG, "Preferred activity bookkeeping changed; writing restrictions");
                         }
-                        mSettings.writePackageRestrictionsLPr(userId);
+                        scheduleWritePackageRestrictionsLocked(userId);
                     }
                 }
             }
@@ -11566,7 +11566,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     + userId + ":");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
-            mSettings.writePackageRestrictionsLPr(userId);
+            scheduleWritePackageRestrictionsLocked(userId);
         }
     }
 
@@ -11682,8 +11682,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             int user = UserHandle.getCallingUserId();
             if (clearPackagePreferredActivitiesLPw(packageName, user)) {
-                mSettings.writePackageRestrictionsLPr(user);
-                scheduleWriteSettingsLocked();
+                scheduleWritePackageRestrictionsLocked(user);
             }
         }
     }
@@ -11733,8 +11732,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             int user = UserHandle.getCallingUserId();
             clearPackagePreferredActivitiesLPw(null, user);
             mSettings.readDefaultPreferredAppsLPw(this, user);
-            mSettings.writePackageRestrictionsLPr(user);
-            scheduleWriteSettingsLocked();
+            scheduleWritePackageRestrictionsLocked(user);
         }
     }
 
@@ -11786,7 +11784,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
             mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
                     new PersistentPreferredActivity(filter, activity));
-            mSettings.writePackageRestrictionsLPr(userId);
+            scheduleWritePackageRestrictionsLocked(userId);
         }
     }
 
@@ -11828,7 +11826,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (changed) {
-                mSettings.writePackageRestrictionsLPr(userId);
+                scheduleWritePackageRestrictionsLocked(userId);
             }
         }
     }
@@ -11849,7 +11847,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             CrossProfileIntentFilter filter = new CrossProfileIntentFilter(intentFilter,
                     ownerPackage, UserHandle.getUserId(callingUid), targetUserId, flags);
             mSettings.editCrossProfileIntentResolverLPw(sourceUserId).addFilter(filter);
-            mSettings.writePackageRestrictionsLPr(sourceUserId);
+            scheduleWritePackageRestrictionsLocked(sourceUserId);
         }
     }
 
@@ -11873,7 +11871,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     resolver.removeFilter(filter);
                 }
             }
-            mSettings.writePackageRestrictionsLPr(sourceUserId);
+            scheduleWritePackageRestrictionsLocked(sourceUserId);
         }
     }
 
