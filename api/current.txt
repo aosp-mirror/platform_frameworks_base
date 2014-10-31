@@ -28333,6 +28333,7 @@ package android.telecom {
     method public final java.util.List<android.telecom.Connection> getConferenceableConnections();
     method public final java.util.List<android.telecom.Connection> getConnections();
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
+    method public android.telecom.Connection getPrimaryConnection();
     method public final int getState();
     method public void onAudioStateChanged(android.telecom.AudioState);
     method public void onDisconnect();
@@ -28422,6 +28423,7 @@ package android.telecom {
   public abstract class ConnectionService extends android.app.Service {
     ctor public ConnectionService();
     method public final void addConference(android.telecom.Conference);
+    method public final void addExistingConnection(android.telecom.PhoneAccountHandle, android.telecom.Connection);
     method public final void conferenceRemoteConnections(android.telecom.RemoteConnection, android.telecom.RemoteConnection);
     method public final android.telecom.RemoteConnection createRemoteIncomingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
     method public final android.telecom.RemoteConnection createRemoteOutgoingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
@@ -28431,6 +28433,7 @@ package android.telecom {
     method public android.telecom.Connection onCreateIncomingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
     method public android.telecom.Connection onCreateOutgoingConnection(android.telecom.PhoneAccountHandle, android.telecom.ConnectionRequest);
     method public void onRemoteConferenceAdded(android.telecom.RemoteConference);
+    method public void onRemoteExistingConnectionAdded(android.telecom.RemoteConnection);
     field public static final java.lang.String SERVICE_INTERFACE = "android.telecom.ConnectionService";
   }
 
