@@ -508,7 +508,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         if (mAppearAnimator != null) {
             mAppearAnimator.cancel();
         }
-        mAnimationTranslationY = translationDirection * mActualHeight;
+        mAnimationTranslationY = translationDirection * getActualHeight();
         if (mAppearAnimationFraction == -1.0f) {
             // not initialized yet, we start anew
             if (isAppearing) {
@@ -601,14 +601,15 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
         float top;
         float bottom;
+        final int actualHeight = getActualHeight();
         if (mAnimationTranslationY > 0.0f) {
-            bottom = mActualHeight - heightFraction * mAnimationTranslationY * 0.1f
+            bottom = actualHeight - heightFraction * mAnimationTranslationY * 0.1f
                     - translateYTotalAmount;
             top = bottom * heightFraction;
         } else {
-            top = heightFraction * (mActualHeight + mAnimationTranslationY) * 0.1f -
+            top = heightFraction * (actualHeight + mAnimationTranslationY) * 0.1f -
                     translateYTotalAmount;
-            bottom = mActualHeight * (1 - heightFraction) + top * heightFraction;
+            bottom = actualHeight * (1 - heightFraction) + top * heightFraction;
         }
         mAppearAnimationRect.set(left, top, right, bottom);
         setOutlineRect(left, top + mAppearAnimationTranslation, right,
