@@ -1091,16 +1091,16 @@ please see styles_device_defaults.xml.
     <!-- Dialog styles -->
 
     <style name="AlertDialog.Material" parent="AlertDialog">
-        <item name="fullDark">@null</item>
-        <item name="topDark">@null</item>
-        <item name="centerDark">@null</item>
-        <item name="bottomDark">@null</item>
-        <item name="fullBright">@null</item>
-        <item name="topBright">@null</item>
-        <item name="centerBright">@null</item>
-        <item name="bottomBright">@null</item>
-        <item name="bottomMedium">@null</item>
-        <item name="centerMedium">@null</item>
+        <item name="fullDark">@empty</item>
+        <item name="topDark">@empty</item>
+        <item name="centerDark">@empty</item>
+        <item name="bottomDark">@empty</item>
+        <item name="fullBright">@empty</item>
+        <item name="topBright">@empty</item>
+        <item name="centerBright">@empty</item>
+        <item name="bottomBright">@empty</item>
+        <item name="bottomMedium">@empty</item>
+        <item name="centerMedium">@empty</item>
         <item name="layout">@layout/alert_dialog_material</item>
         <item name="listLayout">@layout/select_dialog_material</item>
         <item name="progressLayout">@layout/progress_dialog_material</item>
