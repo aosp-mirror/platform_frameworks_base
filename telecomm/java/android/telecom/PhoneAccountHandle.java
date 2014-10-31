@@ -23,7 +23,16 @@ import android.os.Parcelable;
 import java.util.Objects;
 
 /**
- * The unique identifier for a {@link PhoneAccount}.
+ * The unique identifier for a {@link PhoneAccount}. A {@code PhoneAccountHandle} is made of two
+ * parts:
+ * <ul>
+ *  <li>The component name of the associated {@link ConnectionService}.</li>
+ *  <li>A string identifier that is unique across {@code PhoneAccountHandle}s with the same
+ *      component name.</li>
+ * </ul>
+ *
+ * See {@link PhoneAccount},
+ * {@link TelecomManager#registerPhoneAccount TelecomManager.registerPhoneAccount}.
  */
 public class PhoneAccountHandle implements Parcelable {
     private ComponentName mComponentName;
