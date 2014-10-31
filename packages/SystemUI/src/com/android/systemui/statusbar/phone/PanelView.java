@@ -903,7 +903,7 @@ public abstract class PanelView extends FrameLayout {
      *
      * @return whether the panel will be expanded after the action performed by this method
      */
-    private boolean onEmptySpaceClick(float x) {
+    protected boolean onEmptySpaceClick(float x) {
         if (mHintAnimationRunning) {
             return true;
         }
