@@ -78,13 +78,8 @@ public final class PageContentRepository {
         public void onPageContentAvailable(BitmapDrawable content);
     }
 
-    public interface OnMalformedPdfFileListener {
-        public void onMalformedPdfFile();
-    }
-
-    public PageContentRepository(Context context,
-            OnMalformedPdfFileListener malformedPdfFileListener) {
-        mRenderer = new AsyncRenderer(context, malformedPdfFileListener);
+    public PageContentRepository(Context context) {
+        mRenderer = new AsyncRenderer(context);
         mState = STATE_CLOSED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_CLOSED");
@@ -92,7 +87,7 @@ public final class PageContentRepository {
         mCloseGuard.open("destroy");
     }
 
-    public void open(ParcelFileDescriptor source, final Runnable callback) {
+    public void open(ParcelFileDescriptor source, final OpenDocumentCallback callback) {
         throwIfNotClosed();
         mState = STATE_OPENED;
         if (DEBUG) {
@@ -412,8 +407,6 @@ public final class PageContentRepository {
 
         private final ArrayMap<Integer, RenderPageTask> mPageToRenderTaskMap = new ArrayMap<>();
 
-        private final OnMalformedPdfFileListener mOnMalformedPdfFileListener;
-
         private int mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
 
         @GuardedBy("mLock")
@@ -422,9 +415,8 @@ public final class PageContentRepository {
         private boolean mBoundToService;
         private boolean mDestroyed;
 
-        public AsyncRenderer(Context context, OnMalformedPdfFileListener malformedPdfFileListener) {
+        public AsyncRenderer(Context context) {
             mContext = context;
-            mOnMalformedPdfFileListener = malformedPdfFileListener;
 
             ActivityManager activityManager = (ActivityManager)
                     mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -447,7 +439,7 @@ public final class PageContentRepository {
             }
         }
 
-        public void open(final ParcelFileDescriptor source, final Runnable callback) {
+        public void open(final ParcelFileDescriptor source, final OpenDocumentCallback callback) {
             // Opening a new document invalidates the cache as it has pages
             // from the last document. We keep the cache even when the document
             // is closed to show pages while the other side is writing the new
@@ -483,7 +475,7 @@ public final class PageContentRepository {
                             return mRenderer.openDocument(source);
                         } catch (RemoteException re) {
                             Log.e(LOG_TAG, "Cannot open PDF document");
-                            return PdfManipulationService.MALFORMED_PDF_FILE_ERROR;
+                            return PdfManipulationService.ERROR_MALFORMED_PDF_FILE;
                         } finally {
                             // Close the fd as we passed it to another process
                             // which took ownership.
@@ -494,14 +486,25 @@ public final class PageContentRepository {
 
                 @Override
                 public void onPostExecute(Integer pageCount) {
-                    if (pageCount == PdfManipulationService.MALFORMED_PDF_FILE_ERROR) {
-                        mOnMalformedPdfFileListener.onMalformedPdfFile();
-                        mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
-                    } else {
-                        mPageCount = pageCount;
-                    }
-                    if (callback != null) {
-                        callback.run();
+                    switch (pageCount) {
+                        case PdfManipulationService.ERROR_MALFORMED_PDF_FILE: {
+                            mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
+                            if (callback != null) {
+                                callback.onFailure(OpenDocumentCallback.ERROR_MALFORMED_PDF_FILE);
+                            }
+                        } break;
+                        case PdfManipulationService.ERROR_SECURE_PDF_FILE: {
+                            mPageCount = PrintDocumentInfo.PAGE_COUNT_UNKNOWN;
+                            if (callback != null) {
+                                callback.onFailure(OpenDocumentCallback.ERROR_SECURE_PDF_FILE);
+                            }
+                        } break;
+                        default: {
+                            mPageCount = pageCount;
+                            if (callback != null) {
+                                callback.onSuccess();
+                            }
+                        } break;
                     }
                 }
             }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
