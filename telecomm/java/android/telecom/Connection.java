@@ -82,6 +82,9 @@ public abstract class Connection {
         public void onConferenceableConnectionsChanged(
                 Connection c, List<Connection> conferenceableConnections) {}
         public void onConferenceChanged(Connection c, Conference conference) {}
+        /** @hide */
+        public void onConferenceParticipantChanged(Connection c, ConferenceParticipant participant)
+        {}
     }
 
     /** @hide */
@@ -1116,5 +1119,17 @@ public abstract class Connection {
             c.removeConnectionListener(mConnectionDeathListener);
         }
         mConferenceableConnections.clear();
+    }
+
+    /**
+     * Notifies listeners of a change to a conference participant.
+     *
+     * @param conferenceParticipant The participant.
+     * @hide
+     */
+    protected final void updateConferenceParticipant(ConferenceParticipant conferenceParticipant) {
+        for (Listener l : mListeners) {
+            l.onConferenceParticipantChanged(this, conferenceParticipant);
+        }
     }
 }
