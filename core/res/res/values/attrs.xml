@@ -2363,6 +2363,18 @@
              representation this attribute can be used for providing such. -->
         <attr name="contentDescription" format="string" localization="suggested" />
 
+        <!-- Sets the id of a view before which this one is visited in accessibility traversal.
+             A screen-reader must visit the content of this view before the content of the one
+             it precedes.
+             @see android.view.View#setAccessibilityTraversalBefore(int)} -->
+        <attr name="accessibilityTraversalBefore" format="integer" />
+
+        <!-- Sets the id of a view after which this one is visited in accessibility traversal.
+             A screen-reader must visit the content of the other view before the content of
+             this one.
+             @see android.view.View#setAccessibilityTraversalAfter(int)} -->
+        <attr name="accessibilityTraversalAfter" format="integer" />
+
         <!-- Name of the method in this View's context to invoke when the view is
              clicked. This name must correspond to a public method that takes
              exactly one parameter of type View. For instance, if you specify
