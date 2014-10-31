@@ -158,6 +158,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
     static final int LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM = 3;
 
+    static final int MULTI_PRESS_POWER_NOTHING = 0;
+    static final int MULTI_PRESS_POWER_THEATER_MODE = 1;
+    static final int MULTI_PRESS_POWER_BRIGHTNESS_BOOST = 2;
+
     // These need to match the documentation/constant in
     // core/res/res/values/config.xml
     static final int LONG_PRESS_HOME_NOTHING = 0;
@@ -300,11 +304,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     };
 
     GlobalActions mGlobalActions;
-    volatile boolean mPowerKeyHandled; // accessed from input reader and handler thread
-    boolean mPendingPowerKeyUpCanceled;
     Handler mHandler;
     WindowState mLastInputMethodWindow = null;
     WindowState mLastInputMethodTargetWindow = null;
+
+    // FIXME This state is shared between the input reader and handler thread.
+    // Technically it's broken and buggy but it has been like this for many years
+    // and we have not yet seen any problems.  Someday we'll rewrite this logic
+    // so that only one thread is involved in handling input policy.  Unfortunately
+    // it's on a critical path for power management so we can't just post the work to the
+    // handler thread.  We'll need to resolve this someday by teaching the input dispatcher
+    // to hold wakelocks during dispatch and eliminating the critical path.
+    volatile boolean mPowerKeyHandled;
+    volatile int mPowerKeyPressCounter;
+    volatile boolean mEndCallKeyHandled;
 
     boolean mRecentsVisible;
     int mRecentAppsHeldModifiers;
@@ -345,8 +358,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidKeyboardAccessibility;
     int mLidNavigationAccessibility;
     boolean mLidControlsSleep;
-    int mShortPressOnPowerBehavior = -1;
-    int mLongPressOnPowerBehavior = -1;
+    int mShortPressOnPowerBehavior;
+    int mLongPressOnPowerBehavior;
+    int mDoublePressOnPowerBehavior;
+    int mTriplePressOnPowerBehavior;
     boolean mAwake;
     boolean mScreenOnEarly;
     boolean mScreenOnFully;
@@ -517,12 +532,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Increase the chord delay when taking a screenshot from the keyguard
     private static final float KEYGUARD_SCREENSHOT_CHORD_DELAY_MULTIPLIER = 2.5f;
     private boolean mScreenshotChordEnabled;
-    private boolean mVolumeDownKeyTriggered;
-    private long mVolumeDownKeyTime;
-    private boolean mVolumeDownKeyConsumedByScreenshotChord;
-    private boolean mVolumeUpKeyTriggered;
-    private boolean mPowerKeyTriggered;
-    private long mPowerKeyTime;
+    private boolean mScreenshotChordVolumeDownKeyTriggered;
+    private long mScreenshotChordVolumeDownKeyTime;
+    private boolean mScreenshotChordVolumeDownKeyConsumed;
+    private boolean mScreenshotChordVolumeUpKeyTriggered;
+    private boolean mScreenshotChordPowerKeyTriggered;
+    private long mScreenshotChordPowerKeyTime;
 
     /* The number of steps between min and max brightness */
     private static final int BRIGHTNESS_STEPS = 10;
@@ -530,6 +545,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     SettingsObserver mSettingsObserver;
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
+    PowerManager.WakeLock mPowerKeyWakeLock;
     boolean mHavePendingMediaKeyRepeatWithWakeLock;
 
     private int mCurrentUserId;
@@ -555,6 +571,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_DISPATCH_SHOW_GLOBAL_ACTIONS = 10;
     private static final int MSG_HIDE_BOOT_MESSAGE = 11;
     private static final int MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK = 12;
+    private static final int MSG_POWER_DELAYED_PRESS = 13;
+    private static final int MSG_POWER_LONG_PRESS = 14;
 
     private class PolicyHandler extends Handler {
         @Override
@@ -595,6 +613,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
                     launchVoiceAssistWithWakeLock(msg.arg1 != 0);
+                    break;
+                case MSG_POWER_DELAYED_PRESS:
+                    powerPress((Long)msg.obj, msg.arg1 != 0, msg.arg2);
+                    finishPowerKeyPress();
+                    break;
+                case MSG_POWER_LONG_PRESS:
+                    powerLongPress();
                     break;
             }
         }
@@ -789,38 +814,239 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void interceptPowerKeyDown(boolean handled) {
-        mPowerKeyHandled = handled;
-        if (!handled) {
-            mHandler.postDelayed(mPowerLongPress,
-                    ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+    private void interceptPowerKeyDown(KeyEvent event, boolean interactive) {
+        // Hold a wake lock until the power key is released.
+        if (!mPowerKeyWakeLock.isHeld()) {
+            mPowerKeyWakeLock.acquire();
+        }
+
+        // Cancel multi-press detection timeout.
+        if (mPowerKeyPressCounter != 0) {
+            mHandler.removeMessages(MSG_POWER_DELAYED_PRESS);
+        }
+
+        // Detect user pressing the power button in panic when an application has
+        // taken over the whole screen.
+        boolean panic = mImmersiveModeConfirmation.onPowerKeyDown(interactive,
+                event.getDownTime(), isImmersiveMode(mLastSystemUiFlags));
+        if (panic) {
+            mHandler.post(mRequestTransientNav);
+        }
+
+        // Latch power key state to detect screenshot chord.
+        if (interactive && !mScreenshotChordPowerKeyTriggered
+                && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
+            mScreenshotChordPowerKeyTriggered = true;
+            mScreenshotChordPowerKeyTime = event.getDownTime();
+            interceptScreenshotChord();
+        }
+
+        // Stop ringing or end call if configured to do so when power is pressed.
+        TelecomManager telecomManager = getTelecommService();
+        boolean hungUp = false;
+        if (telecomManager != null) {
+            if (telecomManager.isRinging()) {
+                // Pressing Power while there's a ringing incoming
+                // call should silence the ringer.
+                telecomManager.silenceRinger();
+            } else if ((mIncallPowerBehavior
+                    & Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
+                    && telecomManager.isInCall() && interactive) {
+                // Otherwise, if "Power button ends call" is enabled,
+                // the Power button will hang up any current active call.
+                hungUp = telecomManager.endCall();
+            }
+        }
+
+        // If the power key has still not yet been handled, then detect short
+        // press, long press, or multi press and decide what to do.
+        mPowerKeyHandled = hungUp || mScreenshotChordVolumeDownKeyTriggered
+                || mScreenshotChordVolumeUpKeyTriggered;
+        if (!mPowerKeyHandled) {
+            if (interactive) {
+                // When interactive, we're already awake.
+                // Wait for a long press or for the button to be released to decide what to do.
+                if (hasLongPressOnPowerBehavior()) {
+                    Message msg = mHandler.obtainMessage(MSG_POWER_LONG_PRESS);
+                    msg.setAsynchronous(true);
+                    mHandler.sendMessageDelayed(msg,
+                            ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+                }
+            } else {
+                // When non-interactive, we ordinarily wake up immediately and
+                // consume the key.  However on some devices we need to support multi-press
+                // without waking so we will delay handling for later in that case
+                // (at the cost of increased latency).
+                final int maxCount = getMaxMultiPressPowerCount();
+                if (maxCount <= 1) {
+                    // No other actions.  We can wake immediately.
+                    wakeUpFromPowerKey(event.getDownTime());
+                    mPowerKeyHandled = true;
+                }
+            }
         }
     }
 
-    private boolean interceptPowerKeyUp(boolean canceled) {
-        if (!mPowerKeyHandled) {
-            mHandler.removeCallbacks(mPowerLongPress);
-            return !canceled;
+    private void interceptPowerKeyUp(KeyEvent event, boolean interactive, boolean canceled) {
+        final boolean handled = canceled || mPowerKeyHandled;
+        mScreenshotChordPowerKeyTriggered = false;
+        cancelPendingScreenshotChordAction();
+        cancelPendingPowerKeyAction();
+
+        if (!handled) {
+            // Figure out how to handle the key now that it has been released.
+            mPowerKeyPressCounter += 1;
+
+            final int maxCount = getMaxMultiPressPowerCount();
+            final long eventTime = event.getDownTime();
+            if (mPowerKeyPressCounter < maxCount) {
+                // This could be a multi-press.  Wait a little bit longer to confirm.
+                // Continue holding the wake lock.
+                Message msg = mHandler.obtainMessage(MSG_POWER_DELAYED_PRESS,
+                        interactive ? 1 : 0, mPowerKeyPressCounter, eventTime);
+                msg.setAsynchronous(true);
+                mHandler.sendMessageDelayed(msg, ViewConfiguration.getDoubleTapTimeout());
+                return;
+            }
+
+            // No other actions.  Handle it immediately.
+            powerPress(eventTime, interactive, mPowerKeyPressCounter);
         }
-        return false;
+
+        // Done.  Reset our state.
+        finishPowerKeyPress();
+    }
+
+    private void finishPowerKeyPress() {
+        mPowerKeyPressCounter = 0;
+        if (mPowerKeyWakeLock.isHeld()) {
+            mPowerKeyWakeLock.release();
+        }
     }
 
     private void cancelPendingPowerKeyAction() {
         if (!mPowerKeyHandled) {
-            mHandler.removeCallbacks(mPowerLongPress);
+            mPowerKeyHandled = true;
+            mHandler.removeMessages(MSG_POWER_LONG_PRESS);
         }
-        if (mPowerKeyTriggered) {
-            mPendingPowerKeyUpCanceled = true;
+    }
+
+    private void powerPress(long eventTime, boolean interactive, int count) {
+        if (mScreenOnEarly && !mScreenOnFully) {
+            Slog.i(TAG, "Suppressed redundant power key press while "
+                    + "already in the process of turning the screen on.");
+            return;
         }
+
+        if (count == 2) {
+            powerMultiPressAction(eventTime, interactive, mDoublePressOnPowerBehavior);
+        } else if (count == 3) {
+            powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
+        } else if (!interactive) {
+            wakeUpFromPowerKey(eventTime);
+        } else {
+            switch (mShortPressOnPowerBehavior) {
+                case SHORT_PRESS_POWER_NOTHING:
+                    break;
+                case SHORT_PRESS_POWER_GO_TO_SLEEP:
+                    mPowerManager.goToSleep(eventTime,
+                            PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+                    break;
+                case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP:
+                    mPowerManager.goToSleep(eventTime,
+                            PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
+                            PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
+                    break;
+                case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME:
+                    mPowerManager.goToSleep(eventTime,
+                            PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
+                            PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
+                    launchHomeFromHotKey();
+                    break;
+            }
+        }
+    }
+
+    private void powerMultiPressAction(long eventTime, boolean interactive, int behavior) {
+        switch (behavior) {
+            case MULTI_PRESS_POWER_NOTHING:
+                break;
+            case MULTI_PRESS_POWER_THEATER_MODE:
+                if (isTheaterModeEnabled()) {
+                    Slog.i(TAG, "Toggling theater mode off.");
+                    Settings.Global.putInt(mContext.getContentResolver(),
+                            Settings.Global.THEATER_MODE_ON, 0);
+                    if (!interactive) {
+                        wakeUpFromPowerKey(eventTime);
+                    }
+                } else {
+                    Slog.i(TAG, "Toggling theater mode on.");
+                    Settings.Global.putInt(mContext.getContentResolver(),
+                            Settings.Global.THEATER_MODE_ON, 1);
+                    if (interactive) {
+                        mPowerManager.goToSleep(eventTime,
+                                PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+                    }
+                }
+                break;
+            case MULTI_PRESS_POWER_BRIGHTNESS_BOOST:
+                mPowerManager.boostScreenBrightness(eventTime);
+                break;
+        }
+    }
+
+    private int getMaxMultiPressPowerCount() {
+        if (mTriplePressOnPowerBehavior != MULTI_PRESS_POWER_NOTHING) {
+            return 3;
+        }
+        if (mDoublePressOnPowerBehavior != MULTI_PRESS_POWER_NOTHING) {
+            return 2;
+        }
+        return 1;
+    }
+
+    private void powerLongPress() {
+        final int behavior = getResolvedLongPressOnPowerBehavior();
+        switch (behavior) {
+        case LONG_PRESS_POWER_NOTHING:
+            break;
+        case LONG_PRESS_POWER_GLOBAL_ACTIONS:
+            mPowerKeyHandled = true;
+            if (!performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false)) {
+                performAuditoryFeedbackForAccessibilityIfNeed();
+            }
+            showGlobalActionsInternal();
+            break;
+        case LONG_PRESS_POWER_SHUT_OFF:
+        case LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM:
+            mPowerKeyHandled = true;
+            performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
+            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
+            mWindowManagerFuncs.shutdown(behavior == LONG_PRESS_POWER_SHUT_OFF);
+            break;
+        }
+    }
+
+    private int getResolvedLongPressOnPowerBehavior() {
+        if (FactoryTest.isLongPressOnPowerOffEnabled()) {
+            return LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
+        }
+        return mLongPressOnPowerBehavior;
+    }
+
+    private boolean hasLongPressOnPowerBehavior() {
+        return getResolvedLongPressOnPowerBehavior() != LONG_PRESS_POWER_NOTHING;
     }
 
     private void interceptScreenshotChord() {
         if (mScreenshotChordEnabled
-                && mVolumeDownKeyTriggered && mPowerKeyTriggered && !mVolumeUpKeyTriggered) {
+                && mScreenshotChordVolumeDownKeyTriggered && mScreenshotChordPowerKeyTriggered
+                && !mScreenshotChordVolumeUpKeyTriggered) {
             final long now = SystemClock.uptimeMillis();
-            if (now <= mVolumeDownKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS
-                    && now <= mPowerKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS) {
-                mVolumeDownKeyConsumedByScreenshotChord = true;
+            if (now <= mScreenshotChordVolumeDownKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS
+                    && now <= mScreenshotChordPowerKeyTime
+                            + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS) {
+                mScreenshotChordVolumeDownKeyConsumed = true;
                 cancelPendingPowerKeyAction();
 
                 mHandler.postDelayed(mScreenshotRunnable, getScreenshotChordLongPressDelay());
@@ -841,64 +1067,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.removeCallbacks(mScreenshotRunnable);
     }
 
-    private void powerShortPress(long eventTime) {
-        if (mShortPressOnPowerBehavior < 0) {
-            mShortPressOnPowerBehavior = mContext.getResources().getInteger(
-                    com.android.internal.R.integer.config_shortPressOnPowerBehavior);
-        }
-
-        switch (mShortPressOnPowerBehavior) {
-            case SHORT_PRESS_POWER_NOTHING:
-                break;
-            case SHORT_PRESS_POWER_GO_TO_SLEEP:
-                mPowerManager.goToSleep(eventTime,
-                        PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
-                break;
-            case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP:
-                mPowerManager.goToSleep(eventTime,
-                        PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
-                        PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
-                break;
-            case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME:
-                mPowerManager.goToSleep(eventTime,
-                        PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
-                        PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
-                launchHomeFromHotKey();
-                break;
-        }
-    }
-
-    private final Runnable mPowerLongPress = new Runnable() {
+    private final Runnable mEndCallLongPress = new Runnable() {
         @Override
         public void run() {
-            // The context isn't read
-            if (mLongPressOnPowerBehavior < 0) {
-                mLongPressOnPowerBehavior = mContext.getResources().getInteger(
-                        com.android.internal.R.integer.config_longPressOnPowerBehavior);
+            mEndCallKeyHandled = true;
+            if (!performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false)) {
+                performAuditoryFeedbackForAccessibilityIfNeed();
             }
-            int resolvedBehavior = mLongPressOnPowerBehavior;
-            if (FactoryTest.isLongPressOnPowerOffEnabled()) {
-                resolvedBehavior = LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM;
-            }
-
-            switch (resolvedBehavior) {
-            case LONG_PRESS_POWER_NOTHING:
-                break;
-            case LONG_PRESS_POWER_GLOBAL_ACTIONS:
-                mPowerKeyHandled = true;
-                if (!performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false)) {
-                    performAuditoryFeedbackForAccessibilityIfNeed();
-                }
-                showGlobalActionsInternal();
-                break;
-            case LONG_PRESS_POWER_SHUT_OFF:
-            case LONG_PRESS_POWER_SHUT_OFF_NO_CONFIRM:
-                mPowerKeyHandled = true;
-                performHapticFeedbackLw(null, HapticFeedbackConstants.LONG_PRESS, false);
-                sendCloseSystemWindows(SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS);
-                mWindowManagerFuncs.shutdown(resolvedBehavior == LONG_PRESS_POWER_SHUT_OFF);
-                break;
-            }
+            showGlobalActionsInternal();
         }
     };
 
@@ -939,6 +1115,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
     }
 
+    private void handleShortPressOnHome() {
+        // If there's a dream running then use home to escape the dream
+        // but don't actually go home.
+        if (mDreamManagerInternal != null && mDreamManagerInternal.isDreaming()) {
+            mDreamManagerInternal.stopDream(false /*immediate*/);
+            return;
+        }
+
+        // Go home!
+        launchHomeFromHotKey();
+    }
+
     private void handleLongPressOnHome() {
         if (mLongPressOnHomeBehavior != LONG_PRESS_HOME_NOTHING) {
             mHomeConsumed = true;
@@ -964,7 +1152,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void run() {
             if (mHomeDoubleTapPending) {
                 mHomeDoubleTapPending = false;
-                launchHomeFromHotKey();
+                handleShortPressOnHome();
             }
         }
     };
@@ -1007,6 +1195,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mBroadcastWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                 "PhoneWindowManager.mBroadcastWakeLock");
+        mPowerKeyWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "PhoneWindowManager.mPowerKeyWakeLock");
         mEnableShiftMenuBugReports = "1".equals(SystemProperties.get("ro.debuggable"));
         mSupportAutoRotation = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_supportAutoRotation);
@@ -1044,6 +1234,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromLidSwitch);
         mAllowTheaterModeWakeFromWakeGesture = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromGesture);
+
+        mShortPressOnPowerBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_shortPressOnPowerBehavior);
+        mLongPressOnPowerBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_longPressOnPowerBehavior);
+        mDoublePressOnPowerBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_doublePressOnPowerBehavior);
+        mTriplePressOnPowerBehavior = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_triplePressOnPowerBehavior);
 
         readConfigurationDependentBehaviors();
 
@@ -2187,17 +2386,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // but we're not sure, then tell the dispatcher to wait a little while and
         // try again later before dispatching.
         if (mScreenshotChordEnabled && (flags & KeyEvent.FLAG_FALLBACK) == 0) {
-            if (mVolumeDownKeyTriggered && !mPowerKeyTriggered) {
+            if (mScreenshotChordVolumeDownKeyTriggered && !mScreenshotChordPowerKeyTriggered) {
                 final long now = SystemClock.uptimeMillis();
-                final long timeoutTime = mVolumeDownKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS;
+                final long timeoutTime = mScreenshotChordVolumeDownKeyTime
+                        + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS;
                 if (now < timeoutTime) {
                     return timeoutTime - now;
                 }
             }
             if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
-                    && mVolumeDownKeyConsumedByScreenshotChord) {
+                    && mScreenshotChordVolumeDownKeyConsumed) {
                 if (!down) {
-                    mVolumeDownKeyConsumedByScreenshotChord = false;
+                    mScreenshotChordVolumeDownKeyConsumed = false;
                 }
                 return -1;
             }
@@ -2249,15 +2449,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return -1;
                 }
 
-                // If there's a dream running then use home to escape the dream
-                // but don't actually go home.
-                if (mDreamManagerInternal != null && mDreamManagerInternal.isDreaming()) {
-                    mDreamManagerInternal.stopDream(false /*immediate*/);
-                    return -1;
-                }
-
-                // Go home!
-                launchHomeFromHotKey();
+                handleShortPressOnHome();
                 return -1;
             }
 
@@ -2531,7 +2723,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return -1;
         }
 
-        if (mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
+        if (isValidGlobalKey(keyCode)
+                && mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
             return -1;
         }
 
@@ -4292,10 +4485,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // If the key would be handled globally, just return the result, don't worry about special
         // key processing.
-        if (mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
+        if (isValidGlobalKey(keyCode)
+                && mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
             if (isWakeKey) {
-                wakeUp(event.getEventTime(), keyCode == KeyEvent.KEYCODE_POWER
-                        ? mAllowTheaterModeWakeFromPowerKey : mAllowTheaterModeWakeFromKey);
+                wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey);
             }
             return result;
         }
@@ -4311,28 +4504,28 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                     if (down) {
-                        if (interactive && !mVolumeDownKeyTriggered
+                        if (interactive && !mScreenshotChordVolumeDownKeyTriggered
                                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
-                            mVolumeDownKeyTriggered = true;
-                            mVolumeDownKeyTime = event.getDownTime();
-                            mVolumeDownKeyConsumedByScreenshotChord = false;
+                            mScreenshotChordVolumeDownKeyTriggered = true;
+                            mScreenshotChordVolumeDownKeyTime = event.getDownTime();
+                            mScreenshotChordVolumeDownKeyConsumed = false;
                             cancelPendingPowerKeyAction();
                             interceptScreenshotChord();
                         }
                     } else {
-                        mVolumeDownKeyTriggered = false;
+                        mScreenshotChordVolumeDownKeyTriggered = false;
                         cancelPendingScreenshotChordAction();
                     }
                 } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                     if (down) {
-                        if (interactive && !mVolumeUpKeyTriggered
+                        if (interactive && !mScreenshotChordVolumeUpKeyTriggered
                                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
-                            mVolumeUpKeyTriggered = true;
+                            mScreenshotChordVolumeUpKeyTriggered = true;
                             cancelPendingPowerKeyAction();
                             cancelPendingScreenshotChordAction();
                         }
                     } else {
-                        mVolumeUpKeyTriggered = false;
+                        mScreenshotChordVolumeUpKeyTriggered = false;
                         cancelPendingScreenshotChordAction();
                     }
                 }
@@ -4389,20 +4582,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (telecomManager != null) {
                         hungUp = telecomManager.endCall();
                     }
-                    interceptPowerKeyDown(!interactive || hungUp);
+                    if (interactive && !hungUp) {
+                        mEndCallKeyHandled = false;
+                        mHandler.postDelayed(mEndCallLongPress,
+                                ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
+                    } else {
+                        mEndCallKeyHandled = true;
+                    }
                 } else {
-                    if (interceptPowerKeyUp(canceled)) {
-                        if ((mEndcallBehavior
-                                & Settings.System.END_BUTTON_BEHAVIOR_HOME) != 0) {
-                            if (goHome()) {
-                                break;
+                    if (!mEndCallKeyHandled) {
+                        mHandler.removeCallbacks(mEndCallLongPress);
+                        if (!canceled) {
+                            if ((mEndcallBehavior
+                                    & Settings.System.END_BUTTON_BEHAVIOR_HOME) != 0) {
+                                if (goHome()) {
+                                    break;
+                                }
                             }
-                        }
-                        if ((mEndcallBehavior
-                                & Settings.System.END_BUTTON_BEHAVIOR_SLEEP) != 0) {
-                            mPowerManager.goToSleep(event.getEventTime(),
-                                    PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
-                            isWakeKey = false;
+                            if ((mEndcallBehavior
+                                    & Settings.System.END_BUTTON_BEHAVIOR_SLEEP) != 0) {
+                                mPowerManager.goToSleep(event.getEventTime(),
+                                        PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+                                isWakeKey = false;
+                            }
                         }
                     }
                 }
@@ -4411,49 +4613,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             case KeyEvent.KEYCODE_POWER: {
                 result &= ~ACTION_PASS_TO_USER;
+                isWakeKey = false; // wake-up will be handled separately
                 if (down) {
-                    boolean panic = mImmersiveModeConfirmation.onPowerKeyDown(interactive,
-                            event.getDownTime(), isImmersiveMode(mLastSystemUiFlags));
-                    if (panic) {
-                        mHandler.post(mRequestTransientNav);
-                    }
-                    if (interactive && !mPowerKeyTriggered
-                            && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
-                        mPowerKeyTriggered = true;
-                        mPowerKeyTime = event.getDownTime();
-                        interceptScreenshotChord();
-                    }
-
-                    TelecomManager telecomManager = getTelecommService();
-                    boolean hungUp = false;
-                    if (telecomManager != null) {
-                        if (telecomManager.isRinging()) {
-                            // Pressing Power while there's a ringing incoming
-                            // call should silence the ringer.
-                            telecomManager.silenceRinger();
-                        } else if ((mIncallPowerBehavior
-                                & Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_HANGUP) != 0
-                                && telecomManager.isInCall() && interactive) {
-                            // Otherwise, if "Power button ends call" is enabled,
-                            // the Power button will hang up any current active call.
-                            hungUp = telecomManager.endCall();
-                        }
-                    }
-                    interceptPowerKeyDown(!interactive || hungUp
-                            || mVolumeDownKeyTriggered || mVolumeUpKeyTriggered);
+                    interceptPowerKeyDown(event, interactive);
                 } else {
-                    mPowerKeyTriggered = false;
-                    cancelPendingScreenshotChordAction();
-                    if (interceptPowerKeyUp(canceled || mPendingPowerKeyUpCanceled)) {
-                        if (mScreenOnEarly && !mScreenOnFully) {
-                            Slog.i(TAG, "Suppressed redundant power key press while "
-                                    + "already in the process of turning the screen on.");
-                        } else {
-                            powerShortPress(event.getEventTime());
-                        }
-                        isWakeKey = false;
-                    }
-                    mPendingPowerKeyUpCanceled = false;
+                    interceptPowerKeyUp(event, interactive, canceled);
                 }
                 break;
             }
@@ -4544,11 +4708,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (isWakeKey) {
-            wakeUp(event.getEventTime(), keyCode == KeyEvent.KEYCODE_POWER
-                    ? mAllowTheaterModeWakeFromPowerKey : mAllowTheaterModeWakeFromKey);
+            wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey);
         }
 
         return result;
+    }
+
+    /**
+     * Returns true if the key can have global actions attached to it.
+     * We reserve all power management keys for the system since they require
+     * very careful handling.
+     */
+    private static boolean isValidGlobalKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_POWER:
+            case KeyEvent.KEYCODE_WAKEUP:
+            case KeyEvent.KEYCODE_SLEEP:
+                return false;
+            default:
+                return true;
+        }
     }
 
     /**
@@ -4766,6 +4945,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onScreenTurnedOff(why);
         }
+    }
+
+    private void wakeUpFromPowerKey(long eventTime) {
+        wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey);
     }
 
     private void wakeUp(long wakeTime, boolean wakeInTheaterMode) {
@@ -5982,6 +6165,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix);
                 pw.print("mShortPressOnPowerBehavior="); pw.print(mShortPressOnPowerBehavior);
                 pw.print(" mLongPressOnPowerBehavior="); pw.println(mLongPressOnPowerBehavior);
+        pw.print(prefix);
+                pw.print("mDoublePressOnPowerBehavior="); pw.print(mDoublePressOnPowerBehavior);
+                pw.print(" mTriplePressOnPowerBehavior="); pw.println(mTriplePressOnPowerBehavior);
         pw.print(prefix); pw.print("mHasSoftInput="); pw.println(mHasSoftInput);
         pw.print(prefix); pw.print("mAwake="); pw.println(mAwake);
         pw.print(prefix); pw.print("mScreenOnEarly="); pw.print(mScreenOnEarly);
