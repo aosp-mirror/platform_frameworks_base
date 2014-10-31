@@ -36,7 +36,7 @@ public abstract class ExpandableView extends FrameLayout {
     private final int mMaxNotificationHeight;
 
     private OnHeightChangedListener mOnHeightChangedListener;
-    protected int mActualHeight;
+    private int mActualHeight;
     protected int mClipTopAmount;
     private boolean mActualHeightInitialized;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
@@ -101,6 +101,11 @@ public abstract class ExpandableView extends FrameLayout {
                 setActualHeight(initialHeight);
             }
         }
+    }
+
+    protected void resetHeight() {
+        mActualHeight = 0;
+        mActualHeightInitialized = false;
     }
 
     protected int getInitialHeight() {
