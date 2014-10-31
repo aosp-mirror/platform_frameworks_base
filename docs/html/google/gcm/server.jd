@@ -37,7 +37,7 @@ page.title=Implementing GCM Server
 </div>
 
 
-<p>The server side of GCM consists of 2 components:</p>
+<p>The server side of Google Cloud Messaging (GCM) consists of 2 components:</p>
 <ul>
 <li>Google-provided <strong>GCM Connection Servers</strong>
 take messages from a 3rd-party application server and send them to a GCM-enabled
@@ -168,36 +168,37 @@ column for information about which connection servers support that particular
 parameter.</p>
 
 <p class="table-caption" id="table1">
-  <strong>Table 1.</strong> Message parameters.</p>
+  <strong>Table 1.</strong> Message Parameters JSON (CCS and HTTP).</p>
 
 <table>
   <tr>
-    <th>Field</th>
+    <th>Parameter</th>
     <th>Description</th>
 <th>Where Supported</th>
 </tr>
   <td><code>to</code></td>
-<td>In CCS, used in place of <code>registration_ids</code> to specify the
-recipient of a message. Its value must be a registration ID.
+<td>In CCS, this parameter is used in place of <code>registration_ids</code> to
+specify the recipient of a message. Its value must be a registration ID.
 The value is a string. Required.</td>
 <td>CCS</td>
 </tr>
 <tr>
 <td><code>message_id</code></td>
-<td>In CCS, uniquely identifies a message in an XMPP connection. The value is a
-string that uniquely identifies the associated message. The value is a string. Required.</td>
+<td>In CCS, this parameter uniquely identifies a message in an XMPP connection.
+The value is a string that uniquely identifies the associated message. Required.</td>
 <td>CCS</td>
 </tr>
 <tr>
 <td><code>message_type</code></td>
-<td>In CCS, indicates a special status message, typically sent by the system.
+<td>In CCS, this parameter indicates a special status message, typically sent by the system.
 However, your app server also uses this parameter to send an 'ack' or 'nack'
 message back to the CCS connection server. For more discussion of this topic, see
 <a href="ccs.html">Cloud Connection Server</a>. The value is a string. Optional.</td>
 <td>CCS</td>
 <tr>
   <td><code>registration_ids</code></td>
-  <td>A string array with the list of devices (registration IDs) receiving the
+  <td>This parameter specifies a string array containing the list of devices
+(registration IDs) receiving the
 message. It must contain at least 1 and at most 1000 registration IDs. To send a
 multicast message, you must use JSON. For sending a single message to a single
 device, you could use a JSON object with just 1 registration id, or plain text
@@ -208,12 +209,13 @@ Required.</td>
 </tr>
  <tr>
     <td><code>notification_key</code></td>
-    <td>A string that maps a single user to multiple registration IDs associated
+    <td>This parameter specifies a string that maps a single user to multiple
+registration IDs associated
 with that user. This allows a 3rd-party server to send a single message to
 multiple app instances (typically on multiple devices) owned by a single user.
 A 3rd-party server can use {@code notification_key} as the target for a message
 instead of an individual registration ID (or array of registration IDs). The maximum
-number of members allowed for a {@code notification_key} is 10. For more discussion
+number of members allowed for a {@code notification_key} is 20. For more discussion
 of this topic, see <a href="notifications.html">User Notifications</a>. Optional.
 </td>
 <td style="width:100px">HTTP. This feature is supported in CCS, but you use it by
@@ -221,13 +223,14 @@ specifying a notification key in the &quot;to&quot; field.</td>
 </tr>
   <tr>
     <td><code>collapse_key</code></td>
-    <td>An arbitrary string (such as &quot;Updates Available&quot;) that is used
+    <td>This parameter specifies an arbitrary string (such as
+&quot;Updates Available&quot;) that is used
 to collapse a group of like messages
 when the device is offline, so that only the last message gets sent to the
 client. This is intended to avoid sending too many messages to the phone when it
 comes back online. Note that since there is no guarantee of the order in which
 messages get sent, the &quot;last&quot; message may not actually be the last
-message sent by the application server. Collapse keys are also called
+message sent by the application server. Messages with collapse keys are also called
 <a href="#s2s">send-to-sync messages</a>.
 <br>
 <strong>Note:</strong> GCM allows a maximum of 4 different collapse keys to be
@@ -242,8 +245,9 @@ discussion of this topic. Optional.</td>
 </tr>
   <tr>
     <td><code>data</code></td>
-    <td>A JSON object whose fields represents the key-value pairs of the message's
-payload data. If present, the payload data it will be
+    <td>This parameter specifies a JSON object whose fields represents the
+key-value pairs of the message's
+payload data. If present, the payload data will be
 included in the Intent as application data, with the key being the extra's name.
 For instance, <code>"data":{"score":"3x1"}</code> would result in an intent extra
 named <code>score</code> whose value is the string <code>3x1</code>.
@@ -253,17 +257,14 @@ recommend using strings, since the values will be converted to strings in the GC
 server anyway. If you want to include objects or other non-string data types
 (such as integers or booleans), you have to do the conversion to string yourself.
 Also note that the key cannot be a reserved word (<code>from</code> or any word
-starting with <code>google.</code>). To complicate things slightly, there are
-some reserved words (such as <code>collapse_key</code>) that are technically
-allowed in payload data. However, if the request also contains the word, the
-value in the request will overwrite the value in the payload data. Hence using
-words that are defined as field names in this table is not recommended, even in
-cases where they are technically allowed. Optional.</td>
+starting with <code>google.</code>). Using words defined in this table as field
+names (such as <code>collapse_key</code>) could yield unpredictable outcomes and
+is not recommended. Optional.</td>
 <td>CCS, HTTP</td>
 </tr>
   <tr>
     <td><code>delay_while_idle</code></td>
-    <td>If included, indicates that the message should not be sent immediately
+    <td>This parameter indicates that the message should not be sent immediately
 if the device is idle. The server will wait for the device to become active, and
 then only the last message for each <code>collapse_key</code> value will be
 sent. The default value is <code>false</code>, and must be a JSON boolean. Optional.</td>
@@ -271,26 +272,70 @@ sent. The default value is <code>false</code>, and must be a JSON boolean. Optio
 </tr>
   <tr>
     <td><code>time_to_live</code></td>
-    <td>How long (in seconds) the message should be kept on GCM storage if the
-device is offline. Optional (default time-to-live is 4 weeks, and must be set as
+    <td>This parameter specifies how long (in seconds) the message should be kept on GCM
+storage if the device is offline. Optional (default time-to-live is 4 weeks, and must be set as
 a JSON number).</td>
 <td>CCS, HTTP</td>
 </tr>
 <tr>
   <td><code>restricted_package_name</code></td>
-  <td>A string containing the package name of your application. When set, messages
-will only be sent to registration IDs that match the package name. Optional.
+  <td>This parameter specifies a string containing the package
+name of your application. When set, messages
+are only sent to registration IDs that match the package name. Optional.
   </td>
 <td>HTTP</td>
 </tr>
 <tr>
   <td><code>dry_run</code></td>
-  <td>If included, allows developers to test their request without actually
+  <td>This parameter allows developers to test a request without actually
 sending a message. Optional. The default value is <code>false</code>, and must
 be a JSON boolean.
   </td>
 <td>HTTP</td>
 </tr>
+<tr>
+  <td><code>delivery_receipt_requested</code></td>
+  <td>This parameter lets you request confirmation of message delivery. When
+this parameter is set to <code>true</code>, CCS sends a
+delivery receipt when a device confirms that it received a message sent by CCS.
+The default value is <code>false</code>, and must be a JSON boolean. Optional.<br />
+This parameter relates to <a href="{@docRoot}google/gcm/ccs.html#receipts"}>
+delivery receipts</a>.
+</td>
+  <td>CCS</td>
+</tr>
+<tr>
+  <td><code>message_status</code></td>
+  <td>This parameter specifies the status of the receipt message.
+The parameter appears inside the
+<code>&quot;data&quot;</code> field of a
+delivery receipt message. Currently the only possible value
+is <code>MESSAGE_SENT_TO_DEVICE</code>, which indicates that a device acknowledges
+receiving  a message sent by CCS.<br />
+This parameter relates to <a href="{@docRoot}google/gcm/ccs.html#receipts"}>
+delivery receipts</a>.</td>
+  <td>CCS</td>
+</tr>
+<tr>
+  <td><code>original_message_id</code></td>
+  <td>The value of this parameter is the ID of the original message that the server sent to
+the device. This parameter appears inside the <code>&quot;data&quot;</code> field of a
+delivery receipt message. <br />
+This parameter relates to <a href="{@docRoot}google/gcm/ccs.html#receipts"}>
+delivery receipts</a>.</td>
+  <td>CCS</td>
+</tr>
+<tr>
+  <td><code>device_registration_id</code></td>
+  <td>For the purpose of tracking the delivery receipt, this parameter lists
+the registration ID of the device to which a given message was sent. This parameter
+appears inside the <code>&quot;data&quot;</code> field of a
+delivery receipt message. <br />
+This parameter relates to <a href="{@docRoot}google/gcm/ccs.html#receipts"}>
+delivery receipts</a>.</td>
+  <td>CCS</td>
+</tr>
+
 </table>
 
 <p>If you want to test your request (either JSON or plain text) without delivering
@@ -298,21 +343,23 @@ the message to the devices, you can set an optional HTTP or JSON parameter calle
 <code>dry_run</code> with the value <code>true</code>. The result will be almost
 identical to running the request without this parameter, except that the message
 will not be delivered to the devices. Consequently, the response will contain fake
-IDs for the message and multicast fields.</p>
+IDs for the message and multicast parameters.</p>
 
-<h3 id="plain-text">Plain text (HTTP only)</h3>
-
-<p>If you are using plain text instead of JSON, the message fields must be set as
+<p>If you are using plain text instead of JSON, the message parameters must be set as
 HTTP parameters sent in the body, and their syntax is slightly different, as
-described below:
+described in the following table:
+
+<p class="table-caption" id="table2">
+  <strong>Table 2.</strong> Message Parameters Plain Text (HTTP only).</p>
 <table>
   <tr>
-    <th>Field</th>
+    <th>Parameter</th>
     <th>Description</th>
   </tr>
   <tr>
     <td><code>registration_id</code></td>
-    <td>Must contain the registration ID of the single device receiving the message.
+    <td>This parameter specifies the registration ID of the single device
+receiving the message.
 Required.</td>
   </tr>
   <tr>
@@ -322,24 +369,23 @@ Required.</td>
   <tr>
     <td><code>data.&lt;key&gt;</code></td>
 
-    <td>Payload data, expressed as parameters prefixed with <code>data.</code> and
+    <td>This parameter specifies payload data, expressed as parameters
+prefixed with <code>data.</code> and
 suffixed as the key. For instance, a parameter of <code>data.score=3x1</code> would
 result in an intent extra named <code>score</code> whose value is the string
 <code>3x1</code>. There is no limit on the number of key/value parameters, though
 there is a limit on the total size of the  message. Also note that the key cannot
 be a reserved word (<code>from</code> or any word starting with
-<code>google.</code>). To complicate things slightly, there are some reserved words
-(such as <code>collapse_key</code>) that are technically allowed in payload data.
-However, if the request also contains the word, the value in the request will
-overwrite the value in the payload data. Hence using words that are defined as
-field names in this table is not recommended, even in cases where they are
-technically allowed. Optional.</td>
+<code>google.</code>). Using words defined in this table as field
+names (such as <code>collapse_key</code>) could yield unpredictable outcomes and
+is not recommended. Optional.</td>
 
   </tr>
   <tr>
     <td><code>delay_while_idle</code></td>
-    <td>Should be represented as <code>1</code> or <code>true</code> for
-<code>true</code>, anything else for <code>false</code>. Optional. The default
+    <td>This parameter specifies whether messages should be delivered when the device
+is asleep. A value of <code>1</code> or <code>true</code> indicates
+<code>true</code>, and anything else indicates <code>false</code>. Optional. The default
 value is <code>false</code>.</td>
   </tr>
   <tr>
