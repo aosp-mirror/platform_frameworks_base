@@ -29,6 +29,7 @@ import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import android.app.AppOpsManager;
@@ -902,7 +903,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      */
     boolean isVisibleNow() {
         return mHasSurface && mPolicyVisibility && !mAttachedHidden
-                && !mRootToken.hidden && !mExiting && !mDestroying;
+                && (!mRootToken.hidden || mAttrs.type == TYPE_APPLICATION_STARTING)
+                && !mExiting && !mDestroying;
     }
 
     /**
