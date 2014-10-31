@@ -235,12 +235,7 @@ void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
         // waitForCompletion = true is expected to be fairly rare and only
         // happen in destruction. Thus it should be fine to temporarily
         // create a Mutex
-        Mutex mutex;
-        Condition condition;
-        SignalingRenderTask syncTask(task, &mutex, &condition);
-        AutoMutex _lock(mutex);
-        thread.queue(&syncTask);
-        condition.wait(mutex);
+        staticPostAndWait(task);
     } else {
         thread.queue(task);
     }
@@ -256,17 +251,6 @@ void RenderProxy::runWithGlContext(RenderTask* gltask) {
     args->context = mContext;
     args->task = gltask;
     postAndWait(task);
-}
-
-CREATE_BRIDGE1(destroyLayer, Layer* layer) {
-    LayerRenderer::destroyLayer(args->layer);
-    return NULL;
-}
-
-void RenderProxy::enqueueDestroyLayer(Layer* layer) {
-    SETUP_TASK(destroyLayer);
-    args->layer = layer;
-    RenderThread::getInstance().queue(task);
 }
 
 CREATE_BRIDGE2(createTextureLayer, RenderThread* thread, CanvasContext* context) {
@@ -400,6 +384,17 @@ void RenderProxy::dumpProfileInfo(int fd) {
     postAndWait(task);
 }
 
+CREATE_BRIDGE1(outputLogBuffer, int fd) {
+    RenderNode::outputLogBuffer(args->fd);
+    return NULL;
+}
+
+void RenderProxy::outputLogBuffer(int fd) {
+    SETUP_TASK(outputLogBuffer);
+    args->fd = fd;
+    staticPostAndWait(task);
+}
+
 CREATE_BRIDGE4(setTextureAtlas, RenderThread* thread, GraphicBuffer* buffer, int64_t* map, size_t size) {
     CanvasContext::setTextureAtlas(*args->thread, args->buffer, args->map, args->size);
     args->buffer->decStrong(0);
@@ -427,6 +422,19 @@ void* RenderProxy::postAndWait(MethodInvokeRenderTask* task) {
     AutoMutex _lock(mSyncMutex);
     mRenderThread.queue(&syncTask);
     mSyncCondition.wait(mSyncMutex);
+    return retval;
+}
+
+void* RenderProxy::staticPostAndWait(MethodInvokeRenderTask* task) {
+    RenderThread& thread = RenderThread::getInstance();
+    void* retval;
+    task->setReturnPtr(&retval);
+    Mutex mutex;
+    Condition condition;
+    SignalingRenderTask syncTask(task, &mutex, &condition);
+    AutoMutex _lock(mutex);
+    thread.queue(&syncTask);
+    condition.wait(mutex);
     return retval;
 }
 

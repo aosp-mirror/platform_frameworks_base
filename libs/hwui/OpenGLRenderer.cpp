@@ -512,11 +512,8 @@ void OpenGLRenderer::updateLayers() {
 
         // Note: it is very important to update the layers in order
         for (int i = 0; i < count; i++) {
-            Layer* layer = mLayerUpdates.itemAt(i);
+            Layer* layer = mLayerUpdates.itemAt(i).get();
             updateLayer(layer, false);
-            if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
-                mCaches.resourceCache.decrementRefcount(layer);
-            }
         }
 
         if (CC_UNLIKELY(mCaches.drawDeferDisabled)) {
@@ -535,7 +532,7 @@ void OpenGLRenderer::flushLayers() {
 
         // Note: it is very important to update the layers in order
         for (int i = 0; i < count; i++) {
-            Layer* layer = mLayerUpdates.itemAt(i);
+            Layer* layer = mLayerUpdates.itemAt(i).get();
 
             sprintf(layerName, "Layer #%d", i);
             startMark(layerName);
@@ -545,8 +542,6 @@ void OpenGLRenderer::flushLayers() {
 
             ATRACE_END();
             endMark();
-
-            mCaches.resourceCache.decrementRefcount(layer);
         }
 
         mLayerUpdates.clear();
@@ -568,7 +563,6 @@ void OpenGLRenderer::pushLayerUpdate(Layer* layer) {
             }
         }
         mLayerUpdates.push_back(layer);
-        mCaches.resourceCache.incrementRefcount(layer);
     }
 }
 
@@ -577,22 +571,9 @@ void OpenGLRenderer::cancelLayerUpdate(Layer* layer) {
         for (int i = mLayerUpdates.size() - 1; i >= 0; i--) {
             if (mLayerUpdates.itemAt(i) == layer) {
                 mLayerUpdates.removeAt(i);
-                mCaches.resourceCache.decrementRefcount(layer);
                 break;
             }
         }
-    }
-}
-
-void OpenGLRenderer::clearLayerUpdates() {
-    size_t count = mLayerUpdates.size();
-    if (count > 0) {
-        mCaches.resourceCache.lock();
-        for (size_t i = 0; i < count; i++) {
-            mCaches.resourceCache.decrementRefcountLocked(mLayerUpdates.itemAt(i));
-        }
-        mCaches.resourceCache.unlock();
-        mLayerUpdates.clear();
     }
 }
 
@@ -959,7 +940,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
     layer->setConvexMask(NULL);
     if (!mCaches.layerCache.put(layer)) {
         LAYER_LOGD("Deleting layer");
-        Caches::getInstance().resourceCache.decrementRefcount(layer);
+        layer->decStrong(0);
     }
 }
 

@@ -43,6 +43,7 @@
 #include <RenderNode.h>
 #include <CanvasProperty.h>
 #include <Paint.h>
+#include <renderthread/RenderProxy.h>
 
 #include "MinikinUtils.h"
 
@@ -856,7 +857,7 @@ static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
 #ifdef USE_OPENGL_RENDERER
     int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-    android::uirenderer::RenderNode::outputLogBuffer(fd);
+    android::uirenderer::renderthread::RenderProxy::outputLogBuffer(fd);
 #endif // USE_OPENGL_RENDERER
 }
 

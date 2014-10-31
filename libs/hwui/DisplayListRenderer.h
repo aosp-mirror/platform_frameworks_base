@@ -270,12 +270,6 @@ private:
         return regionCopy;
     }
 
-    inline Layer* refLayer(Layer* layer) {
-        mDisplayListData->layers.add(layer);
-        mCaches.resourceCache.incrementRefcount(layer);
-        return layer;
-    }
-
     inline const SkBitmap* refBitmap(const SkBitmap* bitmap) {
         // Note that this assumes the bitmap is immutable. There are cases this won't handle
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its

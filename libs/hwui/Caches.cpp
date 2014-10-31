@@ -266,14 +266,27 @@ void Caches::dumpMemoryUsage() {
 }
 
 void Caches::dumpMemoryUsage(String8 &log) {
+    uint32_t total = 0;
     log.appendFormat("Current memory usage / total memory usage (bytes):\n");
     log.appendFormat("  TextureCache         %8d / %8d\n",
             textureCache.getSize(), textureCache.getMaxSize());
     log.appendFormat("  LayerCache           %8d / %8d (numLayers = %zu)\n",
             layerCache.getSize(), layerCache.getMaxSize(), layerCache.getCount());
-    log.appendFormat("  Garbage layers       %8zu\n", mLayerGarbage.size());
-    log.appendFormat("  Active layers        %8zu\n",
-            mRenderState ? mRenderState->mActiveLayers.size() : 0);
+    if (mRenderState) {
+        int memused = 0;
+        for (std::set<const Layer*>::iterator it = mRenderState->mActiveLayers.begin();
+                it != mRenderState->mActiveLayers.end(); it++) {
+            const Layer* layer = *it;
+            log.appendFormat("    Layer size %dx%d; isTextureLayer()=%d; texid=%u fbo=%u; refs=%d\n",
+                    layer->getWidth(), layer->getHeight(),
+                    layer->isTextureLayer(), layer->getTexture(),
+                    layer->getFbo(), layer->getStrongCount());
+            memused = layer->getWidth() * layer->getHeight() * 4;
+        }
+        log.appendFormat("  Layers total   %8d (numLayers = %zu)\n",
+                memused, mRenderState->mActiveLayers.size());
+        total += memused;
+    }
     log.appendFormat("  RenderBufferCache    %8d / %8d\n",
             renderBufferCache.getSize(), renderBufferCache.getMaxSize());
     log.appendFormat("  GradientCache        %8d / %8d\n",
@@ -298,9 +311,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
     log.appendFormat("  FboCache             %8d / %8d\n",
             fboCache.getSize(), fboCache.getMaxSize());
 
-    uint32_t total = 0;
     total += textureCache.getSize();
-    total += layerCache.getSize();
     total += renderBufferCache.getSize();
     total += gradientCache.getSize();
     total += pathCache.getSize();
@@ -324,27 +335,6 @@ void Caches::clearGarbage() {
     textureCache.clearGarbage();
     pathCache.clearGarbage();
     patchCache.clearGarbage();
-
-    Vector<Layer*> layers;
-
-    { // scope for the lock
-        Mutex::Autolock _l(mGarbageLock);
-        layers = mLayerGarbage;
-        mLayerGarbage.clear();
-    }
-
-    size_t count = layers.size();
-    for (size_t i = 0; i < count; i++) {
-        Layer* layer = layers.itemAt(i);
-        delete layer;
-    }
-    layers.clear();
-}
-
-void Caches::deleteLayerDeferred(Layer* layer) {
-    Mutex::Autolock _l(mGarbageLock);
-    layer->state = Layer::kState_InGarbageList;
-    mLayerGarbage.push(layer);
 }
 
 void Caches::flush(FlushMode mode) {

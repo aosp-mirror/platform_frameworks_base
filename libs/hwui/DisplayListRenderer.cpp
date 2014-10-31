@@ -189,7 +189,7 @@ status_t DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty
 }
 
 status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y) {
-    layer = refLayer(layer);
+    mDisplayListData->ref(layer);
     addDrawOp(new (alloc()) DrawLayerOp(layer, x, y));
     return DrawGlInfo::kStatusDone;
 }
@@ -280,13 +280,13 @@ status_t DisplayListRenderer::drawRoundRect(
         CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
         CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
         CanvasPropertyPaint* paint) {
-    mDisplayListData->refProperty(left);
-    mDisplayListData->refProperty(top);
-    mDisplayListData->refProperty(right);
-    mDisplayListData->refProperty(bottom);
-    mDisplayListData->refProperty(rx);
-    mDisplayListData->refProperty(ry);
-    mDisplayListData->refProperty(paint);
+    mDisplayListData->ref(left);
+    mDisplayListData->ref(top);
+    mDisplayListData->ref(right);
+    mDisplayListData->ref(bottom);
+    mDisplayListData->ref(rx);
+    mDisplayListData->ref(ry);
+    mDisplayListData->ref(paint);
     addDrawOp(new (alloc()) DrawRoundRectPropsOp(&left->value, &top->value,
             &right->value, &bottom->value, &rx->value, &ry->value, &paint->value));
     return DrawGlInfo::kStatusDone;
@@ -300,10 +300,10 @@ status_t DisplayListRenderer::drawCircle(float x, float y, float radius, const S
 
 status_t DisplayListRenderer::drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
         CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint) {
-    mDisplayListData->refProperty(x);
-    mDisplayListData->refProperty(y);
-    mDisplayListData->refProperty(radius);
-    mDisplayListData->refProperty(paint);
+    mDisplayListData->ref(x);
+    mDisplayListData->ref(y);
+    mDisplayListData->ref(radius);
+    mDisplayListData->ref(paint);
     addDrawOp(new (alloc()) DrawCirclePropsOp(&x->value, &y->value,
             &radius->value, &paint->value));
     return DrawGlInfo::kStatusDone;

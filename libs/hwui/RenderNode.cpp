@@ -88,7 +88,11 @@ RenderNode::RenderNode()
 RenderNode::~RenderNode() {
     deleteDisplayListData();
     delete mStagingDisplayListData;
-    LayerRenderer::destroyLayerDeferred(mLayer);
+    if (mLayer) {
+        ALOGW("Memory Warning: Layer %p missed its detachment, held on to for far too long!", mLayer);
+        mLayer->postDecStrong();
+        mLayer = 0;
+    }
 }
 
 void RenderNode::setStagingDisplayList(DisplayListData* data) {
@@ -202,6 +206,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     info.damageAccumulator->peekAtDirty(&dirty);
 
     if (!mLayer) {
+        Caches::getInstance().dumpMemoryUsage();
         if (info.errorHandler) {
             std::string msg = "Unable to create layer for ";
             msg += getName();
