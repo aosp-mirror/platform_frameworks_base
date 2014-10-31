@@ -18,6 +18,7 @@ package android.content.res;
 
 import android.animation.Animator;
 import android.animation.StateListAnimator;
+import android.annotation.NonNull;
 import android.util.Pools.SynchronizedPool;
 import android.view.ViewDebug;
 import com.android.internal.util.XmlUtils;
@@ -1548,20 +1549,21 @@ public class Resources {
          * contents of the typed array are ultimately filled in by
          * {@link Resources#getValue}.
          *
-         * @param values The base set of attribute values, must be equal
-         *               in length to {@code attrs} or {@code null}. All values
-         *               must be of type {@link TypedValue#TYPE_ATTRIBUTE}.
+         * @param values The base set of attribute values, must be equal in
+         *               length to {@code attrs}. All values must be of type
+         *               {@link TypedValue#TYPE_ATTRIBUTE}.
          * @param attrs The desired attributes to be retrieved.
          * @return Returns a TypedArray holding an array of the attribute
          *         values. Be sure to call {@link TypedArray#recycle()}
          *         when done with it.
          * @hide
          */
-        public TypedArray resolveAttributes(int[] values, int[] attrs) {
+        @NonNull
+        public TypedArray resolveAttributes(@NonNull int[] values, @NonNull int[] attrs) {
             final int len = attrs.length;
-            if (values != null && len != values.length) {
+            if (values == null || len != values.length) {
                 throw new IllegalArgumentException(
-                        "Base attribute values must be null or the same length as attrs");
+                        "Base attribute values must the same length as attrs");
             }
 
             final TypedArray array = TypedArray.obtain(Resources.this, len);

@@ -114,7 +114,7 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
             return;
         }
 
-        if (state.mThemeAttrs == null) {
+        if (state.mThemeAttrs != null) {
             final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.ScaleDrawable);
             try {
                 updateStateFromTypedArray(a);
