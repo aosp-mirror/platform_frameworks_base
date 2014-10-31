@@ -312,6 +312,18 @@ public class TypedValue {
     }
 
     /**
+     * Return the complex unit type for this value. For example, a dimen type
+     * with value 12sp will return {@link #COMPLEX_UNIT_SP}. Only use for values
+     * whose type is {@link #TYPE_DIMENSION}.
+     *
+     * @return The complex unit type.
+     */
+     public int getComplexUnit()
+     {
+         return COMPLEX_UNIT_MASK & (data>>TypedValue.COMPLEX_UNIT_SHIFT);
+     }
+
+    /**
      * Converts an unpacked complex data value holding a dimension to its final floating 
      * point value. The two parameters <var>unit</var> and <var>value</var>
      * are as in {@link #TYPE_DIMENSION}.
