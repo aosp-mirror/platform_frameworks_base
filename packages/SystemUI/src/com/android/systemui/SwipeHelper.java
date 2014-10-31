@@ -311,11 +311,14 @@ public class SwipeHelper implements Gefingerpoken {
         final View animView = mCallback.getChildContentView(view);
         final boolean canAnimViewBeDismissed = mCallback.canChildBeDismissed(view);
         float newPos;
+        boolean isLayoutRtl = view.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
 
         if (velocity < 0
                 || (velocity == 0 && getTranslation(animView) < 0)
                 // if we use the Menu to dismiss an item in landscape, animate up
-                || (velocity == 0 && getTranslation(animView) == 0 && mSwipeDirection == Y)) {
+                || (velocity == 0 && getTranslation(animView) == 0 && mSwipeDirection == Y)
+                // if the language is rtl we prefer swiping to the left
+                || (velocity == 0 && getTranslation(animView) == 0 && isLayoutRtl)) {
             newPos = -getSize(animView);
         } else {
             newPos = getSize(animView);
