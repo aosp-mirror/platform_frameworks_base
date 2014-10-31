@@ -3133,9 +3133,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner to disable account management for a specific type of account.
+     * Called by a device owner or profile owner to disable account management for a specific type
+     * of account.
      *
-     * <p>The calling device admin must be a profile owner. If it is not, a
+     * <p>The calling device admin must be a device owner or profile owner. If it is not, a
      * security exception will be thrown.
      *
      * <p>When account management is disabled for an account type, adding or removing an account
