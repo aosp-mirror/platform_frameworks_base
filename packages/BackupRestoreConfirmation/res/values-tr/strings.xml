@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Lütfen cihazınızı şifrelemek için kullandığınız şifreyi aşağıya girin. Bu şifre aynı zamanda yedekleme arşivini şifrelemek için de kullanılacaktır."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Tam yedekleme verilerini şifrelemek için lütfen bir şifre girin. Boş bırakılırsa, mevcut yedekleme şifreniz kullanılır:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Yedeklenen tüm verileri şifrelemek isterseniz, aşağıya bir şifre girin:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Cihazınız şifrelenmiş olduğundan yedeklemenizi şifrelemeniz gerekmektedir. Lütfen şifreyi aşağıya girin:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Geri yükleme verileri şifreliyse, lütfen şifreyi aşağıya girin:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Yedekleme başlıyor..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Yedekleme işlemi sona erdi"</string>

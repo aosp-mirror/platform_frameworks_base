@@ -29,6 +29,7 @@
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"Masukkan sandi enkripsi perangkat Anda di bawah. Sandi ini juga akan digunakan untuk mengenkripsi arsip cadangan."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"Masukkan sandi yang digunakan untuk mengenkripsi data cadangan lengkap. Jika bidang ini dikosongkan, sandi cadangan Anda saat ini akan digunakan:"</string>
     <string name="backup_enc_password_optional" msgid="1350137345907579306">"Jika Anda ingin mengenkripsi data cadangan lengkap, masukkan sandi di bawah:"</string>
+    <string name="backup_enc_password_required" msgid="7889652203371654149">"Karena perangkat Anda dienkripsi, Anda perlu mengenkripsi cadangan. Masukkan sandi di bawah:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Jika data pemulihan dienkripsi, masukkan sandi di bawah:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Pencadangan dimulai..."</string>
     <string name="toast_backup_ended" msgid="3818080769548726424">"Pencadangan selesai"</string>
