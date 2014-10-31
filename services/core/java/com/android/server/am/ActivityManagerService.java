@@ -1606,197 +1606,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final ArrayList<ProcessMemInfo> memInfos = (ArrayList<ProcessMemInfo>)msg.obj;
                 Thread thread = new Thread() {
                     @Override public void run() {
-                        final SparseArray<ProcessMemInfo> infoMap
-                                = new SparseArray<ProcessMemInfo>(memInfos.size());
-                        for (int i=0, N=memInfos.size(); i<N; i++) {
-                            ProcessMemInfo mi = memInfos.get(i);
-                            infoMap.put(mi.pid, mi);
-                        }
-                        updateCpuStatsNow();
-                        synchronized (mProcessCpuTracker) {
-                            final int N = mProcessCpuTracker.countStats();
-                            for (int i=0; i<N; i++) {
-                                ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
-                                if (st.vsize > 0) {
-                                    long pss = Debug.getPss(st.pid, null);
-                                    if (pss > 0) {
-                                        if (infoMap.indexOfKey(st.pid) < 0) {
-                                            ProcessMemInfo mi = new ProcessMemInfo(st.name, st.pid,
-                                                    ProcessList.NATIVE_ADJ, -1, "native", null);
-                                            mi.pss = pss;
-                                            memInfos.add(mi);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        long totalPss = 0;
-                        for (int i=0, N=memInfos.size(); i<N; i++) {
-                            ProcessMemInfo mi = memInfos.get(i);
-                            if (mi.pss == 0) {
-                                mi.pss = Debug.getPss(mi.pid, null);
-                            }
-                            totalPss += mi.pss;
-                        }
-                        Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
-                            @Override public int compare(ProcessMemInfo lhs, ProcessMemInfo rhs) {
-                                if (lhs.oomAdj != rhs.oomAdj) {
-                                    return lhs.oomAdj < rhs.oomAdj ? -1 : 1;
-                                }
-                                if (lhs.pss != rhs.pss) {
-                                    return lhs.pss < rhs.pss ? 1 : -1;
-                                }
-                                return 0;
-                            }
-                        });
-
-                        StringBuilder tag = new StringBuilder(128);
-                        StringBuilder stack = new StringBuilder(128);
-                        tag.append("Low on memory -- ");
-                        appendMemBucket(tag, totalPss, "total", false);
-                        appendMemBucket(stack, totalPss, "total", true);
-
-                        StringBuilder logBuilder = new StringBuilder(1024);
-                        logBuilder.append("Low on memory:\n");
-
-                        boolean firstLine = true;
-                        int lastOomAdj = Integer.MIN_VALUE;
-                        for (int i=0, N=memInfos.size(); i<N; i++) {
-                            ProcessMemInfo mi = memInfos.get(i);
-
-                            if (mi.oomAdj != ProcessList.NATIVE_ADJ
-                                    && (mi.oomAdj < ProcessList.SERVICE_ADJ
-                                            || mi.oomAdj == ProcessList.HOME_APP_ADJ
-                                            || mi.oomAdj == ProcessList.PREVIOUS_APP_ADJ)) {
-                                if (lastOomAdj != mi.oomAdj) {
-                                    lastOomAdj = mi.oomAdj;
-                                    if (mi.oomAdj <= ProcessList.FOREGROUND_APP_ADJ) {
-                                        tag.append(" / ");
-                                    }
-                                    if (mi.oomAdj >= ProcessList.FOREGROUND_APP_ADJ) {
-                                        if (firstLine) {
-                                            stack.append(":");
-                                            firstLine = false;
-                                        }
-                                        stack.append("\n\t at ");
-                                    } else {
-                                        stack.append("$");
-                                    }
-                                } else {
-                                    tag.append(" ");
-                                    stack.append("$");
-                                }
-                                if (mi.oomAdj <= ProcessList.FOREGROUND_APP_ADJ) {
-                                    appendMemBucket(tag, mi.pss, mi.name, false);
-                                }
-                                appendMemBucket(stack, mi.pss, mi.name, true);
-                                if (mi.oomAdj >= ProcessList.FOREGROUND_APP_ADJ
-                                        && ((i+1) >= N || memInfos.get(i+1).oomAdj != lastOomAdj)) {
-                                    stack.append("(");
-                                    for (int k=0; k<DUMP_MEM_OOM_ADJ.length; k++) {
-                                        if (DUMP_MEM_OOM_ADJ[k] == mi.oomAdj) {
-                                            stack.append(DUMP_MEM_OOM_LABEL[k]);
-                                            stack.append(":");
-                                            stack.append(DUMP_MEM_OOM_ADJ[k]);
-                                        }
-                                    }
-                                    stack.append(")");
-                                }
-                            }
-
-                            logBuilder.append("  ");
-                            logBuilder.append(ProcessList.makeOomAdjString(mi.oomAdj));
-                            logBuilder.append(' ');
-                            logBuilder.append(ProcessList.makeProcStateString(mi.procState));
-                            logBuilder.append(' ');
-                            ProcessList.appendRamKb(logBuilder, mi.pss);
-                            logBuilder.append(" kB: ");
-                            logBuilder.append(mi.name);
-                            logBuilder.append(" (");
-                            logBuilder.append(mi.pid);
-                            logBuilder.append(") ");
-                            logBuilder.append(mi.adjType);
-                            logBuilder.append('\n');
-                            if (mi.adjReason != null) {
-                                logBuilder.append("                      ");
-                                logBuilder.append(mi.adjReason);
-                                logBuilder.append('\n');
-                            }
-                        }
-
-                        logBuilder.append("           ");
-                        ProcessList.appendRamKb(logBuilder, totalPss);
-                        logBuilder.append(" kB: TOTAL\n");
-
-                        long[] infos = new long[Debug.MEMINFO_COUNT];
-                        Debug.getMemInfo(infos);
-                        logBuilder.append("  MemInfo: ");
-                        logBuilder.append(infos[Debug.MEMINFO_SLAB]).append(" kB slab, ");
-                        logBuilder.append(infos[Debug.MEMINFO_SHMEM]).append(" kB shmem, ");
-                        logBuilder.append(infos[Debug.MEMINFO_VM_ALLOC_USED]).append(" kB vm alloc, ");
-                        logBuilder.append(infos[Debug.MEMINFO_PAGE_TABLES]).append(" kB page tables ");
-                        logBuilder.append(infos[Debug.MEMINFO_KERNEL_STACK]).append(" kB kernel stack\n");
-                        logBuilder.append("           ");
-                        logBuilder.append(infos[Debug.MEMINFO_BUFFERS]).append(" kB buffers, ");
-                        logBuilder.append(infos[Debug.MEMINFO_CACHED]).append(" kB cached, ");
-                        logBuilder.append(infos[Debug.MEMINFO_MAPPED]).append(" kB mapped, ");
-                        logBuilder.append(infos[Debug.MEMINFO_FREE]).append(" kB free\n");
-                        if (infos[Debug.MEMINFO_ZRAM_TOTAL] != 0) {
-                            logBuilder.append("  ZRAM: ");
-                            logBuilder.append(infos[Debug.MEMINFO_ZRAM_TOTAL]);
-                            logBuilder.append(" kB RAM, ");
-                            logBuilder.append(infos[Debug.MEMINFO_SWAP_TOTAL]);
-                            logBuilder.append(" kB swap total, ");
-                            logBuilder.append(infos[Debug.MEMINFO_SWAP_FREE]);
-                            logBuilder.append(" kB swap free\n");
-                        }
-                        Slog.i(TAG, logBuilder.toString());
-
-                        StringBuilder dropBuilder = new StringBuilder(1024);
-                        /*
-                        StringWriter oomSw = new StringWriter();
-                        PrintWriter oomPw = new FastPrintWriter(oomSw, false, 256);
-                        StringWriter catSw = new StringWriter();
-                        PrintWriter catPw = new FastPrintWriter(catSw, false, 256);
-                        String[] emptyArgs = new String[] { };
-                        dumpApplicationMemoryUsage(null, oomPw, "  ", emptyArgs, true, catPw);
-                        oomPw.flush();
-                        String oomString = oomSw.toString();
-                        */
-                        dropBuilder.append(stack);
-                        dropBuilder.append('\n');
-                        dropBuilder.append('\n');
-                        dropBuilder.append(logBuilder);
-                        dropBuilder.append('\n');
-                        /*
-                        dropBuilder.append(oomString);
-                        dropBuilder.append('\n');
-                        */
-                        StringWriter catSw = new StringWriter();
-                        synchronized (ActivityManagerService.this) {
-                            PrintWriter catPw = new FastPrintWriter(catSw, false, 256);
-                            String[] emptyArgs = new String[] { };
-                            catPw.println();
-                            dumpProcessesLocked(null, catPw, emptyArgs, 0, false, null);
-                            catPw.println();
-                            mServices.dumpServicesLocked(null, catPw, emptyArgs, 0,
-                                    false, false, null);
-                            catPw.println();
-                            dumpActivitiesLocked(null, catPw, emptyArgs, 0, false, false, null);
-                            catPw.flush();
-                        }
-                        dropBuilder.append(catSw.toString());
-                        addErrorToDropBox("lowmem", null, "system_server", null,
-                                null, tag.toString(), dropBuilder.toString(), null, null);
-                        //Slog.i(TAG, "Sent to dropbox:");
-                        //Slog.i(TAG, dropBuilder.toString());
-                        synchronized (ActivityManagerService.this) {
-                            long now = SystemClock.uptimeMillis();
-                            if (mLastMemUsageReportTime < now) {
-                                mLastMemUsageReportTime = now;
-                            }
-                        }
+                        reportMemUsage(memInfos);
                     }
                 };
                 thread.start();
@@ -13927,6 +13737,35 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private static final int KSM_SHARED = 0;
+    private static final int KSM_SHARING = 1;
+    private static final int KSM_UNSHARED = 2;
+    private static final int KSM_VOLATILE = 3;
+
+    private final long[] getKsmInfo() {
+        long[] longOut = new long[4];
+        final int[] SINGLE_LONG_FORMAT = new int[] {
+            Process.PROC_SPACE_TERM|Process.PROC_OUT_LONG
+        };
+        long[] longTmp = new long[1];
+        Process.readProcFile("/sys/kernel/mm/ksm/pages_shared",
+                SINGLE_LONG_FORMAT, null, longTmp, null);
+        longOut[KSM_SHARED] = longTmp[0] * ProcessList.PAGE_SIZE / 1024;
+        longTmp[0] = 0;
+        Process.readProcFile("/sys/kernel/mm/ksm/pages_sharing",
+                SINGLE_LONG_FORMAT, null, longTmp, null);
+        longOut[KSM_SHARING] = longTmp[0] * ProcessList.PAGE_SIZE / 1024;
+        longTmp[0] = 0;
+        Process.readProcFile("/sys/kernel/mm/ksm/pages_unshared",
+                SINGLE_LONG_FORMAT, null, longTmp, null);
+        longOut[KSM_UNSHARED] = longTmp[0] * ProcessList.PAGE_SIZE / 1024;
+        longTmp[0] = 0;
+        Process.readProcFile("/sys/kernel/mm/ksm/pages_volatile",
+                SINGLE_LONG_FORMAT, null, longTmp, null);
+        longOut[KSM_VOLATILE] = longTmp[0] * ProcessList.PAGE_SIZE / 1024;
+        return longOut;
+    }
+
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args, boolean brief, PrintWriter categoryPw) {
         boolean dumpDetails = false;
@@ -14272,7 +14111,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pw.print(" Free RAM: "); pw.print(cachedPss + memInfo.getCachedSizeKb()
                             + memInfo.getFreeSizeKb()); pw.print(" kB (");
                             pw.print(cachedPss); pw.print(" cached pss + ");
-                            pw.print(memInfo.getCachedSizeKb()); pw.print(" cached + ");
+                            pw.print(memInfo.getCachedSizeKb()); pw.print(" cached kernel + ");
                             pw.print(memInfo.getFreeSizeKb()); pw.println(" free)");
                 } else {
                     pw.print("ram,"); pw.print(memInfo.getTotalSizeKb()); pw.print(",");
@@ -14306,32 +14145,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 pw.println(memInfo.getSwapFreeSizeKb());
                     }
                 }
-                final int[] SINGLE_LONG_FORMAT = new int[] {
-                    Process.PROC_SPACE_TERM|Process.PROC_OUT_LONG
-                };
-                long[] longOut = new long[1];
-                Process.readProcFile("/sys/kernel/mm/ksm/pages_shared",
-                        SINGLE_LONG_FORMAT, null, longOut, null);
-                long shared = longOut[0] * ProcessList.PAGE_SIZE / 1024;
-                longOut[0] = 0;
-                Process.readProcFile("/sys/kernel/mm/ksm/pages_sharing",
-                        SINGLE_LONG_FORMAT, null, longOut, null);
-                long sharing = longOut[0] * ProcessList.PAGE_SIZE / 1024;
-                longOut[0] = 0;
-                Process.readProcFile("/sys/kernel/mm/ksm/pages_unshared",
-                        SINGLE_LONG_FORMAT, null, longOut, null);
-                long unshared = longOut[0] * ProcessList.PAGE_SIZE / 1024;
-                longOut[0] = 0;
-                Process.readProcFile("/sys/kernel/mm/ksm/pages_volatile",
-                        SINGLE_LONG_FORMAT, null, longOut, null);
-                long voltile = longOut[0] * ProcessList.PAGE_SIZE / 1024;
+                final long[] ksm = getKsmInfo();
                 if (!isCompact) {
-                    if (sharing != 0 || shared != 0 || unshared != 0 || voltile != 0) {
-                        pw.print("      KSM: "); pw.print(sharing);
+                    if (ksm[KSM_SHARING] != 0 || ksm[KSM_SHARED] != 0 || ksm[KSM_UNSHARED] != 0
+                            || ksm[KSM_VOLATILE] != 0) {
+                        pw.print("      KSM: "); pw.print(ksm[KSM_SHARING]);
                                 pw.print(" kB saved from shared ");
-                                pw.print(shared); pw.println(" kB");
-                        pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
-                                pw.print(voltile); pw.println(" kB volatile");
+                                pw.print(ksm[KSM_SHARED]); pw.println(" kB");
+                        pw.print("           "); pw.print(ksm[KSM_UNSHARED]);
+                                pw.print(" kB unshared; ");
+                                pw.print(ksm[KSM_VOLATILE]); pw.println(" kB volatile");
                     }
                     pw.print("   Tuning: ");
                     pw.print(ActivityManager.staticGetMemoryClass());
@@ -14351,9 +14174,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     pw.println();
                 } else {
-                    pw.print("ksm,"); pw.print(sharing); pw.print(",");
-                    pw.print(shared); pw.print(","); pw.print(unshared); pw.print(",");
-                    pw.println(voltile);
+                    pw.print("ksm,"); pw.print(ksm[KSM_SHARING]); pw.print(",");
+                    pw.print(ksm[KSM_SHARED]); pw.print(","); pw.print(ksm[KSM_UNSHARED]);
+                    pw.print(","); pw.println(ksm[KSM_VOLATILE]);
                     pw.print("tuning,");
                     pw.print(ActivityManager.staticGetMemoryClass());
                     pw.print(',');
@@ -14368,6 +14191,265 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                     pw.println();
                 }
+            }
+        }
+    }
+
+    private void appendBasicMemEntry(StringBuilder sb, int oomAdj, int procState, long pss,
+            String name) {
+        sb.append("  ");
+        sb.append(ProcessList.makeOomAdjString(oomAdj));
+        sb.append(' ');
+        sb.append(ProcessList.makeProcStateString(procState));
+        sb.append(' ');
+        ProcessList.appendRamKb(sb, pss);
+        sb.append(" kB: ");
+        sb.append(name);
+    }
+
+    private void appendMemInfo(StringBuilder sb, ProcessMemInfo mi) {
+        appendBasicMemEntry(sb, mi.oomAdj, mi.procState, mi.pss, mi.name);
+        sb.append(" (");
+        sb.append(mi.pid);
+        sb.append(") ");
+        sb.append(mi.adjType);
+        sb.append('\n');
+        if (mi.adjReason != null) {
+            sb.append("                      ");
+            sb.append(mi.adjReason);
+            sb.append('\n');
+        }
+    }
+
+    void reportMemUsage(ArrayList<ProcessMemInfo> memInfos) {
+        final SparseArray<ProcessMemInfo> infoMap = new SparseArray<>(memInfos.size());
+        for (int i=0, N=memInfos.size(); i<N; i++) {
+            ProcessMemInfo mi = memInfos.get(i);
+            infoMap.put(mi.pid, mi);
+        }
+        updateCpuStatsNow();
+        synchronized (mProcessCpuTracker) {
+            final int N = mProcessCpuTracker.countStats();
+            for (int i=0; i<N; i++) {
+                ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
+                if (st.vsize > 0) {
+                    long pss = Debug.getPss(st.pid, null);
+                    if (pss > 0) {
+                        if (infoMap.indexOfKey(st.pid) < 0) {
+                            ProcessMemInfo mi = new ProcessMemInfo(st.name, st.pid,
+                                    ProcessList.NATIVE_ADJ, -1, "native", null);
+                            mi.pss = pss;
+                            memInfos.add(mi);
+                        }
+                    }
+                }
+            }
+        }
+
+        long totalPss = 0;
+        for (int i=0, N=memInfos.size(); i<N; i++) {
+            ProcessMemInfo mi = memInfos.get(i);
+            if (mi.pss == 0) {
+                mi.pss = Debug.getPss(mi.pid, null);
+            }
+            totalPss += mi.pss;
+        }
+        Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
+            @Override public int compare(ProcessMemInfo lhs, ProcessMemInfo rhs) {
+                if (lhs.oomAdj != rhs.oomAdj) {
+                    return lhs.oomAdj < rhs.oomAdj ? -1 : 1;
+                }
+                if (lhs.pss != rhs.pss) {
+                    return lhs.pss < rhs.pss ? 1 : -1;
+                }
+                return 0;
+            }
+        });
+
+        StringBuilder tag = new StringBuilder(128);
+        StringBuilder stack = new StringBuilder(128);
+        tag.append("Low on memory -- ");
+        appendMemBucket(tag, totalPss, "total", false);
+        appendMemBucket(stack, totalPss, "total", true);
+
+        StringBuilder fullNativeBuilder = new StringBuilder(1024);
+        StringBuilder shortNativeBuilder = new StringBuilder(1024);
+        StringBuilder fullJavaBuilder = new StringBuilder(1024);
+
+        boolean firstLine = true;
+        int lastOomAdj = Integer.MIN_VALUE;
+        long extraNativeRam = 0;
+        long cachedPss = 0;
+        for (int i=0, N=memInfos.size(); i<N; i++) {
+            ProcessMemInfo mi = memInfos.get(i);
+
+            if (mi.oomAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
+                cachedPss += mi.pss;
+            }
+
+            if (mi.oomAdj != ProcessList.NATIVE_ADJ
+                    && (mi.oomAdj < ProcessList.SERVICE_ADJ
+                            || mi.oomAdj == ProcessList.HOME_APP_ADJ
+                            || mi.oomAdj == ProcessList.PREVIOUS_APP_ADJ)) {
+                if (lastOomAdj != mi.oomAdj) {
+                    lastOomAdj = mi.oomAdj;
+                    if (mi.oomAdj <= ProcessList.FOREGROUND_APP_ADJ) {
+                        tag.append(" / ");
+                    }
+                    if (mi.oomAdj >= ProcessList.FOREGROUND_APP_ADJ) {
+                        if (firstLine) {
+                            stack.append(":");
+                            firstLine = false;
+                        }
+                        stack.append("\n\t at ");
+                    } else {
+                        stack.append("$");
+                    }
+                } else {
+                    tag.append(" ");
+                    stack.append("$");
+                }
+                if (mi.oomAdj <= ProcessList.FOREGROUND_APP_ADJ) {
+                    appendMemBucket(tag, mi.pss, mi.name, false);
+                }
+                appendMemBucket(stack, mi.pss, mi.name, true);
+                if (mi.oomAdj >= ProcessList.FOREGROUND_APP_ADJ
+                        && ((i+1) >= N || memInfos.get(i+1).oomAdj != lastOomAdj)) {
+                    stack.append("(");
+                    for (int k=0; k<DUMP_MEM_OOM_ADJ.length; k++) {
+                        if (DUMP_MEM_OOM_ADJ[k] == mi.oomAdj) {
+                            stack.append(DUMP_MEM_OOM_LABEL[k]);
+                            stack.append(":");
+                            stack.append(DUMP_MEM_OOM_ADJ[k]);
+                        }
+                    }
+                    stack.append(")");
+                }
+            }
+
+            appendMemInfo(fullNativeBuilder, mi);
+            if (mi.oomAdj == ProcessList.NATIVE_ADJ) {
+                // The short form only has native processes that are >= 1MB.
+                if (mi.pss >= 1000) {
+                    appendMemInfo(shortNativeBuilder, mi);
+                } else {
+                    extraNativeRam += mi.pss;
+                }
+            } else {
+                // Short form has all other details, but if we have collected RAM
+                // from smaller native processes let's dump a summary of that.
+                if (extraNativeRam > 0) {
+                    appendBasicMemEntry(shortNativeBuilder, ProcessList.NATIVE_ADJ,
+                            -1, extraNativeRam, "(Other native)");
+                    shortNativeBuilder.append('\n');
+                    extraNativeRam = 0;
+                }
+                appendMemInfo(fullJavaBuilder, mi);
+            }
+        }
+
+        fullJavaBuilder.append("           ");
+        ProcessList.appendRamKb(fullJavaBuilder, totalPss);
+        fullJavaBuilder.append(" kB: TOTAL\n");
+
+        MemInfoReader memInfo = new MemInfoReader();
+        memInfo.readMemInfo();
+        final long[] infos = memInfo.getRawInfo();
+
+        StringBuilder memInfoBuilder = new StringBuilder(1024);
+        Debug.getMemInfo(infos);
+        memInfoBuilder.append("  MemInfo: ");
+        memInfoBuilder.append(infos[Debug.MEMINFO_SLAB]).append(" kB slab, ");
+        memInfoBuilder.append(infos[Debug.MEMINFO_SHMEM]).append(" kB shmem, ");
+        memInfoBuilder.append(infos[Debug.MEMINFO_VM_ALLOC_USED]).append(" kB vm alloc, ");
+        memInfoBuilder.append(infos[Debug.MEMINFO_PAGE_TABLES]).append(" kB page tables ");
+        memInfoBuilder.append(infos[Debug.MEMINFO_KERNEL_STACK]).append(" kB kernel stack\n");
+        memInfoBuilder.append("           ");
+        memInfoBuilder.append(infos[Debug.MEMINFO_BUFFERS]).append(" kB buffers, ");
+        memInfoBuilder.append(infos[Debug.MEMINFO_CACHED]).append(" kB cached, ");
+        memInfoBuilder.append(infos[Debug.MEMINFO_MAPPED]).append(" kB mapped, ");
+        memInfoBuilder.append(infos[Debug.MEMINFO_FREE]).append(" kB free\n");
+        if (infos[Debug.MEMINFO_ZRAM_TOTAL] != 0) {
+            memInfoBuilder.append("  ZRAM: ");
+            memInfoBuilder.append(infos[Debug.MEMINFO_ZRAM_TOTAL]);
+            memInfoBuilder.append(" kB RAM, ");
+            memInfoBuilder.append(infos[Debug.MEMINFO_SWAP_TOTAL]);
+            memInfoBuilder.append(" kB swap total, ");
+            memInfoBuilder.append(infos[Debug.MEMINFO_SWAP_FREE]);
+            memInfoBuilder.append(" kB swap free\n");
+        }
+        final long[] ksm = getKsmInfo();
+        if (ksm[KSM_SHARING] != 0 || ksm[KSM_SHARED] != 0 || ksm[KSM_UNSHARED] != 0
+                || ksm[KSM_VOLATILE] != 0) {
+            memInfoBuilder.append("  KSM: "); memInfoBuilder.append(ksm[KSM_SHARING]);
+            memInfoBuilder.append(" kB saved from shared ");
+            memInfoBuilder.append(ksm[KSM_SHARED]); memInfoBuilder.append(" kB\n");
+            memInfoBuilder.append("       "); memInfoBuilder.append(ksm[KSM_UNSHARED]);
+            memInfoBuilder.append(" kB unshared; ");
+            memInfoBuilder.append(ksm[KSM_VOLATILE]); memInfoBuilder.append(" kB volatile\n");
+        }
+        memInfoBuilder.append("  Free RAM: ");
+        memInfoBuilder.append(cachedPss + memInfo.getCachedSizeKb()
+                + memInfo.getFreeSizeKb());
+        memInfoBuilder.append(" kB\n");
+        memInfoBuilder.append("  Used RAM: ");
+        memInfoBuilder.append(totalPss - cachedPss + memInfo.getKernelUsedSizeKb());
+        memInfoBuilder.append(" kB\n");
+        memInfoBuilder.append("  Lost RAM: ");
+        memInfoBuilder.append(memInfo.getTotalSizeKb()
+                - totalPss - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                - memInfo.getKernelUsedSizeKb());
+        memInfoBuilder.append(" kB\n");
+        Slog.i(TAG, "Low on memory:");
+        Slog.i(TAG, shortNativeBuilder.toString());
+        Slog.i(TAG, fullJavaBuilder.toString());
+        Slog.i(TAG, memInfoBuilder.toString());
+
+        StringBuilder dropBuilder = new StringBuilder(1024);
+        /*
+        StringWriter oomSw = new StringWriter();
+        PrintWriter oomPw = new FastPrintWriter(oomSw, false, 256);
+        StringWriter catSw = new StringWriter();
+        PrintWriter catPw = new FastPrintWriter(catSw, false, 256);
+        String[] emptyArgs = new String[] { };
+        dumpApplicationMemoryUsage(null, oomPw, "  ", emptyArgs, true, catPw);
+        oomPw.flush();
+        String oomString = oomSw.toString();
+        */
+        dropBuilder.append("Low on memory:");
+        dropBuilder.append(stack);
+        dropBuilder.append('\n');
+        dropBuilder.append(fullNativeBuilder);
+        dropBuilder.append(fullJavaBuilder);
+        dropBuilder.append('\n');
+        dropBuilder.append(memInfoBuilder);
+        dropBuilder.append('\n');
+        /*
+        dropBuilder.append(oomString);
+        dropBuilder.append('\n');
+        */
+        StringWriter catSw = new StringWriter();
+        synchronized (ActivityManagerService.this) {
+            PrintWriter catPw = new FastPrintWriter(catSw, false, 256);
+            String[] emptyArgs = new String[] { };
+            catPw.println();
+            dumpProcessesLocked(null, catPw, emptyArgs, 0, false, null);
+            catPw.println();
+            mServices.dumpServicesLocked(null, catPw, emptyArgs, 0,
+                    false, false, null);
+            catPw.println();
+            dumpActivitiesLocked(null, catPw, emptyArgs, 0, false, false, null);
+            catPw.flush();
+        }
+        dropBuilder.append(catSw.toString());
+        addErrorToDropBox("lowmem", null, "system_server", null,
+                null, tag.toString(), dropBuilder.toString(), null, null);
+        //Slog.i(TAG, "Sent to dropbox:");
+        //Slog.i(TAG, dropBuilder.toString());
+        synchronized (ActivityManagerService.this) {
+            long now = SystemClock.uptimeMillis();
+            if (mLastMemUsageReportTime < now) {
+                mLastMemUsageReportTime = now;
             }
         }
     }
