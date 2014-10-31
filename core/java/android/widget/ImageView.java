@@ -386,21 +386,21 @@ public class ImageView extends View {
      */
     @android.view.RemotableViewMethod
     public void setImageResource(int resId) {
-        if (mUri != null || mResource != resId) {
-            final int oldWidth = mDrawableWidth;
-            final int oldHeight = mDrawableHeight;
+        // The resource configuration may have changed, so we should always
+        // try to load the resource even if the resId hasn't changed.
+        final int oldWidth = mDrawableWidth;
+        final int oldHeight = mDrawableHeight;
 
-            updateDrawable(null);
-            mResource = resId;
-            mUri = null;
+        updateDrawable(null);
+        mResource = resId;
+        mUri = null;
 
-            resolveUri();
+        resolveUri();
 
-            if (oldWidth != mDrawableWidth || oldHeight != mDrawableHeight) {
-                requestLayout();
-            }
-            invalidate();
+        if (oldWidth != mDrawableWidth || oldHeight != mDrawableHeight) {
+            requestLayout();
         }
+        invalidate();
     }
 
     /**
