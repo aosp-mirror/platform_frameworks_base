@@ -51,12 +51,17 @@
         <!-- If the client uses a customTitle, it will be added here. -->
     </LinearLayout>
 
-    <LinearLayout android:id="@+id/contentPanel"
+    <FrameLayout android:id="@+id/contentPanel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:orientation="vertical"
         android:minHeight="48dp">
+        <View android:id="@+id/scrollIndicatorUp"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="top"
+            android:background="@drawable/list_divider_material"/>
         <ScrollView android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -78,7 +83,13 @@
                        android:layout_height="@dimen/alert_dialog_padding_top_material" />
             </LinearLayout>
         </ScrollView>
-    </LinearLayout>
+        <View android:id="@+id/scrollIndicatorDown"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/list_divider_material"/>
+    </FrameLayout>
 
     <FrameLayout android:id="@+id/customPanel"
         android:layout_width="match_parent"
