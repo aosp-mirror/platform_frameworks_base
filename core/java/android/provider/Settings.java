@@ -6629,7 +6629,8 @@ public final class Settings {
             WIFI_NUM_OPEN_NETWORKS_KEPT,
             EMERGENCY_TONE,
             CALL_AUTO_RETRY,
-            DOCK_AUDIO_MEDIA_ENABLED
+            DOCK_AUDIO_MEDIA_ENABLED,
+            LOW_POWER_MODE_TRIGGER_LEVEL
         };
 
         // Populated lazily, guarded by class object:
