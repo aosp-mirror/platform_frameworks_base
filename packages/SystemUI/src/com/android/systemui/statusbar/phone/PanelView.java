@@ -70,6 +70,7 @@ public abstract class PanelView extends FrameLayout {
     private boolean mOverExpandedBeforeFling;
     private boolean mTouchAboveFalsingThreshold;
     private int mUnlockFalsingThreshold;
+    private boolean mTouchStartedInEmptyArea;
 
     private ValueAnimator mHeightAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -409,6 +410,7 @@ public abstract class PanelView extends FrameLayout {
                 }
                 mInitialTouchY = y;
                 mInitialTouchX = x;
+                mTouchStartedInEmptyArea = !isInContentBounds(x, y);
                 mTouchSlopExceeded = false;
                 mJustPeeked = false;
                 mPanelClosedOnDown = mExpandedHeight == 0.0f;
@@ -432,7 +434,7 @@ public abstract class PanelView extends FrameLayout {
             case MotionEvent.ACTION_MOVE:
                 final float h = y - mInitialTouchY;
                 trackMovement(event);
-                if (scrolledToBottom) {
+                if (scrolledToBottom || mTouchStartedInEmptyArea) {
                     if (h < -mTouchSlop && h < -Math.abs(x - mInitialTouchX)) {
                         cancelHeightAnimator();
                         mInitialOffsetOnTouch = mExpandedHeight;
@@ -451,6 +453,11 @@ public abstract class PanelView extends FrameLayout {
         }
         return false;
     }
+
+    /**
+     * @return Whether a pair of coordinates are inside the visible view content bounds.
+     */
+    protected abstract boolean isInContentBounds(float x, float y);
 
     private void cancelHeightAnimator() {
         if (mHeightAnimator != null) {
