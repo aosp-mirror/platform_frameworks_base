@@ -4587,13 +4587,6 @@ public final class Settings {
         public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
 
         /**
-         * (Experimental). If nonzero, WebView uses data reduction proxy to save network
-         * bandwidth. Otherwise, WebView does not use data reduction proxy.
-         * @hide
-         */
-        public static final String WEBVIEW_DATA_REDUCTION_PROXY = "webview_data_reduction_proxy";
-
-        /**
          * The {@link ComponentName} string of the service to be used as the voice recognition
          * service.
          *
