@@ -17,6 +17,7 @@
 package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.ConnectivityManager.TYPE_WIFI;
 
 import java.net.Inet4Address;
 
@@ -53,7 +54,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
     // ConnectivityService Handler for LinkProperties updates.
     private final Handler mHandler;
 
-    // The network we're running on.
+    // The network we're running on, and its type.
     private final NetworkAgentInfo mNetwork;
 
     // Internal state variables.
@@ -211,23 +212,41 @@ public class Nat464Xlat extends BaseNetworkObserver {
         return stacked;
     }
 
+    private LinkAddress getLinkAddress(String iface) {
+        try {
+            InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
+            return config.getLinkAddress();
+        } catch(RemoteException|IllegalStateException e) {
+            Slog.e(TAG, "Error getting link properties: " + e);
+            return null;
+        }
+    }
+
+    private void maybeSetIpv6NdOffload(String iface, boolean on) {
+        if (mNetwork.networkInfo.getType() != TYPE_WIFI) {
+            return;
+        }
+        try {
+            Slog.d(TAG, (on ? "En" : "Dis") + "abling ND offload on " + iface);
+            mNMService.setInterfaceIpv6NdOffload(iface, on);
+        } catch(RemoteException|IllegalStateException e) {
+            Slog.w(TAG, "Changing IPv6 ND offload on " + iface + "failed: " + e);
+        }
+    }
+
     @Override
     public void interfaceAdded(String iface) {
         // Called by the InterfaceObserver on its own thread, so can race with stop().
         if (isStarted() && mIface.equals(iface)) {
             Slog.i(TAG, "interface " + iface + " added, mIsRunning " + mIsRunning + "->true");
 
-            LinkAddress clatAddress;
-            try {
-                InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
-                clatAddress = config.getLinkAddress();
-            } catch(RemoteException e) {
-                Slog.e(TAG, "Error getting link properties: " + e);
-                return;
-            }
-
             if (!mIsRunning) {
+                LinkAddress clatAddress = getLinkAddress(iface);
+                if (clatAddress == null) {
+                    return;
+                }
                 mIsRunning = true;
+                maybeSetIpv6NdOffload(mBaseIface, false);
                 LinkProperties lp = new LinkProperties(mNetwork.linkProperties);
                 lp.addStackedLink(makeLinkProperties(clatAddress));
                 Slog.i(TAG, "Adding stacked link " + mIface + " on top of " + mBaseIface);
@@ -255,6 +274,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
                 } catch (RemoteException|IllegalStateException e) {
                     // Well, we tried.
                 }
+                maybeSetIpv6NdOffload(mBaseIface, true);
                 LinkProperties lp = new LinkProperties(mNetwork.linkProperties);
                 lp.removeStackedLink(mIface);
                 clear();
