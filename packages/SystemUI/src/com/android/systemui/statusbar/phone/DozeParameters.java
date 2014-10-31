@@ -48,6 +48,7 @@ public class DozeParameters {
         pw.print("    getDisplayStateSupported(): "); pw.println(getDisplayStateSupported());
         pw.print("    getPulseDuration(): "); pw.println(getPulseDuration());
         pw.print("    getPulseInDuration(): "); pw.println(getPulseInDuration());
+        pw.print("    getPulseInDelay(): "); pw.println(getPulseInDelay());
         pw.print("    getPulseInVisibleDuration(): "); pw.println(getPulseVisibleDuration());
         pw.print("    getPulseOutDuration(): "); pw.println(getPulseOutDuration());
         pw.print("    getPulseOnSigMotion(): "); pw.println(getPulseOnSigMotion());
