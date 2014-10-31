@@ -207,6 +207,6 @@ interface IAudioService {
 
     boolean isHdmiSystemAudioSupported();
 
-    boolean registerAudioPolicy(in AudioPolicyConfig policyConfig, IBinder cb);
+           String registerAudioPolicy(in AudioPolicyConfig policyConfig, IBinder cb);
     oneway void unregisterAudioPolicyAsync(in IBinder cb);
 }
