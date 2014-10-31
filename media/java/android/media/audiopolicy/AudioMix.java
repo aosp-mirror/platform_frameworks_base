@@ -24,13 +24,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * @hide CANDIDATE FOR PUBLIC API
+ * @hide
  */
 public class AudioMix {
 
     private AudioMixingRule mRule;
     private AudioFormat mFormat;
     private int mRouteFlags;
+    private String mRegistrationId;
 
     /**
      * All parameters are guaranteed valid through the Builder.
@@ -39,6 +40,7 @@ public class AudioMix {
         mRule = rule;
         mFormat = format;
         mRouteFlags = routeFlags;
+        mRegistrationId = null;
     }
 
     /**
@@ -63,6 +65,15 @@ public class AudioMix {
 
     AudioMixingRule getRule() {
         return mRule;
+    }
+
+    void setRegistration(String regId) {
+        mRegistrationId = regId;
+    }
+
+    /** @hide */
+    public String getRegistration() {
+        return mRegistrationId;
     }
 
     /** @hide */

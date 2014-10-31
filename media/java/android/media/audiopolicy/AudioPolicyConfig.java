@@ -36,7 +36,13 @@ public class AudioPolicyConfig implements Parcelable {
 
     private static final String TAG = "AudioPolicyConfig";
 
-    ArrayList<AudioMix> mMixes;
+    protected ArrayList<AudioMix> mMixes;
+
+    protected String mRegistrationId = null;
+
+    protected AudioPolicyConfig(AudioPolicyConfig conf) {
+        mMixes = conf.mMixes;
+    }
 
     AudioPolicyConfig(ArrayList<AudioMix> mixes) {
         mMixes = mixes;
@@ -117,7 +123,6 @@ public class AudioPolicyConfig implements Parcelable {
         }
     }
 
-    /** @hide */
     public static final Parcelable.Creator<AudioPolicyConfig> CREATOR
             = new Parcelable.Creator<AudioPolicyConfig>() {
         /**
@@ -133,9 +138,7 @@ public class AudioPolicyConfig implements Parcelable {
         }
     };
 
-    /** @hide */
-    @Override
-    public String toString () {
+    public String toLogFriendlyString () {
         String textDump = new String("android.media.audiopolicy.AudioPolicyConfig:\n");
         textDump += mMixes.size() + " AudioMix:\n";
         for(AudioMix mix : mMixes) {
@@ -166,4 +169,13 @@ public class AudioPolicyConfig implements Parcelable {
         }
         return textDump;
     }
+
+    public void setRegistration(String regId) {
+        mRegistrationId = regId;
+        int mixIndex = 0;
+        for (AudioMix mix : mMixes) {
+            mix.setRegistration(mRegistrationId + "mix:" + mixIndex++);
+        }
+    }
+
 }
