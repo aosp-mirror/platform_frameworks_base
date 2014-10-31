@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> cố gắng tạo kết nối VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"Khi tiếp tục, bạn sẽ cho phép ứng dụng cấp quyền ngăn chặn tất cả lưu lượng mạng. "<b>"KHÔNG chấp nhận trừ khi bạn tin cậy ứng dụng."</b>" Nếu không, bạn có nguy cơ bị phần mềm độc hại xâm phạm dữ liệu."</string>
-    <string name="accept" msgid="2889226408765810173">"Tôi tin cậy ứng dụng này."</string>
+    <string name="prompt" msgid="3183836924226407828">"Yêu cầu kết nối"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> muốn thiết lập kết nối VPN cho phép ứng dụng giám sát lưu lượng truy cập mạng. Chỉ chấp nhận nếu bạn tin tưởng nguồn. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; xuất hiện ở đầu màn hình của bạn khi VPN đang hoạt động."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN được kết nối"</string>
     <string name="configure" msgid="4905518375574791375">"Định cấu hình"</string>
     <string name="disconnect" msgid="971412338304200056">"Ngắt kết nối"</string>

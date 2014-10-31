@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"Η εφαρμογή <xliff:g id="APP">%s</xliff:g> επιχειρεί να δημιουργήσει μια σύνδεση VPN."</string>
-    <string name="warning" msgid="5470743576660160079">"Αν συνεχίσετε, θα παραχωρήσετε στην εφαρμογή την άδεια να παρεμβάλλεται σε όλη την κυκλοφορία του δικτύου. "<b>"ΜΗΝ αποδεχθείτε, εκτός και αν θεωρείτε την εφαρμογή αξιόπιστη."</b>" Διαφορετικά, διατρέχετε τον κίνδυνο παραβίασης των δεδομένων σας από κακόβουλο λογισμικό."</string>
-    <string name="accept" msgid="2889226408765810173">"Θεωρώ αυτήν την εφαρμογή αξιόπιστη."</string>
+    <string name="prompt" msgid="3183836924226407828">"Αίτημα σύνδεσης"</string>
+    <string name="warning" msgid="809658604548412033">"Η εφαρμογή <xliff:g id="APP">%s</xliff:g> επιθυμεί να ρυθμίσει μια σύνδεση VPN που της επιτρέπει να παρακολουθεί την επισκεψιμότητα του δικτύου. Αποδεχτείτε το αίτημα μόνο εάν εμπιστεύεστε την πηγή. Το εικονίδιο &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; εμφανίζεται στο επάνω μέρος της οθόνης σας όταν είναι ενεργό το VPN."</string>
     <string name="legacy_title" msgid="192936250066580964">"Το VPN συνδέθηκε"</string>
     <string name="configure" msgid="4905518375574791375">"Διαμόρφωση"</string>
     <string name="disconnect" msgid="971412338304200056">"Αποσύνδεση"</string>

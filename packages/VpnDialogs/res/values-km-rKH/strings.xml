@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> ព្យាយាម​បង្កើត​ការ​តភ្ជាប់ VPN ។"</string>
-    <string name="warning" msgid="5470743576660160079">"ដោយ​បន្ត អ្នក​កំពុង​ផ្ដល់​សិទ្ធិ​ឲ្យ​កម្មវិធី​ទប់ស្កាត់​ចរាចរណ៍​បណ្ដាញ។ "<b>"កុំ​ទទួល​ លុះ​ត្រា​តែ​អ្នក​ទុក​ចិត្ត​កម្មវិធី។"</b>" បើ​មិន​ដូច្នេះ​ទេ អ្នក​ដំណើរការ​ប្រឈម​នឹង​គ្រោះថ្នាក់ ដោយ​ទិន្នន័យ​របស់​អ្នក​បាន​សម្របសម្រួល​ដោយ​កម្មវិធី​ព្យាបាទ។"</string>
-    <string name="accept" msgid="2889226408765810173">"ខ្ញុំ​ទុកចិត្ត​​​កម្មវិធី​នេះ​។"</string>
+    <string name="prompt" msgid="3183836924226407828">"សំណើ​សុំ​ការ​តភ្ជាប់"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ចង់​បង្កើត​ការ​តភ្ជាប់ VPN ដែល​អនុញ្ញាត​ឲ្យ​វា​ត្រួតពិនិត្យ​ចរាចរ​បណ្ដាញ។ ព្រម​ទទួល ប្រសិនបើ​អ្នក​ទុកចិត្ត​លើ​ប្រភព​តែប៉ុណ្ណោះ។ &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; នឹង​លេចឡើង​នៅ​ផ្នែក​ខាងលើ​នៃ​អេក្រង់​របស់​អ្នក ពេល VPN សកម្ម។"</string>
     <string name="legacy_title" msgid="192936250066580964">"បា​ន​ភ្ជាប់ VPN"</string>
     <string name="configure" msgid="4905518375574791375">"កំណត់​រចនាសម្ព័ន្ធ"</string>
     <string name="disconnect" msgid="971412338304200056">"ផ្ដាច់"</string>

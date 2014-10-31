@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g>でVPN接続を作成します。"</string>
-    <string name="warning" msgid="5470743576660160079">"続行すると、すべてのネットワークトラフィックの傍受をアプリケーションに許可することになります。"<b>"信頼できるアプリケーションでない限り、同意しないでください。"</b>"誤って同意した場合は、不正なソフトウェアによりデータが不正使用される危険があります。"</string>
-    <string name="accept" msgid="2889226408765810173">"このアプリケーションを信頼できるものとみなします。"</string>
+    <string name="prompt" msgid="3183836924226407828">"接続リクエスト"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g>がネットワークトラフィックを監視するためVPN接続をセットアップしようとしています。ソースを信頼できる場合にのみ許可してください。&lt;br /&gt; &lt;br /&gt; VPNがアクティブになると画面の上部に&lt;img src=vpn_icon /&gt;が表示されます。"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN接続済み"</string>
     <string name="configure" msgid="4905518375574791375">"設定"</string>
     <string name="disconnect" msgid="971412338304200056">"切断"</string>

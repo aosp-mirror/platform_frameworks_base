@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> покушава да направи VPN везу."</string>
-    <string name="warning" msgid="5470743576660160079">"Ако наставите, дајете апликацији дозволу да пресреће сав мрежни саобраћај. "<b>"НЕМОЈТЕ да прихватате ово осим уколико немате поверења у апликацију."</b>" У супротном, ризикујете да вам податке угрози злонамерни софтвер."</string>
-    <string name="accept" msgid="2889226408765810173">"Имам поверења у ову апликацију."</string>
+    <string name="prompt" msgid="3183836924226407828">"Захтев за повезивање"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> жели да подеси VPN везу која омогућава праћење саобраћаја на мрежи. Прихватите само ако верујете извору. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; се приказује у врху екрана када је VPN активан."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN је повезан"</string>
     <string name="configure" msgid="4905518375574791375">"Конфигуриши"</string>
     <string name="disconnect" msgid="971412338304200056">"Прекини везу"</string>

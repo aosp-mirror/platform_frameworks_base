@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"VPN සම්බන්ධතාවයක් සැදීමට <xliff:g id="APP">%s</xliff:g> උත්සාහ කරයි."</string>
-    <string name="warning" msgid="5470743576660160079">"ඉදිරියට යාමෙන්, සියලු ජාල තදබදය මගදී අල්ලා ගැනීමට ඔබ යෙදුමට අවසර දෙයි. "<b>"ඔබ යෙදුම විශ්වාස නොකරයි නම් පිළිගන්න එපා"</b>" නැතහොත්, අනිෂ්ට මෘදුකාංගයක් මඟින් ඔබගේ දත්ත නිරාවරණය වීමේ අවදානමක් ඔබට ඇත."</string>
-    <string name="accept" msgid="2889226408765810173">"මෙම යෙදුම මට විශ්වාසයි."</string>
+    <string name="prompt" msgid="3183836924226407828">"සම්බන්ධතා ඉල්ලීම"</string>
+    <string name="warning" msgid="809658604548412033">"ජාල තදබදය නිරීක්ෂණය කිරීමට ඉඩ දෙන VPN සම්බන්ධතාවක් සැකසීමට <xliff:g id="APP">%s</xliff:g> අවශ්‍යය වේ. ප්‍රභවය ඔබ විශ්වාස කරන්නේ නම් පමණක් පිළිගන්න. VPN සක්‍රිය විට &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt;."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN සම්බන්ධිතයි"</string>
     <string name="configure" msgid="4905518375574791375">"වින්‍යාස කිරීම"</string>
     <string name="disconnect" msgid="971412338304200056">"විසන්ධි කරන්න"</string>

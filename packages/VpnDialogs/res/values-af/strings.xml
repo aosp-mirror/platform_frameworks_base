@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> pogings om \'n VPN-verbinding te skep."</string>
-    <string name="warning" msgid="5470743576660160079">"Deur voort te gaan, gee jy die program toestemming om alle netwerkverkeer te onderskep. "<b>"Moenie aanvaar nie, tensy jy die program vertrou."</b>"Jy loop andersins die risiko dat jou gekompromitteer word deur \'n kwaadwillige sagteware."</string>
-    <string name="accept" msgid="2889226408765810173">"Ek vertrou hierdie program."</string>
+    <string name="prompt" msgid="3183836924226407828">"Verbindingversoek"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> wil \'n VPN-verbinding opstel wat dit sal toelaat om netwerkverkeer te monitor. Aanvaar dit net as jy die bron vertrou. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; verskyn boaan jou skerm as VPN aktief is."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN is gekoppel"</string>
     <string name="configure" msgid="4905518375574791375">"Stel op"</string>
     <string name="disconnect" msgid="971412338304200056">"Ontkoppel"</string>

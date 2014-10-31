@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> একটি VPN সংযোগ স্থাপনের চেষ্টা করছে৷"</string>
-    <string name="warning" msgid="5470743576660160079">"চালিয়ে যাওয়ার মাধ্যমে, আপনি অ্যাপ্লিকেশানটিকে সমস্ত নেটওয়ার্ক ট্রাফিক বিচ্ছিন্ন করার অনুমতি প্রদান করছেন৷ "<b>"যদি আপনি অ্যাপ্লিকেশানটিকে বিশ্বাস না করেন তবে স্বীকার করবেন না৷"</b>" অন্যথায় আপনার ডেটা একটি ক্ষতিকারক সফ্টওয়্যারের দ্বারা কোনো বাজে লোকের হাতে চলে যাওয়ার ঝুঁকি থেকে যায়৷"</string>
-    <string name="accept" msgid="2889226408765810173">"আমি এই অ্যাপ্লিকেশানটিকে বিশ্বাস করি৷"</string>
+    <string name="prompt" msgid="3183836924226407828">"সংযোগের অনুরোধ"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> এমন একটি VPN সংযোগ সেট আপ করতে চাচ্ছে যেটি দিয়ে এটি নেটওয়ার্ক ট্রাফিক নিরীক্ষণ করতে পারবে। আপনি যদি উৎসটিকে বিশ্বাস করেন, তাহলেই কেবল এতে সম্মতি দিন। VPN সক্রিয় থাকলে আপনার স্ক্রীনের উপরে &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; দেখা যাবে।"</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN সংযুক্ত হয়েছে"</string>
     <string name="configure" msgid="4905518375574791375">"কনফিগার করুন"</string>
     <string name="disconnect" msgid="971412338304200056">"সংযোগ বিচ্ছিন্ন করুন"</string>

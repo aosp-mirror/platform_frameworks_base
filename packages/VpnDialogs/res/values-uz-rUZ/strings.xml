@@ -16,9 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="prompt" msgid="8359175999006833462">"<xliff:g id="APP">%s</xliff:g> VPN ulanish yaratishga urinib ko‘rdi."</string>
-    <string name="warning" msgid="5470743576660160079">"Davom ettirsangiz, ilova dasturga butun tarmoq trafigidan foydalanish huquqini berasiz. "<b>"Dasturga ishonmasangiz, RUXSAT BERMANG."</b>" Aks holda, xavfli dasturlar yordamida ma\'lumlaringizni yovuz niyatli kishilarga uzatish xavfi tug‘iladi."</string>
-    <string name="accept" msgid="2889226408765810173">"Men ushbu dasturga ishonaman."</string>
+    <string name="prompt" msgid="3183836924226407828">"Ulanish uchun so‘rov"</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> ilovasi tarmoq trafigini kuzatish uchun VPN ulanishini o‘rnatmoqchi. Agar ilova manbasiga ishonsangiz, unga rozi bo‘ling. VPN faol bo‘lsa, ekran tepasida &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; paydo bo‘ladi."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN ulangan"</string>
     <string name="configure" msgid="4905518375574791375">"Moslash"</string>
     <string name="disconnect" msgid="971412338304200056">"Aloqani uzish"</string>
