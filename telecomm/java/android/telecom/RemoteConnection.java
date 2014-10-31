@@ -407,6 +407,29 @@ public final class RemoteConnection {
     }
 
     /**
+     * @hide
+     */
+    RemoteConnection(String callId, IConnectionService connectionService,
+            ParcelableConnection connection) {
+        mConnectionId = callId;
+        mConnectionService = connectionService;
+        mConnected = true;
+        mState = connection.getState();
+        mDisconnectCause = connection.getDisconnectCause();
+        mRingbackRequested = connection.isRingbackRequested();
+        mCallCapabilities = connection.getCapabilities();
+        mVideoState = connection.getVideoState();
+        mVideoProvider = new RemoteConnection.VideoProvider(connection.getVideoProvider());
+        mIsVoipAudioMode = connection.getIsVoipAudioMode();
+        mStatusHints = connection.getStatusHints();
+        mAddress = connection.getHandle();
+        mAddressPresentation = connection.getHandlePresentation();
+        mCallerDisplayName = connection.getCallerDisplayName();
+        mCallerDisplayNamePresentation = connection.getCallerDisplayNamePresentation();
+        mConference = null;
+    }
+
+    /**
      * Create a RemoteConnection which is used for failed connections. Note that using it for any
      * "real" purpose will almost certainly fail. Callers should note the failure and act
      * accordingly (moving on to another RemoteConnection, for example)
@@ -415,7 +438,7 @@ public final class RemoteConnection {
      * @hide
      */
     RemoteConnection(DisconnectCause disconnectCause) {
-        this("NULL", null, null);
+        mConnectionId = "NULL";
         mConnected = false;
         mState = Connection.STATE_DISCONNECTED;
         mDisconnectCause = disconnectCause;

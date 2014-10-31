@@ -334,6 +334,19 @@ public abstract class Conference {
     }
 
     /**
+     * Retrieves the primary connection associated with the conference.  The primary connection is
+     * the connection from which the conference will retrieve its current state.
+     *
+     * @return The primary connection.
+     */
+    public Connection getPrimaryConnection() {
+        if (mUnmodifiableChildConnections == null || mUnmodifiableChildConnections.isEmpty()) {
+            return null;
+        }
+        return mUnmodifiableChildConnections.get(0);
+    }
+
+    /**
      * Inform this Conference that the state of its audio output has been changed externally.
      *
      * @param state The new audio state.

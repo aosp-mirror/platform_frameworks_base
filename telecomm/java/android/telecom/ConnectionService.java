@@ -822,6 +822,40 @@ public abstract class ConnectionService extends Service {
     }
 
     /**
+     * Adds a connection created by the {@link ConnectionService} and informs telecom of the new
+     * connection.
+     *
+     * @param phoneAccountHandle The phone account handle for the connection.
+     * @param connection The connection to add.
+     */
+    public final void addExistingConnection(PhoneAccountHandle phoneAccountHandle,
+            Connection connection) {
+
+        String id = addExistingConnectionInternal(connection);
+        if (id != null) {
+            List<String> emptyList = new ArrayList<>(0);
+
+            ParcelableConnection parcelableConnection = new ParcelableConnection(
+                    phoneAccountHandle,
+                    connection.getState(),
+                    connection.getCallCapabilities(),
+                    connection.getAddress(),
+                    connection.getAddressPresentation(),
+                    connection.getCallerDisplayName(),
+                    connection.getCallerDisplayNamePresentation(),
+                    connection.getVideoProvider() == null ?
+                            null : connection.getVideoProvider().getInterface(),
+                    connection.getVideoState(),
+                    connection.isRingbackRequested(),
+                    connection.getAudioModeIsVoip(),
+                    connection.getStatusHints(),
+                    connection.getDisconnectCause(),
+                    emptyList);
+            mAdapter.addExistingConnection(id, parcelableConnection);
+        }
+    }
+
+    /**
      * Returns all the active {@code Connection}s for which this {@code ConnectionService}
      * has taken responsibility.
      *
@@ -906,6 +940,12 @@ public abstract class ConnectionService extends Service {
     public void onRemoteConferenceAdded(RemoteConference conference) {}
 
     /**
+     * Called when an existing connection is added remotely.
+     * @param connection The existing connection which was added.
+     */
+    public void onRemoteExistingConnectionAdded(RemoteConnection connection) {}
+
+    /**
      * @hide
      */
     public boolean containsConference(Conference conference) {
@@ -917,12 +957,29 @@ public abstract class ConnectionService extends Service {
         onRemoteConferenceAdded(remoteConference);
     }
 
+    /** {@hide} */
+    void addRemoteExistingConnection(RemoteConnection remoteConnection) {
+        onRemoteExistingConnectionAdded(remoteConnection);
+    }
+
     private void onAccountsInitialized() {
         mAreAccountsInitialized = true;
         for (Runnable r : mPreInitializationConnectionRequests) {
             r.run();
         }
         mPreInitializationConnectionRequests.clear();
+    }
+
+    /**
+     * Adds an existing connection to the list of connections, identified by a new UUID.
+     *
+     * @param connection The connection.
+     * @return The UUID of the connection (e.g. the call-id).
+     */
+    private String addExistingConnectionInternal(Connection connection) {
+        String id = UUID.randomUUID().toString();
+        addConnection(id, connection);
+        return id;
     }
 
     private void addConnection(String callId, Connection connection) {
