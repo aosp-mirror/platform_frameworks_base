@@ -88,7 +88,7 @@ class="toggle-content-img" alt="" />Revision 2</a> <em>(October 2014)</em>
 
   <div class="toggle-content-toggleme">
 
-    <p>Added location APIs support for Wear.</p>
+    <p>Updated the rendering library.  </p>
 
     <p>Dependencies:</p>
     <ul>
