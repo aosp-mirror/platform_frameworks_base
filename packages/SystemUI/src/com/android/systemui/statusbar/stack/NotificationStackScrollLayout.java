@@ -71,6 +71,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     private SwipeHelper mSwipeHelper;
     private boolean mSwipingInProgress;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
+
+    /**
+     * mCurrentStackHeight is the actual stack height, mLastSetStackHeight is the stack height set
+     * externally from {@link #setStackHeight}
+     */
+    private float mLastSetStackHeight;
     private int mOwnScrollY;
     private int mMaxLayoutHeight;
 
@@ -453,6 +459,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @param height the new height of the stack
      */
     public void setStackHeight(float height) {
+        mLastSetStackHeight = height;
         setIsExpanded(height > 0.0f);
         int newStackHeight = (int) height;
         int minStackHeight = getMinStackHeight();
@@ -1349,7 +1356,19 @@ public class NotificationStackScrollLayout extends ViewGroup
                 && initialVelocity > 0;
     }
 
-    public void updateTopPadding(float qsHeight, int scrollY, boolean animate) {
+    /**
+     * Updates the top padding of the notifications, taking {@link #getIntrinsicPadding()} into
+     * account.
+     *
+     * @param qsHeight the top padding imposed by the quick settings panel
+     * @param scrollY how much the notifications are scrolled inside the QS/notifications scroll
+     *                container
+     * @param animate whether to animate the change
+     * @param ignoreIntrinsicPadding if true, {@link #getIntrinsicPadding()} is ignored and
+     *                               {@code qsHeight} is the final top padding
+     */
+    public void updateTopPadding(float qsHeight, int scrollY, boolean animate,
+            boolean ignoreIntrinsicPadding) {
         float start = qsHeight - scrollY + mNotificationTopPadding;
         float stackHeight = getHeight() - start;
         int minStackHeight = getMinStackHeight();
@@ -1357,13 +1376,13 @@ public class NotificationStackScrollLayout extends ViewGroup
             float overflow = minStackHeight - stackHeight;
             stackHeight = minStackHeight;
             start = getHeight() - stackHeight;
-            setTranslationY(overflow);
             mTopPaddingOverflow = overflow;
         } else {
-            setTranslationY(0);
             mTopPaddingOverflow = 0;
         }
-        setTopPadding(clampPadding((int) start), animate);
+        setTopPadding(ignoreIntrinsicPadding ? (int) start : clampPadding((int) start),
+                animate);
+        setStackHeight(mLastSetStackHeight);
     }
 
     public int getNotificationTopPadding() {
