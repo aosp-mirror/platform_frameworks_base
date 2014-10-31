@@ -278,9 +278,9 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
 
         final ResolverDrawerLayout rdl = (ResolverDrawerLayout) findViewById(R.id.contentPanel);
         if (rdl != null) {
-            rdl.setOnClickOutsideListener(new View.OnClickListener() {
+            rdl.setOnDismissedListener(new ResolverDrawerLayout.OnDismissedListener() {
                 @Override
-                public void onClick(View v) {
+                public void onDismissed() {
                     finish();
                 }
             });
