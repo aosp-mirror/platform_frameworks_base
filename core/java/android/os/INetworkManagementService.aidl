@@ -92,6 +92,11 @@ interface INetworkManagementService
     void enableIpv6(String iface);
 
     /**
+     * Enables or enables IPv6 ND offload.
+     */
+    void setInterfaceIpv6NdOffload(String iface, boolean enable);
+
+    /**
      * Retrieves the network routes currently configured on the specified
      * interface
      */
