@@ -49,22 +49,22 @@ import com.android.ims.ImsConfigListener;
  */
 interface IImsConfig {
     /**
-     * Gets the value for ims service/capabilities parameters from the master
+     * Gets the value for ims service/capabilities parameters from the provisioned
      * value storage. Synchronous blocking call.
      *
      * @param item, as defined in com.android.ims.ImsConfig#ConfigConstants.
      * @return value in Integer format.
      */
-    int getMasterValue(int item);
+    int getProvisionedValue(int item);
 
     /**
-     * Gets the value for ims service/capabilities parameters from the master
+     * Gets the value for ims service/capabilities parameters from the provisioned
      * value storage. Synchronous blocking call.
      *
      * @param item, as defined in com.android.ims.ImsConfig#ConfigConstants.
      * @return value in String format.
      */
-    String getMasterStringValue(int item);
+    String getProvisionedStringValue(int item);
 
     /**
      * Sets the value for IMS service/capabilities parameters by the operator device
