@@ -267,6 +267,12 @@ public abstract class AbsSeekBar extends ProgressBar {
             if (mHasThumbTintMode) {
                 mThumb.setTintMode(mThumbTintMode);
             }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mThumb.isStateful()) {
+                mThumb.setState(getDrawableState());
+            }
         }
     }
 

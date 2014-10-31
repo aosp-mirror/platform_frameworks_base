@@ -315,6 +315,12 @@ public abstract class CompoundButton extends Button implements Checkable {
             if (mHasButtonTintMode) {
                 mButtonDrawable.setTintMode(mButtonTintMode);
             }
+
+            // The drawable (or one of its children) may not have been
+            // stateful before applying the tint, so let's try again.
+            if (mButtonDrawable.isStateful()) {
+                mButtonDrawable.setState(getDrawableState());
+            }
         }
     }
 
