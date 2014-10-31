@@ -133,16 +133,17 @@ class EnterTransitionCoordinator extends ActivityTransitionCoordinator {
             return;
         }
         mAreViewsReady = true;
+        final ViewGroup decor = getDecor();
         // Ensure the views have been laid out before capturing the views -- we need the epicenter.
-        if (sharedElements.isEmpty() || !sharedElements.valueAt(0).isLayoutRequested()) {
+        if (decor == null || (decor.isAttachedToWindow() &&
+                (sharedElements.isEmpty() || !sharedElements.valueAt(0).isLayoutRequested()))) {
             viewsReady(sharedElements);
         } else {
-            final View sharedElement = sharedElements.valueAt(0);
-            sharedElement.getViewTreeObserver()
+            decor.getViewTreeObserver()
                     .addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
-                    sharedElement.getViewTreeObserver().removeOnPreDrawListener(this);
+                    decor.getViewTreeObserver().removeOnPreDrawListener(this);
                     viewsReady(sharedElements);
                     return true;
                 }
