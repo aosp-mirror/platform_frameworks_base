@@ -119,9 +119,7 @@ public class StackScrollState {
                     }
 
                     // apply alpha
-                    if (!becomesInvisible) {
-                        child.setAlpha(newAlpha);
-                    }
+                    child.setAlpha(newAlpha);
                 }
 
                 // apply visibility
