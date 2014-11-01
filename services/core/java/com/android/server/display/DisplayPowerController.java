@@ -570,8 +570,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         state = mPowerState.getScreenState();
 
         // Use zero brightness when screen is off.
+        // Use full brightness when screen brightness is boosted.
         if (state == Display.STATE_OFF) {
             brightness = PowerManager.BRIGHTNESS_OFF;
+        } else if (mPowerRequest.boostScreenBrightness) {
+            brightness = PowerManager.BRIGHTNESS_ON;
         }
 
         // Use default brightness when dozing unless overridden.
