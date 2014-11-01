@@ -378,7 +378,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             return true;
         }
 
-        if (mState == STATE_PRINT_CANCELED ||mState == STATE_PRINT_CONFIRMED
+        if (mState == STATE_PRINT_CANCELED || mState == STATE_PRINT_CONFIRMED
                 || mState == STATE_PRINT_COMPLETED) {
             return true;
         }
@@ -405,12 +405,23 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
     @Override
     public void onMalformedPdfFile() {
+        onPrintDocumentError("Cannot print a malformed PDF file");
+    }
+
+    @Override
+    public void onSecurePdfFile() {
+        onPrintDocumentError("Cannot print a password protected PDF file");
+    }
+
+    private void onPrintDocumentError(String message) {
         mProgressMessageController.cancel();
         ensureErrorUiShown(null, PrintErrorFragment.ACTION_RETRY);
 
         setState(STATE_UPDATE_FAILED);
 
         updateOptionsUi();
+
+        mPrintedDocument.kill(message);
     }
 
     @Override
