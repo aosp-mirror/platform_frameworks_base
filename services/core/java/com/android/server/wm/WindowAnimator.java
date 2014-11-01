@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static com.android.server.wm.WindowManagerService.DEBUG_KEYGUARD;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_MAY_CHANGE;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_FORCE_HIDING_CHANGED;
@@ -29,7 +30,6 @@ import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPA
 import android.content.Context;
 import android.os.Debug;
 import android.os.SystemClock;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -233,12 +233,17 @@ public class WindowAnimator {
                 final WindowStateAnimator winAnimator = win.mWinAnimator;
                 if ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0) {
                     if (!winAnimator.mAnimating) {
+                        if (DEBUG_KEYGUARD) Slog.d(TAG,
+                                "updateWindowsLocked: creating delay animation");
+
                         // Create a new animation to delay until keyguard is gone on its own.
                         winAnimator.mAnimation = new AlphaAnimation(1.0f, 1.0f);
                         winAnimator.mAnimation.setDuration(KEYGUARD_ANIM_TIMEOUT_MS);
                         winAnimator.mAnimationIsEntrance = false;
                     }
                 } else {
+                    if (DEBUG_KEYGUARD) Slog.d(TAG,
+                            "updateWindowsLocked: StatusBar is no longer keyguard");
                     mKeyguardGoingAway = false;
                     winAnimator.clearAnimation();
                 }
@@ -282,7 +287,7 @@ public class WindowAnimator {
 
                 if (mPolicy.isForceHiding(win.mAttrs)) {
                     if (!wasAnimating && nowAnimating) {
-                        if (WindowManagerService.DEBUG_ANIM ||
+                        if (DEBUG_KEYGUARD || WindowManagerService.DEBUG_ANIM ||
                                 WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
                                 "Animation started that could impact force hide: " + win);
                         mBulkUpdateParams |= SET_FORCE_HIDING_CHANGED;
@@ -310,7 +315,7 @@ public class WindowAnimator {
                             mForceHiding = win.isDrawnLw() ? KEYGUARD_SHOWN : KEYGUARD_NOT_SHOWN;
                         }
                     }
-                    if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
+                    if (DEBUG_KEYGUARD || WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
                             "Force hide " + forceHidingToString()
                             + " hasSurface=" + win.mHasSurface
                             + " policyVis=" + win.mPolicyVisibility
@@ -327,12 +332,12 @@ public class WindowAnimator {
                                 && (!winAnimator.isAnimating() || hideWhenLocked))
                             || ((mForceHiding == KEYGUARD_SHOWN) && hideWhenLocked)) {
                         changed = win.hideLw(false, false);
-                        if (WindowManagerService.DEBUG_VISIBILITY && changed) Slog.v(TAG,
-                                "Now policy hidden: " + win);
+                        if ((DEBUG_KEYGUARD || WindowManagerService.DEBUG_VISIBILITY)
+                                && changed) Slog.v(TAG, "Now policy hidden: " + win);
                     } else {
                         changed = win.showLw(false, false);
-                        if (WindowManagerService.DEBUG_VISIBILITY && changed) Slog.v(TAG,
-                                "Now policy shown: " + win);
+                        if ((DEBUG_KEYGUARD || WindowManagerService.DEBUG_VISIBILITY)
+                                && changed) Slog.v(TAG, "Now policy shown: " + win);
                         if (changed) {
                             if ((mBulkUpdateParams & SET_FORCE_HIDING_CHANGED) != 0
                                     && win.isVisibleNow() /*w.isReadyForDisplay()*/) {
@@ -404,6 +409,11 @@ public class WindowAnimator {
                 if (!mKeyguardGoingAwayDisableWindowAnimations) {
                     a = mPolicy.createForceHideEnterAnimation(wallpaperInUnForceHiding,
                             mKeyguardGoingAwayToNotificationShade);
+                    if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: created anim=" + a
+                            + " for win=" + unForceHiding.get(i));
+                } else {
+                    if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: skipping anim for win="
+                            + unForceHiding.get(i));
                 }
                 if (a != null) {
                     final WindowStateAnimator winAnimator = unForceHiding.get(i);
@@ -422,6 +432,7 @@ public class WindowAnimator {
             // Wallpaper is going away in un-force-hide motion, animate it as well.
             if (!wallpaperInUnForceHiding && wallpaper != null
                     && !mKeyguardGoingAwayDisableWindowAnimations) {
+                if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: wallpaper animating away");
                 Animation a = mPolicy.createForceHideWallpaperExitAnimation(
                         mKeyguardGoingAwayToNotificationShade);
                 if (a != null) {
