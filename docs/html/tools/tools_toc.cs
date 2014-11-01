@@ -58,11 +58,17 @@
 
 
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/building/index.html"><span class="en">Building and Running</span></a></div>
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>tools/building/index.html">
+          <span class="en">Building and Running</span></a>
+        </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>tools/building/building-studio.html"><span class="en">From Android Studio</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/building/building-cmdline.html"><span class="en">From the Command Line</span></a></li>
-
+          <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">
+            <span class="en">From Eclipse with ADT</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/building/building-cmdline.html">
+            <span class="en">From the Command Line</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/building/multidex.html">
+            <span class="en">Apps Over 65K Methods</span></a></li>
         </ul>
 
 
