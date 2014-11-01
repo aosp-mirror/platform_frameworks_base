@@ -37,7 +37,7 @@ so you can type replies instead.</p>
 
 <h2 id="VoiceInput">Define the Voice Input</h2>
 
-<p>To create an action that supports voice input, create an instance of 
+<p>To create an action that supports voice input, create an instance of
   {@link android.support.v4.app.RemoteInput.Builder} that you can add to your notification action.
   This class's constructor accepts a string that the system uses as
   the key for the voice input, which you'll later use to retrieve the text of the
@@ -166,9 +166,8 @@ which is referenced by the <code>EXTRA_VOICE_REPLY</code> key that is used in th
 
 private CharSequence getMessageText(Intent intent) {
     Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
-        if (remoteInput != null) {
-            return remoteInput.getCharSequence(EXTRA_VOICE_REPLY);
-        }
+    if (remoteInput != null) {
+        return remoteInput.getCharSequence(EXTRA_VOICE_REPLY);
     }
     return null;
 }
