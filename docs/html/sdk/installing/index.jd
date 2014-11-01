@@ -25,52 +25,6 @@ p.paging-links {
 
 
 
-<!-- ###################    ADT BUNDLE     ####################### -->
-<div id="adt" heading="Installing the Eclipse ADT Bundle" style="display:none">
-
-
-<p>The Eclipse ADT Bundle provides everything you need to start developing apps, including
-the Android SDK tools and a version of the Eclipse IDE with built-in ADT
-(Android Developer Tools) to streamline your Android app development.</p>
-
-<p>If you didn't download the Eclipse ADT bundle, go <a href="{@docRoot}sdk/index.html"
-><b>download the Eclipse ADT bundle now</b></a>, or switch to the
-<a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
-install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=tools">stand-alone SDK Tools
-install</a> instructions</i>.</p>
-
-<div class="procedure-box">
-<p><b>To set up the ADT Bundle:</b></p>
-<ol>
-<li>Unpack the ZIP file
-(named {@code adt-bundle-&lt;os_platform>.zip}) and save it to an appropriate location,
-such as a "Development" directory in your home directory.</li>
-<li>Open the {@code adt-bundle-&lt;os_platform>/eclipse/} directory and launch
-<strong>Eclipse</strong>.</li>
-</ol>
-
-<p class="caution"><strong>Caution:</strong> Do not move any of the files or directories
-from the {@code adt-bundle-&lt;os_platform>} directory. If you move the {@code eclipse/}
-or {@code sdk/} directory, ADT will not be able to locate the SDK and you'll
-need to manually update the ADT preferences.</p>
-</div>
-
-<p>Eclipse with ADT is now ready and loaded with the Android developer tools, but there are still
-a couple packages you should add to make your Android SDK complete.</p>
-
-<p class="paging-links">
-<a href="{@docRoot}sdk/installing/adding-packages.html" class="next-page-link">
-Continue: Adding SDK Packages</a></p>
-
-
-</div>
-<!-- ################    END ADT BUNDLE    ##################### -->
-
-
-
-
-
-
 <!-- ################    STUDIO    ##################### -->
 <div id="studio" heading="Installing Android Studio" style="display:none">
 
@@ -79,10 +33,7 @@ the Android SDK tools and the Android Studio IDE (powered by IntelliJ) to
 streamline your Android app development.</p>
 
 <p>If you didn't download Android Studio, go <a href="{@docRoot}sdk/installing/studio.html"
-><b>download Android Studio now</b></a>, or switch to the
-<a href="{@docRoot}sdk/installing/index.html?pkg=adt">Eclipse ADT
-install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=tools">stand-alone SDK Tools
-install</a> instructions.</p>
+><b>download Android Studio now</b></a>.</p>
 
 
 <p>Before you set up Android Studio, be sure you have installed
@@ -160,8 +111,8 @@ the {@code sdk/} directory. For example:</p>
 <p><b>To set up Android Studio on Linux:</b></p>
 
   <ol>
-    <li>Unpack the downloaded Tar file, {@code android-studio-bundle-&lt;version&gt;.tgz}, into an appropriate
-    location for your applications.
+    <li>Unpack the downloaded Tar file, {@code android-studio-bundle-&lt;version&gt;.tgz}, into an
+    appropriate location for your applications.
     <li>To launch Android Studio, navigate to the {@code android-studio/bin/} directory
     in a terminal and execute {@code studio.sh}.
       <p>You may want to add {@code android-studio/bin/} to your PATH environmental
@@ -215,15 +166,15 @@ style="float:right;font-size:13px"><a href='' onclick='showAll();return false;'
 
 <p><b>To get started on Windows:</b></p>
 
-<p>Your download package is an executable file that starts an installer. The installer checks your machine
-  for required tools, such as the proper Java SE Development Kit (JDK) and installs it if necessary.
-  The installer then saves the Android SDK Tools into a default location (or you can specify the location).</p>
+<p>Your download package is an executable file that starts an installer. The installer checks your
+machine for required tools, such as the proper Java SE Development Kit (JDK) and installs it if
+necessary. The installer then saves the Android SDK Tools into a default location (or you can
+specify the location).</p>
 
 <ol>
 <li>Double-click the executable ({@code .exe} file) to start the install.</li>
-<li>Make a note of the name and location in which it saves the SDK on your system&mdash;you will need to
-refer to the SDK directory later when using
-the SDK tools from the command line.</li>
+<li>Make a note of the name and location in which it saves the SDK on your system&mdash;you will
+need to refer to the SDK directory later when using the SDK tools from the command line.</li>
 <li>Once the installation completes, the installer starts the Android SDK Manager.
 </li>
 </ol>
@@ -237,8 +188,8 @@ the SDK tools from the command line.</li>
 <p><b>To get started on Mac OSX:</b></p>
 
 <p>Unpack the ZIP file you've downloaded. By default, it's unpacked
-into a directory named <code>android-sdk-mac_x86</code>. Move it to an appropriate location on your machine,
-such as a "Development" directory in your home directory.</p>
+into a directory named <code>android-sdk-mac_x86</code>. Move it to an appropriate location on your
+machine, such as a "Development" directory in your home directory.</p>
 
 <p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
 refer to the SDK directory later when using
@@ -254,8 +205,8 @@ the SDK tools from the command line.</p>
 <p><b>To get started on Linux:</b></p>
 
 <p>Unpack the {@code .tgz} file you've downloaded. By default, the SDK files are unpacked
-into a directory named <code>android-sdk-linux_x86</code>. Move it to an appropriate location on your machine,
-such as a "Development" directory in your home directory.</p>
+into a directory named <code>android-sdk-linux_x86</code>. Move it to an appropriate location on
+your machine, such as a "Development" directory in your home directory.</p>
 
 <p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
 refer to the SDK directory later when using
@@ -321,6 +272,52 @@ Continue: Adding SDK Packages</a></p>
 
 
 
+<!-- ###################    ADT BUNDLE     ####################### -->
+<div id="adt" heading="Installing the Eclipse ADT Bundle" style="display:none">
+
+
+<p>The Eclipse ADT Bundle provides everything you need to start developing apps, including
+the Android SDK tools and a version of the Eclipse IDE with built-in ADT
+(Android Developer Tools) to streamline your Android app development.</p>
+
+<p>If you didn't download the Eclipse ADT bundle, go <a href="{@docRoot}sdk/index.html"
+><b>download the Eclipse ADT bundle now</b></a>, or switch to the
+<a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
+install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=tools">stand-alone SDK Tools
+install</a> instructions</i>.</p>
+
+<div class="procedure-box">
+<p><b>To set up the ADT Bundle:</b></p>
+<ol>
+<li>Unpack the ZIP file
+(named {@code adt-bundle-&lt;os_platform>.zip}) and save it to an appropriate location,
+such as a "Development" directory in your home directory.</li>
+<li>Open the {@code adt-bundle-&lt;os_platform>/eclipse/} directory and launch
+<strong>Eclipse</strong>.</li>
+</ol>
+
+<p class="caution"><strong>Caution:</strong> Do not move any of the files or directories
+from the {@code adt-bundle-&lt;os_platform>} directory. If you move the {@code eclipse/}
+or {@code sdk/} directory, ADT will not be able to locate the SDK and you'll
+need to manually update the ADT preferences.</p>
+</div>
+
+<p>Eclipse with ADT is now ready and loaded with the Android developer tools, but there are still
+a couple packages you should add to make your Android SDK complete.</p>
+
+<p class="paging-links">
+<a href="{@docRoot}sdk/installing/adding-packages.html" class="next-page-link">
+Continue: Adding SDK Packages</a></p>
+
+
+</div>
+<!-- ################    END ADT BUNDLE    ##################### -->
+
+
+
+
+
+
 
 <!-- ################    DEFAULT    ##################### -->
 
@@ -328,16 +325,11 @@ Continue: Adding SDK Packages</a></p>
 <div id="default" style="display:none">
 
 <p>If you haven't already, <b><a href="{@docRoot}sdk/index.html">download
-the Android SDK</a></b>. </p>
+the Android SDK bundle for Android Studio or the stand-alone SDK Tools</a></b>. </p>
 
-<p>Then, select which SDK package you want to install:</p>
+<p>Then, select which SDK bundle you want to install:</p>
 
 <div class="cols" style="margin:30px 0 60px">
-<div class="col-4" style="margin-left:0">
-<a href="{@docRoot}sdk/installing/index.html?pkg=adt" class="landing-button landing-secondary">
-Eclipse ADT
-</a>
-</div>
 
 <div class="col-4">
 <a href="{@docRoot}sdk/installing/index.html?pkg=studio" class="landing-button landing-secondary">
@@ -352,6 +344,16 @@ Stand-alone SDK Tools
 </div>
 </div>
 
+<p></p>
+
+<div>
+<p></p>
+<p>If you are still using Eclipse ADT, you can still <a href="{@docRoot}sdk/index.html">download</a>
+and <a href="{@docRoot}sdk/installing/index.html?pkg=adt">install </a> the current release.
+However, <a href="{@docRoot}tools/eclipse/migrate-adt.html">consider migrating to Android Studio</a>
+as the Eclipse ADT plugin is no longer in active development.</p>
+
+</div>
 
 </div>
 <!-- ################    END DEFAULT    ##################### -->
