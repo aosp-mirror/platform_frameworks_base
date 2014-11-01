@@ -586,6 +586,7 @@
             0 - Nothing
             1 - Global actions menu
             2 - Power off (with confirmation)
+            3 - Power off (without confirmation)
     -->
     <integer name="config_longPressOnPowerBehavior">1</integer>
 
@@ -596,6 +597,20 @@
             3 - Really go to sleep and go home (don't doze)
     -->
     <integer name="config_shortPressOnPowerBehavior">1</integer>
+
+    <!-- Control the behavior when the user double presses the power button.
+            0 - Nothing
+            1 - Toggle theater mode setting
+            2 - Brightness boost
+    -->
+    <integer name="config_doublePressOnPowerBehavior">0</integer>
+
+    <!-- Control the behavior when the user triple presses the power button.
+            0 - Nothing
+            1 - Toggle theater mode setting
+            2 - Brightness boost
+    -->
+    <integer name="config_triplePressOnPowerBehavior">0</integer>
 
     <!-- Package name for default keyguard appwidget [DO NOT TRANSLATE] -->
     <string name="widget_default_package_name" translatable="false"></string>
