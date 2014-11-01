@@ -28,9 +28,9 @@ p.paging-links {
 <!-- ################    STUDIO    ##################### -->
 <div id="studio" heading="Installing Android Studio" style="display:none">
 
-<p>Android Studio provides everything you need to start developing apps, including
-the Android SDK tools and the Android Studio IDE (powered by IntelliJ) to
-streamline your Android app development.</p>
+<p>Android Studio provides the tools you need to start developing apps, including
+the Android Studio IDE (powered by IntelliJ) and guides you to install
+the Android SDK tools to streamline your Android app development.</p>
 
 <p>If you didn't download Android Studio, go <a href="{@docRoot}sdk/installing/studio.html"
 ><b>download Android Studio now</b></a>.</p>
@@ -54,8 +54,9 @@ style="float:right;font-size:13px"><a href='' onclick='showAll();return false;'
 
 <p><b>To set up Android Studio on Windows:</b></p>
   <ol>
-    <li>Launch the downloaded EXE file, {@code android-studio-bundle-&lt;version&gt;.exe}.</li>
-    <li>Follow the setup wizard to install Android Studio.
+    <li>Unzip the file, {@code android-studio-ide-&lt;version&gt;-windows.zip} and launch the
+        <code>studio.exe</code> file.</li>
+    <li>Follow the setup wizard to install Android Studio and the SDK Tools.
 
     <p>On some Windows systems, the launcher script does not find where Java is installed.
       If you encounter this problem,
@@ -70,11 +71,10 @@ style="float:right;font-size:13px"><a href='' onclick='showAll();return false;'
   </ol>
 
 
-<p>The individual tools and
-other SDK packages are saved within the Android Studio application directory.
-If you need to access the tools directly, use a terminal to navigate into the application and locate
-the {@code sdk/} directory. For example:</p>
-<p><code>\Users\&lt;user&gt;\AppData\Local\Android\android-studio\sdk\</code></p>
+<p>The individual tools and other SDK packages are saved outside the Android Studio application
+directory. If you need to access the tools directly, use a terminal to navigate to the location
+where they are installed. For example:</p>
+<p><code>\Users\&lt;user&gt;\sdk\</code></p>
 
 
 
@@ -85,7 +85,7 @@ the {@code sdk/} directory. For example:</p>
 
 <p><b>To set up Android Studio on Mac OSX:</b></p>
   <ol>
-    <li>Open the downloaded DMG file, {@code android-studio-bundle-&lt;version&gt;.dmg}.</li>
+    <li>Unzip the downloaded zip file, {@code android-studio-ide-&lt;version&gt;-mac.zip}.</li>
     <li>Drag and drop Android Studio into the Applications folder.
       <p>
       Depending on your security settings, when you attempt to open Android Studio, you might
@@ -94,13 +94,13 @@ the {@code sdk/} directory. For example:</p>
       <strong>Allow applications downloaded from</strong>, select <strong>Anywhere</strong>.
       Then open Android Studio again.</p>
     </li>
+    <li>Follow the links to install the SDK outside of the Android Studio directories.</li>
   </ol>
 
-<p>The individual tools and
-other SDK packages are saved within the Android Studio application directory.
-If you need access the tools directly, use a terminal to navigate into the application and locate
-the {@code sdk/} directory. For example:</p>
-<p><code>/Applications/Android\ Studio.app/sdk/</code></p>
+<p>The individual tools and other SDK packages are saved outside the Android Studio application
+directory. If you need access the tools directly, use a terminal to navigate into the location
+where they are installed. For example:</p>
+<p><code>/Applications/sdk/</code></p>
 
 
 </div><!-- end mac -->
@@ -111,13 +111,14 @@ the {@code sdk/} directory. For example:</p>
 <p><b>To set up Android Studio on Linux:</b></p>
 
   <ol>
-    <li>Unpack the downloaded Tar file, {@code android-studio-bundle-&lt;version&gt;.tgz}, into an
-    appropriate location for your applications.
+    <li>Unpack the downloaded Tar file, {@code android-studio-ide-&lt;version&gt;-linux.zip}, into an 
+        appropriate location for your applications.
     <li>To launch Android Studio, navigate to the {@code android-studio/bin/} directory
     in a terminal and execute {@code studio.sh}.
       <p>You may want to add {@code android-studio/bin/} to your PATH environmental
       variable so that you can start Android Studio from any directory.</p>
     </li>
+    <li>Follow the links to install the SDK outside of the Android Studio directories.</li>
   </ol>
 
 </div><!-- end linux -->
@@ -166,15 +167,16 @@ style="float:right;font-size:13px"><a href='' onclick='showAll();return false;'
 
 <p><b>To get started on Windows:</b></p>
 
-<p>Your download package is an executable file that starts an installer. The installer checks your
-machine for required tools, such as the proper Java SE Development Kit (JDK) and installs it if
-necessary. The installer then saves the Android SDK Tools into a default location (or you can
-specify the location).</p>
+<p>Your download package is an executable file that starts an installer. The installer checks your machine
+  for required tools, such as the proper Java SE Development Kit (JDK) and installs it if necessary.
+  The installer then saves the Android SDK Tools to a specified the location outside of the Android
+  Studio directories.</p>
 
 <ol>
 <li>Double-click the executable ({@code .exe} file) to start the install.</li>
-<li>Make a note of the name and location in which it saves the SDK on your system&mdash;you will
-need to refer to the SDK directory later when using the SDK tools from the command line.</li>
+<li>Make a note of the name and location where you save the SDK on your system&mdash;you will need to
+refer to the SDK directory later when using
+the SDK tools from the command line.</li>
 <li>Once the installation completes, the installer starts the Android SDK Manager.
 </li>
 </ol>
@@ -204,9 +206,8 @@ the SDK tools from the command line.</p>
 
 <p><b>To get started on Linux:</b></p>
 
-<p>Unpack the {@code .tgz} file you've downloaded. By default, the SDK files are unpacked
-into a directory named <code>android-sdk-linux_x86</code>. Move it to an appropriate location on
-your machine, such as a "Development" directory in your home directory.</p>
+<p>Unpack the {@code .zip} file you've downloaded. The SDK files are download separately to a 
+user-specified directory. </p>
 
 <p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
 refer to the SDK directory later when using
