@@ -136,8 +136,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
     static final boolean localLOGV = false;
-    static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_INPUT = false;
+    static final boolean DEBUG_KEYGUARD = false;
+    static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
     static final boolean DEBUG_WAKEUP = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;
@@ -4981,6 +4982,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void dismissKeyguardLw() {
         if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
+            if (DEBUG_KEYGUARD) Slog.d(TAG, "PWM.dismissKeyguardLw");
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -5012,6 +5014,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         if (mKeyguardDelegate != null) {
+            if (DEBUG_KEYGUARD) Slog.d(TAG, "PWM.startKeyguardExitAnimation");
             mKeyguardDelegate.startKeyguardExitAnimation(startTime, fadeoutDuration);
         }
     }
