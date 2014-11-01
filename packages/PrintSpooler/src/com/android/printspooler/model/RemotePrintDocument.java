@@ -304,6 +304,18 @@ public final class RemotePrintDocument {
         disconnectFromRemoteDocument();
     }
 
+    public void kill(String reason) {
+        if (DEBUG) {
+            Log.i(LOG_TAG, "[CALLED] kill()");
+        }
+
+        try {
+            mPrintDocumentAdapter.kill(reason);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error calling kill()", re);
+        }
+    }
+
     public boolean isUpdating() {
         return mState == STATE_UPDATING || mState == STATE_CANCELING;
     }

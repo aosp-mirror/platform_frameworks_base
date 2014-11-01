@@ -47,7 +47,9 @@ public final class PdfManipulationService extends Service {
     public static final String ACTION_GET_EDITOR =
             "com.android.printspooler.renderer.ACTION_GET_EDITOR";
 
-    public static final int MALFORMED_PDF_FILE_ERROR = -2;
+    public static final int ERROR_MALFORMED_PDF_FILE = -2;
+
+    public static final int ERROR_SECURE_PDF_FILE = -3;
 
     private static final String LOG_TAG = "PdfManipulationService";
     private static final boolean DEBUG = false;
@@ -90,7 +92,11 @@ public final class PdfManipulationService extends Service {
                 } catch (IOException | IllegalStateException e) {
                     IoUtils.closeQuietly(source);
                     Log.e(LOG_TAG, "Cannot open file", e);
-                    return MALFORMED_PDF_FILE_ERROR;
+                    return ERROR_MALFORMED_PDF_FILE;
+                } catch (SecurityException e) {
+                    IoUtils.closeQuietly(source);
+                    Log.e(LOG_TAG, "Cannot open file", e);
+                    return ERROR_SECURE_PDF_FILE;
                 }
             }
         }
