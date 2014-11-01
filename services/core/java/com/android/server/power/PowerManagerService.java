@@ -88,6 +88,8 @@ public final class PowerManagerService extends SystemService
     private static final int MSG_USER_ACTIVITY_TIMEOUT = 1;
     // Message: Sent when the device enters or exits a dreaming or dozing state.
     private static final int MSG_SANDMAN = 2;
+    // Message: Sent when the screen brightness boost expires.
+    private static final int MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT = 3;
 
     // Dirty bit: mWakeLocks changed
     private static final int DIRTY_WAKE_LOCKS = 1 << 0;
@@ -111,6 +113,8 @@ public final class PowerManagerService extends SystemService
     private static final int DIRTY_PROXIMITY_POSITIVE = 1 << 9;
     // Dirty bit: dock state changed
     private static final int DIRTY_DOCK_STATE = 1 << 10;
+    // Dirty bit: brightness boost changed
+    private static final int DIRTY_SCREEN_BRIGHTNESS_BOOST = 1 << 11;
 
     // Wakefulness: The device is asleep and can only be awoken by a call to wakeUp().
     // The screen should be off or in the process of being turned off by the display controller.
@@ -148,6 +152,11 @@ public final class PowerManagerService extends SystemService
     // provider populates the actual default value (R.integer.def_screen_off_timeout).
     private static final int DEFAULT_SCREEN_OFF_TIMEOUT = 15 * 1000;
     private static final int DEFAULT_SLEEP_TIMEOUT = -1;
+
+    // Screen brightness boost timeout.
+    // Hardcoded for now until we decide what the right policy should be.
+    // This should perhaps be a setting.
+    private static final int SCREEN_BRIGHTNESS_BOOST_TIMEOUT = 5 * 1000;
 
     // Power hints defined in hardware/libhardware/include/hardware/power.h.
     private static final int POWER_HINT_INTERACTION = 2;
@@ -214,6 +223,10 @@ public final class PowerManagerService extends SystemService
 
     // Timestamp of last interactive power hint.
     private long mLastInteractivePowerHintTime;
+
+    // Timestamp of the last screen brightness boost.
+    private long mLastScreenBrightnessBoostTime;
+    private boolean mScreenBrightnessBoostInProgress;
 
     // A bitfield that summarizes the effect of the user activity timer.
     private int mUserActivitySummary;
@@ -1812,9 +1825,13 @@ public final class PowerManagerService extends SystemService
         final boolean oldDisplayReady = mDisplayReady;
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_WAKEFULNESS
                 | DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED | DIRTY_BOOT_COMPLETED
-                | DIRTY_SETTINGS)) != 0) {
+                | DIRTY_SETTINGS | DIRTY_SCREEN_BRIGHTNESS_BOOST)) != 0) {
             mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked();
 
+            // Handle screen brightness boost timeout.
+            updateScreenBrightnessBoostLocked();
+
+            // Determine appropriate screen brightness and auto-brightness adjustments.
             int screenBrightness = mScreenBrightnessSettingDefault;
             float screenAutoBrightnessAdjustment = 0.0f;
             boolean autoBrightness = (mScreenBrightnessModeSetting ==
@@ -1842,14 +1859,15 @@ public final class PowerManagerService extends SystemService
                     mScreenBrightnessSettingMaximum), mScreenBrightnessSettingMinimum);
             screenAutoBrightnessAdjustment = Math.max(Math.min(
                     screenAutoBrightnessAdjustment, 1.0f), -1.0f);
+
+            // Update display power request.
             mDisplayPowerRequest.screenBrightness = screenBrightness;
             mDisplayPowerRequest.screenAutoBrightnessAdjustment =
                     screenAutoBrightnessAdjustment;
             mDisplayPowerRequest.useAutoBrightness = autoBrightness;
-
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
-
             mDisplayPowerRequest.lowPowerMode = mLowPowerModeEnabled;
+            mDisplayPowerRequest.boostScreenBrightness = mScreenBrightnessBoostInProgress;
 
             if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
                 mDisplayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
@@ -1861,19 +1879,38 @@ public final class PowerManagerService extends SystemService
             }
 
             mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
-                    mRequestWaitForNegativeProximity);
+                    mRequestWaitForNegativeProximity) && !mScreenBrightnessBoostInProgress;
             mRequestWaitForNegativeProximity = false;
 
             if (DEBUG_SPEW) {
-                Slog.d(TAG, "updateScreenStateLocked: mDisplayReady=" + mDisplayReady
+                Slog.d(TAG, "updateDisplayPowerStateLocked: mDisplayReady=" + mDisplayReady
                         + ", policy=" + mDisplayPowerRequest.policy
                         + ", mWakefulness=" + mWakefulness
                         + ", mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary)
                         + ", mUserActivitySummary=0x" + Integer.toHexString(mUserActivitySummary)
-                        + ", mBootCompleted=" + mBootCompleted);
+                        + ", mBootCompleted=" + mBootCompleted
+                        + ", mScreenBrightnessBoostInProgress="
+                                + mScreenBrightnessBoostInProgress);
             }
         }
         return mDisplayReady && !oldDisplayReady;
+    }
+
+    private void updateScreenBrightnessBoostLocked() {
+        if (mScreenBrightnessBoostInProgress) {
+            mHandler.removeMessages(MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT);
+            if (mLastScreenBrightnessBoostTime > mLastSleepTime) {
+                final long boostTimeout = mLastScreenBrightnessBoostTime +
+                        SCREEN_BRIGHTNESS_BOOST_TIMEOUT;
+                if (boostTimeout > SystemClock.uptimeMillis()) {
+                    Message msg = mHandler.obtainMessage(MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT);
+                    msg.setAsynchronous(true);
+                    mHandler.sendMessageAtTime(msg, boostTimeout);
+                    return;
+                }
+            }
+            mScreenBrightnessBoostInProgress = false;
+        }
     }
 
     private static boolean isValidBrightness(int value) {
@@ -2223,6 +2260,41 @@ public final class PowerManagerService extends SystemService
         light.setFlashing(color, Light.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
     }
 
+    private void boostScreenBrightnessInternal(long eventTime, int uid) {
+        synchronized (mLock) {
+            if (!mSystemReady || mWakefulness == WAKEFULNESS_ASLEEP
+                    || eventTime < mLastScreenBrightnessBoostTime) {
+                return;
+            }
+
+            Slog.i(TAG, "Brightness boost activated (uid " + uid +")...");
+            mLastScreenBrightnessBoostTime = eventTime;
+            mScreenBrightnessBoostInProgress = true;
+            mDirty |= DIRTY_SCREEN_BRIGHTNESS_BOOST;
+
+            userActivityNoUpdateLocked(eventTime,
+                    PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, uid);
+            updatePowerStateLocked();
+        }
+    }
+
+    /**
+     * Called when a screen brightness boost timeout has occurred.
+     *
+     * This function must have no other side-effects besides setting the dirty
+     * bit and calling update power state.
+     */
+    private void handleScreenBrightnessBoostTimeout() { // runs on handler thread
+        synchronized (mLock) {
+            if (DEBUG_SPEW) {
+                Slog.d(TAG, "handleScreenBrightnessBoostTimeout");
+            }
+
+            mDirty |= DIRTY_SCREEN_BRIGHTNESS_BOOST;
+            updatePowerStateLocked();
+        }
+    }
+
     private void setScreenBrightnessOverrideFromWindowManagerInternal(int brightness) {
         synchronized (mLock) {
             if (mScreenBrightnessOverrideFromWindowManager != brightness) {
@@ -2366,6 +2438,10 @@ public final class PowerManagerService extends SystemService
                     + TimeUtils.formatUptime(mLastUserActivityTimeNoChangeLights));
             pw.println("  mLastInteractivePowerHintTime="
                     + TimeUtils.formatUptime(mLastInteractivePowerHintTime));
+            pw.println("  mLastScreenBrightnessBoostTime="
+                    + TimeUtils.formatUptime(mLastScreenBrightnessBoostTime));
+            pw.println("  mScreenBrightnessBoostInProgress="
+                    + mScreenBrightnessBoostInProgress);
             pw.println("  mDisplayReady=" + mDisplayReady);
             pw.println("  mHoldingWakeLockSuspendBlocker=" + mHoldingWakeLockSuspendBlocker);
             pw.println("  mHoldingDisplaySuspendBlocker=" + mHoldingDisplaySuspendBlocker);
@@ -2561,6 +2637,9 @@ public final class PowerManagerService extends SystemService
                     break;
                 case MSG_SANDMAN:
                     handleSandman();
+                    break;
+                case MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT:
+                    handleScreenBrightnessBoostTimeout();
                     break;
             }
         }
@@ -3137,6 +3216,24 @@ public final class PowerManagerService extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 setAttentionLightInternal(on, color);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void boostScreenBrightness(long eventTime) {
+            if (eventTime > SystemClock.uptimeMillis()) {
+                throw new IllegalArgumentException("event time must not be in the future");
+            }
+
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final int uid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                boostScreenBrightnessInternal(eventTime, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
