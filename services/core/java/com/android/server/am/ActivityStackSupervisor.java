@@ -444,10 +444,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return mService.startHomeActivityLocked(mCurrentUser);
     }
 
-    void keyguardWaitingForActivityDrawn() {
-        mWindowManager.keyguardWaitingForActivityDrawn();
-    }
-
     TaskRecord anyTaskForIdLocked(int id) {
         int numDisplays = mActivityDisplays.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {

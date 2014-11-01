@@ -166,6 +166,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_FOCUS_LIGHT = DEBUG_FOCUS || false;
     static final boolean DEBUG_ANIM = false;
+    static final boolean DEBUG_KEYGUARD = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_RESIZE = false;
     static final boolean DEBUG_LAYERS = false;
@@ -5363,6 +5364,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires DISABLE_KEYGUARD permission");
         }
+        if (DEBUG_KEYGUARD) Slog.d(TAG, "keyguardGoingAway: disableWinAnim="
+                + disableWindowAnimations + " kgToNotifShade=" + keyguardGoingToNotificationShade);
         synchronized (mWindowMap) {
             mAnimator.mKeyguardGoingAway = true;
             mAnimator.mKeyguardGoingAwayToNotificationShade = keyguardGoingToNotificationShade;
@@ -5372,12 +5375,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void keyguardWaitingForActivityDrawn() {
+        if (DEBUG_KEYGUARD) Slog.d(TAG, "keyguardWaitingForActivityDrawn");
         synchronized (mWindowMap) {
             mKeyguardWaitingForActivityDrawn = true;
         }
     }
 
     public void notifyActivityDrawnForKeyguard() {
+        if (DEBUG_KEYGUARD) Slog.d(TAG, "notifyActivityDrawnForKeyguard: waiting="
+                + mKeyguardWaitingForActivityDrawn);
         synchronized (mWindowMap) {
             if (mKeyguardWaitingForActivityDrawn) {
                 mPolicy.notifyActivityDrawnForKeyguardLw();
