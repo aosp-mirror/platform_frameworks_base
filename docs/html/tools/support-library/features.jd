@@ -8,6 +8,7 @@ page.title=Support Library Features
     <h2>In this document</h2>
     <ol>
       <li><a href="#v4">v4 Support Library</a></li>
+      <li><a href="#multidex">Multidex Support Library</a></li>
       <li><a href="#v7">v7 Support Libraries</a>
         <ol>
           <li><a href="#v7-appcompat">v7 appcompat library</a></li>
@@ -143,6 +144,34 @@ com.android.support:support-v4:21.0.+
 </pre>
 
 <p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+
+
+<h2 id="multidex">Multidex Support Library</h2>
+
+<p>
+  This library provides support for building apps with multiple Dalvik Executable (DEX) files.
+  Apps that reference more than 65536 methods are required to use multidex configurations. For
+  more information about using multidex, see <a href="{@docRoot}tools/building/multidex.html">
+  Building Apps with Over 65K Methods</a>.
+</p>
+
+<p>
+  This library is located in the {@code &lt;sdk&gt;/extras/android/support/multidex/} directory
+  after you download the Android Support Libraries. The library does not contain user interface
+  resources. To include it in your application project, follow the instructions for <a href=
+  "{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
+  resources</a>.
+</p>
+
+<p>
+  The Gradle build script dependency identifier for this library is as follows:
+</p>
+
+<pre>
+com.android.support:multidex:1.0.+
+</pre>
+
+<p>This dependency notation specifies the release version 1.0.0 or higher.</p>
 
 
 <h2 id="v7">v7 Support Libraries</h2>
