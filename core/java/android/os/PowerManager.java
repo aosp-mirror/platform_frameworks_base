@@ -669,6 +669,28 @@ public final class PowerManager {
     }
 
     /**
+     * Boosts the brightness of the screen to maximum for a predetermined
+     * period of time.  This is used to make the screen more readable in bright
+     * daylight for a short duration.
+     * <p>
+     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
+     * </p>
+     *
+     * @param time The time when the request to boost was issued, in the
+     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
+     * order the boost request with other power management functions.  It should be set
+     * to the timestamp of the input event that caused the request to boost.
+     *
+     * @hide Requires signature permission.
+     */
+    public void boostScreenBrightness(long time) {
+        try {
+            mService.boostScreenBrightness(time);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
      * Sets the brightness of the backlights (screen, keyboard, button).
      * <p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
