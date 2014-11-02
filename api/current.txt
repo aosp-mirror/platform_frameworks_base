@@ -16235,7 +16235,7 @@ package android.media.routing {
     method public java.util.List<java.lang.String> getRequiredProtocols();
     method public java.lang.String getServicePackageName();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.os.Parcelable.Creator<android.media.routing.MediaRouteSelector> CREATOR;
   }
 
   public static final class MediaRouteSelector.Builder {
