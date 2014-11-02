@@ -21,6 +21,7 @@
 #include <GLES2/gl2ext.h>
 #include <utils/Mutex.h>
 #include <utils/Functor.h>
+#include <utils/RefBase.h>
 
 #include <private/hwui/DrawGlInfo.h>
 

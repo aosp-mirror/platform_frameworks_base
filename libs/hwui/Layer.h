@@ -20,6 +20,7 @@
 #include <cutils/compiler.h>
 #include <sys/types.h>
 #include <utils/StrongPointer.h>
+#include <utils/RefBase.h>
 
 #include <GLES2/gl2.h>
 
