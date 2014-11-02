@@ -1,5 +1,9 @@
-page.title=Android TV
+page.title=About Android TV
+page.type=about
+page.image=tv/images/hero.jpg
 page.viewport_width=970
+page.tags="tv", "leanback"
+page.metaDescription=Bring your apps, games, and content to the biggest screen in the house.
 fullpage=true
 no_footer_links=true
 page.type=about
