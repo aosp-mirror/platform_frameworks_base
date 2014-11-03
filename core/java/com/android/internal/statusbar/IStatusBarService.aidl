@@ -51,7 +51,7 @@ interface IStatusBarService
     void onNotificationVisibilityChanged(
             in String[] newlyVisibleKeys, in String[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);
-    void setSystemUiVisibility(int vis, int mask);
+    void setSystemUiVisibility(int vis, int mask, String cause);
     void setWindowState(int window, int state);
 
     void showRecentApps(boolean triggeredFromAltTab);
