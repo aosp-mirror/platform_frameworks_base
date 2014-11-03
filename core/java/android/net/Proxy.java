@@ -22,18 +22,9 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.protocol.HttpContext;
-
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.URI;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,8 +34,6 @@ import java.util.regex.Pattern;
  */
 public final class Proxy {
 
-    // Set to true to enable extra debugging.
-    private static final boolean DEBUG = false;
     private static final String TAG = "Proxy";
 
     private static final ProxySelector sDefaultProxySelector;
@@ -190,30 +179,6 @@ public final class Proxy {
         }
     }
 
-    /**
-     * Returns the preferred proxy to be used by clients. This is a wrapper
-     * around {@link android.net.Proxy#getHost()}.
-     *
-     * @param context the context which will be passed to
-     * {@link android.net.Proxy#getHost()}
-     * @param url the target URL for the request
-     * @note Calling this method requires permission
-     * android.permission.ACCESS_NETWORK_STATE
-     * @return The preferred proxy to be used by clients, or null if there
-     * is no proxy.
-     * {@hide}
-     */
-    public static final HttpHost getPreferredHttpHost(Context context,
-            String url) {
-        java.net.Proxy prefProxy = getProxy(context, url);
-        if (prefProxy.equals(java.net.Proxy.NO_PROXY)) {
-            return null;
-        } else {
-            InetSocketAddress sa = (InetSocketAddress)prefProxy.address();
-            return new HttpHost(sa.getHostName(), sa.getPort(), "http");
-        }
-    }
-
     private static final boolean isLocalHost(String host) {
         if (host == null) {
             return false;
@@ -266,48 +231,6 @@ public final class Proxy {
                 throw new IllegalArgumentException();
             }
         }
-    }
-
-    static class AndroidProxySelectorRoutePlanner
-            extends org.apache.http.impl.conn.ProxySelectorRoutePlanner {
-
-        private Context mContext;
-
-        public AndroidProxySelectorRoutePlanner(SchemeRegistry schreg, ProxySelector prosel,
-                Context context) {
-            super(schreg, prosel);
-            mContext = context;
-        }
-
-        @Override
-        protected java.net.Proxy chooseProxy(List<java.net.Proxy> proxies, HttpHost target,
-                HttpRequest request, HttpContext context) {
-            return getProxy(mContext, target.getHostName());
-        }
-
-        @Override
-        protected HttpHost determineProxy(HttpHost target, HttpRequest request,
-                HttpContext context) {
-            return getPreferredHttpHost(mContext, target.getHostName());
-        }
-
-        @Override
-        public HttpRoute determineRoute(HttpHost target, HttpRequest request,
-                HttpContext context) {
-            HttpHost proxy = getPreferredHttpHost(mContext, target.getHostName());
-            if (proxy == null) {
-                return new HttpRoute(target);
-            } else {
-                return new HttpRoute(target, null, proxy, false);
-            }
-        }
-    }
-
-    /** @hide */
-    public static final HttpRoutePlanner getAndroidProxySelectorRoutePlanner(Context context) {
-        AndroidProxySelectorRoutePlanner ret = new AndroidProxySelectorRoutePlanner(
-                new SchemeRegistry(), ProxySelector.getDefault(), context);
-        return ret;
     }
 
     /** @hide */
