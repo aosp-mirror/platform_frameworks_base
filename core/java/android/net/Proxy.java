@@ -26,6 +26,7 @@ import android.util.Log;
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
 import java.net.URI;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
