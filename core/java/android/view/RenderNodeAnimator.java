@@ -219,7 +219,7 @@ public class RenderNodeAnimator extends Animator {
 
     @Override
     public void cancel() {
-        if (mState != STATE_FINISHED) {
+        if (mState != STATE_PREPARE && mState != STATE_FINISHED) {
             if (mState == STATE_DELAYED) {
                 getHelper().removeDelayedAnimation(this);
                 notifyStartListeners();
