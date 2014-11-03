@@ -87,11 +87,11 @@ inline static T max(T a, T b) {
 // range checked; guaranteed to NUL-terminate within the stated number of available slots
 // NOTE: if this truncates the dst string due to running out of space, no attempt is
 // made to avoid splitting surrogate pairs.
-static void strcpy16_dtoh(uint16_t* dst, const uint16_t* src, size_t avail)
+static void strcpy16_dtoh(char16_t* dst, const uint16_t* src, size_t avail)
 {
-    uint16_t* last = dst + avail - 1;
+    char16_t* last = dst + avail - 1;
     while (*src && (dst < last)) {
-        char16_t s = dtohs(*src);
+        char16_t s = dtohs(static_cast<char16_t>(*src));
         *dst++ = s;
         src++;
     }
@@ -501,7 +501,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         if (mHeader->flags&ResStringPool_header::UTF8_FLAG) {
             charSize = sizeof(uint8_t);
         } else {
-            charSize = sizeof(char16_t);
+            charSize = sizeof(uint16_t);
         }
 
         // There should be at least space for the smallest string
@@ -547,8 +547,8 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
                 e[i] = dtohl(mEntries[i]);
             }
             if (!(mHeader->flags&ResStringPool_header::UTF8_FLAG)) {
-                const char16_t* strings = (const char16_t*)mStrings;
-                char16_t* s = const_cast<char16_t*>(strings);
+                const uint16_t* strings = (const uint16_t*)mStrings;
+                uint16_t* s = const_cast<uint16_t*>(strings);
                 for (i=0; i<mStringPoolSize; i++) {
                     s[i] = dtohs(strings[i]);
                 }
@@ -558,7 +558,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
         if ((mHeader->flags&ResStringPool_header::UTF8_FLAG &&
                 ((uint8_t*)mStrings)[mStringPoolSize-1] != 0) ||
                 (!mHeader->flags&ResStringPool_header::UTF8_FLAG &&
-                ((char16_t*)mStrings)[mStringPoolSize-1] != 0)) {
+                ((uint16_t*)mStrings)[mStringPoolSize-1] != 0)) {
             ALOGW("Bad string block: last string is not 0-terminated\n");
             return (mError=BAD_TYPE);
         }
@@ -656,7 +656,7 @@ void ResStringPool::uninit()
  * add it together with the next character.
  */
 static inline size_t
-decodeLength(const char16_t** str)
+decodeLength(const uint16_t** str)
 {
     size_t len = **str;
     if ((len & 0x8000) != 0) {
@@ -689,19 +689,19 @@ decodeLength(const uint8_t** str)
     return len;
 }
 
-const uint16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
+const char16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
 {
     if (mError == NO_ERROR && idx < mHeader->stringCount) {
         const bool isUTF8 = (mHeader->flags&ResStringPool_header::UTF8_FLAG) != 0;
-        const uint32_t off = mEntries[idx]/(isUTF8?sizeof(char):sizeof(char16_t));
+        const uint32_t off = mEntries[idx]/(isUTF8?sizeof(uint8_t):sizeof(uint16_t));
         if (off < (mStringPoolSize-1)) {
             if (!isUTF8) {
-                const char16_t* strings = (char16_t*)mStrings;
-                const char16_t* str = strings+off;
+                const uint16_t* strings = (uint16_t*)mStrings;
+                const uint16_t* str = strings+off;
 
                 *u16len = decodeLength(&str);
                 if ((uint32_t)(str+*u16len-strings) < mStringPoolSize) {
-                    return str;
+                    return reinterpret_cast<const char16_t*>(str);
                 } else {
                     ALOGW("Bad string block: string #%d extends to %d, past end at %d\n",
                             (int)idx, (int)(str+*u16len-strings), (int)mStringPoolSize);
@@ -1013,7 +1013,7 @@ int32_t ResXMLParser::getCommentID() const
     return mCurNode != NULL ? dtohl(mCurNode->comment.index) : -1;
 }
 
-const uint16_t* ResXMLParser::getComment(size_t* outLen) const
+const char16_t* ResXMLParser::getComment(size_t* outLen) const
 {
     int32_t id = getCommentID();
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
@@ -1032,7 +1032,7 @@ int32_t ResXMLParser::getTextID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getText(size_t* outLen) const
+const char16_t* ResXMLParser::getText(size_t* outLen) const
 {
     int32_t id = getTextID();
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
@@ -1055,7 +1055,7 @@ int32_t ResXMLParser::getNamespacePrefixID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getNamespacePrefix(size_t* outLen) const
+const char16_t* ResXMLParser::getNamespacePrefix(size_t* outLen) const
 {
     int32_t id = getNamespacePrefixID();
     //printf("prefix=%d  event=%p\n", id, mEventCode);
@@ -1070,7 +1070,7 @@ int32_t ResXMLParser::getNamespaceUriID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getNamespaceUri(size_t* outLen) const
+const char16_t* ResXMLParser::getNamespaceUri(size_t* outLen) const
 {
     int32_t id = getNamespaceUriID();
     //printf("uri=%d  event=%p\n", id, mEventCode);
@@ -1088,7 +1088,7 @@ int32_t ResXMLParser::getElementNamespaceID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getElementNamespace(size_t* outLen) const
+const char16_t* ResXMLParser::getElementNamespace(size_t* outLen) const
 {
     int32_t id = getElementNamespaceID();
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
@@ -1105,7 +1105,7 @@ int32_t ResXMLParser::getElementNameID() const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getElementName(size_t* outLen) const
+const char16_t* ResXMLParser::getElementName(size_t* outLen) const
 {
     int32_t id = getElementNameID();
     return id >= 0 ? mTree.mStrings.stringAt(id, outLen) : NULL;
@@ -1134,7 +1134,7 @@ int32_t ResXMLParser::getAttributeNamespaceID(size_t idx) const
     return -2;
 }
 
-const uint16_t* ResXMLParser::getAttributeNamespace(size_t idx, size_t* outLen) const
+const char16_t* ResXMLParser::getAttributeNamespace(size_t idx, size_t* outLen) const
 {
     int32_t id = getAttributeNamespaceID(idx);
     //printf("attribute namespace=%d  idx=%d  event=%p\n", id, idx, mEventCode);
@@ -1165,7 +1165,7 @@ int32_t ResXMLParser::getAttributeNameID(size_t idx) const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getAttributeName(size_t idx, size_t* outLen) const
+const char16_t* ResXMLParser::getAttributeName(size_t idx, size_t* outLen) const
 {
     int32_t id = getAttributeNameID(idx);
     //printf("attribute name=%d  idx=%d  event=%p\n", id, idx, mEventCode);
@@ -1205,7 +1205,7 @@ int32_t ResXMLParser::getAttributeValueStringID(size_t idx) const
     return -1;
 }
 
-const uint16_t* ResXMLParser::getAttributeStringValue(size_t idx, size_t* outLen) const
+const char16_t* ResXMLParser::getAttributeStringValue(size_t idx, size_t* outLen) const
 {
     int32_t id = getAttributeValueStringID(idx);
     //XML_NOISY(printf("getAttributeValue 0x%x=0x%x\n", idx, id));
@@ -4239,7 +4239,7 @@ nope:
     return 0;
 }
 
-bool ResTable::expandResourceRef(const uint16_t* refStr, size_t refLen,
+bool ResTable::expandResourceRef(const char16_t* refStr, size_t refLen,
                                  String16* outPackage,
                                  String16* outType,
                                  String16* outName,
@@ -5658,8 +5658,8 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
     if (idx == 0) {
         idx = mPackageGroups.size() + 1;
 
-        char16_t tmpName[sizeof(pkg->name)/sizeof(char16_t)];
-        strcpy16_dtoh(tmpName, pkg->name, sizeof(pkg->name)/sizeof(char16_t));
+        char16_t tmpName[sizeof(pkg->name)/sizeof(pkg->name[0])];
+        strcpy16_dtoh(tmpName, pkg->name, sizeof(pkg->name)/sizeof(pkg->name[0]));
         group = new PackageGroup(this, String16(tmpName), id);
         if (group == NULL) {
             delete package;
@@ -6029,7 +6029,10 @@ status_t ResTable::createIdmap(const ResTable& overlay,
     *outSize += 2 * sizeof(uint16_t);
 
     // overlay packages are assumed to contain only one package group
-    const String16 overlayPackage(overlay.mPackageGroups[0]->packages[0]->package->name);
+    const ResTable_package* overlayPackageStruct = overlay.mPackageGroups[0]->packages[0]->package;
+    char16_t tmpName[sizeof(overlayPackageStruct->name)/sizeof(overlayPackageStruct->name[0])];
+    strcpy16_dtoh(tmpName, overlayPackageStruct->name, sizeof(overlayPackageStruct->name)/sizeof(overlayPackageStruct->name[0]));
+    const String16 overlayPackage(tmpName);
 
     for (size_t typeIndex = 0; typeIndex < pg->types.size(); ++typeIndex) {
         const TypeList& typeList = pg->types[typeIndex];
@@ -6331,8 +6334,10 @@ void ResTable::print(bool inclValues) const
             // Use a package's real ID, since the ID may have been assigned
             // if this package is a shared library.
             packageId = pkg->package->id;
+            char16_t tmpName[sizeof(pkg->package->name)/sizeof(pkg->package->name[0])];
+            strcpy16_dtoh(tmpName, pkg->package->name, sizeof(pkg->package->name)/sizeof(pkg->package->name[0]));
             printf("  Package %d id=0x%02x name=%s\n", (int)pkgIndex,
-                    pkg->package->id, String8(String16(pkg->package->name)).string());
+                    pkg->package->id, String8(tmpName).string());
         }
 
         for (size_t typeIndex=0; typeIndex < pg->types.size(); typeIndex++) {

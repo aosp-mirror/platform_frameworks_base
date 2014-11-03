@@ -33,20 +33,20 @@ aaptSources := \
     Command.cpp \
     CrunchCache.cpp \
     FileFinder.cpp \
+    Images.cpp \
     Package.cpp \
-    StringPool.cpp \
-    XMLNode.cpp \
+    pseudolocalize.cpp \
+    qsort_r_compat.c \
+    Resource.cpp \
     ResourceFilter.cpp \
     ResourceIdCache.cpp \
     ResourceTable.cpp \
-    Images.cpp \
-    Resource.cpp \
-    pseudolocalize.cpp \
     SourcePos.cpp \
+    StringPool.cpp \
     WorkQueue.cpp \
+    XMLNode.cpp \
     ZipEntry.cpp \
-    ZipFile.cpp \
-    qsort_r_compat.c
+    ZipFile.cpp
 
 aaptTests := \
     tests/AaptConfig_test.cpp \
@@ -88,16 +88,13 @@ endif
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libaapt
-
-LOCAL_SRC_FILES := $(aaptSources)
-LOCAL_C_INCLUDES += $(aaptCIncludes)
-
-LOCAL_CFLAGS += -Wno-format-y2k
-LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
-LOCAL_CFLAGS += $(aaptCFlags)
+LOCAL_CFLAGS += -Wno-format-y2k -DSTATIC_ANDROIDFW_FOR_TOOLS $(aaptCFlags)
+LOCAL_CPPFLAGS += $(aaptCppFlags)
 ifeq (darwin,$(HOST_OS))
 LOCAL_CFLAGS += -D_DARWIN_UNLIMITED_STREAMS
 endif
+LOCAL_C_INCLUDES += $(aaptCIncludes)
+LOCAL_SRC_FILES := $(aaptSources)
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
@@ -108,15 +105,11 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := aapt
-
-LOCAL_SRC_FILES := $(aaptMain)
-
-LOCAL_STATIC_LIBRARIES += \
-    libaapt \
-    $(aaptHostStaticLibs)
-
-LOCAL_LDLIBS += $(aaptHostLdLibs)
 LOCAL_CFLAGS += $(aaptCFlags)
+LOCAL_CPPFLAGS += $(aaptCppFlags)
+LOCAL_LDLIBS += $(aaptHostLdLibs)
+LOCAL_SRC_FILES := $(aaptMain)
+LOCAL_STATIC_LIBRARIES += libaapt $(aaptHostStaticLibs)
 
 include $(BUILD_HOST_EXECUTABLE)
 
@@ -127,16 +120,12 @@ include $(BUILD_HOST_EXECUTABLE)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libaapt_tests
-
+LOCAL_CFLAGS += $(aaptCFlags)
+LOCAL_CPPFLAGS += $(aaptCppFlags)
+LOCAL_LDLIBS += $(aaptHostLdLibs)
 LOCAL_SRC_FILES += $(aaptTests)
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
-
-LOCAL_STATIC_LIBRARIES += \
-    libaapt \
-    $(aaptHostStaticLibs)
-
-LOCAL_LDLIBS += $(aaptHostLdLibs)
-LOCAL_CFLAGS += $(aaptCFlags)
+LOCAL_STATIC_LIBRARIES += libaapt $(aaptHostStaticLibs)
 
 include $(BUILD_HOST_NATIVE_TEST)
 
@@ -148,13 +137,12 @@ ifneq ($(SDK_ONLY),true)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := aapt
-
+LOCAL_CFLAGS += $(aaptCFlags)
 LOCAL_SRC_FILES := $(aaptSources) $(aaptMain)
 LOCAL_C_INCLUDES += \
     $(aaptCIncludes) \
     bionic \
     external/stlport/stlport
-
 LOCAL_SHARED_LIBRARIES := \
     libandroidfw \
     libutils \
@@ -162,13 +150,9 @@ LOCAL_SHARED_LIBRARIES := \
     libpng \
     liblog \
     libz
-
 LOCAL_STATIC_LIBRARIES := \
     libstlport_static \
     libexpat_static
-
-LOCAL_CFLAGS += $(aaptCFlags)
-LOCAL_CPPFLAGS += -Wno-non-virtual-dtor
 
 include $(BUILD_EXECUTABLE)
 
