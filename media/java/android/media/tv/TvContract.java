@@ -856,6 +856,9 @@ public final class TvContract {
         /**
          * The start time of this TV program, in milliseconds since the epoch.
          * <p>
+         * The value should be equal to or larger than {@link #COLUMN_END_TIME_UTC_MILLIS} of the
+         * previous program in the same channel.
+         * </p><p>
          * Type: INTEGER (long)
          * </p>
          */
@@ -864,6 +867,9 @@ public final class TvContract {
         /**
          * The end time of this TV program, in milliseconds since the epoch.
          * <p>
+         * The value should be equal to or less than {@link #COLUMN_START_TIME_UTC_MILLIS} of the
+         * next program in the same channel.
+         * </p><p>
          * Type: INTEGER (long)
          * </p>
          */
