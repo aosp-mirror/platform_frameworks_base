@@ -90,9 +90,10 @@ PendingIntent notificationPendingIntent = PendingIntent.getActivity(this, 0, not
 </ol>
 <h2 id="UiLibrary">Create Layouts with the Wearable UI Library</h2>
 <p>
-There's an unofficial UI library that is automatically included when you create your wearable
-app with the Android Studio Project Wizard. You can also add the library to your <code>build.gradle</code>
+The Wearable UI Library is automatically included when you create your wearable
+app with the Android Studio Project Wizard. You can also add this library to your <code>build.gradle</code>
 file with the following dependency declaration:
+</p>
 
 <pre>
 dependencies {
@@ -101,8 +102,11 @@ dependencies {
     compile 'com.google.android.gms:play-services-wearable:+'
 }
 </pre>
-This library helps you build UIs that are designed for wearables. Here are some of the major classes:
-</p>
+
+<p>This library helps you build UIs that are designed for wearables. For more information, see
+<a href="{@docRoot}training/wearables/ui/index.html">Creating Custom UIs for Wear Devices</a>.</p>
+
+<p>Here are some of the major classes in the Wearable UI Library:</p>
 
 <ul>
     <li><code>BoxInsetLayout</code> - A FrameLayout that's aware of screen shape and can box its
