@@ -84,6 +84,8 @@ import android.util.Slog;
 import android.util.SuperNotCalledException;
 import android.view.Display;
 import android.view.HardwareRenderer;
+import android.view.IWindowManager;
+import android.view.IWindowSessionCallback;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
@@ -2365,6 +2367,9 @@ public final class ActivityThread {
 
         if (localLOGV) Slog.v(
             TAG, "Handling launch of " + r);
+
+        // Initialize before creating the activity
+        WindowManagerGlobal.initialize();
 
         Activity a = performLaunchActivity(r, customIntent);
 

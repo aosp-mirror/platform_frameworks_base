@@ -3111,6 +3111,7 @@ package android.animation {
     method public void removeAllUpdateListeners();
     method public void removeUpdateListener(android.animation.ValueAnimator.AnimatorUpdateListener);
     method public void reverse();
+    method public void setCurrentFraction(float);
     method public void setCurrentPlayTime(long);
     method public android.animation.ValueAnimator setDuration(long);
     method public void setEvaluator(android.animation.TypeEvaluator);
