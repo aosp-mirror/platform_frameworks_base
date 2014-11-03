@@ -19,6 +19,7 @@ package com.android.layoutlib.bridge;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
 import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
+import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.Capability;
 import com.android.ide.common.rendering.api.DrawableParams;
 import com.android.ide.common.rendering.api.LayoutLog;
@@ -459,7 +460,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
 
     public static void setLog(LayoutLog log) {
         // check only the thread currently owning the lock can do this.
-        if (sLock.isHeldByCurrentThread() == false) {
+        if (!sLock.isHeldByCurrentThread()) {
             throw new IllegalStateException("scene must be acquired first. see #acquire(long)");
         }
 
@@ -489,7 +490,6 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
 
     /**
      * Returns the name of a framework resource whose value is an int array.
-     * @param array
      */
     public static String resolveResourceId(int[] array) {
         sIntArrayWrapper.set(array);
@@ -502,6 +502,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      * @param name the name of the resource.
      * @return an {@link Integer} containing the resource id, or null if no resource were found.
      */
+    @NonNull
     public static Integer getResourceId(ResourceType type, String name) {
         Map<String, Integer> map = sRevRMap.get(type);
         Integer value = null;
@@ -509,11 +510,8 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             value = map.get(name);
         }
 
-        if (value == null) {
-            value = sDynamicIds.getId(type, name);
-        }
+        return value == null ? sDynamicIds.getId(type, name) : value;
 
-        return value;
     }
 
     /**
