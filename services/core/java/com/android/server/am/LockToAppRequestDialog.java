@@ -112,8 +112,8 @@ public class LockToAppRequestDialog implements OnClickListener {
 
             // Remember state.
             try {
-                boolean useLock = Settings.System.getInt(mContext.getContentResolver(),
-                        Settings.System.LOCK_TO_APP_EXIT_LOCKED) != 0;
+                boolean useLock = Settings.Secure.getInt(mContext.getContentResolver(),
+                        Settings.Secure.LOCK_TO_APP_EXIT_LOCKED) != 0;
                 mCheckbox.setChecked(useLock);
             } catch (SettingNotFoundException e) {
             }
@@ -127,8 +127,8 @@ public class LockToAppRequestDialog implements OnClickListener {
         if (DialogInterface.BUTTON_POSITIVE == which) {
             Slog.d(TAG, "accept lock-to-app request");
             // Set whether to use the lock screen when exiting.
-            Settings.System.putInt(mContext.getContentResolver(),
-                    Settings.System.LOCK_TO_APP_EXIT_LOCKED,
+            Settings.Secure.putInt(mContext.getContentResolver(),
+                    Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
                     mCheckbox != null && mCheckbox.isChecked() ? 1 : 0);
 
             // Start lock-to-app.
