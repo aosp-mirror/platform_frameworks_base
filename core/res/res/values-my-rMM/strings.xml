@@ -716,8 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"appအား ဖိုင်စနစ်၏ကက်ရှကို ဖတ် နှင့် ရေး ခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်နှင့် လက်ခံနိုင်ရန် app ကို ခွင့်ပြုပါ။"</string>
-    <string name="permlab_register_provider" msgid="2654513709546459553">"တယ်လီကွမ် ဆက်သွယ်မှု အသစ်ကို မှတ်ပုံတင်ရန်"</string>
-    <string name="permdesc_register_provider" msgid="7571533832018681544">"appအား တယ်လီကွမ် ဆက်သွယ်မှု အသစ်ကို မှတ်ပုံတင်ခွင့် ပြုပါ။"</string>
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
+    <skip />
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
+    <skip />
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
+    <skip />
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
+    <skip />
     <string name="permlab_connection_manager" msgid="1116193254522105375">"တယ်လီကွမ် ဆက်သွယ်မှုများကို စီမံရန်"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"appအား တယ်လီကွမ် ဆက်သွယ်မှုများကို စီမံခွင့် ပြုပါ။"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ခေါ်ဆိုမှု-အဝင် မျက်နှာပြင်နဲ့ တုံ့ပြန်လုပ်ကိုင်ရန်"</string>
@@ -1235,6 +1241,7 @@
     <string name="smv_application" msgid="3307209192155442829">"app <xliff:g id="APPLICATION">%1$s</xliff:g> (လုပ်ငန်းစဉ် <xliff:g id="PROCESS">%2$s</xliff:g>) က ကိုယ်တိုင် ပြဌာန်းခဲ့သည့် StrictMode မူဝါဒကို ချိုးဖောက်ခဲ့သည်။"</string>
     <string name="smv_process" msgid="5120397012047462446">"ဤ<xliff:g id="PROCESS">%1$s</xliff:g>ဖြစ်စဥ်မှာ ကိုယ်တိုင်အကျိုးသက်ရောက်သော StrictModeမူဝါဒအား ချိုးဖောက်သည်"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"အန်ဒရွိုက်ကို မွမ်းမံနေ…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android စတင်နေ…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> ထဲက app<xliff:g id="NUMBER_1">%2$d</xliff:g>ကို ဆီလျော်အောင် လုပ်နေ"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"appများကို စတင်နေ"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"လုပ်ငန်းစနစ်ထည့်သွင်း၍ ပြန်လည်စတင်ရန် ပြီးပါပြီ"</string>
@@ -1781,17 +1788,21 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ပင်မဖြုတ်မီမှာ စကားဝှက်ကို မေးကြည့်ရန်"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ဘက်ထရီသက်တမ်း ကြာရှည်ခံရန်အတွက်၊ ဘက်ထရီချွေတာရေးအပိုင်းမှ သင့် စက်ပစ္စည်း၏ဆောင်ရွက်ချက်များကို လျော့ချပေးပြီး တုန်ခါမှုနှင့် နောက်ခံအချက်အလက်အများစုကို ကန့်သတ်ပေးသည်။ အီးမေး၊ စာပို့ခြင်း နှင့် တခြားapp များကို သင်ဖွင့်မထားပါက အချိန်နှင့်တပြေးညီ ညှိမပေးပါ။ \n\n စက်ပစ္စည်း အားသွင်းနေစဉ် ဘက်ထရီချွေတာရေးအပိုင်းသည် အလိုအလျောက်ပင် အလုပ်မလုပ်ပါ။"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"သင်၏ စက်ရပ်ချိန် <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> မှာ ပြီးဆုံးသည့် အထိ။"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"တစ်မိနစ်ကြာ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>အထိ)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d မိနစ်ကြာ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>အထိ)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"တစ်နာရီကြာ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>အထိ)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d နာရီကြာ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>အထိ)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"တစ်မိနစ် အတွင်း"</item>
     <item quantity="other" msgid="6924190729213550991">"%d မိနစ် အတွင်း"</item>
   </plurals>
     <!-- String.format failed for translation -->
     <!-- no translation found for zen_mode_duration_hours:other (5408537517529822157) -->
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>အထိ"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"အကန့်အသတ်မရှိစွာ"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"ခေါက်ရန်"</string>
 </resources>

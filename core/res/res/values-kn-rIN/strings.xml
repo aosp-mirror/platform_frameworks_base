@@ -716,8 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ಕ್ಯಾಷ್‌ ಫೈಲ್‌ ವ್ಯವಸ್ಥೆಯನ್ನು ಓದಲು ಮತ್ತು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <string name="permlab_register_provider" msgid="2654513709546459553">"ಹೊಸ ಟೆಲಿಕಾಂ ಸಂಪರ್ಕವನ್ನು ನೋಂದಣಿ ಮಾಡಿ"</string>
-    <string name="permdesc_register_provider" msgid="7571533832018681544">"ಹೊಸ ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಣಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
+    <skip />
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
+    <skip />
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
+    <skip />
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
+    <skip />
     <string name="permlab_connection_manager" msgid="1116193254522105375">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ಒಳ-ಕರೆ ಪರದೆಯ ಮೂಲಕ ಸಂವಹನ ನಡೆಸಿ"</string>
@@ -1235,6 +1241,7 @@
     <string name="smv_application" msgid="3307209192155442829">"ಅಪ್ಲಿಕೇಶನ್‌‌ <xliff:g id="APPLICATION">%1$s</xliff:g> (ಪ್ರಕ್ರಿಯೆಯು <xliff:g id="PROCESS">%2$s</xliff:g>) ತನ್ನ ಸ್ವಯಂ-ಜಾರಿ ಕಠಿಣ ಮೋಡ್ ನೀತಿಯನ್ನು ಉಲ್ಲಂಘನೆ ಮಾಡಿದೆ."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> ಪ್ರಕ್ರಿಯೆಯು ತನ್ನ ಸ್ವಯಂ-ಜಾರಿ ಕಠಿಣ ಮೋಡ್ ನೀತಿಯನ್ನು ಉಲ್ಲಂಘನೆ ಮಾಡಿದೆ."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android ಅಪ್‌ಗ್ರೇಡ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="NUMBER_0">%1$d</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ಬೂಟ್ ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ."</string>
@@ -1781,10 +1788,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳಿ"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕುಂಠಿತಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್‌‌ ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ. ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನೀವು ತೆರೆಯುವವರೆಗೆ ಅವುಗಳನ್ನು ನವೀಕರಿಸಲಾಗುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆಫ್ ಆಗುತ್ತದೆ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ನಿಮ್ಮ ಅಲಭ್ಯತೆ ಕೊನೆಗೊಳ್ಳುವವರೆಗೆ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"ಒಂದು ನಿಮಿಷದವರೆಗೆ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ವರೆಗೆ)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ವರೆಗೆ)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"ಒಂದು ಗಂಟೆಯವರೆಗೆ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ವರೆಗೆ)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d ಗಂಟೆಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ವರೆಗೆ)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ಒಂದು ನಿಮಿಷದವರೆಗೆ"</item>
     <item quantity="other" msgid="6924190729213550991">"%d ನಿಮಿಷಗಳವರೆಗೆ"</item>
@@ -1793,7 +1804,7 @@
     <item quantity="one" msgid="3480040795582254384">"ಒಂದು ಗಂಟೆಯವರೆಗೆ"</item>
     <item quantity="other" msgid="5408537517529822157">"%d ಗಂಟೆಗಳವರೆಗೆ"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"ಅನಿರ್ದಿಷ್ಟವಾಗಿ"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"ಸಂಕುಚಿಸು"</string>
 </resources>

@@ -716,14 +716,16 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ऐप्स को संचय फ़ाइल सिस्‍टम पढ़ने और लिखने देता है."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कॉल करें/प्राप्‍त करें"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ऐप्स को SIP कॉल करने और प्राप्‍त करने देती है."</string>
-    <!-- no translation found for permlab_register_provider (2654513709546459553) -->
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
     <skip />
-    <!-- no translation found for permdesc_register_provider (7571533832018681544) -->
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
     <skip />
-    <!-- no translation found for permlab_connection_manager (1116193254522105375) -->
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
     <skip />
-    <!-- no translation found for permdesc_connection_manager (5925480810356483565) -->
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
     <skip />
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"टेलीकॉम कनेक्शन प्रबंधित करें"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"ऐप को टेलीकॉम कनेक्शन प्रबंधित करने देती है."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"इन-कॉल स्क्रीन से सहभागिता करें"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ऐप्स को यह नियंत्रित करने देती है कि उपयोगकर्ता को इन-कॉल स्क्रीन कब और कैसी दिखाई देती है."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"टेलीफ़ोनी सेवाओं के साथ सहभागिता करें"</string>
@@ -1239,6 +1241,7 @@
     <string name="smv_application" msgid="3307209192155442829">"ऐप्स <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ने उसकी स्‍वयं लागू होने वाली StrictMode नीति का उल्‍लंघन किया है."</string>
     <string name="smv_process" msgid="5120397012047462446">"प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> ने उसकी स्‍व-प्रवर्तित StrictMode नीति का उल्‍लंघन किया है."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android अपग्रेड हो रहा है..."</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android प्रारंभ हो रहा है…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> में से <xliff:g id="NUMBER_0">%1$d</xliff:g> ऐप्स  अनुकूलित हो रहा है."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ऐप्स  प्रारंभ होने वाले हैं"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्‍त हो रहा है."</string>
@@ -1785,10 +1788,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करने से पहले पासवर्ड के लिए पूछें"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"बैटरी के जीवन काल को बेहतर बनाने में सहायता के लिए, बैटरी सेवर आपके डिवाइस के प्रदर्शन को घटा देता है तथा कंपन और अधिकांश पृष्ठभूमि डेटा को सीमित कर देता है. ईमेल, संदेश सेवा और अन्य ऐप्स जो समन्वयन पर निर्भर करते हैं वे तब तक अपडेट नहीं हो सकते जब तक कि आप उन्हें नहीं खोलते.\n\nजब आपका डिवाइस चार्ज हो रहा होता है तो बैटरी सेवर अपने आप बंद हो जाता है."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"जब तक कि <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> बजे आपका डाउनटाइम समाप्‍त न हो"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"एक मिनट के लिए (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> तक)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> तक)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"एक घंटे के लिए (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> तक)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d घंटो के लिए (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> तक)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"एक मिनट के लिए"</item>
     <item quantity="other" msgid="6924190729213550991">"%d मिनट के लिए"</item>
@@ -1797,7 +1804,7 @@
     <item quantity="one" msgid="3480040795582254384">"एक घंटे के लिए"</item>
     <item quantity="other" msgid="5408537517529822157">"%d घंटे के लिए"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> तक"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"अनिश्चित समय तक"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त करें"</string>
 </resources>

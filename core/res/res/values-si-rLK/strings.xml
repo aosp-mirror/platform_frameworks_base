@@ -716,14 +716,16 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"හැඹිලි ගොනු පද්ධති කියවීමට සහ ලිවීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ඇමතුම් සිදුකිරීමට/ලබාගැනීමට"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ඇමතුම් සිදුකිරීමට සහ ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <!-- no translation found for permlab_register_provider (2654513709546459553) -->
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
     <skip />
-    <!-- no translation found for permdesc_register_provider (7571533832018681544) -->
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
     <skip />
-    <!-- no translation found for permlab_connection_manager (1116193254522105375) -->
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
     <skip />
-    <!-- no translation found for permdesc_connection_manager (5925480810356483565) -->
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
     <skip />
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"විදුලි සංදේශන සම්බන්ධතා කළමණාකරණය කරන්න"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"විදුලි සංදේශන සම්බන්ධතා කළමණාකරණය කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ලැබෙන ඇමතුම් තිරය සමග අන්තර් ක්‍රියාකාරී වන්න"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ලැබෙන ඇමතුම් තිරය පරිශීලකයාට පෙනෙන්නේ කෙදිනද සහ කෙසේද යැයි පාලනය කිරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"දුරකථන සේවාවන් සමඟ සම්බන්ධ වීම"</string>
@@ -1241,6 +1243,7 @@
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> යෙදුම (<xliff:g id="PROCESS">%2$s</xliff:g> ක්‍රියාවලිය) එහි StrictMode කොන්දේසිය උල්ලංඝනය කර ඇත."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> ක්‍රියාවලිය එහි StrictMode කොන්දේසිය උල්ලංඝනය කර ඇත."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android උත්ශ්‍රේණි වෙමින් පවතී..."</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android ආරම්භ කරමින්…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> කින් <xliff:g id="NUMBER_0">%1$d</xliff:g> වැනි යෙදුම ප්‍රශස්ත කරමින්."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"යෙදුම් ආරම්භ කරමින්."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ඇරඹුම අවසාන කරමින්."</string>
@@ -1787,10 +1790,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ගැලවීමට පෙර මුරපදය විමසන්න"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"බැටරියේ ජීව කාලය දියුණු කිරීමට උදව් කිරීමට, ඔබගේ උපාංගයේ ක්‍රියාකාරිත්වය සහ සීමා කළ කම්පනයන් සහ බොහොමයක් පසුබිම් දත්ත බැටරි සුරැකීමෙන් අඩු කරයි. සමමුහුර්ත කිරීම බලාපොරොත්තු වෙන ඊ-තැපෑල, පණිවිඩ යැවීම සහ වෙනත් යෙදුම් යාවත්කාලීන වන්නේ ඔබ ඒවා විවෘත කළ විට පමණි.\n\nඔබගේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකීම ස්වයංක්‍රීයව අක්‍රිය වේ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ඔබගේ බිඳවැටුම් වේලාව <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> දී අවසන්වන තුරු"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"මිනිත්තු එකක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
+    <item quantity="other" msgid="2787867221129368935">"මිනිත්තු %1$d සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"පැය එකක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
+    <item quantity="other" msgid="2827214920627669898">"පැය %1$d සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"විනාඩි එකක් සඳහා"</item>
     <item quantity="other" msgid="6924190729213550991">"විනාඩි %d සඳහා"</item>
@@ -1799,7 +1806,7 @@
     <item quantity="one" msgid="3480040795582254384">"පැයක් සඳහා"</item>
     <item quantity="other" msgid="5408537517529822157">"පැය %d ක් සඳහා"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"අනියත ආකාරයට"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"හකුළන්න"</string>
 </resources>
