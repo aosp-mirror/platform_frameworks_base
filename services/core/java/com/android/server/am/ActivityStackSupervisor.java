@@ -3546,9 +3546,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         }
                         mLockTaskNotify.show(false);
                         try {
-                            boolean shouldLockKeyguard = Settings.System.getInt(
+                            boolean shouldLockKeyguard = Settings.Secure.getInt(
                                     mService.mContext.getContentResolver(),
-                                    Settings.System.LOCK_TO_APP_EXIT_LOCKED) != 0;
+                                    Settings.Secure.LOCK_TO_APP_EXIT_LOCKED) != 0;
                             if (!mLockTaskIsLocked && shouldLockKeyguard) {
                                 mWindowManager.lockNow(null);
                                 mWindowManager.dismissKeyguard();
