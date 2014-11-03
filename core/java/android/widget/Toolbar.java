@@ -1746,6 +1746,17 @@ public class Toolbar extends ViewGroup {
     }
 
     /**
+     * Accessor to enable LayoutLib to get ActionMenuPresenter directly.
+     */
+    ActionMenuPresenter getOuterActionMenuPresenter() {
+        return mOuterActionMenuPresenter;
+    }
+
+    Context getPopupContext() {
+        return mPopupContext;
+    }
+
+    /**
      * Interface responsible for receiving menu item click events if the items themselves
      * do not have individual item click listeners.
      */

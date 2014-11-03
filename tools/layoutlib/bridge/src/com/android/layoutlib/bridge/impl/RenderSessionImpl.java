@@ -353,8 +353,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                 // if the theme says no title/action bar, then the size will be 0
                 if (mActionBarSize > 0) {
-                    ActionBarLayout actionBar = createActionBar(context, params);
-                    backgroundLayout.addView(actionBar);
+                    ActionBarLayout actionBar = createActionBar(context, params, backgroundLayout);
                     actionBar.createMenuPopup();
                     mContentRoot = actionBar.getContentRoot();
                 } else if (mTitleBarSize > 0) {
@@ -1624,11 +1623,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     /**
      * Creates the action bar. Also queries the project callback for missing information.
      */
-    private ActionBarLayout createActionBar(BridgeContext context, SessionParams params) {
-        ActionBarLayout actionBar = new ActionBarLayout(context, params);
-        actionBar.setLayoutParams(new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        return actionBar;
+    private ActionBarLayout createActionBar(BridgeContext context, SessionParams params,
+            ViewGroup parentView) {
+        return new ActionBarLayout(context, params, parentView);
     }
 
     public BufferedImage getImage() {
