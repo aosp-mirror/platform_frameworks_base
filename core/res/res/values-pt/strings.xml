@@ -716,8 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permite que o app leia e grave o sistema de arquivos cache."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"fazer/receber chamadas SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Permite que o app faça e receba chamadas SIP."</string>
-    <string name="permlab_register_provider" msgid="2654513709546459553">"registrar nova conexão de telecomunicações"</string>
-    <string name="permdesc_register_provider" msgid="7571533832018681544">"Permite que o app registre novas conexões de telecomunicações."</string>
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
+    <skip />
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
+    <skip />
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
+    <skip />
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
+    <skip />
     <string name="permlab_connection_manager" msgid="1116193254522105375">"gerenciar conexões de telecomunicações"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Permite que o app gerencie conexões de telecomunicações."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interagir com chamada na tela"</string>
@@ -1233,6 +1239,8 @@
     <string name="smv_application" msgid="3307209192155442829">"O app <xliff:g id="APPLICATION">%1$s</xliff:g>, processo <xliff:g id="PROCESS">%2$s</xliff:g>, violou a política StrictMode imposta automaticamente."</string>
     <string name="smv_process" msgid="5120397012047462446">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> violou a política StrictMode imposta automaticamente."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"O Android está sendo atualizado..."</string>
+    <!-- no translation found for android_start_title (8418054686415318207) -->
+    <skip />
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Otimizando app <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Iniciando apps."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Concluindo a inicialização."</string>
@@ -1791,4 +1799,6 @@
     <!-- no translation found for zen_mode_until (7336308492289875088) -->
     <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidamente"</string>
+    <!-- no translation found for toolbar_collapse_description (2821479483960330739) -->
+    <skip />
 </resources>

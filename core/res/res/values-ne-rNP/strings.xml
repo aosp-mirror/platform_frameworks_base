@@ -716,10 +716,16 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"केस फाइल प्रणालीलाई पढ्न र लेख्‍नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कलहरू प्राप्त/बनाउन"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP कलहरू बनाउन र प्राप्त गर्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
-    <string name="permlab_register_provider" msgid="2654513709546459553">"नयाँ दूरसंचार जडान दर्ता गर्नुहोस्"</string>
-    <string name="permdesc_register_provider" msgid="7571533832018681544">"अनुप्रयोग लाई नयाँ दूरसंचार सम्पर्क दर्ता गर्न अनुमति दिन्छ।"</string>
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
+    <skip />
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
+    <skip />
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
+    <skip />
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
+    <skip />
     <string name="permlab_connection_manager" msgid="1116193254522105375">"दूरसंचार जडान व्यवस्थापन गर्नुहोस्"</string>
-    <string name="permdesc_connection_manager" msgid="5925480810356483565">"अनुप्रयोग लाई टेलिकम जडान व्यवस्थापन गर्न अनुमति दिन्छ।"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"अनुप्रयोगलाई टेलिकम जडान व्यवस्थापन गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"आगमन कल स्क्रिन संग अन्तर्क्रिया गर्नुहोस्"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"कहिले र कसरी प्रयोगकर्ताले आगमन कल स्क्रीन हेर्न सक्दछ भनेर नियन्त्रण गर्न अनुप्रयोगलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"टेलिफोनी सेवा अन्तरक्रिया"</string>
@@ -1241,6 +1247,7 @@
     <string name="smv_application" msgid="3307209192155442829">"अनुप्रयोग <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ले यसको स्वयं-लागु गरिएको स्ट्रिटमोड नीति उलङ्घन गरेको छ।"</string>
     <string name="smv_process" msgid="5120397012047462446">"प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> यसको आफ्नै कडामोड नीतिका कारण उल्लङ्घन गरिएको छ।"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"एन्ड्रोइड अपग्रेड हुँदैछ…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android शुरू हुँदैछ..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"अनुप्रयोग अनुकुल हुँदै <xliff:g id="NUMBER_0">%1$d</xliff:g> को <xliff:g id="NUMBER_1">%2$d</xliff:g>।"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"सुरुवात अनुप्रयोगहरू।"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बुट पुरा हुँदै।"</string>
@@ -1769,12 +1776,12 @@
     <string name="item_is_selected" msgid="949687401682476608">"<xliff:g id="ITEM">%1$s</xliff:g> चयन गरियो"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> हटाइयो"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="7570091317001980053">"यो पर्दा अनपिन गर्न, छुनुहोस् र पछाडि पकड्नुहोस् र सोही समयमा अवलोकन गर्नुहोस्।"</string>
-    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"यो पर्दा अनपिन गर्न, छुनुहोस् र अवलोकन पकड्नुहोस्।"</string>
+    <string name="lock_to_app_toast" msgid="7570091317001980053">"यस पर्दालाई अनपिन गर्न एकै समय फिर्ता र सारांशलाई छोई पक्डिनुहोस्।"</string>
+    <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"यस पर्दालाई अनपिन गर्न सारांशलाई छुनुहोस् र पक्डनुहोस्।"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"स्क्रिन अनपिन हुँदैछ। अनपिन गर्ने तपाईँको संगठन द्वारा समर्थित छैन।"</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"स्क्रिन पिन गर्ने प्रयोग गर्नुहुन्छ?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"पर्दा पिन गर्नाले एकल दृश्यमा प्रदर्शन बन्द हुन्छ।\n\nअनपिन गर्न, छुनुहोस् र पछाडि पकड्नुहोस् र सोही समयमा अवलोकन गर्नुहोस्।"</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"पर्दा पिन गर्नाले एकल दृश्यमा प्रदर्शन बन्द हुन्छ।\n\nअनपिन गर्न, छुनुहोस् र अवलोकन पकड्नुहोस्।"</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"पर्दा पिन गर्नाले एकल दृश्यमा प्रदर्शन बन्द हुन्छ।\n\nअनपिन गर्न, छुनुहोस् र पछाडि पकड्नुहोस् र सोही समयमा सारांशलाई हेर्नुहोस्।"</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"पर्दा पिन गर्नाले एकल दृश्यमा प्रदर्शन बन्द हुन्छ।\n\nअनपिन गर्न, छुनुहोस् र सारांश पकड्नुहोस्।"</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"होइन, धन्यवाद"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रिन पिन गरियो"</string>
@@ -1784,10 +1791,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ब्याट्री जीवन सुधार्न, ब्याट्री बचतले आफ्नो उपकरणको प्रदर्शन र कम्पनको सीमा र सबैभन्दा पृष्ठभूमि डेटा कम गर्छ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जसले तपाईं तिनीहरूलाई नखोले सम्म समिकरण अद्यावधिक नगर्न सक्छ भनि भर पर्छ।\n\nब्याट्री बचतले तपाईँको उपकरण चार्ज हुँदै बेला तपाईँको उपकरण स्वचालित बन्द गर्छ।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"तपाईँको <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> डाउनटाइम समाप्त हुँदा सम्म"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"एक मिनेटको लागि (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> सम्म)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> सम्म)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"एक घण्टाको लागि (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> सम्म)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d घण्टाको लागि (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> सम्म)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"एक मिनेटको लागि"</item>
     <item quantity="other" msgid="6924190729213550991">"%d मिनेटको लागि"</item>
@@ -1796,7 +1807,7 @@
     <item quantity="one" msgid="3480040795582254384">"एक घण्टाको लागि"</item>
     <item quantity="other" msgid="5408537517529822157">"%d घण्टाको लागि"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> सम्म"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"अनिश्चित"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त पार्नुहोस्"</string>
 </resources>

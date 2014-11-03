@@ -716,8 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"தற்காலிகச் சேமிப்பு கோப்பு அமைப்பைப் படிக்க மற்றும் எழுத, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP அழைப்புகளைச் செய்தல்/பெறுதல்"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP அழைப்புகளைச் செய்ய/பெற, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <string name="permlab_register_provider" msgid="2654513709546459553">"புதிய தொலைத்தொடர்பு இணைப்பைப் பதிவுசெய்"</string>
-    <string name="permdesc_register_provider" msgid="7571533832018681544">"புதிய தொலைத்தொடர்பு இணைப்புகளைப் பதிவுசெய்ய, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
+    <skip />
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
+    <skip />
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
+    <skip />
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
+    <skip />
     <string name="permlab_connection_manager" msgid="1116193254522105375">"தொலைத்தொடர்பு இணைப்புகளை நிர்வகி"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"தொலைத்தொடர்பு இணைப்புகளை நிர்வகிக்க, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"உள்வரும் அழைப்பிற்கான திரையுடன் ஊடாடுதல்"</string>
@@ -1233,6 +1239,7 @@
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாடு (செயல்முறை <xliff:g id="PROCESS">%2$s</xliff:g>), தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> செயல்முறை, தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android மேம்படுத்தப்படுகிறது…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android துவங்குகிறது..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> பயன்பாட்டை ஒருங்கிணைக்கிறது."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"பயன்பாடுகள் தொடங்கப்படுகின்றன."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"துவக்குதலை முடிக்கிறது."</string>
@@ -1776,10 +1783,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"பேட்டரியின் ஆயுட்காலத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வுறுவதையும் பெரும்பாலான பின்புலத் தரவையும் வரம்பிடுகிறது. ஒத்திசைவைச் சார்ந்திருக்கும் மின்னஞ்சல், மெசேஜ், மேலும் பிற பயன்பாடுகளைத் திறக்கும் வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nசாதனம் சார்ஜ் ஆகும் போது, பேட்டரி சேமிப்பான் தானாகவே முடக்கப்படும்."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> முடியும் வரை"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"ஒரு மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d மணிநேரத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ஒரு நிமிடம்"</item>
     <item quantity="other" msgid="6924190729213550991">"%d நிமிடங்கள்"</item>
@@ -1788,7 +1799,7 @@
     <item quantity="one" msgid="3480040795582254384">"ஒரு மணி நேரம்"</item>
     <item quantity="other" msgid="5408537517529822157">"%d மணிநேரம்"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> வரை"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"வரையறையற்றது"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"சுருக்கு"</string>
 </resources>
