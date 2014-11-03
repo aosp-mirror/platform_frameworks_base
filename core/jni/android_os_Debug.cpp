@@ -46,10 +46,12 @@ enum {
     HEAP_UNKNOWN,
     HEAP_DALVIK,
     HEAP_NATIVE,
+
     HEAP_DALVIK_OTHER,
     HEAP_STACK,
     HEAP_CURSOR,
     HEAP_ASHMEM,
+    HEAP_GL_DEV,
     HEAP_UNKNOWN_DEV,
     HEAP_SO,
     HEAP_JAR,
@@ -297,7 +299,11 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             } else if (strncmp(name, "[stack", 6) == 0) {
                 whichHeap = HEAP_STACK;
             } else if (strncmp(name, "/dev/", 5) == 0) {
-                whichHeap = HEAP_UNKNOWN_DEV;
+                if (strncmp(name, "/dev/kgsl-3d0", 13) == 0) {
+                    whichHeap = HEAP_GL_DEV;
+                } else {
+                    whichHeap = HEAP_UNKNOWN_DEV;
+                }
             } else if (nameLen > 3 && strcmp(name+nameLen-3, ".so") == 0) {
                 whichHeap = HEAP_SO;
                 is_swappable = true;
