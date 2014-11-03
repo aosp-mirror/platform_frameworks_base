@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"तपाईँको हालको स्क्रिन यहाँ प्रकट हुन्छ"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"नयाँ अनुप्रयोगहरू खारेज गर्नुहोस्"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"अवलोकन मा १ पर्दा"</item>
-    <item quantity="other" msgid="5523506463832158203">"अवलोकन मा %%d स्क्रीन"</item>
+    <item quantity="one" msgid="3969335317929254918">"सारांशमा 1 पर्दा"</item>
+    <item quantity="other" msgid="5523506463832158203">"सारांशमा %d पर्दाहरू"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"कुनै सूचनाहरू छैन"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"चलिरहेको"</string>
@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"पछाडि"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"गृह"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"मेनु"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"अवलोकन"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"सारांश"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"खोज्नुहोस्"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"क्यामेरा"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"फोन"</string>
@@ -165,7 +165,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"द्रुत सेटिङहरू"</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"स्क्रीन बन्द गर्नुहोस्।"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"सेटिङहरू"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"अवलोकन।"</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"सारांश।"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"प्रयोगकर्ता <xliff:g id="USER">%s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>।"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"वाइफाइ बन्द गरियो।"</string>
