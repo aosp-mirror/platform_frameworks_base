@@ -716,14 +716,16 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ایپ کو کیش فائل سسٹم پڑھنے اور لکھنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"‏SIP کالز کریں/موصول کریں"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"‏ایپ کو SIP کالز کرنے اور موصول کرنے کی اجازت دیتا ہے۔"</string>
-    <!-- no translation found for permlab_register_provider (2654513709546459553) -->
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
     <skip />
-    <!-- no translation found for permdesc_register_provider (7571533832018681544) -->
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
     <skip />
-    <!-- no translation found for permlab_connection_manager (1116193254522105375) -->
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
     <skip />
-    <!-- no translation found for permdesc_connection_manager (5925480810356483565) -->
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
     <skip />
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"ٹیلی کام کنکشنز کا نظم کریں"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"ایپ کو ٹیلی کام کنکشنز کا نظم کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"درون کال اسکرین کے ساتھ تعامل کریں"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"ایپ کو صارف کے درون کال اسکرین دیکھنے کے وقت اور طریقے کو کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"ٹیلیفونی سروسز کے ساتھ تعامل کریں"</string>
@@ -1237,6 +1239,7 @@
     <string name="smv_application" msgid="3307209192155442829">"‏ایپ <xliff:g id="APPLICATION">%1$s</xliff:g> (کارروائی <xliff:g id="PROCESS">%2$s</xliff:g>) نے خود نافذ کی گئی StrictMode پالیسی کی خلاف ورزی کی ہے۔"</string>
     <string name="smv_process" msgid="5120397012047462446">"‏کارروائی <xliff:g id="PROCESS">%1$s</xliff:g> نے اپنی ذاتی طور پر نافذ کردہ StrictMode پلیسی کی خلاف ورزی کی ہے۔"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android اپ گریڈ ہو رہا ہے…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"‏Android شروع ہو رہا ہے…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"ایپ <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g> کو بہتر بنایا جا رہا ہے۔"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ایپس شروع ہو رہی ہیں۔"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"بوٹ مکمل ہو رہا ہے۔"</string>
@@ -1780,10 +1783,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"پن ہٹانے سے پہلے پاس ورڈ طلب کریں"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"بیٹری کی میعاد بہتر بنانے میں مدد کرنے کیلئے، بیٹری سیور آپ کے آلہ کی کارکردگی میں تخفیف کر دیتی ہے اور وائبریشن اور پس منظر کے زیادہ تر ڈیٹا کو محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر انحصار کرنے والی دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری سیور خود بخود آف ہو جاتی ہے۔"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> پر آپ کا آخری وقت ختم ہونے تک"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"ایک منٹ کیلئے (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> تک)"</item>
+    <item quantity="other" msgid="2787867221129368935">"‏%1$d منٹ کیلئے (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> تک)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"ایک گھنٹے کیلئے (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> تک)"</item>
+    <item quantity="other" msgid="2827214920627669898">"‏%1$d گھنٹوں کیلئے (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> تک)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ایک منٹ کیلئے"</item>
     <item quantity="other" msgid="6924190729213550991">"‏%d منٹ کیلئے"</item>
@@ -1792,7 +1799,7 @@
     <item quantity="one" msgid="3480040795582254384">"ایک گھنٹے کیلئے"</item>
     <item quantity="other" msgid="5408537517529822157">"‏%d گھنٹوں کیلئے"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"غیر متعینہ"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"سکیڑیں"</string>
 </resources>

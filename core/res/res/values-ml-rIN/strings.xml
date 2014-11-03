@@ -716,8 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"കാഷെ ഫയൽ സിസ്‌റ്റം റീഡുചെയ്യുന്നതിനും റൈറ്റുചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP കോളുകൾ വിളിക്കുക/സ്വീകരിക്കുക"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP കോളുകൾ വിളിക്കാനും സ്വീകരിക്കാനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
-    <string name="permlab_register_provider" msgid="2654513709546459553">"പുതിയ ടെലികോം കണക്ഷൻ രജിസ്‌റ്റർ ചെയ്യുക"</string>
-    <string name="permdesc_register_provider" msgid="7571533832018681544">"പുതിയ ടെലികോം കണക്ഷനുകൾ രജിസ്‌റ്റർ ചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
+    <skip />
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
+    <skip />
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
+    <skip />
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
+    <skip />
     <string name="permlab_connection_manager" msgid="1116193254522105375">"ടെലികോം കണക്ഷനുകൾ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"ടെലികോം കണക്ഷനുകൾ നിയന്ത്രിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ഇൻ-കോൾ സ്‌ക്രീനുമായി സംവദിക്കുക"</string>
@@ -1233,6 +1239,7 @@
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> എന്ന അപ്ലിക്കേഷൻ (<xliff:g id="PROCESS">%2$s</xliff:g> പ്രോസസ്സ്) അതിന്റെ സ്വയം നിർബന്ധിത StrictMode നയം ലംഘിച്ചു."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> എന്ന പ്രോസസ്സ് അതിന്റെ സ്വയം നടപ്പിലാക്കിയ StrictMode നയം ലംഘിച്ചു."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android അപ്ഗ്രേഡുചെയ്യുന്നു…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android ആരംഭിക്കുന്നു…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> അപ്ലിക്കേഷൻ ഓപ്റ്റിമൈസ് ചെയ്യുന്നു."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"അപ്ലിക്കേഷനുകൾ ആരംഭിക്കുന്നു."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ബൂട്ട് ചെയ്യൽ പൂർത്തിയാകുന്നു."</string>
@@ -1776,10 +1783,12 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല ഡാറ്റയെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ യാന്ത്രികമായി ഓഫാകും."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ന് നിങ്ങളുടെ കാലാവധി അവസാനിക്കുന്നതുവരെ"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
+    <!-- String.format failed for translation -->
     <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"ഒരു മണിക്കൂർ സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> വരെ)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d മണിക്കൂർ സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> വരെ)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"ഒരു മിനിറ്റ് ദൈർഘ്യം"</item>
     <item quantity="other" msgid="6924190729213550991">"%d മിനിറ്റ് ദൈർഘ്യം"</item>
@@ -1788,7 +1797,7 @@
     <item quantity="one" msgid="3480040795582254384">"ഒരു മണിക്കൂർ ദൈർഘ്യം"</item>
     <item quantity="other" msgid="5408537517529822157">"%d മണിക്കൂർ ദൈർഘ്യം"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"അവ്യക്തം"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"ചുരുക്കുക"</string>
 </resources>

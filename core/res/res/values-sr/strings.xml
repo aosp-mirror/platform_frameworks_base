@@ -716,8 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Дозвољава апликацији да чита систем датотека кеша и уписује податке у њега."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"упућивање/пријем SIP позива"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Омогућава апликацији да упућује и прима SIP позиве."</string>
-    <string name="permlab_register_provider" msgid="2654513709546459553">"регистровање нових веза са телекомуникационим мрежама"</string>
-    <string name="permdesc_register_provider" msgid="7571533832018681544">"Дозвољава апликацији да региструје нове везе са телекомуникационим мрежама."</string>
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
+    <skip />
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
+    <skip />
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
+    <skip />
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
+    <skip />
     <string name="permlab_connection_manager" msgid="1116193254522105375">"управљање везама са телекомуникационим мрежама"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Дозвољава апликацији да управља везама са телекомуникационим мрежама."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"комуницирај са екраном током позива"</string>
@@ -1233,6 +1239,7 @@
     <string name="smv_application" msgid="3307209192155442829">"Апликација <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) је прекршила самонаметнуте StrictMode смернице."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> је прекршио самонаметнуте StrictMode смернице."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android се надограђује…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android се покреће…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Оптимизовање апликације <xliff:g id="NUMBER_0">%1$d</xliff:g> од <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Покретање апликација."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Завршавање покретања."</string>
@@ -1776,10 +1783,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тражи лозинку пре откачињања"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Да би смањила потрошњу батерије, Штедња батерије снижава перформансе уређаја, ограничава вибрацију и већину позадинских података. Имејл, размена порука и друге апликације које се ослањају на синхронизацију се можда неће ажурирати ако их не отворите.\n\nШтедња батерије се аутоматски искључује када се уређај пуни."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Док се прекид рада не заврши у <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"Један минут (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d минута (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"Један сат (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d сата(и) (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Један минут"</item>
     <item quantity="other" msgid="6924190729213550991">"%d мин"</item>
@@ -1788,7 +1799,7 @@
     <item quantity="one" msgid="3480040795582254384">"Један сат"</item>
     <item quantity="other" msgid="5408537517529822157">"%d с"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Бесконачно"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"Скупи"</string>
 </resources>

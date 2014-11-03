@@ -716,14 +716,16 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"앱이 캐시 파일 시스템을 읽고 쓸 수 있도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP 통화 발신/수신"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"앱에서 SIP 통화를 발신 및 수신하도록 허용"</string>
-    <!-- no translation found for permlab_register_provider (2654513709546459553) -->
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
     <skip />
-    <!-- no translation found for permdesc_register_provider (7571533832018681544) -->
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
     <skip />
-    <!-- no translation found for permlab_connection_manager (1116193254522105375) -->
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
     <skip />
-    <!-- no translation found for permdesc_connection_manager (5925480810356483565) -->
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
     <skip />
+    <string name="permlab_connection_manager" msgid="1116193254522105375">"통신 연결 관리"</string>
+    <string name="permdesc_connection_manager" msgid="5925480810356483565">"앱이 통신 연결을 관리할 수 있게 허용합니다."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"통화 화면과 상호작용"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"앱에서 사용자가 통화 화면을 보는 시기와 방법을 제어하도록 허용합니다."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"전화 서비스와 상호 작용"</string>
@@ -1237,6 +1239,7 @@
     <string name="smv_application" msgid="3307209192155442829">"앱 <xliff:g id="APPLICATION">%1$s</xliff:g>(프로세스 <xliff:g id="PROCESS">%2$s</xliff:g>)이(가) 자체 시행 StrictMode 정책을 위반했습니다."</string>
     <string name="smv_process" msgid="5120397012047462446">"프로세스(<xliff:g id="PROCESS">%1$s</xliff:g>)가 자체 시행 StrictMode 정책을 위반했습니다."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android 업그레이드 중.."</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android가 시작되는 중…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"앱 <xliff:g id="NUMBER_1">%2$d</xliff:g>개 중 <xliff:g id="NUMBER_0">%1$d</xliff:g>개 최적화 중"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"앱을 시작하는 중입니다."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"부팅 완료"</string>
@@ -1643,7 +1646,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
-    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>님으로 전환하는 중…"</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 전환하는 중…"</string>
     <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
     <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"관리자가 이 변경을 허용하지 않습니다."</string>
@@ -1780,10 +1783,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"고정 해제 이전에 비밀번호 요청"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"배터리 수명을 개선하기 위해 배터리 세이버에서는 기기의 성능을 줄이고 진동과 대부분의 백그라운드 데이터를 제한합니다. 동기화가 필요한 이메일, 메시지, 기타 앱은 열어야 업데이트됩니다.\n\n기기를 충전하는 중에는 배터리 세이버가 자동으로 사용 중지됩니다."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>에 정지가 종료될 때까지"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"1분(<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>까지)"</item>
+    <item quantity="other" msgid="2787867221129368935">"%1$d분(<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>까지)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"1시간(<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>까지)"</item>
+    <item quantity="other" msgid="2827214920627669898">"%1$d시간(<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>까지)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"1분 동안"</item>
     <item quantity="other" msgid="6924190729213550991">"%d분 동안"</item>
@@ -1792,7 +1799,7 @@
     <item quantity="one" msgid="3480040795582254384">"1시간 동안"</item>
     <item quantity="other" msgid="5408537517529822157">"%d시간 동안"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"무제한"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"접기"</string>
 </resources>

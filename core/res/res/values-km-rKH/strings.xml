@@ -716,8 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ឲ្យ​កម្មវិធី​អាន និង​សរសេរ​ប្រព័ន្ធ​ឯកសារ​ឃ្លាំង​សម្ងាត់។"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"បង្កើត/ទទួល ការ​ហៅ SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"​ឲ្យ​​កម្មវិធី បង្កើត និង​ទទួល​ការ​ហៅ SIP ។"</string>
-    <string name="permlab_register_provider" msgid="2654513709546459553">"ចុះ​ឈ្មោះ​ភ្ជាប់​ទូរគមនាគមន៍​ថ្មី"</string>
-    <string name="permdesc_register_provider" msgid="7571533832018681544">"ឲ្យ​កម្មវិធី​ចុះ​ឈ្មោះ​ការ​ភ្ជាប់​ទូរគមនាគមន៍​ថ្មី។"</string>
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
+    <skip />
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
+    <skip />
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
+    <skip />
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
+    <skip />
     <string name="permlab_connection_manager" msgid="1116193254522105375">"គ្រប់គ្រង​ការ​ភ្ជាប់​ទូរគមនាគមន៍"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​ការ​ភ្ជាប់​ទូរគមនាគមន៍។"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ទាក់ទង​ជា​មួយ​អេក្រង់​ហៅ​ចូល"</string>
@@ -898,7 +904,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"កូដ PIN មិន​ត្រឹមត្រូវ។"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"ដើម្បី​ដោះ​សោ​​ ចុច​ម៉ឺនុយ​ បន្ទាប់មក 0 ។"</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"លេខ​ពេល​អាសន្ន"</string>
-    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"គ្មាន​សេវា។"</string>
+    <string name="lockscreen_carrier_default" msgid="8963839242565653192">"គ្មាន​សេវា"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"ចាក់​អេក្រង់។"</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"ចុច​ម៉ឺនុយ ដើម្បី​ដោះ​សោ​ ឬ​ហៅ​ពេល​អាសន្ន។"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"ចុច​ម៉ឺនុយ ដើម្បី​ដោះ​សោ។"</string>
@@ -1235,6 +1241,7 @@
     <string name="smv_application" msgid="3307209192155442829">"កម្មវិធី <xliff:g id="APPLICATION">%1$s</xliff:g> (ដំណើរការ <xliff:g id="PROCESS">%2$s</xliff:g>) បាន​បំពាន​គោលនយោបាយ​របៀប​តឹងរ៉ឹង​អនុវត្ត​ដោយ​ខ្លួន​​ឯង។"</string>
     <string name="smv_process" msgid="5120397012047462446">"ដំណើរការ <xliff:g id="PROCESS">%1$s</xliff:g> បាន​បំពាន​គោលនយោបាយ​​របៀប​​តឹង​រឹង​​​បង្ខំ​ដោយ​ខ្លួន​ឯង"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android កំពុង​ធ្វើ​បច្ចុប្បន្នភាព..."</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android កំពុង​ចាប់ផ្ដើម…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"ធ្វើ​ឲ្យ​កម្មវិធី​ប្រសើរ​ឡើង <xliff:g id="NUMBER_0">%1$d</xliff:g> នៃ <xliff:g id="NUMBER_1">%2$d</xliff:g> ។"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ចាប់ផ្ដើម​កម្មវិធី។"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"បញ្ចប់​ការ​ចាប់ផ្ដើម។"</string>
@@ -1778,10 +1785,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"សួរ​រក​ពាក្យ​សម្ងាត់​មុន​ពេល​ផ្ដាច់"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ដើម្បី​បង្កើន​អាយុ​ថ្ម កម្មវិធី​សន្សំ​ថ្ម​កាត់​បន្ថយ​ការអនុវត្ត​ឧបករណ៍​របស់​អ្នក​ ហើយ​​កម្រិត​ការ​ញ័រ និង​ទិន្នន័យ​ផ្ទៃ​ខាង​ក្រោយ។ អ៊ីមែល, ការ​ផ្ញើ​សារ និង​កម្មវិធី​ផ្សេងៗ​ទៀត​ដែល​ផ្អែក​លើ​ការ​ធ្វើ​សម​កាល​កម្ម​​​មិន​អាច​ធ្វើ​បច្ចុប្បន្នភាព​លុះ​ត្រា​តែ​អ្នក​បើក​ពួកវា។\n\nកម្មវិធី​សន្សំ​ថ្ម​បិទ​ដោយ​ស្វ័យ​ប្រវត្តិ​ពេល​ឧបករណ៍​របស់​អ្នក​កំពុង​បញ្ចូល​ថ្ម។"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"រហូត​ដល់ម៉ោង​សម្រាក ឬរវល់​របស់​អ្នក​បញ្ចប់​នៅ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"សម្រាប់​មួយ​នាទី (រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"សម្រាប់ %1$d នាទី​ (រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"សម្រាប់​មួយ​ម៉ោង (រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"សម្រាប់ %1$d ម៉ោង (រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"សម្រាប់​មួយ​នាទី"</item>
     <item quantity="other" msgid="6924190729213550991">"សម្រាប់ %d នាទី"</item>
@@ -1790,7 +1801,7 @@
     <item quantity="one" msgid="3480040795582254384">"សម្រាប់​មួយ​ម៉ោង"</item>
     <item quantity="other" msgid="5408537517529822157">"សម្រាប់ %d ម៉ោង"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"រហូត​ដល់ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"គ្មាន​​កំណត់"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"បង្រួម"</string>
 </resources>
