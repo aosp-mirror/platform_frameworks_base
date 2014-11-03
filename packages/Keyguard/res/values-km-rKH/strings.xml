@@ -154,5 +154,5 @@
     <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"ប៊ូតុង​ផ្អាក"</string>
     <string name="keyguard_transport_play_description" msgid="2924628863741150956">"ប៊ូតុង​ចាក់"</string>
     <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"ប៊ូតុង​បញ្ឈប់"</string>
-    <string name="keyguard_carrier_default" msgid="8700650403054042153">"គ្មាន​សេវា​។"</string>
+    <string name="keyguard_carrier_default" msgid="8700650403054042153">"គ្មាន​សេវា"</string>
 </resources>
