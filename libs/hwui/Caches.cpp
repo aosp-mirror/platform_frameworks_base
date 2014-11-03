@@ -281,7 +281,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
                     layer->getWidth(), layer->getHeight(),
                     layer->isTextureLayer(), layer->getTexture(),
                     layer->getFbo(), layer->getStrongCount());
-            memused = layer->getWidth() * layer->getHeight() * 4;
+            memused += layer->getWidth() * layer->getHeight() * 4;
         }
         log.appendFormat("  Layers total   %8d (numLayers = %zu)\n",
                 memused, mRenderState->mActiveLayers.size());
