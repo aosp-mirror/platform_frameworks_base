@@ -364,7 +364,7 @@ public class KeyguardViewMediator extends SystemUI {
                     // only force lock screen in case of missing sim if user hasn't
                     // gone through setup wizard
                     synchronized (this) {
-                        if (!mUpdateMonitor.isDeviceProvisioned()) {
+                        if (shouldWaitForProvisioning()) {
                             if (!isShowing()) {
                                 if (DEBUG) Log.d(TAG, "ICC_ABSENT isn't showing,"
                                         + " we need to show the keyguard since the "
@@ -493,8 +493,7 @@ public class KeyguardViewMediator extends SystemUI {
         mLockPatternUtils.setCurrentUser(ActivityManager.getCurrentUser());
 
         // Assume keyguard is showing (unless it's disabled) until we know for sure...
-        mShowing = (mUpdateMonitor.isDeviceProvisioned() || mLockPatternUtils.isSecure())
-                && !mLockPatternUtils.isLockScreenDisabled();
+        mShowing = !shouldWaitForProvisioning() && !mLockPatternUtils.isLockScreenDisabled();
 
         mStatusBarKeyguardViewManager = new StatusBarKeyguardViewManager(mContext,
                 mViewMediatorCallback, mLockPatternUtils);
@@ -783,7 +782,7 @@ public class KeyguardViewMediator extends SystemUI {
     public void verifyUnlock(IKeyguardExitCallback callback) {
         synchronized (this) {
             if (DEBUG) Log.d(TAG, "verifyUnlock");
-            if (!mUpdateMonitor.isDeviceProvisioned()) {
+            if (shouldWaitForProvisioning()) {
                 // don't allow this api when the device isn't provisioned
                 if (DEBUG) Log.d(TAG, "ignoring because device isn't provisioned");
                 try {
@@ -873,7 +872,7 @@ public class KeyguardViewMediator extends SystemUI {
      * was suppressed by an app that disabled the keyguard or we haven't been provisioned yet.
      */
     public boolean isInputRestricted() {
-        return mShowing || mNeedToReshowWhenReenabled || !mUpdateMonitor.isDeviceProvisioned();
+        return mShowing || mNeedToReshowWhenReenabled || shouldWaitForProvisioning();
     }
 
     /**
@@ -905,14 +904,13 @@ public class KeyguardViewMediator extends SystemUI {
         // if the setup wizard hasn't run yet, don't show
         final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim",
                 false);
-        final boolean provisioned = mUpdateMonitor.isDeviceProvisioned();
         final IccCardConstants.State state = mUpdateMonitor.getSimState();
         final boolean lockedOrMissing = state.isPinLocked()
                 || ((state == IccCardConstants.State.ABSENT
                 || state == IccCardConstants.State.PERM_DISABLED)
                 && requireSim);
 
-        if (!lockedOrMissing && !provisioned) {
+        if (!lockedOrMissing && shouldWaitForProvisioning()) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
                     + " and the sim is not locked or missing");
             return;
@@ -933,6 +931,10 @@ public class KeyguardViewMediator extends SystemUI {
 
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
         showLocked(options);
+    }
+
+    private boolean shouldWaitForProvisioning() {
+        return !mUpdateMonitor.isDeviceProvisioned() && !isSecure();
     }
 
     /**
