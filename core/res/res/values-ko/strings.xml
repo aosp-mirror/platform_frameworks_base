@@ -1639,7 +1639,7 @@
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>
     <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
-    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>님으로 전환하는 중…"</string>
+    <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g>(으)로 전환하는 중…"</string>
     <string name="owner_name" msgid="2716755460376028154">"소유자"</string>
     <string name="error_message_title" msgid="4510373083082500195">"오류"</string>
     <string name="error_message_change_not_allowed" msgid="1347282344200417578">"관리자가 이 변경을 허용하지 않습니다."</string>
