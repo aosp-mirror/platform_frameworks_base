@@ -907,7 +907,7 @@ public class SSLSocketTest extends TestCase {
      */
     public void testClientSessionCaching() throws IOException,
             KeyManagementException {
-        OpenSSLContextImpl context = new OpenSSLContextImpl();
+        OpenSSLContextImpl context = OpenSSLContextImpl.getPreferred();
 
         // Cache size = 2.
         FakeClientSessionCache fakeCache = new FakeClientSessionCache();
@@ -1000,7 +1000,7 @@ public class SSLSocketTest extends TestCase {
 
     public void testFileBasedClientSessionCache() throws IOException,
             KeyManagementException {
-        OpenSSLContextImpl context = new OpenSSLContextImpl();
+        OpenSSLContextImpl context = OpenSSLContextImpl.getPreferred();
         String tmpDir = System.getProperty("java.io.tmpdir");
         if (tmpDir == null) {
             fail("Please set 'java.io.tmpdir' system property.");
