@@ -2113,9 +2113,14 @@
     <string name="permdesc_use_sip">Allows the app to make and receive SIP calls.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_register_provider">register new telecom connection</string>
+    <string name="permlab_register_sim_subscription">register new telecom SIM connections</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_register_provider">Allows the app to register new telecom connections.</string>
+    <string name="permdesc_register_sim_subscription">Allows the app to register new telecom SIM connections.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_register_call_provider">register new telecom connections</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_register_call_provider">Allows the app to register new telecom connections.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_connection_manager">manage telecom connections</string>
