@@ -69,6 +69,7 @@ public class ZenModePanel extends LinearLayout {
     private static final int TIME_CONDITION_INDEX = 1;
     private static final int FIRST_CONDITION_INDEX = 2;
     private static final float SILENT_HINT_PULSE_SCALE = 1.1f;
+    private static final long SELECT_DEFAULT_DELAY = 300;
 
     public static final Intent ZEN_SETTINGS = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
 
@@ -373,8 +374,9 @@ public class ZenModePanel extends LinearLayout {
         if (isDowntime(mSessionExitCondition) && !foundDowntime) {
             bind(mSessionExitCondition, null);
         }
-        // ensure something is selected
-        checkForDefault();
+        // ensure something is selected, after waiting for providers to respond
+        mHandler.removeMessages(H.SELECT_DEFAULT);
+        mHandler.sendEmptyMessageDelayed(H.SELECT_DEFAULT, SELECT_DEFAULT_DELAY);
     }
 
     private static boolean isDowntime(Condition c) {
@@ -385,7 +387,8 @@ public class ZenModePanel extends LinearLayout {
         return (ConditionTag) mZenConditions.getChildAt(index).getTag();
     }
 
-    private void checkForDefault() {
+    private void handleSelectDefault() {
+        if (!mExpanded) return;
         // are we left without anything selected?  if so, set a default
         for (int i = 0; i < mZenConditions.getChildCount(); i++) {
             if (getConditionTagAt(i).rb.isChecked()) {
@@ -638,6 +641,7 @@ public class ZenModePanel extends LinearLayout {
         private static final int UPDATE_CONDITIONS = 1;
         private static final int EXIT_CONDITION_CHANGED = 2;
         private static final int UPDATE_ZEN = 3;
+        private static final int SELECT_DEFAULT = 4;
 
         private H() {
             super(Looper.getMainLooper());
@@ -651,6 +655,8 @@ public class ZenModePanel extends LinearLayout {
                 handleExitConditionChanged((Condition) msg.obj);
             } else if (msg.what == UPDATE_ZEN) {
                 handleUpdateZen(msg.arg1);
+            } else if (msg.what == SELECT_DEFAULT) {
+                handleSelectDefault();
             }
         }
     }
