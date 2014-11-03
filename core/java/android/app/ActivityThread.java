@@ -1742,6 +1742,12 @@ public final class ActivityThread {
                     new LoadedApk(this, aInfo, compatInfo, baseLoader,
                             securityViolation, includeCode &&
                             (aInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0, registerPackage);
+
+                if (mSystemThread && "android".equals(aInfo.packageName)) {
+                    packageInfo.installSystemApplicationInfo(aInfo,
+                            getSystemContext().mPackageInfo.getClassLoader());
+                }
+
                 if (includeCode) {
                     mPackages.put(aInfo.packageName,
                             new WeakReference<LoadedApk>(packageInfo));
@@ -1801,10 +1807,6 @@ public final class ActivityThread {
     public void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
         synchronized (this) {
             getSystemContext().installSystemApplicationInfo(info, classLoader);
-
-            // The code package for "android" in the system server needs
-            // to be the system context's package.
-            mPackages.put("android", new WeakReference<LoadedApk>(getSystemContext().mPackageInfo));
 
             // give ourselves a default profiler
             mProfiler = new Profiler();
