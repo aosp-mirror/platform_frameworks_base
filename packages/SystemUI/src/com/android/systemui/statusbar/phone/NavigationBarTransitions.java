@@ -171,7 +171,8 @@ public final class NavigationBarTransitions extends BarTransitions {
                 applyLightsOut(false, false, false);
 
                 try {
-                    mBarService.setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE);
+                    mBarService.setSystemUiVisibility(0, View.SYSTEM_UI_FLAG_LOW_PROFILE,
+                            "LightsOutListener");
                 } catch (android.os.RemoteException ex) {
                 }
             }

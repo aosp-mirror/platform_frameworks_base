@@ -353,7 +353,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void setSystemUiVisibility(int vis, int mask) {
+    public void setSystemUiVisibility(int vis, int mask, String cause) {
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
@@ -365,7 +365,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                     mCurrentUserId,
                     vis & StatusBarManager.DISABLE_MASK,
                     mSysUiVisToken,
-                    "WindowManager.LayoutParams");
+                    cause);
         }
     }
 
