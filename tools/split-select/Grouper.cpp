@@ -16,24 +16,16 @@
 
 #include "Grouper.h"
 
+#include "aapt/AaptUtil.h"
 #include "SplitDescription.h"
 
 #include <utils/KeyedVector.h>
 #include <utils/Vector.h>
 
 using namespace android;
+using AaptUtil::appendValue;
 
 namespace split {
-
-template <typename Key, typename Value>
-static void addToVector(KeyedVector<Key, SortedVector<Value> >& group,
-        const Key& key, const Value& value) {
-    ssize_t idx = group.indexOfKey(key);
-    if (idx < 0) {
-        idx = group.add(key, SortedVector<Value>());
-    }
-    group.editValueAt(idx).add(value);
-}
 
 Vector<SortedVector<SplitDescription> >
 groupByMutualExclusivity(const Vector<SplitDescription>& splits) {
@@ -43,20 +35,22 @@ groupByMutualExclusivity(const Vector<SplitDescription>& splits) {
     KeyedVector<SplitDescription, SortedVector<SplitDescription> > densityGroups;
     KeyedVector<SplitDescription, SortedVector<SplitDescription> > abiGroups;
     KeyedVector<SplitDescription, SortedVector<SplitDescription> > localeGroups;
-    for (const SplitDescription& split : splits) {
+    const size_t splitCount = splits.size();
+    for (size_t i = 0; i < splitCount; i++) {
+        const SplitDescription& split = splits[i];
         if (split.config.density != 0) {
             SplitDescription key(split);
             key.config.density = 0;
             key.config.sdkVersion = 0; // Ignore density so we can support anydpi.
-            addToVector(densityGroups, key, split);
-        } else if (split.abi != abi::Variant::none) {
+            appendValue(densityGroups, key, split);
+        } else if (split.abi != abi::Variant_none) {
             SplitDescription key(split);
-            key.abi = abi::Variant::none;
-            addToVector(abiGroups, key, split);
+            key.abi = abi::Variant_none;
+            appendValue(abiGroups, key, split);
         } else if (split.config.locale != 0) {
             SplitDescription key(split);
             key.config.clearLocale();
-            addToVector(localeGroups, key, split);
+            appendValue(localeGroups, key, split);
         } else {
             groups.add();
             groups.editTop().add(split);

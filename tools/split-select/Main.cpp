@@ -63,7 +63,7 @@ static void help() {
 
 class SplitSelector {
 public:
-    SplitSelector() = default;
+    SplitSelector();
     SplitSelector(const Vector<SplitDescription>& splits);
 
     Vector<SplitDescription> getBestSplits(const SplitDescription& target) const;
@@ -74,6 +74,9 @@ public:
 private:
     Vector<SortedVector<SplitDescription> > mGroups;
 };
+
+SplitSelector::SplitSelector() {
+}
 
 SplitSelector::SplitSelector(const Vector<SplitDescription>& splits)
     : mGroups(groupByMutualExclusivity(splits)) {
