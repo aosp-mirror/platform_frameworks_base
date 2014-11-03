@@ -203,7 +203,7 @@ public class QSPanel extends ViewGroup {
         }
     }
 
-    private void refreshAllTiles() {
+    public void refreshAllTiles() {
         for (TileRecord r : mRecords) {
             r.tile.refreshState();
         }
