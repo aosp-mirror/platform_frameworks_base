@@ -2625,12 +2625,6 @@ public final class Settings {
         public static final String LOCK_TO_APP_ENABLED = "lock_to_app_enabled";
 
         /**
-         * Whether lock-to-app will lock the keyguard when exiting.
-         * @hide
-         */
-        public static final String LOCK_TO_APP_EXIT_LOCKED = "lock_to_app_exit_locked";
-
-        /**
          * I am the lolrus.
          * <p>
          * Nonzero values indicate that the user has a bukkit.
@@ -2704,6 +2698,7 @@ public final class Settings {
             POINTER_SPEED,
             VIBRATE_WHEN_RINGING,
             RINGTONE,
+            LOCK_TO_APP_ENABLED,
             NOTIFICATION_SOUND
         };
 
@@ -3664,6 +3659,12 @@ public final class Settings {
          */
         public static final String LOCK_BIOMETRIC_WEAK_FLAGS =
                 "lock_biometric_weak_flags";
+
+        /**
+         * Whether lock-to-app will lock the keyguard when exiting.
+         * @hide
+         */
+        public static final String LOCK_TO_APP_EXIT_LOCKED = "lock_to_app_exit_locked";
 
         /**
          * Whether autolock is enabled (0 = false, 1 = true)
