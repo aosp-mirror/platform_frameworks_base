@@ -73,6 +73,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -557,16 +558,26 @@ public class WindowManagerService extends IWindowManager.Stub
     SettingsObserver mSettingsObserver;
 
     private final class SettingsObserver extends ContentObserver {
+        private final Uri mShowImeWithHardKeyboardUri =
+                Settings.Secure.getUriFor(Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD);
+
+        private final Uri mDisplayInversionEnabledUri =
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
+
         public SettingsObserver() {
             super(new Handler());
             ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD), false, this);
+            resolver.registerContentObserver(mShowImeWithHardKeyboardUri, false, this);
+            resolver.registerContentObserver(mDisplayInversionEnabledUri, false, this);
         }
 
         @Override
-        public void onChange(boolean selfChange) {
-            updateShowImeWithHardKeyboard();
+        public void onChange(boolean selfChange, Uri uri) {
+            if (mShowImeWithHardKeyboardUri.equals(uri)) {
+                updateShowImeWithHardKeyboard();
+            } else if (mDisplayInversionEnabledUri.equals(uri)) {
+                updateCircularDisplayMaskIfNeeded();
+            }
         }
     }
 
@@ -902,7 +913,7 @@ public class WindowManagerService extends IWindowManager.Stub
             SurfaceControl.closeTransaction();
         }
 
-        showCircularDisplayMaskIfNeeded();
+        updateCircularDisplayMaskIfNeeded();
         showEmulatorDisplayOverlayIfNeeded();
     }
 
@@ -5821,13 +5832,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void showCircularDisplayMaskIfNeeded() {
+    public void updateCircularDisplayMaskIfNeeded() {
         // we're fullscreen and not hosted in an ActivityView
         if (mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_windowIsRound)
                 && mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_windowShowCircularMask)) {
-            mH.sendMessage(mH.obtainMessage(H.SHOW_CIRCULAR_DISPLAY_MASK));
+            // Device configuration calls for a circular display mask, but we only enable the mask
+            // if the accessibility color inversion feature is disabled, as the inverted mask
+            // causes artifacts.
+            int inversionState = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, 0, mCurrentUserId);
+            int showMask = (inversionState == 1) ? 0 : 1;
+            Message m = mH.obtainMessage(H.SHOW_CIRCULAR_DISPLAY_MASK);
+            m.arg1 = showMask;
+            mH.sendMessage(m);
         }
     }
 
@@ -5840,30 +5859,35 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void showCircularMask() {
+    public void showCircularMask(boolean visible) {
         synchronized(mWindowMap) {
 
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                    ">>> OPEN TRANSACTION showCircularMask");
+                    ">>> OPEN TRANSACTION showCircularMask(visible=" + visible + ")");
             SurfaceControl.openTransaction();
             try {
-                // TODO(multi-display): support multiple displays
-                if (mCircularDisplayMask == null) {
-                    int screenOffset = mContext.getResources().getDimensionPixelSize(
-                            com.android.internal.R.dimen.circular_display_mask_offset);
+                if (visible) {
+                    // TODO(multi-display): support multiple displays
+                    if (mCircularDisplayMask == null) {
+                        int screenOffset = mContext.getResources().getDimensionPixelSize(
+                                com.android.internal.R.dimen.circular_display_mask_offset);
 
-                    mCircularDisplayMask = new CircularDisplayMask(
-                            getDefaultDisplayContentLocked().getDisplay(),
-                            mFxSession,
-                            mPolicy.windowTypeToLayerLw(
-                                    WindowManager.LayoutParams.TYPE_POINTER)
-                                    * TYPE_LAYER_MULTIPLIER + 10, screenOffset);
+                        mCircularDisplayMask = new CircularDisplayMask(
+                                getDefaultDisplayContentLocked().getDisplay(),
+                                mFxSession,
+                                mPolicy.windowTypeToLayerLw(
+                                        WindowManager.LayoutParams.TYPE_POINTER)
+                                        * TYPE_LAYER_MULTIPLIER + 10, screenOffset);
+                    }
+                    mCircularDisplayMask.setVisibility(true);
+                } else if (mCircularDisplayMask != null) {
+                    mCircularDisplayMask.setVisibility(false);
+                    mCircularDisplayMask = null;
                 }
-                mCircularDisplayMask.setVisibility(true);
             } finally {
                 SurfaceControl.closeTransaction();
                 if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
-                        "<<< CLOSE TRANSACTION showCircularMask");
+                        "<<< CLOSE TRANSACTION showCircularMask(visible=" + visible + ")");
             }
         }
     }
@@ -7920,7 +7944,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 case SHOW_CIRCULAR_DISPLAY_MASK: {
-                    showCircularMask();
+                    showCircularMask(msg.arg1 == 1);
                     break;
                 }
 
