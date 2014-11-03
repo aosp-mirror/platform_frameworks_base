@@ -14,7 +14,7 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-# libandroidfw is partially built for the host (used by obbtool and others)
+# libandroidfw is partially built for the host (used by obbtool, aapt, and others)
 # These files are common to host and target builds.
 
 commonSources := \
@@ -35,26 +35,17 @@ deviceSources := \
     BackupHelpers.cpp \
     CursorWindow.cpp
 
-hostSources := \
-    $(commonSources)
+hostSources := $(commonSources)
 
 # For the host
 # =====================================================
-
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES:= $(hostSources)
-
 LOCAL_MODULE:= libandroidfw
-
 LOCAL_MODULE_TAGS := optional
-
 LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
-
-LOCAL_C_INCLUDES := \
-	external/zlib
-
-LOCAL_STATIC_LIBRARIES := liblog libziparchive-host libutils
+LOCAL_SRC_FILES:= $(hostSources)
+LOCAL_C_INCLUDES := external/zlib
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 
@@ -64,24 +55,19 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 
+LOCAL_MODULE:= libandroidfw
+LOCAL_MODULE_TAGS := optional
 LOCAL_SRC_FILES:= $(deviceSources)
-
+LOCAL_C_INCLUDES := \
+    external/zlib \
+    system/core/include
+LOCAL_STATIC_LIBRARIES := libziparchive
 LOCAL_SHARED_LIBRARIES := \
 	libbinder \
 	liblog \
 	libcutils \
 	libutils \
 	libz
-
-LOCAL_STATIC_LIBRARIES := libziparchive
-
-LOCAL_C_INCLUDES := \
-    external/zlib \
-    system/core/include
-
-LOCAL_MODULE:= libandroidfw
-
-LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
 

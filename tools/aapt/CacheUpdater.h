@@ -30,6 +30,8 @@ using namespace android;
  */
 class CacheUpdater {
 public:
+    virtual ~CacheUpdater() {}
+
     // Make sure all the directories along this path exist
     virtual void ensureDirectoriesExist(String8 path) = 0;
 
