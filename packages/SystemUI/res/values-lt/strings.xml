@@ -199,7 +199,7 @@
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Mobiliojo ryšio viešosios interneto prieigos taškas išjungtas."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Mobiliojo ryšio viešosios interneto prieigos taškas įjungtas."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Ekrano perdavimas sustabdytas."</string>
-    <string name="accessibility_brightness" msgid="8003681285547803095">"Ekrano ryškumas"</string>
+    <string name="accessibility_brightness" msgid="8003681285547803095">"Ekrano šviesumas"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="2626865386971800302">"2G–3G duomenys išjungti"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4629078114195977196">"4G duomenys išjungti"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="5793456071535876132">"Mobiliojo ryšio duomenys išjungti"</string>

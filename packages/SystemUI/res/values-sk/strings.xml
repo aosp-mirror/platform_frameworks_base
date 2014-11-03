@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Vaše nedávne obrazovky sa zobrazia tu."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Zatvoriť nedávne aplikácie"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"V Prehľade je 1 obrazovka"</item>
-    <item quantity="other" msgid="5523506463832158203">"V Prehľade je niekoľko obrazoviek (počet: %d)"</item>
+    <item quantity="one" msgid="3969335317929254918">"Počet obrazoviek v Prehľade: 1"</item>
+    <item quantity="other" msgid="5523506463832158203">"Počet obrazoviek v Prehľade: %d"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Žiadne upozornenia"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Prebiehajúce"</string>
@@ -167,7 +167,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Rýchle nastavenia."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Uzamknutá obrazovka"</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Nastavenia"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Prehľad."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Prehľad"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Používateľ: <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Pripojenie Wi-Fi je vypnuté."</string>
