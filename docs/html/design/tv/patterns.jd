@@ -41,6 +41,8 @@ page.title=UI Patterns for TV
       language, you must provide versions of the banner image for each supported language.</li>
 </ul>
 
+<p>See <a href="{@docRoot}training/tv/start/start.html#banner">Provide a home screen banner</a>
+in Get Started with TV Apps for more information.</p>
 
 <h3>Recommendation Icons</h3>
 
