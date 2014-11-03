@@ -1,5 +1,7 @@
 page.title=Building TV Games
-page.tags="controller"
+page.tags="tv", "games", "controller"
+page.image=images/games/game-controller-buttons_2x_crop.png
+page.metaDescription=How to bring your games to Android TV, including recommendations and examples.
 page.article=true
 
 @jd:body
@@ -180,7 +182,7 @@ href="{@docRoot}training/game-controllers/controller-input.html#button"
 It includes a white controller on black background and a black controller on white background
 (shown in figure 1), as a PNG file and an Adobe&reg; Illustrator&reg; file.</p>
 
-<img src="{@docRoot}images/games/game-controller-buttons_2x.png" width="700"
+<img itemprop="image" src="{@docRoot}images/games/game-controller-buttons_2x.png" width="700"
      srcset="{@docRoot}images/games/game-controller-buttons_2x.png 2x,
              {@docRoot}images/games/game-controller-buttons.png 1x" />
 <p class="img-caption"><b>Figure 1.</b> Example controller instructions using the
