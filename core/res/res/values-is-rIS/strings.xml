@@ -716,8 +716,14 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Leyfir forriti að lesa og skrifa í skráakerfi skyndiminnis."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"hringja/svara SIP-símtölum"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Leyfir forritinu að hringja og svara SIP-símtölum."</string>
-    <string name="permlab_register_provider" msgid="2654513709546459553">"skrá nýjar símatengingar"</string>
-    <string name="permdesc_register_provider" msgid="7571533832018681544">"Leyfir forritinu að skrá nýjar símatengingar."</string>
+    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
+    <skip />
+    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
+    <skip />
+    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
+    <skip />
+    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
+    <skip />
     <string name="permlab_connection_manager" msgid="1116193254522105375">"stjórna símatengingum"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Leyfir forritinu að stjórna símatengingum."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"eiga samskipti við símtalsskjá"</string>
@@ -1235,6 +1241,7 @@
     <string name="smv_application" msgid="3307209192155442829">"Forritið <xliff:g id="APPLICATION">%1$s</xliff:g> (ferli <xliff:g id="PROCESS">%2$s</xliff:g>) hefur brotið gegn eigin StrictMode-stefnu."</string>
     <string name="smv_process" msgid="5120397012047462446">"Forritið <xliff:g id="PROCESS">%1$s</xliff:g> braut gegn eigin StrictMode-stefnu."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android er að uppfæra…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android er að ræsast…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Fínstillir forrit <xliff:g id="NUMBER_0">%1$d</xliff:g> af <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Ræsir forrit."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Lýkur ræsingu."</string>
@@ -1781,10 +1788,14 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Biðja um aðgangsorð til að losa"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Til að auka endingu rafhlöðunnar dregur rafhlöðusparnaður úr afköstum tækisins og takmarkar titring og flest bakgrunnsgögn. Ekki er víst að tölvupóstur, skilaboð og önnur forrit sem reiða sig á samstillingu verði uppfærð fyrr en þú opnar þau.\n\nSjálfkrafa er slökkt á rafhlöðusparnaði þegar tækið er í hleðslu."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Þangað til niðritíma lýkur, <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"Í eina mínútu (til <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"Í %1$d mín. (til <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"Í eina klukkustund (til <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"Í %1$d klst. (til <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Í eina mínútu"</item>
     <item quantity="other" msgid="6924190729213550991">"Í %d mínútur"</item>
@@ -1793,7 +1804,7 @@
     <item quantity="one" msgid="3480040795582254384">"Í eina klukkustund"</item>
     <item quantity="other" msgid="5408537517529822157">"Í %d klukkustundir"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Án tímatakmarkana"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minnka"</string>
 </resources>
