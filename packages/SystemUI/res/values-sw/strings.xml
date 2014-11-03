@@ -33,7 +33,7 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Inaendelea"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Arifa"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Betri imeisha"</string>
-    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> zimebakia"</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"Imebakisha <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6534746636002666456">"Imesalia <xliff:g id="NUMBER">%d%%</xliff:g>. Kiokoa betri kimewashwa."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Chaji ya USB haihamiliwi.\n Tumia chaka iliyopeanwa."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Kuchaji kwa kutumia USB hakutumiki."</string>

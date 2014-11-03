@@ -214,7 +214,7 @@
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Մաքրել բոլոր ծանուցումները:"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"Ծանուցման կարգավորումներ"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"<xliff:g id="APP_NAME">%s</xliff:g>-ի կարգավորումներ"</string>
-    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Էկրանը ինքնուրույն կպտտվի:"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Էկրանը ինքնաշխատ կպտտվի:"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Էկրանը կողպված է հորիզոնական դիրքավորման մեջ:"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Էկրանը կողպված է ուղղաձիգ դիրքավորմամբ:"</string>
     <string name="accessibility_rotation_lock_off_changed" msgid="8134601071026305153">"Էկրանն այժմ ավտոմատ կպտտվի:"</string>
