@@ -17,31 +17,31 @@
 #ifndef H_ANDROID_SPLIT_ABI
 #define H_ANDROID_SPLIT_ABI
 
-#include <vector>
+#include <utils/Vector.h>
 
 namespace split {
 namespace abi {
 
-enum class Variant {
-    none = 0,
-    armeabi,
-    armeabi_v7a,
-    arm64_v8a,
-    x86,
-    x86_64,
-    mips,
-    mips64,
+enum Variant {
+    Variant_none = 0,
+    Variant_armeabi,
+    Variant_armeabi_v7a,
+    Variant_arm64_v8a,
+    Variant_x86,
+    Variant_x86_64,
+    Variant_mips,
+    Variant_mips64,
 };
 
-enum class Family {
-    none,
-    arm,
-    intel,
-    mips,
+enum Family {
+    Family_none,
+    Family_arm,
+    Family_intel,
+    Family_mips,
 };
 
 Family getFamily(Variant variant);
-const std::vector<Variant>& getVariants(Family family);
+const android::Vector<Variant>& getVariants(Family family);
 const char* toString(Variant variant);
 
 } // namespace abi

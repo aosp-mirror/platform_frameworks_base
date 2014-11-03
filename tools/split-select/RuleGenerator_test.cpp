@@ -25,19 +25,19 @@ using namespace android;
 namespace split {
 
 static void expectDensityRule(const Vector<int>& densities, int density, int greaterThan, int lessThan);
-static void expectAbiRule(const Vector<abi::Variant>& abis, abi::Variant variant,
-        std::initializer_list<const char*> matches);
+static void expectAbiRule(const Vector<abi::Variant>& abis, abi::Variant variant, const char* a);
+static void expectAbiRule(const Vector<abi::Variant>& abis, abi::Variant variant, const char* a, const char* b);
 
 TEST(RuleGeneratorTest, testAbiRules) {
     Vector<abi::Variant> abis;
-    abis.add(abi::Variant::armeabi);
-    abis.add(abi::Variant::armeabi_v7a);
-    abis.add(abi::Variant::x86);
+    abis.add(abi::Variant_armeabi);
+    abis.add(abi::Variant_armeabi_v7a);
+    abis.add(abi::Variant_x86);
     std::sort(abis.begin(), abis.end());
 
-    expectAbiRule(abis, abi::Variant::armeabi, {"armeabi"});
-    expectAbiRule(abis, abi::Variant::armeabi_v7a, {"armeabi-v7a", "arm64-v8a"});
-    expectAbiRule(abis, abi::Variant::x86, {"x86", "x86_64"});
+    expectAbiRule(abis, abi::Variant_armeabi, "armeabi");
+    expectAbiRule(abis, abi::Variant_armeabi_v7a, "armeabi-v7a", "arm64-v8a");
+    expectAbiRule(abis, abi::Variant_x86, "x86", "x86_64");
 }
 
 TEST(RuleGeneratorTest, testDensityRules) {
@@ -126,8 +126,7 @@ static void expectDensityRule(const Vector<int>& densities, int density, int gre
     }
 }
 
-static void expectAbiRule(const Vector<abi::Variant>& abis, abi::Variant variant,
-        std::initializer_list<const char*> matches) {
+static void expectAbiRule(const Vector<abi::Variant>& abis, abi::Variant variant, const Vector<const char*>& matches) {
     const abi::Variant* iter = std::find(abis.begin(), abis.end(), variant);
     if (abis.end() == iter) {
         ADD_FAILURE() << abi::toString(variant) << " was not in the abi list.";
@@ -143,13 +142,28 @@ static void expectAbiRule(const Vector<abi::Variant>& abis, abi::Variant variant
     EXPECT_EQ(matches.size(), rule->stringArgs.size())
             << " for " << abi::toString(variant) << " rule";
 
-    for (const char* match : matches) {
+    const size_t matchCount = matches.size();
+    for (size_t i = 0; i < matchCount; i++) {
+        const char* match = matches[i];
         if (rule->stringArgs.end() ==
                 std::find(rule->stringArgs.begin(), rule->stringArgs.end(), String8(match))) {
             ADD_FAILURE() << "Rule for abi " << abi::toString(variant)
                     << " does not contain match for expected abi " << match;
         }
     }
+}
+
+static void expectAbiRule(const Vector<abi::Variant>& abis, abi::Variant variant, const char* a) {
+    Vector<const char*> matches;
+    matches.add(a);
+    expectAbiRule(abis, variant, matches);
+}
+
+static void expectAbiRule(const Vector<abi::Variant>& abis, abi::Variant variant, const char* a, const char* b) {
+    Vector<const char*> matches;
+    matches.add(a);
+    matches.add(b);
+    expectAbiRule(abis, variant, matches);
 }
 
 } // namespace split
