@@ -3645,8 +3645,12 @@ ssize_t ResTable::getResource(uint32_t resID, Res_value* outValue, bool mayBeBag
     Entry entry;
     status_t err = getEntry(grp, t, e, &desiredConfig, &entry);
     if (err != NO_ERROR) {
+        // Only log the failure when we're not running on the host as
+        // part of a tool. The caller will do its own logging.
+#ifndef STATIC_ANDROIDFW_FOR_TOOLS
         ALOGW("Failure getting entry for 0x%08x (t=%d e=%d) (error %d)\n",
                 resID, t, e, err);
+#endif
         return err;
     }
 
