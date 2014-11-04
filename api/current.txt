@@ -28850,26 +28850,20 @@ package android.telephony {
   }
 
   public class SubInfoRecord implements android.os.Parcelable {
-    ctor public SubInfoRecord();
-    ctor public SubInfoRecord(int, java.lang.String, int, java.lang.String, int, int, java.lang.String, int, int, int[], int, int);
     method public int describeContents();
     method public int getColor();
-    method public android.graphics.drawable.BitmapDrawable getIconDrawable();
-    method public java.lang.String getLabel();
+    method public int getDataRoaming();
+    method public java.lang.CharSequence getDisplayName();
+    method public java.lang.String getIccId();
+    method public android.graphics.drawable.BitmapDrawable getIcon();
+    method public int getMcc();
+    method public int getMnc();
+    method public int getNameSource();
+    method public java.lang.String getNumber();
+    method public int getSimSlotIndex();
+    method public int getSubscriptionId();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.SubInfoRecord> CREATOR;
-    field public int color;
-    field public int dataRoaming;
-    field public java.lang.String displayName;
-    field public int displayNumberFormat;
-    field public java.lang.String iccId;
-    field public int mcc;
-    field public int mnc;
-    field public int nameSource;
-    field public java.lang.String number;
-    field public int[] simIconRes;
-    field public int slotId;
-    field public int subId;
   }
 
   public class SubscriptionManager implements android.provider.BaseColumns {
