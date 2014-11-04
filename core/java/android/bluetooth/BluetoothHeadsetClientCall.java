@@ -61,6 +61,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
      */
     public static final int CALL_STATE_TERMINATED = 7;
 
+    private final BluetoothDevice mDevice;
     private final int mId;
     private int mState;
     private String mNumber;
@@ -70,8 +71,9 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
     /**
      * Creates BluetoothHeadsetClientCall instance.
      */
-    public BluetoothHeadsetClientCall(int id, int state, String number, boolean multiParty,
-            boolean outgoing) {
+    public BluetoothHeadsetClientCall(BluetoothDevice device, int id, int state, String number,
+            boolean multiParty, boolean outgoing) {
+        mDevice = device;
         mId = id;
         mState = state;
         mNumber = number != null ? number : "";
@@ -111,6 +113,15 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
      */
     public void setMultiParty(boolean multiParty) {
         mMultiParty = multiParty;
+    }
+
+    /**
+     * Gets call's device.
+     *
+     * @return call device.
+     */
+    public BluetoothDevice getDevice() {
+        return mDevice;
     }
 
     /**
@@ -161,7 +172,9 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
     }
 
     public String toString() {
-        StringBuilder builder = new StringBuilder("BluetoothHeadsetClientCall{mId: ");
+        StringBuilder builder = new StringBuilder("BluetoothHeadsetClientCall{mDevice: ");
+        builder.append(mDevice);
+        builder.append(", mId: ");
         builder.append(mId);
         builder.append(", mState: ");
         switch (mState) {
@@ -192,8 +205,9 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
             new Parcelable.Creator<BluetoothHeadsetClientCall>() {
                 @Override
                 public BluetoothHeadsetClientCall createFromParcel(Parcel in) {
-                    return new BluetoothHeadsetClientCall(in.readInt(), in.readInt(),
-                            in.readString(), in.readInt() == 1, in.readInt() == 1);
+                    return new BluetoothHeadsetClientCall((BluetoothDevice)in.readParcelable(null),
+                            in.readInt(), in.readInt(), in.readString(),
+                            in.readInt() == 1, in.readInt() == 1);
                 }
 
                 @Override
@@ -204,6 +218,7 @@ public final class BluetoothHeadsetClientCall implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
+        out.writeParcelable(mDevice, 0);
         out.writeInt(mId);
         out.writeInt(mState);
         out.writeString(mNumber);
