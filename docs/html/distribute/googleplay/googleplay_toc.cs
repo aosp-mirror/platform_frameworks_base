@@ -18,6 +18,12 @@
     </div>
   </li>
   <li class="nav-section">
+    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/tv.html">
+          <span class="en">Distributing to <span style="white-space:nowrap">Android TV</span></span>
+        </a>
+    </div>
+  </li>
+  <li class="nav-section">
     <div class="nav-section-header" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/googleplay/edu/about.html">
           <span class="en">Google Play for Education</span>
         </a>
