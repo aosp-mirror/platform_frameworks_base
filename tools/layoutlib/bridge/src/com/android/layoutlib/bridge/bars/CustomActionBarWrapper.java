@@ -32,7 +32,6 @@ import com.android.internal.widget.ActionBarView;
 import com.android.internal.widget.DecorToolbar;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
-import com.android.resources.ResourceType;
 
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
@@ -48,6 +47,9 @@ import android.view.WindowCallback;
 import android.widget.ActionMenuPresenter;
 import android.widget.Toolbar;
 import android.widget.Toolbar_Accessor;
+
+import static com.android.SdkConstants.ANDROID_NS_NAME_PREFIX;
+import static com.android.resources.ResourceType.MENU;
 
 /**
  * A common API to access {@link ToolbarActionBar} and {@link WindowDecorActionBar}.
@@ -128,12 +130,23 @@ public abstract class CustomActionBarWrapper {
         MenuInflater inflater = new MenuInflater(getActionMenuContext());
         MenuBuilder menuBuilder = getMenuBuilder();
         for (String name : mCallback.getMenuIdNames()) {
-            if (mContext.getRenderResources().getProjectResource(ResourceType.MENU, name)
-                    != null) {
-                int id = mContext.getProjectResourceValue(ResourceType.MENU, name, -1);
-                if (id > -1) {
-                    inflater.inflate(id, menuBuilder);
+            int id = -1;
+            if (name.startsWith(ANDROID_NS_NAME_PREFIX)) {
+                // Framework menu.
+                name = name.substring(ANDROID_NS_NAME_PREFIX.length());
+                if (mContext.getRenderResources().getFrameworkResource(MENU, name) != null) {
+                    // We need to check for the existence of the menu first, since getting the id
+                    // never returns the default value. It creates a new value if one is not found.
+                    id = mContext.getFrameworkResourceValue(MENU, name, -1);
                 }
+            } else {
+                // Project menu.
+                if (mContext.getRenderResources().getProjectResource(MENU, name) != null) {
+                    id = mContext.getProjectResourceValue(MENU, name, -1);
+                }
+            }
+            if (id > -1) {
+                inflater.inflate(id, menuBuilder);
             }
         }
     }
