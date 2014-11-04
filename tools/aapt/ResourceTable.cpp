@@ -399,7 +399,7 @@ static status_t compileAttribute(const sp<AaptFile>& in,
 
     ssize_t l10nIdx = block.indexOfAttribute(NULL, "localization");
     if (l10nIdx >= 0) {
-        const uint16_t* str = block.getAttributeStringValue(l10nIdx, &len);
+        const char16_t* str = block.getAttributeStringValue(l10nIdx, &len);
         bool error;
         uint32_t l10n_required = parse_flags(str, len, l10nRequiredFlags, &error);
         if (error) {
@@ -1325,7 +1325,7 @@ status_t compileResourceFile(Bundle* bundle,
                 size_t n = block.getAttributeCount();
                 for (size_t i = 0; i < n; i++) {
                     size_t length;
-                    const uint16_t* attr = block.getAttributeName(i, &length);
+                    const char16_t* attr = block.getAttributeName(i, &length);
                     if (strcmp16(attr, name16.string()) == 0) {
                         name.setTo(block.getAttributeStringValue(i, &length));
                     } else if (strcmp16(attr, translatable16.string()) == 0) {
@@ -1441,14 +1441,14 @@ status_t compileResourceFile(Bundle* bundle,
                 // translatable.
                 for (size_t i = 0; i < n; i++) {
                     size_t length;
-                    const uint16_t* attr = block.getAttributeName(i, &length);
+                    const char16_t* attr = block.getAttributeName(i, &length);
                     if (strcmp16(attr, formatted16.string()) == 0) {
-                        const uint16_t* value = block.getAttributeStringValue(i, &length);
+                        const char16_t* value = block.getAttributeStringValue(i, &length);
                         if (strcmp16(value, false16.string()) == 0) {
                             curIsFormatted = false;
                         }
                     } else if (strcmp16(attr, translatable16.string()) == 0) {
-                        const uint16_t* value = block.getAttributeStringValue(i, &length);
+                        const char16_t* value = block.getAttributeStringValue(i, &length);
                         if (strcmp16(value, false16.string()) == 0) {
                             isTranslatable = false;
                         }

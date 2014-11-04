@@ -261,7 +261,7 @@ static status_t parsePackage(Bundle* bundle, const sp<AaptAssets>& assets,
                 ssize_t minSdkIndex = block.indexOfAttribute(RESOURCES_ANDROID_NAMESPACE,
                                                              "minSdkVersion");
                 if (minSdkIndex >= 0) {
-                    const uint16_t* minSdk16 = block.getAttributeStringValue(minSdkIndex, &len);
+                    const char16_t* minSdk16 = block.getAttributeStringValue(minSdkIndex, &len);
                     const char* minSdk8 = strdup(String8(minSdk16).string());
                     bundle->setManifestMinSdkVersion(minSdk8);
                 }
@@ -450,7 +450,7 @@ static int validateAttr(const String8& path, const ResTable& table,
     size_t len;
 
     ssize_t index = parser.indexOfAttribute(ns, attr);
-    const uint16_t* str;
+    const char16_t* str;
     Res_value value;
     if (index >= 0 && parser.getAttributeValue(index, &value) >= 0) {
         const ResStringPool* pool = &parser.getStrings();
@@ -503,7 +503,7 @@ static int validateAttr(const String8& path, const ResTable& table,
         }
         if (validChars) {
             for (size_t i=0; i<len; i++) {
-                uint16_t c = str[i];
+                char16_t c = str[i];
                 const char* p = validChars;
                 bool okay = false;
                 while (*p) {
@@ -1710,7 +1710,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
                 }
                 size_t len;
                 ssize_t index = block.indexOfAttribute(RESOURCES_ANDROID_NAMESPACE, "name");
-                const uint16_t* id = block.getAttributeStringValue(index, &len);
+                const char16_t* id = block.getAttributeStringValue(index, &len);
                 if (id == NULL) {
                     fprintf(stderr, "%s:%d: missing name attribute in element <%s>.\n", 
                             manifestPath.string(), block.getLineNumber(),
@@ -1753,7 +1753,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
                   hasErrors = true;
                 }
                 syms->addStringSymbol(String8(e), idStr, srcPos);
-                const uint16_t* cmt = block.getComment(&len);
+                const char16_t* cmt = block.getComment(&len);
                 if (cmt != NULL && *cmt != 0) {
                     //printf("Comment of %s: %s\n", String8(e).string(),
                     //        String8(cmt).string());
