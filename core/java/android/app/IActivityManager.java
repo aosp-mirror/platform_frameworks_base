@@ -373,7 +373,7 @@ public interface IActivityManager extends IInterface {
     public boolean isUserRunning(int userid, boolean orStopping) throws RemoteException;
     public int[] getRunningUserIds() throws RemoteException;
 
-    public boolean removeTask(int taskId, int flags) throws RemoteException;
+    public boolean removeTask(int taskId) throws RemoteException;
 
     public void registerProcessObserver(IProcessObserver observer) throws RemoteException;
     public void unregisterProcessObserver(IProcessObserver observer) throws RemoteException;

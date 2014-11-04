@@ -1836,8 +1836,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                     ComponentName cn = tr.intent.getComponent();
                     if (cn != null && cn.getPackageName().equals(packageName)) {
-                        // If the package name matches, remove the task and kill the process
-                        removeTaskByIdLocked(tr.taskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+                        // If the package name matches, remove the task
+                        removeTaskByIdLocked(tr.taskId, true);
                     }
                 }
             }
@@ -1891,9 +1891,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Prune all the tasks with removed components from the list of recent tasks
             synchronized (ActivityManagerService.this) {
                 for (int i = tasksToRemove.size() - 1; i >= 0; i--) {
-                    // Remove the task but don't kill the process (since other components in that
-                    // package may still be running and in the background)
-                    removeTaskByIdLocked(tasksToRemove.get(i), 0);
+                    removeTaskByIdLocked(tasksToRemove.get(i), false);
                 }
             }
         }
@@ -4313,9 +4311,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 boolean res;
                 if (finishTask && r == rootR) {
                     // If requested, remove the task that is associated to this activity only if it
-                    // was the root activity in the task.  The result code and data is ignored because
-                    // we don't support returning them across task boundaries.
-                    res = removeTaskByIdLocked(tr.taskId, 0);
+                    // was the root activity in the task. The result code and data is ignored
+                    // because we don't support returning them across task boundaries.
+                    res = removeTaskByIdLocked(tr.taskId, false);
                 } else {
                     res = tr.stack.requestFinishActivityLocked(token, resultCode,
                             resultData, "app-request", true);
@@ -5142,7 +5140,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             tr.getBaseIntent().getComponent().getPackageName();
                     if (tr.userId != userId) continue;
                     if (!taskPackageName.equals(packageName)) continue;
-                    removeTaskByIdLocked(tr.taskId, 0);
+                    removeTaskByIdLocked(tr.taskId, false);
                 }
             }
 
@@ -8287,52 +8285,65 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mTaskPersister.getTaskDescriptionIcon(filename);
     }
 
-    private void cleanUpRemovedTaskLocked(TaskRecord tr, int flags) {
+    private void cleanUpRemovedTaskLocked(TaskRecord tr, boolean killProcess) {
         mRecentTasks.remove(tr);
         tr.removedFromRecents(mTaskPersister);
-        final boolean killProcesses = (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0;
-        Intent baseIntent = new Intent(
-                tr.intent != null ? tr.intent : tr.affinityIntent);
-        ComponentName component = baseIntent.getComponent();
+        ComponentName component = tr.getBaseIntent().getComponent();
         if (component == null) {
-            Slog.w(TAG, "Now component for base intent of task: " + tr);
+            Slog.w(TAG, "No component for base intent of task: " + tr);
             return;
         }
 
-        // Find any running services associated with this app.
-        mServices.cleanUpRemovedTaskLocked(tr, component, baseIntent);
+        if (!killProcess) {
+            return;
+        }
 
-        if (killProcesses) {
-            // Find any running processes associated with this app.
-            final String pkg = component.getPackageName();
-            ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
-            ArrayMap<String, SparseArray<ProcessRecord>> pmap = mProcessNames.getMap();
-            for (int i=0; i<pmap.size(); i++) {
-                SparseArray<ProcessRecord> uids = pmap.valueAt(i);
-                for (int j=0; j<uids.size(); j++) {
-                    ProcessRecord proc = uids.valueAt(j);
-                    if (proc.userId != tr.userId) {
-                        continue;
-                    }
-                    if (!proc.pkgList.containsKey(pkg)) {
-                        continue;
-                    }
-                    procs.add(proc);
+        // Determine if the process(es) for this task should be killed.
+        final String pkg = component.getPackageName();
+        ArrayList<ProcessRecord> procsToKill = new ArrayList<ProcessRecord>();
+        ArrayMap<String, SparseArray<ProcessRecord>> pmap = mProcessNames.getMap();
+        for (int i = 0; i < pmap.size(); i++) {
+
+            SparseArray<ProcessRecord> uids = pmap.valueAt(i);
+            for (int j = 0; j < uids.size(); j++) {
+                ProcessRecord proc = uids.valueAt(j);
+                if (proc.userId != tr.userId) {
+                    // Don't kill process for a different user.
+                    continue;
                 }
-            }
-
-            // Kill the running processes.
-            for (int i=0; i<procs.size(); i++) {
-                ProcessRecord pr = procs.get(i);
-                if (pr == mHomeProcess) {
+                if (proc == mHomeProcess) {
                     // Don't kill the home process along with tasks from the same package.
                     continue;
                 }
-                if (pr.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
-                    pr.kill("remove task", true);
-                } else {
-                    pr.waitingToKill = "remove task";
+                if (!proc.pkgList.containsKey(pkg)) {
+                    // Don't kill process that is not associated with this task.
+                    continue;
                 }
+
+                for (int k = 0; k < proc.activities.size(); k++) {
+                    TaskRecord otherTask = proc.activities.get(k).task;
+                    if (tr.taskId != otherTask.taskId && otherTask.inRecents) {
+                        // Don't kill process(es) that has an activity in a different task that is
+                        // also in recents.
+                        return;
+                    }
+                }
+
+                // Add process to kill list.
+                procsToKill.add(proc);
+            }
+        }
+
+        // Find any running services associated with this app and stop if needed.
+        mServices.cleanUpRemovedTaskLocked(tr, component, new Intent(tr.getBaseIntent()));
+
+        // Kill the running processes.
+        for (int i = 0; i < procsToKill.size(); i++) {
+            ProcessRecord pr = procsToKill.get(i);
+            if (pr.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
+                pr.kill("remove task", true);
+            } else {
+                pr.waitingToKill = "remove task";
             }
         }
     }
@@ -8341,15 +8352,14 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Removes the task with the specified task id.
      *
      * @param taskId Identifier of the task to be removed.
-     * @param flags Additional operational flags.  May be 0 or
-     * {@link ActivityManager#REMOVE_TASK_KILL_PROCESS}.
+     * @param killProcess Kill any process associated with the task if possible.
      * @return Returns true if the given task was found and removed.
      */
-    private boolean removeTaskByIdLocked(int taskId, int flags) {
+    private boolean removeTaskByIdLocked(int taskId, boolean killProcess) {
         TaskRecord tr = recentTaskForIdLocked(taskId);
         if (tr != null) {
             tr.removeTaskActivitiesLocked();
-            cleanUpRemovedTaskLocked(tr, flags);
+            cleanUpRemovedTaskLocked(tr, killProcess);
             if (tr.isPersistable) {
                 notifyTaskPersisterLocked(null, true);
             }
@@ -8359,19 +8369,19 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public boolean removeTask(int taskId, int flags) {
+    public boolean removeTask(int taskId) {
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.REMOVE_TASKS,
                     "removeTask()");
             long ident = Binder.clearCallingIdentity();
             try {
-                return removeTaskByIdLocked(taskId, flags);
+                return removeTaskByIdLocked(taskId, true);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
     }
-    
+
     /**
      * TODO: Add mController hook
      */
@@ -19167,16 +19177,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (ActivityManagerService.this) {
                 long origId = Binder.clearCallingIdentity();
                 try {
-                    TaskRecord tr = recentTaskForIdLocked(mTaskId);
-                    if (tr == null) {
+                    if (!removeTaskByIdLocked(mTaskId, false)) {
                         throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
                     }
-                    // Only kill the process if we are not a new document
-                    int flags = tr.getBaseIntent().getFlags();
-                    boolean isDocument = (flags & Intent.FLAG_ACTIVITY_NEW_DOCUMENT) ==
-                            Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
-                    removeTaskByIdLocked(mTaskId,
-                            !isDocument ? ActivityManager.REMOVE_TASK_KILL_PROCESS : 0);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
