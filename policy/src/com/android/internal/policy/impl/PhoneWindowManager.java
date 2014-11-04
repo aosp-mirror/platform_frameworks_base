@@ -4767,18 +4767,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public int interceptMotionBeforeQueueingNonInteractive(long whenNanos, int policyFlags) {
         if ((policyFlags & FLAG_WAKE) != 0) {
-            wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotion);
-            return 0;
+            if (wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotion)) {
+                return 0;
+            }
         }
+
         if (shouldDispatchInputWhenNonInteractive()) {
             return ACTION_PASS_TO_USER;
         }
+
         return 0;
     }
 
     private boolean shouldDispatchInputWhenNonInteractive() {
-        return keyguardIsShowingTq() && mDisplay != null &&
-                mDisplay.getState() != Display.STATE_OFF;
+        // Send events to keyguard while the screen is on.
+        if (keyguardIsShowingTq() && mDisplay != null && mDisplay.getState() != Display.STATE_OFF) {
+            return true;
+        }
+
+        // Send events to a dozing dream even if the screen is off since the dream
+        // is in control of the state of the screen.
+        IDreamManager dreamManager = getDreamManager();
+
+        try {
+            if (dreamManager != null && dreamManager.isDreaming()) {
+                return true;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException when checking if dreaming", e);
+        }
+
+        // Otherwise, consume events since the user can't see what is being
+        // interacted with.
+        return false;
     }
 
     void dispatchMediaKeyWithWakeLock(KeyEvent event) {
@@ -4949,12 +4970,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey);
     }
 
-    private void wakeUp(long wakeTime, boolean wakeInTheaterMode) {
+    private boolean wakeUp(long wakeTime, boolean wakeInTheaterMode) {
         if (!wakeInTheaterMode && isTheaterModeEnabled()) {
-            return;
+            return false;
         }
 
         mPowerManager.wakeUp(wakeTime);
+        return true;
     }
 
     // Called on the PowerManager's Notifier thread.
