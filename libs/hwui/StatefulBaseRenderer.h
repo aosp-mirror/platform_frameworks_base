@@ -43,8 +43,8 @@ class StatefulBaseRenderer : public Renderer {
 public:
     StatefulBaseRenderer();
 
-    virtual status_t prepare(bool opaque) {
-        return prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
+    virtual void prepare(bool opaque) {
+        prepareDirty(0.0f, 0.0f, mWidth, mHeight, opaque);
     }
 
     /**

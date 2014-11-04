@@ -106,7 +106,7 @@ public:
      * Plays back all of the draw ops recorded into batches to the renderer.
      * Adjusts the state of the renderer as necessary, and restores it when complete
      */
-    status_t flush(OpenGLRenderer& renderer, Rect& dirty);
+    void flush(OpenGLRenderer& renderer, Rect& dirty);
 
     void addClip(OpenGLRenderer& renderer, ClipOp* op);
     void addSaveLayer(OpenGLRenderer& renderer, SaveLayerOp* op, int newSaveCount);

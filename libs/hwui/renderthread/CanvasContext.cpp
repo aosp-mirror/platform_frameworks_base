@@ -217,24 +217,23 @@ void CanvasContext::draw() {
         profiler().unionDirty(&dirty);
     }
 
-    status_t status;
     if (!dirty.isEmpty()) {
-        status = mCanvas->prepareDirty(dirty.fLeft, dirty.fTop,
+        mCanvas->prepareDirty(dirty.fLeft, dirty.fTop,
                 dirty.fRight, dirty.fBottom, mOpaque);
     } else {
-        status = mCanvas->prepare(mOpaque);
+        mCanvas->prepare(mOpaque);
     }
 
     Rect outBounds;
-    status |= mCanvas->drawRenderNode(mRootRenderNode.get(), outBounds);
+    mCanvas->drawRenderNode(mRootRenderNode.get(), outBounds);
 
     profiler().draw(mCanvas);
 
-    mCanvas->finish();
+    bool drew = mCanvas->finish();
 
     profiler().markPlaybackEnd();
 
-    if (status & DrawGlInfo::kStatusDrew) {
+    if (drew) {
         swapBuffers();
     } else {
         mEglManager.cancelFrame();

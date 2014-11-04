@@ -112,7 +112,7 @@ public:
      *               and will not be cleared. If false, the target surface
      *               will be cleared
      */
-    virtual status_t prepare(bool opaque) = 0;
+    virtual void prepare(bool opaque) = 0;
 
     /**
      * Prepares the renderer to draw a frame. This method must be invoked
@@ -128,14 +128,16 @@ public:
      *               and will not be cleared. If false, the target surface
      *               will be cleared in the specified dirty rectangle
      */
-    virtual status_t prepareDirty(float left, float top, float right, float bottom,
+    virtual void prepareDirty(float left, float top, float right, float bottom,
             bool opaque) = 0;
 
     /**
      * Indicates the end of a frame. This method must be invoked whenever
      * the caller is done rendering a frame.
+     * Returns true if any drawing was done during the frame (the output
+     * has changed / is "dirty" and should be displayed to the user).
      */
-    virtual void finish() = 0;
+    virtual bool finish() = 0;
 
 // ----------------------------------------------------------------------------
 // Canvas state operations
@@ -180,52 +182,52 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas draw operations
 // ----------------------------------------------------------------------------
-    virtual status_t drawColor(int color, SkXfermode::Mode mode) = 0;
+    virtual void drawColor(int color, SkXfermode::Mode mode) = 0;
 
     // Bitmap-based
-    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) = 0;
-    virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
+    virtual void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) = 0;
+    virtual void drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) = 0;
-    virtual status_t drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) = 0;
-    virtual status_t drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+    virtual void drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) = 0;
+    virtual void drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) = 0;
-    virtual status_t drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+    virtual void drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
             float left, float top, float right, float bottom, const SkPaint* paint) = 0;
 
     // Shapes
-    virtual status_t drawRect(float left, float top, float right, float bottom,
+    virtual void drawRect(float left, float top, float right, float bottom,
             const SkPaint* paint) = 0;
-    virtual status_t drawRects(const float* rects, int count, const SkPaint* paint) = 0;
-    virtual status_t drawRoundRect(float left, float top, float right, float bottom,
+    virtual void drawRects(const float* rects, int count, const SkPaint* paint) = 0;
+    virtual void drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint* paint) = 0;
-    virtual status_t drawCircle(float x, float y, float radius, const SkPaint* paint) = 0;
-    virtual status_t drawOval(float left, float top, float right, float bottom,
+    virtual void drawCircle(float x, float y, float radius, const SkPaint* paint) = 0;
+    virtual void drawOval(float left, float top, float right, float bottom,
             const SkPaint* paint) = 0;
-    virtual status_t drawArc(float left, float top, float right, float bottom,
+    virtual void drawArc(float left, float top, float right, float bottom,
             float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) = 0;
-    virtual status_t drawPath(const SkPath* path, const SkPaint* paint) = 0;
-    virtual status_t drawLines(const float* points, int count, const SkPaint* paint) = 0;
-    virtual status_t drawPoints(const float* points, int count, const SkPaint* paint) = 0;
+    virtual void drawPath(const SkPath* path, const SkPaint* paint) = 0;
+    virtual void drawLines(const float* points, int count, const SkPaint* paint) = 0;
+    virtual void drawPoints(const float* points, int count, const SkPaint* paint) = 0;
 
     // Text
-    virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
+    virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = kDrawOpMode_Immediate) = 0;
-    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
+    virtual void drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
             float hOffset, float vOffset, const SkPaint* paint) = 0;
-    virtual status_t drawPosText(const char* text, int bytesCount, int count,
+    virtual void drawPosText(const char* text, int bytesCount, int count,
             const float* positions, const SkPaint* paint) = 0;
 
 // ----------------------------------------------------------------------------
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
-    virtual status_t drawLayer(Layer* layer, float x, float y) = 0;
-    virtual status_t drawRenderNode(RenderNode* renderNode, Rect& dirty,
+    virtual void drawLayer(Layer* layer, float x, float y) = 0;
+    virtual void drawRenderNode(RenderNode* renderNode, Rect& dirty,
             int32_t replayFlags) = 0;
 
     // TODO: rename for consistency
-    virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty) = 0;
+    virtual void callDrawGLFunction(Functor* functor, Rect& dirty) = 0;
 }; // class Renderer
 
 }; // namespace uirenderer

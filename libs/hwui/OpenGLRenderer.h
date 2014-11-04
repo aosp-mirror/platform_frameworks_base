@@ -126,10 +126,10 @@ public:
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
 
     virtual void onViewportInitialized();
-    virtual status_t prepareDirty(float left, float top, float right, float bottom, bool opaque);
-    virtual void finish();
+    virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    virtual bool finish();
 
-    virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
+    virtual void callDrawGLFunction(Functor* functor, Rect& dirty);
 
     void pushLayerUpdate(Layer* layer);
     void cancelLayerUpdate(Layer* layer);
@@ -149,46 +149,46 @@ public:
     int saveLayerDeferred(float left, float top, float right, float bottom,
             const SkPaint* paint, int flags);
 
-    virtual status_t drawRenderNode(RenderNode* displayList, Rect& dirty, int32_t replayFlags = 1);
-    virtual status_t drawLayer(Layer* layer, float x, float y);
-    virtual status_t drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
-    status_t drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
+    virtual void drawRenderNode(RenderNode* displayList, Rect& dirty, int32_t replayFlags = 1);
+    virtual void drawLayer(Layer* layer, float x, float y);
+    virtual void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
+    void drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
             TextureVertex* vertices, bool pureTranslate, const Rect& bounds, const SkPaint* paint);
-    virtual status_t drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
+    virtual void drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint);
-    virtual status_t drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint);
-    virtual status_t drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
+    virtual void drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint);
+    virtual void drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint);
-    status_t drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
+    void drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
             TextureVertex* vertices, uint32_t indexCount, const SkPaint* paint);
-    virtual status_t drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
+    virtual void drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
             float left, float top, float right, float bottom, const SkPaint* paint);
-    status_t drawPatch(const SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
+    void drawPatch(const SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
             float left, float top, float right, float bottom, const SkPaint* paint);
-    virtual status_t drawColor(int color, SkXfermode::Mode mode);
-    virtual status_t drawRect(float left, float top, float right, float bottom,
+    virtual void drawColor(int color, SkXfermode::Mode mode);
+    virtual void drawRect(float left, float top, float right, float bottom,
             const SkPaint* paint);
-    virtual status_t drawRoundRect(float left, float top, float right, float bottom,
+    virtual void drawRoundRect(float left, float top, float right, float bottom,
             float rx, float ry, const SkPaint* paint);
-    virtual status_t drawCircle(float x, float y, float radius, const SkPaint* paint);
-    virtual status_t drawOval(float left, float top, float right, float bottom,
+    virtual void drawCircle(float x, float y, float radius, const SkPaint* paint);
+    virtual void drawOval(float left, float top, float right, float bottom,
             const SkPaint* paint);
-    virtual status_t drawArc(float left, float top, float right, float bottom,
+    virtual void drawArc(float left, float top, float right, float bottom,
             float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint);
-    virtual status_t drawPath(const SkPath* path, const SkPaint* paint);
-    virtual status_t drawLines(const float* points, int count, const SkPaint* paint);
-    virtual status_t drawPoints(const float* points, int count, const SkPaint* paint);
-    virtual status_t drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
+    virtual void drawPath(const SkPath* path, const SkPaint* paint);
+    virtual void drawLines(const float* points, int count, const SkPaint* paint);
+    virtual void drawPoints(const float* points, int count, const SkPaint* paint);
+    virtual void drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
             float hOffset, float vOffset, const SkPaint* paint);
-    virtual status_t drawPosText(const char* text, int bytesCount, int count,
+    virtual void drawPosText(const char* text, int bytesCount, int count,
             const float* positions, const SkPaint* paint);
-    virtual status_t drawText(const char* text, int bytesCount, int count, float x, float y,
+    virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
             DrawOpMode drawOpMode = kDrawOpMode_Immediate);
-    virtual status_t drawRects(const float* rects, int count, const SkPaint* paint);
+    virtual void drawRects(const float* rects, int count, const SkPaint* paint);
 
-    status_t drawShadow(float casterAlpha,
+    void drawShadow(float casterAlpha,
             const VertexBuffer* ambientShadowVertexBuffer, const VertexBuffer* spotShadowVertexBuffer);
 
     virtual void setDrawFilter(SkDrawFilter* filter);
@@ -324,6 +324,7 @@ public:
         drawColorRect(left, top, right, bottom, color, SkXfermode::kSrcOver_Mode, true);
 
         if (stencilWasEnabled) mCaches.stencil.enableTest();
+        mDirty = true;
     }
 #endif
 
@@ -343,12 +344,12 @@ protected:
      * Indicates the start of rendering. This method will setup the
      * initial OpenGL state (viewport, clearing the buffer, etc.)
      */
-    status_t startFrame();
+    void startFrame();
 
     /**
      * Clears the underlying surface if needed.
      */
-    virtual status_t clear(float left, float top, float right, float bottom, bool opaque);
+    virtual void clear(float left, float top, float right, float bottom, bool opaque);
 
     /**
      * Call this method after updating a layer during a drawing pass.
@@ -613,7 +614,7 @@ private:
      * @param dirty True if calling this method should dirty the current layer
      * @param clip True if the rects should be clipped, false otherwise
      */
-    status_t drawColorRects(const float* rects, int count, const SkPaint* paint,
+    void drawColorRects(const float* rects, int count, const SkPaint* paint,
             bool ignoreTransform = false, bool dirty = true, bool clip = true);
 
     /**
@@ -627,7 +628,7 @@ private:
      * @param texture The texture reprsenting the shape
      * @param paint The paint to draw the shape with
      */
-    status_t drawShape(float left, float top, const PathTexture* texture, const SkPaint* paint);
+    void drawShape(float left, float top, const PathTexture* texture, const SkPaint* paint);
 
     /**
      * Draws the specified texture as an alpha bitmap. Alpha bitmaps obey
@@ -647,15 +648,15 @@ private:
      * @param paint The paint to render with
      * @param flags flags with which to draw
      */
-    status_t drawVertexBuffer(float translateX, float translateY, const VertexBuffer& vertexBuffer,
+    void drawVertexBuffer(float translateX, float translateY, const VertexBuffer& vertexBuffer,
             const SkPaint* paint, int flags = 0);
 
     /**
      * Convenience for translating method
      */
-    status_t drawVertexBuffer(const VertexBuffer& vertexBuffer,
+    void drawVertexBuffer(const VertexBuffer& vertexBuffer,
             const SkPaint* paint, int flags = 0) {
-        return drawVertexBuffer(0.0f, 0.0f, vertexBuffer, paint, flags);
+        drawVertexBuffer(0.0f, 0.0f, vertexBuffer, paint, flags);
     }
 
     /**
@@ -664,7 +665,7 @@ private:
      * @param path The hull of the path to draw
      * @param paint The paint to render with
      */
-    status_t drawConvexPath(const SkPath& path, const SkPaint* paint);
+    void drawConvexPath(const SkPath& path, const SkPaint* paint);
 
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
@@ -930,6 +931,8 @@ private:
      */
     Texture* getTexture(const SkBitmap* bitmap);
 
+    bool reportAndClearDirty() { bool ret = mDirty; mDirty = false; return ret; }
+
     /**
      * Model-view matrix used to position/size objects
      *
@@ -997,6 +1000,10 @@ private:
     bool mFirstFrameAfterResize;
 
     bool mSkipOutlineClip;
+
+    // True if anything has been drawn since the last call to
+    // reportAndClearDirty()
+    bool mDirty;
 
     // Lighting + shadows
     Vector3 mLightCenter;
