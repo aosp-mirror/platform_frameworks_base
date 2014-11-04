@@ -52,7 +52,6 @@ import android.content.res.BridgeTypedArray;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
-import android.content.res.TypedArray;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -127,7 +126,6 @@ public final class BridgeContext extends Context {
      * @param metrics the {@link DisplayMetrics}.
      * @param renderResources the configured resources (both framework and projects) for this
      * render.
-     * @param projectCallback
      * @param config the Configuration object for this render.
      * @param targetSdkVersion the targetSdkVersion of the application.
      */
@@ -331,7 +329,7 @@ public final class BridgeContext extends Context {
             boolean attachToRoot, boolean skipCallbackParser) {
         boolean isPlatformLayout = resource.isFramework();
 
-        if (isPlatformLayout == false && skipCallbackParser == false) {
+        if (!isPlatformLayout && !skipCallbackParser) {
             // check if the project callback can provide us with a custom parser.
             ILayoutPullParser parser = getParser(resource);
 
@@ -663,7 +661,7 @@ public final class BridgeContext extends Context {
                 }
 
                 String attrName = attribute.getFirst();
-                boolean frameworkAttr = attribute.getSecond().booleanValue();
+                boolean frameworkAttr = attribute.getSecond();
                 String value = null;
                 if (set != null) {
                     value = set.getAttributeValue(
@@ -672,7 +670,7 @@ public final class BridgeContext extends Context {
 
                     // if this is an app attribute, and the first get fails, try with the
                     // new res-auto namespace as well
-                    if (frameworkAttr == false && value == null) {
+                    if (!frameworkAttr && value == null) {
                         value = set.getAttributeValue(BridgeConstants.NS_APP_RES_AUTO, attrName);
                     }
                 }
@@ -789,13 +787,13 @@ public final class BridgeContext extends Context {
         List<Pair<String, Boolean>> results = new ArrayList<Pair<String, Boolean>>(attrs.length);
 
         // for each attribute, get its name so that we can search it in the style
-        for (int i = 0 ; i < attrs.length ; i++) {
-            Pair<ResourceType, String> resolvedResource = Bridge.resolveResourceId(attrs[i]);
+        for (int attr : attrs) {
+            Pair<ResourceType, String> resolvedResource = Bridge.resolveResourceId(attr);
             boolean isFramework = false;
             if (resolvedResource != null) {
                 isFramework = true;
             } else {
-                resolvedResource = mProjectCallback.resolveResourceId(attrs[i]);
+                resolvedResource = mProjectCallback.resolveResourceId(attr);
             }
 
             if (resolvedResource != null) {
@@ -841,7 +839,7 @@ public final class BridgeContext extends Context {
 
         if (id == null) {
             // generate a new id
-            id = Integer.valueOf(++mDynamicIdGenerator);
+            id = ++mDynamicIdGenerator;
 
             // and add it to the maps.
             mDynamicIdToStyleMap.put(id, resValue);
@@ -860,19 +858,24 @@ public final class BridgeContext extends Context {
     }
 
     public int getFrameworkResourceValue(ResourceType resType, String resName, int defValue) {
-        Integer value = Bridge.getResourceId(resType, resName);
-        if (value != null) {
-            return value.intValue();
+        if (getRenderResources().getFrameworkResource(resType, resName) != null) {
+            // Bridge.getResourceId creates a new resource id if an existing one isn't found. So,
+            // we check for the existence of the resource before calling it.
+            return Bridge.getResourceId(resType, resName);
         }
 
         return defValue;
     }
 
     public int getProjectResourceValue(ResourceType resType, String resName, int defValue) {
-        if (mProjectCallback != null) {
-            Integer value = mProjectCallback.getResourceId(resType, resName);
-            if (value != null) {
-                return value.intValue();
+        // getResourceId creates a new resource id if an existing resource id isn't found. So, we
+        // check for the existence of the resource before calling it.
+        if (getRenderResources().getProjectResource(resType, resName) != null) {
+            if (mProjectCallback != null) {
+                Integer value = mProjectCallback.getResourceId(resType, resName);
+                if (value != null) {
+                    return value;
+                }
             }
         }
 
@@ -1455,9 +1458,6 @@ public final class BridgeContext extends Context {
         return null;
     }
 
-    /**
-     * @hide
-     */
     @Override
     public int getUserId() {
         return 0; // not used
