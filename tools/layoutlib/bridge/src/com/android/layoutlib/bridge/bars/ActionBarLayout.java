@@ -18,36 +18,24 @@ package com.android.layoutlib.bridge.bars;
 
 import com.android.annotations.NonNull;
 import com.android.annotations.Nullable;
-import com.android.ide.common.rendering.api.ActionBarCallback;
-import com.android.ide.common.rendering.api.ActionBarCallback.HomeButtonStyle;
-import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.internal.R;
-import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuItemImpl;
-import com.android.internal.widget.ActionBarAccessor;
-import com.android.internal.widget.ActionBarContainer;
-import com.android.internal.widget.ActionBarView;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
-import com.android.resources.ResourceType;
 
-import android.app.ActionBar;
-import android.app.ActionBar.Tab;
-import android.app.ActionBar.TabListener;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.ActionMenuPresenter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -56,172 +44,72 @@ import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
-/**
- * A layout representing the action bar.
- */
-public class ActionBarLayout extends LinearLayout {
+public class ActionBarLayout {
+
+    private static final String LAYOUT_ATTR_NAME = "windowActionBarFullscreenDecorLayout";
+
+    // The Action Bar
+    @NonNull private CustomActionBarWrapper mActionBar;
 
     // Store another reference to the context so that we don't have to cast it repeatedly.
     @NonNull private final BridgeContext mBridgeContext;
-    @NonNull private final Context mThemedContext;
 
-    @NonNull private final ActionBar mActionBar;
-
-    // Data for Action Bar.
-    @Nullable private final String mIcon;
-    @Nullable private final String mTitle;
-    @Nullable private final String mSubTitle;
-    private final boolean mSplit;
-    private final boolean mShowHomeAsUp;
-    private final int mNavMode;
-
-    // Helper fields.
-    @NonNull private final MenuBuilder mMenuBuilder;
-    private final int mPopupMaxWidth;
-    @NonNull private final RenderResources res;
-    @Nullable private final ActionBarView mActionBarView;
-    @Nullable private FrameLayout mContentRoot;
-    @NonNull private final ActionBarCallback mCallback;
+    @NonNull private FrameLayout mContentRoot;
 
     // A fake parent for measuring views.
     @Nullable private ViewGroup mMeasureParent;
 
-    public ActionBarLayout(@NonNull BridgeContext context, @NonNull SessionParams params) {
+    /**
+     * Inflate the action bar and attach it to {@code parentView}
+     */
+    public ActionBarLayout(@NonNull BridgeContext context, @NonNull SessionParams params,
+            @NonNull ViewGroup parentView) {
 
-        super(context);
-        setOrientation(LinearLayout.HORIZONTAL);
-        setGravity(Gravity.CENTER_VERTICAL);
-
-        // Inflate action bar layout.
-        LayoutInflater.from(context).inflate(R.layout.screen_action_bar, this,
-                true /*attachToRoot*/);
-        mActionBar = new WindowDecorActionBar(this);
-
-        // Set contexts.
         mBridgeContext = context;
-        mThemedContext = mActionBar.getThemedContext();
 
-        // Set data for action bar.
-        mCallback = params.getProjectCallback().getActionBarCallback();
-        mIcon = params.getAppIcon();
-        mTitle = params.getAppLabel();
-        // Split Action Bar when the screen size is narrow and the application requests split action
-        // bar when narrow.
-        mSplit = context.getResources().getBoolean(R.bool.split_action_bar_is_narrow) &&
-                mCallback.getSplitActionBarWhenNarrow();
-        mNavMode = mCallback.getNavigationMode();
-        // TODO: Support Navigation Drawer Indicator.
-        mShowHomeAsUp = mCallback.getHomeButtonStyle() == HomeButtonStyle.SHOW_HOME_AS_UP;
-        mSubTitle = mCallback.getSubTitle();
-
-
-        // Set helper fields.
-        mMenuBuilder = new MenuBuilder(mThemedContext);
-        res = mBridgeContext.getRenderResources();
-        mPopupMaxWidth = Math.max(mBridgeContext.getMetrics().widthPixels / 2,
-                mThemedContext.getResources().getDimensionPixelSize(
-                        R.dimen.config_prefDialogWidth));
-        mActionBarView = (ActionBarView) findViewById(R.id.action_bar);
-        mContentRoot = (FrameLayout) findViewById(android.R.id.content);
-
-        setupActionBar();
-    }
-
-    /**
-     * Sets up the action bar by filling the appropriate data.
-     */
-    private void setupActionBar() {
-        // Add title and sub title.
-        ResourceValue titleValue = res.findResValue(mTitle, false /*isFramework*/);
-        if (titleValue != null && titleValue.getValue() != null) {
-            mActionBar.setTitle(titleValue.getValue());
+        ResourceValue layoutName = context.getRenderResources()
+                .findItemInTheme(LAYOUT_ATTR_NAME, true);
+        if (layoutName != null) {
+            // We may need to resolve the reference obtained.
+            layoutName = context.getRenderResources().findResValue(layoutName.getValue(),
+                    layoutName.isFramework());
+        }
+        int layoutId = 0;
+        String error = null;
+        if (layoutName == null) {
+            error = "Unable to find action bar layout (" + LAYOUT_ATTR_NAME
+                    + ") in the current theme.";
         } else {
-            mActionBar.setTitle(mTitle);
-        }
-        if (mSubTitle != null) {
-            mActionBar.setSubtitle(mSubTitle);
-        }
-
-        // Add show home as up icon.
-        if (mShowHomeAsUp) {
-            mActionBar.setDisplayOptions(0xFF, ActionBar.DISPLAY_HOME_AS_UP);
-        }
-
-        // Set the navigation mode.
-        mActionBar.setNavigationMode(mNavMode);
-        if (mNavMode == ActionBar.NAVIGATION_MODE_TABS) {
-            setupTabs(3);
-        }
-
-        if (mActionBarView != null) {
-            // If the action bar style doesn't specify an icon, set the icon obtained from the session
-            // params.
-            if (!mActionBarView.hasIcon() && mIcon != null) {
-                Drawable iconDrawable = getDrawable(mIcon, false /*isFramework*/);
-                if (iconDrawable != null) {
-                    mActionBar.setIcon(iconDrawable);
-                }
-            }
-
-            // Set action bar to be split, if needed.
-            ActionBarContainer splitView = (ActionBarContainer) findViewById(R.id.split_action_bar);
-            mActionBarView.setSplitView(splitView);
-            mActionBarView.setSplitToolbar(mSplit);
-
-            inflateMenus();
-        }
-    }
-
-    /**
-     * Gets the menus to add to the action bar from the callback, resolves them, inflates them and
-     * adds them to the action bar.
-     */
-    private void inflateMenus() {
-        if (mActionBarView == null) {
-            return;
-        }
-        final MenuInflater inflater = new MenuInflater(mThemedContext);
-        for (String name : mCallback.getMenuIdNames()) {
-            if (mBridgeContext.getRenderResources().getProjectResource(ResourceType.MENU, name)
-                    != null) {
-                int id = mBridgeContext.getProjectResourceValue(ResourceType.MENU, name, -1);
-                if (id > -1) {
-                    inflater.inflate(id, mMenuBuilder);
-                }
+            layoutId = context.getFrameworkResourceValue(layoutName.getResourceType(),
+                    layoutName.getName(), 0);
+            if (layoutId == 0) {
+                error = String.format("Unable to resolve attribute \"%s\" of type \"%s\"",
+                        layoutName.getName(), layoutName.getResourceType());
             }
         }
-        mActionBarView.setMenu(mMenuBuilder, null /*callback*/);
-    }
-
-    // TODO: Use an adapter, like List View to set up tabs.
-    private void setupTabs(int num) {
-        for (int i = 1; i <= num; i++) {
-            Tab tab = mActionBar.newTab().setText("Tab" + i).setTabListener(new TabListener() {
-                @Override
-                public void onTabUnselected(Tab t, FragmentTransaction ft) {
-                    // pass
-                }
-                @Override
-                public void onTabSelected(Tab t, FragmentTransaction ft) {
-                    // pass
-                }
-                @Override
-                public void onTabReselected(Tab t, FragmentTransaction ft) {
-                    // pass
-                }
-            });
-            mActionBar.addTab(tab);
+        if (layoutId == 0) {
+            throw new RuntimeException(error);
         }
-    }
+        // Inflate action bar layout.
+        View decorContent = LayoutInflater.from(context).inflate(layoutId, parentView, true);
 
-    @Nullable
-    private Drawable getDrawable(@NonNull String name, boolean isFramework) {
-        ResourceValue value = res.findResValue(name, isFramework);
-        value = res.resolveResValue(value);
-        if (value != null) {
-            return ResourceHelper.getDrawable(value, mBridgeContext);
+        mActionBar = CustomActionBarWrapper.getActionBarWrapper(context, params, decorContent);
+
+        FrameLayout contentRoot = (FrameLayout) parentView.findViewById(android.R.id.content);
+
+        // If something went wrong and we were not able to initialize the content root,
+        // just add a frame layout inside this and return.
+        if (contentRoot == null) {
+            contentRoot = new FrameLayout(context);
+            contentRoot.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+                    LayoutParams.MATCH_PARENT));
+            parentView.addView(contentRoot);
+            mContentRoot = contentRoot;
+        } else {
+            mContentRoot = contentRoot;
+            mActionBar.setupActionBar();
+            mActionBar.inflateMenus();
         }
-        return null;
     }
 
     /**
@@ -229,7 +117,7 @@ public class ActionBarLayout extends LinearLayout {
      * the content frame which shall serve as the new content root.
      */
     public void createMenuPopup() {
-        assert mContentRoot != null && findViewById(android.R.id.content) == mContentRoot
+        assert mContentRoot.getId() == android.R.id.content
                 : "Action Bar Menus have already been created.";
 
         if (!isOverflowPopupNeeded()) {
@@ -237,7 +125,7 @@ public class ActionBarLayout extends LinearLayout {
         }
 
         // Create a layout to hold the menus and the user's content.
-        RelativeLayout layout = new RelativeLayout(mThemedContext);
+        RelativeLayout layout = new RelativeLayout(mActionBar.getPopupContext());
         layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT));
         mContentRoot.addView(layout);
@@ -259,13 +147,14 @@ public class ActionBarLayout extends LinearLayout {
     @NonNull
     private View createMenuView() {
         DisplayMetrics metrics = mBridgeContext.getMetrics();
-        OverflowMenuAdapter adapter = new OverflowMenuAdapter(mMenuBuilder, mThemedContext);
+        MenuBuilder menu = mActionBar.getMenuBuilder();
+        OverflowMenuAdapter adapter = new OverflowMenuAdapter(menu, mActionBar.getPopupContext());
 
-        LinearLayout layout = new LinearLayout(mThemedContext);
+        LinearLayout layout = new LinearLayout(mActionBar.getPopupContext());
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 measureContentWidth(adapter), LayoutParams.WRAP_CONTENT);
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_END);
-        if (mSplit) {
+        if (mActionBar.isSplit()) {
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             // TODO: Find correct value instead of hardcoded 10dp.
             layoutParams.bottomMargin = getPixelValue("-10dp", metrics);
@@ -273,7 +162,7 @@ public class ActionBarLayout extends LinearLayout {
             layoutParams.topMargin = getPixelValue("-10dp", metrics);
         }
         layout.setLayoutParams(layoutParams);
-        final TypedArray a = mThemedContext.obtainStyledAttributes(null,
+        final TypedArray a = mActionBar.getPopupContext().obtainStyledAttributes(null,
                 R.styleable.PopupWindow, R.attr.popupMenuStyle, 0);
         layout.setBackground(a.getDrawable(R.styleable.PopupWindow_popupBackground));
         layout.setDividerDrawable(a.getDrawable(R.attr.actionBarDivider));
@@ -282,20 +171,25 @@ public class ActionBarLayout extends LinearLayout {
         layout.setDividerPadding(getPixelValue("12dp", metrics));
         layout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
 
-        ListView listView = new ListView(mThemedContext, null, R.attr.dropDownListViewStyle);
+        ListView listView = new ListView(mActionBar.getPopupContext(), null,
+                R.attr.dropDownListViewStyle);
         listView.setAdapter(adapter);
         layout.addView(listView);
         return layout;
     }
 
     private boolean isOverflowPopupNeeded() {
-        boolean needed = mCallback.isOverflowPopupNeeded();
+        boolean needed = mActionBar.isOverflowPopupNeeded();
         if (!needed) {
             return false;
         }
         // Copied from android.widget.ActionMenuPresenter.updateMenuView()
-        ArrayList<MenuItemImpl> menus = mMenuBuilder.getNonActionItems();
-        if (ActionBarAccessor.getActionMenuPresenter(mActionBarView).isOverflowReserved() &&
+        ArrayList<MenuItemImpl> menus = mActionBar.getMenuBuilder().getNonActionItems();
+        ActionMenuPresenter presenter = mActionBar.getActionMenuPresenter();
+        if (presenter == null) {
+            throw new RuntimeException("Failed to create a Presenter for Action Bar Menus.");
+        }
+        if (presenter.isOverflowReserved() &&
                 menus != null) {
             final int count = menus.size();
             if (count == 1) {
@@ -307,7 +201,7 @@ public class ActionBarLayout extends LinearLayout {
         return needed;
     }
 
-    @Nullable
+    @NonNull
     public FrameLayout getContentRoot() {
         return mContentRoot;
     }
@@ -319,6 +213,7 @@ public class ActionBarLayout extends LinearLayout {
         View itemView = null;
         int itemType = 0;
 
+        Context context = mActionBar.getPopupContext();
         final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         final int count = adapter.getCount();
@@ -330,15 +225,17 @@ public class ActionBarLayout extends LinearLayout {
             }
 
             if (mMeasureParent == null) {
-                mMeasureParent = new FrameLayout(mThemedContext);
+                mMeasureParent = new FrameLayout(context);
             }
 
             itemView = adapter.getView(i, itemView, mMeasureParent);
             itemView.measure(widthMeasureSpec, heightMeasureSpec);
 
             final int itemWidth = itemView.getMeasuredWidth();
-            if (itemWidth >= mPopupMaxWidth) {
-                return mPopupMaxWidth;
+            int popupMaxWidth = Math.max(mBridgeContext.getMetrics().widthPixels / 2,
+                    context.getResources().getDimensionPixelSize(R.dimen.config_prefDialogWidth));
+            if (itemWidth >= popupMaxWidth) {
+                return popupMaxWidth;
             } else if (itemWidth > maxWidth) {
                 maxWidth = itemWidth;
             }
