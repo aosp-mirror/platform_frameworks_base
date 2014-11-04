@@ -41,6 +41,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.DocumentsContract;
@@ -7498,8 +7499,10 @@ public class Intent implements Parcelable, Cloneable {
      */
     public void prepareToEnterProcess() {
         if (mContentUserHint != UserHandle.USER_CURRENT) {
-            fixUris(mContentUserHint);
-            mContentUserHint = UserHandle.USER_CURRENT;
+            if (UserHandle.getAppId(Process.myUid()) != Process.SYSTEM_UID) {
+                fixUris(mContentUserHint);
+                mContentUserHint = UserHandle.USER_CURRENT;
+            }
         }
     }
 
