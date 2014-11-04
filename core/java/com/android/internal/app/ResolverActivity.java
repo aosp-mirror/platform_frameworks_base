@@ -551,7 +551,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     /**
      * Replace me in subclasses!
      */
-    public Intent getReplacementIntent(String packageName, Intent defIntent) {
+    public Intent getReplacementIntent(ActivityInfo aInfo, Intent defIntent) {
         return defIntent;
     }
 
@@ -970,7 +970,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             DisplayResolveInfo dri = filtered ? getItem(position) : mList.get(position);
 
             Intent intent = new Intent(dri.origIntent != null ? dri.origIntent :
-                    getReplacementIntent(dri.ri.activityInfo.packageName, mIntent));
+                    getReplacementIntent(dri.ri.activityInfo, mIntent));
             intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT
                     |Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
             ActivityInfo ai = dri.ri.activityInfo;
