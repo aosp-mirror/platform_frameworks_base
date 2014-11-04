@@ -291,8 +291,8 @@ public class NotificationPanelView extends PanelView implements
         } else {
             setQsExpansion(mQsMinExpansionHeight + mLastOverscroll);
             mNotificationStackScroller.setStackHeight(getExpandedHeight());
-            updateHeader();
         }
+        updateHeader();
         mNotificationStackScroller.updateIsSmallScreen(
                 mHeader.getCollapsedHeight() + mQsPeekHeight);
     }
