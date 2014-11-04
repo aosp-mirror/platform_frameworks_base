@@ -54,7 +54,6 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     private EdgeSwipeHelper mEdgeSwipeHelper;
 
     private PhoneStatusBar mBar;
-    private ExpandHelper mExpandHelper;
 
     private long mStartTouchTime;
     private ViewGroup mContentHolder;
@@ -205,7 +204,6 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
         int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_max_height);
-        mExpandHelper = new ExpandHelper(getContext(), this, minHeight, maxHeight);
 
         mContentHolder = (ViewGroup) findViewById(R.id.content_holder);
         mContentHolder.setOutlineProvider(CONTENT_HOLDER_OUTLINE_PROVIDER);
@@ -226,7 +224,6 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         }
         return mEdgeSwipeHelper.onInterceptTouchEvent(ev)
                 || mSwipeHelper.onInterceptTouchEvent(ev)
-                || mExpandHelper.onInterceptTouchEvent(ev)
                 || super.onInterceptTouchEvent(ev);
     }
 
@@ -254,7 +251,6 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         mBar.resetHeadsUpDecayTimer();
         return mEdgeSwipeHelper.onTouchEvent(ev)
                 || mSwipeHelper.onTouchEvent(ev)
-                || mExpandHelper.onTouchEvent(ev)
                 || super.onTouchEvent(ev);
     }
 
@@ -399,7 +395,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
                     final float dY = ev.getY() - mFirstY;
                     final float daX = Math.abs(ev.getX() - mFirstX);
                     final float daY = Math.abs(dY);
-                    if (!mConsuming && (4f * daX) < daY && daY > mTouchSlop) {
+                    if (!mConsuming && daX < daY && daY > mTouchSlop) {
                         if (dY > 0) {
                             if (DEBUG_EDGE_SWIPE) Log.d(TAG, "found an open");
                             mBar.animateExpandNotificationsPanel();
