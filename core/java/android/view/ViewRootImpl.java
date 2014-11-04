@@ -1746,8 +1746,8 @@ public final class ViewRootImpl implements ViewParent,
                 if (hwInitialized ||
                         mWidth != mAttachInfo.mHardwareRenderer.getWidth() ||
                         mHeight != mAttachInfo.mHardwareRenderer.getHeight()) {
-                    final Rect surfaceInsets = params != null ? params.surfaceInsets : null;
-                    mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight, surfaceInsets);
+                    mAttachInfo.mHardwareRenderer.setup(
+                            mWidth, mHeight, mWindowAttributes.surfaceInsets);
                     if (!hwInitialized) {
                         mAttachInfo.mHardwareRenderer.invalidate(mSurface);
                         mFullRedrawNeeded = true;
