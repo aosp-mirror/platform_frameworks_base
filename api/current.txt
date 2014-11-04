@@ -16304,6 +16304,7 @@ package android.media.session {
     method public void setPlaybackToRemote(android.media.VolumeProvider);
     method public void setQueue(java.util.List<android.media.session.MediaSession.QueueItem>);
     method public void setQueueTitle(java.lang.CharSequence);
+    method public void setRatingType(int);
     method public void setSessionActivity(android.app.PendingIntent);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2

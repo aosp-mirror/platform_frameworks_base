@@ -306,6 +306,7 @@ public final class PlaybackState implements Parcelable {
      * <li> {@link PlaybackState#STATE_REWINDING}</li>
      * <li> {@link PlaybackState#STATE_BUFFERING}</li>
      * <li> {@link PlaybackState#STATE_ERROR}</li>
+     * </ul>
      */
     public int getState() {
         return mState;
