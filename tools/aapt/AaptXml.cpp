@@ -41,7 +41,7 @@ static String8 getStringAttributeAtIndex(const ResXMLTree& tree, ssize_t attrInd
     }
 
     size_t len;
-    const uint16_t* str = tree.getAttributeStringValue(attrIndex, &len);
+    const char16_t* str = tree.getAttributeStringValue(attrIndex, &len);
     return str ? String8(str, len) : String8();
 }
 
@@ -103,7 +103,7 @@ String8 getResolvedAttribute(const ResTable& resTable, const ResXMLTree& tree,
     if (tree.getAttributeValue(idx, &value) != NO_ERROR) {
         if (value.dataType == Res_value::TYPE_STRING) {
             size_t len;
-            const uint16_t* str = tree.getAttributeStringValue(idx, &len);
+            const char16_t* str = tree.getAttributeStringValue(idx, &len);
             return str ? String8(str, len) : String8();
         }
         resTable.resolveReference(&value, 0);

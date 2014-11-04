@@ -36,6 +36,17 @@
 
 namespace android {
 
+/**
+ * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of
+ * casting on raw data and expect char16_t to be exactly 16 bits.
+ */
+#if __cplusplus >= 201103L
+struct __assertChar16Size {
+    static_assert(sizeof(char16_t) == sizeof(uint16_t), "char16_t is not 16 bits");
+    static_assert(alignof(char16_t) == alignof(uint16_t), "char16_t is not 16-bit aligned");
+};
+#endif
+
 /** ********************************************************************
  *  PNG Extensions
  *
@@ -845,7 +856,7 @@ struct ResTable_package
     uint32_t id;
 
     // Actual name of this package, \0-terminated.
-    char16_t name[128];
+    uint16_t name[128];
 
     // Offset to a ResStringPool_header defining the resource
     // type symbol table.  If zero, this package is inheriting from
@@ -1450,7 +1461,7 @@ struct ResTable_lib_entry
     uint32_t packageId;
 
     // The package name of the shared library. \0 terminated.
-    char16_t packageName[128];
+    uint16_t packageName[128];
 };
 
 /**

@@ -523,7 +523,7 @@ static int validateAttr(const String8& path, const ResTable& table,
         }
         if (validChars) {
             for (size_t i=0; i<len; i++) {
-                uint16_t c = str[i];
+                char16_t c = str[i];
                 const char* p = validChars;
                 bool okay = false;
                 while (*p) {
