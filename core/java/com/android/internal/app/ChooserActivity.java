@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -75,16 +76,21 @@ public class ChooserActivity extends ResolverActivity {
     }
 
     @Override
-    public Intent getReplacementIntent(String packageName, Intent defIntent) {
+    public Intent getReplacementIntent(ActivityInfo aInfo, Intent defIntent) {
+        Intent result = defIntent;
         if (mReplacementExtras != null) {
-            final Bundle replExtras = mReplacementExtras.getBundle(packageName);
+            final Bundle replExtras = mReplacementExtras.getBundle(aInfo.packageName);
             if (replExtras != null) {
-                final Intent result = new Intent(defIntent);
+                result = new Intent(defIntent);
                 result.putExtras(replExtras);
-                return result;
             }
         }
-        return defIntent;
+        if (aInfo.name.equals(IntentForwarderActivity.FORWARD_INTENT_TO_USER_OWNER)
+                || aInfo.name.equals(IntentForwarderActivity.FORWARD_INTENT_TO_MANAGED_PROFILE)) {
+            result = Intent.createChooser(result,
+                    getIntent().getCharSequenceExtra(Intent.EXTRA_TITLE));
+        }
+        return result;
     }
 
     @Override
