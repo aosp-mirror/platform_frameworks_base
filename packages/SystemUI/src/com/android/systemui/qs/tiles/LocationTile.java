@@ -67,12 +67,12 @@ public class LocationTile extends QSTile<QSTile.BooleanState> {
         state.visible = !mKeyguard.isShowing();
         state.value = locationEnabled;
         if (locationEnabled) {
-            state.iconId = R.drawable.ic_qs_location_on;
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_location_on);
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location_on);
         } else {
-            state.iconId = R.drawable.ic_qs_location_off;
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_location_off);
             state.label = mContext.getString(R.string.quick_settings_location_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_location_off);
