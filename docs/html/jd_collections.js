@@ -57,8 +57,8 @@ var RESOURCE_COLLECTIONS = {
   },
   "distribute/gp/gpfelanding": {
     "resources": [
+      "distribute/googleplay/tv.html",
       "distribute/googleplay/edu/about.html",
-      "distribute/googleplay/edu/start.html",
       "distribute/googleplay/edu/videos.html"
     ]
   },
@@ -771,6 +771,14 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "https://play.google.com/about/giftcards/",
       "https://support.google.com/googleplay/answer/2651410"
+    ]
+  },
+  "tvlanding": {
+    "title": "",
+    "resources": [
+      "tv/index.html",
+      "design/tv/index.html",
+      "training/tv/index.html"
     ]
   },
   "distribute/stories/games": {
