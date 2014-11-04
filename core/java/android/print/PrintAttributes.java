@@ -415,14 +415,14 @@ public final class PrintAttributes implements Parcelable {
         /** North America Legal media size: 8.5" x 14" (216mm x 356mm) */
         public static final MediaSize NA_LEGAL =
                 new MediaSize("NA_LEGAL", "android", R.string.mediasize_na_legal, 8500, 14000);
-        /** North America Junior Legal media size: 8.0" x 5.0" (203mm × 127mm) */
+        /** North America Junior Legal media size: 8.0" x 5.0" (203mm x 127mm) */
         public static final MediaSize NA_JUNIOR_LEGAL =
                 new MediaSize("NA_JUNIOR_LEGAL", "android",
                         R.string.mediasize_na_junior_legal, 8000, 5000);
-        /** North America Ledger media size: 17" x 11" (432mm × 279mm) */
+        /** North America Ledger media size: 17" x 11" (432mm x 279mm) */
         public static final MediaSize NA_LEDGER =
                 new MediaSize("NA_LEDGER", "android", R.string.mediasize_na_ledger, 17000, 11000);
-        /** North America Tabloid media size: 11" x 17" (279mm × 432mm) */
+        /** North America Tabloid media size: 11" x 17" (279mm x 432mm) */
         public static final MediaSize NA_TABLOID =
                 new MediaSize("NA_TABLOID", "android",
                         R.string.mediasize_na_tabloid, 11000, 17000);
