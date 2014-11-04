@@ -222,7 +222,7 @@ public class SubInfoRecord implements Parcelable {
             int id = source.readInt();
             String iccId = source.readString();
             int simSlotIndex = source.readInt();
-            String displayName = source.readString();
+            CharSequence displayName = source.readCharSequence();
             int nameSource = source.readInt();
             int color = source.readInt();
             String number = source.readString();
@@ -247,7 +247,7 @@ public class SubInfoRecord implements Parcelable {
         dest.writeInt(mId);
         dest.writeString(mIccId);
         dest.writeInt(mSimSlotIndex);
-        dest.writeString(mDisplayName.toString());
+        dest.writeCharSequence(mDisplayName);
         dest.writeInt(mNameSource);
         dest.writeInt(mColor);
         dest.writeString(mNumber.toString());
