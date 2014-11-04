@@ -159,15 +159,6 @@ public abstract class TvInputService extends Service {
     }
 
     /**
-     * Get the number of callbacks that are registered.
-     * @hide
-     */
-    @VisibleForTesting
-    public final int getRegisteredCallbackCount() {
-        return mCallbacks.getRegisteredCallbackCount();
-    }
-
-    /**
      * Returns a concrete implementation of {@link Session}.
      * <p>
      * May return {@code null} if this TV input service fails to create a session for some reason.
@@ -550,13 +541,14 @@ public abstract class TvInputService extends Service {
          * @param left Left position in pixels, relative to the overlay view.
          * @param top Top position in pixels, relative to the overlay view.
          * @param right Right position in pixels, relative to the overlay view.
-         * @param bottm Bottom position in pixels, relative to the overlay view.
+         * @param bottom Bottom position in pixels, relative to the overlay view.
          * @see #onOverlayViewSizeChanged
          * @hide
          */
         @SystemApi
-        public void layoutSurface(final int left, final int top, final int right, final int bottm) {
-            if (left > right || top > bottm) {
+        public void layoutSurface(final int left, final int top, final int right,
+                final int bottom) {
+            if (left > right || top > bottom) {
                 throw new IllegalArgumentException("Invalid parameter");
             }
             executeOrPostRunnable(new Runnable() {
@@ -564,8 +556,8 @@ public abstract class TvInputService extends Service {
                 public void run() {
                     try {
                         if (DEBUG) Log.d(TAG, "layoutSurface (l=" + left + ", t=" + top + ", r="
-                                + right + ", b=" + bottm + ",)");
-                        mSessionCallback.onLayoutSurface(left, top, right, bottm);
+                                + right + ", b=" + bottom + ",)");
+                        mSessionCallback.onLayoutSurface(left, top, right, bottom);
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in layoutSurface");
                     }
