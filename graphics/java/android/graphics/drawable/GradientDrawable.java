@@ -943,7 +943,11 @@ public class GradientDrawable extends Drawable {
 
                     float radius = st.mGradientRadius;
                     if (st.mGradientRadiusType == RADIUS_TYPE_FRACTION) {
-                        radius *= Math.min(st.mWidth, st.mHeight);
+                        // Fall back to parent width or height if intrinsic
+                        // size is not specified.
+                        final float width = st.mWidth >= 0 ? st.mWidth : r.width();
+                        final float height = st.mHeight >= 0 ? st.mHeight : r.height();
+                        radius *= Math.min(width, height);
                     } else if (st.mGradientRadiusType == RADIUS_TYPE_FRACTION_PARENT) {
                         radius *= Math.min(r.width(), r.height());
                     }
@@ -954,9 +958,9 @@ public class GradientDrawable extends Drawable {
 
                     mGradientRadius = radius;
 
-                    if (radius == 0) {
-                        // We can't have a shader with zero radius, so let's
-                        // have a very, very small radius.
+                    if (radius <= 0) {
+                        // We can't have a shader with non-positive radius, so
+                        // let's have a very, very small radius.
                         radius = 0.001f;
                     }
 
