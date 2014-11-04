@@ -27,7 +27,6 @@ namespace split {
 
 struct SplitDescription {
     SplitDescription();
-    SplitDescription(const SplitDescription&) = default;
 
     ConfigDescription config;
     abi::Variant abi;

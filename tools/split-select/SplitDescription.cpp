@@ -27,7 +27,7 @@ using namespace android;
 namespace split {
 
 SplitDescription::SplitDescription()
-: abi(abi::Variant::none) {
+: abi(abi::Variant_none) {
 }
 
 int SplitDescription::compare(const SplitDescription& rhs) const {
@@ -38,11 +38,11 @@ int SplitDescription::compare(const SplitDescription& rhs) const {
 }
 
 bool SplitDescription::isBetterThan(const SplitDescription& o, const SplitDescription& target) const {
-    if (abi != abi::Variant::none || o.abi != abi::Variant::none) {
+    if (abi != abi::Variant_none || o.abi != abi::Variant_none) {
         abi::Family family = abi::getFamily(abi);
         abi::Family oFamily = abi::getFamily(o.abi);
         if (family != oFamily) {
-            return family != abi::Family::none;
+            return family != abi::Family_none;
         }
 
         if (int(target.abi) - int(abi) < int(target.abi) - int(o.abi)) {
@@ -53,7 +53,7 @@ bool SplitDescription::isBetterThan(const SplitDescription& o, const SplitDescri
 }
 
 bool SplitDescription::match(const SplitDescription& o) const {
-    if (abi != abi::Variant::none) {
+    if (abi != abi::Variant_none) {
         abi::Family family = abi::getFamily(abi);
         abi::Family oFamily = abi::getFamily(o.abi);
         if (family != oFamily) {
@@ -69,7 +69,7 @@ bool SplitDescription::match(const SplitDescription& o) const {
 
 String8 SplitDescription::toString() const {
     String8 extension;
-    if (abi != abi::Variant::none) {
+    if (abi != abi::Variant_none) {
         if (extension.isEmpty()) {
             extension.append(":");
         } else {
@@ -85,40 +85,40 @@ String8 SplitDescription::toString() const {
 ssize_t parseAbi(const Vector<String8>& parts, const ssize_t index,
         SplitDescription* outSplit) {
     const ssize_t N = parts.size();
-    abi::Variant abi = abi::Variant::none;
+    abi::Variant abi = abi::Variant_none;
     ssize_t endIndex = index;
     if (parts[endIndex] == "arm64") {
         endIndex++;
         if (endIndex < N) {
             if (parts[endIndex] == "v8a") {
                 endIndex++;
-                abi = abi::Variant::arm64_v8a;
+                abi = abi::Variant_arm64_v8a;
             }
         }
     } else if (parts[endIndex] == "armeabi") {
         endIndex++;
-        abi = abi::Variant::armeabi;
+        abi = abi::Variant_armeabi;
         if (endIndex < N) {
             if (parts[endIndex] == "v7a") {
                 endIndex++;
-                abi = abi::Variant::armeabi_v7a;
+                abi = abi::Variant_armeabi_v7a;
             }
         }
     } else if (parts[endIndex] == "x86") {
         endIndex++;
-        abi = abi::Variant::x86;
+        abi = abi::Variant_x86;
     } else if (parts[endIndex] == "x86_64") {
         endIndex++;
-        abi = abi::Variant::x86_64;
+        abi = abi::Variant_x86_64;
     } else if (parts[endIndex] == "mips") {
         endIndex++;
-        abi = abi::Variant::mips;
+        abi = abi::Variant_mips;
     } else if (parts[endIndex] == "mips64") {
         endIndex++;
-        abi = abi::Variant::mips64;
+        abi = abi::Variant_mips64;
     }
 
-    if (abi == abi::Variant::none && endIndex != index) {
+    if (abi == abi::Variant_none && endIndex != index) {
         return -1;
     }
 

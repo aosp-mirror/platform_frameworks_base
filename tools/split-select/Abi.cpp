@@ -16,42 +16,58 @@
 
 #include "Abi.h"
 
+using namespace android;
+
 namespace split {
 namespace abi {
 
-static const std::vector<Variant> sNoneVariants = {};
-static const std::vector<Variant> sArmVariants =
-        {Variant::armeabi, Variant::armeabi_v7a, Variant::arm64_v8a};
-static const std::vector<Variant> sIntelVariants = {Variant::x86, Variant::x86_64};
-static const std::vector<Variant> sMipsVariants = {Variant::mips, Variant::mips64};
+static Vector<Variant> buildVariants(Variant v1, Variant v2) {
+    Vector<Variant> v;
+    v.add(v1);
+    v.add(v2);
+    return v;
+}
+
+static Vector<Variant> buildVariants(Variant v1, Variant v2, Variant v3) {
+    Vector<Variant> v;
+    v.add(v1);
+    v.add(v2);
+    v.add(v3);
+    return v;
+}
+
+static const Vector<Variant> sNoneVariants;
+static const Vector<Variant> sArmVariants = buildVariants(Variant_armeabi, Variant_armeabi_v7a, Variant_arm64_v8a);
+static const Vector<Variant> sIntelVariants = buildVariants(Variant_x86, Variant_x86_64);
+static const Vector<Variant> sMipsVariants = buildVariants(Variant_mips, Variant_mips64);
 
 Family getFamily(Variant variant) {
     switch (variant) {
-        case Variant::none:
-            return Family::none;
-        case Variant::armeabi:
-        case Variant::armeabi_v7a:
-        case Variant::arm64_v8a:
-            return Family::arm;
-        case Variant::x86:
-        case Variant::x86_64:
-            return Family::intel;
-        case Variant::mips:
-        case Variant::mips64:
-            return Family::mips;
+        case Variant_none:
+            return Family_none;
+        case Variant_armeabi:
+        case Variant_armeabi_v7a:
+        case Variant_arm64_v8a:
+            return Family_arm;
+        case Variant_x86:
+        case Variant_x86_64:
+            return Family_intel;
+        case Variant_mips:
+        case Variant_mips64:
+            return Family_mips;
     }
-    return Family::none;
+    return Family_none;
 }
 
-const std::vector<Variant>& getVariants(Family family) {
+const Vector<Variant>& getVariants(Family family) {
     switch (family) {
-        case Family::none:
+        case Family_none:
             return sNoneVariants;
-        case Family::arm:
+        case Family_arm:
             return sArmVariants;
-        case Family::intel:
+        case Family_intel:
             return sIntelVariants;
-        case Family::mips:
+        case Family_mips:
             return sMipsVariants;
     }
     return sNoneVariants;
@@ -59,21 +75,21 @@ const std::vector<Variant>& getVariants(Family family) {
 
 const char* toString(Variant variant) {
     switch (variant) {
-        case Variant::none:
+        case Variant_none:
             return "";
-        case Variant::armeabi:
+        case Variant_armeabi:
             return "armeabi";
-        case Variant::armeabi_v7a:
+        case Variant_armeabi_v7a:
             return "armeabi-v7a";
-        case Variant::arm64_v8a:
+        case Variant_arm64_v8a:
             return "arm64-v8a";
-        case Variant::x86:
+        case Variant_x86:
             return "x86";
-        case Variant::x86_64:
+        case Variant_x86_64:
             return "x86_64";
-        case Variant::mips:
+        case Variant_mips:
             return "mips";
-        case Variant::mips64:
+        case Variant_mips64:
             return "mips64";
     }
     return "";
