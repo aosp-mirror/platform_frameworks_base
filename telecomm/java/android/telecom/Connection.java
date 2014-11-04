@@ -974,6 +974,15 @@ public abstract class Connection {
     public void onDisconnect() {}
 
     /**
+     * Notifies this Connection of a request to disconnect a participant of the conference managed
+     * by the connection.
+     *
+     * @param endpoint the {@link Uri} of the participant to disconnect.
+     * @hide
+     */
+    public void onDisconnectConferenceParticipant(Uri endpoint) {}
+
+    /**
      * Notifies this Connection of a request to separate from its parent conference.
      */
     public void onSeparate() {}
