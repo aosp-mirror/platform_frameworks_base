@@ -6038,8 +6038,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (f != null) {
                     f.filter(s, this);
                 } else {
-                    throw new IllegalStateException("You cannot call onTextChanged with a non "
-                            + "filterable adapter");
+                    throw new IllegalStateException("You cannot call onTextChanged with a null filter.");
                 }
             }
         }
