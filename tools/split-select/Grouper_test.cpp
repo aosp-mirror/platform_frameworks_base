@@ -19,7 +19,6 @@
 #include "SplitDescription.h"
 
 #include <gtest/gtest.h>
-#include <initializer_list>
 #include <utils/String8.h>
 #include <utils/Vector.h>
 
@@ -55,7 +54,11 @@ protected:
     }
 
     void addSplit(Vector<SplitDescription>& splits, const char* str);
-    void expectHasGroupWithSplits(std::initializer_list<const char*> l);
+    void expectHasGroupWithSplits(const char* a);
+    void expectHasGroupWithSplits(const char* a, const char* b);
+    void expectHasGroupWithSplits(const char* a, const char* b, const char* c);
+    void expectHasGroupWithSplits(const char* a, const char* b, const char* c, const char* d);
+    void expectHasGroupWithSplits(const Vector<const char*>& expectedStrs);
 
     Vector<SortedVector<SplitDescription> > mGroups;
 };
@@ -65,39 +68,70 @@ TEST_F(GrouperTest, shouldHaveCorrectNumberOfGroups) {
 }
 
 TEST_F(GrouperTest, shouldGroupDensities) {
-    expectHasGroupWithSplits({"en-rUS-sw300dp-hdpi", "en-rUS-sw300dp-xhdpi"});
-    expectHasGroupWithSplits({"en-rUS-sw600dp-hdpi", "en-rUS-sw600dp-xhdpi"});
-    expectHasGroupWithSplits({"fr-rFR-sw600dp-hdpi", "fr-rFR-sw600dp-xhdpi"});
-    expectHasGroupWithSplits({"hdpi", "xhdpi", "xxhdpi", "anydpi"});
+    expectHasGroupWithSplits("en-rUS-sw300dp-hdpi", "en-rUS-sw300dp-xhdpi");
+    expectHasGroupWithSplits("en-rUS-sw600dp-hdpi", "en-rUS-sw600dp-xhdpi");
+    expectHasGroupWithSplits("fr-rFR-sw600dp-hdpi", "fr-rFR-sw600dp-xhdpi");
+    expectHasGroupWithSplits("hdpi", "xhdpi", "xxhdpi", "anydpi");
 }
 
 TEST_F(GrouperTest, shouldGroupAbi) {
-    expectHasGroupWithSplits({":armeabi", ":x86"});
+    expectHasGroupWithSplits(":armeabi", ":x86");
 }
 
 TEST_F(GrouperTest, shouldGroupLocale) {
-    expectHasGroupWithSplits({"pl-rPL", "de-rDE"});
+    expectHasGroupWithSplits("pl-rPL", "de-rDE");
 }
 
 TEST_F(GrouperTest, shouldGroupEachSplitIntoItsOwnGroup) {
-    expectHasGroupWithSplits({"large"});
-    expectHasGroupWithSplits({"xlarge"});
-    expectHasGroupWithSplits({"v7"});
-    expectHasGroupWithSplits({"v8"});
-    expectHasGroupWithSplits({"sw600dp"});
-    expectHasGroupWithSplits({"sw300dp"});
+    expectHasGroupWithSplits("large");
+    expectHasGroupWithSplits("xlarge");
+    expectHasGroupWithSplits("v7");
+    expectHasGroupWithSplits("v8");
+    expectHasGroupWithSplits("sw600dp");
+    expectHasGroupWithSplits("sw300dp");
 }
 
 //
 // Helper methods
 //
 
-void GrouperTest::expectHasGroupWithSplits(std::initializer_list<const char*> l) {
+void GrouperTest::expectHasGroupWithSplits(const char* a) {
+    Vector<const char*> expected;
+    expected.add(a);
+    expectHasGroupWithSplits(expected);
+}
+
+void GrouperTest::expectHasGroupWithSplits(const char* a, const char* b) {
+    Vector<const char*> expected;
+    expected.add(a);
+    expected.add(b);
+    expectHasGroupWithSplits(expected);
+}
+
+void GrouperTest::expectHasGroupWithSplits(const char* a, const char* b, const char* c) {
+    Vector<const char*> expected;
+    expected.add(a);
+    expected.add(b);
+    expected.add(c);
+    expectHasGroupWithSplits(expected);
+}
+
+void GrouperTest::expectHasGroupWithSplits(const char* a, const char* b, const char* c, const char* d) {
+    Vector<const char*> expected;
+    expected.add(a);
+    expected.add(b);
+    expected.add(c);
+    expected.add(d);
+    expectHasGroupWithSplits(expected);
+}
+
+void GrouperTest::expectHasGroupWithSplits(const Vector<const char*>& expectedStrs) {
     Vector<SplitDescription> splits;
-    for (const char* str : l) {
+    const size_t expectedStrCount = expectedStrs.size();
+    for (size_t i = 0; i < expectedStrCount; i++) {
         splits.add();
-        if (!SplitDescription::parse(String8(str), &splits.editTop())) {
-            ADD_FAILURE() << "Failed to parse SplitDescription " << str;
+        if (!SplitDescription::parse(String8(expectedStrs[i]), &splits.editTop())) {
+            ADD_FAILURE() << "Failed to parse SplitDescription " << expectedStrs[i];
             return;
         }
     }
