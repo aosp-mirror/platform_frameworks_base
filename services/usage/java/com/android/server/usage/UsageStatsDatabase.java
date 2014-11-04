@@ -119,6 +119,7 @@ class UsageStatsDatabase {
                 if (!files.valueAt(start).getBaseFile().getName().endsWith("-c")) {
                     break;
                 }
+                start++;
             }
 
             if (start == fileCount - 1) {
