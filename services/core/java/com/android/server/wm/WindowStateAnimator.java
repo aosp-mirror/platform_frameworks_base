@@ -167,14 +167,14 @@ class WindowStateAnimator {
     private static final int SYSTEM_UI_FLAGS_LAYOUT_STABLE_FULLSCREEN =
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
-    static String drawStateToString(int state) {
-        switch (state) {
+    String drawStateToString() {
+        switch (mDrawState) {
             case NO_SURFACE: return "NO_SURFACE";
             case DRAW_PENDING: return "DRAW_PENDING";
             case COMMIT_DRAW_PENDING: return "COMMIT_DRAW_PENDING";
             case READY_TO_SHOW: return "READY_TO_SHOW";
             case HAS_DRAWN: return "HAS_DRAWN";
-            default: return Integer.toString(state);
+            default: return Integer.toString(mDrawState);
         }
     }
     int mDrawState;
@@ -489,7 +489,7 @@ class WindowStateAnimator {
         if (DEBUG_STARTING_WINDOW &&
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
             Slog.v(TAG, "Finishing drawing window " + mWin + ": mDrawState="
-                    + drawStateToString(mDrawState));
+                    + drawStateToString());
         }
         if (mDrawState == DRAW_PENDING) {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
@@ -510,18 +510,17 @@ class WindowStateAnimator {
         if (DEBUG_STARTING_WINDOW &&
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
             Slog.i(TAG, "commitFinishDrawingLocked: " + mWin + " cur mDrawState="
-                    + drawStateToString(mDrawState));
+                    + drawStateToString());
         }
-        if (mDrawState != COMMIT_DRAW_PENDING) {
+        if (mDrawState != COMMIT_DRAW_PENDING && mDrawState != READY_TO_SHOW) {
             return false;
         }
         if (DEBUG_SURFACE_TRACE || DEBUG_ANIM) {
             Slog.i(TAG, "commitFinishDrawingLocked: mDrawState=READY_TO_SHOW " + mSurfaceControl);
         }
         mDrawState = READY_TO_SHOW;
-        final boolean starting = mWin.mAttrs.type == TYPE_APPLICATION_STARTING;
         final AppWindowToken atoken = mWin.mAppToken;
-        if (atoken == null || atoken.allDrawn || starting) {
+        if (atoken == null || atoken.allDrawn || mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
             performShowLocked();
         }
         return true;
@@ -1868,7 +1867,7 @@ class WindowStateAnimator {
             if (dumpAll) {
                 pw.print(prefix); pw.print("mSurface="); pw.println(mSurfaceControl);
                 pw.print(prefix); pw.print("mDrawState=");
-                pw.print(drawStateToString(mDrawState));
+                pw.print(drawStateToString());
                 pw.print(" mLastHidden="); pw.println(mLastHidden);
             }
             pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);
