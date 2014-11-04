@@ -3600,6 +3600,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             instantCollapseNotificationPanel();
         }
         updateKeyguardState(staying, false /* fromShadeLocked */);
+
+        // Keyguard state has changed, but QS is not listening anymore. Make sure to update the tile
+        // visibilities so next time we open the panel we know the correct height already.
+        if (mQSPanel != null) {
+            mQSPanel.refreshAllTiles();
+        }
         return staying;
     }
 
