@@ -44,6 +44,7 @@ import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
 import android.util.ArraySet;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
@@ -2953,7 +2954,8 @@ final class ActivityStack {
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
                     (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent);
+                parent.deliverNewIntentLocked(srec.info.applicationInfo.uid, destIntent,
+                        srec.packageName);
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
@@ -3773,7 +3775,7 @@ final class ActivityStack {
     private boolean relaunchActivityLocked(ActivityRecord r,
             int changes, boolean andResume) {
         List<ResultInfo> results = null;
-        List<Intent> newIntents = null;
+        List<ReferrerIntent> newIntents = null;
         if (andResume) {
             results = r.results;
             newIntents = r.newIntents;

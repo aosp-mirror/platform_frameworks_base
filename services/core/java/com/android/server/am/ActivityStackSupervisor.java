@@ -97,6 +97,7 @@ import android.view.InputEvent;
 import android.view.Surface;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
+import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
@@ -1101,7 +1102,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 throw new RemoteException();
             }
             List<ResultInfo> results = null;
-            List<Intent> newIntents = null;
+            List<ReferrerIntent> newIntents = null;
             if (andResume) {
                 results = r.results;
                 newIntents = r.newIntents;
@@ -1155,9 +1156,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info, new Configuration(mService.mConfiguration),
-                    r.compat, r.task.voiceInteractor, app.repProcState, r.icicle, r.persistentState,
-                    results, newIntents, !andResume, mService.isNextTransitionForward(),
-                    profilerInfo);
+                    r.compat, r.launchedFromPackage, r.task.voiceInteractor, app.repProcState,
+                    r.icicle, r.persistentState, results, newIntents, !andResume,
+                    mService.isNextTransitionForward(), profilerInfo);
 
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
@@ -1896,7 +1897,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             }
                             ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT,
                                     r, top.task);
-                            top.deliverNewIntentLocked(callingUid, r.intent);
+                            top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
                         } else {
                             // A special case: we need to
                             // start the activity because it is not currently
@@ -1922,7 +1923,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
                             if (intentActivity.frontOfTask) {
                                 intentActivity.task.setIntent(r);
                             }
-                            intentActivity.deliverNewIntentLocked(callingUid, r.intent);
+                            intentActivity.deliverNewIntentLocked(callingUid, r.intent,
+                                    r.launchedFromPackage);
                         } else if (!r.intent.filterEquals(intentActivity.task.intent)) {
                             // In this case we are launching the root activity
                             // of the task, but with a different intent.  We
@@ -1995,7 +1997,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 // is the case, so this is it!
                                 return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                             }
-                            top.deliverNewIntentLocked(callingUid, r.intent);
+                            top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
                             return ActivityManager.START_DELIVERED_TO_TOP;
                         }
                     }
@@ -2071,7 +2073,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 keepCurTransition = true;
                 if (top != null) {
                     ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r, top.task);
-                    top.deliverNewIntentLocked(callingUid, r.intent);
+                    top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
                     // For paranoia, make sure we have correctly
                     // resumed the top activity.
                     targetStack.mLastPausedActivity = null;
@@ -2092,7 +2094,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     task.moveActivityToFrontLocked(top);
                     ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r, task);
                     top.updateOptionsLocked(options);
-                    top.deliverNewIntentLocked(callingUid, r.intent);
+                    top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
                     targetStack.mLastPausedActivity = null;
                     if (doResume) {
                         targetStack.resumeTopActivityLocked(null);
@@ -2132,7 +2134,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         // is the case, so this is it!
                         return ActivityManager.START_RETURN_INTENT_TO_CALLER;
                     }
-                    top.deliverNewIntentLocked(callingUid, r.intent);
+                    top.deliverNewIntentLocked(callingUid, r.intent, r.launchedFromPackage);
                     return ActivityManager.START_DELIVERED_TO_TOP;
                 }
             }
