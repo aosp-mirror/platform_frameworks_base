@@ -36,7 +36,6 @@ aaptSources := \
     Images.cpp \
     Package.cpp \
     pseudolocalize.cpp \
-    qsort_r_compat.c \
     Resource.cpp \
     ResourceFilter.cpp \
     ResourceIdCache.cpp \
