@@ -977,10 +977,10 @@
 
     <!-- TODO: Mark these as translatable when API is finalized. -->
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_broadcastScoreNetworks" translatable="false">send score networks broadcast</string>
+    <string name="permlab_broadcastNetworkPrivileged" translatable="false">send privileged network broadcasts</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_broadcastScoreNetworks" translatable="false">Allows the app
-        to broadcast a notification that networks need to be scored.
+    <string name="permdesc_broadcastNetworkPrivileged" translatable="false">Allows the app
+        to send privileged network broadcasts.
         Never needed for normal apps.
     </string>
 
