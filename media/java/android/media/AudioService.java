@@ -533,6 +533,8 @@ public class AudioService extends IAudioService.Stub {
 
     private AudioOrientationEventListener mOrientationListener;
 
+    private static Long mLastDeviceConnectMsgTime = new Long(0);
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -3269,8 +3271,15 @@ public class AudioService extends IAudioService.Stub {
         } else if (existingMsgPolicy == SENDMSG_NOOP && handler.hasMessages(msg)) {
             return;
         }
-
-        handler.sendMessageDelayed(handler.obtainMessage(msg, arg1, arg2, obj), delay);
+        synchronized (mLastDeviceConnectMsgTime) {
+            long time = SystemClock.uptimeMillis() + delay;
+            handler.sendMessageAtTime(handler.obtainMessage(msg, arg1, arg2, obj), time);
+            if (msg == MSG_SET_WIRED_DEVICE_CONNECTION_STATE ||
+                    msg == MSG_SET_A2DP_SRC_CONNECTION_STATE ||
+                    msg == MSG_SET_A2DP_SINK_CONNECTION_STATE) {
+                mLastDeviceConnectMsgTime = time;
+            }
+        }
     }
 
     boolean checkAudioSettingsPermission(String method) {
@@ -4587,7 +4596,12 @@ public class AudioService extends IAudioService.Stub {
         if (mAudioHandler.hasMessages(MSG_SET_A2DP_SRC_CONNECTION_STATE) ||
                 mAudioHandler.hasMessages(MSG_SET_A2DP_SINK_CONNECTION_STATE) ||
                 mAudioHandler.hasMessages(MSG_SET_WIRED_DEVICE_CONNECTION_STATE)) {
-            delay = 1000;
+            synchronized (mLastDeviceConnectMsgTime) {
+                long time = SystemClock.uptimeMillis();
+                if (mLastDeviceConnectMsgTime > time) {
+                    delay = (int)(mLastDeviceConnectMsgTime - time);
+                }
+            }
         }
         return delay;
     }
