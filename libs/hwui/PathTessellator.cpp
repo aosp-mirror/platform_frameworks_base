@@ -812,7 +812,7 @@ void PathTessellator::tessellatePoints(const float* points, int count, const SkP
     // determine point shape
     SkPath path;
     float radius = paintInfo.halfStrokeWidth;
-    if (radius == 0.0f) radius = 0.25f;
+    if (radius == 0.0f) radius = 0.5f;
 
     if (paintInfo.cap == SkPaint::kRound_Cap) {
         path.addCircle(0, 0, radius);
