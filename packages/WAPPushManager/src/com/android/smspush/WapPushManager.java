@@ -117,14 +117,18 @@ public class WapPushManager extends Service {
          */
         protected queryData queryLastApp(SQLiteDatabase db,
                 String app_id, String content_type) {
-            String sql = "select install_order, package_name, class_name, "
-                    + " app_type, need_signature, further_processing"
-                    + " from " + APPID_TABLE_NAME
-                    + " where x_wap_application=\'" + app_id + "\'"
-                    + " and content_type=\'" + content_type + "\'"
-                    + " order by install_order desc";
-            if (DEBUG_SQL) Log.v(LOG_TAG, "sql: " + sql);
-            Cursor cur = db.rawQuery(sql, null);
+            if (LOCAL_LOGV) Log.v(LOG_TAG, "queryLastApp app_id: " + app_id
+                    + " content_type: " +  content_type);
+
+            Cursor cur = db.query(APPID_TABLE_NAME,
+                    new String[] {"install_order", "package_name", "class_name",
+                    "app_type", "need_signature", "further_processing"},
+                    "x_wap_application=? and content_type=?",
+                    new String[] {app_id, content_type},
+                    null /* groupBy */,
+                    null /* having */,
+                    "install_order desc" /* orderBy */);
+
             queryData ret = null;
 
             if (cur.moveToNext()) {
@@ -392,9 +396,19 @@ public class WapPushManager extends Service {
         SQLiteDatabase db = dbh.getReadableDatabase();
         WapPushManDBHelper.queryData lastapp = dbh.queryLastApp(db, x_app_id, content_type);
 
+        if (LOCAL_LOGV) Log.v(LOG_TAG, "verifyData app id: " + x_app_id + " content type: " +
+                content_type + " lastapp: " + lastapp);
+
         db.close();
 
         if (lastapp == null) return false;
+
+        if (LOCAL_LOGV) Log.v(LOG_TAG, "verifyData lastapp.packageName: " + lastapp.packageName +
+                " lastapp.className: " + lastapp.className +
+                " lastapp.appType: " + lastapp.appType +
+                " lastapp.needSignature: " + lastapp.needSignature +
+                " lastapp.furtherProcessing: " + lastapp.furtherProcessing);
+
 
         if (lastapp.packageName.equals(package_name)
                 && lastapp.className.equals(class_name)
