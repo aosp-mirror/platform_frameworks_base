@@ -25,9 +25,11 @@
 #include <SkTLazy.h>
 #include <cutils/compiler.h>
 
+#include "CanvasState.h"
 #include "DisplayList.h"
 #include "DisplayListLogBuffer.h"
-#include "StatefulBaseRenderer.h"
+#include "RenderNode.h"
+#include "Renderer.h"
 
 namespace android {
 namespace uirenderer {
@@ -57,7 +59,7 @@ class StateOp;
 /**
  * Records drawing commands in a display list for later playback into an OpenGLRenderer.
  */
-class ANDROID_API DisplayListRenderer: public StatefulBaseRenderer {
+class ANDROID_API DisplayListRenderer: public Renderer, public CanvasStateClient {
 public:
     DisplayListRenderer();
     virtual ~DisplayListRenderer();
@@ -70,6 +72,9 @@ public:
 // Frame state operations
 // ----------------------------------------------------------------------------
     virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    virtual void prepare(bool opaque) {
+        prepareDirty(0.0f, 0.0f, mState.getWidth(), mState.getHeight(), opaque);
+    }
     virtual bool finish();
     virtual void interrupt();
     virtual void resume();
@@ -77,7 +82,10 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas state operations
 // ----------------------------------------------------------------------------
+    virtual void setViewport(int width, int height) { mState.setViewport(width, height); }
+
     // Save (layer)
+    virtual int getSaveCount() const { return mState.getSaveCount(); }
     virtual int save(int flags);
     virtual void restore();
     virtual void restoreToCount(int saveCount);
@@ -85,6 +93,8 @@ public:
             const SkPaint* paint, int flags);
 
     // Matrix
+    virtual void getMatrix(SkMatrix* outMatrix) const { mState.getMatrix(outMatrix); }
+
     virtual void translate(float dx, float dy, float dz = 0.0f);
     virtual void rotate(float degrees);
     virtual void scale(float sx, float sy);
@@ -100,9 +110,14 @@ public:
 
     // Misc
     virtual void setDrawFilter(SkDrawFilter* filter);
+    virtual const Rect& getLocalClipBounds() const { return mState.getLocalClipBounds(); }
+    const Rect& getRenderTargetClipBounds() const { return mState.getRenderTargetClipBounds(); }
+    virtual bool quickRejectConservative(float left, float top, float right, float bottom) const {
+        return mState.quickRejectConservative(left, top, right, bottom);
+    }
 
     bool isCurrentTransformSimple() {
-        return currentTransform()->isSimple();
+        return mState.currentTransform()->isSimple();
     }
 
 // ----------------------------------------------------------------------------
@@ -163,7 +178,18 @@ public:
     void setHighContrastText(bool highContrastText) {
         mHighContrastText = highContrastText;
     }
+
+// ----------------------------------------------------------------------------
+// CanvasState callbacks
+// ----------------------------------------------------------------------------
+    virtual void onViewportInitialized() { }
+    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) { }
+    virtual GLuint onGetTargetFbo() const { return -1; }
+
 private:
+
+    CanvasState mState;
+
     enum DeferredBarrierType {
         kBarrier_None,
         kBarrier_InOrder,

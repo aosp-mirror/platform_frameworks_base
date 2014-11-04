@@ -68,7 +68,7 @@ protected:
     virtual void ensureStencilBuffer();
     virtual bool hasLayer() const;
     virtual Region* getRegion() const;
-    virtual GLuint getTargetFbo() const;
+    virtual GLuint onGetTargetFbo() const;
     virtual bool suppressErrorChecks() const;
 
 private:

@@ -38,13 +38,14 @@
 
 #include <androidfw/ResourceTypes.h>
 
+#include "CanvasState.h"
 #include "Debug.h"
 #include "Extensions.h"
 #include "Matrix.h"
 #include "Program.h"
 #include "Rect.h"
+#include "Renderer.h"
 #include "Snapshot.h"
-#include "StatefulBaseRenderer.h"
 #include "UvMapper.h"
 #include "Vertex.h"
 #include "Caches.h"
@@ -116,7 +117,7 @@ enum ModelViewMode {
 /**
  * OpenGL Renderer implementation.
  */
-class OpenGLRenderer : public StatefulBaseRenderer {
+class OpenGLRenderer : public Renderer, public CanvasStateClient {
 public:
     OpenGLRenderer(RenderState& renderState);
     virtual ~OpenGLRenderer();
@@ -125,8 +126,10 @@ public:
     void initLight(const Vector3& lightCenter, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
 
-    virtual void onViewportInitialized();
     virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
+    virtual void prepare(bool opaque) {
+        prepareDirty(0.0f, 0.0f, mState.getWidth(), mState.getHeight(), opaque);
+    }
     virtual bool finish();
 
     virtual void callDrawGLFunction(Functor* functor, Rect& dirty);
@@ -218,20 +221,16 @@ public:
     }
 
     // simple rect clip
-    bool isCurrentClipSimple() {
-        return mSnapshot->clipRegion->isEmpty();
-    }
+    bool isCurrentClipSimple() { return mState.isCurrentClipSimple(); }
 
-    int getViewportWidth() { return currentSnapshot()->getViewportWidth(); }
-    int getViewportHeight() { return currentSnapshot()->getViewportHeight(); }
+    int getViewportWidth() { return mState.getViewportWidth(); }
+    int getViewportHeight() { return mState.getViewportHeight(); }
 
     /**
      * Scales the alpha on the current snapshot. This alpha value will be modulated
      * with other alpha values when drawing primitives.
      */
-    void scaleAlpha(float alpha) {
-        mSnapshot->alpha *= alpha;
-    }
+    void scaleAlpha(float alpha) { mState.scaleAlpha(alpha); }
 
     /**
      * Inserts a named event marker in the stream of GL commands.
@@ -328,10 +327,62 @@ public:
     }
 #endif
 
-    const Vector3& getLightCenter() const { return currentSnapshot()->getRelativeLightCenter(); }
+    const Vector3& getLightCenter() const { return mState.currentLightCenter(); }
     float getLightRadius() const { return mLightRadius; }
     uint8_t getAmbientShadowAlpha() const { return mAmbientShadowAlpha; }
     uint8_t getSpotShadowAlpha() const { return mSpotShadowAlpha; }
+
+    ///////////////////////////////////////////////////////////////////
+    /// State manipulation
+
+    virtual void setViewport(int width, int height) { mState.setViewport(width, height); }
+
+    virtual int getSaveCount() const;
+    virtual int save(int flags);
+    virtual void restore();
+    virtual void restoreToCount(int saveCount);
+
+    virtual void getMatrix(SkMatrix* outMatrix) const { mState.getMatrix(outMatrix); }
+    virtual void setMatrix(const SkMatrix& matrix) { mState.setMatrix(matrix); }
+    virtual void concatMatrix(const SkMatrix& matrix) { mState.concatMatrix(matrix); }
+
+    virtual void translate(float dx, float dy, float dz = 0.0f);
+    virtual void rotate(float degrees);
+    virtual void scale(float sx, float sy);
+    virtual void skew(float sx, float sy);
+
+    void setMatrix(const Matrix4& matrix); // internal only convenience method
+    void concatMatrix(const Matrix4& matrix); // internal only convenience method
+
+    virtual const Rect& getLocalClipBounds() const { return mState.getLocalClipBounds(); }
+    const Rect& getRenderTargetClipBounds() const { return mState.getRenderTargetClipBounds(); }
+    virtual bool quickRejectConservative(float left, float top, float right, float bottom) const {
+        return mState.quickRejectConservative(left, top, right, bottom);
+    }
+
+    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
+    virtual bool clipPath(const SkPath* path, SkRegion::Op op);
+    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
+
+    /**
+     * Does not support different clipping Ops (that is, every call to setClippingOutline is
+     * effectively using SkRegion::kReplaceOp)
+     *
+     * The clipping outline is independent from the regular clip.
+     */
+    void setClippingOutline(LinearAllocator& allocator, const Outline* outline);
+    void setClippingRoundRect(LinearAllocator& allocator,
+            const Rect& rect, float radius, bool highPriority = true);
+
+    inline bool hasRectToRectTransform() const { return mState.hasRectToRectTransform(); }
+    inline const mat4* currentTransform() const { return mState.currentTransform(); }
+
+    ///////////////////////////////////////////////////////////////////
+    /// CanvasStateClient interface
+
+    virtual void onViewportInitialized();
+    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored);
+    virtual GLuint onGetTargetFbo() const { return 0; }
 
 protected:
     /**
@@ -396,22 +447,16 @@ protected:
      * Returns the region of the current layer.
      */
     virtual Region* getRegion() const {
-        return mSnapshot->region;
+        return mState.currentRegion();
     }
 
     /**
      * Indicates whether rendering is currently targeted at a layer.
      */
     virtual bool hasLayer() const {
-        return (mSnapshot->flags & Snapshot::kFlagFboTarget) && mSnapshot->region;
+        return (mState.currentFlags() & Snapshot::kFlagFboTarget) && mState.currentRegion();
     }
 
-    /**
-     * Returns the name of the FBO this renderer is rendering into.
-     */
-    virtual GLuint getTargetFbo() const {
-        return 0;
-    }
 
     /**
      * Renders the specified layer as a textured quad.
@@ -464,6 +509,8 @@ protected:
 
     inline RenderState& renderState() { return mRenderState; }
 
+    CanvasState mState;
+
 private:
     /**
      * Discards the content of the framebuffer if supported by the driver.
@@ -498,8 +545,6 @@ private:
      * are switching to another render target.
      */
     void endTiling();
-
-    void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored);
 
     /**
      * Sets the clipping rectangle using glScissor. The clip is defined by
@@ -916,9 +961,7 @@ private:
     /**
      * Should be invoked every time the glScissor is modified.
      */
-    inline void dirtyClip() {
-        mDirtyClip = true;
-    }
+    inline void dirtyClip() { mState.setDirtyClip(true); }
 
     inline const UvMapper& getMapper(const Texture* texture) {
         return texture && texture->uvMapper ? *texture->uvMapper : mUvMapper;
@@ -932,6 +975,8 @@ private:
     Texture* getTexture(const SkBitmap* bitmap);
 
     bool reportAndClearDirty() { bool ret = mDirty; mDirty = false; return ret; }
+    inline Snapshot* writableSnapshot() { return mState.writableSnapshot(); }
+    inline const Snapshot* currentSnapshot() const { return mState.currentSnapshot(); }
 
     /**
      * Model-view matrix used to position/size objects

@@ -14,41 +14,45 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "OpenGLRenderer"
-
 #include <SkCanvas.h>
 
-#include "StatefulBaseRenderer.h"
-
+#include "CanvasState.h"
 #include "utils/MathUtils.h"
 
 namespace android {
 namespace uirenderer {
 
-StatefulBaseRenderer::StatefulBaseRenderer()
+
+CanvasState::CanvasState(CanvasStateClient& renderer)
         : mDirtyClip(false)
         , mWidth(-1)
         , mHeight(-1)
         , mSaveCount(1)
         , mFirstSnapshot(new Snapshot)
+        , mCanvas(renderer)
         , mSnapshot(mFirstSnapshot) {
+
 }
 
-void StatefulBaseRenderer::initializeSaveStack(float clipLeft, float clipTop,
+CanvasState::~CanvasState() {
+
+}
+
+void CanvasState::initializeSaveStack(float clipLeft, float clipTop,
         float clipRight, float clipBottom, const Vector3& lightCenter) {
     mSnapshot = new Snapshot(mFirstSnapshot,
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
     mSnapshot->setClip(clipLeft, clipTop, clipRight, clipBottom);
-    mSnapshot->fbo = getTargetFbo();
+    mSnapshot->fbo = mCanvas.onGetTargetFbo();
     mSnapshot->setRelativeLightCenter(lightCenter);
     mSaveCount = 1;
 }
 
-void StatefulBaseRenderer::setViewport(int width, int height) {
+void CanvasState::setViewport(int width, int height) {
     mWidth = width;
     mHeight = height;
     mFirstSnapshot->initializeViewport(width, height);
-    onViewportInitialized();
+    mCanvas.onViewportInitialized();
 
     // create a temporary 1st snapshot, so old snapshots are released,
     // and viewport can be queried safely.
@@ -63,24 +67,24 @@ void StatefulBaseRenderer::setViewport(int width, int height) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Non-virtual implementation of save, guaranteed to save without side-effects
+ * Guaranteed to save without side-effects
  *
- * The approach here and in restoreSnapshot(), allows subclasses to directly manipulate the save
+ * This approach, here and in restoreSnapshot(), allows subclasses to directly manipulate the save
  * stack, and ensures restoreToCount() doesn't call back into subclass overrides.
  */
-int StatefulBaseRenderer::saveSnapshot(int flags) {
+int CanvasState::saveSnapshot(int flags) {
     mSnapshot = new Snapshot(mSnapshot, flags);
     return mSaveCount++;
 }
 
-int StatefulBaseRenderer::save(int flags) {
+int CanvasState::save(int flags) {
     return saveSnapshot(flags);
 }
 
 /**
- * Non-virtual implementation of restore, guaranteed to restore without side-effects.
+ * Guaranteed to restore without side-effects.
  */
-void StatefulBaseRenderer::restoreSnapshot() {
+void CanvasState::restoreSnapshot() {
     sp<Snapshot> toRemove = mSnapshot;
     sp<Snapshot> toRestore = mSnapshot->previous;
 
@@ -88,16 +92,16 @@ void StatefulBaseRenderer::restoreSnapshot() {
     mSnapshot = toRestore;
 
     // subclass handles restore implementation
-    onSnapshotRestored(*toRemove, *toRestore);
+    mCanvas.onSnapshotRestored(*toRemove, *toRestore);
 }
 
-void StatefulBaseRenderer::restore() {
+void CanvasState::restore() {
     if (mSaveCount > 1) {
         restoreSnapshot();
     }
 }
 
-void StatefulBaseRenderer::restoreToCount(int saveCount) {
+void CanvasState::restoreToCount(int saveCount) {
     if (saveCount < 1) saveCount = 1;
 
     while (mSaveCount > saveCount) {
@@ -109,40 +113,40 @@ void StatefulBaseRenderer::restoreToCount(int saveCount) {
 // Matrix
 ///////////////////////////////////////////////////////////////////////////////
 
-void StatefulBaseRenderer::getMatrix(SkMatrix* matrix) const {
+void CanvasState::getMatrix(SkMatrix* matrix) const {
     mSnapshot->transform->copyTo(*matrix);
 }
 
-void StatefulBaseRenderer::translate(float dx, float dy, float dz) {
+void CanvasState::translate(float dx, float dy, float dz) {
     mSnapshot->transform->translate(dx, dy, dz);
 }
 
-void StatefulBaseRenderer::rotate(float degrees) {
+void CanvasState::rotate(float degrees) {
     mSnapshot->transform->rotate(degrees, 0.0f, 0.0f, 1.0f);
 }
 
-void StatefulBaseRenderer::scale(float sx, float sy) {
+void CanvasState::scale(float sx, float sy) {
     mSnapshot->transform->scale(sx, sy, 1.0f);
 }
 
-void StatefulBaseRenderer::skew(float sx, float sy) {
+void CanvasState::skew(float sx, float sy) {
     mSnapshot->transform->skew(sx, sy);
 }
 
-void StatefulBaseRenderer::setMatrix(const SkMatrix& matrix) {
+void CanvasState::setMatrix(const SkMatrix& matrix) {
     mSnapshot->transform->load(matrix);
 }
 
-void StatefulBaseRenderer::setMatrix(const Matrix4& matrix) {
+void CanvasState::setMatrix(const Matrix4& matrix) {
     mSnapshot->transform->load(matrix);
 }
 
-void StatefulBaseRenderer::concatMatrix(const SkMatrix& matrix) {
+void CanvasState::concatMatrix(const SkMatrix& matrix) {
     mat4 transform(matrix);
     mSnapshot->transform->multiply(transform);
 }
 
-void StatefulBaseRenderer::concatMatrix(const Matrix4& matrix) {
+void CanvasState::concatMatrix(const Matrix4& matrix) {
     mSnapshot->transform->multiply(matrix);
 }
 
@@ -150,7 +154,7 @@ void StatefulBaseRenderer::concatMatrix(const Matrix4& matrix) {
 // Clip
 ///////////////////////////////////////////////////////////////////////////////
 
-bool StatefulBaseRenderer::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
+bool CanvasState::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
     if (CC_LIKELY(currentTransform()->rectToRect())) {
         mDirtyClip |= mSnapshot->clip(left, top, right, bottom, op);
         return !mSnapshot->clipRect->isEmpty();
@@ -159,10 +163,10 @@ bool StatefulBaseRenderer::clipRect(float left, float top, float right, float bo
     SkPath path;
     path.addRect(left, top, right, bottom);
 
-    return StatefulBaseRenderer::clipPath(&path, op);
+    return CanvasState::clipPath(&path, op);
 }
 
-bool StatefulBaseRenderer::clipPath(const SkPath* path, SkRegion::Op op) {
+bool CanvasState::clipPath(const SkPath* path, SkRegion::Op op) {
     SkMatrix transform;
     currentTransform()->copyTo(transform);
 
@@ -189,12 +193,12 @@ bool StatefulBaseRenderer::clipPath(const SkPath* path, SkRegion::Op op) {
     return !mSnapshot->clipRect->isEmpty();
 }
 
-bool StatefulBaseRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
+bool CanvasState::clipRegion(const SkRegion* region, SkRegion::Op op) {
     mDirtyClip |= mSnapshot->clipRegionTransformed(*region, op);
     return !mSnapshot->clipRect->isEmpty();
 }
 
-void StatefulBaseRenderer::setClippingOutline(LinearAllocator& allocator, const Outline* outline) {
+void CanvasState::setClippingOutline(LinearAllocator& allocator, const Outline* outline) {
     Rect bounds;
     float radius;
     if (!outline->getAsRoundRect(&bounds, &radius)) return; // only RR supported
@@ -209,7 +213,7 @@ void StatefulBaseRenderer::setClippingOutline(LinearAllocator& allocator, const 
     }
 }
 
-void StatefulBaseRenderer::setClippingRoundRect(LinearAllocator& allocator,
+void CanvasState::setClippingRoundRect(LinearAllocator& allocator,
         const Rect& rect, float radius, bool highPriority) {
     mSnapshot->setClippingRoundRect(allocator, rect, radius, highPriority);
 }
@@ -229,7 +233,7 @@ void StatefulBaseRenderer::setClippingRoundRect(LinearAllocator& allocator,
  * @param snapOut if set, the geometry will be treated as having an AA ramp.
  *         See Rect::snapGeometryToPixelBoundaries()
  */
-bool StatefulBaseRenderer::calculateQuickRejectForScissor(float left, float top,
+bool CanvasState::calculateQuickRejectForScissor(float left, float top,
         float right, float bottom,
         bool* clipRequired, bool* roundRectClipRequired,
         bool snapOut) const {
@@ -259,18 +263,7 @@ bool StatefulBaseRenderer::calculateQuickRejectForScissor(float left, float top,
     return false;
 }
 
-/**
- * Returns false if drawing won't be clipped out.
- *
- * Makes the decision conservatively, by rounding out the mapped rect before comparing with the
- * clipRect. To be used when perfect, pixel accuracy is not possible (esp. with tessellation) but
- * rejection is still desired.
- *
- * This function, unlike quickRejectSetupScissor, should be used where precise geometry information
- * isn't known (esp. when geometry adjusts based on scale). Generally, this will be first pass
- * rejection where precise rejection isn't important, or precise information isn't available.
- */
-bool StatefulBaseRenderer::quickRejectConservative(float left, float top,
+bool CanvasState::quickRejectConservative(float left, float top,
         float right, float bottom) const {
     if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
         return true;
@@ -288,5 +281,5 @@ bool StatefulBaseRenderer::quickRejectConservative(float left, float top,
     return false;
 }
 
-}; // namespace uirenderer
-}; // namespace android
+} // namespace uirenderer
+} // namespace android
