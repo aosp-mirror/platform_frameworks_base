@@ -120,19 +120,19 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         final String signalContentDescription;
         final Resources r = mContext.getResources();
         if (!state.enabled) {
-            state.iconId = R.drawable.ic_qs_wifi_disabled;
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_disabled);
             state.label = r.getString(R.string.quick_settings_wifi_label);
             signalContentDescription = r.getString(R.string.accessibility_wifi_off);
         } else if (wifiConnected) {
-            state.iconId = cb.wifiSignalIconId;
+            state.icon = ResourceIcon.get(cb.wifiSignalIconId);
             state.label = removeDoubleQuotes(cb.enabledDesc);
             signalContentDescription = cb.wifiSignalContentDescription;
         } else if (wifiNotConnected) {
-            state.iconId = R.drawable.ic_qs_wifi_0;
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_0);
             state.label = r.getString(R.string.quick_settings_wifi_label);
             signalContentDescription = r.getString(R.string.accessibility_no_wifi);
         } else {
-            state.iconId = R.drawable.ic_qs_wifi_no_network;
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_no_network);
             state.label = r.getString(R.string.quick_settings_wifi_label);
             signalContentDescription = r.getString(R.string.accessibility_wifi_off);
         }

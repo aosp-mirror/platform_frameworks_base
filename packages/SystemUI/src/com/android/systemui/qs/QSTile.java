@@ -18,11 +18,13 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -299,10 +301,91 @@ public abstract class QSTile<TState extends State> implements Listenable {
         }
     }
 
+    public static abstract class Icon {
+        abstract public Drawable getDrawable(Context context);
+
+        @Override
+        public int hashCode() {
+            return Icon.class.hashCode();
+        }
+    }
+
+    public static class ResourceIcon extends Icon {
+        private static final SparseArray<Icon> ICONS = new SparseArray<Icon>();
+
+        private final int mResId;
+
+        private ResourceIcon(int resId) {
+            mResId = resId;
+        }
+
+        public static Icon get(int resId) {
+            Icon icon = ICONS.get(resId);
+            if (icon == null) {
+                icon = new ResourceIcon(resId);
+                ICONS.put(resId, icon);
+            }
+            return icon;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            return context.getDrawable(mResId);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof ResourceIcon && ((ResourceIcon) o).mResId == mResId;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("ResourceIcon[resId=0x%08x]", mResId);
+        }
+    }
+
+    protected class AnimationIcon extends ResourceIcon {
+        private boolean mAllowAnimation;
+
+        public AnimationIcon(int resId) {
+            super(resId);
+        }
+
+        public void setAllowAnimation(boolean allowAnimation) {
+            mAllowAnimation = allowAnimation;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            // workaround: get a clean state for every new AVD
+            final AnimatedVectorDrawable d = (AnimatedVectorDrawable) super.getDrawable(context)
+                    .getConstantState().newDrawable();
+            d.start();
+            if (mAllowAnimation) {
+                mAllowAnimation = false;
+            } else {
+                d.stop(); // skip directly to end state
+            }
+            return d;
+        }
+    }
+
+    protected enum UserBoolean {
+        USER_TRUE(true, true),
+        USER_FALSE(true, false),
+        BACKGROUND_TRUE(false, true),
+        BACKGROUND_FALSE(false, false);
+        public final boolean value;
+        public final boolean userInitiated;
+        private UserBoolean(boolean userInitiated, boolean value) {
+            this.value = value;
+            this.userInitiated = userInitiated;
+        }
+    }
+
     public static class State {
         public boolean visible;
-        public int iconId;
-        public Drawable icon;
+        public Icon icon;
         public String label;
         public String contentDescription;
         public String dualLabelContentDescription;
@@ -312,7 +395,6 @@ public abstract class QSTile<TState extends State> implements Listenable {
             if (other == null) throw new IllegalArgumentException();
             if (!other.getClass().equals(getClass())) throw new IllegalArgumentException();
             final boolean changed = other.visible != visible
-                    || other.iconId != iconId
                     || !Objects.equals(other.icon, icon)
                     || !Objects.equals(other.label, label)
                     || !Objects.equals(other.contentDescription, contentDescription)
@@ -320,7 +402,6 @@ public abstract class QSTile<TState extends State> implements Listenable {
                     || !Objects.equals(other.dualLabelContentDescription,
                     dualLabelContentDescription);
             other.visible = visible;
-            other.iconId = iconId;
             other.icon = icon;
             other.label = label;
             other.contentDescription = contentDescription;
@@ -335,9 +416,8 @@ public abstract class QSTile<TState extends State> implements Listenable {
         }
 
         protected StringBuilder toStringBuilder() {
-            final StringBuilder sb = new StringBuilder(  getClass().getSimpleName()).append('[');
+            final StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('[');
             sb.append("visible=").append(visible);
-            sb.append(",iconId=").append(iconId);
             sb.append(",icon=").append(icon);
             sb.append(",label=").append(label);
             sb.append(",contentDescription=").append(contentDescription);

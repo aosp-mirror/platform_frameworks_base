@@ -92,17 +92,17 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
         if (enabled) {
             state.label = null;
             if (connected) {
-                state.iconId = R.drawable.ic_qs_bluetooth_connected;
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_connected);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_bluetooth_connected);
                 state.label = mController.getLastDeviceName();
             } else if (connecting) {
-                state.iconId = R.drawable.ic_qs_bluetooth_connecting;
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_connecting);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_bluetooth_connecting);
                 state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
             } else {
-                state.iconId = R.drawable.ic_qs_bluetooth_on;
+                state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_on);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_bluetooth_on);
             }
@@ -110,7 +110,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
                 state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
             }
         } else {
-            state.iconId = R.drawable.ic_qs_bluetooth_off;
+            state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_off);
             state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
             state.contentDescription = mContext.getString(
                     R.string.accessibility_quick_settings_bluetooth_off);
