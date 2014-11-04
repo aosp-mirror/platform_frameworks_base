@@ -127,7 +127,7 @@ public class ActivityTestMain extends Activity {
             @Override
             public boolean onLongClick(View v) {
                 if (task.id >= 0 && thumbs != null) {
-                    mAm.removeTask(task.id, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+                    mAm.removeTask(task.id);
                     buildUi();
                     return true;
                 }
