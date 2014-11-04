@@ -165,7 +165,7 @@ public final class Debug
         public int otherSwappedOut;
 
         /** @hide */
-        public static final int NUM_OTHER_STATS = 16;
+        public static final int NUM_OTHER_STATS = 17;
 
         /** @hide */
         public static final int NUM_DVK_STATS = 5;
@@ -296,23 +296,24 @@ public final class Debug
                 case 1: return "Stack";
                 case 2: return "Cursor";
                 case 3: return "Ashmem";
-                case 4: return "Other dev";
-                case 5: return ".so mmap";
-                case 6: return ".jar mmap";
-                case 7: return ".apk mmap";
-                case 8: return ".ttf mmap";
-                case 9: return ".dex mmap";
-                case 10: return "code mmap";
-                case 11: return "image mmap";
-                case 12: return "Other mmap";
-                case 13: return "Graphics";
-                case 14: return "GL";
-                case 15: return "Memtrack";
-                case 16: return ".Heap";
-                case 17: return ".LOS";
-                case 18: return ".LinearAlloc";
-                case 19: return ".GC";
-                case 20: return ".JITCache";
+                case 4: return "Gfx driver";
+                case 5: return "Other dev";
+                case 6: return ".so mmap";
+                case 7: return ".jar mmap";
+                case 8: return ".apk mmap";
+                case 9: return ".ttf mmap";
+                case 10: return ".dex mmap";
+                case 11: return ".oat mmap";
+                case 12: return ".art mmap";
+                case 13: return "Other mmap";
+                case 14: return "Graphics";
+                case 15: return "GL";
+                case 16: return "Memtrack";
+                case 17: return ".Heap";
+                case 18: return ".LOS";
+                case 19: return ".LinearAlloc";
+                case 20: return ".GC";
+                case 21: return ".JITCache";
                 default: return "????";
             }
         }
