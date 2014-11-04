@@ -100,6 +100,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     private int mMaxColumns;
     private int mLastSelected = ListView.INVALID_POSITION;
     private boolean mResolvingHome = false;
+    private int mProfileSwitchMessageId = -1;
 
     private UsageStatsManager mUsm;
     private Map<String, UsageStats> mStats;
@@ -200,6 +201,11 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             List<ResolveInfo> rList, boolean alwaysUseOption) {
         setTheme(R.style.Theme_DeviceDefault_Resolver);
         super.onCreate(savedInstanceState);
+
+        // Determine whether we should show that intent is forwarded
+        // from managed profile to owner or other way around.
+        setProfileSwitchMessageId(intent.getContentUserHint());
+
         try {
             mLaunchedFromUid = ActivityManagerNative.getDefault().getLaunchedFromUid(
                     getActivityToken());
@@ -317,6 +323,22 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         if (mAdapter.hasFilteredItem()) {
             setAlwaysButtonEnabled(true, mAdapter.getFilteredPosition(), false);
             mOnceButton.setEnabled(true);
+        }
+    }
+
+    private void setProfileSwitchMessageId(int contentUserHint) {
+        if (contentUserHint != UserHandle.USER_CURRENT &&
+                contentUserHint != UserHandle.myUserId()) {
+            UserManager userManager = (UserManager) getSystemService(Context.USER_SERVICE);
+            UserInfo originUserInfo = userManager.getUserInfo(contentUserHint);
+            boolean originIsManaged = originUserInfo != null ? originUserInfo.isManagedProfile()
+                    : false;
+            boolean targetIsManaged = userManager.isManagedProfile();
+            if (originIsManaged && !targetIsManaged) {
+                mProfileSwitchMessageId = com.android.internal.R.string.forward_intent_to_owner;
+            } else if (!originIsManaged && targetIsManaged) {
+                mProfileSwitchMessageId = com.android.internal.R.string.forward_intent_to_work;
+            }
         }
     }
 
@@ -642,6 +664,11 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
     }
 
     public void safelyStartActivity(Intent intent) {
+        // If needed, show that intent is forwarded
+        // from managed profile to owner or other way around.
+        if (mProfileSwitchMessageId != -1) {
+            Toast.makeText(this, getString(mProfileSwitchMessageId), Toast.LENGTH_LONG).show();
+        }
         if (!mSafeForwardingMode) {
             startActivity(intent);
             onActivityStarted(intent);
