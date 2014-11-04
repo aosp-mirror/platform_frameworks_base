@@ -2272,6 +2272,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         return height;
     }
 
+    public int getEmptyShadeViewHeight() {
+        return mEmptyShadeView.getHeight();
+    }
+
     public float getBottomMostNotificationBottom() {
         final int count = getChildCount();
         float max = 0;
