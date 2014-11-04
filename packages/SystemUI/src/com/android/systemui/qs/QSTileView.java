@@ -63,6 +63,7 @@ public class QSTileView extends ViewGroup {
     private boolean mDual;
     private OnClickListener mClickPrimary;
     private OnClickListener mClickSecondary;
+    private Drawable mTileBackground;
     private RippleDrawable mRipple;
 
     public QSTileView(Context context) {
@@ -75,6 +76,7 @@ public class QSTileView extends ViewGroup {
         mTilePaddingBelowIconPx =  res.getDimensionPixelSize(R.dimen.qs_tile_padding_below_icon);
         mDualTileVerticalPaddingPx =
                 res.getDimensionPixelSize(R.dimen.qs_dual_tile_padding_vertical);
+        mTileBackground = newTileBackground();
         recreateLabel();
         setClipChildren(false);
 
@@ -175,22 +177,21 @@ public class QSTileView extends ViewGroup {
         if (changed) {
             recreateLabel();
         }
-        Drawable tileBackground = getTileBackground();
-        if (tileBackground instanceof RippleDrawable) {
-            setRipple((RippleDrawable) tileBackground);
+        if (mTileBackground instanceof RippleDrawable) {
+            setRipple((RippleDrawable) mTileBackground);
         }
         if (dual) {
             mTopBackgroundView.setOnClickListener(mClickPrimary);
             setOnClickListener(null);
             setClickable(false);
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-            mTopBackgroundView.setBackground(tileBackground);
+            mTopBackgroundView.setBackground(mTileBackground);
         } else {
             mTopBackgroundView.setOnClickListener(null);
             mTopBackgroundView.setClickable(false);
             setOnClickListener(mClickPrimary);
             setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-            setBackground(tileBackground);
+            setBackground(mTileBackground);
         }
         mTopBackgroundView.setFocusable(dual);
         setFocusable(!dual);
@@ -217,7 +218,7 @@ public class QSTileView extends ViewGroup {
         return icon;
     }
 
-    private Drawable getTileBackground() {
+    private Drawable newTileBackground() {
         final int[] attrs = new int[] { android.R.attr.selectableItemBackgroundBorderless };
         final TypedArray ta = mContext.obtainStyledAttributes(attrs);
         final Drawable d = ta.getDrawable(0);
