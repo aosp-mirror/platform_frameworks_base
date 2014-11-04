@@ -37,7 +37,7 @@ for more information about creating a <a href="{@docRoot}reference/com/google/an
 implementing its callbacks, and handling error cases.</p>
 
 <pre style="clear:right">
-GoogleApiClient mGoogleAppiClient = new GoogleApiClient.Builder(this)
+GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(this)
         .addConnectionCallbacks(new ConnectionCallbacks() {
                 &#64;Override
                 public void onConnected(Bundle connectionHint) {
