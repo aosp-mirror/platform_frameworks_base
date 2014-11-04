@@ -209,7 +209,7 @@ public class SubscriptionManager implements BaseColumns {
     public static final int DISPLAY_NUMBER_LAST = 2;
 
     /** @hide */
-    public static final int DISLPAY_NUMBER_DEFAULT = DISPLAY_NUMBER_FIRST;
+    public static final int DISPLAY_NUMBER_DEFAULT = DISPLAY_NUMBER_FIRST;
 
     /**
      * TelephonyProvider column name for permission for data roaming of a SIM.
