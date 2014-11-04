@@ -284,6 +284,8 @@ interface INetworkManagementService
      */
     void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces);
 
+    void setUidCleartextNetworkPolicy(int uid, int policy);
+
     /**
      * Return status of bandwidth control module.
      */

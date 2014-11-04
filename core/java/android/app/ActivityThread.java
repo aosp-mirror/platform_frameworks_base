@@ -1168,8 +1168,16 @@ public final class ActivityThread {
             sendMessage(H.BACKGROUND_VISIBLE_BEHIND_CHANGED, token, visible ? 1 : 0);
         }
 
+        @Override
         public void scheduleEnterAnimationComplete(IBinder token) {
             sendMessage(H.ENTER_ANIMATION_COMPLETE, token);
+        }
+
+        @Override
+        public void notifyCleartextNetwork(byte[] firstPacket) {
+            if (StrictMode.vmCleartextNetworkEnabled()) {
+                StrictMode.onCleartextNetworkDetected(firstPacket);
+            }
         }
     }
 
