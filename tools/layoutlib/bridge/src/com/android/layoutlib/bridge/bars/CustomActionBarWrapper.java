@@ -130,20 +130,14 @@ public abstract class CustomActionBarWrapper {
         MenuInflater inflater = new MenuInflater(getActionMenuContext());
         MenuBuilder menuBuilder = getMenuBuilder();
         for (String name : mCallback.getMenuIdNames()) {
-            int id = -1;
+            int id;
             if (name.startsWith(ANDROID_NS_NAME_PREFIX)) {
                 // Framework menu.
                 name = name.substring(ANDROID_NS_NAME_PREFIX.length());
-                if (mContext.getRenderResources().getFrameworkResource(MENU, name) != null) {
-                    // We need to check for the existence of the menu first, since getting the id
-                    // never returns the default value. It creates a new value if one is not found.
-                    id = mContext.getFrameworkResourceValue(MENU, name, -1);
-                }
+                id = mContext.getFrameworkResourceValue(MENU, name, -1);
             } else {
                 // Project menu.
-                if (mContext.getRenderResources().getProjectResource(MENU, name) != null) {
-                    id = mContext.getProjectResourceValue(MENU, name, -1);
-                }
+                id = mContext.getProjectResourceValue(MENU, name, -1);
             }
             if (id > -1) {
                 inflater.inflate(id, menuBuilder);
