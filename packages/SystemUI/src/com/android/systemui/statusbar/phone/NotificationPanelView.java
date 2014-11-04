@@ -1329,6 +1329,16 @@ public class NotificationPanelView extends PanelView implements
         float notificationHeight = mNotificationStackScroller.getHeight()
                 - mNotificationStackScroller.getEmptyBottomMargin()
                 - mNotificationStackScroller.getTopPadding();
+
+        // When only empty shade view is visible in QS collapsed state, simulate that we would have
+        // it in expanded QS state as well so we don't run into troubles when fading the view in/out
+        // and expanding/collapsing the whole panel from/to quick settings.
+        if (mNotificationStackScroller.getNotGoneChildCount() == 0
+                && mShadeEmpty) {
+            notificationHeight = mNotificationStackScroller.getEmptyShadeViewHeight()
+                    + mNotificationStackScroller.getBottomStackPeekSize()
+                    + mNotificationStackScroller.getCollapseSecondCardPadding();
+        }
         float totalHeight = Math.max(
                 mQsMaxExpansionHeight + mNotificationStackScroller.getNotificationTopPadding(),
                 mClockPositionResult.stackScrollerPadding - mTopPaddingAdjustment)
