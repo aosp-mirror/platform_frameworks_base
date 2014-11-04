@@ -47,10 +47,10 @@ TEST(RuleGeneratorTest, testDensityRules) {
     densities.add(ConfigDescription::DENSITY_XXHIGH);
     densities.add(ConfigDescription::DENSITY_ANY);
 
-    ASSERT_LT(263, ConfigDescription::DENSITY_XHIGH);
-    ASSERT_GT(262, ConfigDescription::DENSITY_HIGH);
-    ASSERT_LT(363, ConfigDescription::DENSITY_XXHIGH);
-    ASSERT_GT(362, ConfigDescription::DENSITY_XHIGH);
+    ASSERT_LT(263, (int) ConfigDescription::DENSITY_XHIGH);
+    ASSERT_GT(262, (int) ConfigDescription::DENSITY_HIGH);
+    ASSERT_LT(363, (int) ConfigDescription::DENSITY_XXHIGH);
+    ASSERT_GT(362, (int) ConfigDescription::DENSITY_XHIGH);
 
     expectDensityRule(densities, ConfigDescription::DENSITY_HIGH, 0, 263);
     expectDensityRule(densities, ConfigDescription::DENSITY_XHIGH, 262, 363);
@@ -87,7 +87,7 @@ static void expectDensityRule(const Vector<int>& densities, int density, int gre
     EXPECT_EQ(isAnyDpi == false, anyDpiRule->negate)
             << "for " << density << "dpi ANY DPI rule";
     if (anyDpiRule->longArgs.size() == 1) {
-        EXPECT_EQ(ConfigDescription::DENSITY_ANY, anyDpiRule->longArgs[0])
+        EXPECT_EQ((long) ConfigDescription::DENSITY_ANY, anyDpiRule->longArgs[0])
             << "for " << density << "dpi ANY DPI rule";
     } else {
         EXPECT_EQ(1u, anyDpiRule->longArgs.size())
