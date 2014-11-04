@@ -4340,6 +4340,19 @@ public class Notification implements Parcelable
          */
         public static final int SIZE_FULL_SCREEN = 5;
 
+        /**
+         * Sentinel value for use with {@link #setHintScreenTimeout} to keep the screen on for a
+         * short amount of time when this notification is displayed on the screen. This
+         * is the default value.
+         */
+        public static final int SCREEN_TIMEOUT_SHORT = 0;
+
+        /**
+         * Sentinel value for use with {@link #setHintScreenTimeout} to keep the screen on
+         * for a longer amount of time when this notification is displayed on the screen.
+         */
+        public static final int SCREEN_TIMEOUT_LONG = -1;
+
         /** Notification extra which contains wearable extensions */
         private static final String EXTRA_WEARABLE_EXTENSIONS = "android.wearable.EXTENSIONS";
 
@@ -4355,12 +4368,14 @@ public class Notification implements Parcelable
         private static final String KEY_CUSTOM_SIZE_PRESET = "customSizePreset";
         private static final String KEY_CUSTOM_CONTENT_HEIGHT = "customContentHeight";
         private static final String KEY_GRAVITY = "gravity";
+        private static final String KEY_HINT_SCREEN_TIMEOUT = "hintScreenTimeout";
 
         // Flags bitwise-ored to mFlags
         private static final int FLAG_CONTENT_INTENT_AVAILABLE_OFFLINE = 0x1;
         private static final int FLAG_HINT_HIDE_ICON = 1 << 1;
         private static final int FLAG_HINT_SHOW_BACKGROUND_ONLY = 1 << 2;
         private static final int FLAG_START_SCROLL_BOTTOM = 1 << 3;
+        private static final int FLAG_HINT_AVOID_BACKGROUND_CLIPPING = 1 << 4;
 
         // Default value for flags integer
         private static final int DEFAULT_FLAGS = FLAG_CONTENT_INTENT_AVAILABLE_OFFLINE;
@@ -4379,6 +4394,7 @@ public class Notification implements Parcelable
         private int mCustomSizePreset = SIZE_DEFAULT;
         private int mCustomContentHeight;
         private int mGravity = DEFAULT_GRAVITY;
+        private int mHintScreenTimeout;
 
         /**
          * Create a {@link android.app.Notification.WearableExtender} with default
@@ -4414,6 +4430,7 @@ public class Notification implements Parcelable
                         SIZE_DEFAULT);
                 mCustomContentHeight = wearableBundle.getInt(KEY_CUSTOM_CONTENT_HEIGHT);
                 mGravity = wearableBundle.getInt(KEY_GRAVITY, DEFAULT_GRAVITY);
+                mHintScreenTimeout = wearableBundle.getInt(KEY_HINT_SCREEN_TIMEOUT);
             }
         }
 
@@ -4461,6 +4478,9 @@ public class Notification implements Parcelable
             if (mGravity != DEFAULT_GRAVITY) {
                 wearableBundle.putInt(KEY_GRAVITY, mGravity);
             }
+            if (mHintScreenTimeout != 0) {
+                wearableBundle.putInt(KEY_HINT_SCREEN_TIMEOUT, mHintScreenTimeout);
+            }
 
             builder.getExtras().putBundle(EXTRA_WEARABLE_EXTENSIONS, wearableBundle);
             return builder;
@@ -4480,6 +4500,7 @@ public class Notification implements Parcelable
             that.mCustomSizePreset = this.mCustomSizePreset;
             that.mCustomContentHeight = this.mCustomContentHeight;
             that.mGravity = this.mGravity;
+            that.mHintScreenTimeout = this.mHintScreenTimeout;
             return that;
         }
 
@@ -4873,6 +4894,48 @@ public class Notification implements Parcelable
          */
         public boolean getHintShowBackgroundOnly() {
             return (mFlags & FLAG_HINT_SHOW_BACKGROUND_ONLY) != 0;
+        }
+
+        /**
+         * Set a hint that this notification's background should not be clipped if possible.
+         * @param hintAvoidBackgroundClipping {@code true} to avoid clipping if possible.
+         * @return this object for method chaining
+         */
+        public WearableExtender setHintAvoidBackgroundClipping(
+                boolean hintAvoidBackgroundClipping) {
+            setFlag(FLAG_HINT_AVOID_BACKGROUND_CLIPPING, hintAvoidBackgroundClipping);
+            return this;
+        }
+
+        /**
+         * Get a hint that this notification's background should not be clipped if possible.
+         * @return {@code true} if it's ok if the background is clipped on the screen, false
+         * otherwise. The default value is {@code false} if this was never set.
+         */
+        public boolean getHintAvoidBackgroundClipping() {
+            return (mFlags & FLAG_HINT_AVOID_BACKGROUND_CLIPPING) != 0;
+        }
+
+        /**
+         * Set a hint that the screen should remain on for at least this duration when
+         * this notification is displayed on the screen.
+         * @param timeout The requested screen timeout in milliseconds. Can also be either
+         *     {@link #SCREEN_TIMEOUT_SHORT} or {@link #SCREEN_TIMEOUT_LONG}.
+         * @return this object for method chaining
+         */
+        public WearableExtender setHintScreenTimeout(int timeout) {
+            mHintScreenTimeout = timeout;
+            return this;
+        }
+
+        /**
+         * Get the duration, in milliseconds, that the screen should remain on for
+         * when this notification is displayed.
+         * @return the duration in milliseconds if > 0, or either one of the sentinel values
+         *     {@link #SCREEN_TIMEOUT_SHORT} or {@link #SCREEN_TIMEOUT_LONG}.
+         */
+        public int getHintScreenTimeout() {
+            return mHintScreenTimeout;
         }
 
         private void setFlag(int mask, boolean value) {
