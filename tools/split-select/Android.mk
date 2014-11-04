@@ -17,10 +17,6 @@
 # This tool is prebuilt if we're doing an app-only build.
 ifeq ($(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)),)
 
-# TODO(adamlesinski): Enable OS X builds when I figure out how
-# to build with clang and libc++
-ifneq ($(HOST_OS),darwin)
-
 # ==========================================================
 # Setup some common variables for the different build
 # targets here.
@@ -55,7 +51,7 @@ hostStaticLibs := \
     libexpat \
     libziparchive-host
 
-cFlags := -std=c++11 -Wall -Werror
+cFlags := -Wall -Werror
 
 ifeq ($(HOST_OS),linux)
     hostLdLibs += -lrt -ldl -lpthread
@@ -115,5 +111,4 @@ LOCAL_CFLAGS += $(cFlags)
 
 include $(BUILD_HOST_EXECUTABLE)
 
-endif # Not OS X
 endif # No TARGET_BUILD_APPS or TARGET_BUILD_PDK

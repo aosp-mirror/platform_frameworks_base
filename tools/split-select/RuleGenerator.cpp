@@ -65,12 +65,12 @@ sp<Rule> RuleGenerator::generateDensity(const Vector<int>& allDensities, size_t 
 
 sp<Rule> RuleGenerator::generateAbi(const Vector<abi::Variant>& splitAbis, size_t index) {
     const abi::Variant thisAbi = splitAbis[index];
-    const std::vector<abi::Variant>& familyVariants = abi::getVariants(abi::getFamily(thisAbi));
+    const Vector<abi::Variant>& familyVariants = abi::getVariants(abi::getFamily(thisAbi));
 
-    std::vector<abi::Variant>::const_iterator start =
+    Vector<abi::Variant>::const_iterator start =
             std::find(familyVariants.begin(), familyVariants.end(), thisAbi);
 
-    std::vector<abi::Variant>::const_iterator end = familyVariants.end();
+    Vector<abi::Variant>::const_iterator end = familyVariants.end();
     if (index + 1 < splitAbis.size()) {
         end = std::find(start, familyVariants.end(), splitAbis[index + 1]);
     }
@@ -127,7 +127,7 @@ sp<Rule> RuleGenerator::generate(const SortedVector<SplitDescription>& group, si
         rootRule->subrules.add(generateDensity(allDensities, densityIndex));
     }
 
-    if (group[index].abi != abi::Variant::none) {
+    if (group[index].abi != abi::Variant_none) {
         size_t abiIndex = 0;
         Vector<abi::Variant> allVariants;
         allVariants.add(group[index].abi);
