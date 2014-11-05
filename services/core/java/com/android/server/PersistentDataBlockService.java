@@ -72,7 +72,7 @@ public class PersistentDataBlockService extends SystemService {
     private final String mDataBlockFile;
     private final Object mLock = new Object();
 
-    private int mAllowedAppId = -1;
+    private int mAllowedUid = -1;
     /*
      * Separate lock for OEM unlock related operations as they can happen in parallel with regular
      * block operations.
@@ -86,11 +86,11 @@ public class PersistentDataBlockService extends SystemService {
         mContext = context;
         mDataBlockFile = SystemProperties.get(PERSISTENT_DATA_BLOCK_PROP);
         mBlockDeviceSize = -1; // Load lazily
-        mAllowedAppId = getAllowedAppId(UserHandle.USER_OWNER);
+        mAllowedUid = getAllowedUid(UserHandle.USER_OWNER);
     }
 
 
-    private int getAllowedAppId(int userHandle) {
+    private int getAllowedUid(int userHandle) {
         String allowedPackage = mContext.getResources()
                 .getString(R.string.config_persistentDataPackageName);
         PackageManager pm = mContext.getPackageManager();
@@ -101,7 +101,7 @@ public class PersistentDataBlockService extends SystemService {
             // not expected
             Slog.e(TAG, "not able to find package " + allowedPackage, e);
         }
-        return UserHandle.getAppId(allowedUid);
+        return allowedUid;
     }
 
     @Override
@@ -116,8 +116,14 @@ public class PersistentDataBlockService extends SystemService {
     }
 
     private void enforceUid(int callingUid) {
-        if (UserHandle.getAppId(callingUid) != mAllowedAppId) {
+        if (callingUid != mAllowedUid) {
             throw new SecurityException("uid " + callingUid + " not allowed to access PST");
+        }
+    }
+
+    private void enforceIsOwner() {
+        if (!Binder.getCallingUserHandle().isOwner()) {
+            throw new SecurityException("Only the Owner is allowed to change OEM unlock state");
         }
     }
 
@@ -249,6 +255,7 @@ public class PersistentDataBlockService extends SystemService {
                 return;
             }
             enforceOemUnlockPermission();
+            enforceIsOwner();
             FileOutputStream outputStream;
             try {
                 outputStream = new FileOutputStream(new File(mDataBlockFile));
