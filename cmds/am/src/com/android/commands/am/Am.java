@@ -417,7 +417,7 @@ public class Am extends BaseCommand {
             } else if (opt.equals("--ei")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
-                intent.putExtra(key, Integer.valueOf(value));
+                intent.putExtra(key, Integer.decode(value));
             } else if (opt.equals("--eu")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -434,7 +434,7 @@ public class Am extends BaseCommand {
                 String[] strings = value.split(",");
                 int[] list = new int[strings.length];
                 for (int i = 0; i < strings.length; i++) {
-                    list[i] = Integer.valueOf(strings[i]);
+                    list[i] = Integer.decode(strings[i]);
                 }
                 intent.putExtra(key, list);
             } else if (opt.equals("--el")) {
@@ -477,8 +477,23 @@ public class Am extends BaseCommand {
                 hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
-                String value = nextArgRequired();
-                intent.putExtra(key, Boolean.valueOf(value));
+                String value = nextArgRequired().toLowerCase();
+                // Boolean.valueOf() results in false for anything that is not "true", which is
+                // error-prone in shell commands
+                boolean arg;
+                if ("true".equals(value) || "t".equals(value)) {
+                    arg = true;
+                } else if ("false".equals(value) || "f".equals(value)) {
+                    arg = false;
+                } else {
+                    try {
+                        arg = Integer.decode(value) != 0;
+                    } catch (NumberFormatException ex) {
+                        throw new IllegalArgumentException("Invalid boolean value: " + value);
+                    }
+                }
+
+                intent.putExtra(key, arg);
             } else if (opt.equals("-n")) {
                 String str = nextArgRequired();
                 ComponentName cn = ComponentName.unflattenFromString(str);
