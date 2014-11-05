@@ -238,7 +238,7 @@ class="en">Support Library</span></a></div>
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>tools/revisions/index.html"><span class="en">Revisions</span></a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>tools/revisions/studio-tools.html">
+      <li><a href="<?cs var:toroot ?>tools/revisions/studio.html">
         <span class="en">Android Studio</span>
       </a></li>
       <li><a href="<?cs var:toroot ?>tools/revisions/sdk/tools-notes.html">
@@ -250,7 +250,7 @@ class="en">Support Library</span></a></div>
       </a></li>
       <li><a href="<?cs var:toroot ?>tools/revisions/platforms.html"><span
 class="en">Platforms</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/revisions/eclipse-adt.html">
+      <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html">
         <span class="en">ADT Plugin</span></a></li>
     </ul>
   </li><!-- end of revision -->
