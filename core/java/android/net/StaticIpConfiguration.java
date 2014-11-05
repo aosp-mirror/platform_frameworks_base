@@ -107,6 +107,7 @@ public class StaticIpConfiguration implements Parcelable {
         for (InetAddress dns : dnsServers) {
             lp.addDnsServer(dns);
         }
+        lp.setDomains(domains);
         return lp;
     }
 
