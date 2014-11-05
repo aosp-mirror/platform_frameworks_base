@@ -449,6 +449,27 @@ public final class MediaSession {
     }
 
     /**
+     * Set the style of rating used by this session. Apps trying to set the
+     * rating should use this style. Must be one of the following:
+     * <ul>
+     * <li>{@link Rating#RATING_NONE}</li>
+     * <li>{@link Rating#RATING_3_STARS}</li>
+     * <li>{@link Rating#RATING_4_STARS}</li>
+     * <li>{@link Rating#RATING_5_STARS}</li>
+     * <li>{@link Rating#RATING_HEART}</li>
+     * <li>{@link Rating#RATING_PERCENTAGE}</li>
+     * <li>{@link Rating#RATING_THUMB_UP_DOWN}</li>
+     * </ul>
+     */
+    public void setRatingType(int type) {
+        try {
+            mBinder.setRatingType(type);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setRatingType.", e);
+        }
+    }
+
+    /**
      * Set some extras that can be associated with the {@link MediaSession}. No assumptions should
      * be made as to how a {@link MediaController} will handle these extras.
      * Keys should be fully qualified (e.g. com.example.MY_EXTRA) to avoid conflicts.

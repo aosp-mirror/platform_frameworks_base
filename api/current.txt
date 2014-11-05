@@ -16310,6 +16310,7 @@ package android.media.session {
     method public void setPlaybackToRemote(android.media.VolumeProvider);
     method public void setQueue(java.util.List<android.media.session.MediaSession.QueueItem>);
     method public void setQueueTitle(java.lang.CharSequence);
+    method public void setRatingType(int);
     method public void setSessionActivity(android.app.PendingIntent);
     field public static final int FLAG_HANDLES_MEDIA_BUTTONS = 1; // 0x1
     field public static final int FLAG_HANDLES_TRANSPORT_CONTROLS = 2; // 0x2
@@ -16368,6 +16369,7 @@ package android.media.session {
     method public long getBufferedPosition();
     method public java.util.List<android.media.session.PlaybackState.CustomAction> getCustomActions();
     method public java.lang.CharSequence getErrorMessage();
+    method public android.os.Bundle getExtras();
     method public long getLastPositionUpdateTime();
     method public float getPlaybackSpeed();
     method public long getPosition();
@@ -16412,6 +16414,7 @@ package android.media.session {
     method public android.media.session.PlaybackState.Builder setActiveQueueItemId(long);
     method public android.media.session.PlaybackState.Builder setBufferedPosition(long);
     method public android.media.session.PlaybackState.Builder setErrorMessage(java.lang.CharSequence);
+    method public android.media.session.PlaybackState.Builder setExtras(android.os.Bundle);
     method public android.media.session.PlaybackState.Builder setState(int, long, float, long);
     method public android.media.session.PlaybackState.Builder setState(int, long, float);
   }
