@@ -158,7 +158,8 @@ public class DowntimeConditionProvider extends ConditionProviderService {
         final long time = getTime(System.currentTimeMillis(), downtime.endHour, downtime.endMinute);
         final String formatted = new SimpleDateFormat(pattern, locale).format(new Date(time));
         final String summary = mContext.getString(R.string.downtime_condition_summary, formatted);
-        return new Condition(id, summary, "", "", 0, state, Condition.FLAG_RELEVANT_NOW);
+        final String line1 = mContext.getString(R.string.downtime_condition_line_one);
+        return new Condition(id, summary, line1, formatted, 0, state, Condition.FLAG_RELEVANT_NOW);
     }
 
     public boolean isDowntimeCondition(Condition condition) {

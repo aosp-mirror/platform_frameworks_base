@@ -498,7 +498,7 @@ public class ZenModeConfig implements Parcelable {
     }
 
     // For built-in conditions
-    private static final String SYSTEM_AUTHORITY = "android";
+    public static final String SYSTEM_AUTHORITY = "android";
 
     // Built-in countdown conditions, e.g. condition://android/countdown/1399917958951
     private static final String COUNTDOWN_PATH = "countdown";
