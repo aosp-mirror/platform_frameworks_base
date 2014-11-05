@@ -31,19 +31,25 @@ package android.hardware.hdmi;
      /**
       * Called when one touch record is started or failed during initialization.
       *
+      * @param recorderAddress An address of recorder that reports result of one touch record
+      *            request
       * @param result result code for one touch record
       */
-     void onOneTouchRecordResult(int result);
+     void onOneTouchRecordResult(int recorderAddress, int result);
      /**
       * Called when timer recording is started or failed during initialization.
-
+      *
+      * @param recorderAddress An address of recorder that reports result of timer recording
+      *            request
       * @param result result code for timer recording
       */
-     void onTimerRecordingResult(int result);
+     void onTimerRecordingResult(int recorderAddress, int result);
      /**
       * Called when receiving result for clear timer recording request.
       *
-      * @param result result of clear timer.
+      * @param recorderAddress An address of recorder that reports result of clear timer recording
+      *            request
+      * @param result result of clear timer
       */
-     void onClearTimerRecordingResult(int result);
+     void onClearTimerRecordingResult(int recorderAddress, int result);
  }
