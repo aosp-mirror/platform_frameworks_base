@@ -9783,7 +9783,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                     if (!w.isDrawnLw()) {
                                         Slog.v(TAG, "Not displayed: s=" + winAnimator.mSurfaceControl
                                                 + " pv=" + w.mPolicyVisibility
-                                                + " mDrawState=" + winAnimator.mDrawState
+                                                + " mDrawState=" + winAnimator.drawStateToString()
                                                 + " ah=" + w.mAttachedHidden
                                                 + " th=" + atoken.hiddenRequested
                                                 + " a=" + winAnimator.mAnimating);
