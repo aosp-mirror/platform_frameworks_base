@@ -200,7 +200,7 @@ public class DhcpResults extends StaticIpConfiguration {
         vendorInfo = info;
     }
 
-    public void setDomains(String domains) {
-        domains = domains;
+    public void setDomains(String newDomains) {
+        domains = newDomains;
     }
 }
