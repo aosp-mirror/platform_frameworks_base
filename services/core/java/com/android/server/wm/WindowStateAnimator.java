@@ -962,11 +962,6 @@ class WindowStateAnimator {
             mWin.mHasSurface = false;
             mDrawState = NO_SURFACE;
         }
-
-        // Destroy any deferred thumbnail surfaces
-        if (mAppAnimator != null) {
-            mAppAnimator.clearDeferredThumbnail();
-        }
     }
 
     void destroyDeferredSurfaceLocked() {

@@ -9196,12 +9196,6 @@ public class WindowManagerService extends IWindowManager.Stub
                                 topClosingLayer);
                         openingAppAnimator.deferThumbnailDestruction =
                                 !mAppTransition.isNextThumbnailTransitionScaleUp();
-                        if (openingAppAnimator.deferThumbnailDestruction) {
-                            if (closingAppAnimator != null &&
-                                    closingAppAnimator.animation != null) {
-                                closingAppAnimator.deferredThumbnail = surfaceControl;
-                            }
-                        }
                     } else {
                         anim = mAppTransition.createThumbnailScaleAnimationLocked(
                                 displayInfo.appWidth, displayInfo.appHeight, transit);
