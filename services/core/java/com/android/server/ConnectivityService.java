@@ -3701,12 +3701,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void updateCapabilities(NetworkAgentInfo networkAgent,
             NetworkCapabilities networkCapabilities) {
-        //  TODO - turn this on in MR1 when we have more dogfooding time.
-        // rematchAllNetworksAndRequests();
         if (!Objects.equals(networkAgent.networkCapabilities, networkCapabilities)) {
             synchronized (networkAgent) {
                 networkAgent.networkCapabilities = networkCapabilities;
             }
+            rematchAllNetworksAndRequests(networkAgent, networkAgent.getCurrentScore());
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
     }
