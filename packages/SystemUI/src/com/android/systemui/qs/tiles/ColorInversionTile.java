@@ -26,6 +26,10 @@ import com.android.systemui.qs.UsageTracker;
 /** Quick settings tile: Invert colors **/
 public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
 
+    private final AnimationIcon mEnable
+            = new AnimationIcon(R.drawable.ic_invert_colors_enable_animation);
+    private final AnimationIcon mDisable
+            = new AnimationIcon(R.drawable.ic_invert_colors_disable_animation);
     private final SecureSetting mSetting;
     private final UsageTracker mUsageTracker;
 
@@ -79,6 +83,8 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     @Override
     protected void handleClick() {
         mSetting.setValue(mState.value ? 0 : 1);
+        mEnable.setAllowAnimation(true);
+        mDisable.setAllowAnimation(true);
     }
 
     @Override
@@ -88,8 +94,7 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         state.visible = enabled || mUsageTracker.isRecentlyUsed();
         state.value = enabled;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
-        state.icon = ResourceIcon.get(enabled ? R.drawable.ic_qs_inversion_on
-                : R.drawable.ic_qs_inversion_off);
+        state.icon = enabled ? mEnable : mDisable;
     }
 
     @Override
