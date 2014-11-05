@@ -61,4 +61,9 @@ public class DismissViewImageButton extends ImageButton {
         outRect.top += translationY;
         outRect.bottom += translationY;
     }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
 }
