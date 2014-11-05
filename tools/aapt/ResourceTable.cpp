@@ -6,6 +6,7 @@
 
 #include "ResourceTable.h"
 
+#include "AaptUtil.h"
 #include "XMLNode.h"
 #include "ResourceFilter.h"
 #include "ResourceIdCache.h"
@@ -4516,4 +4517,35 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
     }
 
     return NO_ERROR;
+}
+
+void ResourceTable::getDensityVaryingResources(KeyedVector<Symbol, Vector<SymbolDefinition> >& resources) {
+    const ConfigDescription nullConfig;
+
+    const size_t packageCount = mOrderedPackages.size();
+    for (size_t p = 0; p < packageCount; p++) {
+        const Vector<sp<Type> >& types = mOrderedPackages[p]->getOrderedTypes();
+        const size_t typeCount = types.size();
+        for (size_t t = 0; t < typeCount; t++) {
+            const Vector<sp<ConfigList> >& configs = types[t]->getOrderedConfigs();
+            const size_t configCount = configs.size();
+            for (size_t c = 0; c < configCount; c++) {
+                const DefaultKeyedVector<ConfigDescription, sp<Entry> >& configEntries = configs[c]->getEntries();
+                const size_t configEntryCount = configEntries.size();
+                for (size_t ce = 0; ce < configEntryCount; ce++) {
+                    const ConfigDescription& config = configEntries.keyAt(ce);
+                    if (AaptConfig::isDensityOnly(config)) {
+                        // This configuration only varies with regards to density.
+                        const Symbol symbol(mOrderedPackages[p]->getName(),
+                                types[t]->getName(),
+                                configs[c]->getName(),
+                                getResId(mOrderedPackages[p], types[t], configs[c]->getEntryIndex()));
+
+                        const sp<Entry>& entry = configEntries.valueAt(ce);
+                        AaptUtil::appendValue(resources, symbol, SymbolDefinition(symbol, config, entry->getPos()));
+                    }
+                }
+            }
+        }
+    }
 }

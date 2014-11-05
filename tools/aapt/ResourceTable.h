@@ -7,14 +7,15 @@
 #ifndef RESOURCE_TABLE_H
 #define RESOURCE_TABLE_H
 
-#include "ConfigDescription.h"
-#include "StringPool.h"
-#include "SourcePos.h"
-#include "ResourceFilter.h"
-
 #include <map>
 #include <queue>
 #include <set>
+
+#include "ConfigDescription.h"
+#include "ResourceFilter.h"
+#include "SourcePos.h"
+#include "StringPool.h"
+#include "Symbol.h"
 
 using namespace std;
 
@@ -542,6 +543,8 @@ public:
         DefaultKeyedVector<String16, uint32_t> mTypeStringsMapping;
         DefaultKeyedVector<String16, uint32_t> mKeyStringsMapping;
     };
+
+    void getDensityVaryingResources(KeyedVector<Symbol, Vector<SymbolDefinition> >& resources);
 
 private:
     void writePublicDefinitions(const String16& package, FILE* fp, bool pub);
