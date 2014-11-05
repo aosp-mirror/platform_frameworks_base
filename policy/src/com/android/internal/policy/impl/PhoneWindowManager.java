@@ -116,6 +116,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.List;
 
 import static android.view.WindowManager.LayoutParams.*;
 import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
@@ -2299,24 +2300,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             boolean goingToNotificationShade) {
         if (goingToNotificationShade) {
             return AnimationUtils.loadAnimation(mContext, R.anim.lock_screen_behind_enter_fade_in);
-        } else if (onWallpaper) {
-            Animation a = AnimationUtils.loadAnimation(mContext,
-                    R.anim.lock_screen_behind_enter_wallpaper);
-            AnimationSet set = (AnimationSet) a;
-
-            // TODO: Use XML interpolators when we have log interpolators available in XML.
-            set.getAnimations().get(0).setInterpolator(mLogDecelerateInterpolator);
-            set.getAnimations().get(1).setInterpolator(mLogDecelerateInterpolator);
-            return set;
-        } else {
-            Animation a = AnimationUtils.loadAnimation(mContext,
-                    R.anim.lock_screen_behind_enter);
-            AnimationSet set = (AnimationSet) a;
-
-            // TODO: Use XML interpolators when we have log interpolators available in XML.
-            set.getAnimations().get(0).setInterpolator(mLogDecelerateInterpolator);
-            return set;
         }
+
+        AnimationSet set = (AnimationSet) AnimationUtils.loadAnimation(mContext, onWallpaper ?
+                    R.anim.lock_screen_behind_enter_wallpaper :
+                    R.anim.lock_screen_behind_enter);
+
+        // TODO: Use XML interpolators when we have log interpolators available in XML.
+        final List<Animation> animations = set.getAnimations();
+        for (int i = animations.size() - 1; i >= 0; --i) {
+            animations.get(i).setInterpolator(mLogDecelerateInterpolator);
+        }
+
+        return set;
     }
 
 
