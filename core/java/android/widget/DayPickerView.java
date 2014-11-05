@@ -107,9 +107,9 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
 
         mAdapter.setRange(mMinDate, mMaxDate);
 
-        if (constrainCalendar(mSelectedDay, mMinDate, mMaxDate)) {
-            goTo(mSelectedDay, false, true, true);
-        }
+        // Changing the min/max date changes the selection position since we
+        // don't really have stable IDs.
+        goTo(mSelectedDay, false, true, true);
     }
 
     /**
