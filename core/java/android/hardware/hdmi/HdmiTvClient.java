@@ -226,19 +226,19 @@ public final class HdmiTvClient extends HdmiClient {
             }
 
             @Override
-            public void onOneTouchRecordResult(int result) {
-                callback.onOneTouchRecordResult(result);
+            public void onOneTouchRecordResult(int recorderAddress, int result) {
+                callback.onOneTouchRecordResult(recorderAddress, result);
             }
 
             @Override
-            public void onTimerRecordingResult(int result) {
-                callback.onTimerRecordingResult(
+            public void onTimerRecordingResult(int recorderAddress, int result) {
+                callback.onTimerRecordingResult(recorderAddress,
                         HdmiRecordListener.TimerStatusData.parseFrom(result));
             }
 
             @Override
-            public void onClearTimerRecordingResult(int result) {
-                callback.onClearTimerRecordingResult(result);
+            public void onClearTimerRecordingResult(int recorderAddress, int result) {
+                callback.onClearTimerRecordingResult(recorderAddress, result);
             }
         };
     }

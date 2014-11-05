@@ -1661,11 +1661,11 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    void invokeOneTouchRecordResult(int result) {
+    void invokeOneTouchRecordResult(int recorderAddress, int result) {
         synchronized (mLock) {
             if (mRecordListenerRecord != null) {
                 try {
-                    mRecordListenerRecord.mListener.onOneTouchRecordResult(result);
+                    mRecordListenerRecord.mListener.onOneTouchRecordResult(recorderAddress, result);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to call onOneTouchRecordResult.", e);
                 }
@@ -1673,11 +1673,11 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    void invokeTimerRecordingResult(int result) {
+    void invokeTimerRecordingResult(int recorderAddress, int result) {
         synchronized (mLock) {
             if (mRecordListenerRecord != null) {
                 try {
-                    mRecordListenerRecord.mListener.onTimerRecordingResult(result);
+                    mRecordListenerRecord.mListener.onTimerRecordingResult(recorderAddress, result);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to call onTimerRecordingResult.", e);
                 }
@@ -1685,11 +1685,12 @@ public final class HdmiControlService extends SystemService {
         }
     }
 
-    void invokeClearTimerRecordingResult(int result) {
+    void invokeClearTimerRecordingResult(int recorderAddress, int result) {
         synchronized (mLock) {
             if (mRecordListenerRecord != null) {
                 try {
-                    mRecordListenerRecord.mListener.onClearTimerRecordingResult(result);
+                    mRecordListenerRecord.mListener.onClearTimerRecordingResult(recorderAddress,
+                            result);
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to call onClearTimerRecordingResult.", e);
                 }
