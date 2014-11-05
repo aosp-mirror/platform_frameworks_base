@@ -4871,7 +4871,10 @@
     <string name="battery_saver_description">To help improve battery life, battery saver reduces your device’s performance and limits vibration and most background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery saver turns off automatically when your device is charging.</string>
 
     <!-- [CHAR_LIMIT=NONE] Zen mode: Condition summary for built-in downtime condition, if active -->
-    <string name="downtime_condition_summary">Until your downtime ends at <xliff:g id="formattedTime" example="10.00 PM">%1$s</xliff:g></string>
+    <string name="downtime_condition_summary">Until your downtime ends at <xliff:g id="formattedTime" example="10:00 PM">%1$s</xliff:g></string>
+
+    <!-- [CHAR_LIMIT=NONE] Zen mode: Condition line one for built-in downtime condition, if active -->
+    <string name="downtime_condition_line_one">Until your downtime ends</string>
 
     <!-- Zen mode condition - summary: time duration in minutes. [CHAR LIMIT=NONE] -->
     <plurals name="zen_mode_duration_minutes_summary">
@@ -4905,4 +4908,10 @@
 
     <!-- Content description for the Toolbar icon used to collapse an expanded action mode. [CHAR LIMIT=NONE] -->
     <string name="toolbar_collapse_description">Collapse</string>
+
+    <!-- Zen mode condition - summary: until next alarm. [CHAR LIMIT=NONE] -->
+    <string name="zen_mode_next_alarm_summary">Until next alarm at <xliff:g id="formattedTime" example="7:30 AM">%1$s</xliff:g></string>
+
+    <!-- Zen mode condition - line one: until next alarm. [CHAR LIMIT=NONE] -->
+    <string name="zen_mode_next_alarm_line_one">Until next alarm</string>
 </resources>

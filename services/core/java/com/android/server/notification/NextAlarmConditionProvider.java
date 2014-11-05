@@ -1,0 +1,318 @@
+/*
+ * Copyright (C) 2014 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.notification;
+
+import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.AlarmManager.AlarmClockInfo;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
+import android.os.PowerManager;
+import android.os.UserHandle;
+import android.service.notification.Condition;
+import android.service.notification.ConditionProviderService;
+import android.service.notification.IConditionProvider;
+import android.service.notification.ZenModeConfig;
+import android.util.TimeUtils;
+import android.text.format.DateFormat;
+import android.util.Log;
+import android.util.Slog;
+
+import com.android.internal.R;
+import com.android.server.notification.NotificationManagerService.DumpFilter;
+
+import java.io.PrintWriter;
+import java.util.Locale;
+
+/** Built-in zen condition provider for alarm clock conditions */
+public class NextAlarmConditionProvider extends ConditionProviderService {
+    private static final String TAG = "NextAlarmConditions";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    private static final String ACTION_TRIGGER = TAG + ".trigger";
+    private static final String EXTRA_TRIGGER = "trigger";
+    private static final int REQUEST_CODE = 100;
+    private static final long SECONDS = 1000;
+    private static final long HOURS = 60 * 60 * SECONDS;
+    private static final long NEXT_ALARM_UPDATE_DELAY = 1 * SECONDS;  // treat clear+set as update
+    private static final long EARLY = 5 * SECONDS;  // fire early, ensure alarm stream is unmuted
+    private static final String NEXT_ALARM_PATH = "next_alarm";
+    public static final ComponentName COMPONENT =
+            new ComponentName("android", NextAlarmConditionProvider.class.getName());
+
+    private final Context mContext = this;
+    private final H mHandler = new H();
+
+    private boolean mConnected;
+    private boolean mRegistered;
+    private AlarmManager mAlarmManager;
+    private int mCurrentUserId;
+    private long mLookaheadThreshold;
+    private long mScheduledAlarmTime;
+    private Callback mCallback;
+    private Uri mCurrentSubscription;
+    private PowerManager.WakeLock mWakeLock;
+
+    public NextAlarmConditionProvider() {
+        if (DEBUG) Slog.d(TAG, "new NextAlarmConditionProvider()");
+    }
+
+    public void dump(PrintWriter pw, DumpFilter filter) {
+        pw.println("    NextAlarmConditionProvider:");
+        pw.print("      mConnected="); pw.println(mConnected);
+        pw.print("      mRegistered="); pw.println(mRegistered);
+        pw.print("      mCurrentUserId="); pw.println(mCurrentUserId);
+        pw.print("      mScheduledAlarmTime="); pw.println(formatAlarmDebug(mScheduledAlarmTime));
+        pw.print("      mLookaheadThreshold="); pw.print(mLookaheadThreshold);
+        pw.print(" ("); TimeUtils.formatDuration(mLookaheadThreshold, pw); pw.println(")");
+        pw.print("      mCurrentSubscription="); pw.println(mCurrentSubscription);
+        pw.print("      mWakeLock="); pw.println(mWakeLock);
+    }
+
+    public void setCallback(Callback callback) {
+        mCallback = callback;
+    }
+
+    @Override
+    public void onConnected() {
+        if (DEBUG) Slog.d(TAG, "onConnected");
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        final PowerManager p = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mWakeLock = p.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mLookaheadThreshold = mContext.getResources()
+                .getInteger(R.integer.config_next_alarm_condition_lookahead_threshold_hrs) * HOURS;
+        init();
+        mConnected = true;
+    }
+
+    public void onUserSwitched() {
+        if (DEBUG) Slog.d(TAG, "onUserSwitched");
+        if (mConnected) {
+            init();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (DEBUG) Slog.d(TAG, "onDestroy");
+        if (mConnected) {
+            mContext.unregisterReceiver(mReceiver);
+        }
+        mConnected = false;
+    }
+
+    @Override
+    public void onRequestConditions(int relevance) {
+        if (!mConnected || (relevance & Condition.FLAG_RELEVANT_NOW) == 0) return;
+
+        final AlarmClockInfo nextAlarm = mAlarmManager.getNextAlarmClock(mCurrentUserId);
+        if (nextAlarm == null) return;  // no next alarm
+        if (mCallback != null && mCallback.isInDowntime()) return;  // prefer downtime condition
+        if (!isWithinLookaheadThreshold(nextAlarm)) return;  // alarm not within window
+
+        // next alarm exists, and is within the configured lookahead threshold
+        notifyCondition(newConditionId(), nextAlarm, true, "request");
+    }
+
+    private boolean isWithinLookaheadThreshold(AlarmClockInfo alarm) {
+        if (alarm == null) return false;
+        final long delta = getEarlyTriggerTime(alarm) - System.currentTimeMillis();
+        return delta > 0 && (mLookaheadThreshold <= 0 || delta < mLookaheadThreshold);
+    }
+
+    @Override
+    public void onSubscribe(Uri conditionId) {
+        if (DEBUG) Slog.d(TAG, "onSubscribe " + conditionId);
+        if (!isNextAlarmCondition(conditionId)) {
+            notifyCondition(conditionId, null, false, "badCondition");
+            return;
+        }
+        mCurrentSubscription = conditionId;
+        mHandler.postEvaluate(0);
+    }
+
+    private static long getEarlyTriggerTime(AlarmClockInfo alarm) {
+        return alarm != null ? (alarm.getTriggerTime() - EARLY) : 0;
+    }
+
+    private void handleEvaluate() {
+        final AlarmClockInfo nextAlarm = mAlarmManager.getNextAlarmClock(mCurrentUserId);
+        final long triggerTime = getEarlyTriggerTime(nextAlarm);
+        final boolean withinThreshold = isWithinLookaheadThreshold(nextAlarm);
+        if (DEBUG) Slog.d(TAG, "handleEvaluate mCurrentSubscription=" + mCurrentSubscription
+                + " nextAlarm=" + formatAlarmDebug(triggerTime)
+                + " withinThreshold=" + withinThreshold);
+        if (mCurrentSubscription == null) return;  // no one cares
+        if (!withinThreshold) {
+            // triggertime invalid or in the past, condition = false
+            notifyCondition(mCurrentSubscription, nextAlarm, false, "!withinThreshold");
+            mCurrentSubscription = null;
+            return;
+        }
+        // triggertime in the future, condition = true, schedule alarm
+        notifyCondition(mCurrentSubscription, nextAlarm, true, "withinThreshold");
+        rescheduleAlarm(triggerTime);
+    }
+
+    private static String formatDuration(long millis) {
+        final StringBuilder sb = new StringBuilder();
+        TimeUtils.formatDuration(millis, sb);
+        return sb.toString();
+    }
+
+    private void rescheduleAlarm(long time) {
+        if (DEBUG) Slog.d(TAG, "rescheduleAlarm " + time);
+        final AlarmManager alarms = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, REQUEST_CODE,
+                new Intent(ACTION_TRIGGER)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                        .putExtra(EXTRA_TRIGGER, time),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        alarms.cancel(pendingIntent);
+        mScheduledAlarmTime = time;
+        if (time > 0) {
+            if (DEBUG) Slog.d(TAG, String.format("Scheduling alarm for %s (in %s)",
+                    formatAlarmDebug(time), formatDuration(time - System.currentTimeMillis())));
+            alarms.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
+        }
+    }
+
+    private void notifyCondition(Uri id, AlarmClockInfo alarm, boolean state, String reason) {
+        final String formattedAlarm = alarm == null ? "" : formatAlarm(alarm.getTriggerTime());
+        if (DEBUG) Slog.d(TAG, "notifyCondition " + state + " alarm=" + formattedAlarm + " reason="
+                + reason);
+        notifyCondition(new Condition(id,
+                mContext.getString(R.string.zen_mode_next_alarm_summary, formattedAlarm),
+                mContext.getString(R.string.zen_mode_next_alarm_line_one),
+                formattedAlarm, 0,
+                state ? Condition.STATE_TRUE : Condition.STATE_FALSE,
+                Condition.FLAG_RELEVANT_NOW));
+    }
+
+    @Override
+    public void onUnsubscribe(Uri conditionId) {
+        if (DEBUG) Slog.d(TAG, "onUnsubscribe " + conditionId);
+        if (conditionId != null && conditionId.equals(mCurrentSubscription)) {
+            mCurrentSubscription = null;
+            rescheduleAlarm(0);
+        }
+    }
+
+    public void attachBase(Context base) {
+        attachBaseContext(base);
+    }
+
+    public IConditionProvider asInterface() {
+        return (IConditionProvider) onBind(null);
+    }
+
+    private Uri newConditionId() {
+        return new Uri.Builder().scheme(Condition.SCHEME)
+                .authority(ZenModeConfig.SYSTEM_AUTHORITY)
+                .appendPath(NEXT_ALARM_PATH)
+                .appendPath(Integer.toString(mCurrentUserId))
+                .build();
+    }
+
+    private boolean isNextAlarmCondition(Uri conditionId) {
+        return conditionId != null && conditionId.getScheme().equals(Condition.SCHEME)
+                && conditionId.getAuthority().equals(ZenModeConfig.SYSTEM_AUTHORITY)
+                && conditionId.getPathSegments().size() == 2
+                && conditionId.getPathSegments().get(0).equals(NEXT_ALARM_PATH)
+                && conditionId.getPathSegments().get(1).equals(Integer.toString(mCurrentUserId));
+    }
+
+    private void init() {
+        if (mRegistered) {
+            mContext.unregisterReceiver(mReceiver);
+        }
+        mCurrentUserId = ActivityManager.getCurrentUser();
+        final IntentFilter filter = new IntentFilter();
+        filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
+        filter.addAction(ACTION_TRIGGER);
+        filter.addAction(Intent.ACTION_TIME_CHANGED);
+        filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        mContext.registerReceiverAsUser(mReceiver, new UserHandle(mCurrentUserId), filter, null,
+                null);
+        mRegistered = true;
+        mHandler.postEvaluate(0);
+    }
+
+    private String formatAlarm(long time) {
+        return formatAlarm(time, "Hm", "hma");
+    }
+
+    private String formatAlarm(long time, String skeleton24, String skeleton12) {
+        final String skeleton = DateFormat.is24HourFormat(mContext) ? skeleton24 : skeleton12;
+        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        return DateFormat.format(pattern, time).toString();
+    }
+
+    private String formatAlarmDebug(AlarmClockInfo alarm) {
+        return formatAlarmDebug(alarm != null ? alarm.getTriggerTime() : 0);
+    }
+
+    private String formatAlarmDebug(long time) {
+        if (time <= 0) return Long.toString(time);
+        return String.format("%s (%s)", time, formatAlarm(time, "Hms", "hmsa"));
+    }
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (DEBUG) Slog.d(TAG, "onReceive " + action);
+            long delay = 0;
+            if (action.equals(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED)) {
+                delay = NEXT_ALARM_UPDATE_DELAY;
+                if (DEBUG) Slog.d(TAG, String.format("  next alarm for user %s: %s",
+                        mCurrentUserId,
+                        formatAlarmDebug(mAlarmManager.getNextAlarmClock(mCurrentUserId))));
+            }
+            mHandler.postEvaluate(delay);
+            mWakeLock.acquire(delay + 5000);  // stay awake during evaluate
+        }
+    };
+
+    public interface Callback {
+        boolean isInDowntime();
+    }
+
+    private class H extends Handler {
+        private static final int MSG_EVALUATE = 1;
+
+        public void postEvaluate(long delay) {
+            removeMessages(MSG_EVALUATE);
+            sendEmptyMessageDelayed(MSG_EVALUATE, delay);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_EVALUATE) {
+                handleEvaluate();
+            }
+        }
+    }
+}
