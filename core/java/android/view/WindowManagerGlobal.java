@@ -118,6 +118,9 @@ public final class WindowManagerGlobal {
 
     private Runnable mSystemPropertyUpdater;
 
+    /** Default token to apply to added views. */
+    private IBinder mDefaultToken;
+
     private WindowManagerGlobal() {
     }
 
@@ -169,6 +172,17 @@ public final class WindowManagerGlobal {
         }
     }
 
+    /**
+     * Sets the default token to use in {@link #addView} when no parent window
+     * token is available and no token has been explicitly set in the view's
+     * layout params.
+     *
+     * @param token Default window token to apply to added views.
+     */
+    public void setDefaultToken(IBinder token) {
+        mDefaultToken = token;
+    }
+
     public String[] getViewRootNames() {
         synchronized (mLock) {
             final int numRoots = mRoots.size();
@@ -214,6 +228,10 @@ public final class WindowManagerGlobal {
                     && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
                 wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
+        }
+
+        if (wparams.token == null && mDefaultToken != null) {
+            wparams.token = mDefaultToken;
         }
 
         ViewRootImpl root;
