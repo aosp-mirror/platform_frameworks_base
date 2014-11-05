@@ -25,14 +25,14 @@ import com.android.systemui.statusbar.policy.RotationLockController.RotationLock
 
 /** Quick settings tile: Rotation **/
 public class RotationLockTile extends QSTile<QSTile.BooleanState> {
-    private final AnimationIcon PORTRAIT_TO_AUTO
+    private final AnimationIcon mPortraitToAuto
             = new AnimationIcon(R.drawable.ic_portrait_to_auto_rotate_animation);
-    private final AnimationIcon AUTO_TO_PORTRAIT
+    private final AnimationIcon mAutoToPortrait
             = new AnimationIcon(R.drawable.ic_portrait_from_auto_rotate_animation);
 
-    private final AnimationIcon LANDSCAPE_TO_AUTO
+    private final AnimationIcon mLandscapeToAuto
             = new AnimationIcon(R.drawable.ic_landscape_to_auto_rotate_animation);
-    private final AnimationIcon AUTO_TO_LANDSCAPE
+    private final AnimationIcon mAutoToLandscape
             = new AnimationIcon(R.drawable.ic_landscape_from_auto_rotate_animation);
 
     private final RotationLockController mController;
@@ -79,10 +79,10 @@ public class RotationLockTile extends QSTile<QSTile.BooleanState> {
             final int label = portrait ? R.string.quick_settings_rotation_locked_portrait_label
                     : R.string.quick_settings_rotation_locked_landscape_label;
             state.label = mContext.getString(label);
-            icon = portrait ? AUTO_TO_PORTRAIT : AUTO_TO_LANDSCAPE;
+            icon = portrait ? mAutoToPortrait : mAutoToLandscape;
         } else {
             state.label = mContext.getString(R.string.quick_settings_rotation_unlocked_label);
-            icon = portrait ? PORTRAIT_TO_AUTO : LANDSCAPE_TO_AUTO;
+            icon = portrait ? mPortraitToAuto : mLandscapeToAuto;
         }
         icon.setAllowAnimation(userInitiated);
         state.icon = icon;
