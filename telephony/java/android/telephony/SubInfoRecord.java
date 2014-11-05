@@ -250,7 +250,7 @@ public class SubInfoRecord implements Parcelable {
         dest.writeCharSequence(mDisplayName);
         dest.writeInt(mNameSource);
         dest.writeInt(mColor);
-        dest.writeString(mNumber.toString());
+        dest.writeString(mNumber);
         dest.writeInt(mDataRoaming);
         dest.writeIntArray(mSimIconRes);
         dest.writeInt(mMcc);
