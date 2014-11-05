@@ -794,4 +794,23 @@ bool isSameExcept(const ResTable_config& a, const ResTable_config& b, int axisMa
     return a.diff(b) == axisMask;
 }
 
+bool isDensityOnly(const ResTable_config& config) {
+    if (config.density == ResTable_config::DENSITY_NONE) {
+        return false;
+    }
+
+    if (config.density == ResTable_config::DENSITY_ANY) {
+        if (config.sdkVersion != SDK_L) {
+            // Someone modified the sdkVersion from the default, this is not safe to assume.
+            return false;
+        }
+    } else if (config.sdkVersion != SDK_DONUT) {
+        return false;
+    }
+
+    const uint32_t mask = ResTable_config::CONFIG_DENSITY | ResTable_config::CONFIG_VERSION;
+    const ConfigDescription nullConfig;
+    return (nullConfig.diff(config) & ~mask) == 0;
+}
+
 } // namespace AaptConfig
