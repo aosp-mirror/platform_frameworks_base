@@ -473,6 +473,8 @@
     <bool name="config_allowTheaterModeWakeFromDock">false</bool>
     <!-- If this is true, allow wake from theater mode from window layout flag. -->
     <bool name="config_allowTheaterModeWakeFromWindowLayout">false</bool>
+    <!-- If this is true, go to sleep when theater mode is enabled from button press -->
+    <bool name="config_goToSleepOnButtonPressTheaterMode">true</bool>
 
     <!-- Auto-rotation behavior -->
 
