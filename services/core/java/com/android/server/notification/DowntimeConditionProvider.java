@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionProvider;
@@ -64,7 +65,7 @@ public class DowntimeConditionProvider extends ConditionProviderService {
     private final ArraySet<Integer> mDays = new ArraySet<Integer>();
 
     private boolean mConnected;
-    private boolean mInDowntime;
+    private int mDowntimeMode;
     private ZenModeConfig mConfig;
     private Callback mCallback;
 
@@ -75,7 +76,7 @@ public class DowntimeConditionProvider extends ConditionProviderService {
     public void dump(PrintWriter pw, DumpFilter filter) {
         pw.println("    DowntimeConditionProvider:");
         pw.print("      mConnected="); pw.println(mConnected);
-        pw.print("      mInDowntime="); pw.println(mInDowntime);
+        pw.print("      mDowntimeMode="); pw.println(Global.zenModeToString(mDowntimeMode));
     }
 
     public void attachBase(Context base) {
@@ -113,7 +114,7 @@ public class DowntimeConditionProvider extends ConditionProviderService {
     public void onRequestConditions(int relevance) {
         if (DEBUG) Slog.d(TAG, "onRequestConditions relevance=" + relevance);
         if ((relevance & Condition.FLAG_RELEVANT_NOW) != 0) {
-            if (mInDowntime && mConfig != null) {
+            if (isInDowntime() && mConfig != null) {
                 notifyCondition(createCondition(mConfig.toDowntimeInfo(), Condition.STATE_TRUE));
             }
         }
@@ -124,7 +125,7 @@ public class DowntimeConditionProvider extends ConditionProviderService {
         if (DEBUG) Slog.d(TAG, "onSubscribe conditionId=" + conditionId);
         final DowntimeInfo downtime = ZenModeConfig.tryParseDowntimeConditionId(conditionId);
         if (downtime != null && mConfig != null) {
-            final int state = mConfig.toDowntimeInfo().equals(downtime) && mInDowntime
+            final int state = mConfig.toDowntimeInfo().equals(downtime) && isInDowntime()
                     ? Condition.STATE_TRUE : Condition.STATE_FALSE;
             if (DEBUG) Slog.d(TAG, "notify condition state: " + Condition.stateToString(state));
             notifyCondition(createCondition(downtime, state));
@@ -146,7 +147,7 @@ public class DowntimeConditionProvider extends ConditionProviderService {
     }
 
     public boolean isInDowntime() {
-        return mInDowntime;
+        return mDowntimeMode != Global.ZEN_MODE_OFF;
     }
 
     public Condition createCondition(DowntimeInfo downtime, int state) {
@@ -182,15 +183,18 @@ public class DowntimeConditionProvider extends ConditionProviderService {
         }
     }
 
-    private boolean isInDowntime(long time) {
-        if (mConfig == null || mDays.size() == 0) return false;
+    private int computeDowntimeMode(long time) {
+        if (mConfig == null || mDays.size() == 0) return Global.ZEN_MODE_OFF;
         final long start = getTime(time, mConfig.sleepStartHour, mConfig.sleepStartMinute);
         long end = getTime(time, mConfig.sleepEndHour, mConfig.sleepEndMinute);
-        if (start == end) return false;
+        if (start == end) return Global.ZEN_MODE_OFF;
         if (end < start) {
             end = addDays(end, 1);
         }
-        return isInDowntime(-1, time, start, end) || isInDowntime(0, time, start, end);
+        final boolean inDowntime = isInDowntime(-1, time, start, end)
+                || isInDowntime(0, time, start, end);
+        return inDowntime ? (mConfig.sleepNone ? Global.ZEN_MODE_NO_INTERRUPTIONS
+                : Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) : Global.ZEN_MODE_OFF;
     }
 
     private boolean isInDowntime(int daysOffset, long time, long start, long end) {
@@ -202,18 +206,18 @@ public class DowntimeConditionProvider extends ConditionProviderService {
     }
 
     private void reevaluateDowntime() {
-        final boolean inDowntime = isInDowntime(System.currentTimeMillis());
-        if (DEBUG) Slog.d(TAG, "inDowntime=" + inDowntime);
-        if (inDowntime == mInDowntime) return;
-        Slog.i(TAG, (inDowntime ? "Entering" : "Exiting" ) + " downtime");
-        mInDowntime = inDowntime;
-        ZenLog.traceDowntime(mInDowntime, getDayOfWeek(System.currentTimeMillis()), mDays);
+        final int downtimeMode = computeDowntimeMode(System.currentTimeMillis());
+        if (DEBUG) Slog.d(TAG, "downtimeMode=" + downtimeMode);
+        if (downtimeMode == mDowntimeMode) return;
+        mDowntimeMode = downtimeMode;
+        Slog.i(TAG, (isInDowntime() ? "Entering" : "Exiting" ) + " downtime");
+        ZenLog.traceDowntime(mDowntimeMode, getDayOfWeek(System.currentTimeMillis()), mDays);
         fireDowntimeChanged();
     }
 
     private void fireDowntimeChanged() {
         if (mCallback != null) {
-            mCallback.onDowntimeChanged(mInDowntime);
+            mCallback.onDowntimeChanged(mDowntimeMode);
         }
     }
 
@@ -256,7 +260,10 @@ public class DowntimeConditionProvider extends ConditionProviderService {
             time = addDays(time, 1);
         }
         final PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, requestCode,
-                new Intent(action).putExtra(EXTRA_TIME, time), PendingIntent.FLAG_UPDATE_CURRENT);
+                new Intent(action)
+                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                    .putExtra(EXTRA_TIME, time),
+                PendingIntent.FLAG_UPDATE_CURRENT);
         alarms.cancel(pendingIntent);
         if (mConfig.sleepMode != null) {
             if (DEBUG) Slog.d(TAG, String.format("Scheduling %s for %s, %s in the future, now=%s",
@@ -290,6 +297,6 @@ public class DowntimeConditionProvider extends ConditionProviderService {
     };
 
     public interface Callback {
-        void onDowntimeChanged(boolean inDowntime);
+        void onDowntimeChanged(int downtimeMode);
     }
 }

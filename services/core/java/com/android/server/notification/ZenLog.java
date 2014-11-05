@@ -75,8 +75,8 @@ public class ZenLog {
         append(TYPE_SET_RINGER_MODE, ringerModeToString(ringerMode));
     }
 
-    public static void traceDowntime(boolean inDowntime, int day, ArraySet<Integer> days) {
-        append(TYPE_DOWNTIME, inDowntime + ",day=" + day + ",days=" + days);
+    public static void traceDowntime(int downtimeMode, int day, ArraySet<Integer> days) {
+        append(TYPE_DOWNTIME, zenModeToString(downtimeMode) + ",day=" + day + ",days=" + days);
     }
 
     public static void traceSetZenMode(int mode, String reason) {
