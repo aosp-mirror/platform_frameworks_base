@@ -3074,8 +3074,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
             else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 mScreenOn = true;
-                // work around problem where mDisplay.getRotation() is not stable while screen is off (bug 7086018)
-                repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
             }
             else if (ACTION_DEMO.equals(action)) {
