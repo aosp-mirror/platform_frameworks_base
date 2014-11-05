@@ -835,7 +835,7 @@ final class ActivityStack {
         prev.task.touchActiveTime();
         clearLaunchTime(prev);
         final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
-        if (mService.mHasRecents && (next == null || next.noDisplay || next.task != prev.task)) {
+        if (mService.mHasRecents && (next == null || next.noDisplay || next.task != prev.task || uiSleeping)) {
             prev.updateThumbnail(screenshotActivities(prev), null);
         }
         stopFullyDrawnTraceIfNeeded();
