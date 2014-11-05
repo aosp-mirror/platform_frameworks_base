@@ -527,6 +527,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mAllowTheaterModeWakeFromLidSwitch;
     private boolean mAllowTheaterModeWakeFromWakeGesture;
 
+    // Whether to go to sleep entering theater mode from power button
+    private boolean mGoToSleepOnButtonPressTheaterMode;
+
     // Screenshot trigger states
     // Time to volume and power must be pressed within this interval of each other.
     private static final long SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS = 150;
@@ -984,7 +987,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Slog.i(TAG, "Toggling theater mode on.");
                     Settings.Global.putInt(mContext.getContentResolver(),
                             Settings.Global.THEATER_MODE_ON, 1);
-                    if (interactive) {
+
+                    if (mGoToSleepOnButtonPressTheaterMode && interactive) {
                         mPowerManager.goToSleep(eventTime,
                                 PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
                     }
@@ -1235,6 +1239,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromLidSwitch);
         mAllowTheaterModeWakeFromWakeGesture = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromGesture);
+
+        mGoToSleepOnButtonPressTheaterMode = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_goToSleepOnButtonPressTheaterMode);
 
         mShortPressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shortPressOnPowerBehavior);
