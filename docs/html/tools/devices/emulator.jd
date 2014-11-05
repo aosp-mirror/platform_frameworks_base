@@ -80,7 +80,9 @@ using your mouse or keyboard to generate events for your application. It also
 provides a screen in which your application is displayed, together with any other
 active Android applications. </p>
 
-<img src="{@docRoot}images/emulator-wvga800l.png" width="367" height="349" />
+<img src="{@docRoot}images/emulator@2x.png"
+srcset="{@docRoot}images/emulator.png 1x, {@docRoot}images/emulator@2x.png 2x" alt=""
+  width="367" height="330"/>
 
 <p>To let you model and test your application more easily, the emulator utilizes
 Android Virtual Device (AVD) configurations. AVDs let you define certain hardware
