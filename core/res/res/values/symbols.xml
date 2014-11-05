@@ -1987,12 +1987,16 @@
   <java-symbol type="string" name="timepicker_transition_end_radius_multiplier" />
   <java-symbol type="string" name="battery_saver_description" />
   <java-symbol type="string" name="downtime_condition_summary" />
+  <java-symbol type="string" name="downtime_condition_line_one" />
   <java-symbol type="string" name="zen_mode_forever" />
   <java-symbol type="plurals" name="zen_mode_duration_minutes" />
   <java-symbol type="plurals" name="zen_mode_duration_hours" />
   <java-symbol type="plurals" name="zen_mode_duration_minutes_summary" />
   <java-symbol type="plurals" name="zen_mode_duration_hours_summary" />
   <java-symbol type="string" name="zen_mode_until" />
+  <java-symbol type="string" name="zen_mode_next_alarm_summary" />
+  <java-symbol type="string" name="zen_mode_next_alarm_line_one" />
+  <java-symbol type="integer" name="config_next_alarm_condition_lookahead_threshold_hrs" />
 
   <java-symbol type="string" name="item_is_selected" />
   <java-symbol type="string" name="day_of_week_label_typeface" />

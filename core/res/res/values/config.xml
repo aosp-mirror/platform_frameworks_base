@@ -1907,4 +1907,7 @@
            1. Lenient threshold
     -->
     <integer name="config_LTE_RSRP_threshold_type">1</integer>
+
+    <!-- Show the next-alarm as a zen exit condition if it occurs in the next n hours. -->
+    <integer name="config_next_alarm_condition_lookahead_threshold_hrs">12</integer>
 </resources>

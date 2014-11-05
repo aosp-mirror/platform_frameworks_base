@@ -52,6 +52,7 @@ public class ConditionProviders extends ManagedServices {
     private final ArrayList<ConditionRecord> mRecords = new ArrayList<ConditionRecord>();
     private final CountdownConditionProvider mCountdown = new CountdownConditionProvider();
     private final DowntimeConditionProvider mDowntime = new DowntimeConditionProvider();
+    private final NextAlarmConditionProvider mNextAlarm = new NextAlarmConditionProvider();
 
     private Condition mExitCondition;
     private ComponentName mExitConditionComponent;
@@ -99,6 +100,7 @@ public class ConditionProviders extends ManagedServices {
         }
         mCountdown.dump(pw, filter);
         mDowntime.dump(pw, filter);
+        mNextAlarm.dump(pw, filter);
     }
 
     @Override
@@ -116,6 +118,23 @@ public class ConditionProviders extends ManagedServices {
         registerService(mDowntime.asInterface(), DowntimeConditionProvider.COMPONENT,
                 UserHandle.USER_OWNER);
         mDowntime.setCallback(new DowntimeCallback());
+        mNextAlarm.attachBase(mContext);
+        registerService(mNextAlarm.asInterface(), NextAlarmConditionProvider.COMPONENT,
+                UserHandle.USER_OWNER);
+        mNextAlarm.setCallback(new NextAlarmConditionProvider.Callback() {
+            @Override
+            public boolean isInDowntime() {
+                return mDowntime.isInDowntime();
+            }
+        });
+    }
+
+    @Override
+    public void onUserSwitched() {
+        super.onUserSwitched();
+        if (mNextAlarm != null) {
+            mNextAlarm.onUserSwitched();
+        }
     }
 
     @Override
