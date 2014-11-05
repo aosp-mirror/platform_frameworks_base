@@ -86,11 +86,14 @@ public class BridgeRenderSession extends RenderSession {
     }
 
     @Override
-    public Result render(long timeout) {
+    public Result render(long timeout, boolean forceMeasure) {
         try {
             Bridge.prepareThread();
             mLastResult = mSession.acquire(timeout);
             if (mLastResult.isSuccess()) {
+                if (forceMeasure) {
+                    mSession.invalidateRenderingSize();
+                }
                 mLastResult = mSession.render(false /*freshRender*/);
             }
         } finally {
