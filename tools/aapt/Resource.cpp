@@ -4,6 +4,7 @@
 // Build resource files from raw assets.
 //
 #include "AaptAssets.h"
+#include "AaptUtil.h"
 #include "AaptXml.h"
 #include "CacheUpdater.h"
 #include "CrunchCache.h"
@@ -13,8 +14,11 @@
 #include "Main.h"
 #include "ResourceTable.h"
 #include "StringPool.h"
+#include "Symbol.h"
 #include "WorkQueue.h"
 #include "XMLNode.h"
+
+#include <algorithm>
 
 #if HAVE_PRINTF_ZD
 #  define ZD "%zd"
@@ -1550,6 +1554,7 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
     // Re-flatten because we may have added new resource IDs
     // --------------------------------------------------------------
 
+
     ResTable finalResTable;
     sp<AaptFile> resFile;
     
@@ -1558,6 +1563,13 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
         err = table.addSymbols(symbols);
         if (err < NO_ERROR) {
             return err;
+        }
+
+        KeyedVector<Symbol, Vector<SymbolDefinition> > densityVaryingResources;
+        if (builder->getSplits().size() > 1) {
+            // Only look for density varying resources if we're generating
+            // splits.
+            table.getDensityVaryingResources(densityVaryingResources);
         }
 
         Vector<sp<ApkSplit> >& splits = builder->getSplits();
@@ -1583,6 +1595,63 @@ status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets, sp<ApkBuil
                     return err;
                 }
             } else {
+                ResTable resTable;
+                err = resTable.add(flattenedTable->getData(), flattenedTable->getSize());
+                if (err != NO_ERROR) {
+                    fprintf(stderr, "Generated resource table for split '%s' is corrupt.\n",
+                            split->getPrintableName().string());
+                    return err;
+                }
+
+                bool hasError = false;
+                const std::set<ConfigDescription>& splitConfigs = split->getConfigs();
+                for (std::set<ConfigDescription>::const_iterator iter = splitConfigs.begin();
+                        iter != splitConfigs.end();
+                        ++iter) {
+                    const ConfigDescription& config = *iter;
+                    if (AaptConfig::isDensityOnly(config)) {
+                        // Each density only split must contain all
+                        // density only resources.
+                        Res_value val;
+                        resTable.setParameters(&config);
+                        const size_t densityVaryingResourceCount = densityVaryingResources.size();
+                        for (size_t k = 0; k < densityVaryingResourceCount; k++) {
+                            const Symbol& symbol = densityVaryingResources.keyAt(k);
+                            ssize_t block = resTable.getResource(symbol.id, &val, true);
+                            if (block < 0) {
+                                // Maybe it's in the base?
+                                finalResTable.setParameters(&config);
+                                block = finalResTable.getResource(symbol.id, &val, true);
+                            }
+
+                            if (block < 0) {
+                                hasError = true;
+                                SourcePos().error("%s has no definition for density split '%s'",
+                                        symbol.toString().string(), config.toString().string());
+
+                                if (bundle->getVerbose()) {
+                                    const Vector<SymbolDefinition>& defs = densityVaryingResources[k];
+                                    const size_t defCount = std::min(size_t(5), defs.size());
+                                    for (size_t d = 0; d < defCount; d++) {
+                                        const SymbolDefinition& def = defs[d];
+                                        def.source.error("%s has definition for %s",
+                                                symbol.toString().string(), def.config.toString().string());
+                                    }
+
+                                    if (defCount < defs.size()) {
+                                        SourcePos().error("and %d more ...", (int) (defs.size() - defCount));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (hasError) {
+                    return UNKNOWN_ERROR;
+                }
+
+                // Generate the AndroidManifest for this split.
                 sp<AaptFile> generatedManifest = new AaptFile(String8("AndroidManifest.xml"),
                         AaptGroupEntry(), String8());
                 err = generateAndroidManifestForSplit(bundle, assets, split,
