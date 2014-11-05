@@ -286,7 +286,9 @@ public final class MediaSession {
         if (volumeProvider == null) {
             throw new IllegalArgumentException("volumeProvider may not be null!");
         }
-        mVolumeProvider = volumeProvider;
+        synchronized (mLock) {
+            mVolumeProvider = volumeProvider;
+        }
         volumeProvider.setCallback(new VolumeProvider.Callback() {
             @Override
             public void onVolumeChanged(VolumeProvider volumeProvider) {
@@ -491,9 +493,11 @@ public final class MediaSession {
      * @hide
      */
     public void notifyRemoteVolumeChanged(VolumeProvider provider) {
-        if (provider == null || provider != mVolumeProvider) {
-            Log.w(TAG, "Received update from stale volume provider");
-            return;
+        synchronized (mLock) {
+            if (provider == null || provider != mVolumeProvider) {
+                Log.w(TAG, "Received update from stale volume provider");
+                return;
+            }
         }
         try {
             mBinder.setCurrentVolume(provider.getCurrentVolume());
@@ -556,6 +560,14 @@ public final class MediaSession {
 
     private void dispatchMediaButton(Intent mediaButtonIntent) {
         postToCallback(CallbackMessageHandler.MSG_MEDIA_BUTTON, mediaButtonIntent);
+    }
+
+    private void dispatchAdjustVolume(int direction) {
+        postToCallback(CallbackMessageHandler.MSG_ADJUST_VOLUME, direction);
+    }
+
+    private void dispatchSetVolumeTo(int volume) {
+        postToCallback(CallbackMessageHandler.MSG_SET_VOLUME, volume);
     }
 
     private void postToCallback(int what) {
@@ -1009,9 +1021,7 @@ public final class MediaSession {
         public void onAdjustVolume(int direction) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                if (session.mVolumeProvider != null) {
-                    session.mVolumeProvider.onAdjustVolume(direction);
-                }
+                session.dispatchAdjustVolume(direction);
             }
         }
 
@@ -1019,9 +1029,7 @@ public final class MediaSession {
         public void onSetVolumeTo(int value) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                if (session.mVolumeProvider != null) {
-                    session.mVolumeProvider.onSetVolumeTo(value);
-                }
+                session.dispatchSetVolumeTo(value);
             }
         }
 
@@ -1138,6 +1146,8 @@ public final class MediaSession {
         private static final int MSG_CUSTOM_ACTION = 13;
         private static final int MSG_MEDIA_BUTTON = 14;
         private static final int MSG_COMMAND = 15;
+        private static final int MSG_ADJUST_VOLUME = 16;
+        private static final int MSG_SET_VOLUME = 17;
 
         private MediaSession.Callback mCallback;
 
@@ -1166,6 +1176,7 @@ public final class MediaSession {
 
         @Override
         public void handleMessage(Message msg) {
+            VolumeProvider vp;
             switch (msg.what) {
                 case MSG_PLAY:
                     mCallback.onPlay();
@@ -1212,6 +1223,22 @@ public final class MediaSession {
                 case MSG_COMMAND:
                     Command cmd = (Command) msg.obj;
                     mCallback.onCommand(cmd.command, cmd.extras, cmd.stub);
+                    break;
+                case MSG_ADJUST_VOLUME:
+                    synchronized (mLock) {
+                        vp = mVolumeProvider;
+                    }
+                    if (vp != null) {
+                        vp.onAdjustVolume((int) msg.obj);
+                    }
+                    break;
+                case MSG_SET_VOLUME:
+                    synchronized (mLock) {
+                        vp = mVolumeProvider;
+                    }
+                    if (vp != null) {
+                        vp.onSetVolumeTo((int) msg.obj);
+                    }
                     break;
             }
         }
