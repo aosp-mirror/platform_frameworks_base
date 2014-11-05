@@ -16896,9 +16896,11 @@ package android.net {
     method public boolean isDefaultNetworkActive();
     method public static boolean isNetworkTypeValid(int);
     method public void registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
+    method public void releaseNetworkRequest(android.app.PendingIntent);
     method public void removeDefaultNetworkActiveListener(android.net.ConnectivityManager.OnNetworkActiveListener);
     method public void reportBadNetwork(android.net.Network);
     method public void requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback);
+    method public void requestNetwork(android.net.NetworkRequest, android.app.PendingIntent);
     method public deprecated boolean requestRouteToHost(int, int);
     method public deprecated void setNetworkPreference(int);
     method public static boolean setProcessDefaultNetwork(android.net.Network);
@@ -16911,6 +16913,8 @@ package android.net {
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
     field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
+    field public static final java.lang.String EXTRA_NETWORK_REQUEST_NETWORK = "networkRequestNetwork";
+    field public static final java.lang.String EXTRA_NETWORK_REQUEST_NETWORK_REQUEST = "networkRequestNetworkRequest";
     field public static final java.lang.String EXTRA_NETWORK_TYPE = "networkType";
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";
