@@ -553,20 +553,22 @@ public class ConditionProviders extends ManagedServices {
 
     private class DowntimeCallback implements DowntimeConditionProvider.Callback {
         @Override
-        public void onDowntimeChanged(boolean inDowntime) {
+        public void onDowntimeChanged(int downtimeMode) {
             final int mode = mZenModeHelper.getZenMode();
             final ZenModeConfig config = mZenModeHelper.getConfig();
-            // enter downtime
-            if (inDowntime && mode == Global.ZEN_MODE_OFF && config != null) {
+            final boolean inDowntime = downtimeMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                    || downtimeMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
+            final boolean downtimeCurrent = mDowntime.isDowntimeCondition(mExitCondition);
+            // enter downtime, or update mode if reconfigured during an active downtime
+            if (inDowntime && (mode == Global.ZEN_MODE_OFF || downtimeCurrent)  && config != null) {
                 final Condition condition = mDowntime.createCondition(config.toDowntimeInfo(),
                         Condition.STATE_TRUE);
-                mZenModeHelper.setZenMode(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, "downtimeEnter");
+                mZenModeHelper.setZenMode(downtimeMode, "downtimeEnter");
                 setZenModeCondition(condition, "downtime");
             }
             // exit downtime
-            if (!inDowntime && mDowntime.isDowntimeCondition(mExitCondition)
-                    && (mode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                                || mode == Global.ZEN_MODE_NO_INTERRUPTIONS)) {
+            if (!inDowntime && downtimeCurrent && (mode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                    || mode == Global.ZEN_MODE_NO_INTERRUPTIONS)) {
                 mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF, "downtimeExit");
             }
         }
