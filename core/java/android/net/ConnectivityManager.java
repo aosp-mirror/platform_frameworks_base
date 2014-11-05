@@ -1012,60 +1012,57 @@ public class ConnectivityManager {
         return null;
     }
 
+    /**
+     * Guess what the network request was trying to say so that the resulting
+     * network is accessible via the legacy (deprecated) API such as
+     * requestRouteToHost.
+     * This means we should try to be fairly preceise about transport and
+     * capability but ignore things such as networkSpecifier.
+     * If the request has more than one transport or capability it doesn't
+     * match the old legacy requests (they selected only single transport/capability)
+     * so this function cannot map the request to a single legacy type and
+     * the resulting network will not be available to the legacy APIs.
+     *
+     * TODO - This should be removed when the legacy APIs are removed.
+     */
     private int inferLegacyTypeForNetworkCapabilities(NetworkCapabilities netCap) {
         if (netCap == null) {
             return TYPE_NONE;
         }
+
         if (!netCap.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             return TYPE_NONE;
         }
+
+        String type = null;
+        int result = TYPE_NONE;
+
         if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_CBS)) {
-            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableCBS"))) {
-                return TYPE_MOBILE_CBS;
-            } else {
-                return TYPE_NONE;
-            }
+            type = "enableCBS";
+            result = TYPE_MOBILE_CBS;
+        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_IMS)) {
+            type = "enableIMS";
+            result = TYPE_MOBILE_IMS;
+        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_FOTA)) {
+            type = "enableFOTA";
+            result = TYPE_MOBILE_FOTA;
+        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_DUN)) {
+            type = "enableDUN";
+            result = TYPE_MOBILE_DUN;
+        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
+            type = "enableSUPL";
+            result = TYPE_MOBILE_SUPL;
+        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_MMS)) {
+            type = "enableMMS";
+            result = TYPE_MOBILE_MMS;
+        } else if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+            type = "enableHIPRI";
+            result = TYPE_MOBILE_HIPRI;
         }
-        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_IMS)) {
-            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableIMS"))) {
-                return TYPE_MOBILE_IMS;
-            } else {
-                return TYPE_NONE;
-            }
-        }
-        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_FOTA)) {
-            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableFOTA"))) {
-                return TYPE_MOBILE_FOTA;
-            } else {
-                return TYPE_NONE;
-            }
-        }
-        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_DUN)) {
-            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableDUN"))) {
-                return TYPE_MOBILE_DUN;
-            } else {
-                return TYPE_NONE;
-            }
-        }
-        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_SUPL)) {
-            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableSUPL"))) {
-                return TYPE_MOBILE_SUPL;
-            } else {
-                return TYPE_NONE;
-            }
-        }
-        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_MMS)) {
-            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableMMS"))) {
-                return TYPE_MOBILE_MMS;
-            } else {
-                return TYPE_NONE;
-            }
-        }
-        if (netCap.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-            if (netCap.equals(networkCapabilitiesForFeature(TYPE_MOBILE, "enableHIPRI"))) {
-                return TYPE_MOBILE_HIPRI;
-            } else {
-                return TYPE_NONE;
+        if (type != null) {
+            NetworkCapabilities testCap = networkCapabilitiesForFeature(TYPE_MOBILE, type);
+            if (testCap.equalsNetCapabilities(netCap) && testCap.equalsTransportTypes(netCap)) {
+                return result;
             }
         }
         return TYPE_NONE;

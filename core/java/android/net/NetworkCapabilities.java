@@ -235,7 +235,8 @@ public final class NetworkCapabilities implements Parcelable {
         return ((nc.mNetworkCapabilities & this.mNetworkCapabilities) == this.mNetworkCapabilities);
     }
 
-    private boolean equalsNetCapabilities(NetworkCapabilities nc) {
+    /** @hide */
+    public boolean equalsNetCapabilities(NetworkCapabilities nc) {
         return (nc.mNetworkCapabilities == this.mNetworkCapabilities);
     }
 
@@ -344,7 +345,8 @@ public final class NetworkCapabilities implements Parcelable {
         return ((this.mTransportTypes == 0) ||
                 ((this.mTransportTypes & nc.mTransportTypes) != 0));
     }
-    private boolean equalsTransportTypes(NetworkCapabilities nc) {
+    /** @hide */
+    public boolean equalsTransportTypes(NetworkCapabilities nc) {
         return (nc.mTransportTypes == this.mTransportTypes);
     }
 
