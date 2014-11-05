@@ -70,7 +70,7 @@ public:
  * that quickRejection can also be used.
  */
 
-class CanvasState {
+class ANDROID_API CanvasState {
 public:
     CanvasState(CanvasStateClient& renderer);
     ~CanvasState();
