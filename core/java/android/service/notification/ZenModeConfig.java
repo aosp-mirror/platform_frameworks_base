@@ -78,6 +78,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_EVENTS = "events";
     private static final String SLEEP_TAG = "sleep";
     private static final String SLEEP_ATT_MODE = "mode";
+    private static final String SLEEP_ATT_NONE = "none";
 
     private static final String SLEEP_ATT_START_HR = "startHour";
     private static final String SLEEP_ATT_START_MIN = "startMin";
@@ -107,6 +108,7 @@ public class ZenModeConfig implements Parcelable {
     public int sleepStartMinute; // 0-59
     public int sleepEndHour;
     public int sleepEndMinute;
+    public boolean sleepNone;    // false = priority, true = none
     public ComponentName[] conditionComponents;
     public Uri[] conditionIds;
     public Condition exitCondition;
@@ -125,6 +127,7 @@ public class ZenModeConfig implements Parcelable {
         sleepStartMinute = source.readInt();
         sleepEndHour = source.readInt();
         sleepEndMinute = source.readInt();
+        sleepNone = source.readInt() == 1;
         int len = source.readInt();
         if (len > 0) {
             conditionComponents = new ComponentName[len];
@@ -155,6 +158,7 @@ public class ZenModeConfig implements Parcelable {
         dest.writeInt(sleepStartMinute);
         dest.writeInt(sleepEndHour);
         dest.writeInt(sleepEndMinute);
+        dest.writeInt(sleepNone ? 1 : 0);
         if (conditionComponents != null && conditionComponents.length > 0) {
             dest.writeInt(conditionComponents.length);
             dest.writeTypedArray(conditionComponents, 0);
@@ -182,6 +186,7 @@ public class ZenModeConfig implements Parcelable {
             .append(",sleepMode=").append(sleepMode)
             .append(",sleepStart=").append(sleepStartHour).append('.').append(sleepStartMinute)
             .append(",sleepEnd=").append(sleepEndHour).append('.').append(sleepEndMinute)
+            .append(",sleepNone=").append(sleepNone)
             .append(",conditionComponents=")
             .append(conditionComponents == null ? null : TextUtils.join(",", conditionComponents))
             .append(",conditionIds=")
@@ -214,6 +219,7 @@ public class ZenModeConfig implements Parcelable {
                 && other.allowFrom == allowFrom
                 && other.allowEvents == allowEvents
                 && Objects.equals(other.sleepMode, sleepMode)
+                && other.sleepNone == sleepNone
                 && other.sleepStartHour == sleepStartHour
                 && other.sleepStartMinute == sleepStartMinute
                 && other.sleepEndHour == sleepEndHour
@@ -226,7 +232,7 @@ public class ZenModeConfig implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(allowCalls, allowMessages, allowFrom, allowEvents, sleepMode,
+        return Objects.hash(allowCalls, allowMessages, allowFrom, allowEvents, sleepMode, sleepNone,
                 sleepStartHour, sleepStartMinute, sleepEndHour, sleepEndMinute,
                 Arrays.hashCode(conditionComponents), Arrays.hashCode(conditionIds),
                 exitCondition, exitConditionComponent);
@@ -302,6 +308,7 @@ public class ZenModeConfig implements Parcelable {
                 } else if (SLEEP_TAG.equals(tag)) {
                     final String mode = parser.getAttributeValue(null, SLEEP_ATT_MODE);
                     rt.sleepMode = isValidSleepMode(mode)? mode : null;
+                    rt.sleepNone = safeBoolean(parser, SLEEP_ATT_NONE, false);
                     final int startHour = safeInt(parser, SLEEP_ATT_START_HR, 0);
                     final int startMinute = safeInt(parser, SLEEP_ATT_START_MIN, 0);
                     final int endHour = safeInt(parser, SLEEP_ATT_END_HR, 0);
@@ -345,6 +352,7 @@ public class ZenModeConfig implements Parcelable {
         if (sleepMode != null) {
             out.attribute(null, SLEEP_ATT_MODE, sleepMode);
         }
+        out.attribute(null, SLEEP_ATT_NONE, Boolean.toString(sleepNone));
         out.attribute(null, SLEEP_ATT_START_HR, Integer.toString(sleepStartHour));
         out.attribute(null, SLEEP_ATT_START_MIN, Integer.toString(sleepStartMinute));
         out.attribute(null, SLEEP_ATT_END_HR, Integer.toString(sleepEndHour));
