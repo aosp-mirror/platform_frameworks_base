@@ -1109,15 +1109,17 @@ final class AccessibilityInteractionController {
                         || accessibilityViewId == providerHost.getAccessibilityViewId()) {
                     final AccessibilityNodeInfo parent;
                     if (virtualDescendantId != AccessibilityNodeInfo.UNDEFINED_ITEM_ID) {
-                        parent = provider.createAccessibilityNodeInfo(
-                                virtualDescendantId);
+                        parent = provider.createAccessibilityNodeInfo(virtualDescendantId);
                     } else {
-                        parent= provider.createAccessibilityNodeInfo(
+                        parent = provider.createAccessibilityNodeInfo(
                                 AccessibilityNodeProvider.HOST_VIEW_ID);
                     }
-                    if (parent != null) {
-                        outInfos.add(parent);
+                    if (parent == null) {
+                        // Couldn't obtain the parent, which means we have a
+                        // disconnected sub-tree. Abort prefetch immediately.
+                        return;
                     }
+                    outInfos.add(parent);
                     parentNodeId = parent.getParentNodeId();
                     accessibilityViewId = AccessibilityNodeInfo.getAccessibilityViewId(
                             parentNodeId);
