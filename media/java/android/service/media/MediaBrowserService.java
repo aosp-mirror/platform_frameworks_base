@@ -101,7 +101,6 @@ public abstract class MediaBrowserService extends Service {
      * be thrown.
      *
      * @see MediaBrowserService#onLoadChildren
-     * @see MediaBrowserService#onLoadIcon
      */
     public class Result<T> {
         private Object mDebug;
