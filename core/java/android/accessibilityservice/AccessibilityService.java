@@ -24,11 +24,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.Display;
 import android.view.KeyEvent;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -620,18 +618,6 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
-    @Override
-    public Object getSystemService(String name) {
-        if (Context.WINDOW_SERVICE.equals(name)) {
-            if (mWindowManager == null) {
-                WindowManager wrapped = (WindowManager) super.getSystemService(name);
-                mWindowManager = new LocalWindowManager(wrapped);
-            }
-            return mWindowManager;
-        }
-        return super.getSystemService(name);
-    }
-
     /**
      * Implement to return the implementation of the internal accessibility
      * service interface.
@@ -658,6 +644,9 @@ public abstract class AccessibilityService extends Service {
             public void init(int connectionId, IBinder windowToken) {
                 mConnectionId = connectionId;
                 mWindowToken = windowToken;
+
+                // Let the window manager know about our shiny new token.
+                WindowManagerGlobal.getInstance().setDefaultToken(mWindowToken);
             }
 
             @Override
@@ -810,55 +799,6 @@ public abstract class AccessibilityService extends Service {
                 default :
                     Log.w(LOG_TAG, "Unknown message type " + message.what);
             }
-        }
-    }
-
-    private class LocalWindowManager implements WindowManager {
-        private final WindowManager mImpl;
-
-        private LocalWindowManager(WindowManager impl) {
-            mImpl = impl;
-        }
-
-        @Override
-        public Display getDefaultDisplay() {
-            return mImpl.getDefaultDisplay();
-        }
-
-        @Override
-        public void addView(View view, ViewGroup.LayoutParams params) {
-            if (!(params instanceof WindowManager.LayoutParams)) {
-                throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
-            }
-            WindowManager.LayoutParams windowParams = (WindowManager.LayoutParams) params;
-            if (windowParams.type == LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-                    && windowParams.token == null) {
-                windowParams.token = mWindowToken;
-            }
-            mImpl.addView(view, params);
-        }
-
-        @Override
-        public void updateViewLayout(View view, ViewGroup.LayoutParams params) {
-            if (!(params instanceof WindowManager.LayoutParams)) {
-                throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
-            }
-            WindowManager.LayoutParams windowParams = (WindowManager.LayoutParams) params;
-            if (windowParams.type == LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
-                    && windowParams.token == null) {
-                windowParams.token = mWindowToken;
-            }
-            mImpl.updateViewLayout(view, params);
-        }
-
-        @Override
-        public void removeViewImmediate(View view) {
-            mImpl.removeViewImmediate(view);
-        }
-
-        @Override
-        public void removeView(View view) {
-            mImpl.removeView(view);
         }
     }
 }
