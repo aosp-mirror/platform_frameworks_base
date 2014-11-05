@@ -6352,7 +6352,7 @@
         <!-- The summary for the Preference in a PreferenceActivity screen. -->
         <attr name="summary" />
         <!-- The order for the Preference (lower values are to be ordered first). If this is not
-             specified, the default orderin will be alphabetic. -->
+             specified, the default ordering will be alphabetic. -->
         <attr name="order" format="integer" />
         <!-- When used inside of a modern PreferenceActivity, this declares
              a new PreferenceFragment to be shown when the user selects this item. -->
