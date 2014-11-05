@@ -691,8 +691,10 @@ public class AppTransition implements Dump {
                 throw new RuntimeException("Invalid thumbnail transition state");
         }
 
-        return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight,
-                THUMBNAIL_APP_TRANSITION_DURATION, mThumbnailFastOutSlowInInterpolator);
+        int duration = Math.max(THUMBNAIL_APP_TRANSITION_ALPHA_DURATION,
+                THUMBNAIL_APP_TRANSITION_DURATION);
+        return prepareThumbnailAnimationWithDuration(a, appWidth, appHeight, duration,
+                mThumbnailFastOutSlowInInterpolator);
     }
 
     /**
