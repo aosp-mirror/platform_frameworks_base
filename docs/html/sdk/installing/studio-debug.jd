@@ -6,7 +6,11 @@ page.title=Debugging with Android Studio
 <div id="qv">
 <h2>In this document</h2>
 <ol>
-  <li><a href="#runDebug">Run your App in Debug Mode</a></li>
+  <li><a href="#runDebug">Run your App in Debug Mode</a>
+    <ol>
+      <li><a href="#attachDebug">Attach the debugger to a running process</a></li>
+    </ol>
+  </li>
   <li><a href="#systemLog">Use the System Log</a>
     <ol>
       <li><a href="#systemLogWrite">Write log messages in your code</a></li>
@@ -93,6 +97,22 @@ window also provides other debugging tools covered in the following sections.</p
 <img src="{@docRoot}images/tools/as-debugview.png" alt="" />
 <p class="img-caption"><strong>Figure 2.</strong> The Debug tool window in Android Studio showing
 the current thread and the object tree for a variable.</p>
+
+<h3 id="attachDebug">Attach the debugger to a running process</h3>
+
+<p>You don't always have to restart your app to debug it. To debug an app that you're already
+running:</p>
+
+<ol>
+<li>Click <strong>Attach debugger to Android proccess</strong>
+<img src="{@docRoot}images/tools/as-attach.png" alt=""
+style="vertical-align:bottom;margin:0;height:20px"/>.</li>
+<li>In the <em>Choose Process</em> window, select the device and app you want to attach the
+debugger to.</li>
+<li>To open the <em>Debug</em> tool window, click <strong>Debug</strong>
+<img src="{@docRoot}images/tools/as-debugwindowbutton.png"
+alt="" style="vertical-align:bottom;margin:0;height:20px"/>.</li>
+</ol>
 
 
 <h2 id="systemLog">Use the System Log</h2>
