@@ -115,10 +115,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public boolean clearScores() {
-        // Only the active scorer or the system (who can broadcast BROADCAST_SCORE_NETWORKS) should
-        // be allowed to flush all scores.
+        // Only the active scorer or the system (who can broadcast BROADCAST_NETWORK_PRIVILEGED)
+        // should be allowed to flush all scores.
         if (NetworkScorerAppManager.isCallerActiveScorer(mContext, getCallingUid()) ||
-                mContext.checkCallingOrSelfPermission(permission.BROADCAST_SCORE_NETWORKS) ==
+                mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED) ==
                         PackageManager.PERMISSION_GRANTED) {
             clearInternal();
             return true;
@@ -130,16 +130,16 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public boolean setActiveScorer(String packageName) {
-        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_SCORE_NETWORKS, TAG);
+        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
         return setScorerInternal(packageName);
     }
 
     @Override
     public void disableScoring() {
-        // Only the active scorer or the system (who can broadcast BROADCAST_SCORE_NETOWRKS) should
-        // be allowed to disable scoring.
+        // Only the active scorer or the system (who can broadcast BROADCAST_NETWORK_PRIVILEGED)
+        // should be allowed to disable scoring.
         if (NetworkScorerAppManager.isCallerActiveScorer(mContext, getCallingUid()) ||
-                mContext.checkCallingOrSelfPermission(permission.BROADCAST_SCORE_NETWORKS) ==
+                mContext.checkCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED) ==
                         PackageManager.PERMISSION_GRANTED) {
             // The return value is discarded here because at this point, the call should always
             // succeed. The only reason for failure is if the new package is not a valid scorer, but
@@ -188,7 +188,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public void registerNetworkScoreCache(int networkType, INetworkScoreCache scoreCache) {
-        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_SCORE_NETWORKS, TAG);
+        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
         synchronized (mScoreCaches) {
             if (mScoreCaches.containsKey(networkType)) {
                 throw new IllegalArgumentException(
