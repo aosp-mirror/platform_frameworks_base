@@ -41,6 +41,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
@@ -170,6 +171,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     private final AccessPointController mAccessPoints;
     private final MobileDataController mMobileDataController;
+    private final ConnectivityManager mConnectivityManager;
 
     /**
      * Construct this controller object and register for updates.
@@ -178,9 +180,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mContext = context;
         final Resources res = context.getResources();
 
-        ConnectivityManager cm = (ConnectivityManager)mContext.getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        mHasMobileDataFeature = cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        mConnectivityManager =
+                (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mHasMobileDataFeature = getCM().isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
 
         mShowPhoneRSSIForData = res.getBoolean(R.bool.config_showPhoneRSSIForData);
         mShowAtLeastThreeGees = res.getBoolean(R.bool.config_showMin3G);
@@ -192,13 +194,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         updateWimaxIcons();
 
         // telephony
-        mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-        mPhone.listen(mPhoneStateListener,
-                          PhoneStateListener.LISTEN_SERVICE_STATE
-                        | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
-                        | PhoneStateListener.LISTEN_CALL_STATE
-                        | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
-                        | PhoneStateListener.LISTEN_DATA_ACTIVITY);
+        mPhone = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         mHspaDataDistinguishable = mContext.getResources().getBoolean(
                 R.bool.config_hspa_data_distinguishable);
         mNetworkNameSeparator = mContext.getString(R.string.status_bar_network_name_separator);
@@ -214,6 +210,36 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (wifiMessenger != null) {
             mWifiChannel.connect(mContext, handler, wifiMessenger);
         }
+
+        registerListeners();
+
+        // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
+        updateAirplaneMode();
+
+        mLastLocale = mContext.getResources().getConfiguration().locale;
+        mAccessPoints = new AccessPointController(mContext);
+        mMobileDataController = new MobileDataController(mContext);
+        mMobileDataController.setCallback(new MobileDataController.Callback() {
+            @Override
+            public void onMobileDataEnabled(boolean enabled) {
+                notifyMobileDataEnabled(enabled);
+            }
+        });
+    }
+
+    @VisibleForTesting
+    protected ConnectivityManager getCM() {
+        return mConnectivityManager;
+    }
+
+    @VisibleForTesting
+    protected void registerListeners() {
+        mPhone.listen(mPhoneStateListener,
+                          PhoneStateListener.LISTEN_SERVICE_STATE
+                        | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
+                        | PhoneStateListener.LISTEN_CALL_STATE
+                        | PhoneStateListener.LISTEN_DATA_CONNECTION_STATE
+                        | PhoneStateListener.LISTEN_DATA_ACTIVITY);
 
         // broadcasts
         IntentFilter filter = new IntentFilter();
@@ -233,20 +259,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             filter.addAction(WimaxManagerConstants.SIGNAL_LEVEL_CHANGED_ACTION);
             filter.addAction(WimaxManagerConstants.NET_4G_STATE_CHANGED_ACTION);
         }
-        context.registerReceiver(this, filter);
-
-        // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
-        updateAirplaneMode();
-
-        mLastLocale = mContext.getResources().getConfiguration().locale;
-        mAccessPoints = new AccessPointController(mContext);
-        mMobileDataController = new MobileDataController(mContext);
-        mMobileDataController.setCallback(new MobileDataController.Callback() {
-            @Override
-            public void onMobileDataEnabled(boolean enabled) {
-                notifyMobileDataEnabled(enabled);
-            }
-        });
+        mContext.registerReceiver(this, filter);
     }
 
     @Override
@@ -1072,9 +1085,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             Log.d(TAG, "updateConnectivity: intent=" + intent);
         }
 
-        final ConnectivityManager connManager = (ConnectivityManager) mContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        final NetworkInfo info = connManager.getActiveNetworkInfo();
+        final NetworkInfo info = getCM().getActiveNetworkInfo();
 
         // Are we connected at all, by any interface?
         mConnected = info != null && info.isConnected();
