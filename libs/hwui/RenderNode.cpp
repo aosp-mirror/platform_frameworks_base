@@ -98,9 +98,6 @@ void RenderNode::setStagingDisplayList(DisplayListData* data) {
     mNeedsDisplayListDataSync = true;
     delete mStagingDisplayListData;
     mStagingDisplayListData = data;
-    if (mStagingDisplayListData) {
-        Caches::getInstance().registerFunctors(mStagingDisplayListData->functors.size());
-    }
 }
 
 /**
@@ -305,6 +302,10 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
         // changes in isRenderable or, in the future, bounds
         damageSelf(info);
         deleteDisplayListData();
+        // TODO: Remove this caches stuff
+        if (mStagingDisplayListData && mStagingDisplayListData->functors.size()) {
+            Caches::getInstance().registerFunctors(mStagingDisplayListData->functors.size());
+        }
         mDisplayListData = mStagingDisplayListData;
         mStagingDisplayListData = NULL;
         if (mDisplayListData) {
@@ -320,6 +321,9 @@ void RenderNode::deleteDisplayListData() {
     if (mDisplayListData) {
         for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
             mDisplayListData->children()[i]->mRenderNode->decParentRefCount();
+        }
+        if (mDisplayListData->functors.size()) {
+            Caches::getInstance().unregisterFunctors(mDisplayListData->functors.size());
         }
     }
     delete mDisplayListData;

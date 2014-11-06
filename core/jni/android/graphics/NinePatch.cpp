@@ -21,7 +21,7 @@
 #include <androidfw/ResourceTypes.h>
 #include <utils/Log.h>
 
-#include <Caches.h>
+#include <ResourceCache.h>
 
 #include "Paint.h"
 #include "Canvas.h"
@@ -80,9 +80,9 @@ public:
     static void finalize(JNIEnv* env, jobject, jlong patchHandle) {
         int8_t* patch = reinterpret_cast<int8_t*>(patchHandle);
 #ifdef USE_OPENGL_RENDERER
-        if (android::uirenderer::Caches::hasInstance()) {
+        if (android::uirenderer::ResourceCache::hasInstance()) {
             Res_png_9patch* p = (Res_png_9patch*) patch;
-            android::uirenderer::Caches::getInstance().resourceCache.destructor(p);
+            android::uirenderer::ResourceCache::getInstance().destructor(p);
             return;
         }
 #endif // USE_OPENGL_RENDERER
