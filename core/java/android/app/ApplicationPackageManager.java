@@ -1609,6 +1609,18 @@ final class ApplicationPackageManager extends PackageManager {
         return null;
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isUpgrade() {
+        try {
+            return mPM.isUpgrade();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     @Override
     public PackageInstaller getPackageInstaller() {
         synchronized (mLock) {
