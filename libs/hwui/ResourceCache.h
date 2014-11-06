@@ -22,6 +22,7 @@
 #include <SkBitmap.h>
 
 #include <utils/KeyedVector.h>
+#include <utils/Singleton.h>
 
 #include <androidfw/ResourceTypes.h>
 
@@ -53,10 +54,13 @@ public:
     ResourceType resourceType;
 };
 
-class ANDROID_API ResourceCache {
-public:
+class ANDROID_API ResourceCache: public Singleton<ResourceCache> {
     ResourceCache();
     ~ResourceCache();
+
+    friend class Singleton<ResourceCache>;
+
+public:
 
     /**
      * When using these two methods, make sure to only invoke the *Locked()
