@@ -122,6 +122,10 @@ public final class MediaMetadata implements Parcelable {
 
     /**
      * The artwork for the media as a {@link Bitmap}.
+     * <p>
+     * The artwork should be relatively small and may be scaled down by the
+     * system if it is too large. For higher resolution artwork
+     * {@link #METADATA_KEY_ART_URI} should be used instead.
      */
     public static final String METADATA_KEY_ART = "android.media.metadata.ART";
 
@@ -129,12 +133,20 @@ public final class MediaMetadata implements Parcelable {
      * The artwork for the media as a Uri formatted String. The artwork can be
      * loaded using a combination of {@link ContentResolver#openInputStream} and
      * {@link BitmapFactory#decodeStream}.
+     * <p>
+     * For the best results, Uris should use the content:// style and support
+     * {@link ContentResolver#EXTRA_SIZE} for retrieving scaled artwork through
+     * {@link ContentResolver#openTypedAssetFileDescriptor(Uri, String, Bundle)}.
      */
     public static final String METADATA_KEY_ART_URI = "android.media.metadata.ART_URI";
 
     /**
      * The artwork for the album of the media's original source as a
      * {@link Bitmap}.
+     * <p>
+     * The artwork should be relatively small and may be scaled down by the
+     * system if it is too large. For higher resolution artwork
+     * {@link #METADATA_KEY_ALBUM_ART_URI} should be used instead.
      */
     public static final String METADATA_KEY_ALBUM_ART = "android.media.metadata.ALBUM_ART";
 
@@ -143,6 +155,10 @@ public final class MediaMetadata implements Parcelable {
      * formatted String. The artwork can be loaded using a combination of
      * {@link ContentResolver#openInputStream} and
      * {@link BitmapFactory#decodeStream}.
+     * <p>
+     * For the best results, Uris should use the content:// style and support
+     * {@link ContentResolver#EXTRA_SIZE} for retrieving scaled artwork through
+     * {@link ContentResolver#openTypedAssetFileDescriptor(Uri, String, Bundle)}.
      */
     public static final String METADATA_KEY_ALBUM_ART_URI = "android.media.metadata.ALBUM_ART_URI";
 
@@ -188,6 +204,10 @@ public final class MediaMetadata implements Parcelable {
      * An icon or thumbnail that is suitable for display to the user. When
      * displaying an icon for media described by this metadata this should be
      * preferred to other fields if present. This must be a {@link Bitmap}.
+     * <p>
+     * The icon should be relatively small and may be scaled down by the system
+     * if it is too large. For higher resolution artwork
+     * {@link #METADATA_KEY_DISPLAY_ICON_URI} should be used instead.
      */
     public static final String METADATA_KEY_DISPLAY_ICON
             = "android.media.metadata.DISPLAY_ICON";
@@ -199,6 +219,10 @@ public final class MediaMetadata implements Parcelable {
      * fields when present. The icon can be loaded using a combination of
      * {@link ContentResolver#openInputStream} and
      * {@link BitmapFactory#decodeStream}.
+     * <p>
+     * For the best results, Uris should use the content:// style and support
+     * {@link ContentResolver#EXTRA_SIZE} for retrieving scaled artwork through
+     * {@link ContentResolver#openTypedAssetFileDescriptor(Uri, String, Bundle)}.
      */
     public static final String METADATA_KEY_DISPLAY_ICON_URI
             = "android.media.metadata.DISPLAY_ICON_URI";
@@ -602,6 +626,11 @@ public final class MediaMetadata implements Parcelable {
          * <li>{@link #METADATA_KEY_DISPLAY_DESCRIPTION}</li>
          * <li>{@link #METADATA_KEY_DISPLAY_ICON_URI}</li>
          * </ul>
+         * <p>
+         * Uris for artwork should use the content:// style and support
+         * {@link ContentResolver#EXTRA_SIZE} for retrieving scaled artwork
+         * through {@link ContentResolver#openTypedAssetFileDescriptor(Uri,
+         * String, Bundle)}.
          *
          * @param key The key for referencing this value
          * @param value The String value to store
