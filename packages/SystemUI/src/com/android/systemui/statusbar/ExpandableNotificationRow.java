@@ -22,6 +22,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.view.accessibility.AccessibilityEvent;
@@ -68,6 +69,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     private NotificationGuts mGuts;
 
     private StatusBarNotification mStatusBarNotification;
+    private boolean mIsHeadsUp;
 
     public void setIconAnimationRunning(boolean running) {
         setIconAnimationRunning(running, mPublicLayout);
@@ -122,6 +124,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         return mStatusBarNotification;
     }
 
+    public void setHeadsUp(boolean isHeadsUp) {
+        mIsHeadsUp = isHeadsUp;
+    }
+
     public interface ExpansionLogger {
         public void logNotificationExpansion(String key, boolean userAction, boolean expanded);
     }
@@ -147,18 +153,25 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
         mShowingPublicInitialized = false;
         mIsSystemExpanded = false;
         mExpansionDisabled = false;
-        mPublicLayout.reset();
-        mPrivateLayout.reset();
+        mPublicLayout.reset(mIsHeadsUp);
+        mPrivateLayout.reset(mIsHeadsUp);
         resetHeight();
         logExpansionEvent(false, wasExpanded);
     }
 
     public void resetHeight() {
-        super.resetHeight();
+        if (mIsHeadsUp) {
+            resetActualHeight();
+        }
         mMaxExpandHeight = 0;
         mWasReset = true;
         onHeightReset();
         requestLayout();
+    }
+
+    @Override
+    protected boolean filterMotionEvent(MotionEvent event) {
+        return mIsHeadsUp || super.filterMotionEvent(event);
     }
 
     @Override
