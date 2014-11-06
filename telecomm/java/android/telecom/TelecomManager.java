@@ -338,8 +338,6 @@ public class TelecomManager {
      * @param uriScheme The URI scheme.
      * @return The {@link PhoneAccountHandle} corresponding to the user-chosen default for outgoing
      * phone calls for a specified URI scheme.
-     *
-     * @hide
      */
     public PhoneAccountHandle getDefaultOutgoingPhoneAccount(String uriScheme) {
         try {
@@ -459,8 +457,6 @@ public class TelecomManager {
      *
      * @param uriScheme The URI scheme.
      * @return A list of {@code PhoneAccountHandle} objects supporting the URI scheme.
-     *
-     * @hide
      */
     public List<PhoneAccountHandle> getPhoneAccountsSupportingScheme(String uriScheme) {
         try {
