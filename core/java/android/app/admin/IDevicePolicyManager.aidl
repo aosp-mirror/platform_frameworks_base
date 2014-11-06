@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ProxyInfo;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
 import java.util.List;
@@ -183,8 +184,10 @@ interface IDevicePolicyManager {
     boolean getCrossProfileCallerIdDisabled(in ComponentName who);
     boolean getCrossProfileCallerIdDisabledForUser(int userId);
 
-    void setTrustAgentFeaturesEnabled(in ComponentName admin, in ComponentName agent, in List<String> features, int userId);
-    List<String> getTrustAgentFeaturesEnabled(in ComponentName admin, in ComponentName agent, int userId);
+    void setTrustAgentConfiguration(in ComponentName admin, in ComponentName agent,
+            in PersistableBundle args, int userId);
+    List<PersistableBundle> getTrustAgentConfiguration(in ComponentName admin,
+            in ComponentName agent, int userId);
 
     boolean addCrossProfileWidgetProvider(in ComponentName admin, String packageName);
     boolean removeCrossProfileWidgetProvider(in ComponentName admin, String packageName);
