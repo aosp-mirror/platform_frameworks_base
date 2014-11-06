@@ -95,42 +95,57 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Set/get the bsp root node */
     public void setTaskStacks(ArrayList<TaskStack> stacks) {
-        // Remove all TaskStackViews (but leave the search bar)
+        int numStacks = stacks.size();
+
+        // Make a list of the stack view children only
+        ArrayList<TaskStackView> stackViews = new ArrayList<TaskStackView>();
         int childCount = getChildCount();
-        for (int i = childCount - 1; i >= 0; i--) {
-            View v = getChildAt(i);
-            if (v != mSearchBar) {
-                removeViewAt(i);
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child != mSearchBar) {
+                stackViews.add((TaskStackView) child);
             }
         }
 
-        // Create and add all the stacks for this partition of space.
+        // Remove all/extra stack views
+        int numTaskStacksToKeep = 0; // Keep no tasks if we are recreating the layout
+        if (mConfig.launchedReuseTaskStackViews) {
+            numTaskStacksToKeep = Math.min(childCount, numStacks);
+        }
+        for (int i = stackViews.size() - 1; i >= numTaskStacksToKeep; i--) {
+            removeView(stackViews.get(i));
+            stackViews.remove(i);
+        }
+
+        // Update the stack views that we are keeping
+        for (int i = 0; i < numTaskStacksToKeep; i++) {
+            stackViews.get(i).setStack(stacks.get(i));
+        }
+
+        // Add remaining/recreate stack views
         mStacks = stacks;
-        int numStacks = mStacks.size();
-        for (int i = 0; i < numStacks; i++) {
-            TaskStack stack = mStacks.get(i);
+        for (int i = stackViews.size(); i < numStacks; i++) {
+            TaskStack stack = stacks.get(i);
             TaskStackView stackView = new TaskStackView(getContext(), stack);
             stackView.setCallbacks(this);
-            // Enable debug mode drawing
-            if (mConfig.debugModeEnabled) {
-                stackView.setDebugOverlay(mDebugOverlay);
-            }
             addView(stackView);
+        }
+
+        // Enable debug mode drawing on all the stacks if necessary
+        if (mConfig.debugModeEnabled) {
+            for (int i = childCount - 1; i >= 0; i--) {
+                View v = getChildAt(i);
+                if (v != mSearchBar) {
+                    TaskStackView stackView = (TaskStackView) v;
+                    stackView.setDebugOverlay(mDebugOverlay);
+                }
+            }
         }
 
         // Reset the launched state
         mAlreadyLaunchingTask = false;
-    }
-
-    /** Removes all the task stack views from this recents view. */
-    public void removeAllTaskStacks() {
-        int childCount = getChildCount();
-        for (int i = childCount - 1; i >= 0; i--) {
-            View child = getChildAt(i);
-            if (child != mSearchBar) {
-                removeViewAt(i);
-            }
-        }
+        // Trigger a new layout
+        requestLayout();
     }
 
     /** Launches the focused task from the first stack if possible */
@@ -527,6 +542,19 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
     @Override
     public void onAllTaskViewsDismissed() {
         mCb.onAllTaskViewsDismissed();
+    }
+
+    /** Final callback after Recents is finally hidden. */
+    public void onRecentsHidden() {
+        // Notify each task stack view
+        int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            View child = getChildAt(i);
+            if (child != mSearchBar) {
+                TaskStackView stackView = (TaskStackView) child;
+                stackView.onRecentsHidden();
+            }
+        }
     }
 
     @Override

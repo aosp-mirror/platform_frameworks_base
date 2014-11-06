@@ -112,6 +112,14 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         mCb = cb;
     }
 
+    /** Resets this TaskView for reuse. */
+    void reset() {
+        resetViewProperties();
+        resetNoUserInteractionState();
+        setClipViewInStack(false);
+        setCallbacks(null);
+    }
+
     /** Gets the task */
     Task getTask() {
         return mTask;
@@ -191,6 +199,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Resets this view's properties */
     void resetViewProperties() {
         setDim(0);
+        setLayerType(View.LAYER_TYPE_NONE, null);
         TaskViewTransform.reset(this);
     }
 
@@ -446,6 +455,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     /** Mark this task view that the user does has not interacted with the stack after a certain time. */
     void setNoUserInteractionState() {
         mHeaderView.setNoUserInteractionState();
+    }
+
+    /** Resets the state tracking that the user has not interacted with the stack after a certain time. */
+    void resetNoUserInteractionState() {
+        mHeaderView.resetNoUserInteractionState();
     }
 
     /** Dismisses this task. */
