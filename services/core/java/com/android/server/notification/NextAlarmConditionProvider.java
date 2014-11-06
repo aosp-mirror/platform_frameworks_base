@@ -45,7 +45,19 @@ import com.android.server.notification.NotificationManagerService.DumpFilter;
 import java.io.PrintWriter;
 import java.util.Locale;
 
-/** Built-in zen condition provider for alarm clock conditions */
+/**
+ * Built-in zen condition provider for alarm-clock-based conditions.
+ *
+ * <p>If the user's next alarm is within a lookahead threshold (config, default 12hrs), advertise
+ * it as an exit condition for zen mode (unless the built-in downtime condition is also available).
+ *
+ * <p>When this next alarm is selected as the active exit condition, follow subsequent changes
+ * to the user's next alarm, assuming it remains within the 12-hr window.
+ *
+ * <p>The next alarm is defined as {@link AlarmManager#getNextAlarmClock(int)}, which does not
+ * survive a reboot.  Maintain the illusion of a consistent next alarm value by holding on to
+ * a persisted condition until we receive the first value after reboot, or timeout with no value.
+ */
 public class NextAlarmConditionProvider extends ConditionProviderService {
     private static final String TAG = "NextAlarmConditions";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -54,9 +66,12 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
     private static final String EXTRA_TRIGGER = "trigger";
     private static final int REQUEST_CODE = 100;
     private static final long SECONDS = 1000;
-    private static final long HOURS = 60 * 60 * SECONDS;
+    private static final long MINUTES = 60 * SECONDS;
+    private static final long HOURS = 60 * MINUTES;
     private static final long NEXT_ALARM_UPDATE_DELAY = 1 * SECONDS;  // treat clear+set as update
     private static final long EARLY = 5 * SECONDS;  // fire early, ensure alarm stream is unmuted
+    private static final long WAIT_AFTER_CONNECT = 5 * MINUTES;// for initial alarm re-registration
+    private static final long WAIT_AFTER_BOOT = 20 * SECONDS;  // for initial alarm re-registration
     private static final String NEXT_ALARM_PATH = "next_alarm";
     public static final ComponentName COMPONENT =
             new ComponentName("android", NextAlarmConditionProvider.class.getName());
@@ -64,7 +79,7 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
     private final Context mContext = this;
     private final H mHandler = new H();
 
-    private boolean mConnected;
+    private long mConnected;
     private boolean mRegistered;
     private AlarmManager mAlarmManager;
     private int mCurrentUserId;
@@ -73,6 +88,7 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
     private Callback mCallback;
     private Uri mCurrentSubscription;
     private PowerManager.WakeLock mWakeLock;
+    private long mBootCompleted;
 
     public NextAlarmConditionProvider() {
         if (DEBUG) Slog.d(TAG, "new NextAlarmConditionProvider()");
@@ -81,6 +97,7 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
     public void dump(PrintWriter pw, DumpFilter filter) {
         pw.println("    NextAlarmConditionProvider:");
         pw.print("      mConnected="); pw.println(mConnected);
+        pw.print("      mBootCompleted="); pw.println(mBootCompleted);
         pw.print("      mRegistered="); pw.println(mRegistered);
         pw.print("      mCurrentUserId="); pw.println(mCurrentUserId);
         pw.print("      mScheduledAlarmTime="); pw.println(formatAlarmDebug(mScheduledAlarmTime));
@@ -103,12 +120,12 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
         mLookaheadThreshold = mContext.getResources()
                 .getInteger(R.integer.config_next_alarm_condition_lookahead_threshold_hrs) * HOURS;
         init();
-        mConnected = true;
+        mConnected = System.currentTimeMillis();
     }
 
     public void onUserSwitched() {
         if (DEBUG) Slog.d(TAG, "onUserSwitched");
-        if (mConnected) {
+        if (mConnected != 0) {
             init();
         }
     }
@@ -117,15 +134,16 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
     public void onDestroy() {
         super.onDestroy();
         if (DEBUG) Slog.d(TAG, "onDestroy");
-        if (mConnected) {
+        if (mRegistered) {
             mContext.unregisterReceiver(mReceiver);
+            mRegistered = false;
         }
-        mConnected = false;
+        mConnected = 0;
     }
 
     @Override
     public void onRequestConditions(int relevance) {
-        if (!mConnected || (relevance & Condition.FLAG_RELEVANT_NOW) == 0) return;
+        if (mConnected == 0 || (relevance & Condition.FLAG_RELEVANT_NOW) == 0) return;
 
         final AlarmClockInfo nextAlarm = mAlarmManager.getNextAlarmClock(mCurrentUserId);
         if (nextAlarm == null) return;  // no next alarm
@@ -133,7 +151,7 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
         if (!isWithinLookaheadThreshold(nextAlarm)) return;  // alarm not within window
 
         // next alarm exists, and is within the configured lookahead threshold
-        notifyCondition(newConditionId(), nextAlarm, true, "request");
+        notifyCondition(newConditionId(), nextAlarm, Condition.STATE_TRUE, "request");
     }
 
     private boolean isWithinLookaheadThreshold(AlarmClockInfo alarm) {
@@ -146,7 +164,7 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
     public void onSubscribe(Uri conditionId) {
         if (DEBUG) Slog.d(TAG, "onSubscribe " + conditionId);
         if (!isNextAlarmCondition(conditionId)) {
-            notifyCondition(conditionId, null, false, "badCondition");
+            notifyCondition(conditionId, null, Condition.STATE_FALSE, "badCondition");
             return;
         }
         mCurrentSubscription = conditionId;
@@ -157,22 +175,38 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
         return alarm != null ? (alarm.getTriggerTime() - EARLY) : 0;
     }
 
+    private boolean isDoneWaitingAfterBoot(long time) {
+        if (mBootCompleted > 0) return (time - mBootCompleted) > WAIT_AFTER_BOOT;
+        if (mConnected > 0) return (time - mConnected) > WAIT_AFTER_CONNECT;
+        return true;
+    }
+
     private void handleEvaluate() {
         final AlarmClockInfo nextAlarm = mAlarmManager.getNextAlarmClock(mCurrentUserId);
         final long triggerTime = getEarlyTriggerTime(nextAlarm);
         final boolean withinThreshold = isWithinLookaheadThreshold(nextAlarm);
+        final long now = System.currentTimeMillis();
+        final boolean booted = isDoneWaitingAfterBoot(now);
         if (DEBUG) Slog.d(TAG, "handleEvaluate mCurrentSubscription=" + mCurrentSubscription
                 + " nextAlarm=" + formatAlarmDebug(triggerTime)
-                + " withinThreshold=" + withinThreshold);
+                + " withinThreshold=" + withinThreshold
+                + " booted=" + booted);
         if (mCurrentSubscription == null) return;  // no one cares
+        if (!booted) {
+            // we don't know yet
+            notifyCondition(mCurrentSubscription, nextAlarm, Condition.STATE_UNKNOWN, "!booted");
+            final long recheckTime = (mBootCompleted > 0 ? mBootCompleted : now) + WAIT_AFTER_BOOT;
+            rescheduleAlarm(recheckTime);
+            return;
+        }
         if (!withinThreshold) {
             // triggertime invalid or in the past, condition = false
-            notifyCondition(mCurrentSubscription, nextAlarm, false, "!withinThreshold");
+            notifyCondition(mCurrentSubscription, nextAlarm, Condition.STATE_FALSE, "!within");
             mCurrentSubscription = null;
             return;
         }
         // triggertime in the future, condition = true, schedule alarm
-        notifyCondition(mCurrentSubscription, nextAlarm, true, "withinThreshold");
+        notifyCondition(mCurrentSubscription, nextAlarm, Condition.STATE_TRUE, "within");
         rescheduleAlarm(triggerTime);
     }
 
@@ -199,16 +233,14 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
         }
     }
 
-    private void notifyCondition(Uri id, AlarmClockInfo alarm, boolean state, String reason) {
+    private void notifyCondition(Uri id, AlarmClockInfo alarm, int state, String reason) {
         final String formattedAlarm = alarm == null ? "" : formatAlarm(alarm.getTriggerTime());
-        if (DEBUG) Slog.d(TAG, "notifyCondition " + state + " alarm=" + formattedAlarm + " reason="
-                + reason);
+        if (DEBUG) Slog.d(TAG, "notifyCondition " + Condition.stateToString(state)
+                + " alarm=" + formattedAlarm + " reason=" + reason);
         notifyCondition(new Condition(id,
                 mContext.getString(R.string.zen_mode_next_alarm_summary, formattedAlarm),
                 mContext.getString(R.string.zen_mode_next_alarm_line_one),
-                formattedAlarm, 0,
-                state ? Condition.STATE_TRUE : Condition.STATE_FALSE,
-                Condition.FLAG_RELEVANT_NOW));
+                formattedAlarm, 0, state, Condition.FLAG_RELEVANT_NOW));
     }
 
     @Override
@@ -254,6 +286,7 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
         filter.addAction(ACTION_TRIGGER);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         mContext.registerReceiverAsUser(mReceiver, new UserHandle(mCurrentUserId), filter, null,
                 null);
         mRegistered = true;
@@ -290,6 +323,8 @@ public class NextAlarmConditionProvider extends ConditionProviderService {
                 if (DEBUG) Slog.d(TAG, String.format("  next alarm for user %s: %s",
                         mCurrentUserId,
                         formatAlarmDebug(mAlarmManager.getNextAlarmClock(mCurrentUserId))));
+            } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+                mBootCompleted = System.currentTimeMillis();
             }
             mHandler.postEvaluate(delay);
             mWakeLock.acquire(delay + 5000);  // stay awake during evaluate
