@@ -2378,17 +2378,15 @@ public class ConnectivityManager {
 
     /**
      * The lookup key for a {@link Network} object included with the intent after
-     * succesfully finding a network for the applications request.  Retrieve it with
+     * successfully finding a network for the applications request.  Retrieve it with
      * {@link android.content.Intent#getParcelableExtra(String)}.
-     * @hide
      */
     public static final String EXTRA_NETWORK_REQUEST_NETWORK = "networkRequestNetwork";
 
     /**
      * The lookup key for a {@link NetworkRequest} object included with the intent after
-     * succesfully finding a network for the applications request.  Retrieve it with
+     * successfully finding a network for the applications request.  Retrieve it with
      * {@link android.content.Intent#getParcelableExtra(String)}.
-     * @hide
      */
     public static final String EXTRA_NETWORK_REQUEST_NETWORK_REQUEST =
             "networkRequestNetworkRequest";
@@ -2397,7 +2395,7 @@ public class ConnectivityManager {
     /**
      * Request a network to satisfy a set of {@link NetworkCapabilities}.
      *
-     * This function behavies identically to the version that takes a NetworkCallback, but instead
+     * This function behaves identically to the version that takes a NetworkCallback, but instead
      * of {@link NetworkCallback} a {@link PendingIntent} is used.  This means
      * the request may outlive the calling application and get called back when a suitable
      * network is found.
@@ -2418,18 +2416,43 @@ public class ConnectivityManager {
      * two Intents defined by {@link Intent#filterEquals}), then it will be removed and
      * replaced by this one, effectively releasing the previous {@link NetworkRequest}.
      * <p>
-     * The request may be released normally by calling {@link #unregisterNetworkCallback}.
+     * The request may be released normally by calling
+     * {@link #releaseNetworkRequest(android.app.PendingIntent)}.
      *
      * @param request {@link NetworkRequest} describing this request.
      * @param operation Action to perform when the network is available (corresponds
      *                  to the {@link NetworkCallback#onAvailable} call.  Typically
-     *                  comes from {@link PendingIntent#getBroadcast}.
-     * @hide
+     *                  comes from {@link PendingIntent#getBroadcast}. Cannot be null.
      */
     public void requestNetwork(NetworkRequest request, PendingIntent operation) {
+        checkPendingIntent(operation);
         try {
             mService.pendingRequestForNetwork(request.networkCapabilities, operation);
         } catch (RemoteException e) {}
+    }
+
+    /**
+     * Removes a request made via {@link #requestNetwork(NetworkRequest, android.app.PendingIntent)}
+     * <p>
+     * This method has the same behavior as {@link #unregisterNetworkCallback} with respect to
+     * releasing network resources and disconnecting.
+     *
+     * @param operation A PendingIntent equal (as defined by {@link Intent#filterEquals}) to the
+     *                  PendingIntent passed to
+     *                  {@link #requestNetwork(NetworkRequest, android.app.PendingIntent)} with the
+     *                  corresponding NetworkRequest you'd like to remove. Cannot be null.
+     */
+    public void releaseNetworkRequest(PendingIntent operation) {
+        checkPendingIntent(operation);
+        try {
+            mService.releasePendingNetworkRequest(operation);
+        } catch (RemoteException e) {}
+    }
+
+    private void checkPendingIntent(PendingIntent intent) {
+        if (intent == null) {
+            throw new IllegalArgumentException("PendingIntent cannot be null.");
+        }
     }
 
     /**
@@ -2448,7 +2471,7 @@ public class ConnectivityManager {
     /**
      * Unregisters callbacks about and possibly releases networks originating from
      * {@link #requestNetwork} and {@link #registerNetworkCallback} calls.  If the
-     * given {@code NetworkCallback} had previosuly been used with {@code #requestNetwork},
+     * given {@code NetworkCallback} had previously been used with {@code #requestNetwork},
      * any networks that had been connected to only to satisfy that request will be
      * disconnected.
      *
