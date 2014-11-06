@@ -719,7 +719,8 @@ public final class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         int errorCode = mMessageValidator.isValid(message);
         if (errorCode != HdmiCecMessageValidator.OK) {
-            // We'll not response on the messages with the invalid source or destination.
+            // We'll not response on the messages with the invalid source or destination
+            // or with parameter length shorter than specified in the standard.
             if (errorCode == HdmiCecMessageValidator.ERROR_PARAMETER) {
                 maySendFeatureAbortCommand(message, Constants.ABORT_INVALID_OPERAND);
             }
