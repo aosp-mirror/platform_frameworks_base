@@ -4281,9 +4281,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             // Keep track of the root activity of the task before we finish it
             TaskRecord tr = r.task;
             ActivityRecord rootR = tr.getRootActivity();
+            if (rootR == null) {
+                Slog.w(TAG, "Finishing task with all activities already finished");
+            }
             // Do not allow task to finish in Lock Task mode.
             if (tr == mStackSupervisor.mLockTaskModeTask) {
                 if (rootR == r) {
+                    Slog.i(TAG, "Not finishing task in lock task mode");
                     mStackSupervisor.showLockTaskToast();
                     return false;
                 }
@@ -4302,6 +4306,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
 
                     if (!resumeOK) {
+                        Slog.i(TAG, "Not finishing activity because controller resumed");
                         return false;
                     }
                 }
@@ -4314,9 +4319,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // was the root activity in the task. The result code and data is ignored
                     // because we don't support returning them across task boundaries.
                     res = removeTaskByIdLocked(tr.taskId, false);
+                    if (!res) {
+                        Slog.i(TAG, "Removing task failed to finish activity");
+                    }
                 } else {
                     res = tr.stack.requestFinishActivityLocked(token, resultCode,
                             resultData, "app-request", true);
+                    if (!res) {
+                        Slog.i(TAG, "Failed to finish by app-request");
+                    }
                 }
                 return res;
             } finally {
@@ -8365,6 +8376,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             return true;
         }
+        Slog.w(TAG, "Request to remove task ignored for non-existent task " + taskId);
         return false;
     }
 
