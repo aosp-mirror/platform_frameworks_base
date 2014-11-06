@@ -207,6 +207,13 @@ public abstract class Conference {
     }
 
     /**
+     * @return The {@link DisconnectCause} for this connection.
+     */
+    public final DisconnectCause getDisconnectCause() {
+        return mDisconnectCause;
+    }
+
+    /**
      * Sets the capabilities of a conference. See {@link PhoneCapabilities} for valid values.
      *
      * @param capabilities A bitmask of the {@code PhoneCapabilities} of the conference call.
