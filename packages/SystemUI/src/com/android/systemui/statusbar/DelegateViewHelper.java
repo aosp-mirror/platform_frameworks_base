@@ -17,10 +17,11 @@
 package com.android.systemui.statusbar;
 
 import android.app.StatusBarManager;
+import android.content.res.Resources;
 import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
+import com.android.systemui.R;
 
 public class DelegateViewHelper {
     private View mDelegateView;
@@ -106,8 +107,8 @@ public class DelegateViewHelper {
     public void setSourceView(View view) {
         mSourceView = view;
         if (mSourceView != null) {
-            mTriggerThreshhold =
-                    ViewConfiguration.get(mSourceView.getContext()).getScaledPagingTouchSlop();
+            Resources r = mSourceView.getContext().getResources();
+            mTriggerThreshhold = r.getDimensionPixelSize(R.dimen.navigation_bar_min_swipe_distance);
         }
     }
 
