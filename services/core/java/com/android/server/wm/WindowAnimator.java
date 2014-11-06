@@ -272,6 +272,7 @@ public class WindowAnimator {
             if (winAnimator.mSurfaceControl != null) {
                 final boolean wasAnimating = winAnimator.mWasAnimating;
                 final boolean nowAnimating = winAnimator.stepAnimationLocked(mCurrentTime);
+                mAnimating |= nowAnimating;
 
                 if (WindowManagerService.DEBUG_WALLPAPER) {
                     Slog.v(TAG, win + ": wasAnimating=" + wasAnimating +
@@ -423,7 +424,8 @@ public class WindowAnimator {
             if (mKeyguardGoingAwayDisableWindowAnimations) {
                 if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: skipping anim for windows");
             } else {
-                if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: created anim for windows");
+                if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: created anim for windows="
+                        + unForceHiding);
                 mPostKeyguardExitAnimation = mPolicy.createForceHideEnterAnimation(
                         wallpaperInUnForceHiding, mKeyguardGoingAwayToNotificationShade);
             }
@@ -432,6 +434,17 @@ public class WindowAnimator {
                     final WindowStateAnimator winAnimator = unForceHiding.get(i);
                     winAnimator.setAnimation(mPostKeyguardExitAnimation);
                     winAnimator.keyguardGoingAwayAnimation = true;
+                }
+            }
+
+            // Wallpaper is going away in un-force-hide motion, animate it as well.
+            if (!wallpaperInUnForceHiding && wallpaper != null
+                    && !mKeyguardGoingAwayDisableWindowAnimations) {
+                if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: wallpaper animating away");
+                Animation a = mPolicy.createForceHideWallpaperExitAnimation(
+                        mKeyguardGoingAwayToNotificationShade);
+                if (a != null) {
+                    wallpaper.mWinAnimator.setAnimation(a);
                 }
             }
         }
@@ -446,17 +459,6 @@ public class WindowAnimator {
             } else if (mPostKeyguardExitAnimation.hasEnded()) {
                 // Done with the animation, reset.
                 mPostKeyguardExitAnimation = null;
-            }
-        }
-
-        // Wallpaper is going away in un-force-hide motion, animate it as well.
-        if (!wallpaperInUnForceHiding && wallpaper != null
-                && !mKeyguardGoingAwayDisableWindowAnimations) {
-            if (DEBUG_KEYGUARD) Slog.d(TAG, "updateWindowsLocked: wallpaper animating away");
-            Animation a = mPolicy.createForceHideWallpaperExitAnimation(
-                    mKeyguardGoingAwayToNotificationShade);
-            if (a != null) {
-                wallpaper.mWinAnimator.setAnimation(a);
             }
         }
     }

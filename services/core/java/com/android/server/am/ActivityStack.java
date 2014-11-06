@@ -241,9 +241,6 @@ final class ActivityStack {
     /** Run all ActivityStacks through this */
     final ActivityStackSupervisor mStackSupervisor;
 
-    /** Used to keep resumeTopActivityLocked() from being entered recursively */
-    private boolean inResumeTopActivity;
-
     static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
     static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
     static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
@@ -1468,7 +1465,7 @@ final class ActivityStack {
     }
 
     final boolean resumeTopActivityLocked(ActivityRecord prev, Bundle options) {
-        if (inResumeTopActivity) {
+        if (mStackSupervisor.inResumeTopActivity) {
             // Don't even start recursing.
             return false;
         }
@@ -1476,10 +1473,14 @@ final class ActivityStack {
         boolean result = false;
         try {
             // Protect against recursion.
-            inResumeTopActivity = true;
+            mStackSupervisor.inResumeTopActivity = true;
+            if (mService.mLockScreenShown == ActivityManagerService.LOCK_SCREEN_LEAVING) {
+                mService.mLockScreenShown = ActivityManagerService.LOCK_SCREEN_HIDDEN;
+                mService.comeOutOfSleepIfNeededLocked();
+            }
             result = resumeTopActivityInnerLocked(prev, options);
         } finally {
-            inResumeTopActivity = false;
+            mStackSupervisor.inResumeTopActivity = false;
         }
         return result;
     }
