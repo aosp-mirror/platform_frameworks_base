@@ -28104,6 +28104,7 @@ package android.telecom {
     method public final int getCapabilities();
     method public final java.util.List<android.telecom.Connection> getConferenceableConnections();
     method public final java.util.List<android.telecom.Connection> getConnections();
+    method public final android.telecom.DisconnectCause getDisconnectCause();
     method public final android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method public android.telecom.Connection getPrimaryConnection();
     method public final int getState();
