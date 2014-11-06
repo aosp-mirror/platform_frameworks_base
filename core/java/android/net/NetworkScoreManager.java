@@ -192,12 +192,15 @@ public class NetworkScoreManager {
     /**
      * Set the active scorer to a new package and clear existing scores.
      *
+     * <p>Should never be called directly without obtaining user consent. This can be done by using
+     * the {@link #ACTION_CHANGE_ACTIVE} broadcast, or using a custom configuration activity.
+     *
      * @return true if the operation succeeded, or false if the new package is not a valid scorer.
      * @throws SecurityException if the caller does not hold the
-     *         {@link android.Manifest.permission#BROADCAST_NETWORK_PRIVILEGED} permission
-     *         indicating that it can manage scorer applications.
+     *         {@link android.Manifest.permission#SCORE_NETWORKS} permission.
      * @hide
      */
+    @SystemApi
     public boolean setActiveScorer(String packageName) throws SecurityException {
         try {
             return mService.setActiveScorer(packageName);
