@@ -74,7 +74,7 @@ public class NotificationContentView extends FrameLayout {
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mFadePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.ADD));
-        reset();
+        reset(true);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class NotificationContentView extends FrameLayout {
         updateVisibility();
     }
 
-    public void reset() {
+    public void reset(boolean resetActualHeight) {
         if (mContractedChild != null) {
             mContractedChild.animate().cancel();
         }
@@ -100,8 +100,10 @@ public class NotificationContentView extends FrameLayout {
         mContractedChild = null;
         mExpandedChild = null;
         mSmallHeight = getResources().getDimensionPixelSize(R.dimen.notification_min_height);
-        mActualHeight = mSmallHeight;
         mContractedVisible = true;
+        if (resetActualHeight) {
+            mActualHeight = mSmallHeight;
+        }
     }
 
     public View getContractedChild() {
