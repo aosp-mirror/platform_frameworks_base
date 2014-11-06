@@ -486,8 +486,9 @@ class WindowStateAnimator {
     }
 
     boolean finishDrawingLocked() {
-        if (DEBUG_STARTING_WINDOW &&
-                mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+        final boolean startingWindow =
+                mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+        if (DEBUG_STARTING_WINDOW && startingWindow) {
             Slog.v(TAG, "Finishing drawing window " + mWin + ": mDrawState="
                     + drawStateToString());
         }
@@ -495,11 +496,13 @@ class WindowStateAnimator {
             if (DEBUG_SURFACE_TRACE || DEBUG_ANIM || SHOW_TRANSACTIONS || DEBUG_ORIENTATION)
                 Slog.v(TAG, "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING " + this + " in "
                         + mSurfaceControl);
-            if (DEBUG_STARTING_WINDOW &&
-                    mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING) {
+            if (DEBUG_STARTING_WINDOW && startingWindow) {
                 Slog.v(TAG, "Draw state now committed in " + mWin);
             }
             mDrawState = COMMIT_DRAW_PENDING;
+            if (startingWindow) {
+                mService.notifyActivityDrawnForKeyguard();
+            }
             return true;
         }
         return false;
