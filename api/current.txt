@@ -28466,6 +28466,7 @@ package android.telecom {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int BUSY = 7; // 0x7
     field public static final int CANCELED = 4; // 0x4
+    field public static final int CONNECTION_MANAGER_NOT_SUPPORTED = 10; // 0xa
     field public static final android.os.Parcelable.Creator<android.telecom.DisconnectCause> CREATOR;
     field public static final int ERROR = 1; // 0x1
     field public static final int LOCAL = 2; // 0x2
