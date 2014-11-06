@@ -61,6 +61,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
+import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RecoverySystem;
@@ -97,6 +98,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -323,7 +325,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 = "permitted-accessiblity-services";
         private static final String TAG_ENCRYPTION_REQUESTED = "encryption-requested";
         private static final String TAG_MANAGE_TRUST_AGENT_FEATURES = "manage-trust-agent-features";
-        private static final String TAG_TRUST_AGENT_FEATURE = "feature";
+        private static final String TAG_TRUST_AGENT_COMPONENT_OPTIONS = "trust-agent-component-options";
         private static final String TAG_TRUST_AGENT_COMPONENT = "component";
         private static final String TAG_PASSWORD_EXPIRATION_DATE = "password-expiration-date";
         private static final String TAG_PASSWORD_EXPIRATION_TIMEOUT = "password-expiration-timeout";
@@ -390,6 +392,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long passwordExpirationDate = DEF_PASSWORD_EXPIRATION_DATE;
 
         static final int DEF_KEYGUARD_FEATURES_DISABLED = 0; // none
+
         int disabledKeyguardFeatures = DEF_KEYGUARD_FEATURES_DISABLED;
 
         boolean encryptionRequested = false;
@@ -397,6 +400,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean disableCallerId = false;
         boolean disableScreenCapture = false; // Can only be set by a device/profile owner.
         boolean requireAutoTime = false; // Can only be set by a device owner.
+
+        static class TrustAgentInfo {
+            public PersistableBundle options;
+            TrustAgentInfo(PersistableBundle bundle) {
+                options = bundle;
+            }
+        }
 
         Set<String> accountTypesWithManagementDisabled = new HashSet<String>();
 
@@ -414,7 +424,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean specifiesGlobalProxy = false;
         String globalProxySpec = null;
         String globalProxyExclusionList = null;
-        HashMap<String, List<String>> trustAgentFeatures = new HashMap<String, List<String>>();
+
+        HashMap<String, TrustAgentInfo> trustAgentInfos = new HashMap<String, TrustAgentInfo>();
 
         List<String> crossProfileWidgetProviders;
 
@@ -552,16 +563,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 out.endTag(null,  TAG_DISABLE_ACCOUNT_MANAGEMENT);
             }
-            if (!trustAgentFeatures.isEmpty()) {
-                Set<Entry<String, List<String>>> set = trustAgentFeatures.entrySet();
+            if (!trustAgentInfos.isEmpty()) {
+                Set<Entry<String, TrustAgentInfo>> set = trustAgentInfos.entrySet();
                 out.startTag(null, TAG_MANAGE_TRUST_AGENT_FEATURES);
-                for (Entry<String, List<String>> component : set) {
+                for (Entry<String, TrustAgentInfo> entry : set) {
+                    TrustAgentInfo trustAgentInfo = entry.getValue();
                     out.startTag(null, TAG_TRUST_AGENT_COMPONENT);
-                    out.attribute(null, ATTR_VALUE, component.getKey());
-                    for (String feature : component.getValue()) {
-                        out.startTag(null, TAG_TRUST_AGENT_FEATURE);
-                        out.attribute(null, ATTR_VALUE, feature);
-                        out.endTag(null, TAG_TRUST_AGENT_FEATURE);
+                    out.attribute(null, ATTR_VALUE, entry.getKey());
+                    if (trustAgentInfo.options != null) {
+                        out.startTag(null, TAG_TRUST_AGENT_COMPONENT_OPTIONS);
+                        try {
+                            trustAgentInfo.options.saveToXml(out);
+                        } catch (XmlPullParserException e) {
+                            Log.e(LOG_TAG, "Failed to save TrustAgent options", e);
+                        }
+                        out.endTag(null, TAG_TRUST_AGENT_COMPONENT_OPTIONS);
                     }
                     out.endTag(null, TAG_TRUST_AGENT_COMPONENT);
                 }
@@ -680,7 +696,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if (TAG_DISABLE_ACCOUNT_MANAGEMENT.equals(tag)) {
                     accountTypesWithManagementDisabled = readDisableAccountInfo(parser, tag);
                 } else if (TAG_MANAGE_TRUST_AGENT_FEATURES.equals(tag)) {
-                    trustAgentFeatures = getAllTrustAgentFeatures(parser, tag);
+                    trustAgentInfos = getAllTrustAgentInfos(parser, tag);
                 } else if (TAG_CROSS_PROFILE_WIDGET_PROVIDERS.equals(tag)) {
                     crossProfileWidgetProviders = getCrossProfileWidgetProviders(parser, tag);
                 } else if (TAG_PERMITTED_ACCESSIBILITY_SERVICES.equals(tag)) {
@@ -739,11 +755,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return result;
         }
 
-        private HashMap<String, List<String>> getAllTrustAgentFeatures(XmlPullParser parser,
-                String tag) throws XmlPullParserException, IOException {
+        private HashMap<String, TrustAgentInfo> getAllTrustAgentInfos(
+                XmlPullParser parser, String tag) throws XmlPullParserException, IOException {
             int outerDepthDAM = parser.getDepth();
             int typeDAM;
-            HashMap<String, List<String>> result = new HashMap<String, List<String>>();
+            HashMap<String, TrustAgentInfo> result = new HashMap<String, TrustAgentInfo>();
             while ((typeDAM=parser.next()) != END_DOCUMENT
                     && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
                 if (typeDAM == END_TAG || typeDAM == TEXT) {
@@ -752,7 +768,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 String tagDAM = parser.getName();
                 if (TAG_TRUST_AGENT_COMPONENT.equals(tagDAM)) {
                     final String component = parser.getAttributeValue(null, ATTR_VALUE);
-                    result.put(component, getTrustAgentFeatures(parser, tag));
+                    final TrustAgentInfo trustAgentInfo = getTrustAgentInfo(parser, tag);
+                    result.put(component, trustAgentInfo);
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
                 }
@@ -760,20 +777,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return result;
         }
 
-        private List<String> getTrustAgentFeatures(XmlPullParser parser, String tag)
+        private TrustAgentInfo getTrustAgentInfo(XmlPullParser parser, String tag)
                 throws XmlPullParserException, IOException  {
             int outerDepthDAM = parser.getDepth();
             int typeDAM;
-            ArrayList<String> result = new ArrayList<String>();
+            TrustAgentInfo result = new TrustAgentInfo(null);
             while ((typeDAM=parser.next()) != END_DOCUMENT
                     && (typeDAM != END_TAG || parser.getDepth() > outerDepthDAM)) {
                 if (typeDAM == END_TAG || typeDAM == TEXT) {
                     continue;
                 }
                 String tagDAM = parser.getName();
-                if (TAG_TRUST_AGENT_FEATURE.equals(tagDAM)) {
-                    final String feature = parser.getAttributeValue(null, ATTR_VALUE);
-                    result.add(feature);
+                if (TAG_TRUST_AGENT_COMPONENT_OPTIONS.equals(tagDAM)) {
+                    PersistableBundle bundle = new PersistableBundle();
+                    bundle.restoreFromXml(parser);
+                    result.options = bundle;
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag under " + tag +  ": " + tagDAM);
                 }
@@ -1175,7 +1193,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             int userHandle) {
         List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
         for (UserInfo ui : profiles) {
-            int id = ui.getUserHandle().getIdentifier();
+            int id = ui.id;
             sendAdminCommandLocked(action, reqPolicy, id);
         }
     }
@@ -1592,7 +1610,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo ui : profiles) {
-                int profileUserHandle = ui.getUserHandle().getIdentifier();
+                int profileUserHandle = ui.id;
                 final DevicePolicyData policy = getUserData(profileUserHandle);
                 final int count = policy.mAdminList.size();
                 if (count > 0) {
@@ -1879,7 +1897,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -1926,7 +1944,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -1973,7 +1991,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i = 0; i < N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2034,7 +2052,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i = 0; i < N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2132,7 +2150,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
         for (UserInfo userInfo : profiles) {
-            DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+            DevicePolicyData policy = getUserData(userInfo.id);
             final int N = policy.mAdminList.size();
             for (int i = 0; i < N; i++) {
                 ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2189,7 +2207,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2233,7 +2251,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2280,7 +2298,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2327,7 +2345,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i = 0; i < N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2374,7 +2392,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2421,7 +2439,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -2527,7 +2545,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int count = 0;
         ActiveAdmin strictestAdmin = null;
         for (UserInfo userInfo : mUserManager.getProfiles(userHandle)) {
-            DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+            DevicePolicyData policy = getUserData(userInfo.id);
             for (ActiveAdmin admin : policy.mAdminList) {
                 if (admin.maximumFailedPasswordsForWipe ==
                         ActiveAdmin.DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE) {
@@ -2739,7 +2757,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Return strictest policy for this user and profiles that are visible from this user.
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
                 for (int i=0; i<N; i++) {
                     ActiveAdmin admin = policy.mAdminList.get(i);
@@ -3056,7 +3074,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void updatePasswordExpirationsLocked(int userHandle) {
             List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
             for (UserInfo userInfo : profiles) {
-                int profileId = userInfo.getUserHandle().getIdentifier();
+                int profileId = userInfo.id;
                 DevicePolicyData policy = getUserData(profileId);
                 final int N = policy.mAdminList.size();
                 if (N > 0) {
@@ -4107,13 +4125,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    public void setTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent,
-            List<String>features, int userHandle) {
+    public void setTrustAgentConfiguration(ComponentName admin, ComponentName agent,
+            PersistableBundle args, int userHandle) {
         if (!mHasFeature) {
             return;
         }
         enforceCrossUserPermission(userHandle);
-        enforceNotManagedProfile(userHandle, "manage trust agent features");
+        enforceNotManagedProfile(userHandle, "set trust agent configuration");
         synchronized (this) {
             if (admin == null) {
                 throw new NullPointerException("admin is null");
@@ -4123,57 +4141,68 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             ActiveAdmin ap = getActiveAdminForCallerLocked(admin,
                     DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES);
-            ap.trustAgentFeatures.put(agent.flattenToString(), features);
+            ap.trustAgentInfos.put(agent.flattenToString(), new TrustAgentInfo(args));
             saveSettingsLocked(userHandle);
             syncDeviceCapabilitiesLocked(getUserData(userHandle));
         }
     }
 
-    public List<String> getTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent,
-            int userHandle) {
+    public List<PersistableBundle> getTrustAgentConfiguration(ComponentName admin,
+            ComponentName agent, int userHandle) {
         if (!mHasFeature) {
             return null;
         }
         enforceCrossUserPermission(userHandle);
+        if (agent == null) {
+            throw new NullPointerException("agent is null");
+        }
+
         synchronized (this) {
-            if (agent == null) {
-                throw new NullPointerException("agent is null");
-            }
             final String componentName = agent.flattenToString();
             if (admin != null) {
                 final ActiveAdmin ap = getActiveAdminUncheckedLocked(admin, userHandle);
-                return (ap != null) ? ap.trustAgentFeatures.get(componentName) : null;
+                if (ap == null) return null;
+                TrustAgentInfo trustAgentInfo = ap.trustAgentInfos.get(componentName);
+                if (trustAgentInfo == null || trustAgentInfo.options == null) return null;
+                List<PersistableBundle> result = new ArrayList<PersistableBundle>();
+                result.add(trustAgentInfo.options);
+                return result;
             }
 
             // Return strictest policy for this user and profiles that are visible from this user.
-            List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
-            List<String> result = null;
+            final List<UserInfo> profiles = mUserManager.getProfiles(userHandle);
+            List<PersistableBundle> result = null;
+
+            // Search through all admins that use KEYGUARD_DISABLE_TRUST_AGENTS and keep track
+            // of the options. If any admin doesn't have options, discard options for the rest
+            // and return null.
+            boolean allAdminsHaveOptions = true;
             for (UserInfo userInfo : profiles) {
-                DevicePolicyData policy = getUserData(userInfo.getUserHandle().getIdentifier());
+                DevicePolicyData policy = getUserData(userInfo.id);
                 final int N = policy.mAdminList.size();
-                for (int i=0; i<N; i++) {
-                    ActiveAdmin ap = policy.mAdminList.get(i);
-                    // Compute the intersection of all features for active admins that disable
-                    // trust agents:
-                    if ((ap.disabledKeyguardFeatures
-                            & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0) {
-                        final List<String> features = ap.trustAgentFeatures.get(componentName);
-                        if (result == null) {
-                            if (features == null || features.size() == 0) {
-                                result = new ArrayList<String>();
-                                Slog.w(LOG_TAG, "admin " + ap.info.getPackageName()
-                                    + " has null trust agent feature set; all will be disabled");
-                            } else {
-                                result = new ArrayList<String>(features.size());
-                                result.addAll(features);
+                for (int i=0; i < N; i++) {
+                    final ActiveAdmin active = policy.mAdminList.get(i);
+                    final boolean disablesTrust = (active.disabledKeyguardFeatures
+                            & DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS) != 0;
+                    final TrustAgentInfo info = active.trustAgentInfos.get(componentName);
+                    if (info != null && info.options != null && !info.options.isEmpty()) {
+                        if (disablesTrust) {
+                            if (result == null) {
+                                result = new ArrayList<PersistableBundle>();
                             }
+                            result.add(info.options);
                         } else {
-                            result.retainAll(features);
+                            Log.w(LOG_TAG, "Ignoring admin " + active.info
+                                    + " because it has trust options but doesn't declare "
+                                    + "KEYGUARD_DISABLE_TRUST_AGENTS");
                         }
+                    } else if (disablesTrust) {
+                        allAdminsHaveOptions = false;
+                        break;
                     }
                 }
             }
-            return result;
+            return allAdminsHaveOptions ? result : null;
         }
     }
 

@@ -31,6 +31,7 @@ import android.content.pm.ResolveInfo;
 import android.net.ProxyInfo;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -40,6 +41,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
 import android.service.restrictions.RestrictionsReceiver;
+import android.service.trust.TrustAgentService;
 import android.util.Log;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -2604,25 +2606,29 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets a list of features to enable for a TrustAgent component. This is meant to be
-     * used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which will disable all
-     * trust agents but those with features enabled by this function call.
+     * Sets a list of configuration features to enable for a TrustAgent component. This is meant
+     * to be used in conjunction with {@link #KEYGUARD_DISABLE_TRUST_AGENTS}, which disables all
+     * trust agents but those enabled by this function call. If flag
+     * {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is not set, then this call has no effect.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_KEYGUARD_FEATURES} to be able to call
-     * this method; if it has not, a security exception will be thrown.
+     * this method; if not, a security exception will be thrown.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param agent Which component to enable features for.
-     * @param features List of features to enable. Consult specific TrustAgent documentation for
-     * the feature list.
-     * @hide
+     * @param target Component name of the agent to be enabled.
+     * @param options TrustAgent-specific feature bundle. If null for any admin, agent
+     * will be strictly disabled according to the state of the
+     *  {@link #KEYGUARD_DISABLE_TRUST_AGENTS} flag.
+     * <p>If {@link #KEYGUARD_DISABLE_TRUST_AGENTS} is set and options is not null for all admins,
+     * then it's up to the TrustAgent itself to aggregate the values from all device admins.
+     * <p>Consult documentation for the specific TrustAgent to determine legal options parameters.
      */
-    public void setTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent,
-            List<String> features) {
+    public void setTrustAgentConfiguration(ComponentName admin, ComponentName target,
+            PersistableBundle options) {
         if (mService != null) {
             try {
-                mService.setTrustAgentFeaturesEnabled(admin, agent, features, UserHandle.myUserId());
+                mService.setTrustAgentConfiguration(admin, target, options, UserHandle.myUserId());
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
@@ -2630,24 +2636,30 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Gets list of enabled features for the given TrustAgent component. If admin is
-     * null, this will return the intersection of all features enabled for the given agent by all
-     * admins.
+     * Gets configuration for the given trust agent based on aggregating all calls to
+     * {@link #setTrustAgentConfiguration(ComponentName, ComponentName, PersistableBundle)} for
+     * all device admins.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param agent Which component to get enabled features for.
-     * @return List of enabled features.
-     * @hide
+     * @return configuration for the given trust agent.
      */
-    public List<String> getTrustAgentFeaturesEnabled(ComponentName admin, ComponentName agent) {
+    public List<PersistableBundle> getTrustAgentConfiguration(ComponentName admin,
+            ComponentName agent) {
+        return getTrustAgentConfiguration(admin, agent, UserHandle.myUserId());
+    }
+
+    /** @hide per-user version */
+    public List<PersistableBundle> getTrustAgentConfiguration(ComponentName admin,
+            ComponentName agent, int userHandle) {
         if (mService != null) {
             try {
-                return mService.getTrustAgentFeaturesEnabled(admin, agent, UserHandle.myUserId());
+                return mService.getTrustAgentConfiguration(admin, agent, userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, "Failed talking with device policy service", e);
             }
         }
-        return new ArrayList<String>(); // empty list
+        return new ArrayList<PersistableBundle>(); // empty list
     }
 
     /**
