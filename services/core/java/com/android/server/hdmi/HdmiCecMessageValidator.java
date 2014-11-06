@@ -79,7 +79,7 @@ public final class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_SET_STREAM_PATH,
                 physicalAddressValidator, DEST_BROADCAST);
         addValidationInfo(Constants.MESSAGE_SYSTEM_AUDIO_MODE_REQUEST,
-                physicalAddressValidator, DEST_DIRECT);
+                new SystemAudioModeRequestValidator(), DEST_DIRECT);
 
         // Messages have no parameter.
         FixedLengthValidator noneValidator = new FixedLengthValidator(0);
@@ -300,6 +300,17 @@ public final class HdmiCecMessageValidator {
                 return ERROR_PARAMETER_SHORT;
             }
             return toErrorCode(isValidPhysicalAddress(params, 0));
+        }
+    }
+
+    private class SystemAudioModeRequestValidator extends PhysicalAddressValidator {
+        @Override
+        public int isValid(byte[] params) {
+            // TV can send <System Audio Mode Request> with no parameters to terminate system audio.
+            if (params.length == 0) {
+                return OK;
+            }
+            return super.isValid(params);
         }
     }
 
