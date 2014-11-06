@@ -574,6 +574,7 @@
   <java-symbol type="string" name="durationHourMinutes" />
   <java-symbol type="string" name="durationHourMinute" />
   <java-symbol type="string" name="durationMinutes" />
+  <java-symbol type="string" name="durationMinute" />
   <java-symbol type="string" name="durationMinuteSeconds" />
   <java-symbol type="string" name="durationMinuteSecond" />
   <java-symbol type="string" name="durationSeconds" />
