@@ -26,7 +26,6 @@ public class AnimatedVectorDrawableTest extends Activity implements View.OnClick
     private static final String LOGCAT = "AnimatedVectorDrawableTest";
 
     protected int[] icon = {
-            R.drawable.ic_open_animation,
             R.drawable.ic_rotate_2_portrait_v2_animation,
             R.drawable.ic_signal_airplane_v2_animation,
             R.drawable.ic_hourglass_animation,
