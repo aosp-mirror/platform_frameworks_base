@@ -23,18 +23,19 @@ import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_DUMMY;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
-import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
-import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
+import static android.net.ConnectivityManager.TYPE_MOBILE_CBS;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
-import static android.net.ConnectivityManager.TYPE_MOBILE_IMS;
-import static android.net.ConnectivityManager.TYPE_MOBILE_CBS;
-import static android.net.ConnectivityManager.TYPE_MOBILE_IA;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
+import static android.net.ConnectivityManager.TYPE_MOBILE_IA;
+import static android.net.ConnectivityManager.TYPE_MOBILE_IMS;
+import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
+import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
 import static android.net.ConnectivityManager.TYPE_NONE;
+import static android.net.ConnectivityManager.TYPE_PROXY;
+import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
-import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
@@ -703,6 +704,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // ignore it - leave the entry null
             }
         }
+
+        // Forcibly add TYPE_VPN as a supported type, if it has not already been added via config.
+        if (mNetConfigs[TYPE_VPN] == null) {
+            // mNetConfigs is used only for "restore time", which isn't applicable to VPNs, so we
+            // don't need to add TYPE_VPN to mNetConfigs.
+            mLegacyTypeTracker.addSupportedType(TYPE_VPN);
+            mNetworksDefined++;  // used only in the log() statement below.
+        }
+
         if (VDBG) log("mNetworksDefined=" + mNetworksDefined);
 
         mProtectedNetworks = new ArrayList<Integer>();
@@ -4111,6 +4121,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
 
             notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_AVAILABLE);
+
+            // A VPN generally won't get added to the legacy tracker in the "for (nri)" loop above,
+            // because usually there are no NetworkRequests it satisfies (e.g., mDefaultRequest
+            // wants the NOT_VPN capability, so it will never be satisfied by a VPN). So, add the
+            // newNetwork to the tracker explicitly (it's a no-op if it has already been added).
+            if (newNetwork.isVPN()) {
+                mLegacyTypeTracker.add(TYPE_VPN, newNetwork);
+            }
         } else if (nascent) {
             // Only tear down newly validated networks here.  Leave unvalidated to either become
             // validated (and get evaluated against peers, one losing here) or
