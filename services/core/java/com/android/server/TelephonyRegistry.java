@@ -596,7 +596,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 + " phoneId=" + phoneId + " state=" + state);
                     }
                     if (((r.events & PhoneStateListener.LISTEN_SERVICE_STATE) != 0) &&
-                            subIdMatch(r.subId, subId)) {
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (DBG) {
                                 log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
@@ -641,7 +641,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                 + " phoneId=" + phoneId + " ss=" + signalStrength);
                     }
                     if (((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTHS) != 0) &&
-                            subIdMatch(r.subId, subId)) {
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (DBG) {
                                 log("notifySignalStrengthForSubscriber: callback.onSsS r=" + r
@@ -654,7 +654,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         }
                     }
                     if (((r.events & PhoneStateListener.LISTEN_SIGNAL_STRENGTH) != 0) &&
-                            subIdMatch(r.subId, subId)){
+                            idMatch(r.subId, subId, phoneId)){
                         try {
                             int gsmSignalStrength = signalStrength.getGsmSignalStrength();
                             int ss = (gsmSignalStrength == 99 ? -1 : gsmSignalStrength);
@@ -696,7 +696,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCellInfo.set(phoneId, cellInfo);
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_INFO) &&
-                            subIdMatch(r.subId, subId)) {
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (DBG_LOC) {
                                 log("notifyCellInfo: mCellInfo=" + cellInfo + " r=" + r);
@@ -751,7 +751,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mMessageWaiting[phoneId] = mwi;
                 for (Record r : mRecords) {
                     if (((r.events & PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR) != 0) &&
-                            subIdMatch(r.subId, subId)) {
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             r.callback.onMessageWaitingIndicatorChanged(mwi);
                         } catch (RemoteException ex) {
@@ -782,7 +782,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCallForwarding[phoneId] = cfi;
                 for (Record r : mRecords) {
                     if (((r.events & PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR) != 0) &&
-                            subIdMatch(r.subId, subId)) {
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             r.callback.onCallForwardingIndicatorChanged(cfi);
                         } catch (RemoteException ex) {
@@ -879,7 +879,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
                 for (Record r : mRecords) {
                     if (((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) &&
-                            subIdMatch(r.subId, subId)) {
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             log("Notify data connection state changed on sub: " +
                                     subId);
@@ -965,7 +965,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCellLocation[phoneId] = cellLocation;
                 for (Record r : mRecords) {
                     if (validateEventsAndUserLocked(r, PhoneStateListener.LISTEN_CELL_LOCATION) &&
-                            subIdMatch(r.subId, subId)) {
+                            idMatch(r.subId, subId, phoneId)) {
                         try {
                             if (DBG_LOC) {
                                 log("notifyCellLocation: cellLocation=" + cellLocation
@@ -1386,7 +1386,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         @Override
         public String toString() {
-            return mS + " " + mTime.toString() + " " + mSubId + " " + mPhoneId + " " + mState;
+            return mS + " Time " + mTime.toString() + " mSubId " + mSubId + " mPhoneId " + mPhoneId + "  mState " + mState;
         }
     }
 
@@ -1429,8 +1429,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    boolean subIdMatch(int rSubId, int subId) {
+    boolean idMatch(int rSubId, int subId, int phoneId) {
         if(rSubId == SubscriptionManager.DEFAULT_SUB_ID) {
+            if(subId < 0) {
+                // Invalid case, we need compare phoneId with default one.
+                return (mDefaultPhoneId == phoneId);
+            }
             return (subId == mDefaultSubId);
         } else {
             return (rSubId == subId);
