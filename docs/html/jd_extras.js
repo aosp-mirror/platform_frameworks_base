@@ -1394,5 +1394,18 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["stories"],
     "type": "Case Study Deck",
     "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "shareables/distribute/play_dev_guide_secrets_en.pdf",
+    "timestamp": null,
+    "image": "distribute/images/play_dev_guide_b.jpg",
+    "title": "The Secrets to App Success on Google Play",
+    "summary": "A guide to useful features, tips, and best practices that will help you grow a successful app business on Google Play.",
+    "keywords": ["distribute"],
+    "type": "PDF DOWNLOAD (11MB)",
+    "titleFriendly": ""
   }
 ]);
