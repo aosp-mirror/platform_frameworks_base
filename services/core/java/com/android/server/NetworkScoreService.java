@@ -130,7 +130,16 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     @Override
     public boolean setActiveScorer(String packageName) {
-        mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        // TODO: For now, since SCORE_NETWORKS requires an app to be privileged, we allow such apps
+        // to directly set the scorer app rather than having to use the consent dialog. The
+        // assumption is that anyone bundling a scorer app with the system is trusted by the OEM to
+        // do the right thing and not enable this feature without explaining it to the user.
+        // In the future, should this API be opened to 3p apps, we will need to lock this down and
+        // figure out another way to streamline the UX.
+
+        // mContext.enforceCallingOrSelfPermission(permission.BROADCAST_NETWORK_PRIVILEGED, TAG);
+        mContext.enforceCallingOrSelfPermission(permission.SCORE_NETWORKS, TAG);
+
         return setScorerInternal(packageName);
     }
 
