@@ -11,6 +11,7 @@ startpage=true
   <h2>This lesson teaches you how to</h2>
   <ol>
     <li><a href="#dev-project">Setup a TV Project</a></li>
+    <li><a href="#tv-libraries">Add TV Support Libraries</a></li>
     <li><a href="#build-it">Build TV Apps</a></li>
     <li><a href="#run">Run TV Apps</a></li>
   </ol>
@@ -86,16 +87,9 @@ startpage=true
 
 <p>An application intended to run on TV devices must declare a launcher activity for TV
   in its manifest using a {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} intent filter.
-  This filter identifies your app as being enabled for TV, allowing it to be considered a TV app
-  in Google Play. Declaring this intent also identifies which activity
+  This filter identifies your app as being enabled for TV, and is required for your app to be
+  considered a TV app in Google Play. Declaring this intent also identifies which activity
   in your app to launch when a user selects its icon on the TV home screen.</p>
-
-<p class="caution">
-  <strong>Caution:</strong> If you do not include the {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} intent filter in
-  your app, it is not visible to users running the Google Play store on TV devices. Also, if your
-  app does not have this filter when you load it onto a TV device using developer tools, the app
-  does not appear in the TV user interface.
-</p>
 
 <p>The following code snippet shows how to include this intent filter in your manifest:</p>
 
@@ -132,6 +126,14 @@ startpage=true
   launch on a TV device.
 </p>
 
+<p class="caution">
+  <strong>Caution:</strong> If you do not include the
+  {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER} intent filter in
+  your app, it is not visible to users running the Google Play store on TV devices. Also, if your
+  app does not have this filter when you load it onto a TV device using developer tools, the app
+  does not appear in the TV user interface.
+</p>
+
 <p>
   If you are modifying an existing app for use on TV, your app should not use the same
   activity layout for TV that it does for phones and tablets. The user interface of your TV app (or
@@ -140,6 +142,31 @@ startpage=true
   "{@docRoot}design/tv/index.html">TV Design</a> guide. For more information on the minimum
   implementation requirements for interface layouts on TV, see <a href=
   "{@docRoot}training/tv/start/layouts.html">Building TV Layouts</a>.
+</p>
+
+
+<h3 id="no-touchscreen">Declare touchscreen not required</h3>
+
+<p>
+  Applications that are intended to run on TV devices do not rely on touch screens for input. In
+  order to make this clear, the manifest of your TV app must declare that a the {@code
+  android.hardware.touchscreen} feature is not required. This setting identifies your app as being
+  able to work on a TV device, and is required for your app to be considered a TV app in Google
+  Play. The following code example shows how to include this manifest declaration:
+</p>
+
+<pre>
+&lt;manifest&gt;
+    <strong>&lt;uses-feature android:name="android.hardware.touchscreen"
+              android:required="false" /&gt;</strong>
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p class="caution">
+  <strong>Caution:</strong> You must declare that a touch screen is not required in your app
+  manifest, as shown this example code, or your app cannot appear in the Google Play store on TV
+  devices.
 </p>
 
 <h3 id="banner">Provide a home screen banner</h3>
@@ -152,9 +179,10 @@ startpage=true
 
 <pre>
 &lt;application
-    . . .
+    ...
     android:banner="&#64;drawable/banner" &gt;
-    . . .
+
+    ...
 &lt;/application&gt;
 </pre>
 
@@ -171,7 +199,7 @@ startpage=true
   design guide.
 </p>
 
-<h3 id="tv-libraries">Add TV support libraries</h3>
+<h2 id="tv-libraries">Add TV Support Libraries</h3>
 
 <p>
   The Android SDK includes support libraries that are intended for use with TV apps. These
