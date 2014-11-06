@@ -515,7 +515,10 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         // last chance, check against any uri grants
-        if (context.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        final int callingUserId = UserHandle.getUserId(uid);
+        final Uri userUri = (mSingleUser && !UserHandle.isSameUser(mMyUid, uid))
+                ? maybeAddUserId(uri, callingUserId) : uri;
+        if (context.checkUriPermission(userUri, pid, uid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 == PERMISSION_GRANTED) {
             return;
         }
