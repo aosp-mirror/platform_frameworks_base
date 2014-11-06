@@ -55,9 +55,20 @@ GoogleApiClient mGoogleAppiClient = new GoogleApiClient.Builder(this)
                     Log.d(TAG, "onConnectionFailed: " + result);
                 }
             })
+        // Request access only to the Wearable API
         .addApi(Wearable.API)
         .build();
 </pre>
+
+<p class="caution">
+<strong>Important:</strong> To avoid client connection errors on devices that do not have the
+<a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
+Wear app</a> installed, use a separate <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> instance to access only the <a
+href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
+Wearable}</a> API. For more information, see <a
+href="{@docRoot}google/auth/api-client.html#WearableApi">Access the Wearable API</a>.</p>
 
 <p>Before you use the data layer API, start a connection on your client by calling the
 <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()">connect()</a>
