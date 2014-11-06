@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -142,6 +143,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             } else if (action.equals(AlternateRecentsComponent.ACTION_TOGGLE_RECENTS_ACTIVITY)) {
                 // If we are toggling Recents, then first unfilter any filtered stacks first
                 dismissRecentsToFocusedTaskOrHome(true);
+            } else if (action.equals(AlternateRecentsComponent.ACTION_START_ENTER_ANIMATION)) {
+                // Trigger the enter animation
+                onEnterAnimationTriggered();
+                // Notify the fallback receiver that we have successfully got the broadcast
+                // See AlternateRecentsComponent.onAnimationStarted()
+                setResultCode(Activity.RESULT_OK);
             }
         }
     };
@@ -157,7 +164,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHome(false);
                 // Start preloading some tasks in the background
-                RecentsTaskLoader.getInstance().preload(RecentsActivity.this);
+                RecentsTaskLoader.getInstance().preload(RecentsActivity.this,
+                        Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
             } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
                 // When the search activity changes, update the Search widget
                 refreshSearchWidget();
@@ -188,6 +196,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 AlternateRecentsComponent.EXTRA_FROM_TASK_ID, -1);
         mConfig.launchedWithAltTab = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
+        mConfig.launchedReuseTaskStackViews = launchIntent.getBooleanExtra(
+                AlternateRecentsComponent.EXTRA_REUSE_TASK_STACK_VIEWS, false);
 
         // Load all the tasks
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
@@ -397,8 +407,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Update if we are getting a configuration change
         if (savedInstanceState != null) {
+            // Update RecentsConfiguration
+            mConfig = RecentsConfiguration.reinitialize(this,
+                    RecentsTaskLoader.getInstance().getSystemServicesProxy());
             mConfig.updateOnConfigurationChange();
-            onConfigurationChange();
+            // Trigger the enter animation
+            onEnterAnimationTriggered();
         }
 
         // Start listening for widget package changes if there is one bound, post it since we don't
@@ -426,19 +440,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             mDebugOverlay.setCallbacks(this);
             mRecentsView.setDebugOverlay(mDebugOverlay);
         }
-    }
-
-    /** Called when the configuration changes. */
-    void onConfigurationChange() {
-        // Update RecentsConfiguration
-        mConfig = RecentsConfiguration.reinitialize(this,
-                RecentsTaskLoader.getInstance().getSystemServicesProxy());
-
-        // Try and start the enter animation (or restart it on configuration changed)
-        ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
-        mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
-        // Animate the SystemUI scrim views
-        mScrimViews.startEnterRecentsAnimation();
     }
 
     /** Handles changes to the activity visibility. */
@@ -474,6 +475,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         IntentFilter filter = new IntentFilter();
         filter.addAction(AlternateRecentsComponent.ACTION_HIDE_RECENTS_ACTIVITY);
         filter.addAction(AlternateRecentsComponent.ACTION_TOGGLE_RECENTS_ACTIVITY);
+        filter.addAction(AlternateRecentsComponent.ACTION_START_ENTER_ANIMATION);
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register any broadcast receivers for the task loader
@@ -492,8 +494,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     protected void onStop() {
         super.onStop();
 
-        // Remove all the views
-        mRecentsView.removeAllTaskStacks();
+        // Notify the views that we are no longer visible
+        mRecentsView.onRecentsHidden();
 
         // Unregister the RecentsService receiver
         unregisterReceiver(mServiceBroadcastReceiver);
@@ -515,8 +517,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
-    @Override
-    public void onEnterAnimationComplete() {
+    public void onEnterAnimationTriggered() {
         // Try and start the enter animation (or restart it on configuration changed)
         ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
         mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
@@ -584,7 +585,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Called when debug mode is triggered */
     public void onDebugModeTriggered() {
-
         if (mConfig.developerOptionsEnabled) {
             SharedPreferences settings = getSharedPreferences(getPackageName(), 0);
             if (settings.getBoolean(Constants.Values.App.Key_DebugModeEnabled, false)) {

@@ -75,4 +75,12 @@ public class ViewPool<V, T> {
         mViewCreator.prepareViewToLeavePool(v, prepareData, isNewView);
         return v;
     }
+
+    /** Returns an iterator to the list of the views in the pool. */
+    Iterator<V> poolViewIterator() {
+        if (mPool != null) {
+            return mPool.iterator();
+        }
+        return null;
+    }
 }

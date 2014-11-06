@@ -40,6 +40,7 @@ import com.android.systemui.recents.model.TaskStack;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 
 
 /* The visual representation of a task stack view */
@@ -99,25 +100,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
     };
 
-    // A convenience runnable to return all views to the pool
-    Runnable mReturnAllViewsToPoolRunnable = new Runnable() {
-        @Override
-        public void run() {
-            int childCount = getChildCount();
-            for (int i = childCount - 1; i >= 0; i--) {
-                TaskView tv = (TaskView) getChildAt(i);
-                mViewPool.returnViewToPool(tv);
-                // Also hide the view since we don't need it anymore
-                tv.setVisibility(View.INVISIBLE);
-            }
-        }
-    };
-
     public TaskStackView(Context context, TaskStack stack) {
         super(context);
+        // Set the stack first
+        setStack(stack);
         mConfig = RecentsConfiguration.getInstance();
-        mStack = stack;
-        mStack.setCallbacks(this);
         mViewPool = new ViewPool<TaskView, Task>(context, this);
         mInflater = LayoutInflater.from(context);
         mLayoutAlgorithm = new TaskStackViewLayoutAlgorithm(mConfig);
@@ -143,9 +130,60 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mCb = cb;
     }
 
+    /** Sets the task stack */
+    void setStack(TaskStack stack) {
+        // Unset the old stack
+        if (mStack != null) {
+            mStack.setCallbacks(null);
+
+            // Return all existing views to the pool
+            reset();
+            // Layout again with the new stack
+            requestLayout();
+        }
+
+        // Set the new stack
+        mStack = stack;
+        if (mStack != null) {
+            mStack.setCallbacks(this);
+        }
+    }
+
     /** Sets the debug overlay */
     public void setDebugOverlay(DebugOverlayView overlay) {
         mDebugOverlay = overlay;
+    }
+
+    /** Resets this TaskStackView for reuse. */
+    void reset() {
+        // Return all the views to the pool
+        int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            TaskView tv = (TaskView) getChildAt(i);
+            mViewPool.returnViewToPool(tv);
+        }
+
+        // Mark each task view for relayout
+        if (mViewPool != null) {
+            Iterator<TaskView> iter = mViewPool.poolViewIterator();
+            if (iter != null) {
+                while (iter.hasNext()) {
+                    TaskView tv = iter.next();
+                    tv.reset();
+                }
+            }
+        }
+
+        // Reset the stack state
+        resetFocusedTask();
+        mStackViewsDirty = true;
+        mStackViewsClipDirty = true;
+        mAwaitingFirstLayout = true;
+        mPrevAccessibilityFocusedIndex = -1;
+        if (mUIDozeTrigger != null) {
+            mUIDozeTrigger.stopDozing();
+            mUIDozeTrigger.resetTrigger();
+        }
     }
 
     /** Requests that the views be synchronized with the model */
@@ -510,6 +548,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         tv.dismissTask();
     }
 
+    /** Resets the focused task. */
+    void resetFocusedTask() {
+        if (mFocusedTaskIndex > -1) {
+            Task t = mStack.getTasks().get(mFocusedTaskIndex);
+            TaskView tv = getChildViewForTask(t);
+            tv.unsetFocusedTask();
+        }
+        mFocusedTaskIndex = -1;
+    }
+
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
@@ -543,6 +591,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void computeScroll() {
+        if (mStack == null) return;
+
         mStackScroller.computeScroll();
         // Synchronize the views
         synchronizeStackViewsWithModel();
@@ -758,9 +808,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskView tv = (TaskView) getChildAt(i);
             tv.startExitToHomeAnimation(ctx);
         }
-
-        // Add a runnable to the post animation ref counter to clear all the views
-        ctx.postAnimationTrigger.addLastDecrementRunnable(mReturnAllViewsToPoolRunnable);
     }
 
     /** Animates a task view in this stack as it launches. */
@@ -778,6 +825,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 t.startLaunchTaskAnimation(null, false, occludesLaunchTarget, lockToTask);
             }
         }
+    }
+
+    /** Final callback after Recents is finally hidden. */
+    void onRecentsHidden() {
+        reset();
+        setStack(null);
     }
 
     public boolean isTransformedTouchPointInView(float x, float y, View child) {
@@ -944,19 +997,22 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // Reset the view properties
         tv.resetViewProperties();
+
+        // Reset the clip state of the task view
+        tv.setClipViewInStack(false);
     }
 
     @Override
     public void prepareViewToLeavePool(TaskView tv, Task task, boolean isNewView) {
+        // It is possible for a view to be returned to the view pool before it is laid out,
+        // which means that we will need to relayout the view when it is first used next.
+        boolean requiresRelayout = tv.getWidth() <= 0 && !isNewView;
+
         // Rebind the task and request that this task's data be filled into the TaskView
         tv.onTaskBound(task);
 
         // Load the task data
         RecentsTaskLoader.getInstance().loadTaskData(task);
-
-        // Sanity check, the task view should always be clipping against the stack at this point,
-        // but just in case, re-enable it here
-        tv.setClipViewInStack(true);
 
         // If the doze trigger has already fired, then update the state for this task view
         if (mUIDozeTrigger.hasTriggered()) {
@@ -985,13 +1041,17 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Add/attach the view to the hierarchy
         if (isNewView) {
             addView(tv, insertIndex);
-
-            // Set the callbacks and listeners for this new view
-            tv.setTouchEnabled(true);
-            tv.setCallbacks(this);
         } else {
             attachViewToParent(tv, insertIndex, tv.getLayoutParams());
+            if (requiresRelayout) {
+                tv.requestLayout();
+            }
         }
+
+        // Set the new state for this view, including the callbacks and view clipping
+        tv.setCallbacks(this);
+        tv.setTouchEnabled(true);
+        tv.setClipViewInStack(true);
     }
 
     @Override

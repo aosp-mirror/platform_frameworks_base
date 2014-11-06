@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /** A proxy implementation for the recents component */
-public class AlternateRecentsComponent {
+public class AlternateRecentsComponent implements ActivityOptions.OnAnimationStartedListener {
 
     final public static String EXTRA_FROM_HOME = "recents.triggeredOverHome";
     final public static String EXTRA_FROM_SEARCH_HOME = "recents.triggeredOverSearchHome";
@@ -62,7 +62,9 @@ public class AlternateRecentsComponent {
     final public static String EXTRA_FROM_TASK_ID = "recents.activeTaskId";
     final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "recents.triggeredFromAltTab";
     final public static String EXTRA_TRIGGERED_FROM_HOME_KEY = "recents.triggeredFromHomeKey";
+    final public static String EXTRA_REUSE_TASK_STACK_VIEWS = "recents.reuseTaskStackViews";
 
+    final public static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
     final public static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
     final public static String ACTION_HIDE_RECENTS_ACTIVITY = "action_hide_recents_activity";
 
@@ -77,7 +79,10 @@ public class AlternateRecentsComponent {
     Context mContext;
     LayoutInflater mInflater;
     SystemServicesProxy mSystemServicesProxy;
+    Handler mHandler;
     boolean mBootCompleted;
+    boolean mStartAnimationTriggered;
+    boolean mCanReuseTaskStackViews = true;
 
     // Task launching
     RecentsConfiguration mConfig;
@@ -103,6 +108,7 @@ public class AlternateRecentsComponent {
         mInflater = LayoutInflater.from(context);
         mContext = context;
         mSystemServicesProxy = new SystemServicesProxy(context);
+        mHandler = new Handler();
         mTaskStackBounds = new Rect();
     }
 
@@ -128,7 +134,7 @@ public class AlternateRecentsComponent {
         }
 
         // When we start, preload the metadata associated with the previous tasks
-        RecentsTaskLoader.getInstance().preload(mContext);
+        RecentsTaskLoader.getInstance().preload(mContext, RecentsTaskLoader.ALL_TASKS);
     }
 
     public void onBootCompleted() {
@@ -176,7 +182,9 @@ public class AlternateRecentsComponent {
     }
 
     public void onPreloadRecents() {
-        // Do nothing
+        // When we start, preload the metadata associated with the previous tasks
+        RecentsTaskLoader.getInstance().preload(mContext,
+                Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
     }
 
     public void onCancelPreloadingRecents() {
@@ -186,7 +194,7 @@ public class AlternateRecentsComponent {
     void showRelativeAffiliatedTask(boolean showNextTask) {
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         TaskStack stack = loader.getTaskStack(mSystemServicesProxy, mContext.getResources(),
-                -1, -1, false, true, null, null);
+                -1, -1, RecentsTaskLoader.ALL_TASKS, false, true, null, null);
         // Return early if there are no tasks
         if (stack.getTaskCount() == 0) return;
 
@@ -251,6 +259,8 @@ public class AlternateRecentsComponent {
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
+        // Don't reuse task stack views if the configuration changes
+        mCanReuseTaskStackViews = false;
         // Reload the header bar layout
         reloadHeaderBarLayout();
     }
@@ -364,23 +374,28 @@ public class AlternateRecentsComponent {
      * Creates the activity options for a unknown state->recents transition.
      */
     ActivityOptions getUnknownTransitionActivityOptions() {
+        mStartAnimationTriggered = false;
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_unknown_enter,
-                R.anim.recents_from_unknown_exit);
+                R.anim.recents_from_unknown_exit,
+                mHandler, this);
     }
 
     /**
      * Creates the activity options for a home->recents transition.
      */
     ActivityOptions getHomeTransitionActivityOptions(boolean fromSearchHome) {
+        mStartAnimationTriggered = false;
         if (fromSearchHome) {
             return ActivityOptions.makeCustomAnimation(mContext,
                     R.anim.recents_from_search_launcher_enter,
-                    R.anim.recents_from_search_launcher_exit);
+                    R.anim.recents_from_search_launcher_exit,
+                    mHandler, this);
         }
         return ActivityOptions.makeCustomAnimation(mContext,
                 R.anim.recents_from_launcher_enter,
-                R.anim.recents_from_launcher_exit);
+                R.anim.recents_from_launcher_exit,
+                mHandler, this);
     }
 
     /**
@@ -408,9 +423,10 @@ public class AlternateRecentsComponent {
                 c.setBitmap(null);
             }
 
+            mStartAnimationTriggered = false;
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mStatusBarView,
                     thumbnail, toTaskRect.left, toTaskRect.top, toTaskRect.width(),
-                    toTaskRect.height(), null);
+                    toTaskRect.height(), this);
         }
 
         // If both the screenshot and thumbnail fails, then just fall back to the default transition
@@ -423,7 +439,7 @@ public class AlternateRecentsComponent {
         // Get the stack of tasks that we are animating into
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         TaskStack stack = loader.getTaskStack(mSystemServicesProxy, mContext.getResources(),
-                runningTaskId, -1, false, isTopTaskHome, null, null);
+                runningTaskId, -1, RecentsTaskLoader.ALL_TASKS, false, isTopTaskHome, null, null);
         if (stack.getTaskCount() == 0) {
             return null;
         }
@@ -529,11 +545,13 @@ public class AlternateRecentsComponent {
         }
         intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, mTriggeredFromAltTab);
         intent.putExtra(EXTRA_FROM_TASK_ID, (topTask != null) ? topTask.id : -1);
+        intent.putExtra(EXTRA_REUSE_TASK_STACK_VIEWS, mCanReuseTaskStackViews);
         if (opts != null) {
             mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.CURRENT);
         } else {
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         }
+        mCanReuseTaskStackViews = true;
     }
 
     /** Sets the RecentsComponent callbacks. */
@@ -545,6 +563,44 @@ public class AlternateRecentsComponent {
     public static void notifyVisibilityChanged(boolean visible) {
         if (sRecentsComponentCallbacks != null) {
             sRecentsComponentCallbacks.onVisibilityChanged(visible);
+        }
+    }
+
+    /**** OnAnimationStartedListener Implementation ****/
+
+    @Override
+    public void onAnimationStarted() {
+        // Notify recents to start the enter animation
+        if (!mStartAnimationTriggered) {
+            // There can be a race condition between the start animation callback and
+            // the start of the new activity (where we register the receiver that listens
+            // to this broadcast, so we add our own receiver and if that gets called, then
+            // we know the activity has not yet started and we can retry sending the broadcast.
+            BroadcastReceiver fallbackReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (getResultCode() == Activity.RESULT_OK) {
+                        mStartAnimationTriggered = true;
+                        return;
+                    }
+
+                    // Schedule for the broadcast to be sent again after some time
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            onAnimationStarted();
+                        }
+                    }, 25);
+                }
+            };
+
+            // Send the broadcast to notify Recents that the animation has started
+            Intent intent = new Intent(ACTION_START_ENTER_ANIMATION);
+            intent.setPackage(mContext.getPackageName());
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
+                    Intent.FLAG_RECEIVER_FOREGROUND);
+            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.CURRENT, null,
+                    fallbackReceiver, null, Activity.RESULT_CANCELED, null, null);
         }
     }
 }
