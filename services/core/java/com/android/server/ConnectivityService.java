@@ -184,7 +184,8 @@ import javax.net.ssl.SSLSession;
 /**
  * @hide
  */
-public class ConnectivityService extends IConnectivityManager.Stub {
+public class ConnectivityService extends IConnectivityManager.Stub
+        implements PendingIntent.OnFinished {
     private static final String TAG = "ConnectivityService";
 
     private static final boolean DBG = true;
@@ -382,6 +383,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private static final int EVENT_SYSTEM_READY = 25;
 
+    /**
+     * used to add a network request with a pending intent
+     * includes a NetworkRequestInfo
+     */
+    private static final int EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT = 26;
+
+    /**
+     * used to remove a pending intent and its associated network request.
+     * arg1 = UID of caller
+     * obj  = PendingIntent
+     */
+    private static final int EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT = 27;
+
 
     /** Handler used for internal events. */
     final private InternalHandler mHandler;
@@ -395,6 +409,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private String mNetTransitionWakeLockCausedBy = "";
     private int mNetTransitionWakeLockSerialNumber;
     private int mNetTransitionWakeLockTimeout;
+    private final PowerManager.WakeLock mPendingIntentWakeLock;
 
     private InetAddress mDefaultDns;
 
@@ -649,6 +664,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mNetTransitionWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mNetTransitionWakeLockTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_networkTransitionTimeout);
+        mPendingIntentWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         mNetTrackers = new NetworkStateTracker[
                 ConnectivityManager.MAX_NETWORK_TYPE+1];
@@ -2131,10 +2147,39 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
+    // If this method proves to be too slow then we can maintain a separate
+    // pendingIntent => NetworkRequestInfo map.
+    // This method assumes that every non-null PendingIntent maps to exactly 1 NetworkRequestInfo.
+    private NetworkRequestInfo findExistingNetworkRequestInfo(PendingIntent pendingIntent) {
+        Intent intent = pendingIntent.getIntent();
+        for (Map.Entry<NetworkRequest, NetworkRequestInfo> entry : mNetworkRequests.entrySet()) {
+            PendingIntent existingPendingIntent = entry.getValue().mPendingIntent;
+            if (existingPendingIntent != null &&
+                    existingPendingIntent.getIntent().filterEquals(intent)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    private void handleRegisterNetworkRequestWithIntent(Message msg) {
+        final NetworkRequestInfo nri = (NetworkRequestInfo) (msg.obj);
+
+        NetworkRequestInfo existingRequest = findExistingNetworkRequestInfo(nri.mPendingIntent);
+        if (existingRequest != null) { // remove the existing request.
+            if (DBG) log("Replacing " + existingRequest.request + " with "
+                    + nri.request + " because their intents matched.");
+            handleReleaseNetworkRequest(existingRequest.request, getCallingUid());
+        }
+        handleRegisterNetworkRequest(msg);
+    }
+
     private void handleRegisterNetworkRequest(Message msg) {
         final NetworkRequestInfo nri = (NetworkRequestInfo) (msg.obj);
         final NetworkCapabilities newCap = nri.request.networkCapabilities;
         int score = 0;
+
+        mNetworkRequests.put(nri.request, nri);
 
         // Check for the best currently alive network that satisfies this request
         NetworkAgentInfo bestNetwork = null;
@@ -2173,13 +2218,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mLegacyTypeTracker.add(nri.request.legacyType, bestNetwork);
             }
         }
-        mNetworkRequests.put(nri.request, nri);
+
         if (nri.isRequest) {
             if (DBG) log("sending new NetworkRequest to factories");
             for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
                 nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score,
                         0, nri.request);
             }
+        }
+    }
+
+    private void handleReleaseNetworkRequestWithIntent(PendingIntent pendingIntent,
+            int callingUid) {
+        NetworkRequestInfo nri = findExistingNetworkRequestInfo(pendingIntent);
+        if (nri != null) {
+            handleReleaseNetworkRequest(nri.request, callingUid);
         }
     }
 
@@ -2218,11 +2271,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                 }
 
-                // Maintain the illusion.  When this request arrived, we might have preteneded
+                // Maintain the illusion.  When this request arrived, we might have pretended
                 // that a network connected to serve it, even though the network was already
                 // connected.  Now that this request has gone away, we might have to pretend
                 // that the network disconnected.  LegacyTypeTracker will generate that
-                // phatom disconnect for this type.
+                // phantom disconnect for this type.
                 NetworkAgentInfo nai = mNetworkForRequestId.get(nri.request.requestId);
                 if (nai != null) {
                     mNetworkForRequestId.remove(nri.request.requestId);
@@ -2253,7 +2306,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         @Override
         public void handleMessage(Message msg) {
-            NetworkInfo info;
             switch (msg.what) {
                 case EVENT_EXPIRE_NET_TRANSITION_WAKELOCK:
                 case EVENT_CLEAR_NET_TRANSITION_WAKELOCK: {
@@ -2332,6 +2384,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 case EVENT_REGISTER_NETWORK_REQUEST:
                 case EVENT_REGISTER_NETWORK_LISTENER: {
                     handleRegisterNetworkRequest(msg);
+                    break;
+                }
+                case EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT: {
+                    handleRegisterNetworkRequestWithIntent(msg);
+                    break;
+                }
+                case EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT: {
+                    handleReleaseNetworkRequestWithIntent((PendingIntent) msg.obj, msg.arg1);
                     break;
                 }
                 case EVENT_RELEASE_NETWORK_REQUEST: {
@@ -3347,11 +3407,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         static final boolean LISTEN = false;
 
         final NetworkRequest request;
-        IBinder mBinder;
+        final PendingIntent mPendingIntent;
+        private final IBinder mBinder;
         final int mPid;
         final int mUid;
         final Messenger messenger;
         final boolean isRequest;
+
+        NetworkRequestInfo(NetworkRequest r, PendingIntent pi, boolean isRequest) {
+            request = r;
+            mPendingIntent = pi;
+            messenger = null;
+            mBinder = null;
+            mPid = getCallingPid();
+            mUid = getCallingUid();
+            this.isRequest = isRequest;
+        }
 
         NetworkRequestInfo(Messenger m, NetworkRequest r, IBinder binder, boolean isRequest) {
             super();
@@ -3361,6 +3432,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mPid = getCallingPid();
             mUid = getCallingUid();
             this.isRequest = isRequest;
+            mPendingIntent = null;
 
             try {
                 mBinder.linkToDeath(this, 0);
@@ -3370,7 +3442,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         void unlinkDeathRecipient() {
-            mBinder.unlinkToDeath(this, 0);
+            if (mBinder != null) {
+                mBinder.unlinkToDeath(this, 0);
+            }
         }
 
         public void binderDied() {
@@ -3381,40 +3455,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         public String toString() {
             return (isRequest ? "Request" : "Listen") + " from uid/pid:" + mUid + "/" +
-                    mPid + " for " + request;
+                    mPid + " for " + request +
+                    (mPendingIntent == null ? "" : " to trigger " + mPendingIntent);
         }
     }
 
     @Override
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType) {
-        if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                == false) {
-            enforceConnectivityInternalPermission();
-        } else {
-            enforceChangePermission();
-        }
-
         networkCapabilities = new NetworkCapabilities(networkCapabilities);
-
-        // if UID is restricted, don't allow them to bring up metered APNs
-        if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-                == false) {
-            final int uidRules;
-            final int uid = Binder.getCallingUid();
-            synchronized(mRulesLock) {
-                uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
-            }
-            if ((uidRules & RULE_REJECT_METERED) != 0) {
-                // we could silently fail or we can filter the available nets to only give
-                // them those they have access to.  Chose the more useful
-                networkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
-            }
-        }
+        enforceNetworkRequestPermissions(networkCapabilities);
+        enforceMeteredApnPolicy(networkCapabilities);
 
         if (timeoutMs < 0 || timeoutMs > ConnectivityManager.MAX_NETWORK_REQUEST_TIMEOUT_MS) {
             throw new IllegalArgumentException("Bad timeout specified");
         }
+
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, legacyType,
                 nextNetworkRequestId());
         if (DBG) log("requestNetwork for " + networkRequest);
@@ -3429,11 +3485,54 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return networkRequest;
     }
 
+    private void enforceNetworkRequestPermissions(NetworkCapabilities networkCapabilities) {
+        if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+                == false) {
+            enforceConnectivityInternalPermission();
+        } else {
+            enforceChangePermission();
+        }
+    }
+
+    private void enforceMeteredApnPolicy(NetworkCapabilities networkCapabilities) {
+        // if UID is restricted, don't allow them to bring up metered APNs
+        if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+                == false) {
+            final int uidRules;
+            final int uid = Binder.getCallingUid();
+            synchronized(mRulesLock) {
+                uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
+            }
+            if ((uidRules & RULE_REJECT_METERED) != 0) {
+                // we could silently fail or we can filter the available nets to only give
+                // them those they have access to.  Chose the more useful
+                networkCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+            }
+        }
+    }
+
     @Override
     public NetworkRequest pendingRequestForNetwork(NetworkCapabilities networkCapabilities,
             PendingIntent operation) {
-        // TODO
-        return null;
+        checkNotNull(operation, "PendingIntent cannot be null.");
+        networkCapabilities = new NetworkCapabilities(networkCapabilities);
+        enforceNetworkRequestPermissions(networkCapabilities);
+        enforceMeteredApnPolicy(networkCapabilities);
+
+        NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
+                nextNetworkRequestId());
+        if (DBG) log("pendingRequest for " + networkRequest + " to trigger " + operation);
+        NetworkRequestInfo nri = new NetworkRequestInfo(networkRequest, operation,
+                NetworkRequestInfo.REQUEST);
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT,
+                nri));
+        return networkRequest;
+    }
+
+    @Override
+    public void releasePendingNetworkRequest(PendingIntent operation) {
+        mHandler.sendMessage(mHandler.obtainMessage(EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT,
+                getCallingUid(), 0, operation));
     }
 
     @Override
@@ -3725,6 +3824,39 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score, 0,
                     networkRequest);
         }
+    }
+
+    private void sendPendingIntentForRequest(NetworkRequestInfo nri, NetworkAgentInfo networkAgent,
+            int notificationType) {
+        if (notificationType == ConnectivityManager.CALLBACK_AVAILABLE) {
+            Intent intent = new Intent();
+            intent.putExtra(ConnectivityManager.EXTRA_NETWORK_REQUEST_NETWORK, nri.request);
+            intent.putExtra(ConnectivityManager.EXTRA_NETWORK_REQUEST_NETWORK_REQUEST,
+                    networkAgent.network);
+            sendIntent(nri.mPendingIntent, intent);
+        }
+        // else not handled
+    }
+
+    private void sendIntent(PendingIntent pendingIntent, Intent intent) {
+        mPendingIntentWakeLock.acquire();
+        try {
+            if (DBG) log("Sending " + pendingIntent);
+            pendingIntent.send(mContext, 0, intent, this /* onFinished */, null /* Handler */);
+        } catch (PendingIntent.CanceledException e) {
+            if (DBG) log(pendingIntent + " was not sent, it had been canceled.");
+            mPendingIntentWakeLock.release();
+            releasePendingNetworkRequest(pendingIntent);
+        }
+        // ...otherwise, mPendingIntentWakeLock.release() gets called by onSendFinished()
+    }
+
+    @Override
+    public void onSendFinished(PendingIntent pendingIntent, Intent intent, int resultCode,
+            String resultData, Bundle resultExtras) {
+        if (DBG) log("Finished sending " + pendingIntent);
+        mPendingIntentWakeLock.release();
+        releasePendingNetworkRequest(pendingIntent);
     }
 
     private void callCallbackForRequest(NetworkRequestInfo nri,
@@ -4137,7 +4269,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 //        } else if (nai.networkMonitor.isEvaluating()) {
 //            notifyType = NetworkCallbacks.callCallbackForRequest(request, nai, notifyType);
 //        }
-        callCallbackForRequest(nri, nai, notifyType);
+        if (nri.mPendingIntent == null) {
+            callCallbackForRequest(nri, nai, notifyType);
+        } else {
+            sendPendingIntentForRequest(nri, nai, notifyType);
+        }
     }
 
     private void sendLegacyNetworkBroadcast(NetworkAgentInfo nai, boolean connected, int type) {
@@ -4196,7 +4332,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             NetworkRequest nr = networkAgent.networkRequests.valueAt(i);
             NetworkRequestInfo nri = mNetworkRequests.get(nr);
             if (VDBG) log(" sending notification for " + nr);
-            callCallbackForRequest(nri, networkAgent, notifyType);
+            if (nri.mPendingIntent == null) {
+                callCallbackForRequest(nri, networkAgent, notifyType);
+            } else {
+                sendPendingIntentForRequest(nri, networkAgent, notifyType);
+            }
         }
     }
 
