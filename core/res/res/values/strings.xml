@@ -61,6 +61,9 @@
     <!-- [CHAR_LIMIT=10] Suffix added to signify duration in minutes -->
     <string name="durationMinutes"><xliff:g id="minutes">%1$d</xliff:g> mins</string>
 
+    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one minute -->
+    <string name="durationMinute"><xliff:g id="minutes">%1$d</xliff:g> min</string>
+
     <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one minute with seconds -->
     <string name="durationMinuteSeconds"><xliff:g id="minutes">%1$d</xliff:g> min
             <xliff:g id="seconds">%2$d</xliff:g> secs</string>
