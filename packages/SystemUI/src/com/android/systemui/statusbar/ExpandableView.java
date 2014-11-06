@@ -103,9 +103,13 @@ public abstract class ExpandableView extends FrameLayout {
         }
     }
 
-    protected void resetHeight() {
+    /**
+     * Resets the height of the view on the next layout pass
+     */
+    protected void resetActualHeight() {
         mActualHeight = 0;
         mActualHeightInitialized = false;
+        requestLayout();
     }
 
     protected int getInitialHeight() {
@@ -120,7 +124,7 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
-    private boolean filterMotionEvent(MotionEvent event) {
+    protected boolean filterMotionEvent(MotionEvent event) {
         return event.getActionMasked() != MotionEvent.ACTION_DOWN
                 || event.getY() > mClipTopAmount && event.getY() < mActualHeight;
     }
