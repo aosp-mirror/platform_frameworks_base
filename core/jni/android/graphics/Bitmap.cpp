@@ -17,7 +17,7 @@
 
 #include <jni.h>
 
-#include <Caches.h>
+#include <ResourceCache.h>
 
 #if 0
     #define TRACE_BITMAP(code)  code
@@ -365,8 +365,8 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
 static void Bitmap_destructor(JNIEnv* env, jobject, jlong bitmapHandle) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
 #ifdef USE_OPENGL_RENDERER
-    if (android::uirenderer::Caches::hasInstance()) {
-        android::uirenderer::Caches::getInstance().resourceCache.destructor(bitmap);
+    if (android::uirenderer::ResourceCache::hasInstance()) {
+        android::uirenderer::ResourceCache::getInstance().destructor(bitmap);
         return;
     }
 #endif // USE_OPENGL_RENDERER
@@ -376,9 +376,9 @@ static void Bitmap_destructor(JNIEnv* env, jobject, jlong bitmapHandle) {
 static jboolean Bitmap_recycle(JNIEnv* env, jobject, jlong bitmapHandle) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
 #ifdef USE_OPENGL_RENDERER
-    if (android::uirenderer::Caches::hasInstance()) {
+    if (android::uirenderer::ResourceCache::hasInstance()) {
         bool result;
-        result = android::uirenderer::Caches::getInstance().resourceCache.recycle(bitmap);
+        result = android::uirenderer::ResourceCache::getInstance().recycle(bitmap);
         return result ? JNI_TRUE : JNI_FALSE;
     }
 #endif // USE_OPENGL_RENDERER

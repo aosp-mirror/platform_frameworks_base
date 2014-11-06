@@ -21,7 +21,7 @@
 
 #include <private/hwui/DrawGlInfo.h>
 
-#include "Caches.h"
+#include "ResourceCache.h"
 #include "DeferredDisplayList.h"
 #include "DisplayListLogBuffer.h"
 #include "DisplayListOp.h"
@@ -33,7 +33,7 @@ namespace uirenderer {
 
 DisplayListRenderer::DisplayListRenderer()
     : mState(*this)
-    , mCaches(Caches::getInstance())
+    , mResourceCache(ResourceCache::getInstance())
     , mDisplayListData(NULL)
     , mTranslateX(0.0f)
     , mTranslateY(0.0f)

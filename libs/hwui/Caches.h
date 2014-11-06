@@ -342,7 +342,6 @@ public:
     TessellationCache tessellationCache;
     TextDropShadowCache dropShadowCache;
     FboCache fboCache;
-    ResourceCache resourceCache;
 
     GammaFontRenderer* fontRenderer;
 
