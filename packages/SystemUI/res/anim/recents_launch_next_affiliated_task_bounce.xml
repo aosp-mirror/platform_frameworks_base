@@ -20,40 +20,30 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
      android:background="#ff000000" android:shareInterpolator="false" android:zAdjustment="normal">
 
-    <alpha android:fromAlpha="1.0" android:toAlpha="0.6"
+
+    <translate android:fromYDelta="0" android:toYDelta="2%"
         android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-        android:interpolator="@android:interpolator/accelerate_cubic"
+        android:interpolator="@android:interpolator/fast_out_slow_in"
         android:duration="133"/>
 
-    <translate android:fromYDelta="0" android:toYDelta="10%"
-        android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-        android:interpolator="@android:interpolator/accelerate_cubic"
-        android:duration="350"/>
-
-    <scale android:fromXScale="1.0" android:toXScale="0.9"
-        android:fromYScale="1.0" android:toYScale="0.9"
+    <scale android:fromXScale="1.0" android:toXScale="0.98"
+        android:fromYScale="1.0" android:toYScale="0.98"
         android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
         android:pivotX="50%p" android:pivotY="50%p"
         android:interpolator="@android:interpolator/fast_out_slow_in"
-        android:duration="350" />
+        android:duration="133" />
 
-    <alpha android:fromAlpha="1.0" android:toAlpha="1.6666666666"
-        android:fillEnabled="true" android:fillBefore="false" android:fillAfter="true"
-        android:interpolator="@android:interpolator/decelerate_cubic"
-        android:startOffset="350"
-        android:duration="133"/>
+    <translate android:fromYDelta="0" android:toYDelta="-2%"
+        android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
+        android:interpolator="@interpolator/recents_launch_prev_affiliated_task_bounce_ydelta"
+        android:startOffset="133"
+        android:duration="217"/>
 
-    <translate android:fromYDelta="0%" android:toYDelta="-8.8888888888%"
-        android:fillEnabled="true" android:fillBefore="false" android:fillAfter="true"
-        android:interpolator="@android:interpolator/decelerate_cubic"
-        android:startOffset="350"
-        android:duration="350"/>
-
-    <scale android:fromXScale="1.0" android:toXScale="1.1111111111"
-        android:fromYScale="1.0" android:toYScale="1.1111111111"
+    <scale android:fromXScale="1.0" android:toXScale="1.02040816326531"
+        android:fromYScale="1.0" android:toYScale="1.02040816326531"
         android:fillEnabled="true" android:fillBefore="false" android:fillAfter="true"
         android:pivotX="50%p" android:pivotY="50%p"
-        android:interpolator="@android:interpolator/decelerate_cubic"
-        android:startOffset="350"
-        android:duration="350" />
+        android:interpolator="@interpolator/recents_launch_next_affiliated_task_bounce_scale"
+        android:startOffset="133"
+        android:duration="217" />
 </set>

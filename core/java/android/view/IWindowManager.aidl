@@ -96,6 +96,7 @@ interface IWindowManager
     void overridePendingAppTransitionAspectScaledThumb(in Bitmap srcThumb, int startX,
             int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
             boolean scaleUp);
+    void overridePendingAppTransitionInPlace(String packageName, int anim);
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
             in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
