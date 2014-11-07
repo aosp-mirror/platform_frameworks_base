@@ -327,9 +327,9 @@ void AmbientShadow::createAmbientShadow(bool isCasterOpaque,
     shadowVertexBuffer.updateVertexCount(vertexBufferIndex);
     shadowVertexBuffer.updateIndexCount(indexBufferIndex);
 
-    ShadowTessellator::checkOverflow(vertexBufferIndex, totalVertexCount, "Vertex Buffer");
-    ShadowTessellator::checkOverflow(indexBufferIndex, totalIndexCount, "Index Buffer");
-    ShadowTessellator::checkOverflow(umbraIndex, totalUmbraCount, "Umbra Buffer");
+    ShadowTessellator::checkOverflow(vertexBufferIndex, totalVertexCount, "Ambient Vertex Buffer");
+    ShadowTessellator::checkOverflow(indexBufferIndex, totalIndexCount, "Ambient Index Buffer");
+    ShadowTessellator::checkOverflow(umbraIndex, totalUmbraCount, "Ambient Umbra Buffer");
 
 #if DEBUG_SHADOW
     for (int i = 0; i < vertexBufferIndex; i++) {
