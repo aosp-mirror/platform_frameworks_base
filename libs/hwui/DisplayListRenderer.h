@@ -172,6 +172,7 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
+    virtual void drawLayer(DeferredLayerUpdater* layerHandle, float x, float y);
     virtual void drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t replayFlags);
 
     // TODO: rename for consistency
