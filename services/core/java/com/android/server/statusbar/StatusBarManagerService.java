@@ -142,6 +142,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
                 }
             }
         }
+
+        @Override
+        public void showScreenPinningRequest() {
+            if (mBar != null) {
+                try {
+                    mBar.showScreenPinningRequest();
+                } catch (RemoteException e) {
+                }
+            }
+        }
     };
 
     // ================================================================================
