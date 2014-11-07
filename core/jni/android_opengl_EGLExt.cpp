@@ -81,23 +81,19 @@ nativeClassInit(JNIEnv *_env, jclass glImplClass)
     eglsurfaceConstructor = _env->GetMethodID(eglsurfaceClass, "<init>", "(J)V");
     eglconfigConstructor = _env->GetMethodID(eglconfigClass, "<init>", "(J)V");
 
-    jobject localeglNoContextObject = _env->NewObject(eglcontextClass, eglcontextConstructor, reinterpret_cast<jlong>(EGL_NO_CONTEXT));
-    eglNoContextObject = _env->NewGlobalRef(localeglNoContextObject);
-    jobject localeglNoDisplayObject = _env->NewObject(egldisplayClass, egldisplayConstructor, reinterpret_cast<jlong>(EGL_NO_DISPLAY));
-    eglNoDisplayObject = _env->NewGlobalRef(localeglNoDisplayObject);
-    jobject localeglNoSurfaceObject = _env->NewObject(eglsurfaceClass, eglsurfaceConstructor, reinterpret_cast<jlong>(EGL_NO_SURFACE));
-    eglNoSurfaceObject = _env->NewGlobalRef(localeglNoSurfaceObject);
-
 
     jclass eglClass = _env->FindClass("android/opengl/EGL14");
     jfieldID noContextFieldID = _env->GetStaticFieldID(eglClass, "EGL_NO_CONTEXT", "Landroid/opengl/EGLContext;");
-    _env->SetStaticObjectField(eglClass, noContextFieldID, eglNoContextObject);
+    jobject localeglNoContextObject = _env->GetStaticObjectField(eglClass, noContextFieldID);
+    eglNoContextObject = _env->NewGlobalRef(localeglNoContextObject);
 
     jfieldID noDisplayFieldID = _env->GetStaticFieldID(eglClass, "EGL_NO_DISPLAY", "Landroid/opengl/EGLDisplay;");
-    _env->SetStaticObjectField(eglClass, noDisplayFieldID, eglNoDisplayObject);
+    jobject localeglNoDisplayObject = _env->GetStaticObjectField(eglClass, noDisplayFieldID);
+    eglNoDisplayObject = _env->NewGlobalRef(localeglNoDisplayObject);
 
     jfieldID noSurfaceFieldID = _env->GetStaticFieldID(eglClass, "EGL_NO_SURFACE", "Landroid/opengl/EGLSurface;");
-    _env->SetStaticObjectField(eglClass, noSurfaceFieldID, eglNoSurfaceObject);
+    jobject localeglNoSurfaceObject = _env->GetStaticObjectField(eglClass, noSurfaceFieldID);
+    eglNoSurfaceObject = _env->NewGlobalRef(localeglNoSurfaceObject);
 }
 
 static void *
