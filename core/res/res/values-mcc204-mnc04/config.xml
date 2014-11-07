@@ -38,4 +38,9 @@
            1. Lenient threshold
     -->
     <integer name="config_LTE_RSRP_threshold_type">0</integer>
+
+    <string-array translatable="false" name="config_sms_convert_destination_number_support">
+        <item>true;BAE0000000000000</item>
+        <item>false</item>
+    </string-array>
 </resources>

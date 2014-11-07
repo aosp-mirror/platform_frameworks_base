@@ -34,4 +34,9 @@
     </string-array>
 
     <bool name="config_auto_attach_data_on_creation">false</bool>
+
+    <string-array translatable="false" name="config_sms_convert_destination_number_support">
+        <item>true</item>
+    </string-array>
+
 </resources>

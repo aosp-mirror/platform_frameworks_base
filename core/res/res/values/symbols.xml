@@ -2105,6 +2105,7 @@
   <java-symbol type="layout" name="simple_account_item" />
   <java-symbol type="id" name="scrollIndicatorUp" />
   <java-symbol type="id" name="scrollIndicatorDown" />
+  <java-symbol type="array" name="config_sms_convert_destination_number_support" />
 
   <!-- From SignalStrength -->
   <java-symbol type="integer" name="config_LTE_RSRP_threshold_type" />
