@@ -123,6 +123,7 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.qs.QSPanel;
+import com.android.systemui.recent.ScreenPinningRequest;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -355,6 +356,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private final GestureRecorder mGestureRec = DEBUG_GESTURES
         ? new GestureRecorder("/sdcard/statusbar_gestures.dat")
         : null;
+
+    private ScreenPinningRequest mScreenPinningRequest;
 
     private int mNavigationIconHints = 0;
 
@@ -597,6 +600,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setControllerUsers();
 
         notifyUserAboutHiddenNotifications();
+
+        mScreenPinningRequest = new ScreenPinningRequest(mContext);
     }
 
     // ================================================================================
@@ -3144,6 +3149,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         updateShowSearchHoldoff();
         updateRowStates();
+        mScreenPinningRequest.onConfigurationChanged();
     }
 
     @Override
@@ -4038,7 +4044,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void showScreenPinningRequest() {
-        // TODO: Show request.
+        if (mKeyguardMonitor.isShowing()) {
+            // Don't allow apps to trigger this from keyguard.
+            return;
+        }
+        // Show screen pinning request, since this comes from an app, show 'no thanks', button.
+        showScreenPinningRequest(true);
+    }
+
+    public void showScreenPinningRequest(boolean allowCancel) {
+        mScreenPinningRequest.showPrompt(allowCancel);
     }
 
     public boolean hasActiveNotifications() {

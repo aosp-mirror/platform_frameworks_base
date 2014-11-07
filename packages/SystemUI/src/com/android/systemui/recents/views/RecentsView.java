@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
+
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.SystemServicesProxy;
@@ -54,6 +55,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         public void onTaskLaunchFailed();
         public void onAllTaskViewsDismissed();
         public void onExitToHomeAnimationTriggered();
+        public void onScreenPinningRequest();
     }
 
     RecentsConfiguration mConfig;
@@ -461,7 +463,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                             postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    ssp.lockCurrentTask();
+                                    mCb.onScreenPinningRequest();
                                 }
                             }, 350);
                             mTriggered = true;
@@ -485,7 +487,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                     if (ssp.startActivityFromRecents(getContext(), task.key.id,
                             task.activityLabel, launchOpts)) {
                         if (launchOpts == null && lockToTask) {
-                            ssp.lockCurrentTask();
+                            mCb.onScreenPinningRequest();
                         }
                     } else {
                         // Dismiss the task and return the user to home if we fail to
