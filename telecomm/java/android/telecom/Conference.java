@@ -179,6 +179,13 @@ public abstract class Conference {
     public void onAudioStateChanged(AudioState state) {}
 
     /**
+     * Notifies this conference that a connection has been added to it.
+     *
+     * @param connection The newly added connection.
+     */
+    public void onConnectionAdded(Connection connection) {}
+
+    /**
      * Sets state to be on hold.
      */
     public final void setOnHold() {
@@ -238,6 +245,7 @@ public abstract class Conference {
         if (connection != null && !mChildConnections.contains(connection)) {
             if (connection.setConference(this)) {
                 mChildConnections.add(connection);
+                onConnectionAdded(connection);
                 for (Listener l : mListeners) {
                     l.onConnectionAdded(this, connection);
                 }
