@@ -66,6 +66,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     private static final int SYNC_OK = 0;
     // Needs a ViewRoot invalidate
     private static final int SYNC_INVALIDATE_REQUIRED = 1 << 0;
+    // Spoiler: the reward is GPU-accelerated drawing, better find that Surface!
+    private static final int SYNC_LOST_SURFACE_REWARD_IF_FOUND = 1 << 1;
 
     private static final String[] VISUALIZERS = {
         PROFILE_PROPERTY_VISUALIZE_BARS,
@@ -336,6 +338,12 @@ public class ThreadedRenderer extends HardwareRenderer {
 
         int syncResult = nSyncAndDrawFrame(mNativeProxy, frameTimeNanos,
                 recordDuration, view.getResources().getDisplayMetrics().density);
+        if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
+            setEnabled(false);
+            // Invalidate since we failed to draw. This should fetch a Surface
+            // if it is still needed or do nothing if we are no longer drawing
+            attachInfo.mViewRootImpl.invalidate();
+        }
         if ((syncResult & SYNC_INVALIDATE_REQUIRED) != 0) {
             attachInfo.mViewRootImpl.invalidate();
         }
