@@ -88,6 +88,19 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    protected void handleLongClick() {
+        if (mState.value) return;  // don't allow usage reset if inversion is active
+        final String title = mContext.getString(R.string.quick_settings_reset_confirmation_title,
+                mState.label);
+        mUsageTracker.showResetConfirmation(title, new Runnable() {
+            @Override
+            public void run() {
+                refreshState();
+            }
+        });
+    }
+
+    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;

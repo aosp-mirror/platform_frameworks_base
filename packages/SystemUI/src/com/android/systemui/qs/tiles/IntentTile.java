@@ -39,6 +39,8 @@ public class IntentTile extends QSTile<QSTile.State> {
 
     private PendingIntent mOnClick;
     private String mOnClickUri;
+    private PendingIntent mOnLongClick;
+    private String mOnLongClickUri;
     private int mCurrentUserId;
 
     private IntentTile(Host host, String action) {
@@ -80,15 +82,24 @@ public class IntentTile extends QSTile<QSTile.State> {
 
     @Override
     protected void handleClick() {
+        sendIntent("click", mOnClick, mOnClickUri);
+    }
+
+    @Override
+    protected void handleLongClick() {
+        sendIntent("long-click", mOnLongClick, mOnLongClickUri);
+    }
+
+    private void sendIntent(String type, PendingIntent pi, String uri) {
         try {
-            if (mOnClick != null) {
-                mOnClick.send();
-            } else if (mOnClickUri != null) {
-                final Intent intent = Intent.parseUri(mOnClickUri, Intent.URI_INTENT_SCHEME);
+            if (pi != null) {
+                pi.send();
+            } else if (uri != null) {
+                final Intent intent = Intent.parseUri(uri, Intent.URI_INTENT_SCHEME);
                 mContext.sendBroadcastAsUser(intent, new UserHandle(mCurrentUserId));
             }
         } catch (Throwable t) {
-            Log.w(TAG, "Error sending click intent", t);
+            Log.w(TAG, "Error sending " + type + " intent", t);
         }
     }
 
@@ -120,6 +131,8 @@ public class IntentTile extends QSTile<QSTile.State> {
         }
         mOnClick = intent.getParcelableExtra("onClick");
         mOnClickUri = intent.getStringExtra("onClickUri");
+        mOnLongClick = intent.getParcelableExtra("onLongClick");
+        mOnLongClickUri = intent.getStringExtra("onLongClickUri");
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {

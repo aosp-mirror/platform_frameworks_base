@@ -911,4 +911,12 @@
     <!-- Screen pinning negative response. -->
     <string name="screen_pinning_negative">No thanks</string>
 
+    <!-- Hide quick settings tile confirmation title -->
+    <string name="quick_settings_reset_confirmation_title">Hide <xliff:g id="tile_label" example="Hotspot">%1$s</xliff:g>?</string>
+
+    <!-- Hide quick settings tile confirmation message -->
+    <string name="quick_settings_reset_confirmation_message">It will reappear the next time you turn it on in settings.</string>
+
+    <!-- Hide quick settings tile confirmation button -->
+    <string name="quick_settings_reset_confirmation_button">Hide</string>
 </resources>
