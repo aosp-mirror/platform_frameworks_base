@@ -1774,7 +1774,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Bed om pinkode inden frigørelse"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Bed om oplåsningsmønster ved deaktivering"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bed om adgangskode inden frigørelse"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"For at forbedre batteriets levetid reducerer batterisparefunktionen enhedens ydeevne og begrænser vibrationer og de fleste baggrundsdata. E-mail, beskeder og andre apps, der benytter synkronisering, opdateres ikke, medmindre du åbner dem.\n\nBatterisparefunktionen deaktiveres automatisk, når enheden oplades."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"For at forbedre batteriets levetid reducerer batterisparefunktionen enhedens ydeevne og begrænser vibrationer og de fleste baggrundsdata. E-mail, chat og andre apps, der benytter synkronisering, opdateres ikke, medmindre du åbner dem.\n\nBatterisparefunktionen deaktiveres automatisk, når enheden oplades."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Indtil din nedetid slutter kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"I ét minut"</item>

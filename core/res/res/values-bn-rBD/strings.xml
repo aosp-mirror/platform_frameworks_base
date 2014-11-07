@@ -1288,7 +1288,7 @@
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"আমন্ত্রণ পাঠানো হয়েছে"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"সংযুক্ত হওয়ার আমন্ত্রণ"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"থেকে:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"প্রতি:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"প্রাপক:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"প্রয়োজনীয় PINটি লিখুন:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ট্যাবলেটটি যখন <xliff:g id="DEVICE_NAME">%1$s</xliff:g> এ সংযুক্ত হবে তখন এটি Wi-Fi থেকে সাময়িকভাবে সংযোগ বিচ্ছিন্ন হবে"</string>

@@ -1774,7 +1774,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"고정 해제 이전에 잠금해제 패턴 요청"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"고정 해제 이전에 비밀번호 요청"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"배터리 수명을 개선하기 위해 배터리 세이버에서는 기기의 성능을 줄이고 진동과 대부분의 백그라운드 데이터를 제한합니다. 동기화가 필요한 이메일, 메시지, 기타 앱은 열어야 업데이트됩니다.\n\n기기를 충전하는 중에는 배터리 세이버가 자동으로 사용 중지됩니다."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"배터리 수명을 개선하기 위해 배터리 절약에서는 기기의 성능을 줄이고 진동과 대부분의 백그라운드 데이터를 제한합니다. 동기화가 필요한 이메일, 채팅 메시지, 기타 앱은 열어야 업데이트됩니다.\n\n기기를 충전하는 중에는 배터리 절약이 자동으로 사용 중지됩니다."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>에 정지가 종료될 때까지"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"1분 동안"</item>

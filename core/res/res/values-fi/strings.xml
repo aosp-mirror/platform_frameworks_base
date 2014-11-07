@@ -1774,7 +1774,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pyydä PIN-koodi ennen irrotusta"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pyydä lukituksenpoistokuvio ennen irrotusta"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pyydä salasana ennen irrotusta"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Akunsäästötoiminto heikentää laitteen suorituskykyä ja rajoittaa värinää ja useimpia taustatietoja akun iän pidentämiseksi. Sähköposti, viestitys ja muut synkronointia edellyttävät sovellukset eivät ehkä päivity, ellet käynnistä niitä.\n\nAkunsäästö kytkeytyy automaattisesti pois laitteen akun latauksen ajaksi."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Akunsäästötoiminto heikentää laitteen suorituskykyä ja rajoittaa värinää ja useimpia taustatietoja akun iän pidentämiseksi. Sähköposti, pikaviestit ja muut synkronointia edellyttävät sovellukset eivät ehkä päivity, ellet käynnistä niitä.\n\nAkunsäästö kytkeytyy automaattisesti pois laitteen akun latauksen ajaksi."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Käyttökatkos päättyy klo <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Minuutiksi"</item>

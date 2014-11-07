@@ -1774,7 +1774,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Sabitlemeyi kaldırmadan önce PIN\'i sor"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sabitlemeyi kaldırmadan önce kilit açma desenini sor"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Sabitlemeyi kaldırmadan önce şifre sor"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Pil tasarrufu, pilin ömrünü uzatmaya yardımcı olmak amacıyla cihazınızın performansını düşürür ve arka plan verilerini sınırlar. E-posta, mesajlaşma ve senkronizasyona dayalı diğer uygulamalar siz açmadığınız müddetçe güncellenemez. \n\nPil tasarrufu, cihaz şarj olurken otomatik olarak kapanır."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Pil tasarrufu, pilin ömrünü uzatmaya yardımcı olmak amacıyla cihazınızın performansını düşürür ve arka plan verilerini sınırlar. E-posta, anlık mesajlaşma ve senkronizasyona dayalı diğer uygulamalar siz açmadığınız müddetçe güncellenemez. \n\nPil tasarrufu, cihaz şarj olurken otomatik olarak kapanır."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Kesinti süreniz <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> saatinde sona erene kadar"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Bir dakika süreyle"</item>

@@ -1774,7 +1774,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Vor dem Beenden nach PIN fragen"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Vor dem Beenden nach Entsperrungsmuster fragen"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vor dem Beenden nach Passwort fragen"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Der Energiesparmodus hilft, den Akku zu schonen, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion und die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail-, SMS/MMS- und andere Apps, die die Synchronisierungsfunktion benötigen, werden möglicherweise nicht aktualisiert, bis Sie sie öffnen.\n\nDer Energiesparmodus endet automatisch, wenn Ihr Gerät aufgeladen wird."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Der Energiesparmodus hilft, den Akku zu schonen, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion und die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail-, Chat- und andere Apps, die die Synchronisierungsfunktion benötigen, werden möglicherweise nicht aktualisiert, bis Sie sie öffnen.\n\nDer Energiesparmodus endet automatisch, wenn Ihr Gerät aufgeladen wird."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Bis zum Ende der Downtime um <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Für eine Minute"</item>
