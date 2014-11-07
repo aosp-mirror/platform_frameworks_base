@@ -159,7 +159,7 @@ public class DataLayerListenerService extends WearableListenerService {
         }
 
         // Loop through the events and send a message
-        / to the node that created the data item.
+        // to the node that created the data item.
         for (DataEvent event : events) {
             Uri uri = event.getDataItem().getUri();
 
