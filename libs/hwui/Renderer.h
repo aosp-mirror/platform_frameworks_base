@@ -220,7 +220,6 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
-    virtual status_t drawLayer(Layer* layer, float x, float y) = 0;
     virtual status_t drawRenderNode(RenderNode* renderNode, Rect& dirty,
             int32_t replayFlags) = 0;
 
