@@ -6080,14 +6080,14 @@ status_t ResTable::createIdmap(const ResTable& overlay,
             }
 
             if (typeMap.entryOffset + typeMap.entryMap.size() < entryIndex) {
-                // Resize to accomodate this entry and the 0's in between.
-                if (typeMap.entryMap.resize((entryIndex - typeMap.entryOffset) + 1) < 0) {
+                // pad with 0xffffffff's (indicating non-existing entries) before adding this entry
+                size_t index = typeMap.entryMap.size();
+                size_t numItems = entryIndex - (typeMap.entryOffset + index);
+                if (typeMap.entryMap.insertAt(0xffffffff, index, numItems) < 0) {
                     return NO_MEMORY;
                 }
-                typeMap.entryMap.editTop() = Res_GETENTRY(overlayResID);
-            } else {
-                typeMap.entryMap.add(Res_GETENTRY(overlayResID));
             }
+            typeMap.entryMap.add(Res_GETENTRY(overlayResID));
         }
 
         if (!typeMap.entryMap.isEmpty()) {
