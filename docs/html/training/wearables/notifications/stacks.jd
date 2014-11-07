@@ -87,7 +87,7 @@ notification and call {@link android.support.v4.app.NotificationCompat.Builder#s
 on the summary notification.</p>
 
 <p>This notification does not appear in your stack of notifications on the wearable, but
-appears as the only notification on the handheld device.</p>
+it appears as the only notification on the handheld device.</p>
 
 <pre style="clear:right">
 Bitmap largeIcon = BitmapFactory.decodeResource(getResources(),

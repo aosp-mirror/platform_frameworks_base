@@ -83,5 +83,3 @@ channel.
     <dt><a href="{@docRoot}training/wearables/data-layer/events.html">Handling Data Layer Events</a></dt>
       <dd>Be notified of changes and events to the data layer.</dd>
   </dl>
-
-</div>
