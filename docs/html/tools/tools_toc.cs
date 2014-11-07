@@ -65,12 +65,10 @@
           <span class="en">Building and Running</span></a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">
-            <span class="en">From Eclipse with ADT</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/building/building-studio.html">
+            <span class="en">From Android Studio</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/building/building-cmdline.html">
             <span class="en">From the Command Line</span></a></li>
-          <li><a href="<?cs var:toroot ?>tools/building/multidex.html">
-            <span class="en">Apps Over 65K Methods</span></a></li>
         </ul>
       </li>
 
@@ -226,13 +224,15 @@ class="en">MonkeyRunner</span></a></li>
 
   <li class="nav-section">
     <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>tools/gradle/index.html">Build System</a>
+      <a href="<?cs var:toroot ?>sdk/installing/studio-build.html">Build System</a>
     </div>
     <ul>
-      <li><a href="<?cs var:toroot ?>tools/gradle/studio-build.html">
-          Building Your Project with Gradle</a></li>
-      <li><a href="<?cs var:toroot ?>tools/gradle/gradle-ref.html">
-          Gradle for Android Reference</a></li>
+      <li><a href="<?cs var:toroot ?>tools/building/configuring-gradle.html">
+        <span class="en">Configuring Gradle Builds</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/building/plugin-for-gradle.html">
+        <span class="en">Android Plugin for Gradle</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/building/multidex.html">
+        <span class="en">Apps Over 65K Methods</span></a></li>
       </ul>
   </li><!-- end of build system -->
 
@@ -300,6 +300,7 @@ class="en">Support Library</span></a></div>
     <li><a href="<?cs var:toroot ?>tools/sdk/installing/migrate.html">Migrating to Android Studio</a></li>
     <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Managing Projects</a></li>
     <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building and Running</a></li>
+    <li><a href="<?cs var:toroot ?>tools/building/building-cmdline-ant.html">Building with Ant</a></li>
     <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">Testing</a></li>
     <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html">Debugging</a></li>
     <li><a href="<?cs var:toroot ?>tools/publishing/app-signing-eclipse.html">Signing Your Apps</a></li>
