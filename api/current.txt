@@ -28355,6 +28355,7 @@ package android.telecom {
     method public android.telecom.Connection getPrimaryConnection();
     method public final int getState();
     method public void onAudioStateChanged(android.telecom.AudioState);
+    method public void onConnectionAdded(android.telecom.Connection);
     method public void onDisconnect();
     method public void onHold();
     method public void onMerge(android.telecom.Connection);
@@ -28393,7 +28394,6 @@ package android.telecom {
     method public void onAbort();
     method public void onAnswer();
     method public void onAudioStateChanged(android.telecom.AudioState);
-    method public void onConferenceChanged();
     method public void onDisconnect();
     method public void onHold();
     method public void onPlayDtmfTone(char);
