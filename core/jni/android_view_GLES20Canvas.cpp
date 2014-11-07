@@ -818,7 +818,7 @@ static void android_view_GLES20Canvas_drawRenderNode(JNIEnv* env,
 static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
         jlong rendererPtr, jlong layerPtr, jfloat x, jfloat y) {
     DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
-    Layer* layer = reinterpret_cast<Layer*>(layerPtr);
+    DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerPtr);
     renderer->drawLayer(layer, x, y);
 }
 

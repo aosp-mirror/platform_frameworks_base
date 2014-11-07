@@ -222,7 +222,6 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
-    virtual void drawLayer(Layer* layer, float x, float y) = 0;
     virtual void drawRenderNode(RenderNode* renderNode, Rect& dirty,
             int32_t replayFlags) = 0;
 

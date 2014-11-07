@@ -75,7 +75,7 @@ public:
 
     ANDROID_API bool apply();
 
-    ANDROID_API Layer* backingLayer() {
+    Layer* backingLayer() {
         return mLayer;
     }
 

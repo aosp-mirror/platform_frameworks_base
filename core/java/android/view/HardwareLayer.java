@@ -126,8 +126,8 @@ final class HardwareLayer {
         mRenderer.detachSurfaceTexture(mFinalizer.get());
     }
 
-    public long getLayer() {
-        return nGetLayer(mFinalizer.get());
+    public long getLayerHandle() {
+        return mFinalizer.get();
     }
 
     public void setSurfaceTexture(SurfaceTexture surface) {
@@ -153,6 +153,5 @@ final class HardwareLayer {
     private static native void nUpdateRenderLayer(long layerUpdater, long displayList,
             int left, int top, int right, int bottom);
 
-    private static native long nGetLayer(long layerUpdater);
     private static native int nGetTexName(long layerUpdater);
 }
