@@ -492,6 +492,7 @@ public class GpsClock implements Parcelable {
         setType(TYPE_UNKNOWN);
         setTimeInNs(Long.MIN_VALUE);
         resetTimeUncertaintyInNs();
+        resetFullBiasInNs();
         resetBiasInNs();
         resetBiasUncertaintyInNs();
         resetDriftInNsPerSec();
