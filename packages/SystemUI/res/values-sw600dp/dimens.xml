@@ -87,4 +87,15 @@
 
     <!-- Margin on the right side of the system icon group on Keyguard. -->
     <dimen name="system_icons_keyguard_padding_end">2dp</dimen>
+
+    <!-- Screen pinning request width -->
+    <dimen name="screen_pinning_request_width">400dp</dimen>
+    <!-- Screen pinning request bottom button circle widths -->
+    <dimen name="screen_pinning_request_button_width">128dp</dimen>
+    <!-- Screen pinning request, controls padding on bigger screens, bigger nav bar -->
+    <dimen name="screen_pinning_request_frame_padding">22dp</dimen>
+    <!-- Screen pinning request side views to match nav bar
+         In sw600dp we want the buttons centered so this fills the space,
+         (screen_pinning_request_width - 3 * screen_pinning_request_button_width) / 2 -->
+    <dimen name="screen_pinning_request_side_width">8dp</dimen>
 </resources>

@@ -37,6 +37,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.Toast;
+
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.DebugTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
@@ -50,6 +51,8 @@ import com.android.systemui.recents.views.DebugOverlayView;
 import com.android.systemui.recents.views.RecentsView;
 import com.android.systemui.recents.views.SystemBarScrimViews;
 import com.android.systemui.recents.views.ViewAnimation;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
+import com.android.systemui.SystemUIApplication;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
@@ -81,6 +84,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     // Runnables to finish the Recents activity
     FinishRecentsRunnable mFinishLaunchHomeRunnable;
+
+    private PhoneStatusBar mStatusBar;
 
     /**
      * A common Runnable to finish Recents either by calling finish() (with a custom animation) or
@@ -430,6 +435,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 }
             });
         }
+
+        mStatusBar = ((SystemUIApplication) getApplication())
+                .getComponent(PhoneStatusBar.class);
     }
 
     /** Inflates the debug overlay if debug mode is enabled. */
@@ -629,6 +637,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onAllTaskViewsDismissed() {
         mFinishLaunchHomeRunnable.run();
+    }
+
+    @Override
+    public void onScreenPinningRequest() {
+        if (mStatusBar != null) {
+            mStatusBar.showScreenPinningRequest(false);
+        }
     }
 
     /**** RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks Implementation ****/

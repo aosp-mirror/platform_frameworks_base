@@ -23,5 +23,13 @@
          navigation_extra_key_width -->
     <dimen name="navigation_side_padding">50dp</dimen>
 
+    <!-- Screen pinning request padding on side of icons
+         (makes the width match the nav bar)-->
+    <dimen name="screen_pinning_request_nav_side_padding">7dp</dimen>
+    <!-- Screen pinning request side views to match nav bar
+         navigation_side_padding - 3 / 2 * (screen_pinning_request_button_width
+                                                - navigation_key_width) -->
+    <dimen name="screen_pinning_request_side_width">44dp</dimen>
+
 </resources>
 
