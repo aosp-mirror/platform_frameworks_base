@@ -429,43 +429,31 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     private int parseTransition(@NonNull Resources r, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
-        int drawableRes = 0;
-        int fromId = 0;
-        int toId = 0;
-        boolean reversible = false;
+        // This allows state list drawable item elements to be themed at
+        // inflation time but does NOT make them work for Zygote preload.
+        final TypedArray a = obtainAttributes(r, theme, attrs,
+                R.styleable.AnimatedStateListDrawableTransition);
+        final int fromId = a.getResourceId(
+                R.styleable.AnimatedStateListDrawableTransition_fromId, 0);
+        final int toId = a.getResourceId(
+                R.styleable.AnimatedStateListDrawableTransition_toId, 0);
+        final boolean reversible = a.getBoolean(
+                R.styleable.AnimatedStateListDrawableTransition_reversible, false);
+        Drawable dr = a.getDrawable(
+                R.styleable.AnimatedStateListDrawableTransition_drawable);
+        a.recycle();
 
-        final int numAttrs = attrs.getAttributeCount();
-        for (int i = 0; i < numAttrs; i++) {
-            final int stateResId = attrs.getAttributeNameResource(i);
-            switch (stateResId) {
-                case 0:
-                    break;
-                case R.attr.fromId:
-                    fromId = attrs.getAttributeResourceValue(i, 0);
-                    break;
-                case R.attr.toId:
-                    toId = attrs.getAttributeResourceValue(i, 0);
-                    break;
-                case R.attr.drawable:
-                    drawableRes = attrs.getAttributeResourceValue(i, 0);
-                    break;
-                case R.attr.reversible:
-                    reversible = attrs.getAttributeBooleanValue(i, false);
-                    break;
-            }
-        }
-
-        final Drawable dr;
-        if (drawableRes != 0) {
-            dr = r.getDrawable(drawableRes, theme);
-        } else {
+        // Loading child elements modifies the state of the AttributeSet's
+        // underlying parser, so it needs to happen after obtaining
+        // attributes and extracting states.
+        if (dr == null) {
             int type;
             while ((type = parser.next()) == XmlPullParser.TEXT) {
             }
             if (type != XmlPullParser.START_TAG) {
                 throw new XmlPullParserException(
                         parser.getPositionDescription()
-                                + ": <item> tag requires a 'drawable' attribute or "
+                                + ": <transition> tag requires a 'drawable' attribute or "
                                 + "child tag defining a drawable");
             }
             dr = Drawable.createFromXmlInner(r, parser, attrs, theme);
@@ -477,34 +465,20 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     private int parseItem(@NonNull Resources r, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
-        int drawableRes = 0;
-        int keyframeId = 0;
+        // This allows state list drawable item elements to be themed at
+        // inflation time but does NOT make them work for Zygote preload.
+        final TypedArray a = obtainAttributes(r, theme, attrs,
+                R.styleable.AnimatedStateListDrawableItem);
+        final int keyframeId = a.getResourceId(R.styleable.AnimatedStateListDrawableItem_id, 0);
+        Drawable dr = a.getDrawable(R.styleable.AnimatedStateListDrawableItem_drawable);
+        a.recycle();
 
-        int j = 0;
-        final int numAttrs = attrs.getAttributeCount();
-        int[] states = new int[numAttrs];
-        for (int i = 0; i < numAttrs; i++) {
-            final int stateResId = attrs.getAttributeNameResource(i);
-            switch (stateResId) {
-                case 0:
-                    break;
-                case R.attr.id:
-                    keyframeId = attrs.getAttributeResourceValue(i, 0);
-                    break;
-                case R.attr.drawable:
-                    drawableRes = attrs.getAttributeResourceValue(i, 0);
-                    break;
-                default:
-                    final boolean hasState = attrs.getAttributeBooleanValue(i, false);
-                    states[j++] = hasState ? stateResId : -stateResId;
-            }
-        }
-        states = StateSet.trimStateSet(states, j);
+        final int[] states = extractStateSet(attrs);
 
-        final Drawable dr;
-        if (drawableRes != 0) {
-            dr = r.getDrawable(drawableRes, theme);
-        } else {
+        // Loading child elements modifies the state of the AttributeSet's
+        // underlying parser, so it needs to happen after obtaining
+        // attributes and extracting states.
+        if (dr == null) {
             int type;
             while ((type = parser.next()) == XmlPullParser.TEXT) {
             }
