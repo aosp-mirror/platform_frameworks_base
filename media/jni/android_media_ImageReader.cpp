@@ -80,7 +80,7 @@ public:
 
     virtual ~JNIImageReaderContext();
 
-    virtual void onFrameAvailable();
+    virtual void onFrameAvailable(const BufferItem& item);
 
     CpuConsumer::LockedBuffer* getLockedBuffer();
 
@@ -187,7 +187,7 @@ JNIImageReaderContext::~JNIImageReaderContext() {
     mConsumer.clear();
 }
 
-void JNIImageReaderContext::onFrameAvailable()
+void JNIImageReaderContext::onFrameAvailable(const BufferItem& /*item*/)
 {
     ALOGV("%s: frame available", __FUNCTION__);
     bool needsDetach = false;
