@@ -274,6 +274,9 @@ public final class ActivityStackSupervisor implements DisplayListener {
     final ArrayList<PendingActivityLaunch> mPendingActivityLaunches
             = new ArrayList<PendingActivityLaunch>();
 
+    /** Used to keep resumeTopActivityLocked() from being entered recursively */
+    boolean inResumeTopActivity;
+
     /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
