@@ -656,7 +656,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     void reportActivityVisibleLocked(ActivityRecord r) {
         sendWaitingVisibleReportLocked(r);
-        notifyActivityDrawnForKeyguard();
     }
 
     void sendWaitingVisibleReportLocked(ActivityRecord r) {
@@ -1832,6 +1831,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     final ActivityStack lastStack = getLastStack();
                     ActivityRecord curTop = lastStack == null?
                             null : lastStack.topRunningNonDelayedActivityLocked(notTop);
+                    boolean movedToFront = false;
                     if (curTop != null && (curTop.task != intentActivity.task ||
                             curTop.task != lastStack.topTask())) {
                         r.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
@@ -1851,6 +1851,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
                                 intentActivity.task.setTaskToReturnTo(HOME_ACTIVITY_TYPE);
                             }
                             options = null;
+                            movedToFront = true;
                         }
                     }
                     // If the caller has requested that the target task be
@@ -1865,6 +1866,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         // sure we have correctly resumed the top activity.
                         if (doResume) {
                             resumeTopActivitiesLocked(targetStack, null, options);
+
+                            // Make sure to notify Keyguard as well if we are not running an app
+                            // transition later.
+                            if (!movedToFront) {
+                                notifyActivityDrawnForKeyguard();
+                            }
                         } else {
                             ActivityOptions.abort(options);
                         }
@@ -1956,6 +1963,11 @@ public final class ActivityStackSupervisor implements DisplayListener {
                         // sure we have correctly resumed the top activity.
                         if (doResume) {
                             targetStack.resumeTopActivityLocked(null, options);
+                            if (!movedToFront) {
+                                // Make sure to notify Keyguard as well if we are not running an app
+                                // transition later.
+                                notifyActivityDrawnForKeyguard();
+                            }
                         } else {
                             ActivityOptions.abort(options);
                         }

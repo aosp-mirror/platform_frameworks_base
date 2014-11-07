@@ -426,7 +426,9 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         public void keyguardDone(boolean authenticated) {
-            KeyguardViewMediator.this.keyguardDone(authenticated, true);
+            if (!mKeyguardDonePending) {
+                KeyguardViewMediator.this.keyguardDone(authenticated, true);
+            }
         }
 
         public void keyguardDoneDrawing() {
@@ -1049,9 +1051,6 @@ public class KeyguardViewMediator extends SystemUI {
     public void keyguardDone(boolean authenticated, boolean wakeup) {
         if (DEBUG) Log.d(TAG, "keyguardDone(" + authenticated + ")");
         EventLog.writeEvent(70000, 2);
-        synchronized (this) {
-            mKeyguardDonePending = false;
-        }
         Message msg = mHandler.obtainMessage(KEYGUARD_DONE, authenticated ? 1 : 0, wakeup ? 1 : 0);
         mHandler.sendMessage(msg);
     }
@@ -1122,6 +1121,9 @@ public class KeyguardViewMediator extends SystemUI {
      */
     private void handleKeyguardDone(boolean authenticated, boolean wakeup) {
         if (DEBUG) Log.d(TAG, "handleKeyguardDone");
+        synchronized (this) {
+            mKeyguardDonePending = false;
+        }
 
         if (authenticated) {
             mUpdateMonitor.clearFailedUnlockAttempts();
@@ -1297,6 +1299,7 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void handleOnActivityDrawn() {
+        if (DEBUG) Log.d(TAG, "handleOnActivityDrawn: mKeyguardDonePending=" + mKeyguardDonePending);
         if (mKeyguardDonePending) {
             mStatusBarKeyguardViewManager.onActivityDrawn();
         }
