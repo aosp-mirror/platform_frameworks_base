@@ -122,7 +122,7 @@ bool ObbFile::parseObbFile(int fd)
         if (fileLength < 0) {
             ALOGW("error seeking in ObbFile: %s\n", strerror(errno));
         } else {
-            ALOGW("file is only %lld (less than %d minimum)\n", fileLength, kFooterMinSize);
+            ALOGW("file is only %lld (less than %d minimum)\n", (long long int)fileLength, kFooterMinSize);
         }
         return false;
     }
@@ -150,8 +150,8 @@ bool ObbFile::parseObbFile(int fd)
         footerSize = get4LE((unsigned char*)footer);
         if (footerSize > (size_t)fileLength - kFooterTagSize
                 || footerSize > kMaxBufSize) {
-            ALOGW("claimed footer size is too large (0x%08zx; file size is 0x%08llx)\n",
-                    footerSize, fileLength);
+            ALOGW("claimed footer size is too large (0x%08zx; file size is 0x%08lld)\n",
+                    footerSize, (long long int)fileLength);
             return false;
         }
 
@@ -164,7 +164,7 @@ bool ObbFile::parseObbFile(int fd)
 
     off64_t fileOffset = fileLength - footerSize - kFooterTagSize;
     if (lseek64(fd, fileOffset, SEEK_SET) != fileOffset) {
-        ALOGW("seek %lld failed: %s\n", fileOffset, strerror(errno));
+        ALOGW("seek %lld failed: %s\n", (long long int)fileOffset, strerror(errno));
         return false;
     }
 
