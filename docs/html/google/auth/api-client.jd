@@ -15,6 +15,7 @@ startpage=true
     <ol>
       <li><a href="#HandlingFailures">Handle connection failures</a></li>
       <li><a href="#MaintainingState">Maintain state while resolving an error</a></li>
+      <li><a href="#WearableApi">Access the Wearable API</a></li>
     </ol>
   </li>
   <li><a href="#Communicating">Communicate with Google Services</a>
@@ -104,7 +105,17 @@ additional calls to
 <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#addScope(com.google.android.gms.common.api.Scope)"
 >{@code addScope()}</a>.</p>
 
-<p>However, before you can begin a connection by calling <a
+<p class="caution">
+<strong>Important:</strong> To avoid client connection errors on devices that do not have the
+<a href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
+Wear app</a> installed, use a separate <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> instance to access only the <a
+href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
+Wearable}</a> API. For more information, see <a href="#WearableApi">Access the Wearable
+API</a>.</p>
+
+<p>Before you can begin a connection by calling <a
 href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html#connect()"
 >{@code connect()}</a> on the <a
 href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
@@ -406,6 +417,45 @@ consult the corresponding documentation, such as for
 <a href="{@docRoot}google/play-services/games.html">Google Play Games</a> or
 <a href="{@docRoot}google/play-services/drive.html">Google Drive</a>.
 </p>
+
+
+<h3 id="WearableApi">Access the Wearable API</h3>
+
+<p>On devices that do not have the <a
+href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
+Wear app</a> installed, connection requests that include the <a
+href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
+Wearable}</a> API fail with the <a
+href="{@docRoot}reference/com/google/android/gms/common/ConnectionResult.html#API_UNAVAILABLE">
+<code>API_UNAVAILABLE</code></a> error code. If your app uses the <a
+href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
+Wearable}</a> API in addition to other Google APIs, use a separate <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> instance to access the <a
+href="{@docRoot}reference/com/google/android/gms/wearable/Wearable.html">{@code
+Wearable}</a> API. This approach enables you to access other Google APIs on devices that are not
+paired with a wearable device.</p>
+
+<p>When you use a separate <a
+href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code
+GoogleApiClient}</a> instance to access only the Wearable API, you can determine
+whether the <a
+href="https://play.google.com/store/apps/details?id=com.google.android.wearable.app&hl=en">Android
+Wear app</a> is installed on the device:</p>
+
+<pre>
+// Connection failed listener method for a client that only
+// requests access to the Wearable API
+&#64;Override
+public void onConnectionFailed(ConnectionResult result) {
+    if (result.getErrorCode() == ConnectionResult.API_UNAVAILABLE) {
+        // The Android Wear app is not installed
+    }
+    ...
+}
+</pre>
+
+
 
 
 
