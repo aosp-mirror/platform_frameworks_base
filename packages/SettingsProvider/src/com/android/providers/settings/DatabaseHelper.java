@@ -71,7 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 117;
+    private static final int DATABASE_VERSION = 118;
 
     private Context mContext;
     private int mUserHandle;
@@ -1879,6 +1879,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 117;
         }
 
+        if (upgradeVersion < 118) {
+            // Reset rotation-lock-for-accessibility on upgrade, since it now hides the display
+            // setting.
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR REPLACE INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadSetting(stmt, Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY, 0);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 118;
+        }
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
