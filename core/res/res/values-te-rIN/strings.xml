@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"కాష్ ఫైల్‌సిస్టమ్‌ను చదవడానికి మరియు వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP కాల్‌లను చేయడానికి/స్వీకరించడానికి"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP కాల్‌లను చేయడానికి మరియు స్వీకరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"కొత్త టెలికామ్ SIM కనెక్షన్‌లను నమోదు చేయడం"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"కొత్త టెలికామ్ SIM కనెక్షన్‌లను నమోదు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడం"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"కొత్త టెలికామ్ కనెక్షన్‌లను నమోదు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడం"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"టెలికామ్ కనెక్షన్‌లను నిర్వహించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ఇన్-కాల్ స్క్రీన్‌తో పరస్పర చర్య చేయడం"</string>
@@ -1783,6 +1779,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"అన్‌పిన్ చేయడానికి ముందు పాస్‌వర్డ్ కోసం అడుగు"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"బ్యాటరీ సామర్థ్యాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరుని తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను మరియు అత్యధిక నేపథ్య డేటాను పరిమితపరుస్తుంది. అలాగే సమకాలీకరణపై ఆధారపడే ఇమెయిల్, సందేశ సేవ మరియు ఇతర అనువర్తనాలు మీరు వాటిని తెరిస్తే మినహా నవీకరించబడకపోవచ్చు.\n\nమీ పరికరం ఛార్జింగ్‌లో ఉన్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ చేయబడుతుంది."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"మీ వృథా సమయం <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>కి ముగిసే వరకు"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"ఒక నిమిషం పాటు (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> వరకు)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d నిమిషాల పాటు (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> వరకు)"</item>
@@ -1802,4 +1800,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"నిరవధికంగా"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"కుదించండి"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>

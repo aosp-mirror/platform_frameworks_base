@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ಕ್ಯಾಷ್‌ ಫೈಲ್‌ ವ್ಯವಸ್ಥೆಯನ್ನು ಓದಲು ಮತ್ತು ಬರೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ಕರೆಗಳನ್ನು ಮಾಡಿ/ಸ್ವೀಕರಿಸಿ"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ಹೊಸ ಟೆಲಿಕಾಮ್ SIM ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಿ"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಹೊಸ ಟೆಲಿಕಾಮ್ SIM ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಲು ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"ಹೊಸ ಟೆಲಿಕಾಮ್ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಾಯಿಸಿ"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"ಹೊಸ ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನೋಂದಣಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"ಟೆಲಿಕಾಂ ಸಂಪರ್ಕಗಳನ್ನು ನಿರ್ವಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ಒಳ-ಕರೆ ಪರದೆಯ ಮೂಲಕ ಸಂವಹನ ನಡೆಸಿ"</string>
@@ -1783,6 +1779,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ಅನ್‌ಪಿನ್ ಮಾಡುವುದಕ್ಕೂ ಮೊದಲು ಪಾಸ್‌ವರ್ಡ್ ಕೇಳಿ"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸುವ ನಿಟ್ಟಿನಲ್ಲಿ ಸಹಾಯ ಮಾಡಲು, ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕುಂಠಿತಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ವೈಬ್ರೇಷನ್‌‌ ಹಾಗೂ ಹೆಚ್ಚಿನ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಸೀಮಿತಗೊಳಿಸುತ್ತದೆ. ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ, ಮತ್ತು ಸಿಂಕ್ ಮಾಡುವುದನ್ನು ಅವಲಂಬಿಸಿರುವ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನೀವು ತೆರೆಯುವವರೆಗೆ ಅವುಗಳನ್ನು ನವೀಕರಿಸಲಾಗುವುದಿಲ್ಲ.\n\nನಿಮ್ಮ ಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿತಾಯವು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆಫ್ ಆಗುತ್ತದೆ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ನಿಮ್ಮ ಅಲಭ್ಯತೆ ಕೊನೆಗೊಳ್ಳುವವರೆಗೆ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"ಒಂದು ನಿಮಿಷದವರೆಗೆ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ವರೆಗೆ)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d ನಿಮಿಷಗಳವರೆಗೆ (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> ವರೆಗೆ)"</item>
@@ -1802,4 +1800,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"ಅನಿರ್ದಿಷ್ಟವಾಗಿ"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ಸಂಕುಚಿಸು"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>

@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"केस फाइल प्रणालीलाई पढ्न र लेख्‍नको लागि अनुप्रयोगलाई अनुमति दिन्छ।"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कलहरू प्राप्त/बनाउन"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP कलहरू बनाउन र प्राप्त गर्न अनुप्रयोगलाई अनुमति दिन्छ।"</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"नयाँ दूरसंचार सिम जडानहरू दर्ता गर्नुहोस्"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"अनुप्रयोगलाई नयाँ दूरसंचार SIM जडानहरू दर्ता गर्न अनुमति दिन्छ।"</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"नयाँ दूरसंचार जडानहरू दर्ता गर्नुहोस्"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"अनुप्रयोगलाई नयाँ दूरसंचार सम्पर्क दर्ता गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"दूरसंचार जडान व्यवस्थापन गर्नुहोस्"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"अनुप्रयोगलाई टेलिकम जडान व्यवस्थापन गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"आगमन कल स्क्रिन संग अन्तर्क्रिया गर्नुहोस्"</string>
@@ -1791,6 +1787,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ब्याट्री जीवन सुधार्न, ब्याट्री बचतले आफ्नो उपकरणको प्रदर्शन र कम्पनको सीमा र सबैभन्दा पृष्ठभूमि डेटा कम गर्छ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जसले तपाईं तिनीहरूलाई नखोले सम्म समिकरण अद्यावधिक नगर्न सक्छ भनि भर पर्छ।\n\nब्याट्री बचतले तपाईँको उपकरण चार्ज हुँदै बेला तपाईँको उपकरण स्वचालित बन्द गर्छ।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"तपाईँको <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> डाउनटाइम समाप्त हुँदा सम्म"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"एक मिनेटको लागि (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> सम्म)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> सम्म)"</item>
@@ -1810,4 +1808,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> सम्म"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"अनिश्चित"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त पार्नुहोस्"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>

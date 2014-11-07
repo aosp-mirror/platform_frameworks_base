@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"தற்காலிகச் சேமிப்பு கோப்பு அமைப்பைப் படிக்க மற்றும் எழுத, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP அழைப்புகளைச் செய்தல்/பெறுதல்"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP அழைப்புகளைச் செய்ய/பெற, பயன்பாட்டை அனுமதிக்கிறது."</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"புதிய நிறுவன சிம் இணைப்புகளைப் பதிவுசெய்தல்"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"புதிய நிறுவன சிம் இணைப்புகளைப் பதிவுசெய்ய, பயன்பாட்டை அனுமதிக்கும்."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"புதிய நிறுவன இணைப்புகளைப் பதிவுசெய்தல்"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"புதிய தொலைத்தொடர்பு இணைப்புகளைப் பதிவுசெய்ய, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"தொலைத்தொடர்பு இணைப்புகளை நிர்வகி"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"தொலைத்தொடர்பு இணைப்புகளை நிர்வகிக்க, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"உள்வரும் அழைப்பிற்கான திரையுடன் ஊடாடுதல்"</string>
@@ -1783,6 +1779,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"பேட்டரியின் ஆயுட்காலத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வுறுவதையும் பெரும்பாலான பின்புலத் தரவையும் வரம்பிடுகிறது. ஒத்திசைவைச் சார்ந்திருக்கும் மின்னஞ்சல், மெசேஜ், மேலும் பிற பயன்பாடுகளைத் திறக்கும் வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nசாதனம் சார்ஜ் ஆகும் போது, பேட்டரி சேமிப்பான் தானாகவே முடக்கப்படும்."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> முடியும் வரை"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
@@ -1802,4 +1800,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> வரை"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"வரையறையற்றது"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"சுருக்கு"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>
