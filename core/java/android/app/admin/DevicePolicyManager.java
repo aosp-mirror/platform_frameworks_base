@@ -2586,6 +2586,10 @@ public class DevicePolicyManager {
      * <p>The application restrictions are only made visible to the target application and the
      * profile or device owner.
      *
+     * <p>If the restrictions are not available yet, but may be applied in the near future,
+     * the admin can notify the target application of that by adding
+     * {@link UserManager#KEY_RESTRICTIONS_PENDING} to the settings parameter.
+     *
      * <p>The calling device admin must be a profile or device owner; if it is not, a security
      * exception will be thrown.
      *
@@ -2593,6 +2597,8 @@ public class DevicePolicyManager {
      * @param packageName The name of the package to update restricted settings for.
      * @param settings A {@link Bundle} to be parsed by the receiving application, conveying a new
      * set of active restrictions.
+     *
+     * @see UserManager#KEY_RESTRICTIONS_PENDING
      */
     public void setApplicationRestrictions(ComponentName admin, String packageName,
             Bundle settings) {

@@ -371,6 +371,24 @@ public class UserManager {
      */
     public static final String DISALLOW_OUTGOING_BEAM = "no_outgoing_beam";
 
+    /**
+     * Application restriction key that is used to indicate the pending arrival
+     * of real restrictions for the app.
+     *
+     * <p>
+     * Applications that support restrictions should check for the presence of this key.
+     * A <code>true</code> value indicates that restrictions may be applied in the near
+     * future but are not available yet. It is the responsibility of any
+     * management application that sets this flag to update it when the final
+     * restrictions are enforced.
+     *
+     * <p/>Key for application restrictions.
+     * <p/>Type: Boolean
+     * @see android.app.admin.DevicePolicyManager#addApplicationRestriction()
+     * @see android.app.admin.DevicePolicyManager#getApplicationRestriction()
+     */
+    public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
+
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
     /** @hide */
