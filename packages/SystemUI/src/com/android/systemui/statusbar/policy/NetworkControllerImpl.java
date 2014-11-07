@@ -177,12 +177,21 @@ public class NetworkControllerImpl extends BroadcastReceiver
      * Construct this controller object and register for updates.
      */
     public NetworkControllerImpl(Context context) {
+        this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
+                (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE),
+                (WifiManager) context.getSystemService(Context.WIFI_SERVICE));
+        registerListeners();
+    }
+
+    @VisibleForTesting
+    NetworkControllerImpl(Context context, ConnectivityManager connectivityManager,
+            TelephonyManager telephonyManager, WifiManager wifiManager) {
         mContext = context;
         final Resources res = context.getResources();
 
-        mConnectivityManager =
-                (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mHasMobileDataFeature = getCM().isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        mConnectivityManager = connectivityManager;
+        mHasMobileDataFeature =
+                mConnectivityManager.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
 
         mShowPhoneRSSIForData = res.getBoolean(R.bool.config_showPhoneRSSIForData);
         mShowAtLeastThreeGees = res.getBoolean(R.bool.config_showMin3G);
@@ -203,15 +212,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mNetworkName = mNetworkNameDefault;
 
         // wifi
-        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        mWifiManager = wifiManager;
         Handler handler = new WifiHandler();
         mWifiChannel = new AsyncChannel();
         Messenger wifiMessenger = mWifiManager.getWifiServiceMessenger();
         if (wifiMessenger != null) {
             mWifiChannel.connect(mContext, handler, wifiMessenger);
         }
-
-        registerListeners();
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode();
@@ -227,13 +234,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         });
     }
 
-    @VisibleForTesting
-    protected ConnectivityManager getCM() {
-        return mConnectivityManager;
-    }
-
-    @VisibleForTesting
-    protected void registerListeners() {
+    private void registerListeners() {
         mPhone.listen(mPhoneStateListener,
                           PhoneStateListener.LISTEN_SERVICE_STATE
                         | PhoneStateListener.LISTEN_SIGNAL_STRENGTHS
@@ -1085,7 +1086,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             Log.d(TAG, "updateConnectivity: intent=" + intent);
         }
 
-        final NetworkInfo info = getCM().getActiveNetworkInfo();
+        final NetworkInfo info = mConnectivityManager.getActiveNetworkInfo();
 
         // Are we connected at all, by any interface?
         mConnected = info != null && info.isConnected();

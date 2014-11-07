@@ -4,16 +4,19 @@ package com.android.systemui.statusbar.policy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import android.telephony.TelephonyManager;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import com.android.internal.telephony.cdma.EriInfo;
+import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SignalCluster;
 
 import org.mockito.ArgumentCaptor;
@@ -24,13 +27,23 @@ import java.io.StringWriter;
 
 public class NetworkControllerBaseTest extends AndroidTestCase {
     private static final String TAG = "NetworkControllerBaseTest";
+    protected static final int DEFAULT_LEVEL = 2;
+    protected static final int DEFAULT_SIGNAL_STRENGTH =
+            TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL];
+    protected static final int DEFAULT_QS_SIGNAL_STRENGTH =
+            TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL];
+    protected static final int DEFAULT_ICON = TelephonyIcons.ICON_3G;
+    protected static final int DEFAULT_QS_ICON = TelephonyIcons.QS_ICON_3G;
 
     protected NetworkControllerImpl mNetworkController;
     protected PhoneStateListener mPhoneStateListener;
     protected SignalCluster mSignalCluster;
+    protected NetworkSignalChangedCallback mNetworkSignalChangedCallback;
     private SignalStrength mSignalStrength;
     private ServiceState mServiceState;
-    private ConnectivityManager mMockCM;
+    protected ConnectivityManager mMockCm;
+    protected WifiManager mMockWm;
+    protected TelephonyManager mMockTm;
 
     @Override
     protected void setUp() throws Exception {
@@ -39,17 +52,24 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 
-        mMockCM = mock(ConnectivityManager.class);
-        when(mMockCM.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
+        mMockWm = mock(WifiManager.class);
+        mMockTm = mock(TelephonyManager.class);
+        mMockCm = mock(ConnectivityManager.class);
+        when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
 
-        // TODO: Move away from fake, use spy if possible after MSIM refactor.
-        mNetworkController = new FakeNetworkControllerImpl(mContext);
-
-        mPhoneStateListener = mNetworkController.mPhoneStateListener;
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);
         mSignalCluster = mock(SignalCluster.class);
+        mNetworkSignalChangedCallback = mock(NetworkSignalChangedCallback.class);
+
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm);
+        setupNetworkController();
+    }
+
+    protected void setupNetworkController() {
+        mPhoneStateListener = mNetworkController.mPhoneStateListener;
         mNetworkController.addSignalCluster(mSignalCluster);
+        mNetworkController.addNetworkSignalChangedCallback(mNetworkSignalChangedCallback);
     }
 
     @Override
@@ -62,13 +82,24 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         super.tearDown();
     }
 
+    // 2 Bars 3G GSM.
+    public void setupDefaultSignal() {
+        setIsGsm(true);
+        setVoiceRegState(ServiceState.STATE_IN_SERVICE);
+        setGsmRoaming(false);
+        setLevel(DEFAULT_LEVEL);
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_UMTS);
+        setConnectivity(100, ConnectivityManager.TYPE_MOBILE, true);
+    }
+
     public void setConnectivity(int inetCondition, int networkType, boolean isConnected) {
         Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
         NetworkInfo networkInfo = mock(NetworkInfo.class);
         when(networkInfo.isConnected()).thenReturn(isConnected);
         when(networkInfo.getType()).thenReturn(networkType);
         when(networkInfo.getTypeName()).thenReturn("");
-        when(mMockCM.getActiveNetworkInfo()).thenReturn(networkInfo);
+        when(mMockCm.getActiveNetworkInfo()).thenReturn(networkInfo);
 
         i.putExtra(ConnectivityManager.EXTRA_INET_CONDITION, inetCondition);
         mNetworkController.onReceive(mContext, i);
@@ -79,8 +110,21 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         updateServiceState();
     }
 
+    public void setCdmaRoaming(boolean isRoaming) {
+        when(mServiceState.getCdmaEriIconIndex()).thenReturn(isRoaming ?
+                EriInfo.ROAMING_INDICATOR_ON : EriInfo.ROAMING_INDICATOR_OFF);
+        when(mServiceState.getCdmaEriIconMode()).thenReturn(isRoaming ?
+                EriInfo.ROAMING_ICON_MODE_NORMAL : -1);
+        updateServiceState();
+    }
+
     public void setVoiceRegState(int voiceRegState) {
         when(mServiceState.getVoiceRegState()).thenReturn(voiceRegState);
+        updateServiceState();
+    }
+
+    public void setDataRegState(int dataRegState) {
+        when(mServiceState.getDataRegState()).thenReturn(dataRegState);
         updateServiceState();
     }
 
@@ -131,32 +175,49 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         mPhoneStateListener.onDataActivity(dataActivity);
     }
 
-    protected void verifyLastMobileDataIndicators(boolean visible, int icon) {
+    protected void verifyLastQsMobileDataIndicators(boolean visible, int icon, int typeIcon,
+            boolean dataIn, boolean dataOut, boolean noSim) {
         ArgumentCaptor<Integer> iconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Boolean> visibleArg = ArgumentCaptor.forClass(Boolean.class);
+        ArgumentCaptor<Boolean> dataInArg = ArgumentCaptor.forClass(Boolean.class);
+        ArgumentCaptor<Boolean> dataOutArg = ArgumentCaptor.forClass(Boolean.class);
+        ArgumentCaptor<Boolean> noSimArg = ArgumentCaptor.forClass(Boolean.class);
+
+        Mockito.verify(mNetworkSignalChangedCallback, Mockito.atLeastOnce())
+                .onMobileDataSignalChanged(visibleArg.capture(), iconArg.capture(),
+                        ArgumentCaptor.forClass(String.class).capture(),
+                        typeIconArg.capture(),
+                        dataInArg.capture(),
+                        dataOutArg.capture(),
+                        ArgumentCaptor.forClass(String.class).capture(),
+                        ArgumentCaptor.forClass(String.class).capture(),
+                        noSimArg.capture(),
+                        ArgumentCaptor.forClass(Boolean.class).capture());
+        assertEquals("Visibility in, quick settings", visible, (boolean) visibleArg.getValue());
+        assertEquals("Signal icon in, quick settings", icon, (int) iconArg.getValue());
+        assertEquals("Data icon in, quick settings", typeIcon, (int) typeIconArg.getValue());
+        assertEquals("Data direction in, in quick settings", dataIn,
+                (boolean) dataInArg.getValue());
+        assertEquals("Data direction out, in quick settings", dataOut,
+                (boolean) dataOutArg.getValue());
+        assertEquals("Sim state in quick settings", noSim, (boolean) noSimArg.getValue());
+    }
+
+    protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon) {
+        ArgumentCaptor<Integer> iconArg = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Boolean> visibleArg = ArgumentCaptor.forClass(Boolean.class);
 
         // TODO: Verify all fields.
         Mockito.verify(mSignalCluster, Mockito.atLeastOnce()).setMobileDataIndicators(
-                visibleArg.capture(), iconArg.capture(),
-                ArgumentCaptor.forClass(Integer.class).capture(),
+                visibleArg.capture(), iconArg.capture(), typeIconArg.capture(),
                 ArgumentCaptor.forClass(String.class).capture(),
                 ArgumentCaptor.forClass(String.class).capture(),
                 ArgumentCaptor.forClass(Boolean.class).capture());
 
-        assertEquals(icon, (int) iconArg.getValue());
-        assertEquals(visible, (boolean) visibleArg.getValue());
-    }
-
-    private class FakeNetworkControllerImpl extends NetworkControllerImpl {
-        public FakeNetworkControllerImpl(Context context) {
-            super(context);
-        }
-
-        @Override
-        public ConnectivityManager getCM() {
-            return mMockCM;
-        }
-
-        public void registerListeners() {};
+        assertEquals("Signal icon in status bar", icon, (int) iconArg.getValue());
+        assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
+        assertEquals("Visibility in status bar", visible, (boolean) visibleArg.getValue());
     }
 }
