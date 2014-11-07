@@ -156,6 +156,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Resets this TaskStackView for reuse. */
     void reset() {
+        // Reset the focused task
+        resetFocusedTask();
+
         // Return all the views to the pool
         int childCount = getChildCount();
         for (int i = childCount - 1; i >= 0; i--) {
@@ -175,7 +178,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Reset the stack state
-        resetFocusedTask();
         mStackViewsDirty = true;
         mStackViewsClipDirty = true;
         mAwaitingFirstLayout = true;
