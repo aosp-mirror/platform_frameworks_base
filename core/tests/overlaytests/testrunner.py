@@ -421,8 +421,8 @@ def _create_enable_single_overlay_task():
         _create_disable_overlays_task(),
         MkdirTask('/system/vendor'),
         MkdirTask('/vendor/overlay'),
-        PushTask('/data/app/com.android.overlaytest.overlay.apk', '/vendor/overlay/framework_a.apk'),
-        PushTask('/data/app/com.android.overlaytest.first_app_overlay.apk', '/vendor/overlay/app_a.apk'),
+        PushTask('/data/app/com.android.overlaytest.overlay/com.android.overlaytest.overlay.apk', '/vendor/overlay/framework_a.apk'),
+        PushTask('/data/app/com.android.overlaytest.first_app_overlay/com.android.overlaytest.first_app_overlay.apk', '/vendor/overlay/app_a.apk'),
     ]
     return CompoundTask(TASK_ENABLE_SINGLE_OVERLAY, tasks)
 
@@ -432,9 +432,9 @@ def _create_enable_multiple_overlays_task():
         MkdirTask('/system/vendor'),
         MkdirTask('/vendor/overlay'),
 
-        PushTask('/data/app/com.android.overlaytest.overlay.apk', '/vendor/overlay/framework_b.apk'),
-        PushTask('/data/app/com.android.overlaytest.first_app_overlay.apk', '/vendor/overlay/app_a.apk'),
-        PushTask('/data/app/com.android.overlaytest.second_app_overlay.apk', '/vendor/overlay/app_b.apk'),
+        PushTask('/data/app/com.android.overlaytest.overlay/com.android.overlaytest.overlay.apk', '/vendor/overlay/framework_b.apk'),
+        PushTask('/data/app/com.android.overlaytest.first_app_overlay/com.android.overlaytest.first_app_overlay.apk', '/vendor/overlay/app_a.apk'),
+        PushTask('/data/app/com.android.overlaytest.second_app_overlay/com.android.overlaytest.second_app_overlay.apk', '/vendor/overlay/app_b.apk'),
     ]
     return CompoundTask(TASK_ENABLE_MULTIPLE_OVERLAYS, tasks)
 
@@ -584,7 +584,7 @@ if __name__ == '__main__':
     # remount filesystem, install test project
     tasks.append(RootTask())
     tasks.append(RemountTask())
-    tasks.append(PushTask('/system/app/OverlayTest.apk', '/system/app/OverlayTest.apk'))
+    tasks.append(PushTask('/system/app/OverlayTest/OverlayTest.apk', '/system/app/OverlayTest.apk'))
 
     # test idmap
     if opts.test_idmap:
@@ -609,9 +609,9 @@ if __name__ == '__main__':
         tasks.append(GrepIdmapTest(idmap, 'bool/config_annoy_dianne', 1))
 
         # overlays.list
-        overlays_list_path = '/data/resource-cache/overlays.list'
+        overlays_list_path = idmaps + '/overlays.list'
         expected_content = '''\
-/vendor/overlay/framework_b.apk /data/resource-cache/vendor@overlay@framework_b.apk@idmap
+/vendor/overlay/framework_b.apk /data/local/tmp/idmaps/vendor@overlay@framework_b.apk@idmap
 '''
         tasks.append(FileExistsTest(overlays_list_path))
         tasks.append(Md5Test(overlays_list_path, expected_content))
