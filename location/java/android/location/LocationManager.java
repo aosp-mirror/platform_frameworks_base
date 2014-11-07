@@ -1583,6 +1583,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public boolean addGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
         return mGpsMeasurementListenerTransport.add(listener);
     }
@@ -1594,6 +1595,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public void removeGpsMeasurementListener(GpsMeasurementsEvent.Listener listener) {
         mGpsMeasurementListenerTransport.remove(listener);
     }
@@ -1606,6 +1608,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public boolean addGpsNavigationMessageListener(GpsNavigationMessageEvent.Listener listener) {
         return mGpsNavigationMessageListenerTransport.add(listener);
     }
@@ -1617,6 +1620,7 @@ public class LocationManager {
      *
      * @hide
      */
+    @SystemApi
     public void removeGpsNavigationMessageListener(
             GpsNavigationMessageEvent.Listener listener) {
         mGpsNavigationMessageListenerTransport.remove(listener);
