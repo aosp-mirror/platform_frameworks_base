@@ -11,6 +11,7 @@
       <span class="en">Lollipop</span></a></div>
       <ul>
         <li><a href="<?cs var:toroot ?>about/versions/android-5.0.html">Android 5.0 APIs</a></li>
+        <li><a href="<?cs var:toroot ?>about/versions/android-5.0-changes.html">Android 5.0 Changes</a></li>
       </ul>
   </li>
   <li class="nav-section">
