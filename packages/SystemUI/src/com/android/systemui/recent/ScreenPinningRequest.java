@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
+import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
