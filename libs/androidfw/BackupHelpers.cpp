@@ -68,14 +68,11 @@ struct file_metadata_v1 {
 
 const static int CURRENT_METADATA_VERSION = 1;
 
-#if 1
-#define LOGP(f, x...)
-#else
+static const bool kIsDebug = false;
 #if TEST_BACKUP_HELPERS
-#define LOGP(f, x...) printf(f "\n", x)
+#define LOGP(f, x...) if (kIsDebug) printf(f "\n", x)
 #else
-#define LOGP(x...) ALOGD(x)
-#endif
+#define LOGP(x...) if (kIsDebug) ALOGD(x)
 #endif
 
 const static int ROUND_UP[4] = { 0, 3, 2, 1 };
@@ -205,13 +202,6 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
 }
 
 static int
-write_delete_file(BackupDataWriter* dataStream, const String8& key)
-{
-    LOGP("write_delete_file %s\n", key.string());
-    return dataStream->WriteEntityHeader(key, -1);
-}
-
-static int
 write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8& key,
         char const* realFilename)
 {
@@ -225,8 +215,6 @@ write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8&
     file_metadata_v1 metadata;
 
     char* buf = (char*)malloc(bufsize);
-    int crc = crc32(0L, Z_NULL, 0);
-
 
     fileSize = lseek(fd, 0, SEEK_END);
     lseek(fd, 0, SEEK_SET);
@@ -442,18 +430,6 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
     return 0;
 }
 
-// Utility function, equivalent to stpcpy(): perform a strcpy, but instead of
-// returning the initial dest, return a pointer to the trailing NUL.
-static char* strcpy_ptr(char* dest, const char* str) {
-    if (dest && str) {
-        while ((*dest = *str) != 0) {
-            dest++;
-            str++;
-        }
-    }
-    return dest;
-}
-
 static void calc_tar_checksum(char* buf) {
     // [ 148 :   8 ] checksum -- to be calculated with this field as space chars
     memset(buf + 148, ' ', 8);
@@ -635,7 +611,6 @@ int write_tarfile(const String8& packageName, const String8& domain,
 
         // construct the pax extended header data block
         memset(paxData, 0, BUFSIZE - (paxData - buf));
-        int len;
 
         // size header -- calc len in digits by actually rendering the number
         // to a string - brute force but simple
@@ -1200,7 +1175,6 @@ test_read_header_and_entity(BackupDataReader& reader, const char* str)
     size_t bufSize = strlen(str)+1;
     char* buf = (char*)malloc(bufSize);
     String8 string;
-    int cookie = 0x11111111;
     size_t actualSize;
     bool done;
     int type;
@@ -1490,7 +1464,6 @@ int
 backup_helper_test_null_base()
 {
     int err;
-    int oldSnapshotFD;
     int dataStreamFD;
     int newSnapshotFD;
 
@@ -1539,7 +1512,6 @@ int
 backup_helper_test_missing_file()
 {
     int err;
-    int oldSnapshotFD;
     int dataStreamFD;
     int newSnapshotFD;
 

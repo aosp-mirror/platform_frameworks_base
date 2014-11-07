@@ -41,6 +41,8 @@
     _rc; })
 #endif
 
+static const bool kIsDebug = false;
+
 static inline size_t min_of(size_t a, size_t b) { return (a < b) ? a : b; }
 
 using namespace android;
@@ -209,7 +211,9 @@ int StreamingZipInflater::readNextChunk() {
         size_t toRead = min_of(mInBufSize, mInTotalSize - mInNextChunkOffset);
         if (toRead > 0) {
             ssize_t didRead = TEMP_FAILURE_RETRY(::read(mFd, mInBuf, toRead));
-            //ALOGV("Reading input chunk, size %08x didread %08x", toRead, didRead);
+            if (kIsDebug) {
+                ALOGV("Reading input chunk, size %08zx didread %08zx", toRead, didRead);
+            }
             if (didRead < 0) {
                 ALOGE("Error reading asset data: %s", strerror(errno));
                 return didRead;
