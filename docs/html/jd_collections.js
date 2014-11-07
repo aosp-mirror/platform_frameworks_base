@@ -57,9 +57,9 @@ var RESOURCE_COLLECTIONS = {
   },
   "distribute/gp/gpfelanding": {
     "resources": [
+      "distribute/googleplay/guide.html",
       "distribute/googleplay/tv.html",
-      "distribute/googleplay/edu/about.html",
-      "distribute/googleplay/edu/videos.html"
+      "distribute/googleplay/edu/about.html"
     ]
   },
   "distribute/essentials": {
@@ -779,6 +779,12 @@ var RESOURCE_COLLECTIONS = {
       "tv/index.html",
       "design/tv/index.html",
       "training/tv/index.html"
+    ]
+  },
+  "play_dev_guide": {
+    "title": "",
+    "resources": [
+      "shareables/distribute/play_dev_guide_secrets_en.pdf"
     ]
   },
   "distribute/stories/games": {
