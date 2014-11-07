@@ -296,6 +296,10 @@ bool AssetManager::addOverlayPath(const String8& packagePath, int32_t* cookie)
     mAssetPaths.add(oap);
     *cookie = static_cast<int32_t>(mAssetPaths.size());
 
+    if (mResources != NULL) {
+        appendPathToResTable(oap);
+    }
+
     return true;
  }
 

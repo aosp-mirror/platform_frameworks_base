@@ -2001,7 +2001,7 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_getAssetRemainingLength },
     { "addAssetPathNative", "(Ljava/lang/String;)I",
         (void*) android_content_AssetManager_addAssetPath },
-    { "addOverlayPath",   "(Ljava/lang/String;)I",
+    { "addOverlayPathNative",   "(Ljava/lang/String;)I",
         (void*) android_content_AssetManager_addOverlayPath },
     { "isUpToDate",     "()Z",
         (void*) android_content_AssetManager_isUpToDate },
