@@ -23,4 +23,5 @@ import android.location.GpsMeasurementsEvent;
  */
 oneway interface IGpsMeasurementsListener {
     void onGpsMeasurementsReceived(in GpsMeasurementsEvent event);
+    void onStatusChanged(in int status);
 }

@@ -32,6 +32,24 @@ import java.util.Collections;
  * @hide
  */
 public class GpsMeasurementsEvent implements Parcelable {
+
+    /**
+     * The system does not support tracking of GPS Measurements. This status will not change in the
+     * future.
+     */
+    public static final int STATUS_NOT_SUPPORTED = 0;
+
+    /**
+     * GPS Measurements are successfully being tracked, it will receive updates once they are
+     * available.
+     */
+    public static final int STATUS_READY = 1;
+
+    /**
+     * GPS provider or Location is disabled, updates will not be received until they are enabled.
+     */
+    public static final int STATUS_GPS_LOCATION_DISABLED = 2;
+
     private final GpsClock mClock;
     private final Collection<GpsMeasurement> mReadOnlyMeasurements;
 
@@ -43,7 +61,16 @@ public class GpsMeasurementsEvent implements Parcelable {
      * @hide
      */
     public interface Listener {
+
+        /**
+         * Returns the latest collected GPS Measurements.
+         */
         void onGpsMeasurementsReceived(GpsMeasurementsEvent eventArgs);
+
+        /**
+         * Returns the latest status of the GPS Measurements sub-system.
+         */
+        void onStatusChanged(int status);
     }
 
     public GpsMeasurementsEvent(GpsClock clock, GpsMeasurement[] measurements) {
@@ -103,7 +130,9 @@ public class GpsMeasurementsEvent implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mClock, flags);
 
-        GpsMeasurement[] measurementsArray = mReadOnlyMeasurements.toArray(new GpsMeasurement[0]);
+        int measurementsCount = mReadOnlyMeasurements.size();
+        GpsMeasurement[] measurementsArray =
+                mReadOnlyMeasurements.toArray(new GpsMeasurement[measurementsCount]);
         parcel.writeInt(measurementsArray.length);
         parcel.writeTypedArray(measurementsArray, flags);
     }
