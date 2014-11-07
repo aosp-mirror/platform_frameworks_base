@@ -123,4 +123,10 @@
 
     <!-- Shadow color for the furthest pixels around the fake shadow for recents. -->
     <color name="fake_shadow_end_color">#03000000</color>
+
+    <!-- 25% deep teal 200 -->
+    <color name="screen_pinning_nav_icon_highlight_outer">#4080cbc4</color>
+    <!-- deep teal 500 -->
+    <color name="screen_pinning_request_bg">#ff009688</color>
+    <color name="screen_pinning_request_window_bg">#80000000</color>
 </resources>

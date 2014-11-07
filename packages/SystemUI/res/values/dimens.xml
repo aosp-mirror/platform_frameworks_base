@@ -520,4 +520,29 @@
 
     <!-- Padding for signal cluster and battery icon when there are not icons in signal cluster -->
     <dimen name="no_signal_cluster_battery_padding">3dp</dimen>
+
+    <!-- Screen pinning request width -->
+    <dimen name="screen_pinning_request_width">@dimen/match_parent</dimen>
+    <!-- Screen pinning request nav button circle heights -->
+    <dimen name="screen_pinning_request_button_height">66dp</dimen>
+    <!-- Screen pinning request nav button circle widths -->
+    <dimen name="screen_pinning_request_button_width">84dp</dimen>
+    <!-- Screen pinning request padding on top of inner circle -->
+    <dimen name="screen_pinning_request_inner_padding">14dp</dimen>
+    <!-- Screen pinning request padding on top of icons -->
+    <dimen name="screen_pinning_request_nav_icon_padding">18dp</dimen>
+    <!-- Screen pinning request padding on side of icons
+         (makes the width match the nav bar)-->
+    <dimen name="screen_pinning_request_nav_side_padding">7dp</dimen>
+    <!-- Screen pinning request side views to match nav bar
+         navigation_side_padding - 3 / 2 * (screen_pinning_request_button_width
+                                                - navigation_key_width) -->
+    <dimen name="screen_pinning_request_side_width">34dp</dimen>
+    <!-- Screen pinning request controls padding on bigger screens -->
+    <dimen name="screen_pinning_request_frame_padding">0dp</dimen>
+    <!-- Screen pinning inner nav bar circle size -->
+    <dimen name="screen_pinning_nav_highlight_size">56dp</dimen>
+    <!-- Screen pinning inner nav bar outer circle size -->
+    <dimen name="screen_pinning_nav_highlight_outer_size">84dp</dimen>
+
 </resources>

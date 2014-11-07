@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/**
+ * Copyright (c) 2014, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/screen_pinning_text_area"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/screen_pinning_request_bg"
+    android:gravity="center_vertical" >
+
+    <TextView
+        android:id="@+id/screen_pinning_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingEnd="48dp"
+        android:paddingStart="48dp"
+        android:paddingTop="43dp"
+        android:text="@string/screen_pinning_title"
+        android:textColor="@color/screen_pinning_primary_text"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/screen_pinning_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/screen_pinning_title"
+        android:paddingEnd="48dp"
+        android:paddingStart="48dp"
+        android:paddingTop="12.6dp"
+        android:text="@string/screen_pinning_description"
+        android:textColor="@color/screen_pinning_primary_text"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/screen_pinning_ok_button"
+        style="@android:style/Widget.Material.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/screen_pinning_description"
+        android:layout_marginEnd="40dp"
+        android:layout_marginTop="18dp"
+        android:background="@null"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:text="@string/screen_pinning_positive"
+        android:textColor="@android:color/white"
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/screen_pinning_cancel_button"
+        style="@android:style/Widget.Material.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_alignTop="@id/screen_pinning_ok_button"
+        android:layout_marginEnd="4dp"
+        android:layout_toStartOf="@id/screen_pinning_ok_button"
+        android:background="@null"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:text="@string/screen_pinning_negative"
+        android:textColor="@android:color/white"
+        android:textSize="14sp" />
+
+</RelativeLayout>
