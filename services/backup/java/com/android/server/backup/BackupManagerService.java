@@ -153,7 +153,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import libcore.io.IoUtils;
 
-public class BackupManagerService extends IBackupManager.Stub {
+public class BackupManagerService {
 
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
@@ -322,8 +322,12 @@ public class BackupManagerService extends IBackupManager.Stub {
     // Watch the device provisioning operation during setup
     ContentObserver mProvisionedObserver;
 
-    static BackupManagerService sInstance;
-    static BackupManagerService getInstance() {
+    // The published binder is actually to a singleton trampoline object that calls
+    // through to the proper code.  This indirection lets us turn down the heavy
+    // implementation object on the fly without disturbing binders that have been
+    // cached elsewhere in the system.
+    static Trampoline sInstance;
+    static Trampoline getInstance() {
         // Always constructed during system bringup, so no need to lazy-init
         return sInstance;
     }
@@ -332,7 +336,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         public Lifecycle(Context context) {
             super(context);
-            sInstance = new BackupManagerService(context);
+            sInstance = new Trampoline(context);
         }
 
         @Override
@@ -342,11 +346,17 @@ public class BackupManagerService extends IBackupManager.Stub {
 
         @Override
         public void onBootPhase(int phase) {
-            if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                sInstance.initialize(UserHandle.USER_OWNER);
+            } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 ContentResolver r = sInstance.mContext.getContentResolver();
                 boolean areEnabled = Settings.Secure.getInt(r,
                         Settings.Secure.BACKUP_ENABLED, 0) != 0;
-                sInstance.setBackupEnabled(areEnabled);
+                try {
+                    sInstance.setBackupEnabled(areEnabled);
+                } catch (RemoteException e) {
+                    // can't happen; it's a local object
+                }
             }
         }
     }
@@ -934,7 +944,7 @@ public class BackupManagerService extends IBackupManager.Stub {
 
     // ----- Main service implementation -----
 
-    public BackupManagerService(Context context) {
+    public BackupManagerService(Context context, Trampoline parent) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mPackageManagerBinder = AppGlobals.getPackageManager();
@@ -944,7 +954,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mMountService = IMountService.Stub.asInterface(ServiceManager.getService("mount"));
 
-        mBackupManagerBinder = asInterface(asBinder());
+        mBackupManagerBinder = Trampoline.asInterface(parent.asBinder());
 
         // spin up the backup/restore handler thread
         mHandlerThread = new HandlerThread("backup", Process.THREAD_PRIORITY_BACKGROUND);
@@ -1451,7 +1461,6 @@ public class BackupManagerService extends IBackupManager.Stub {
         return false;
     }
 
-    @Override
     public boolean setBackupPassword(String currentPw, String newPw) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupPassword");
@@ -1532,7 +1541,6 @@ public class BackupManagerService extends IBackupManager.Stub {
         return false;
     }
 
-    @Override
     public boolean hasBackupPassword() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "hasBackupPassword");
@@ -8145,7 +8153,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
     //
     // This is the variant used by 'adb backup'; it requires on-screen confirmation
     // by the user because it can be used to offload data over untrusted USB.
-    @Override
     public void fullBackup(ParcelFileDescriptor fd, boolean includeApks,
             boolean includeObbs, boolean includeShared, boolean doWidgets,
             boolean doAllApps, boolean includeSystem, boolean compress, String[] pkgList) {
@@ -8217,7 +8224,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    @Override
     public void fullTransportBackup(String[] pkgNames) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                 "fullTransportBackup");
@@ -8247,7 +8253,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    @Override
     public void fullRestore(ParcelFileDescriptor fd) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullRestore");
 
@@ -8343,7 +8348,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Confirm that the previously-requested full backup/restore operation can proceed.  This
     // is used to require a user-facing disclosure about the operation.
-    @Override
     public void acknowledgeFullBackupOrRestore(int token, boolean allow,
             String curPassword, String encPpassword, IFullBackupRestoreObserver observer) {
         if (DEBUG) Slog.d(TAG, "acknowledgeFullBackupOrRestore : token=" + token
@@ -8391,8 +8395,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    // Enable/disable the backup service
-    @Override
+    // Enable/disable backups
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupEnabled");
@@ -8798,7 +8801,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
     // Note that a currently-active backup agent has notified us that it has
     // completed the given outstanding asynchronous backup/restore operation.
-    @Override
     public void opComplete(int token) {
         if (MORE_DEBUG) Slog.v(TAG, "opComplete: " + Integer.toHexString(token));
         Operation op = null;
@@ -9147,7 +9149,6 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
         }
     }
 
-    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
