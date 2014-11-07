@@ -1039,7 +1039,8 @@ public abstract class ConnectionService extends Service {
         connection.setConnectionService(this);
     }
 
-    private void removeConnection(Connection connection) {
+    /** {@hide} */
+    protected void removeConnection(Connection connection) {
         String id = mIdByConnection.get(connection);
         connection.unsetConnectionService(this);
         connection.removeConnectionListener(mConnectionListener);
