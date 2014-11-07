@@ -4404,9 +4404,9 @@ package android.app {
     method public android.content.Intent createConfirmDeviceCredentialIntent(java.lang.CharSequence, java.lang.CharSequence);
     method public deprecated void exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult);
     method public boolean inKeyguardRestrictedInputMode();
+    method public boolean isKeyguardInTrustedState();
     method public boolean isKeyguardLocked();
     method public boolean isKeyguardSecure();
-    method public boolean isKeyguardInTrustedState();
     method public deprecated android.app.KeyguardManager.KeyguardLock newKeyguardLock(java.lang.String);
   }
 
@@ -22355,6 +22355,7 @@ package android.os {
     field public static final java.lang.String DISALLOW_UNMUTE_MICROPHONE = "no_unmute_microphone";
     field public static final java.lang.String DISALLOW_USB_FILE_TRANSFER = "no_usb_file_transfer";
     field public static final java.lang.String ENSURE_VERIFY_APPS = "ensure_verify_apps";
+    field public static final java.lang.String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
   }
 
   public abstract class Vibrator {
