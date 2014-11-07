@@ -319,6 +319,7 @@ public class Surface implements Parcelable {
      * @return A canvas for drawing into the surface.
      *
      * @throws IllegalStateException If the canvas cannot be locked.
+     * @hide
      */
     public Canvas lockHardwareCanvas() {
         synchronized (mLock) {
