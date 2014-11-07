@@ -45,7 +45,7 @@ API changes,
 behavior changes, system enhancements, and bug fixes. This document highlights
 some of the key changes that you should be understand and account for in your apps.</p>
 
-<p>f you have previously published an app for Android, be aware that your app
+<p>If you have previously published an app for Android, be aware that your app
   might be affected by these changes in Android 5.0.</p>
 
 
@@ -82,9 +82,7 @@ Behavior on the Android Runtime (ART)</a>. Pay particular attention if:</p>
   <li>You use development tools that generate non-standard code (such as some
       obfuscators).</li>
   <li>You use techniques that are incompatible with compacting garbage
-      collection. (ART does not currently implement compacting GC, but
-      compacting GC is under development in the Android Open Source
-      Project.)</li>
+      collection.</li>
 </ul>
 
 
