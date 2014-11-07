@@ -121,7 +121,7 @@ class JNISurfaceTextureContext : public GLConsumer::FrameAvailableListener
 public:
     JNISurfaceTextureContext(JNIEnv* env, jobject weakThiz, jclass clazz);
     virtual ~JNISurfaceTextureContext();
-    virtual void onFrameAvailable();
+    virtual void onFrameAvailable(const BufferItem& item);
 
 private:
     static JNIEnv* getJNIEnv(bool* needsDetach);
@@ -177,7 +177,7 @@ JNISurfaceTextureContext::~JNISurfaceTextureContext()
     }
 }
 
-void JNISurfaceTextureContext::onFrameAvailable()
+void JNISurfaceTextureContext::onFrameAvailable(const BufferItem& /* item */)
 {
     bool needsDetach = false;
     JNIEnv* env = getJNIEnv(&needsDetach);
