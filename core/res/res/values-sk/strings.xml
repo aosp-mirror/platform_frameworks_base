@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Umožňuje aplikácii čítať a zapisovať do súborového systému vyrovnávacej pamäte."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"uskutočňovanie/príjem hovorov SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Umožňuje aplikácii uskutočňovať a prijímať hovory SIP."</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"registrácia nových pripojení telekomunikačnej siete SIM"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Povoľuje aplikácii registrovať nové pripojenia telekomunikačnej siete SIM."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"registrácia nových pripojení telekomunikačnej siete"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Povoľuje aplikácii registrovať nové pripojenia telekomunikačnej siete."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"správa pripojení telefonických sietí"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Povoľuje aplikácii spravovať pripojenia telekomunikačnej siete."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interakcia s obrazovkou hovoru"</string>
@@ -1788,6 +1784,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pred uvoľnením požiadať o heslo"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Na predĺženie výdrže batérie šetrič batérie znižuje výkonnosť zariadenia a obmedzuje vibrácie a prenos údajov na pozadí. E-mail, správy a ďalšie aplikácie, ktoré používajú synchronizáciu, sa možno nebudú aktualizovať, dokiaľ ich neotvoríte.\n\nPri nabíjaní zariadenia sa šetrič batérie automaticky vypne."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dokým o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> neskončí výpadok"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Na minútu (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"Na %1$d min. (do <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1807,4 +1805,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Natrvalo"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Zbaliť"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>
