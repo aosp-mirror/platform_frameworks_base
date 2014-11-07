@@ -622,6 +622,14 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
+     * Computes the maximum number of visible tasks and thumbnails.  Requires that
+     * updateMinMaxScrollForStack() is called first.
+     */
+    public TaskStackViewLayoutAlgorithm.VisibilityReport computeStackVisibilityReport() {
+        return mLayoutAlgorithm.computeStackVisibilityReport(mStack.getTasks());
+    }
+
+    /**
      * This is called with the full window width and height to allow stack view children to
      * perform the full screen transition down.
      */

@@ -214,6 +214,9 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
     /** Requests all task stacks to start their exit-recents animation */
     public void startExitToHomeAnimation(ViewAnimation.TaskViewExitContext ctx) {
+        // We have to increment/decrement the post animation trigger in case there are no children
+        // to ensure that it runs
+        ctx.postAnimationTrigger.increment();
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
@@ -222,6 +225,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
                 stackView.startExitToHomeAnimation(ctx);
             }
         }
+        ctx.postAnimationTrigger.decrement();
 
         // Notify of the exit animation
         mCb.onExitToHomeAnimationTriggered();
@@ -501,7 +505,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
 
         // Launch the app right away if there is no task view, otherwise, animate the icon out first
         if (tv == null) {
-            post(launchRunnable);
+            launchRunnable.run();
         } else {
             if (!task.group.isFrontMostTask(task)) {
                 // For affiliated tasks that are behind other tasks, we must animate the front cards
@@ -510,7 +514,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             } else {
                 // Otherwise, we can start the task transition immediately
                 stackView.startLaunchTaskAnimation(tv, null, lockToTask);
-                postDelayed(launchRunnable, 17);
+                launchRunnable.run();
             }
         }
     }

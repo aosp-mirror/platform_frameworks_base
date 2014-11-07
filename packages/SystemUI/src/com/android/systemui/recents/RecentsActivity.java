@@ -27,10 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -42,6 +39,7 @@ import com.android.systemui.recents.misc.DebugTrigger;
 import com.android.systemui.recents.misc.ReferenceCountedTrigger;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.SpaceNode;
 import com.android.systemui.recents.model.Task;
@@ -163,9 +161,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHome(false);
-                // Start preloading some tasks in the background
-                RecentsTaskLoader.getInstance().preload(RecentsActivity.this,
-                        Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
+                // Preload the metadata for all tasks in the background
+                RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+                RecentsTaskLoadPlan plan = loader.createLoadPlan(context);
+                loader.preloadTasks(plan, true /* isTopTaskHome */);
             } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
                 // When the search activity changes, update the Search widget
                 refreshSearchWidget();
@@ -188,6 +187,10 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Update the configuration based on the launch intent
         boolean fromSearchHome = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_FROM_SEARCH_HOME, false);
+        int numVisibleTasks = launchIntent.getIntExtra(
+                AlternateRecentsComponent.EXTRA_NUM_VISIBLE_TASKS, 0);
+        int numVisibleThumbnails = launchIntent.getIntExtra(
+                AlternateRecentsComponent.EXTRA_NUM_VISIBLE_THUMBNAILS, 0);
         mConfig.launchedFromHome = fromSearchHome || launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_FROM_HOME, false);
         mConfig.launchedFromAppWithThumbnail = launchIntent.getBooleanExtra(
@@ -199,16 +202,29 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mConfig.launchedReuseTaskStackViews = launchIntent.getBooleanExtra(
                 AlternateRecentsComponent.EXTRA_REUSE_TASK_STACK_VIEWS, false);
 
-        // Load all the tasks
+        // If AlternateRecentsComponent has preloaded a load plan, then use that to prevent
+        // reconstructing the task stack
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        SpaceNode root = loader.reload(this,
-                Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount,
-                mConfig.launchedFromHome);
-        ArrayList<TaskStack> stacks = root.getStacks();
-        if (!stacks.isEmpty()) {
-            mRecentsView.setTaskStacks(root.getStacks());
+        RecentsTaskLoadPlan plan = AlternateRecentsComponent.consumeInstanceLoadPlan();
+        if (plan == null) {
+            plan = loader.createLoadPlan(this);
+            loader.preloadTasks(plan, mConfig.launchedFromHome);
         }
-        mConfig.launchedWithNoRecentTasks = !root.hasTasks();
+
+        // Start loading tasks according to the load plan
+        RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
+        loadOpts.runningTaskId = mConfig.launchedToTaskId;
+        loadOpts.numVisibleTasks = numVisibleTasks;
+        loadOpts.numVisibleTaskThumbnails = numVisibleThumbnails;
+        loader.loadTasks(this, plan, loadOpts);
+
+        SpaceNode root = plan.getSpaceNode();
+        ArrayList<TaskStack> stacks = root.getStacks();
+        boolean hasTasks = root.hasTasks();
+        if (hasTasks) {
+            mRecentsView.setTaskStacks(stacks);
+        }
+        mConfig.launchedWithNoRecentTasks = !hasTasks;
 
         // Create the home intent runnable
         Intent homeIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -434,6 +450,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Inflates the debug overlay if debug mode is enabled. */
     void inflateDebugOverlay() {
+        if (!Constants.DebugFlags.App.EnableDebugMode) return;
+
         if (mConfig.debugModeEnabled && mDebugOverlay == null) {
             // Inflate the overlay and seek bars
             mDebugOverlay = (DebugOverlayView) mDebugOverlayStub.inflate();
@@ -592,13 +610,17 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 settings.edit().remove(Constants.Values.App.Key_DebugModeEnabled).apply();
                 mConfig.debugModeEnabled = false;
                 inflateDebugOverlay();
-                mDebugOverlay.disable();
+                if (mDebugOverlay != null) {
+                    mDebugOverlay.disable();
+                }
             } else {
                 // Enable the debug mode
                 settings.edit().putBoolean(Constants.Values.App.Key_DebugModeEnabled, true).apply();
                 mConfig.debugModeEnabled = true;
                 inflateDebugOverlay();
-                mDebugOverlay.enable();
+                if (mDebugOverlay != null) {
+                    mDebugOverlay.enable();
+                }
             }
             Toast.makeText(this, "Debug mode (" + Constants.Values.App.DebugModeVersion + ") " +
                 (mConfig.debugModeEnabled ? "Enabled" : "Disabled") + ", please restart Recents now",
