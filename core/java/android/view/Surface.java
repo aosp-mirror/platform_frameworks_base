@@ -603,15 +603,6 @@ public class Surface implements Parcelable {
                 mHwuiRenderer = 0;
             }
         }
-
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                destroy();
-            } finally {
-                super.finalize();
-            }
-        }
     }
 
     private static native long nHwuiCreate(long rootNode, long surface);
