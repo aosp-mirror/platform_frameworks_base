@@ -921,7 +921,6 @@ public abstract class Connection {
             mConference = conference;
             if (mConnectionService != null && mConnectionService.containsConference(conference)) {
                 fireConferenceChanged();
-                onConferenceChanged();
             }
             return true;
         }
@@ -937,7 +936,6 @@ public abstract class Connection {
             Log.d(this, "Conference reset");
             mConference = null;
             fireConferenceChanged();
-            onConferenceChanged();
         }
     }
 
@@ -1029,11 +1027,6 @@ public abstract class Connection {
      * Notifies this Connection whether the user wishes to proceed with the post-dial DTMF codes.
      */
     public void onPostDialContinue(boolean proceed) {}
-
-    /**
-     * Notifies this Connection that the conference which is set on it has changed.
-     */
-    public void onConferenceChanged() {}
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.
