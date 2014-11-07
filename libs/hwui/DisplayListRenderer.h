@@ -44,6 +44,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 class DeferredDisplayList;
+class DeferredLayerUpdater;
 class DisplayListRenderer;
 class DisplayListOp;
 class DrawOp;
@@ -150,7 +151,7 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
-    virtual status_t drawLayer(Layer* layer, float x, float y);
+    virtual status_t drawLayer(DeferredLayerUpdater* layerHandle, float x, float y);
     virtual status_t drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t replayFlags);
 
     // TODO: rename for consistency

@@ -23,6 +23,7 @@
 
 #include "Caches.h"
 #include "DeferredDisplayList.h"
+#include "DeferredLayerUpdater.h"
 #include "DisplayListLogBuffer.h"
 #include "DisplayListOp.h"
 #include "DisplayListRenderer.h"
@@ -188,9 +189,11 @@ status_t DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty
     return DrawGlInfo::kStatusDone;
 }
 
-status_t DisplayListRenderer::drawLayer(Layer* layer, float x, float y) {
-    mDisplayListData->ref(layer);
-    addDrawOp(new (alloc()) DrawLayerOp(layer, x, y));
+status_t DisplayListRenderer::drawLayer(DeferredLayerUpdater* layerHandle, float x, float y) {
+    // We ref the DeferredLayerUpdater due to its thread-safe ref-counting
+    // semantics.
+    mDisplayListData->ref(layerHandle);
+    addDrawOp(new (alloc()) DrawLayerOp(layerHandle->backingLayer(), x, y));
     return DrawGlInfo::kStatusDone;
 }
 
