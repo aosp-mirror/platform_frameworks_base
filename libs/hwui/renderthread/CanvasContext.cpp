@@ -166,6 +166,11 @@ void CanvasContext::prepareTree(TreeInfo& info) {
         freePrefetechedLayers();
     }
 
+    if (CC_UNLIKELY(!mNativeWindow.get())) {
+        info.out.canDrawThisFrame = false;
+        return;
+    }
+
     int runningBehind = 0;
     // TODO: This query is moderately expensive, investigate adding some sort
     // of fast-path based off when we last called eglSwapBuffers() as well as
