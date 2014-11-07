@@ -49,7 +49,6 @@ interface IPowerManager
     void crash(String message);
 
     void setStayOnSetting(int val);
-    void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs);
     void boostScreenBrightness(long time);
 
     // temporarily overrides the screen brightness settings to allow the user to
