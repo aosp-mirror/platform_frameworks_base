@@ -82,6 +82,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.AppTransition;
 import com.android.server.wm.WindowManagerService;
 import com.google.android.collect.Lists;
@@ -199,6 +200,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+
 import dalvik.system.VMRuntime;
 
 import java.io.BufferedInputStream;
@@ -1217,8 +1219,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     CompatModeDialog mCompatModeDialog;
     long mLastMemUsageReportTime = 0;
 
-    private LockToAppRequestDialog mLockToAppRequest;
-
     /**
      * Flag whether the current user is a "monkey", i.e. whether
      * the UI is driven by a UI automation tool.
@@ -1689,7 +1689,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                         BatteryStats.HistoryItem.EVENT_USER_FOREGROUND_START,
                         Integer.toString(msg.arg1), msg.arg1);
                 mSystemServiceManager.switchUser(msg.arg1);
-                mLockToAppRequest.clearPrompt();
                 break;
             }
             case ENTER_ANIMATION_COMPLETE_MSG: {
@@ -2161,8 +2160,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         };
-
-        mLockToAppRequest = new LockToAppRequestDialog(mContext, this);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -8684,13 +8681,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         boolean isSystemInitiated = Binder.getCallingUid() == Process.SYSTEM_UID;
         if (!isSystemInitiated && !isLockTaskAuthorized(pkg)) {
-            final TaskRecord taskRecord = task;
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mLockToAppRequest.showLockTaskPrompt(taskRecord);
-                }
-            });
+            StatusBarManagerInternal statusBarManager = LocalServices.getService(
+                    StatusBarManagerInternal.class);
+            if (statusBarManager != null) {
+                statusBarManager.showScreenPinningRequest();
+            }
             return;
         }
         long ident = Binder.clearCallingIdentity();
@@ -8752,11 +8747,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void startLockTaskModeOnCurrent() throws RemoteException {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "startLockTaskModeOnCurrent");
-        ActivityRecord r = null;
-        synchronized (this) {
-            r = mStackSupervisor.topRunningActivityLocked();
+        long ident = Binder.clearCallingIdentity();
+        try {
+            ActivityRecord r = null;
+            synchronized (this) {
+                r = mStackSupervisor.topRunningActivityLocked();
+            }
+            startLockTaskMode(r.task);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-        startLockTaskMode(r.task);
     }
 
     @Override

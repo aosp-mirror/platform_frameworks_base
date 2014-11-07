@@ -4036,6 +4036,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         notifyUiVisibilityChanged(mSystemUiVisibility);
     }
 
+    @Override
+    public void showScreenPinningRequest() {
+        // TODO: Show request.
+    }
+
     public boolean hasActiveNotifications() {
         return !mNotificationData.getActiveNotifications().isEmpty();
     }
