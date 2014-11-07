@@ -34,14 +34,6 @@
 #include <assert.h>
 #include <unistd.h>
 
-/*
- * We must open binary files using open(path, ... | O_BINARY) under Windows.
- * Otherwise strange read errors will happen.
- */
-#ifndef O_BINARY
-#  define O_BINARY  0
-#endif
-
 using namespace android;
 
 class _ZipEntryRO {
