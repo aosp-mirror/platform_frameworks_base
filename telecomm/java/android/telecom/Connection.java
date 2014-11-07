@@ -83,8 +83,8 @@ public abstract class Connection {
                 Connection c, List<Connection> conferenceableConnections) {}
         public void onConferenceChanged(Connection c, Conference conference) {}
         /** @hide */
-        public void onConferenceParticipantChanged(Connection c, ConferenceParticipant participant)
-        {}
+        public void onConferenceParticipantsChanged(Connection c,
+                List<ConferenceParticipant> participants) {}
     }
 
     /** @hide */
@@ -1124,14 +1124,15 @@ public abstract class Connection {
     }
 
     /**
-     * Notifies listeners of a change to a conference participant.
+     * Notifies listeners of a change to conference participant(s).
      *
-     * @param conferenceParticipant The participant.
+     * @param conferenceParticipants The participants.
      * @hide
      */
-    protected final void updateConferenceParticipant(ConferenceParticipant conferenceParticipant) {
+    protected final void updateConferenceParticipants(
+            List<ConferenceParticipant> conferenceParticipants) {
         for (Listener l : mListeners) {
-            l.onConferenceParticipantChanged(this, conferenceParticipant);
+            l.onConferenceParticipantsChanged(this, conferenceParticipants);
         }
     }
 }
