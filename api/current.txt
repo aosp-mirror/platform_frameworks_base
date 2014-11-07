@@ -28650,8 +28650,10 @@ package android.telecom {
     method public void clearAccounts();
     method public android.net.Uri getAdnUriForPhoneAccount(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccountHandle getConnectionManager();
+    method public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(java.lang.String);
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
+    method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public boolean handleMmi(java.lang.String);
     method public boolean handleMmi(android.telecom.PhoneAccountHandle, java.lang.String);
     method public boolean hasMultipleCallCapableAccounts();
