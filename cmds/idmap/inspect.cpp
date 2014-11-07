@@ -152,13 +152,13 @@ namespace {
             printe("failed to get resource name id=0x%08x\n", res_id);
             return UNKNOWN_ERROR;
         }
-        if (package) {
+        if (package != NULL) {
             *package = String8(String16(data.package, data.packageLen));
         }
-        if (type) {
+        if (type != NULL) {
             *type = String8(String16(data.type, data.typeLen));
         }
-        if (name) {
+        if (name != NULL) {
             *name = String8(String16(data.name, data.nameLen));
         }
         return NO_ERROR;

@@ -25,4 +25,6 @@ LOCAL_C_INCLUDES := external/zlib
 
 LOCAL_MODULE_TAGS := optional
 
+LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+
 include $(BUILD_EXECUTABLE)
