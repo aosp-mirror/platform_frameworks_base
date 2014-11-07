@@ -68,6 +68,8 @@ public:
     bool initialize(ANativeWindow* window);
     void updateSurface(ANativeWindow* window);
     void pauseSurface(ANativeWindow* window);
+    bool hasSurface() { return mNativeWindow.get(); }
+
     void setup(int width, int height, const Vector3& lightCenter, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     void setOpaque(bool opaque);
