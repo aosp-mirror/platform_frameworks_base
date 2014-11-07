@@ -48,6 +48,8 @@ import android.hardware.hdmi.IHdmiRecordListener;
 import android.hardware.hdmi.IHdmiSystemAudioModeChangeListener;
 import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.media.AudioManager;
+import android.media.tv.TvInputManager;
+import android.media.tv.TvInputManager.TvInputCallback;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -272,6 +274,9 @@ public final class HdmiControlService extends SystemService {
     @Nullable
     private HdmiMhlControllerStub mMhlController;
 
+    @Nullable
+    private TvInputManager mTvInputManager;
+
     // Last input port before switching to the MHL port. Should switch back to this port
     // when the mobile device sends the request one touch play with off.
     // Gets invalidated if we go to other port/input.
@@ -341,6 +346,28 @@ public final class HdmiControlService extends SystemService {
             // Register ContentObserver to monitor the settings change.
             registerContentObserver();
         }
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            mTvInputManager = (TvInputManager) getContext().getSystemService(
+                    Context.TV_INPUT_SERVICE);
+        }
+    }
+
+    TvInputManager getTvInputManager() {
+        return mTvInputManager;
+    }
+
+    void registerTvInputCallback(TvInputCallback callback) {
+        if (mTvInputManager == null) return;
+        mTvInputManager.registerCallback(callback, mHandler);
+    }
+
+    void unregisterTvInputCallback(TvInputCallback callback) {
+        if (mTvInputManager == null) return;
+        mTvInputManager.unregisterCallback(callback);
     }
 
     /**
