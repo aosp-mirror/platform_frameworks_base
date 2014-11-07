@@ -198,54 +198,17 @@ public class PopupWindow {
         mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
 
         final TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.PopupWindow, defStyleAttr, defStyleRes);
-
-        mBackground = a.getDrawable(R.styleable.PopupWindow_popupBackground);
+                attrs, R.styleable.PopupWindow, defStyleAttr, defStyleRes);
+        final Drawable bg = a.getDrawable(R.styleable.PopupWindow_popupBackground);
         mElevation = a.getDimension(R.styleable.PopupWindow_popupElevation, 0);
         mOverlapAnchor = a.getBoolean(R.styleable.PopupWindow_overlapAnchor, false);
 
         final int animStyle = a.getResourceId(R.styleable.PopupWindow_popupAnimationStyle, -1);
-        mAnimationStyle = animStyle == com.android.internal.R.style.Animation_PopupWindow ? -1 :
-                animStyle;
+        mAnimationStyle = animStyle == R.style.Animation_PopupWindow ? -1 : animStyle;
 
-        // If this is a StateListDrawable, try to find and store the drawable to be
-        // used when the drop-down is placed above its anchor view, and the one to be
-        // used when the drop-down is placed below its anchor view. We extract
-        // the drawables ourselves to work around a problem with using refreshDrawableState
-        // that it will take into account the padding of all drawables specified in a
-        // StateListDrawable, thus adding superfluous padding to drop-down views.
-        //
-        // We assume a StateListDrawable will have a drawable for ABOVE_ANCHOR_STATE_SET and
-        // at least one other drawable, intended for the 'below-anchor state'.
-        if (mBackground instanceof StateListDrawable) {
-            StateListDrawable background = (StateListDrawable) mBackground;
-
-            // Find the above-anchor view - this one's easy, it should be labeled as such.
-            int aboveAnchorStateIndex = background.getStateDrawableIndex(ABOVE_ANCHOR_STATE_SET);
-            
-            // Now, for the below-anchor view, look for any other drawable specified in the
-            // StateListDrawable which is not for the above-anchor state and use that.
-            int count = background.getStateCount();
-            int belowAnchorStateIndex = -1;
-            for (int i = 0; i < count; i++) {
-                if (i != aboveAnchorStateIndex) {
-                    belowAnchorStateIndex = i;
-                    break;
-                }
-            }
-            
-            // Store the drawables we found, if we found them. Otherwise, set them both
-            // to null so that we'll just use refreshDrawableState.
-            if (aboveAnchorStateIndex != -1 && belowAnchorStateIndex != -1) {
-                mAboveAnchorBackgroundDrawable = background.getStateDrawable(aboveAnchorStateIndex);
-                mBelowAnchorBackgroundDrawable = background.getStateDrawable(belowAnchorStateIndex);
-            } else {
-                mBelowAnchorBackgroundDrawable = null;
-                mAboveAnchorBackgroundDrawable = null;
-            }
-        }
-        
         a.recycle();
+
+        setBackgroundDrawable(bg);
     }
 
     /**
@@ -346,6 +309,43 @@ public class PopupWindow {
      */
     public void setBackgroundDrawable(Drawable background) {
         mBackground = background;
+
+        // If this is a StateListDrawable, try to find and store the drawable to be
+        // used when the drop-down is placed above its anchor view, and the one to be
+        // used when the drop-down is placed below its anchor view. We extract
+        // the drawables ourselves to work around a problem with using refreshDrawableState
+        // that it will take into account the padding of all drawables specified in a
+        // StateListDrawable, thus adding superfluous padding to drop-down views.
+        //
+        // We assume a StateListDrawable will have a drawable for ABOVE_ANCHOR_STATE_SET and
+        // at least one other drawable, intended for the 'below-anchor state'.
+        if (mBackground instanceof StateListDrawable) {
+            StateListDrawable stateList = (StateListDrawable) mBackground;
+
+            // Find the above-anchor view - this one's easy, it should be labeled as such.
+            int aboveAnchorStateIndex = stateList.getStateDrawableIndex(ABOVE_ANCHOR_STATE_SET);
+
+            // Now, for the below-anchor view, look for any other drawable specified in the
+            // StateListDrawable which is not for the above-anchor state and use that.
+            int count = stateList.getStateCount();
+            int belowAnchorStateIndex = -1;
+            for (int i = 0; i < count; i++) {
+                if (i != aboveAnchorStateIndex) {
+                    belowAnchorStateIndex = i;
+                    break;
+                }
+            }
+
+            // Store the drawables we found, if we found them. Otherwise, set them both
+            // to null so that we'll just use refreshDrawableState.
+            if (aboveAnchorStateIndex != -1 && belowAnchorStateIndex != -1) {
+                mAboveAnchorBackgroundDrawable = stateList.getStateDrawable(aboveAnchorStateIndex);
+                mBelowAnchorBackgroundDrawable = stateList.getStateDrawable(belowAnchorStateIndex);
+            } else {
+                mBelowAnchorBackgroundDrawable = null;
+                mAboveAnchorBackgroundDrawable = null;
+            }
+        }
     }
 
     /**
