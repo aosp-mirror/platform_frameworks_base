@@ -18,10 +18,13 @@ package com.android.systemui.qs;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 
+import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.Listenable;
 
 public class UsageTracker implements Listenable {
@@ -63,6 +66,25 @@ public class UsageTracker implements Listenable {
 
     public void reset() {
         getSharedPrefs().edit().remove(mPrefKey).commit();
+    }
+
+    public void showResetConfirmation(String title, final Runnable onConfirmed) {
+        final SystemUIDialog d = new SystemUIDialog(mContext);
+        d.setTitle(title);
+        d.setMessage(mContext.getString(R.string.quick_settings_reset_confirmation_message));
+        d.setNegativeButton(android.R.string.cancel, null);
+        d.setPositiveButton(R.string.quick_settings_reset_confirmation_button,
+                new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                reset();
+                if (onConfirmed != null) {
+                    onConfirmed.run();
+                }
+            }
+        });
+        d.setCanceledOnTouchOutside(true);
+        d.show();
     }
 
     private SharedPreferences getSharedPrefs() {

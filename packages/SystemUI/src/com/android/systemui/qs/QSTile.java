@@ -112,6 +112,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
         mHandler.sendEmptyMessage(H.SECONDARY_CLICK);
     }
 
+    public void longClick() {
+        mHandler.sendEmptyMessage(H.LONG_CLICK);
+    }
+
     public void showDetail(boolean show) {
         mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0).sendToTarget();
     }
@@ -152,6 +156,10 @@ public abstract class QSTile<TState extends State> implements Listenable {
     }
 
     protected void handleSecondaryClick() {
+        // optional
+    }
+
+    protected void handleLongClick() {
         // optional
     }
 
@@ -216,12 +224,13 @@ public abstract class QSTile<TState extends State> implements Listenable {
         private static final int SET_CALLBACK = 1;
         private static final int CLICK = 2;
         private static final int SECONDARY_CLICK = 3;
-        private static final int REFRESH_STATE = 4;
-        private static final int SHOW_DETAIL = 5;
-        private static final int USER_SWITCH = 6;
-        private static final int TOGGLE_STATE_CHANGED = 7;
-        private static final int SCAN_STATE_CHANGED = 8;
-        private static final int DESTROY = 9;
+        private static final int LONG_CLICK = 4;
+        private static final int REFRESH_STATE = 5;
+        private static final int SHOW_DETAIL = 6;
+        private static final int USER_SWITCH = 7;
+        private static final int TOGGLE_STATE_CHANGED = 8;
+        private static final int SCAN_STATE_CHANGED = 9;
+        private static final int DESTROY = 10;
 
         private H(Looper looper) {
             super(looper);
@@ -241,6 +250,9 @@ public abstract class QSTile<TState extends State> implements Listenable {
                 } else if (msg.what == SECONDARY_CLICK) {
                     name = "handleSecondaryClick";
                     handleSecondaryClick();
+                } else if (msg.what == LONG_CLICK) {
+                    name = "handleLongClick";
+                    handleLongClick();
                 } else if (msg.what == REFRESH_STATE) {
                     name = "handleRefreshState";
                     handleRefreshState(msg.obj);
