@@ -25,8 +25,7 @@ using namespace android;
 
 #include <unistd.h>
 
-int
-usage(int argc, const char** argv)
+static int usage(int /* argc */, const char** argv)
 {
     const char* p = argv[0];
 
@@ -44,15 +43,13 @@ usage(int argc, const char** argv)
     return 1;
 }
 
-int
-perform_full_backup()
+static int perform_full_backup()
 {
     printf("this would have written all of your data to stdout\n");
     return 0;
 }
 
-int
-perform_list(const char* filename)
+static int perform_list(const char* filename)
 {
     int err;
     int fd;
@@ -95,14 +92,13 @@ perform_list(const char* filename)
     return 0;
 }
 
-int perform_print(const char* entityname, const char* filename)
+static int perform_print(const char* entityname, const char* filename)
 {
     printf("perform_print(%s, %s);", entityname, filename);
     return 0;
 }
 
-int
-main(int argc, const char** argv)
+int main(int argc, const char** argv)
 {
     if (argc <= 1) {
         return perform_full_backup();
