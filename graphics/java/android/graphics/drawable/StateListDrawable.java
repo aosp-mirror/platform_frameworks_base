@@ -173,29 +173,19 @@ public class StateListDrawable extends DrawableContainer {
                 continue;
             }
 
-            int drawableRes = 0;
+            // This allows state list drawable item elements to be themed at
+            // inflation time but does NOT make them work for Zygote preload.
+            final TypedArray a = obtainAttributes(r, theme, attrs,
+                    R.styleable.StateListDrawableItem);
+            Drawable dr = a.getDrawable(R.styleable.StateListDrawableItem_drawable);
+            a.recycle();
 
-            int i;
-            int j = 0;
-            final int numAttrs = attrs.getAttributeCount();
-            int[] states = new int[numAttrs];
-            for (i = 0; i < numAttrs; i++) {
-                final int stateResId = attrs.getAttributeNameResource(i);
-                if (stateResId == 0) break;
-                if (stateResId == R.attr.drawable) {
-                    drawableRes = attrs.getAttributeResourceValue(i, 0);
-                } else {
-                    states[j++] = attrs.getAttributeBooleanValue(i, false)
-                            ? stateResId
-                            : -stateResId;
-                }
-            }
-            states = StateSet.trimStateSet(states, j);
+            final int[] states = extractStateSet(attrs);
 
-            final Drawable dr;
-            if (drawableRes != 0) {
-                dr = r.getDrawable(drawableRes, theme);
-            } else {
+            // Loading child elements modifies the state of the AttributeSet's
+            // underlying parser, so it needs to happen after obtaining
+            // attributes and extracting states.
+            if (dr == null) {
                 while ((type = parser.next()) == XmlPullParser.TEXT) {
                 }
                 if (type != XmlPullParser.START_TAG) {
@@ -209,6 +199,35 @@ public class StateListDrawable extends DrawableContainer {
 
             state.addStateSet(states, dr);
         }
+    }
+
+    /**
+     * Extracts state_ attributes from an attribute set.
+     *
+     * @param attrs The attribute set.
+     * @return An array of state_ attributes.
+     */
+    int[] extractStateSet(AttributeSet attrs) {
+        int j = 0;
+        final int numAttrs = attrs.getAttributeCount();
+        int[] states = new int[numAttrs];
+        for (int i = 0; i < numAttrs; i++) {
+            final int stateResId = attrs.getAttributeNameResource(i);
+            switch (stateResId) {
+                case 0:
+                    break;
+                case R.attr.drawable:
+                case R.attr.id:
+                    // Ignore attributes from StateListDrawableItem and
+                    // AnimatedStateListDrawableItem.
+                    continue;
+                default:
+                    states[j++] = attrs.getAttributeBooleanValue(i, false)
+                            ? stateResId : -stateResId;
+            }
+        }
+        states = StateSet.trimStateSet(states, j);
+        return states;
     }
 
     StateListState getStateListState() {
