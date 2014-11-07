@@ -126,6 +126,13 @@ public class SubscriptionManager implements BaseColumns {
     public static final String DISPLAY_NAME = "display_name";
 
     /**
+     * TelephonyProvider column name for the service provider name for the SIM.
+     * <P>Type: TEXT (String)</P>
+     */
+    /** @hide */
+    public static final String CARRIER_NAME = "carrier_name";
+
+    /**
      * Default name resource
      * @hide
      */
