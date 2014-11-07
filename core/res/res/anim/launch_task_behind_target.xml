@@ -20,15 +20,15 @@
 <set xmlns:android="http://schemas.android.com/apk/res/android"
      android:background="#ff000000" android:shareInterpolator="false" android:zAdjustment="top">
 
-    <translate android:fromYDelta="110%" android:toYDelta="66%"
+    <translate android:fromYDelta="110%" android:toYDelta="70%"
                android:fillEnabled="true" android:fillBefore="true" android:fillAfter="true"
-               android:interpolator="@interpolator/decelerate_quint"
+               android:interpolator="@interpolator/launch_task_behind_target_ydelta"
                android:startOffset="50"
-               android:duration="300" />
+               android:duration="333" />
 
-    <translate android:fromYDelta="0%" android:toYDelta="167%"
+    <translate android:fromYDelta="0%" android:toYDelta="50%"
                android:fillEnabled="true" android:fillBefore="false" android:fillAfter="true"
-               android:interpolator="@interpolator/accelerate_quint"
-               android:startOffset="433"
-               android:duration="300" />
+               android:interpolator="@interpolator/fast_out_linear_in"
+               android:startOffset="467"
+               android:duration="317" />
 </set>

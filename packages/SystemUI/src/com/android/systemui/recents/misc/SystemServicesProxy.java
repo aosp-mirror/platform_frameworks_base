@@ -48,12 +48,14 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.IWindowManager;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -429,6 +431,7 @@ public class SystemServicesProxy {
         opts.putInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY,
                 AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX);
         if (!mAwm.bindAppWidgetIdIfAllowed(searchWidgetId, searchWidgetInfo.provider, opts)) {
+            host.deleteAppWidgetId(searchWidgetId);
             return null;
         }
         return new Pair<Integer, AppWidgetProviderInfo>(searchWidgetId, searchWidgetInfo);
@@ -531,5 +534,16 @@ public class SystemServicesProxy {
             }
         }
         return false;
+    }
+
+    /** Starts an in-place animation on the front most application windows. */
+    public void startInPlaceAnimationOnFrontMostApplication(ActivityOptions opts) {
+        if (mIam == null) return;
+
+        try {
+            mIam.startInPlaceAnimationOnFrontMostApplication(opts);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

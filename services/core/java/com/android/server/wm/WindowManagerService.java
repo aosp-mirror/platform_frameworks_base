@@ -4124,6 +4124,13 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void overridePendingAppTransitionInPlace(String packageName, int anim) {
+        synchronized(mWindowMap) {
+            mAppTransition.overrideInPlaceAppTransition(packageName, anim);
+        }
+    }
+
+    @Override
     public void executeAppTransition() {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "executeAppTransition()")) {
@@ -4533,6 +4540,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         return delayed;
+    }
+
+    void updateTokenInPlaceLocked(AppWindowToken wtoken, int transit) {
+        if (transit != AppTransition.TRANSIT_UNSET) {
+            if (wtoken.mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
+                wtoken.mAppAnimator.animation = null;
+            }
+            applyAnimationLocked(wtoken, null, transit, false, false);
+        }
     }
 
     @Override
@@ -9124,6 +9140,29 @@ public class WindowManagerService extends IWindowManager.Stub
             AppWindowToken topClosingApp = null;
             int topOpeningLayer = 0;
             int topClosingLayer = 0;
+
+            // Process all applications animating in place
+            if (transit == AppTransition.TRANSIT_TASK_IN_PLACE) {
+                // Find the focused window
+                final WindowState win =
+                        findFocusedWindowLocked(getDefaultDisplayContentLocked());
+                if (win != null) {
+                    final AppWindowToken wtoken = win.mAppToken;
+                    final AppWindowAnimator appAnimator = wtoken.mAppAnimator;
+                    if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now animating app in place " + wtoken);
+                    appAnimator.clearThumbnail();
+                    appAnimator.animation = null;
+                    updateTokenInPlaceLocked(wtoken, transit);
+                    wtoken.updateReportedVisibilityLocked();
+
+                    appAnimator.mAllAppWinAnimators.clear();
+                    final int N = wtoken.allAppWindows.size();
+                    for (int j = 0; j < N; j++) {
+                        appAnimator.mAllAppWinAnimators.add(wtoken.allAppWindows.get(j).mWinAnimator);
+                    }
+                    mAnimator.mAnimating |= appAnimator.showAllWindowsLocked();
+                }
+            }
 
             NN = mOpeningApps.size();
             for (i=0; i<NN; i++) {
