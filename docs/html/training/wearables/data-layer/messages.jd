@@ -27,7 +27,7 @@ Messages are a one-way communication mechanism that's good for remote procedure 
 such as sending a message to the wearable
 to start an activity. You can also use messages in request/response model
 where one side of the connection sends a message, does some work,
-sends back a response message.</p>
+and sends back a response message.</p>
 
 <h2 id="SendMessage">Send a Message</h2>
 
@@ -95,5 +95,5 @@ public void onMessageReceived(MessageEvent messageEvent) {
 <p>
 This is just a snippet that requires more implementation details. Learn about
 how to implement a full listener service or activity in
-<a href="{@docRoot}training/wearables/data-layer/events.html">Listening for Data Layer Events</a>.
+<a href="{@docRoot}training/wearables/data-layer/events.html#Listen">Listening for Data Layer Events</a>.
 </p>
