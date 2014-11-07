@@ -1774,7 +1774,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN prima di sbloccare"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Richiedi sequenza di sblocco prima di sbloccare"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Per aumentare la durata della batteria, la funzione Risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione e gran parte dei dati in background. App di email, messaggi e altre app basate sulla sincronizzazione potrebbero non essere aggiornate se non le apri.\n\nIl risparmio energetico si disattiva automaticamente quando il dispositivo è in carica."</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"Per aumentare la durata della batteria, la funzione Risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione e gran parte dei dati in background. App di email, messaggistica e altre app basate sulla sincronizzazione potrebbero non essere aggiornate se non le apri.\n\nIl risparmio energetico si disattiva automaticamente quando il dispositivo è in carica."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Fino al termine del periodo di inattività previsto per le <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Per un minuto"</item>
