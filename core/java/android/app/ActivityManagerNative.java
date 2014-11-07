@@ -2279,6 +2279,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case START_IN_PLACE_ANIMATION_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final Bundle bundle;
+            if (data.readInt() == 0) {
+                bundle = null;
+            } else {
+                bundle = data.readBundle();
+            }
+            final ActivityOptions options = bundle == null ? null : new ActivityOptions(bundle);
+            startInPlaceAnimationOnFrontMostApplication(options);
+            reply.writeNoException();
+            return true;
+        }
+
         case REQUEST_VISIBLE_BEHIND_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -5295,6 +5309,24 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return icon;
+    }
+
+    @Override
+    public void startInPlaceAnimationOnFrontMostApplication(ActivityOptions options)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        if (options == null) {
+            data.writeInt(0);
+        } else {
+            data.writeInt(1);
+            data.writeBundle(options.toBundle());
+        }
+        mRemote.transact(START_IN_PLACE_ANIMATION_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
 
     @Override

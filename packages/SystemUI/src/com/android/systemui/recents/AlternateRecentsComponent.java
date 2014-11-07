@@ -16,13 +16,11 @@
 
 package com.android.systemui.recents;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -31,7 +29,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -207,6 +204,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         Task toTask = null;
         ActivityOptions launchOpts = null;
         int taskCount = tasks.size();
+        int numAffiliatedTasks = 0;
         for (int i = 0; i < taskCount; i++) {
             Task task = tasks.get(i);
             if (task.key.id == runningTask.id) {
@@ -226,16 +224,23 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 if (toTaskKey != null) {
                     toTask = stack.findTaskWithId(toTaskKey.id);
                 }
+                numAffiliatedTasks = group.getTaskCount();
                 break;
             }
         }
 
         // Return early if there is no next task
         if (toTask == null) {
-            if (showNextTask) {
-                // XXX: Show the next-task bounce animation
-            } else {
-                // XXX: Show the prev-task bounce animation
+            if (numAffiliatedTasks > 1) {
+                if (showNextTask) {
+                    mSystemServicesProxy.startInPlaceAnimationOnFrontMostApplication(
+                            ActivityOptions.makeCustomInPlaceAnimation(mContext,
+                                    R.anim.recents_launch_next_affiliated_task_bounce));
+                } else {
+                    mSystemServicesProxy.startInPlaceAnimationOnFrontMostApplication(
+                            ActivityOptions.makeCustomInPlaceAnimation(mContext,
+                                    R.anim.recents_launch_prev_affiliated_task_bounce));
+                }
             }
             return;
         }
