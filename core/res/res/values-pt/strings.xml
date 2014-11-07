@@ -1784,6 +1784,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pedir senha antes de liberar"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Para ajudar a melhorar a vida útil da bateria, a economia de bateria reduz o desempenho do dispositivo e restringe a vibração e a maioria dos dados em segundo plano. É possível que apps de e-mail, mensagens, entre outros que dependem de sincronização não sejam atualizados a menos que sejam abertos.\n\nA economia de bateria é desativada automaticamente quando o dispositivo estiver carregando."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Até o período de inatividade terminar às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
     <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
     <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
     <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
@@ -1800,5 +1802,9 @@
     <skip />
     <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidamente"</string>
     <!-- no translation found for toolbar_collapse_description (2821479483960330739) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
     <skip />
 </resources>

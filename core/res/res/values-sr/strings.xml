@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Дозвољава апликацији да чита систем датотека кеша и уписује податке у њега."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"упућивање/пријем SIP позива"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Омогућава апликацији да упућује и прима SIP позиве."</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"региструје нове везе са телекомуникационим мрежама преко SIM картице"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Дозвољава апликацији да региструје нове везе са телекомуникационим мрежама преко SIM картице."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"региструје нове везе са телекомуникационим мрежама"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Дозвољава апликацији да региструје нове везе са телекомуникационим мрежама."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"управљање везама са телекомуникационим мрежама"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Дозвољава апликацији да управља везама са телекомуникационим мрежама."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"комуницирај са екраном током позива"</string>
@@ -1783,6 +1779,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тражи лозинку пре откачињања"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Да би смањила потрошњу батерије, Штедња батерије снижава перформансе уређаја, ограничава вибрацију и већину позадинских података. Имејл, размена порука и друге апликације које се ослањају на синхронизацију се можда неће ажурирати ако их не отворите.\n\nШтедња батерије се аутоматски искључује када се уређај пуни."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Док се прекид рада не заврши у <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Један минут (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d минута (до <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1802,4 +1800,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Бесконачно"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Скупи"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>
