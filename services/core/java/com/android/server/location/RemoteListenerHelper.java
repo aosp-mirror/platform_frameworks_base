@@ -19,35 +19,41 @@ package com.android.server.location;
 import com.android.internal.util.Preconditions;
 
 import android.annotation.NonNull;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 /**
  * A helper class, that handles operations in remote listeners, and tracks for remote process death.
  */
 abstract class RemoteListenerHelper<TListener extends IInterface> {
-    private final String mTag;
-    private final HashMap<IBinder, LinkedListener> mListenerMap =
-            new HashMap<IBinder, LinkedListener>();
+    protected static final int RESULT_SUCCESS = 0;
+    protected static final int RESULT_NOT_AVAILABLE = 1;
+    protected static final int RESULT_NOT_SUPPORTED = 2;
+    protected static final int RESULT_GPS_LOCATION_DISABLED = 3;
+    protected static final int RESULT_INTERNAL_ERROR = 4;
 
-    protected RemoteListenerHelper(String name) {
+    private final Handler mHandler;
+    private final String mTag;
+
+    private final HashMap<IBinder, LinkedListener> mListenerMap = new HashMap<>();
+
+    private boolean mIsRegistered;
+    private boolean mHasIsSupported;
+    private boolean mIsSupported;
+
+    protected RemoteListenerHelper(Handler handler, String name) {
         Preconditions.checkNotNull(name);
+        mHandler = handler;
         mTag = name;
     }
 
     public boolean addListener(@NonNull TListener listener) {
         Preconditions.checkNotNull(listener, "Attempted to register a 'null' listener.");
-        if (!isSupported()) {
-            Log.e(mTag, "Refused to add listener, the feature is not supported.");
-            return false;
-        }
-
         IBinder binder = listener.asBinder();
         LinkedListener deathListener = new LinkedListener(listener);
         synchronized (mListenerMap) {
@@ -55,75 +61,126 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
                 // listener already added
                 return true;
             }
-
             try {
                 binder.linkToDeath(deathListener, 0 /* flags */);
             } catch (RemoteException e) {
                 // if the remote process registering the listener is already death, just swallow the
-                // exception and continue
-                Log.e(mTag, "Remote listener already died.", e);
+                // exception and return
+                Log.v(mTag, "Remote listener already died.", e);
                 return false;
             }
-
             mListenerMap.put(binder, deathListener);
-            if (mListenerMap.size() == 1) {
-                if (!registerWithService()) {
-                    Log.e(mTag, "RegisterWithService failed, listener will be removed.");
-                    removeListener(listener);
-                    return false;
-                }
-            }
-        }
 
+            // update statuses we already know about, starting from the ones that will never change
+            int result;
+            if (!isAvailableInPlatform()) {
+                result = RESULT_NOT_AVAILABLE;
+            } else if (mHasIsSupported && !mIsSupported) {
+                result = RESULT_NOT_SUPPORTED;
+            } else if (!isGpsEnabled()) {
+                result = RESULT_GPS_LOCATION_DISABLED;
+            } else if (!tryRegister()) {
+                // only attempt to register if GPS is enabled, otherwise we will register once GPS
+                // becomes available
+                result = RESULT_INTERNAL_ERROR;
+            } else if (mHasIsSupported && mIsSupported) {
+                result = RESULT_SUCCESS;
+            } else {
+                // at this point if the supported flag is not set, the notification will be sent
+                // asynchronously in the future
+                return true;
+            }
+            post(listener, getHandlerOperation(result));
+        }
         return true;
     }
 
-    public boolean removeListener(@NonNull TListener listener) {
+    public void removeListener(@NonNull TListener listener) {
         Preconditions.checkNotNull(listener, "Attempted to remove a 'null' listener.");
-        if (!isSupported()) {
-            Log.e(mTag, "Refused to remove listener, the feature is not supported.");
-            return false;
-        }
-
         IBinder binder = listener.asBinder();
         LinkedListener linkedListener;
         synchronized (mListenerMap) {
             linkedListener = mListenerMap.remove(binder);
-            if (mListenerMap.isEmpty() && linkedListener != null) {
-                unregisterFromService();
+            if (mListenerMap.isEmpty()) {
+                tryUnregister();
             }
         }
-
         if (linkedListener != null) {
             binder.unlinkToDeath(linkedListener, 0 /* flags */);
         }
-        return true;
     }
 
-    protected abstract boolean isSupported();
+    public void onGpsEnabledChanged(boolean enabled) {
+        // handle first the sub-class implementation, so any error in registration can take
+        // precedence
+        handleGpsEnabledChanged(enabled);
+        synchronized (mListenerMap) {
+            if (!enabled) {
+                tryUnregister();
+                return;
+            }
+            if (mListenerMap.isEmpty()) {
+                return;
+            }
+            if (tryRegister()) {
+                // registration was successful, there is no need to update the state
+                return;
+            }
+            ListenerOperation<TListener> operation = getHandlerOperation(RESULT_INTERNAL_ERROR);
+            foreachUnsafe(operation);
+        }
+    }
+
+    protected abstract boolean isAvailableInPlatform();
+    protected abstract boolean isGpsEnabled();
     protected abstract boolean registerWithService();
     protected abstract void unregisterFromService();
+    protected abstract ListenerOperation<TListener> getHandlerOperation(int result);
+    protected abstract void handleGpsEnabledChanged(boolean enabled);
 
     protected interface ListenerOperation<TListener extends IInterface> {
         void execute(TListener listener) throws RemoteException;
     }
 
-    protected void foreach(ListenerOperation operation) {
-        Collection<LinkedListener> linkedListeners;
+    protected void foreach(ListenerOperation<TListener> operation) {
         synchronized (mListenerMap) {
-            Collection<LinkedListener> values = mListenerMap.values();
-            linkedListeners = new ArrayList<LinkedListener>(values);
+            foreachUnsafe(operation);
         }
+    }
 
-        for (LinkedListener linkedListener : linkedListeners) {
-            TListener listener = linkedListener.getUnderlyingListener();
-            try {
-                operation.execute(listener);
-            } catch (RemoteException e) {
-                Log.e(mTag, "Error in monitored listener.", e);
-                removeListener(listener);
-            }
+    protected void setSupported(boolean value, ListenerOperation<TListener> notifier) {
+        synchronized (mListenerMap) {
+            mHasIsSupported = true;
+            mIsSupported = value;
+            foreachUnsafe(notifier);
         }
+    }
+
+    private void foreachUnsafe(ListenerOperation<TListener> operation) {
+        for (LinkedListener linkedListener : mListenerMap.values()) {
+            post(linkedListener.getUnderlyingListener(), operation);
+        }
+    }
+
+    private void post(TListener listener, ListenerOperation<TListener> operation) {
+        if (operation != null) {
+            mHandler.post(new HandlerRunnable(listener, operation));
+        }
+    }
+
+    private boolean tryRegister() {
+        if (!mIsRegistered) {
+            mIsRegistered = registerWithService();
+        }
+        return mIsRegistered;
+    }
+
+    private void tryUnregister() {
+        if (!mIsRegistered) {
+            return;
+        }
+        unregisterFromService();
+        mIsRegistered = false;
     }
 
     private class LinkedListener implements IBinder.DeathRecipient {
@@ -142,6 +199,25 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         public void binderDied() {
             Log.d(mTag, "Remote Listener died: " + mListener);
             removeListener(mListener);
+        }
+    }
+
+    private class HandlerRunnable implements Runnable {
+        private final TListener mListener;
+        private final ListenerOperation<TListener> mOperation;
+
+        public HandlerRunnable(TListener listener, ListenerOperation<TListener> operation) {
+            mListener = listener;
+            mOperation = operation;
+        }
+
+        @Override
+        public void run() {
+            try {
+                mOperation.execute(mListener);
+            } catch (RemoteException e) {
+                Log.v(mTag, "Error in monitored listener.", e);
+            }
         }
     }
 }
