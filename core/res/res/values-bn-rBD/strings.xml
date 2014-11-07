@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ক্যাশে ফাইল সিস্টেম পড়তে ও লিখতে অ্যাপ্লিকেশানকে অনুমতি দেয়৷"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP কল করুন/গ্রহণ করুন"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"অ্যাপ্লিকেশানকে SIP কল করতে ও গ্রহণ করতে অনুমতি দেয়।"</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"নতুন টেলিকম SIM সংযোগগুলির নিবন্ধন"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"অ্যাপ্লিকেশানটিকে নতুন টেলিকম SIM সংযোগগুলি নিবন্ধিত করতে অনুমোদিত করে৷"</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"নতুন টেলিকম সংযোগগুলির নিবন্ধন"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"নতুন টেলিকম সংযোগ নিবন্ধিত করতে অ্যাপ্লিকেশানটিকে অনুমোদিত করে৷"</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"টেলিকম সংযোগগুলি পরিচালনা করুন"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"টেলিকম সংযোগগুলি পরিচালনা করতে  অ্যাপ্লিকেশানটিকে অনুমোদিত করে৷"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"কলে-থাকা স্ক্রীণের সাথে ইন্টারঅ্যাক্ট করে"</string>
@@ -1300,7 +1296,7 @@
     <string name="wifi_p2p_invitation_sent_title" msgid="1318975185112070734">"আমন্ত্রণ পাঠানো হয়েছে"</string>
     <string name="wifi_p2p_invitation_to_connect_title" msgid="4958803948658533637">"সংযুক্ত হওয়ার আমন্ত্রণ"</string>
     <string name="wifi_p2p_from_message" msgid="570389174731951769">"থেকে:"</string>
-    <string name="wifi_p2p_to_message" msgid="248968974522044099">"প্রতি:"</string>
+    <string name="wifi_p2p_to_message" msgid="248968974522044099">"প্রাপক:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"প্রয়োজনীয় PINটি লিখুন:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ট্যাবলেটটি যখন <xliff:g id="DEVICE_NAME">%1$s</xliff:g> এ সংযুক্ত হবে তখন এটি Wi-Fi থেকে সাময়িকভাবে সংযোগ বিচ্ছিন্ন হবে"</string>
@@ -1788,6 +1784,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"আনপিন করার আগে পাসওয়ার্ড চান"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ব্যাটারির আয়ু বাড়াতে সহায়তার জন্য, ব্যাটারি সঞ্চয়কারী আপনার ডিভাইসের কার্য-সম্পাদনা কমিয়ে আনবে এবং কম্পন ও পশ্চাদভূমি ডেটাকে সীমিত করবে। ইমেল, বার্তাপ্রেরণ ও অন্যান্য অ্যাপ্লিকেশান, যেগুলি সিঙ্ক হওয়ার উপর নির্ভরশীল সেগুলিকে আপনি না খোলা পর্যন্ত সেগুলি আপডেট নাও হতে পারে।\n\nআপনার ডিভাইস চার্জ হওয়ার সময় ব্যাটারি সঞ্চয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>টার সময়ে আপনার ডাউনটাইম শেষ হওয়া পর্যন্ত"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"এক মিনিটের জন্য (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> পর্যন্ত)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d মিনিটের জন্য (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> পর্যন্ত)"</item>
@@ -1807,4 +1805,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"অনির্দিষ্টভাবে"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"সঙ্কুচিত করুন"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>

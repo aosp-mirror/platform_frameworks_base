@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ایپ کو کیش فائل سسٹم پڑھنے اور لکھنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"‏SIP کالز کریں/موصول کریں"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"‏ایپ کو SIP کالز کرنے اور موصول کرنے کی اجازت دیتا ہے۔"</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"‏نئے ٹیلی کام SIM کنکشنز رجسٹر کریں"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"‏ایپ کو نئے ٹیلی کام SIM کنکشنز کو رجسٹر کرنے کی اجازت دیتی ہے۔"</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"نئے ٹیلی کام کنکشنز رجسٹر کریں"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"ایپ کو نئے ٹیلی کام کنکشنز کو رجسٹر کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"ٹیلی کام کنکشنز کا نظم کریں"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"ایپ کو ٹیلی کام کنکشنز کا نظم کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"درون کال اسکرین کے ساتھ تعامل کریں"</string>
@@ -1788,6 +1784,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"پن ہٹانے سے پہلے پاس ورڈ طلب کریں"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"بیٹری کی میعاد بہتر بنانے میں مدد کرنے کیلئے، بیٹری سیور آپ کے آلہ کی کارکردگی میں تخفیف کر دیتی ہے اور وائبریشن اور پس منظر کے زیادہ تر ڈیٹا کو محدود کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر انحصار کرنے والی دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری سیور خود بخود آف ہو جاتی ہے۔"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> پر آپ کا آخری وقت ختم ہونے تک"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"ایک منٹ کیلئے (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> تک)"</item>
     <item quantity="other" msgid="2787867221129368935">"‏%1$d منٹ کیلئے (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> تک)"</item>
@@ -1807,4 +1805,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"غیر متعینہ"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"سکیڑیں"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>

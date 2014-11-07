@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານ ແລະຂຽນ ລະບົບໄຟລ໌ແຄດ."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"ຮັບສາຍ/ໂທອອກ ຜ່ານ SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ອະນຸຍາດ​ໃຫ້ແອັບຯ​ສາມາດ​ຮັບສາຍ ແລະໂທອອກ​ຜ່ານ SIP ໄດ້"</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ລົງ​ທະ​ບຽນ SIM ການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ​ໃໝ່"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ລົງ​ທະ​ບຽນ SIM ​ການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ​ໃໝ່."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"ລົງ​ທະ​ບຽນການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມໃໝ່​"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ລົງ​ທະ​ບຽນການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມໃໝ່​."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"ຈັດ​ການ​ການ​ເຊື່ອມ​ຕໍ່​​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຈັດ​ການ​ການ​ເຊື່ອມ​ຕໍ່​​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ໂຕ້​ຕອບ​ກັບ​ໜ້າ​ຈໍ​ການ​ໂທ"</string>
@@ -1752,7 +1748,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">
@@ -1788,6 +1784,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ເພື່ອ​ຊ່ວຍ​ປັບ​ປຸງ​ອາ​ຍຸ​ແບັດ​ເຕ​ີ​ຣີ, ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​​ຂອງ​ອຸ​ປະ​ກອນ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນເຕືອນ ຮວມ​ເຖິງຂໍ້​ມູນ​ພື້ນຫຼັງ​ສ່ວນ​ໃຫຍ່​ນຳ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ ແລະ​ແອັບຯ​ອື່ນໆ​ທີ່​ອີງ​ອາ​ໃສ​ການ​ຊິ້ງ​ຂໍ້​ມູນ​ອາດບໍ່​ມີ​ການ​ອັບ​ເດດ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ເປີດ​ພວກ​ມັນ​ຂຶ້ນ​ມາ.\n\n​ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະ​ປິດ​ໂດຍ​ອັດ​ຕະ​ໂນ​ມັດ​ເມື່ອ​ມີ​ອຸ​ປະ​ກອນ​ຖືກ​ສາກ​ໄຟ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ຈົນ​ກວ່າ​ດາວ​ທາມ​ຂອງ​ທ່ານ​ຈະ​ສິ້ນ​ສຸດ​ທີ່ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"​ເປັນ​ເວ​ລາ 1 ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"​ເປັນ​ເວ​ລາ %1$d ​ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1807,4 +1805,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"ຢ່າງ​ບໍ່​ມີ​ກຳນົດ"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ຫຍໍ້"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>

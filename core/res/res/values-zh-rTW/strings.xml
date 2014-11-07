@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允許應用程式讀取及寫入快取檔案系統。"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"撥打/接聽 SIP 通話"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"允許應用程式撥打及接聽 SIP 通話。"</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"註冊新的電信 SIM 卡連線"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"允許應用程式註冊新的電信 SIM 卡連線。"</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"註冊新的電信連線"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"允許應用程式註冊新的電信連線。"</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"管理電信連線"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"允許應用程式管理電信連線。"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"與通話螢幕互動"</string>
@@ -1546,7 +1542,7 @@
     <string name="storage_sd_card" msgid="3282948861378286745">"SD 卡"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 儲存裝置"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"編輯"</string>
-    <string name="data_usage_warning_title" msgid="1955638862122232342">"資料用量警告"</string>
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"數據用量警告"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"輕觸即可查看使用量和設定。"</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"已達到 2G-3G 數據流量上限"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"已達到 4G 數據流量上限"</string>
@@ -1786,8 +1782,10 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖形"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"節約耗電量功能會降低裝置的效能，並限制震動和大多數背景資料，藉此延長電池續航力。此外，電子郵件、簡訊和其他需要使用同步功能的應用程式若未開啟，將不會自動更新。\n\n當您為裝置充電時，節約耗電量功能會自動關閉。"</string>
+    <string name="battery_saver_description" msgid="2510530476513605742">"節約耗電量功能會降低裝置的效能，並限制震動和大多數背景資料，藉此延長電池續航力。此外，電子郵件、聊天工具和其他需要使用同步功能的應用程式若未開啟，將不會自動更新。\n\n當您為裝置充電時，節約耗電量功能會自動關閉。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"直到 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 停機時間結束"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"1 分鐘 (結束時間：<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d 分鐘 (結束時間：<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1807,4 +1805,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"結束時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"無限期"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收合"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>

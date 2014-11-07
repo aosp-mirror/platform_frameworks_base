@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"कॅशे filesystem वाचण्यासाठी आणि लिहिण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP कॉल करा/प्राप्त करा"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"अॅपला SIP कॉल करण्‍याची आणि प्राप्त करण्‍याची अनुमती देते."</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"नवीन टेलिकॉम सिम कनेक्शनची नोंदणी करा"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"नवीन टेलिकॉम सिम कनेक्शनची नोंदणी करण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"नवीन टेलिकॉम कनेक्शनची नोंदणी करा"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"नवीन टेलिकॉम कनेक्शनची नोंदणी करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"टेलिकॉम कनेक्शन व्यवस्थापित करा"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"टेलिकॉम कनेक्शन व्यवस्थापित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"कॉल-मधील स्‍क्रीनशी परस्‍परसंवाद करा"</string>
@@ -1788,6 +1784,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"बॅटरीचे आयुष्य सुधारण्यात मदत होण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि अन्य अॅप्स आपण ते उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"आपला कार्य न करण्याचा कालावधी <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता समाप्त होईपर्यंत"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"एका मिनिटासाठी (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> पर्यंत)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d मिनिटांसाठी (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> पर्यंत)"</item>
@@ -1807,4 +1805,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> पर्यंत"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"अनिश्‍चितपणे"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त करा"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>

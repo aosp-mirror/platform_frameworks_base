@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Permet que l\'aplicació llegeixi el sistema de fitxers de la memòria cau i que hi escrigui."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"Fer i rebre trucades de SIP"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"Permet que l\'aplicació pugui fer i rebre trucades de SIP."</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"registrar connexions SIM de telecomunicacions noves"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"Permet que l\'aplicació registri connexions SIM de telecomunicacions noves."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"registrar connexions de telecomunicacions noves"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"Permet que l\'aplicació registri connexions de telecomunicacions noves."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"gestionar les connexions de telecomunicacions"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"Permet que l\'aplicació gestioni les connexions de telecomunicacions."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"interaccionar amb la pantalla de la trucada"</string>
@@ -1788,6 +1784,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya abans d\'anul·lar la fixació"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Per tal d\'augmentar la durada de la bateria, la funció d\'estalvi de bateria redueix el rendiment del dispositiu i en limita la vibració i la majoria de dades en segon pla. És possible que el correu electrònic, la missatgeria i la resta d\'aplicacions que se sincronitzen amb freqüència no s\'actualitzin llevat que les obris.\n\nL\'estalvi de bateria es desactiva automàticament mentre el dispositiu s\'està carregant."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Fins que no finalitzi la inactivitat a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>."</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Durant 1 minut (fins a les <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"Durant %1$d minuts (fins a les <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1807,4 +1805,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Fins a les <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidament"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Replega"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>

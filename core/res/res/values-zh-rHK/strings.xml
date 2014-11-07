@@ -716,14 +716,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允許應用程式讀取及寫入快取檔案系統。"</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"撥打/接聽 SIP 電話"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"允許應用程式撥打及接聽 SIP 電話。"</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"註冊新的電訊 SIM 卡連接"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"允許應用程式註冊新的電訊 SIM 卡連接。"</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"註冊新的電訊連接"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"允許應用程式註冊新的電訊連接。"</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"管理電訊連接"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"允許應用程式管理電訊連接。"</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"與通話畫面互動"</string>
@@ -1788,6 +1784,8 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"省電模式可延長電池使用時間，但會降低裝置的效能，並限制震動和大部分背景數據傳輸。電郵、短訊及其他需要同步處理的應用程式可能只會在開啟時才會更新。\n\n裝置充電時，省電模式會自動關閉。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"直到停機時間於 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 結束"</string>
+    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
+    <skip />
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"需時 1 分鐘 (完成時間：<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"需時 %1$d 分鐘 (完成時間 <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1807,4 +1805,8 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"完成時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"無限期"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收合"</string>
+    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
+    <skip />
+    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
+    <skip />
 </resources>
