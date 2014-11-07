@@ -4804,6 +4804,13 @@
         <attr name="autoMirrored"/>
     </declare-styleable>
 
+    <!-- Represents a single state inside a StateListDrawable. -->
+    <declare-styleable name="StateListDrawableItem">
+        <!-- Reference to a drawable resource to use for the state. If not
+             given, the drawable must be defined by the first child tag. -->
+        <attr name="drawable" />
+    </declare-styleable>
+
     <!-- Transition used to animate between states with keyframe IDs. -->
     <declare-styleable name="AnimatedStateListDrawableItem">
         <!-- Reference to a drawable resource to use for the frame.  If not
