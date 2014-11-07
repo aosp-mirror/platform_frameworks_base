@@ -27,8 +27,8 @@ import java.util.Objects;
  * A curve defining the network score over a range of RSSI values.
  *
  * <p>For each RSSI bucket, the score may be any byte. Scores have no absolute meaning and are only
- * considered relative to other scores assigned by the same scorer. Networks with no score are all
- * considered equivalent and ranked below any network with a score.
+ * considered relative to other scores assigned by the same scorer. Networks with no score are
+ * treated equivalently to a network with score {@link Byte#MIN_VALUE}, and will not be used.
  *
  * <p>For example, consider a curve starting at -110 dBm with a bucket width of 10 and the
  * following buckets: {@code [-20, -10, 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]}.
@@ -52,6 +52,7 @@ import java.util.Objects;
  */
 @SystemApi
 public class RssiCurve implements Parcelable {
+    private static final int DEFAULT_ACTIVE_NETWORK_RSSI_BOOST = 25;
 
     /** The starting dBm of the curve. */
     public final int start;
@@ -63,6 +64,15 @@ public class RssiCurve implements Parcelable {
     public final byte[] rssiBuckets;
 
     /**
+     * The RSSI boost to give this network when active, in dBm.
+     *
+     * <p>When the system is connected to this network, it will pretend that the network has this
+     * much higher of an RSSI. This is to avoid switching networks when another network has only a
+     * slightly higher score.
+     */
+    public final int activeNetworkRssiBoost;
+
+    /**
      * Construct a new {@link RssiCurve}.
      *
      * @param start the starting dBm of the curve.
@@ -70,12 +80,25 @@ public class RssiCurve implements Parcelable {
      * @param rssiBuckets the score for each RSSI bucket.
      */
     public RssiCurve(int start, int bucketWidth, byte[] rssiBuckets) {
+        this(start, bucketWidth, rssiBuckets, DEFAULT_ACTIVE_NETWORK_RSSI_BOOST);
+    }
+
+    /**
+     * Construct a new {@link RssiCurve}.
+     *
+     * @param start the starting dBm of the curve.
+     * @param bucketWidth the width of each RSSI bucket, in dBm.
+     * @param rssiBuckets the score for each RSSI bucket.
+     * @param activeNetworkRssiBoost the RSSI boost to apply when this network is active, in dBm.
+     */
+    public RssiCurve(int start, int bucketWidth, byte[] rssiBuckets, int activeNetworkRssiBoost) {
         this.start = start;
         this.bucketWidth = bucketWidth;
         if (rssiBuckets == null || rssiBuckets.length == 0) {
             throw new IllegalArgumentException("rssiBuckets must be at least one element large.");
         }
         this.rssiBuckets = rssiBuckets;
+        this.activeNetworkRssiBoost = activeNetworkRssiBoost;
     }
 
     private RssiCurve(Parcel in) {
@@ -84,6 +107,7 @@ public class RssiCurve implements Parcelable {
         int bucketCount = in.readInt();
         rssiBuckets = new byte[bucketCount];
         in.readByteArray(rssiBuckets);
+        activeNetworkRssiBoost = in.readInt();
     }
 
     @Override
@@ -97,6 +121,7 @@ public class RssiCurve implements Parcelable {
         out.writeInt(bucketWidth);
         out.writeInt(rssiBuckets.length);
         out.writeByteArray(rssiBuckets);
+        out.writeInt(activeNetworkRssiBoost);
     }
 
     /**
@@ -108,6 +133,23 @@ public class RssiCurve implements Parcelable {
      * @return the score for the given RSSI.
      */
     public byte lookupScore(int rssi) {
+        return lookupScore(rssi, false /* isActiveNetwork */);
+    }
+
+    /**
+     * Lookup the score for a given RSSI value.
+     *
+     * @param rssi The RSSI to lookup. If the RSSI falls below the start of the curve, the score at
+     *         the start of the curve will be returned. If it falls after the end of the curve, the
+     *         score at the end of the curve will be returned.
+     * @param isActiveNetwork Whether this network is currently active.
+     * @return the score for the given RSSI.
+     */
+    public byte lookupScore(int rssi, boolean isActiveNetwork) {
+        if (isActiveNetwork) {
+            rssi += activeNetworkRssiBoost;
+        }
+
         int index = (rssi - start) / bucketWidth;
 
         // Snap the index to the closest bucket if it falls outside the curve.
@@ -136,12 +178,13 @@ public class RssiCurve implements Parcelable {
 
         return start == rssiCurve.start &&
                 bucketWidth == rssiCurve.bucketWidth &&
-                Arrays.equals(rssiBuckets, rssiCurve.rssiBuckets);
+                Arrays.equals(rssiBuckets, rssiCurve.rssiBuckets) &&
+                activeNetworkRssiBoost == rssiCurve.activeNetworkRssiBoost;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(start, bucketWidth, rssiBuckets);
+        return Objects.hash(start, bucketWidth, rssiBuckets, activeNetworkRssiBoost);
     }
 
     @Override
@@ -150,7 +193,9 @@ public class RssiCurve implements Parcelable {
         sb.append("RssiCurve[start=")
                 .append(start)
                 .append(",bucketWidth=")
-                .append(bucketWidth);
+                .append(bucketWidth)
+                .append(",activeNetworkRssiBoost=")
+                .append(activeNetworkRssiBoost);
 
         sb.append(",buckets=");
         for (int i = 0; i < rssiBuckets.length; i++) {
