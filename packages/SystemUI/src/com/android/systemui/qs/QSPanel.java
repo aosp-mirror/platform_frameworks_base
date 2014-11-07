@@ -296,7 +296,14 @@ public class QSPanel extends ViewGroup {
                 r.tile.secondaryClick();
             }
         };
-        r.tileView.init(click, clickSecondary);
+        final View.OnLongClickListener longClick = new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                r.tile.longClick();
+                return true;
+            }
+        };
+        r.tileView.init(click, clickSecondary, longClick);
         r.tile.setListening(mListening);
         callback.onStateChanged(r.tile.getState());
         r.tile.refreshState();
