@@ -156,6 +156,8 @@ interface IConnectivityManager
     NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
             in PendingIntent operation);
 
+    void releasePendingNetworkRequest(in PendingIntent operation);
+
     NetworkRequest listenForNetwork(in NetworkCapabilities networkCapabilities,
             in Messenger messenger, in IBinder binder);
 
