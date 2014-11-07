@@ -22,6 +22,9 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_JAVA_LIBRARIES := android.test.runner
 
 LOCAL_PACKAGE_NAME := SystemUITests
+LOCAL_INSTRUMENTATION_FOR := SystemUI
+
+LOCAL_STATIC_JAVA_LIBRARIES := mockito-target
 
 # sign this with platform cert, so this test is allowed to inject key events into
 # UI it doesn't own. This is necessary to allow screenshots to be taken
