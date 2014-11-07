@@ -16,6 +16,7 @@
 
 package android.location;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -25,6 +26,7 @@ import android.util.Log;
  *
  * @hide
  */
+@SystemApi
 public class GpsMeasurement implements Parcelable {
     private static final String TAG = "GpsMeasurement";
 
