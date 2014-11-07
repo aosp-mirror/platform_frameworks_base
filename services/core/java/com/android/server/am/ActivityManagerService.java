@@ -8298,6 +8298,20 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mTaskPersister.getTaskDescriptionIcon(filename);
     }
 
+    @Override
+    public void startInPlaceAnimationOnFrontMostApplication(ActivityOptions opts)
+            throws RemoteException {
+        if (opts.getAnimationType() != ActivityOptions.ANIM_CUSTOM_IN_PLACE ||
+                opts.getCustomInPlaceResId() == 0) {
+            throw new IllegalArgumentException("Expected in-place ActivityOption " +
+                    "with valid animation");
+        }
+        mWindowManager.prepareAppTransition(AppTransition.TRANSIT_TASK_IN_PLACE, false);
+        mWindowManager.overridePendingAppTransitionInPlace(opts.getPackageName(),
+                opts.getCustomInPlaceResId());
+        mWindowManager.executeAppTransition();
+    }
+
     private void cleanUpRemovedTaskLocked(TaskRecord tr, boolean killProcess) {
         mRecentTasks.remove(tr);
         tr.removedFromRecents(mTaskPersister);
