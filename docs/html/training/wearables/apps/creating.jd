@@ -92,6 +92,11 @@ types of screen shapes, which is useful for testing.</p>
   <li>Leave the Android Wear app open on your phone.</li>
   <li>Connect the wearable to your machine through USB, so you can install apps directly to it
   as you develop. A message appears on both the wearable and the Android Wear app prompting you to allow debugging.</li>
+  <p class="note"><strong>Note:</strong> If you can not connect your wearable to your machine via USB,
+  follow the directions on
+  <a href="{@docRoot}training/wearables/apps/bt-debugging.html">Debugging over
+  Bluetooth</a>.
+  </p>
   <li>On the Android Wear app, check <strong>Always allow from this computer</strong> and tap
   <strong>OK</strong>.</li>
 </ol>
