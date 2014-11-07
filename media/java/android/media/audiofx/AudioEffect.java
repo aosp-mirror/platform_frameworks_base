@@ -483,6 +483,10 @@ public class AudioEffect {
      */
     public static boolean isEffectTypeAvailable(UUID type) {
         AudioEffect.Descriptor[] desc = AudioEffect.queryEffects();
+        if (desc == null) {
+            return false;
+        }
+
         for (int i = 0; i < desc.length; i++) {
             if (desc[i].type.equals(type)) {
                 return true;
