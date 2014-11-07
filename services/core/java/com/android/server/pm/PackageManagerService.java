@@ -4561,6 +4561,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 sortedPkgs.add(pkg);
             }
 
+            // If we want to be lazy, filter everything that wasn't recently used.
+            if (mLazyDexOpt) {
+                filterRecentlyUsedApps(sortedPkgs);
+            }
+
             int i = 0;
             int total = sortedPkgs.size();
             File dataDir = Environment.getDataDirectory();
@@ -4579,7 +4584,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    private void filterRecentlyUsedApps(ArraySet<PackageParser.Package> pkgs) {
+    private void filterRecentlyUsedApps(Collection<PackageParser.Package> pkgs) {
         // Filter out packages that aren't recently used.
         //
         // The exception is first boot of a non-eng device (aka !mLazyDexOpt), which
