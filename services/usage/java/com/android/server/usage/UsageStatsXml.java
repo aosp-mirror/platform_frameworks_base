@@ -31,17 +31,21 @@ public class UsageStatsXml {
     private static final int CURRENT_VERSION = 1;
     private static final String USAGESTATS_TAG = "usagestats";
     private static final String VERSION_ATTR = "version";
-    private static final String CHECKED_IN_SUFFIX = "-c";
+    static final String CHECKED_IN_SUFFIX = "-c";
 
     public static long parseBeginTime(AtomicFile file) {
         return parseBeginTime(file.getBaseFile());
     }
 
     public static long parseBeginTime(File file) {
-        final String name = file.getName();
-        if (name.endsWith(CHECKED_IN_SUFFIX)) {
-            return Long.parseLong(
-                    name.substring(0, name.length() - CHECKED_IN_SUFFIX.length()));
+        String name = file.getName();
+
+        // Eat as many occurrences of -c as possible. This is due to a bug where -c
+        // would be appended more than once to a checked-in file, causing a crash
+        // on boot when indexing files since Long.parseLong() will puke on anything but
+        // a number.
+        while (name.endsWith(CHECKED_IN_SUFFIX)) {
+            name = name.substring(0, name.length() - CHECKED_IN_SUFFIX.length());
         }
         return Long.parseLong(name);
     }
