@@ -15576,7 +15576,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     & Intent.FLAG_RECEIVER_BOOT_UPGRADE) == 0) {
                 Slog.w(TAG, "Skipping broadcast of " + intent
                         + ": user " + userId + " is stopped");
-                return ActivityManager.BROADCAST_SUCCESS;
+                return ActivityManager.BROADCAST_FAILED_USER_STOPPED;
             }
         }
 
