@@ -33,11 +33,11 @@ status_t BnMountShutdownObserver::onTransact(
             onShutDownComplete(statusCode);
             reply->writeNoException();
             return NO_ERROR;
-        } break;
+        }
         default:
             return BBinder::onTransact(code, data, reply, flags);
     }
 }
 // ----------------------------------------------------------------------
 
-};
+}
