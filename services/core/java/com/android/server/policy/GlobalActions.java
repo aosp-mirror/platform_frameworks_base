@@ -379,19 +379,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         }
     }
 
-    private final class RestartAction extends SinglePressAction implements LongPressAction {
+    private final class RestartAction extends SinglePressAction {
         private RestartAction() {
-            super(R.drawable.ic_restart, R.string.global_action_restart);
-        }
-
-        @Override
-        public boolean onLongPress() {
-            UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-            if (!um.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
-                mWindowManagerFuncs.rebootSafeMode(true);
-                return true;
-            }
-            return false;
+            super(R.drawable.ic_restart, R.string.global_action_reboot);
         }
 
         @Override
@@ -406,7 +396,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         @Override
         public void onPress() {
-            mWindowManagerFuncs.reboot(false /* confirm */);
+            mWindowManagerFuncs.reboot();
         }
     }
 
@@ -645,6 +635,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         mAirplaneModeOn.updateState(mAirplaneState);
         mAdapter.notifyDataSetChanged();
         mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        mDialog.setTitle(R.string.global_actions);
         if (mShowSilentToggle) {
             IntentFilter filter = new IntentFilter(AudioManager.RINGER_MODE_CHANGED_ACTION);
             mContext.registerReceiver(mRingerModeReceiver, filter);
