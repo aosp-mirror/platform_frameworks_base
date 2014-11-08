@@ -74,12 +74,12 @@ interface ISub {
     int addSubInfoRecord(String iccId, int slotId);
 
     /**
-     * Set SIM color by simInfo index
-     * @param color the color of the SIM
+     * Set SIM icon tint color by simInfo index
+     * @param tint the icon tint color of the SIM
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
      */
-    int setColor(int color, int subId);
+    int setIconTint(int tint, int subId);
 
     /**
      * Set display name by simInfo index
@@ -105,14 +105,6 @@ interface ISub {
      * @return the number of records updated
      */
     int setDisplayNumber(String number, int subId);
-
-    /**
-     * Set number display format. 0: none, 1: the first four digits, 2: the last four digits
-     * @param format the display format of phone number
-     * @param subId the unique SubInfoRecord index in database
-     * @return the number of records updated
-     */
-    int setDisplayNumberFormat(int format, int subId);
 
     /**
      * Set data roaming by simInfo index
