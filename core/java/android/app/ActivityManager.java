@@ -213,6 +213,13 @@ public class ActivityManager {
     public static final int BROADCAST_STICKY_CANT_HAVE_PERMISSION = -1;
 
     /**
+     * Result for IActivityManager.broadcastIntent: trying to send a broadcast
+     * to a stopped user. Fail.
+     * @hide
+     */
+    public static final int BROADCAST_FAILED_USER_STOPPED = -2;
+
+    /**
      * Type for IActivityManaqer.getIntentSender: this PendingIntent is
      * for a sendBroadcast operation.
      * @hide
