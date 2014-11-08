@@ -40,6 +40,7 @@ class UsageStatsDatabase {
     private static final String TAG = "UsageStatsDatabase";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
     private static final String BAK_SUFFIX = ".bak";
+    private static final String CHECKED_IN_SUFFIX = UsageStatsXml.CHECKED_IN_SUFFIX;
 
     private final Object mLock = new Object();
     private final File[] mIntervalDirs;
@@ -114,14 +115,17 @@ class UsageStatsDatabase {
             final TimeSparseArray<AtomicFile> files =
                     mSortedStatFiles[UsageStatsManager.INTERVAL_DAILY];
             final int fileCount = files.size();
-            int start = 0;
-            while (start < fileCount - 1) {
-                if (!files.valueAt(start).getBaseFile().getName().endsWith("-c")) {
-                    break;
+
+            // We may have holes in the checkin (if there was an error)
+            // so find the last checked-in file and go from there.
+            int lastCheckin = -1;
+            for (int i = 0; i < fileCount - 1; i++) {
+                if (files.valueAt(i).getBaseFile().getPath().endsWith(CHECKED_IN_SUFFIX)) {
+                    lastCheckin = i;
                 }
-                start++;
             }
 
+            final int start = lastCheckin + 1;
             if (start == fileCount - 1) {
                 return true;
             }
@@ -143,8 +147,8 @@ class UsageStatsDatabase {
             // are marked as checked-in.
             for (int i = start; i < fileCount - 1; i++) {
                 final AtomicFile file = files.valueAt(i);
-                final File checkedInFile = new File(file.getBaseFile().getParent(),
-                        file.getBaseFile().getName() + "-c");
+                final File checkedInFile = new File(
+                        file.getBaseFile().getPath() + CHECKED_IN_SUFFIX);
                 if (!file.getBaseFile().renameTo(checkedInFile)) {
                     // We must return success, as we've already marked some files as checked-in.
                     // It's better to repeat ourselves than to lose data.
@@ -152,6 +156,10 @@ class UsageStatsDatabase {
                             + " as checked-in");
                     return true;
                 }
+
+                // AtomicFile needs to set a new backup path with the same -c extension, so
+                // we replace the old AtomicFile with the updated one.
+                files.setValueAt(i, new AtomicFile(checkedInFile));
             }
         }
         return true;
@@ -240,8 +248,13 @@ class UsageStatsDatabase {
                         } catch (IOException e) {
                             // Ignore, this is just to make sure there are no backups.
                         }
-                        final File newFile = new File(file.getBaseFile().getParentFile(),
-                                Long.toString(newTime));
+
+                        String newName = Long.toString(newTime);
+                        if (file.getBaseFile().getName().endsWith(CHECKED_IN_SUFFIX)) {
+                            newName = newName + CHECKED_IN_SUFFIX;
+                        }
+
+                        final File newFile = new File(file.getBaseFile().getParentFile(), newName);
                         Slog.i(TAG, "Moving file " + file.getBaseFile().getAbsolutePath() + " to "
                                 + newFile.getAbsolutePath());
                         file.getBaseFile().renameTo(newFile);
