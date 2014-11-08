@@ -1940,13 +1940,19 @@ public class StateMachine {
      * @param args
      */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(getName() + ":");
-        pw.println(" total records=" + getLogRecCount());
+        pw.println(this.toString());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getName() + ":\n");
+        sb.append(" total records=" + getLogRecCount() + "\n");
         for (int i = 0; i < getLogRecSize(); i++) {
-            pw.printf(" rec[%d]: %s\n", i, getLogRec(i).toString());
-            pw.flush();
+            sb.append(" rec[" + i + "]: " + getLogRec(i).toString() + "\n");
         }
-        pw.println("curState=" + getCurrentState().getName());
+        sb.append("curState=" + getCurrentState().getName());
+        return sb.toString();
     }
 
     /**
