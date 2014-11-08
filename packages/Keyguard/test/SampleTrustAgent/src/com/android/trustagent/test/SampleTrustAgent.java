@@ -28,6 +28,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.List;
+
 public class SampleTrustAgent extends TrustAgentService
         implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -90,11 +92,10 @@ public class SampleTrustAgent extends TrustAgentService
     }
 
     @Override
-    public boolean onConfigure(Configuration config) {
-        if (config != null && config.options != null) {
-           for (int i = 0; i < config.options.size(); i++) {
-               PersistableBundle options = config.options.get(i);
-               Log.v(TAG, "Policy options received: " + options.toString());
+    public boolean onConfigure(List<PersistableBundle> options) {
+        if (options != null) {
+           for (int i = 0; i < options.size(); i++) {
+               Log.v(TAG, "Policy options received: " + options.get(i));
            }
         } else {
             Log.w(TAG, "onConfigure() called with no options");
