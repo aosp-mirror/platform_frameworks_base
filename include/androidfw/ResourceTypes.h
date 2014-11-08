@@ -1793,9 +1793,7 @@ public:
             const char* targetPath, const char* overlayPath,
             void** outData, size_t* outSize) const;
 
-    enum {
-        IDMAP_HEADER_SIZE_BYTES = 4 * sizeof(uint32_t) + 2 * 256,
-    };
+    static const size_t IDMAP_HEADER_SIZE_BYTES = 4 * sizeof(uint32_t) + 2 * 256;
 
     // Retrieve idmap meta-data.
     //

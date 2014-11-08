@@ -78,7 +78,7 @@ fail:
         if (fstat(idmap_fd, &st) == -1) {
             return true;
         }
-        if (st.st_size < N) {
+        if (st.st_size < static_cast<off_t>(N)) {
             // file is empty or corrupt
             return true;
         }
