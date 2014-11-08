@@ -74,6 +74,16 @@ public final class Phone {
          * @param call A newly removed {@code Call}.
          */
         public void onCallRemoved(Phone phone, Call call) { }
+
+        /**
+         * Called when the {@code Phone} ability to add more calls changes.  If the phone cannot
+         * support more calls then {@code canAddCall} is set to {@code false}.  If it can, then it
+         * is set to {@code true}.
+         *
+         * @param phone The {@code Phone} calling this method.
+         * @param canAddCall Indicates whether an additional call can be added.
+         */
+        public void onCanAddCallChanged(Phone phone, boolean canAddCall) { }
     }
 
     // A Map allows us to track each Call by its Telecom-specified call ID
@@ -91,6 +101,8 @@ public final class Phone {
     private AudioState mAudioState;
 
     private final List<Listener> mListeners = new CopyOnWriteArrayList<>();
+
+    private boolean mCanAddCall = true;
 
     /** {@hide} */
     Phone(InCallAdapter adapter) {
@@ -149,6 +161,14 @@ public final class Phone {
         fireBringToForeground(showDialpad);
     }
 
+    /** {@hide} */
+    final void internalSetCanAddCall(boolean canAddCall) {
+        if (mCanAddCall != canAddCall) {
+            mCanAddCall = canAddCall;
+            fireCanAddCallChanged(canAddCall);
+        }
+    }
+
     /**
      * Called to destroy the phone and cleanup any lingering calls.
      * @hide
@@ -188,6 +208,15 @@ public final class Phone {
      */
     public final List<Call> getCalls() {
         return mUnmodifiableCalls;
+    }
+
+    /**
+     * Returns if the {@code Phone} can support additional calls.
+     *
+     * @return Whether the phone supports adding more calls.
+     */
+    public final boolean canAddCall() {
+        return mCanAddCall;
     }
 
     /**
@@ -263,6 +292,12 @@ public final class Phone {
     private void fireBringToForeground(boolean showDialpad) {
         for (Listener listener : mListeners) {
             listener.onBringToForeground(this, showDialpad);
+        }
+    }
+
+    private void fireCanAddCallChanged(boolean canAddCall) {
+        for (Listener listener : mListeners) {
+            listener.onCanAddCallChanged(this, canAddCall);
         }
     }
 
