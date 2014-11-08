@@ -16,19 +16,20 @@
 
 package android.content.pm;
 
-import static android.system.OsConstants.*;
-
-import com.android.frameworks.coretests.R;
-import com.android.internal.content.PackageHelper;
+import static android.system.OsConstants.S_IFDIR;
+import static android.system.OsConstants.S_IFMT;
+import static android.system.OsConstants.S_IRGRP;
+import static android.system.OsConstants.S_IROTH;
+import static android.system.OsConstants.S_IRWXU;
+import static android.system.OsConstants.S_ISDIR;
+import static android.system.OsConstants.S_IXGRP;
+import static android.system.OsConstants.S_IXOTH;
 
 import android.app.PackageInstallObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.KeySet;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.res.Resources;
@@ -57,8 +58,10 @@ import android.system.StructStat;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.DisplayMetrics;
 import android.util.Log;
+
+import com.android.frameworks.coretests.R;
+import com.android.internal.content.PackageHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,7 +69,6 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -79,9 +81,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     public final long WAIT_TIME_INCR = 5 * 1000;
 
-    private static final String APP_LIB_DIR_PREFIX = "/data/app-lib/";
-
-    private static final String SECURE_CONTAINERS_PREFIX = "/mnt/asec/";
+    private static final String SECURE_CONTAINERS_PREFIX = "/mnt/asec";
 
     private static final int APP_INSTALL_AUTO = PackageHelper.APP_INSTALL_AUTO;
 
@@ -128,7 +128,11 @@ public class PackageManagerTests extends AndroidTestCase {
 
         private boolean doneFlag = false;
 
-        public void packageInstalled(String packageName, Bundle extras, int returnCode) {
+        @Override
+        public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                Bundle extras) {
+            Log.d(TAG, "onPackageInstalled: code=" + returnCode + ", msg=" + msg + ", extras="
+                    + extras);
             synchronized (this) {
                 this.returnCode = returnCode;
                 doneFlag = true;
@@ -410,10 +414,12 @@ public class PackageManagerTests extends AndroidTestCase {
             String appInstallPath = new File(dataDir, "app").getPath();
             String drmInstallPath = new File(dataDir, "app-private").getPath();
             File srcDir = new File(info.sourceDir);
-            String srcPath = srcDir.getParent();
+            String srcPath = srcDir.getParentFile().getParent();
             File publicSrcDir = new File(info.publicSourceDir);
-            String publicSrcPath = publicSrcDir.getParent();
+            String publicSrcPath = publicSrcDir.getParentFile().getParent();
             long pkgLen = new File(info.sourceDir).length();
+            String expectedLibPath = new File(new File(info.sourceDir).getParentFile(), "lib")
+                    .getPath();
 
             int rLoc = getInstallLoc(flags, expInstallLocation, pkgLen);
             if (rLoc == INSTALL_LOC_INT) {
@@ -436,12 +442,11 @@ public class PackageManagerTests extends AndroidTestCase {
                     }
                 } else {
                     assertFalse((info.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0);
-                    assertEquals(srcPath, appInstallPath);
-                    assertEquals(publicSrcPath, appInstallPath);
+                    assertEquals(appInstallPath, srcPath);
+                    assertEquals(appInstallPath, publicSrcPath);
                     assertStartsWith("Native library should point to shared lib directory",
-                            new File(APP_LIB_DIR_PREFIX, info.packageName).getPath(),
-                            info.nativeLibraryDir);
-                    assertDirOwnerGroupPerms(
+                            expectedLibPath, info.nativeLibraryDir);
+                    assertDirOwnerGroupPermsIfExists(
                             "Native library directory should be owned by system:system and 0755",
                             Process.SYSTEM_UID, Process.SYSTEM_UID,
                             S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH,
@@ -451,13 +456,13 @@ public class PackageManagerTests extends AndroidTestCase {
 
                 // Make sure the native library dir is not a symlink
                 final File nativeLibDir = new File(info.nativeLibraryDir);
-                assertTrue("Native library dir should exist at " + info.nativeLibraryDir,
-                        nativeLibDir.exists());
-                try {
-                    assertEquals("Native library dir should not be a symlink",
-                            info.nativeLibraryDir, nativeLibDir.getCanonicalPath());
-                } catch (IOException e) {
-                    fail("Can't read " + nativeLibDir.getPath());
+                if (nativeLibDir.exists()) {
+                    try {
+                        assertEquals("Native library dir should not be a symlink",
+                                info.nativeLibraryDir, nativeLibDir.getCanonicalPath());
+                    } catch (IOException e) {
+                        fail("Can't read " + nativeLibDir.getPath());
+                    }
                 }
             } else if (rLoc == INSTALL_LOC_SD) {
                 if ((flags & PackageManager.INSTALL_FORWARD_LOCK) != 0) {
@@ -500,9 +505,13 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
-    private void assertDirOwnerGroupPerms(String reason, int uid, int gid, int perms, String path) {
-        final StructStat stat;
+    private void assertDirOwnerGroupPermsIfExists(String reason, int uid, int gid, int perms,
+            String path) {
+        if (!new File(path).exists()) {
+            return;
+        }
 
+        final StructStat stat;
         try {
             stat = Os.lstat(path);
         } catch (ErrnoException e) {
@@ -3007,7 +3016,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchNoCerts1() throws Exception {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT3, true, true,
-                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
     }
 
     /*
@@ -3017,7 +3026,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchNoCerts2() throws Exception {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT3_CERT4, true, true,
-                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
     }
 
     /*
@@ -3027,7 +3036,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchSomeCerts1() throws Exception {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT1, true, true,
-                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
     }
 
     /*
@@ -3037,7 +3046,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchSomeCerts2() throws Exception {
         replaceCerts(APP1_CERT1_CERT2, APP1_CERT2, true, true,
-                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
     }
 
     /*
@@ -3047,7 +3056,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchMoreCerts() throws Exception {
         replaceCerts(APP1_CERT1, APP1_CERT1_CERT2, true, true,
-                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
     }
 
     /*
@@ -3058,7 +3067,7 @@ public class PackageManagerTests extends AndroidTestCase {
     @LargeTest
     public void testReplaceMatchMoreCertsReplaceSomeCerts() throws Exception {
         InstallParams ip = replaceCerts(APP1_CERT1, APP1_CERT1_CERT2, false, true,
-                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
         try {
             int rFlags = PackageManager.INSTALL_REPLACE_EXISTING;
             installFromRawResource("install.apk", APP1_CERT1, rFlags, false,
@@ -3098,7 +3107,7 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     public void testUpgradeKSWithWrongKey() throws Exception {
         replaceCerts(R.raw.keyset_sa_ua, R.raw.keyset_sb_ua, true, true,
-                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
     }
 
     /*
@@ -3107,7 +3116,7 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     public void testUpgradeKSWithWrongSigningKey() throws Exception {
         replaceCerts(R.raw.keyset_sa_ub, R.raw.keyset_sa_ub, true, true,
-                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
     }
 
     /*
@@ -3139,7 +3148,7 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     public void testMultipleUpgradeKSWithSigningKey() throws Exception {
         replaceCerts(R.raw.keyset_sau_ub, R.raw.keyset_sa_ua, true, true,
-                PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES);
+                PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE);
     }
 
     /*
@@ -3732,7 +3741,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1_CERT2;
         int rapk1 = SHARED1_CERT1;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3744,7 +3753,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1_CERT2;
         int rapk2 = SHARED2_CERT1;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3756,7 +3765,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk1 = SHARED1_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3768,7 +3777,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk2 = SHARED2_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3780,7 +3789,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk1 = SHARED1_CERT1_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk1, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -3792,7 +3801,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int apk2 = SHARED2_CERT1;
         int rapk2 = SHARED2_CERT1_CERT2;
         boolean fail = true;
-        int retCode = PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+        int retCode = PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
         checkSharedSignatures(apk1, apk2, false, false, -1, PackageManager.SIGNATURE_MATCH);
         installFromRawResource("install.apk", rapk2, PackageManager.INSTALL_REPLACE_EXISTING, true,
                 fail, retCode, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
