@@ -16,7 +16,15 @@
 
 package android.telephony;
 
-import android.graphics.drawable.BitmapDrawable;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -59,9 +67,9 @@ public class SubInfoRecord implements Parcelable {
     private int mNameSource;
 
     /**
-     * The color to be used for when displaying to the user
+     * The color to be used for tinting the icon when displaying to the user
      */
-    private int mColor;
+    private int mIconTint;
 
     /**
      * A number presented to the user identify this subscription
@@ -74,9 +82,9 @@ public class SubInfoRecord implements Parcelable {
     private int mDataRoaming;
 
     /**
-     * SIM Icon resource identifiers. FIXME: Check with MTK what it really is
+     * SIM Icon bitmap
      */
-    private int[] mSimIconRes;
+    private Bitmap mIconBitmap;
 
     /**
      * Mobile Country Code
@@ -90,38 +98,20 @@ public class SubInfoRecord implements Parcelable {
 
     /**
      * @hide
-    public SubInfoRecord() {
-        this.mId = SubscriptionManager.INVALID_SUB_ID;
-        this.mIccId = "";
-        this.mSimSlotIndex = SubscriptionManager.INVALID_SLOT_ID;
-        this.mDisplayName = "";
-        this.mCarrierName = "";
-        this.mNameSource = 0;
-        this.mColor = 0;
-        this.mNumber = "";
-        this.mDataRoaming = 0;
-        this.mSimIconRes = new int[2];
-        this.mMcc = 0;
-        this.mMnc = 0;
-    }
-     */
-
-    /**
-     * @hide
      */
     public SubInfoRecord(int id, String iccId, int simSlotIndex, CharSequence displayName,
-            CharSequence carrierName, int nameSource, int color, String number, int roaming,
-            int[] iconRes, int mcc, int mnc) {
+            CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
+            Bitmap icon, int mcc, int mnc) {
         this.mId = id;
         this.mIccId = iccId;
         this.mSimSlotIndex = simSlotIndex;
         this.mDisplayName = displayName;
         this.mCarrierName = carrierName;
         this.mNameSource = nameSource;
-        this.mColor = color;
+        this.mIconTint = iconTint;
         this.mNumber = number;
         this.mDataRoaming = roaming;
-        this.mSimIconRes = iconRes;
+        this.mIconBitmap = icon;
         this.mMcc = mcc;
         this.mMnc = mnc;
     }
@@ -187,21 +177,58 @@ public class SubInfoRecord implements Parcelable {
     }
 
     /**
-     * Return the color to be used for when displaying to the user. This is the value of the color.
-     * ex: 0x00ff00
+     * Creates and returns an icon {@code Bitmap} to represent this {@code SubInfoRecord} in a user
+     * interface.
+     *
+     * @param context A {@code Context} to get the {@code DisplayMetrics}s from.
+     *
+     * @return A bitmap icon for this {@code SubInfoRecord}.
      */
-    public int getColor() {
-        // Note: This color is currently an index into a list of drawables, but this is soon to
-        // change.
-        return this.mColor;
+    public Bitmap createIconBitmap(Context context) {
+        int width = mIconBitmap.getWidth();
+        int height = mIconBitmap.getHeight();
+
+        // Create a new bitmap of the same size because it will be modified.
+        Bitmap workingBitmap = Bitmap.createBitmap(context.getResources().getDisplayMetrics(),
+                width, height, mIconBitmap.getConfig());
+
+        Canvas canvas = new Canvas(workingBitmap);
+        Paint paint = new Paint();
+
+        // Tint the icon with the color.
+        paint.setColorFilter(new PorterDuffColorFilter(mIconTint, PorterDuff.Mode.SRC_ATOP));
+        canvas.drawBitmap(mIconBitmap, 0, 0, paint);
+        paint.setColorFilter(null);
+
+        // Write the sim slot index.
+        paint.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+        paint.setColor(Color.WHITE);
+        paint.setTextSize(12);
+        final String index = Integer.toString(mSimSlotIndex);
+        final Rect textBound = new Rect();
+        paint.getTextBounds(index, 0, 1, textBound);
+        final float xOffset = (width / 2.f) - textBound.centerX();
+        final float yOffset = (height / 2.f) - textBound.centerY();
+        canvas.drawText(index, xOffset, yOffset, paint);
+
+        return workingBitmap;
+    }
+
+    /**
+     * A highlight color to use in displaying information about this {@code PhoneAccount}.
+     *
+     * @return A hexadecimal color value.
+     */
+    public int getIconTint() {
+        return mIconTint;
     }
 
     /**
      * Sets the color displayed to the user that identifies this subscription
      * @hide
      */
-    public void setColor(int color) {
-        this.mColor = color;
+    public void setIconTint(int iconTint) {
+        this.mIconTint = iconTint;
     }
 
     /**
@@ -216,13 +243,6 @@ public class SubInfoRecord implements Parcelable {
      */
     public int getDataRoaming() {
         return this.mDataRoaming;
-    }
-
-    /**
-     * Return the icon used to identify this subscription.
-     */
-    public BitmapDrawable getIcon() {
-        return new BitmapDrawable();
     }
 
     /**
@@ -248,16 +268,15 @@ public class SubInfoRecord implements Parcelable {
             CharSequence displayName = source.readCharSequence();
             CharSequence carrierName = source.readCharSequence();
             int nameSource = source.readInt();
-            int color = source.readInt();
+            int iconTint = source.readInt();
             String number = source.readString();
             int dataRoaming = source.readInt();
-            int[] iconRes = new int[2];
-            source.readIntArray(iconRes);
             int mcc = source.readInt();
             int mnc = source.readInt();
+            Bitmap iconBitmap = Bitmap.CREATOR.createFromParcel(source);
 
-            return new SubInfoRecord(id, iccId, simSlotIndex, displayName, carrierName,
-                    nameSource, color, number, dataRoaming, iconRes, mcc, mnc);
+            return new SubInfoRecord(id, iccId, simSlotIndex, displayName, carrierName, nameSource,
+                    iconTint, number, dataRoaming, iconBitmap, mcc, mnc);
         }
 
         @Override
@@ -274,12 +293,12 @@ public class SubInfoRecord implements Parcelable {
         dest.writeCharSequence(mDisplayName);
         dest.writeCharSequence(mCarrierName);
         dest.writeInt(mNameSource);
-        dest.writeInt(mColor);
+        dest.writeInt(mIconTint);
         dest.writeString(mNumber);
         dest.writeInt(mDataRoaming);
-        dest.writeIntArray(mSimIconRes);
         dest.writeInt(mMcc);
         dest.writeInt(mMnc);
+        mIconBitmap.writeToParcel(dest, flags);
     }
 
     @Override
@@ -290,8 +309,9 @@ public class SubInfoRecord implements Parcelable {
     @Override
     public String toString() {
         return "{id=" + mId + ", iccId=" + mIccId + " simSlotIndex=" + mSimSlotIndex
-                + " displayName=" + mDisplayName + " carrierName=" + mCarrierName + " nameSource=" + mNameSource + " color=" + mColor
-                + " number=" + mNumber + " dataRoaming=" + mDataRoaming + " simIconRes=" + mSimIconRes
-                + " mcc " + mMcc + " mnc " + mMnc + "}";
+                + " displayName=" + mDisplayName + " carrierName=" + mCarrierName
+                + " nameSource=" + mNameSource + " iconTint=" + mIconTint + " number=" + mNumber
+                + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc " + mMcc
+                + " mnc " + mMnc + "}";
     }
 }

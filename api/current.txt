@@ -29110,12 +29110,12 @@ package android.telephony {
   }
 
   public class SubInfoRecord implements android.os.Parcelable {
+    method public android.graphics.Bitmap createIconBitmap(android.content.Context);
     method public int describeContents();
-    method public int getColor();
     method public int getDataRoaming();
     method public java.lang.CharSequence getDisplayName();
     method public java.lang.String getIccId();
-    method public android.graphics.drawable.BitmapDrawable getIcon();
+    method public int getIconTint();
     method public int getMcc();
     method public int getMnc();
     method public int getNameSource();

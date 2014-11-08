@@ -246,13 +246,6 @@ public class SubscriptionManager implements BaseColumns {
      */
     public static final String MNC = "mnc";
 
-
-    private static final int RES_TYPE_BACKGROUND_DARK = 0;
-
-    private static final int RES_TYPE_BACKGROUND_LIGHT = 1;
-
-    private static final int[] sSimBackgroundDarkRes = setSimResource(RES_TYPE_BACKGROUND_DARK);
-
     /**
      * Broadcast Action: The user has changed one of the default subs related to
      * data, phone calls, or sms</p>
@@ -476,17 +469,16 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /**
-     * Set SIM color by simInfo index
-     * @param color the rgb value of color of the SIM
+     * Set SIM icon tint color by simInfo index
+     * @param tint the rgb value of icon tint color of the SIM
      * @param subId the unique SubInfoRecord index in database
      * @return the number of records updated
      * @hide
      */
-    public static int setColor(int color, int subId) {
-        if (VDBG) logd("[setColor]+ color:" + color + " subId:" + subId);
-        int size = sSimBackgroundDarkRes.length;
+    public static int setIconTint(int tint, int subId) {
+        if (VDBG) logd("[setIconTint]+ tint:" + tint + " subId:" + subId);
         if (!isValidSubId(subId)) {
-            logd("[setColor]- fail");
+            logd("[setIconTint]- fail");
             return -1;
         }
 
@@ -495,7 +487,7 @@ public class SubscriptionManager implements BaseColumns {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.setColor(color, subId);
+                result = iSub.setIconTint(tint, subId);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -569,35 +561,6 @@ public class SubscriptionManager implements BaseColumns {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
                 result = iSub.setDisplayNumber(number, subId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
-
-    }
-
-    /**
-     * Set number display format. 0: none, 1: the first four digits, 2: the last four digits
-     * @param format the display format of phone number
-     * @param subId the unique SubInfoRecord index in database
-     * @return the number of records updated
-     * @hide
-     */
-    public static int setDisplayNumberFormat(int format, int subId) {
-        if (VDBG) logd("[setDisplayNumberFormat]+ format:" + format + " subId:" + subId);
-        if (format < 0 || !isValidSubId(subId)) {
-            logd("[setDisplayNumberFormat]- fail, return -1");
-            return -1;
-        }
-
-        int result = 0;
-
-        try {
-            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
-            if (iSub != null) {
-                result = iSub.setDisplayNumberFormat(format, subId);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -702,31 +665,6 @@ public class SubscriptionManager implements BaseColumns {
         if (VDBG) logd("[getPhoneId]- phoneId=" + result);
         return result;
 
-    }
-
-    private static int[] setSimResource(int type) {
-        int[] simResource = null;
-
-        switch (type) {
-            case RES_TYPE_BACKGROUND_DARK:
-                simResource = new int[] {
-                    com.android.internal.R.drawable.sim_dark_blue,
-                    com.android.internal.R.drawable.sim_dark_orange,
-                    com.android.internal.R.drawable.sim_dark_green,
-                    com.android.internal.R.drawable.sim_dark_purple
-                };
-                break;
-            case RES_TYPE_BACKGROUND_LIGHT:
-                simResource = new int[] {
-                    com.android.internal.R.drawable.sim_light_blue,
-                    com.android.internal.R.drawable.sim_light_orange,
-                    com.android.internal.R.drawable.sim_light_green,
-                    com.android.internal.R.drawable.sim_light_purple
-                };
-                break;
-        }
-
-        return simResource;
     }
 
     private static void logd(String msg) {
