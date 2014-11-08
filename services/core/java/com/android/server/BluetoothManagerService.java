@@ -44,6 +44,10 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 class BluetoothManagerService extends IBluetoothManager.Stub {
     private static final String TAG = "BluetoothManagerService";
     private static final boolean DBG = true;
@@ -1280,6 +1284,23 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mHandler.sendMessageDelayed(restartMsg, ERROR_RESTART_TIME_MS);
         } else {
             // todo: notify user to power down and power up phone to make bluetooth work.
+        }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        writer.println("enabled: " + mEnable);
+        writer.println("state: " + mState);
+        writer.println("address: " + mAddress);
+        writer.println("name: " + mName);
+        if (mBluetooth == null) {
+            writer.println("Bluetooth Service not connected");
+        } else {
+            try {
+                writer.println(mBluetooth.dump());
+            } catch (RemoteException re) {
+                writer.println("RemoteException while calling Bluetooth Service");
+            }
         }
     }
 }
