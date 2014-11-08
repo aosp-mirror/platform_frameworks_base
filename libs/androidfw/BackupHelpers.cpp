@@ -555,7 +555,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     snprintf(buf + 124, 12, "%011llo", (isdir) ? 0LL : s.st_size);
 
     // [ 136 :  12 ] last mod time as a UTC time_t
-    snprintf(buf + 136, 12, "%0lo", s.st_mtime);
+    snprintf(buf + 136, 12, "%0lo", (unsigned long)s.st_mtime);
 
     // [ 156 :   1 ] link/file type
     uint8_t type;
