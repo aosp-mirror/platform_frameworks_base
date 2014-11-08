@@ -9,4 +9,6 @@ LOCAL_SRC_FILES:= \
 
 LOCAL_MODULE:= libstorage
 
+LOCAL_CFLAGS += -Wall -Werror
+
 include $(BUILD_STATIC_LIBRARY)

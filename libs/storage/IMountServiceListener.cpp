@@ -34,7 +34,7 @@ status_t BnMountServiceListener::onTransact(
             onUsbMassStorageConnectionChanged(connected);
             reply->writeNoException();
             return NO_ERROR;
-        } break;
+        }
         case TRANSACTION_onStorageStateChanged: {
             CHECK_INTERFACE(IMountServiceListener, data, reply);
             String16 path = data.readString16();
@@ -50,4 +50,4 @@ status_t BnMountServiceListener::onTransact(
 }
 // ----------------------------------------------------------------------
 
-};
+}
