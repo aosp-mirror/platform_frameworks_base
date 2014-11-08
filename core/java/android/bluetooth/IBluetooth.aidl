@@ -98,4 +98,7 @@ interface IBluetooth
     boolean isActivityAndEnergyReportingSupported();
     void getActivityEnergyInfoFromController();
     BluetoothActivityEnergyInfo reportActivityInfo();
+
+    // for dumpsys support
+    String dump();
 }
