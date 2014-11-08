@@ -94,31 +94,6 @@ public class TrustAgentService extends Service {
     private static final int MSG_TRUST_TIMEOUT = 3;
 
     /**
-     * Container class for a list of configuration options and helper methods
-     */
-    public static final class Configuration {
-        public final List<PersistableBundle> options;
-        public Configuration(List<PersistableBundle> opts) {
-            options = opts;
-        }
-
-        /**
-         * Very basic method to determine if all bundles have the given feature, regardless
-         * of type.
-         * @param option String to search for.
-         * @return true if found in all bundles.
-         */
-        public boolean hasOption(String option) {
-            if (options == null || options.size() == 0) return false;
-            final int N = options.size();
-            for (int i = 0; i < N; i++) {
-                if (!options.get(i).containsKey(option)) return false;
-            }
-            return true;
-        }
-    }
-
-    /**
      * Class containing raw data for a given configuration request.
      */
     private static final class ConfigurationData {
@@ -147,7 +122,7 @@ public class TrustAgentService extends Service {
                     break;
                 case MSG_CONFIGURE:
                     ConfigurationData data = (ConfigurationData) msg.obj;
-                    boolean result = onConfigure(new Configuration(data.options));
+                    boolean result = onConfigure(data.options);
                     try {
                         synchronized (mLock) {
                             mCallback.onConfigureCompleted(result, data.token);
@@ -212,7 +187,7 @@ public class TrustAgentService extends Service {
      * @param options bundle containing all options or null if none.
      * @return true if the {@link TrustAgentService} supports configuration options.
      */
-    public boolean onConfigure(Configuration options) {
+    public boolean onConfigure(List<PersistableBundle> options) {
         return false;
     }
 
