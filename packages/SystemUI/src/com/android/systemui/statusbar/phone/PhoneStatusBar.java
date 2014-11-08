@@ -3444,6 +3444,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             dispatchDemoCommand(COMMAND_ENTER, new Bundle());
         }
         boolean modeChange = command.equals(COMMAND_ENTER) || command.equals(COMMAND_EXIT);
+        if ((modeChange || command.equals(COMMAND_VOLUME)) && mVolumeComponent != null) {
+            mVolumeComponent.dispatchDemoCommand(command, args);
+        }
         if (modeChange || command.equals(COMMAND_CLOCK)) {
             dispatchDemoCommandToView(command, args, R.id.clock);
         }

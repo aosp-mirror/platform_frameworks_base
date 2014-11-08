@@ -19,8 +19,10 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/segmented_button_spacing"
     android:layout_weight="1"
+    android:gravity="center_horizontal|top"
     android:textColor="@color/segmented_button_text_selector"
     android:background="@drawable/btn_borderless_rect"
     android:textAppearance="@style/TextAppearance.QS.SegmentedButton"
-    android:minHeight="36dp"
-    android:padding="4dp" />
+    android:minHeight="64dp"
+    android:paddingTop="11dp"
+    android:drawablePadding="6dp" />
