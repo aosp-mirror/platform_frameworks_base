@@ -20,6 +20,7 @@ import com.android.internal.telecom.IConnectionService;
 import com.android.internal.telecom.IVideoCallback;
 import com.android.internal.telecom.IVideoProvider;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -37,7 +38,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @see ConnectionService#createRemoteOutgoingConnection(PhoneAccountHandle, ConnectionRequest)
  * @see ConnectionService#createRemoteIncomingConnection(PhoneAccountHandle, ConnectionRequest)
+ * @hide
  */
+@SystemApi
 public final class RemoteConnection {
 
     public static abstract class Callback {
