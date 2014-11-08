@@ -159,7 +159,7 @@ public class Tethering extends BaseNetworkObserver {
         mStateReceiver = new StateReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_STATE);
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         mContext.registerReceiver(mStateReceiver, filter);
 
@@ -517,12 +517,12 @@ public class Tethering extends BaseNetworkObserver {
                     }
                     mUsbTetherRequested = false;
                 }
-            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+            } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE)) {
                 NetworkInfo networkInfo = (NetworkInfo)intent.getParcelableExtra(
                         ConnectivityManager.EXTRA_NETWORK_INFO);
                 if (networkInfo != null &&
                         networkInfo.getDetailedState() != NetworkInfo.DetailedState.FAILED) {
-                    if (VDBG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION");
+                    if (VDBG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION_IMMEDIATE");
                     mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED, networkInfo);
                 }
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
