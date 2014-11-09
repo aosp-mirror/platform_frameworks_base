@@ -199,7 +199,8 @@
 
 
         <!-- started from PhoneWindowManager
-             TODO: Should have an android:permission attribute -->
+             TODO: Should have an android:permission attribute
+             -->
         <service android:name=".screenshot.TakeScreenshotService"
             android:process=":screenshot"
             android:exported="false" />
