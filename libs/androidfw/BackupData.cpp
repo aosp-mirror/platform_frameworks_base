@@ -45,12 +45,6 @@ static const bool kIsDebug = false;
 const static int ROUND_UP[4] = { 0, 3, 2, 1 };
 
 static inline size_t
-round_up(size_t n)
-{
-    return n + ROUND_UP[n % 4];
-}
-
-static inline size_t
 padding_extra(size_t n)
 {
     return ROUND_UP[n % 4];
@@ -343,7 +337,7 @@ BackupDataReader::ReadEntityData(void* data, size_t size)
     }
     int remaining = m_dataEndPos - m_pos;
     if (kIsDebug) {
-        ALOGD("ReadEntityData size=%d m_pos=0x%x m_dataEndPos=0x%x remaining=%d\n",
+        ALOGD("ReadEntityData size=%zu m_pos=0x%zx m_dataEndPos=0x%zx remaining=%d\n",
                 size, m_pos, m_dataEndPos, remaining);
     }
     if (remaining <= 0) {
@@ -353,7 +347,7 @@ BackupDataReader::ReadEntityData(void* data, size_t size)
         size = remaining;
     }
     if (kIsDebug) {
-        ALOGD("   reading %d bytes", size);
+        ALOGD("   reading %zu bytes", size);
     }
     int amt = read(m_fd, data, size);
     if (amt < 0) {
