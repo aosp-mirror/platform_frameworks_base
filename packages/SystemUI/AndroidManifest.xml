@@ -164,6 +164,9 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".screenshot.TrashScreenshot"
+                android:exported="true" />
+
         <activity android:name=".usb.UsbStorageActivity"
                   android:label="@*android:string/usb_storage_activity_title"
                   android:excludeFromRecents="true">

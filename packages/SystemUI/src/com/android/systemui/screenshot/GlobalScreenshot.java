@@ -57,6 +57,7 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
+import com.android.systemui.screenshot.TrashScreenshot;
 
 import java.io.File;
 import java.io.OutputStream;
@@ -251,6 +252,15 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
                      PendingIntent.getActivity(context, 0, chooserIntent,
                              PendingIntent.FLAG_CANCEL_CURRENT));
 
+            Intent trashIntent = new Intent();
+            trashIntent.setClass(context, TrashScreenshot.class);
+            trashIntent.putExtra(TrashScreenshot.SCREENSHOT_URI, uri.toString());
+
+            mNotificationBuilder.addAction(android.R.drawable.ic_menu_delete,
+                     r.getString(com.android.internal.R.string.delete),
+                     PendingIntent.getBroadcast(context, 0, trashIntent,
+                             PendingIntent.FLAG_CANCEL_CURRENT));
+
             OutputStream out = resolver.openOutputStream(uri);
             image.compress(Bitmap.CompressFormat.PNG, 100, out);
             out.flush();
@@ -341,7 +351,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 class GlobalScreenshot {
     private static final String TAG = "GlobalScreenshot";
 
-    private static final int SCREENSHOT_NOTIFICATION_ID = 789;
+    public static final int SCREENSHOT_NOTIFICATION_ID = 789;
     private static final int SCREENSHOT_FLASH_TO_PEAK_DURATION = 130;
     private static final int SCREENSHOT_DROP_IN_DURATION = 430;
     private static final int SCREENSHOT_DROP_OUT_DELAY = 500;
