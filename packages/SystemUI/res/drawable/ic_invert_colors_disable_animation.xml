@@ -20,9 +20,6 @@
         android:name="root"
         android:animation="@anim/ic_invert_colors_disable_animation_root" />
     <target
-        android:name="icon"
-        android:animation="@anim/ic_invert_colors_disable_animation_icon" />
-    <target
         android:name="mask"
         android:animation="@anim/ic_invert_colors_disable_animation_mask" />
     <target

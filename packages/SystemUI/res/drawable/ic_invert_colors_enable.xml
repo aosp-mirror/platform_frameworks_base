@@ -24,8 +24,7 @@
     <group
         android:name="icon"
         android:translateX="21.9995"
-        android:translateY="25.73401"
-        android:alpha="0.54" >
+        android:translateY="25.73401" >
         <group
             android:name="icon_pivot"
             android:translateX="-23.21545"

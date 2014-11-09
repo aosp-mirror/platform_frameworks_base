@@ -20,9 +20,6 @@
         android:name="root"
         android:animation="@anim/ic_signal_flashlight_disable_animation_root" />
     <target
-        android:name="ic_signal_flashlight"
-        android:animation="@anim/ic_signal_flashlight_disable_animation_ic_signal_flashlight" />
-    <target
         android:name="mask"
         android:animation="@anim/ic_signal_flashlight_disable_animation_mask" />
     <target

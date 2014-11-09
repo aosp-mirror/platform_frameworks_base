@@ -18,7 +18,7 @@
     <set
         android:ordering="sequentially" >
         <objectAnimator
-            android:duration="250"
+            android:duration="50"
             android:propertyName="rotation"
             android:valueFrom="-135"
             android:valueTo="-135"

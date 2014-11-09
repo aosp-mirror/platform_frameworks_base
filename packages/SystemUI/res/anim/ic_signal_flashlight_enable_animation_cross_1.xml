@@ -15,27 +15,17 @@
      limitations under the License.
 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android" >
+    <objectAnimator
+        android:duration="350"
+        android:propertyName="pathData"
+        android:valueFrom="M 8.34049987793,5.6930847168 c 0.0,0.0 29.7749786377,29.7999725342 29.7749786377,29.7999725342 "
+        android:valueTo="M 8.34049987793,5.6930847168 c 0.0,0.0 0.274993896484,0.29997253418 0.274993896484,0.29997253418 "
+        android:valueType="pathType"
+        android:interpolator="@interpolator/ic_signal_flashlight_enable_cross_1_pathdata_interpolator" />
     <set
         android:ordering="sequentially" >
         <objectAnimator
-            android:duration="200"
-            android:propertyName="pathData"
-            android:valueFrom="M 8.34049987793,5.6930847168 c 0.0,0.0 29.7749786377,29.7999725342 29.7749786377,29.7999725342 "
-            android:valueTo="M 8.34049987793,5.6930847168 c 0.0,0.0 29.7749786377,29.7999725342 29.7749786377,29.7999725342 "
-            android:valueType="pathType"
-            android:interpolator="@android:interpolator/linear" />
-        <objectAnimator
-            android:duration="350"
-            android:propertyName="pathData"
-            android:valueFrom="M 8.34049987793,5.6930847168 c 0.0,0.0 29.7749786377,29.7999725342 29.7749786377,29.7999725342 "
-            android:valueTo="M 8.34049987793,5.6930847168 c 0.0,0.0 0.274993896484,0.29997253418 0.274993896484,0.29997253418 "
-            android:valueType="pathType"
-            android:interpolator="@interpolator/ic_signal_flashlight_enable_cross_1_pathdata_interpolator" />
-    </set>
-    <set
-        android:ordering="sequentially" >
-        <objectAnimator
-            android:duration="533"
+            android:duration="333"
             android:propertyName="strokeAlpha"
             android:valueFrom="1"
             android:valueTo="1"

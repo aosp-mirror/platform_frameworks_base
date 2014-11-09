@@ -15,36 +15,17 @@
      limitations under the License.
 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android" >
-    <set
-        android:ordering="sequentially" >
-        <objectAnimator
-            android:duration="200"
-            android:propertyName="pathData"
-            android:valueFrom="M 8.34049987793,5.6930847168 c 0.0,0.0 0.274993896484,0.29997253418 0.274993896484,0.29997253418 "
-            android:valueTo="M 8.34049987793,5.6930847168 c 0.0,0.0 0.274993896484,0.29997253418 0.274993896484,0.29997253418 "
-            android:valueType="pathType"
-            android:interpolator="@android:interpolator/fast_out_slow_in" />
-        <objectAnimator
-            android:duration="350"
-            android:propertyName="pathData"
-            android:valueFrom="M 8.34049987793,5.6930847168 c 0.0,0.0 0.274993896484,0.29997253418 0.274993896484,0.29997253418 "
-            android:valueTo="M 8.34049987793,5.6930847168 c 0.0,0.0 29.7749786377,29.7999725342 29.7749786377,29.7999725342 "
-            android:valueType="pathType"
-            android:interpolator="@android:interpolator/fast_out_slow_in" />
-    </set>
-    <set
-        android:ordering="sequentially" >
-        <objectAnimator
-            android:duration="200"
-            android:propertyName="strokeAlpha"
-            android:valueFrom="0"
-            android:valueTo="0"
-            android:interpolator="@android:interpolator/linear" />
-        <objectAnimator
-            android:duration="17"
-            android:propertyName="strokeAlpha"
-            android:valueFrom="0"
-            android:valueTo="1"
-            android:interpolator="@android:interpolator/linear" />
-    </set>
+    <objectAnimator
+        android:duration="350"
+        android:propertyName="pathData"
+        android:valueFrom="M 8.34049987793,5.6930847168 c 0.0,0.0 0.274993896484,0.29997253418 0.274993896484,0.29997253418 "
+        android:valueTo="M 8.34049987793,5.6930847168 c 0.0,0.0 29.7749786377,29.7999725342 29.7749786377,29.7999725342 "
+        android:valueType="pathType"
+        android:interpolator="@android:interpolator/fast_out_slow_in" />
+    <objectAnimator
+        android:duration="17"
+        android:propertyName="strokeAlpha"
+        android:valueFrom="0"
+        android:valueTo="1"
+        android:interpolator="@android:interpolator/linear" />
 </set>
