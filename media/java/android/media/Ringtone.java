@@ -41,7 +41,7 @@ import java.io.IOException;
  */
 public class Ringtone {
     private static final String TAG = "Ringtone";
-    private static final boolean LOGD = true;
+    private static final boolean LOGD = false;
 
     private static final String[] MEDIA_COLUMNS = new String[] {
         MediaStore.Audio.Media._ID,
