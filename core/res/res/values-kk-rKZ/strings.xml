@@ -1233,6 +1233,7 @@
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> қолданбасы (<xliff:g id="PROCESS">%2$s</xliff:g> процесі) өзі қолданған StrictMode саясатын бұзды."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> үрдісі өздігінен күшіне енген ҚатаңРежим ережесін бұзды."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android жаңартылуда…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android іске қосылуда…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ішінен <xliff:g id="NUMBER_0">%1$d</xliff:g> қолданба оңтайландырылуда."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Қолданбалар іске қосылуда."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Қосуды аяқтауда."</string>

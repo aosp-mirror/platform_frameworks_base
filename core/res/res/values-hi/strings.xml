@@ -1233,6 +1233,7 @@
     <string name="smv_application" msgid="3307209192155442829">"ऐप्स <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ने उसकी स्‍वयं लागू होने वाली StrictMode नीति का उल्‍लंघन किया है."</string>
     <string name="smv_process" msgid="5120397012047462446">"प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> ने उसकी स्‍व-प्रवर्तित StrictMode नीति का उल्‍लंघन किया है."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android अपग्रेड हो रहा है..."</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android प्रारंभ हो रहा है…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> में से <xliff:g id="NUMBER_0">%1$d</xliff:g> ऐप्स  अनुकूलित हो रहा है."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ऐप्स  प्रारंभ होने वाले हैं"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्‍त हो रहा है."</string>

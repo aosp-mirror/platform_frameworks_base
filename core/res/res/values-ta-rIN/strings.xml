@@ -1233,6 +1233,7 @@
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாடு (செயல்முறை <xliff:g id="PROCESS">%2$s</xliff:g>), தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> செயல்முறை, தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android மேம்படுத்தப்படுகிறது…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android துவங்குகிறது..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g> / <xliff:g id="NUMBER_1">%2$d</xliff:g> பயன்பாட்டை ஒருங்கிணைக்கிறது."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"பயன்பாடுகள் தொடங்கப்படுகின்றன."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"துவக்குதலை முடிக்கிறது."</string>

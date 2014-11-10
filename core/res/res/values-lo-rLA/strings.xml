@@ -1233,6 +1233,7 @@
     <string name="smv_application" msgid="3307209192155442829">"ແອັບຯ <xliff:g id="APPLICATION">%1$s</xliff:g> (ໂປຣເຊສ <xliff:g id="PROCESS">%2$s</xliff:g>) ໄດ້ລະເມີດນະໂຍບາຍ StrictMode ທີ່ບັງຄັບໃຊ້ດ້ວຍໂຕເອງ."</string>
     <string name="smv_process" msgid="5120397012047462446">"ໂປຣເຊສ <xliff:g id="PROCESS">%1$s</xliff:g> ລະເມີດນະໂຍບາຍບັງຄັບໃຊ້ເອງ StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"ກຳລັງອັບເກຣດ Android..."</string>
+    <string name="android_start_title" msgid="8418054686415318207">"ກຳ​ລັງ​ເລີ່ມລະ​ບົບ​ Android …"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"ກຳລັງ​ປັບປຸງ​ປະສິດທິພາບ​ແອັບຯ​ທີ <xliff:g id="NUMBER_0">%1$d</xliff:g> ຈາກ​ທັງ​ໝົດ <xliff:g id="NUMBER_1">%2$d</xliff:g> ແອັບຯ."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ກຳລັງເປີດແອັບຯ."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"ກຳລັງສຳເລັດການເປີດລະບົບ."</string>
@@ -1740,7 +1741,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">

@@ -1233,6 +1233,7 @@
     <string name="smv_application" msgid="3307209192155442829">"অ্যাপ্লিকেশানটি <xliff:g id="APPLICATION">%1$s</xliff:g> (প্রক্রিয়া <xliff:g id="PROCESS">%2$s</xliff:g>) তার স্ব-প্রয়োগ করা কঠোর মোড নীতি লঙ্ঘন করেছে৷"</string>
     <string name="smv_process" msgid="5120397012047462446">"প্রক্রিয়াটি <xliff:g id="PROCESS">%1$s</xliff:g> তার স্ব-প্রয়োগ করা কঠোর মোড নীতি লঙ্ঘন করেছে৷"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android আপগ্রেড করা হচ্ছে..."</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android চালু হচ্ছে…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g>টির মধ্যে <xliff:g id="NUMBER_0">%1$d</xliff:g>টি অ্যাপ্লিকেশান অপ্টিমাইজ করা হচ্ছে৷"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"অ্যাপ্লিকেশানগুলি শুরু করা হচ্ছে৷"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"চালু করা সম্পূর্ণ হচ্ছে৷"</string>

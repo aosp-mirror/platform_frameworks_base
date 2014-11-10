@@ -1241,6 +1241,7 @@
     <string name="smv_application" msgid="3307209192155442829">"अनुप्रयोग <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ले यसको स्वयं-लागु गरिएको स्ट्रिटमोड नीति उलङ्घन गरेको छ।"</string>
     <string name="smv_process" msgid="5120397012047462446">"प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> यसको आफ्नै कडामोड नीतिका कारण उल्लङ्घन गरिएको छ।"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"एन्ड्रोइड अपग्रेड हुँदैछ…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Android शुरू हुँदैछ..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"अनुप्रयोग अनुकुल हुँदै <xliff:g id="NUMBER_0">%1$d</xliff:g> को <xliff:g id="NUMBER_1">%2$d</xliff:g>।"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"सुरुवात अनुप्रयोगहरू।"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बुट पुरा हुँदै।"</string>

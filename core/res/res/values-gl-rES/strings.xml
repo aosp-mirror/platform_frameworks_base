@@ -1233,6 +1233,7 @@
     <string name="smv_application" msgid="3307209192155442829">"A aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) infrinxiu a súa política StrictMode autoaplicada."</string>
     <string name="smv_process" msgid="5120397012047462446">"O proceso <xliff:g id="PROCESS">%1$s</xliff:g> infrinxiu a política StrictMode de aplicación automática."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Estase actualizando Android…"</string>
+    <string name="android_start_title" msgid="8418054686415318207">"Estase iniciando Android…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Optimizando aplicación <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Iniciando aplicacións."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Está finalizando o arranque"</string>

@@ -663,7 +663,7 @@
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"دسترسی به تنظیمات بلوتوث"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"‏به برنامه اجازه می‎دهد تا رایانهٔ لوحی بلوتوث محلی را پیکربندی کرده، دستگاه‌های راه دور را شناسایی کرده و با آن‌ها جفت شود."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"‏به برنامه اجازه می‎دهد تا تلفن بلوتوث محلی را پیکربندی کند و دستگاه‌های راه دور را پیدا کند و با آن‌ها جفت شود."</string>
-    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"اجازه ارتباط با بلوتوث از طریق برنامه"</string>
+    <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"اجازه مرتبط‌سازی بلوتوث از طریق برنامه"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"به برنامه امکان می‌دهد بدون تعامل کاربر با دستگاه‌های راه دور مرتبط شود."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"به برنامه امکان می‌دهد بدون تعامل کاربر با دستگاه‌های راه دور مرتبط شود."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"‏دسترسی به اطلاعات MAP بلوتوث"</string>
@@ -1233,6 +1233,7 @@
     <string name="smv_application" msgid="3307209192155442829">"‏برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> (پردازش <xliff:g id="PROCESS">%2$s</xliff:g>) خط مشی StrictMode اجرایی خود را نقض کرده است."</string>
     <string name="smv_process" msgid="5120397012047462446">"‏فرآیند <xliff:g id="PROCESS">%1$s</xliff:g> خط مشی StrictMode اجرای خودکار خود را نقض کرده است."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android در حال ارتقا است..."</string>
+    <string name="android_start_title" msgid="8418054686415318207">"‏Android در حال راه‌اندازی است..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"در حال بهینه‌سازی برنامهٔ <xliff:g id="NUMBER_0">%1$d</xliff:g> از <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"در حال آغاز برنامه‌ها."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"در حال اتمام راه‌اندازی."</string>
