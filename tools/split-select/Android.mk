@@ -34,7 +34,8 @@ sources := \
 testSources := \
     Grouper_test.cpp \
     Rule_test.cpp \
-    RuleGenerator_test.cpp
+    RuleGenerator_test.cpp \
+    TestRules.cpp
 
 cIncludes := \
     external/zlib \
