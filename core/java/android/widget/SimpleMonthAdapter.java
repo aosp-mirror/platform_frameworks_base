@@ -20,34 +20,39 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SimpleMonthView.OnDayClickListener;
 
 import java.util.Calendar;
-import java.util.HashMap;
 
 /**
  * An adapter for a list of {@link android.widget.SimpleMonthView} items.
  */
-class SimpleMonthAdapter extends BaseAdapter implements SimpleMonthView.OnDayClickListener {
+class SimpleMonthAdapter extends BaseAdapter {
     private final Calendar mMinDate = Calendar.getInstance();
     private final Calendar mMaxDate = Calendar.getInstance();
 
     private final Context mContext;
-    private final DatePickerController mController;
 
     private Calendar mSelectedDay;
     private ColorStateList mCalendarTextColors;
+    private OnDaySelectedListener mOnDaySelectedListener;
 
-    public SimpleMonthAdapter(Context context, DatePickerController controller) {
+    private int mFirstDayOfWeek;
+
+    public SimpleMonthAdapter(Context context) {
         mContext = context;
-        mController = controller;
-
-        init();
-        setSelectedDay(mController.getSelectedDay());
+        mSelectedDay = Calendar.getInstance();
     }
 
     public void setRange(Calendar min, Calendar max) {
         mMinDate.setTimeInMillis(min.getTimeInMillis());
         mMaxDate.setTimeInMillis(max.getTimeInMillis());
+
+        notifyDataSetInvalidated();
+    }
+
+    public void setFirstDayOfWeek(int firstDayOfWeek) {
+        mFirstDayOfWeek = firstDayOfWeek;
 
         notifyDataSetInvalidated();
     }
@@ -58,21 +63,22 @@ class SimpleMonthAdapter extends BaseAdapter implements SimpleMonthView.OnDayCli
      * @param day The day to highlight
      */
     public void setSelectedDay(Calendar day) {
-        if (mSelectedDay != day) {
-            mSelectedDay = day;
-            notifyDataSetChanged();
-        }
+        mSelectedDay = day;
+
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Sets the listener to call when the user selects a day.
+     *
+     * @param listener The listener to call.
+     */
+    public void setOnDaySelectedListener(OnDaySelectedListener listener) {
+        mOnDaySelectedListener = listener;
     }
 
     void setCalendarTextColor(ColorStateList colors) {
         mCalendarTextColors = colors;
-    }
-
-    /**
-     * Set up the gesture detector and selected time
-     */
-    protected void init() {
-        mSelectedDay = Calendar.getInstance();
     }
 
     @Override
@@ -111,7 +117,7 @@ class SimpleMonthAdapter extends BaseAdapter implements SimpleMonthView.OnDayCli
                     AbsListView.LayoutParams.MATCH_PARENT, AbsListView.LayoutParams.MATCH_PARENT);
             v.setLayoutParams(params);
             v.setClickable(true);
-            v.setOnDayClickListener(this);
+            v.setOnDayClickListener(mOnDayClickListener);
 
             if (mCalendarTextColors != null) {
                 v.setTextColor(mCalendarTextColors);
@@ -148,7 +154,7 @@ class SimpleMonthAdapter extends BaseAdapter implements SimpleMonthView.OnDayCli
             enabledDayRangeEnd = 31;
         }
 
-        v.setMonthParams(selectedDay, month, year, mController.getFirstDayOfWeek(),
+        v.setMonthParams(selectedDay, month, year, mFirstDayOfWeek,
                 enabledDayRangeStart, enabledDayRangeEnd);
         v.invalidate();
 
@@ -159,27 +165,24 @@ class SimpleMonthAdapter extends BaseAdapter implements SimpleMonthView.OnDayCli
         return mSelectedDay.get(Calendar.YEAR) == year && mSelectedDay.get(Calendar.MONTH) == month;
     }
 
-    @Override
-    public void onDayClick(SimpleMonthView view, Calendar day) {
-        if (day != null && isCalendarInRange(day)) {
-            onDaySelected(day);
-        }
-    }
-
     private boolean isCalendarInRange(Calendar value) {
         return value.compareTo(mMinDate) >= 0 && value.compareTo(mMaxDate) <= 0;
     }
 
-    /**
-     * Maintains the same hour/min/sec but moves the day to the tapped day.
-     *
-     * @param day The day that was tapped
-     */
-    private void onDaySelected(Calendar day) {
-        mController.tryVibrate();
-        mController.onDayOfMonthSelected(day.get(Calendar.YEAR), day.get(Calendar.MONTH),
-                day.get(Calendar.DAY_OF_MONTH));
+    private final OnDayClickListener mOnDayClickListener = new OnDayClickListener() {
+        @Override
+        public void onDayClick(SimpleMonthView view, Calendar day) {
+            if (day != null && isCalendarInRange(day)) {
+                setSelectedDay(day);
 
-        setSelectedDay(day);
+                if (mOnDaySelectedListener != null) {
+                    mOnDaySelectedListener.onDaySelected(SimpleMonthAdapter.this, day);
+                }
+            }
+        }
+    };
+
+    public interface OnDaySelectedListener {
+        public void onDaySelected(SimpleMonthAdapter view, Calendar day);
     }
 }
