@@ -4778,6 +4778,16 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether to allow one finger quick settings expansion on the side of the statusbar.
+         * 0 = 0ff, 1 = right, 2 = left
+         */
+        public static final String STATUS_BAR_QUICK_QS_PULLDOWN = "qs_quick_pulldown";
+
+        /** @hide */
+        public static final Validator STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4996,6 +5006,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(ADVANCED_REBOOT);
             PRIVATE_SETTINGS.add(LOCKSCREEN_MEDIA_METADATA);
             PRIVATE_SETTINGS.add(LOCKSCREEN_PIN_SCRAMBLE_LAYOUT);
+            PRIVATE_SETTINGS.add(STATUS_BAR_QUICK_QS_PULLDOWN);
         }
 
         /**
@@ -5117,6 +5128,7 @@ public final class Settings {
             VALIDATORS.put(ADVANCED_REBOOT, ADVANCED_REBOOT_VALIDATOR);
             VALIDATORS.put(LOCKSCREEN_MEDIA_METADATA, LOCKSCREEN_MEDIA_METADATA_VALIDATOR);
             VALIDATORS.put(LOCKSCREEN_PIN_SCRAMBLE_LAYOUT, LOCKSCREEN_PIN_SCRAMBLE_LAYOUT_VALIDATOR);
+            VALIDATORS.put(STATUS_BAR_QUICK_QS_PULLDOWN, STATUS_BAR_QUICK_QS_PULLDOWN_VALIDATOR);
         }
 
         /**
