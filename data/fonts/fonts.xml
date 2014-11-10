@@ -220,10 +220,59 @@
         <font weight="700" style="normal">NotoSansMyanmarUI-Bold.ttf</font>
     </family>
     <family>
-        <font weight="400" style="normal">NotoSansCherokee-Regular.ttf</font>
+        <font weight="400" style="normal">NotoSansThaana-Regular.ttf</font>
+        <font weight="700" style="normal">NotoSansThaana-Bold.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansBalinese-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansBatak-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansBuginese-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansBuhid-Regular.ttf</font>
     </family>
     <family>
         <font weight="400" style="normal">NotoSansCanadianAboriginal-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansCherokee-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansHanunoo-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansJavanese-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansLepcha-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansLimbu-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansMeeteiMayek-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansOlChiki-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansRejang-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansSaurashtra-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansSundanese-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansSylotiNagri-Regular.ttf</font>
+    </family>
+    <family>
+        <font weight="400" style="normal">NotoSansTagbanwa-Regular.ttf</font>
     </family>
     <family>
         <font weight="400" style="normal">NotoSansYi-Regular.ttf</font>
