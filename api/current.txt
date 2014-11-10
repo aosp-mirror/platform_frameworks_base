@@ -35921,24 +35921,25 @@ package android.webkit {
     enum_constant public static final android.webkit.ConsoleMessage.MessageLevel WARNING;
   }
 
-  public class CookieManager {
-    method public synchronized boolean acceptCookie();
-    method public boolean acceptThirdPartyCookies(android.webkit.WebView);
+  public abstract class CookieManager {
+    ctor public CookieManager();
+    method public abstract boolean acceptCookie();
+    method public abstract boolean acceptThirdPartyCookies(android.webkit.WebView);
     method public static boolean allowFileSchemeCookies();
-    method public void flush();
-    method public java.lang.String getCookie(java.lang.String);
+    method public abstract void flush();
+    method public abstract java.lang.String getCookie(java.lang.String);
     method public static synchronized android.webkit.CookieManager getInstance();
-    method public synchronized boolean hasCookies();
-    method public deprecated void removeAllCookie();
-    method public void removeAllCookies(android.webkit.ValueCallback<java.lang.Boolean>);
-    method public deprecated void removeExpiredCookie();
-    method public deprecated void removeSessionCookie();
-    method public void removeSessionCookies(android.webkit.ValueCallback<java.lang.Boolean>);
-    method public synchronized void setAcceptCookie(boolean);
+    method public abstract boolean hasCookies();
+    method public abstract deprecated void removeAllCookie();
+    method public abstract void removeAllCookies(android.webkit.ValueCallback<java.lang.Boolean>);
+    method public abstract deprecated void removeExpiredCookie();
+    method public abstract deprecated void removeSessionCookie();
+    method public abstract void removeSessionCookies(android.webkit.ValueCallback<java.lang.Boolean>);
+    method public abstract void setAcceptCookie(boolean);
     method public static void setAcceptFileSchemeCookies(boolean);
-    method public void setAcceptThirdPartyCookies(android.webkit.WebView, boolean);
-    method public void setCookie(java.lang.String, java.lang.String);
-    method public void setCookie(java.lang.String, java.lang.String, android.webkit.ValueCallback<java.lang.Boolean>);
+    method public abstract void setAcceptThirdPartyCookies(android.webkit.WebView, boolean);
+    method public abstract void setCookie(java.lang.String, java.lang.String);
+    method public abstract void setCookie(java.lang.String, java.lang.String, android.webkit.ValueCallback<java.lang.Boolean>);
   }
 
   public final deprecated class CookieSyncManager extends android.webkit.WebSyncManager {
@@ -36047,11 +36048,13 @@ package android.webkit {
     method public abstract void onReceiveValue(T);
   }
 
-  public class WebBackForwardList implements java.lang.Cloneable java.io.Serializable {
-    method public synchronized int getCurrentIndex();
-    method public synchronized android.webkit.WebHistoryItem getCurrentItem();
-    method public synchronized android.webkit.WebHistoryItem getItemAtIndex(int);
-    method public synchronized int getSize();
+  public abstract class WebBackForwardList implements java.lang.Cloneable java.io.Serializable {
+    ctor public WebBackForwardList();
+    method protected abstract android.webkit.WebBackForwardList clone();
+    method public abstract int getCurrentIndex();
+    method public abstract android.webkit.WebHistoryItem getCurrentItem();
+    method public abstract android.webkit.WebHistoryItem getItemAtIndex(int);
+    method public abstract int getSize();
   }
 
   public class WebChromeClient {
@@ -36103,21 +36106,24 @@ package android.webkit {
     field public static final int MODE_SAVE = 3; // 0x3
   }
 
-  public class WebHistoryItem implements java.lang.Cloneable {
-    method public android.graphics.Bitmap getFavicon();
-    method public java.lang.String getOriginalUrl();
-    method public java.lang.String getTitle();
-    method public java.lang.String getUrl();
+  public abstract class WebHistoryItem implements java.lang.Cloneable {
+    ctor public WebHistoryItem();
+    method protected abstract android.webkit.WebHistoryItem clone();
+    method public abstract android.graphics.Bitmap getFavicon();
+    method public abstract java.lang.String getOriginalUrl();
+    method public abstract java.lang.String getTitle();
+    method public abstract java.lang.String getUrl();
   }
 
-  public deprecated class WebIconDatabase {
-    method public void close();
+  public abstract deprecated class WebIconDatabase {
+    ctor public WebIconDatabase();
+    method public abstract void close();
     method public static android.webkit.WebIconDatabase getInstance();
-    method public void open(java.lang.String);
-    method public void releaseIconForPageUrl(java.lang.String);
-    method public void removeAllIcons();
-    method public void requestIconForPageUrl(java.lang.String, android.webkit.WebIconDatabase.IconListener);
-    method public void retainIconForPageUrl(java.lang.String);
+    method public abstract void open(java.lang.String);
+    method public abstract void releaseIconForPageUrl(java.lang.String);
+    method public abstract void removeAllIcons();
+    method public abstract void requestIconForPageUrl(java.lang.String, android.webkit.WebIconDatabase.IconListener);
+    method public abstract void retainIconForPageUrl(java.lang.String);
   }
 
   public static abstract deprecated interface WebIconDatabase.IconListener {
@@ -36149,98 +36155,99 @@ package android.webkit {
   }
 
   public abstract class WebSettings {
-    method public deprecated boolean enableSmoothTransition();
-    method public boolean getAllowContentAccess();
-    method public boolean getAllowFileAccess();
+    ctor public WebSettings();
+    method public abstract deprecated boolean enableSmoothTransition();
+    method public abstract boolean getAllowContentAccess();
+    method public abstract boolean getAllowFileAccess();
     method public abstract boolean getAllowFileAccessFromFileURLs();
     method public abstract boolean getAllowUniversalAccessFromFileURLs();
-    method public synchronized boolean getBlockNetworkImage();
-    method public synchronized boolean getBlockNetworkLoads();
-    method public boolean getBuiltInZoomControls();
-    method public int getCacheMode();
-    method public synchronized java.lang.String getCursiveFontFamily();
-    method public synchronized boolean getDatabaseEnabled();
-    method public deprecated synchronized java.lang.String getDatabasePath();
-    method public synchronized int getDefaultFixedFontSize();
-    method public synchronized int getDefaultFontSize();
-    method public synchronized java.lang.String getDefaultTextEncodingName();
+    method public abstract boolean getBlockNetworkImage();
+    method public abstract boolean getBlockNetworkLoads();
+    method public abstract boolean getBuiltInZoomControls();
+    method public abstract int getCacheMode();
+    method public abstract java.lang.String getCursiveFontFamily();
+    method public abstract boolean getDatabaseEnabled();
+    method public abstract deprecated java.lang.String getDatabasePath();
+    method public abstract int getDefaultFixedFontSize();
+    method public abstract int getDefaultFontSize();
+    method public abstract java.lang.String getDefaultTextEncodingName();
     method public static java.lang.String getDefaultUserAgent(android.content.Context);
-    method public deprecated android.webkit.WebSettings.ZoomDensity getDefaultZoom();
-    method public boolean getDisplayZoomControls();
-    method public synchronized boolean getDomStorageEnabled();
-    method public synchronized java.lang.String getFantasyFontFamily();
-    method public synchronized java.lang.String getFixedFontFamily();
-    method public synchronized boolean getJavaScriptCanOpenWindowsAutomatically();
-    method public synchronized boolean getJavaScriptEnabled();
-    method public synchronized android.webkit.WebSettings.LayoutAlgorithm getLayoutAlgorithm();
-    method public deprecated boolean getLightTouchEnabled();
-    method public boolean getLoadWithOverviewMode();
-    method public synchronized boolean getLoadsImagesAutomatically();
-    method public boolean getMediaPlaybackRequiresUserGesture();
-    method public synchronized int getMinimumFontSize();
-    method public synchronized int getMinimumLogicalFontSize();
+    method public abstract deprecated android.webkit.WebSettings.ZoomDensity getDefaultZoom();
+    method public abstract boolean getDisplayZoomControls();
+    method public abstract boolean getDomStorageEnabled();
+    method public abstract java.lang.String getFantasyFontFamily();
+    method public abstract java.lang.String getFixedFontFamily();
+    method public abstract boolean getJavaScriptCanOpenWindowsAutomatically();
+    method public abstract boolean getJavaScriptEnabled();
+    method public abstract android.webkit.WebSettings.LayoutAlgorithm getLayoutAlgorithm();
+    method public abstract deprecated boolean getLightTouchEnabled();
+    method public abstract boolean getLoadWithOverviewMode();
+    method public abstract boolean getLoadsImagesAutomatically();
+    method public abstract boolean getMediaPlaybackRequiresUserGesture();
+    method public abstract int getMinimumFontSize();
+    method public abstract int getMinimumLogicalFontSize();
     method public abstract int getMixedContentMode();
-    method public deprecated synchronized android.webkit.WebSettings.PluginState getPluginState();
-    method public synchronized java.lang.String getSansSerifFontFamily();
-    method public boolean getSaveFormData();
-    method public deprecated boolean getSavePassword();
-    method public synchronized java.lang.String getSerifFontFamily();
-    method public synchronized java.lang.String getStandardFontFamily();
+    method public abstract deprecated android.webkit.WebSettings.PluginState getPluginState();
+    method public abstract java.lang.String getSansSerifFontFamily();
+    method public abstract boolean getSaveFormData();
+    method public abstract deprecated boolean getSavePassword();
+    method public abstract java.lang.String getSerifFontFamily();
+    method public abstract java.lang.String getStandardFontFamily();
     method public deprecated synchronized android.webkit.WebSettings.TextSize getTextSize();
-    method public synchronized int getTextZoom();
-    method public synchronized boolean getUseWideViewPort();
-    method public synchronized java.lang.String getUserAgentString();
-    method public void setAllowContentAccess(boolean);
-    method public void setAllowFileAccess(boolean);
+    method public abstract int getTextZoom();
+    method public abstract boolean getUseWideViewPort();
+    method public abstract java.lang.String getUserAgentString();
+    method public abstract void setAllowContentAccess(boolean);
+    method public abstract void setAllowFileAccess(boolean);
     method public abstract void setAllowFileAccessFromFileURLs(boolean);
     method public abstract void setAllowUniversalAccessFromFileURLs(boolean);
-    method public synchronized void setAppCacheEnabled(boolean);
-    method public deprecated synchronized void setAppCacheMaxSize(long);
-    method public synchronized void setAppCachePath(java.lang.String);
-    method public synchronized void setBlockNetworkImage(boolean);
-    method public synchronized void setBlockNetworkLoads(boolean);
-    method public void setBuiltInZoomControls(boolean);
-    method public void setCacheMode(int);
-    method public synchronized void setCursiveFontFamily(java.lang.String);
-    method public synchronized void setDatabaseEnabled(boolean);
-    method public deprecated synchronized void setDatabasePath(java.lang.String);
-    method public synchronized void setDefaultFixedFontSize(int);
-    method public synchronized void setDefaultFontSize(int);
-    method public synchronized void setDefaultTextEncodingName(java.lang.String);
-    method public deprecated void setDefaultZoom(android.webkit.WebSettings.ZoomDensity);
-    method public void setDisplayZoomControls(boolean);
-    method public synchronized void setDomStorageEnabled(boolean);
-    method public deprecated void setEnableSmoothTransition(boolean);
-    method public synchronized void setFantasyFontFamily(java.lang.String);
-    method public synchronized void setFixedFontFamily(java.lang.String);
-    method public synchronized void setGeolocationDatabasePath(java.lang.String);
-    method public synchronized void setGeolocationEnabled(boolean);
-    method public synchronized void setJavaScriptCanOpenWindowsAutomatically(boolean);
-    method public synchronized void setJavaScriptEnabled(boolean);
-    method public synchronized void setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm);
-    method public deprecated void setLightTouchEnabled(boolean);
-    method public void setLoadWithOverviewMode(boolean);
-    method public synchronized void setLoadsImagesAutomatically(boolean);
-    method public void setMediaPlaybackRequiresUserGesture(boolean);
-    method public synchronized void setMinimumFontSize(int);
-    method public synchronized void setMinimumLogicalFontSize(int);
+    method public abstract void setAppCacheEnabled(boolean);
+    method public abstract deprecated void setAppCacheMaxSize(long);
+    method public abstract void setAppCachePath(java.lang.String);
+    method public abstract void setBlockNetworkImage(boolean);
+    method public abstract void setBlockNetworkLoads(boolean);
+    method public abstract void setBuiltInZoomControls(boolean);
+    method public abstract void setCacheMode(int);
+    method public abstract void setCursiveFontFamily(java.lang.String);
+    method public abstract void setDatabaseEnabled(boolean);
+    method public abstract deprecated void setDatabasePath(java.lang.String);
+    method public abstract void setDefaultFixedFontSize(int);
+    method public abstract void setDefaultFontSize(int);
+    method public abstract void setDefaultTextEncodingName(java.lang.String);
+    method public abstract deprecated void setDefaultZoom(android.webkit.WebSettings.ZoomDensity);
+    method public abstract void setDisplayZoomControls(boolean);
+    method public abstract void setDomStorageEnabled(boolean);
+    method public abstract deprecated void setEnableSmoothTransition(boolean);
+    method public abstract void setFantasyFontFamily(java.lang.String);
+    method public abstract void setFixedFontFamily(java.lang.String);
+    method public abstract void setGeolocationDatabasePath(java.lang.String);
+    method public abstract void setGeolocationEnabled(boolean);
+    method public abstract void setJavaScriptCanOpenWindowsAutomatically(boolean);
+    method public abstract void setJavaScriptEnabled(boolean);
+    method public abstract void setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm);
+    method public abstract deprecated void setLightTouchEnabled(boolean);
+    method public abstract void setLoadWithOverviewMode(boolean);
+    method public abstract void setLoadsImagesAutomatically(boolean);
+    method public abstract void setMediaPlaybackRequiresUserGesture(boolean);
+    method public abstract void setMinimumFontSize(int);
+    method public abstract void setMinimumLogicalFontSize(int);
     method public abstract void setMixedContentMode(int);
-    method public void setNeedInitialFocus(boolean);
-    method public deprecated synchronized void setPluginState(android.webkit.WebSettings.PluginState);
-    method public deprecated synchronized void setRenderPriority(android.webkit.WebSettings.RenderPriority);
-    method public synchronized void setSansSerifFontFamily(java.lang.String);
-    method public void setSaveFormData(boolean);
-    method public deprecated void setSavePassword(boolean);
-    method public synchronized void setSerifFontFamily(java.lang.String);
-    method public synchronized void setStandardFontFamily(java.lang.String);
-    method public synchronized void setSupportMultipleWindows(boolean);
-    method public void setSupportZoom(boolean);
+    method public abstract void setNeedInitialFocus(boolean);
+    method public abstract deprecated void setPluginState(android.webkit.WebSettings.PluginState);
+    method public abstract deprecated void setRenderPriority(android.webkit.WebSettings.RenderPriority);
+    method public abstract void setSansSerifFontFamily(java.lang.String);
+    method public abstract void setSaveFormData(boolean);
+    method public abstract deprecated void setSavePassword(boolean);
+    method public abstract void setSerifFontFamily(java.lang.String);
+    method public abstract void setStandardFontFamily(java.lang.String);
+    method public abstract void setSupportMultipleWindows(boolean);
+    method public abstract void setSupportZoom(boolean);
     method public deprecated synchronized void setTextSize(android.webkit.WebSettings.TextSize);
-    method public synchronized void setTextZoom(int);
-    method public synchronized void setUseWideViewPort(boolean);
-    method public synchronized void setUserAgentString(java.lang.String);
-    method public synchronized boolean supportMultipleWindows();
-    method public boolean supportZoom();
+    method public abstract void setTextZoom(int);
+    method public abstract void setUseWideViewPort(boolean);
+    method public abstract void setUserAgentString(java.lang.String);
+    method public abstract boolean supportMultipleWindows();
+    method public abstract boolean supportZoom();
     field public static final int LOAD_CACHE_ELSE_NETWORK = 1; // 0x1
     field public static final int LOAD_CACHE_ONLY = 3; // 0x3
     field public static final int LOAD_DEFAULT = -1; // 0xffffffff
@@ -36490,14 +36497,15 @@ package android.webkit {
     field public static final int ERROR_UNSUPPORTED_SCHEME = -10; // 0xfffffff6
   }
 
-  public class WebViewDatabase {
-    method public void clearFormData();
-    method public void clearHttpAuthUsernamePassword();
-    method public deprecated void clearUsernamePassword();
+  public abstract class WebViewDatabase {
+    ctor public WebViewDatabase();
+    method public abstract void clearFormData();
+    method public abstract void clearHttpAuthUsernamePassword();
+    method public abstract deprecated void clearUsernamePassword();
     method public static android.webkit.WebViewDatabase getInstance(android.content.Context);
-    method public boolean hasFormData();
-    method public boolean hasHttpAuthUsernamePassword();
-    method public deprecated boolean hasUsernamePassword();
+    method public abstract boolean hasFormData();
+    method public abstract boolean hasHttpAuthUsernamePassword();
+    method public abstract deprecated boolean hasUsernamePassword();
   }
 
   public class WebViewFragment extends android.app.Fragment {

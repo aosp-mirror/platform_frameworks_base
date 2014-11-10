@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.content.Context;
@@ -35,6 +36,7 @@ import android.view.ViewRootImpl;
  *
  * @hide
  */
+@SystemApi
 public final class WebViewDelegate {
 
     /* package */ WebViewDelegate() { }
