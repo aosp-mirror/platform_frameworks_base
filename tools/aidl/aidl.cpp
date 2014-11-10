@@ -228,7 +228,8 @@ check_filename(const char* filename, const char* package, buffer_type* name)
         }
 #endif
 
-#ifdef OS_CASE_SENSITIVE
+        // aidl assumes case-insensitivity on Mac Os and Windows.
+#if defined(__linux__)
         valid = (expected == p);
 #else
         valid = !strcasecmp(expected.c_str(), p);
