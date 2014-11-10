@@ -29,6 +29,16 @@ inline static void indentStr(String8& str, int indent) {
     }
 }
 
+Rule::Rule(const Rule& rhs)
+    : RefBase()
+    , op(rhs.op)
+    , key(rhs.key)
+    , negate(rhs.negate)
+    , stringArgs(rhs.stringArgs)
+    , longArgs(rhs.longArgs)
+    , subrules(rhs.subrules) {
+}
+
 String8 Rule::toJson(int indent) const {
     String8 str;
     indentStr(str, indent);

@@ -15,6 +15,7 @@
  */
 
 #include "RuleGenerator.h"
+#include "aapt/SdkConstants.h"
 
 #include <algorithm>
 #include <cmath>
@@ -32,18 +33,21 @@ static inline int findMid(int l, int h) {
 }
 
 sp<Rule> RuleGenerator::generateDensity(const Vector<int>& allDensities, size_t index) {
-    sp<Rule> densityRule = new Rule();
-    densityRule->op = Rule::AND_SUBRULES;
+    if (allDensities[index] != ResTable_config::DENSITY_ANY) {
+        sp<Rule> densityRule = new Rule();
+        densityRule->op = Rule::AND_SUBRULES;
 
-    const bool anyDensity = allDensities[index] == ResTable_config::DENSITY_ANY;
-    sp<Rule> any = new Rule();
-    any->op = Rule::EQUALS;
-    any->key = Rule::SCREEN_DENSITY;
-    any->longArgs.add((int)ResTable_config::DENSITY_ANY);
-    any->negate = !anyDensity;
-    densityRule->subrules.add(any);
+        const bool hasAnyDensity = std::find(allDensities.begin(),
+                allDensities.end(), (int) ResTable_config::DENSITY_ANY) != allDensities.end();
 
-    if (!anyDensity) {
+        if (hasAnyDensity) {
+            sp<Rule> version = new Rule();
+            version->op = Rule::LESS_THAN;
+            version->key = Rule::SDK_VERSION;
+            version->longArgs.add((long) SDK_LOLLIPOP);
+            densityRule->subrules.add(version);
+        }
+
         if (index > 0) {
             sp<Rule> gt = new Rule();
             gt->op = Rule::GREATER_THAN;
@@ -59,8 +63,14 @@ sp<Rule> RuleGenerator::generateDensity(const Vector<int>& allDensities, size_t 
             lt->longArgs.add(findMid(allDensities[index], allDensities[index + 1]));
             densityRule->subrules.add(lt);
         }
+        return densityRule;
+    } else {
+        // SDK_VERSION is handled elsewhere, so we always pick DENSITY_ANY if it's
+        // available.
+        sp<Rule> always = new Rule();
+        always->op = Rule::ALWAYS_TRUE;
+        return always;
     }
-    return densityRule;
 }
 
 sp<Rule> RuleGenerator::generateAbi(const Vector<abi::Variant>& splitAbis, size_t index) {
