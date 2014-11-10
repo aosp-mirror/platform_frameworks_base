@@ -15,19 +15,10 @@
      limitations under the License.
 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android" >
-    <set
-        android:ordering="sequentially" >
-        <objectAnimator
-            android:duration="200"
-            android:propertyName="rotation"
-            android:valueFrom="0"
-            android:valueTo="0"
-            android:interpolator="@android:interpolator/fast_out_slow_in" />
-        <objectAnimator
-            android:duration="400"
-            android:propertyName="rotation"
-            android:valueFrom="0"
-            android:valueTo="-135"
-            android:interpolator="@android:interpolator/fast_out_slow_in" />
-    </set>
+    <objectAnimator
+        android:duration="400"
+        android:propertyName="rotation"
+        android:valueFrom="0"
+        android:valueTo="-135"
+        android:interpolator="@android:interpolator/fast_out_slow_in" />
 </set>

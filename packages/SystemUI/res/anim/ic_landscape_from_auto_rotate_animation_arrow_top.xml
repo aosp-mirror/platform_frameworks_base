@@ -18,7 +18,7 @@
     <set
         android:ordering="sequentially" >
         <objectAnimator
-            android:duration="567"
+            android:duration="367"
             android:propertyName="fillAlpha"
             android:valueFrom="1"
             android:valueTo="1"
