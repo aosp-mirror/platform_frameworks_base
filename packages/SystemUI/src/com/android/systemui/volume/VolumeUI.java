@@ -10,6 +10,7 @@ import android.media.session.ISessionController;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -183,6 +184,11 @@ public class VolumeUI extends SystemUI {
         @Override
         public ZenModeController getZenController() {
             return mPanel.getZenController();
+        }
+
+        @Override
+        public void dispatchDemoCommand(String command, Bundle args) {
+            mPanel.dispatchDemoCommand(command, args);
         }
     }
 
