@@ -330,7 +330,8 @@ public abstract class PanelView extends FrameLayout {
                         vectorVel = (float) Math.hypot(
                                 mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
                     }
-                    boolean expand = flingExpands(vel, vectorVel);
+                    boolean expand = flingExpands(vel, vectorVel)
+                            || event.getActionMasked() == MotionEvent.ACTION_CANCEL;
                     onTrackingStopped(expand);
                     DozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
                             mStatusBar.isFalsingThresholdNeeded(),
