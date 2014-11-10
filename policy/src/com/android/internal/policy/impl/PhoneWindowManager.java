@@ -3073,7 +3073,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void getContentInsetHintLw(WindowManager.LayoutParams attrs, Rect contentInset) {
+    public void getInsetHintLw(WindowManager.LayoutParams attrs, Rect outContentInsets,
+            Rect outStableInsets) {
         final int fl = PolicyControl.getWindowFlags(null, attrs);
         final int sysuiVis = PolicyControl.getSystemUiVisibility(null, attrs);
         final int systemUiVisibility = (sysuiVis | attrs.subtreeSystemUiVisibility);
@@ -3091,26 +3092,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             if ((systemUiVisibility & View.SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0) {
                 if ((fl & FLAG_FULLSCREEN) != 0) {
-                    contentInset.set(mStableFullscreenLeft, mStableFullscreenTop,
+                    outContentInsets.set(mStableFullscreenLeft, mStableFullscreenTop,
                             availRight - mStableFullscreenRight,
                             availBottom - mStableFullscreenBottom);
                 } else {
-                    contentInset.set(mStableLeft, mStableTop,
+                    outContentInsets.set(mStableLeft, mStableTop,
                             availRight - mStableRight, availBottom - mStableBottom);
                 }
             } else if ((fl & FLAG_FULLSCREEN) != 0 || (fl & FLAG_LAYOUT_IN_OVERSCAN) != 0) {
-                contentInset.setEmpty();
+                outContentInsets.setEmpty();
             } else if ((systemUiVisibility & (View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)) == 0) {
-                contentInset.set(mCurLeft, mCurTop,
+                outContentInsets.set(mCurLeft, mCurTop,
                         availRight - mCurRight, availBottom - mCurBottom);
             } else {
-                contentInset.set(mCurLeft, mCurTop,
+                outContentInsets.set(mCurLeft, mCurTop,
                         availRight - mCurRight, availBottom - mCurBottom);
             }
+
+            outStableInsets.set(mStableLeft, mStableTop,
+                    availRight - mStableRight, availBottom - mStableBottom);
             return;
         }
-        contentInset.setEmpty();
+        outContentInsets.setEmpty();
+        outStableInsets.setEmpty();
     }
 
     /** {@inheritDoc} */
