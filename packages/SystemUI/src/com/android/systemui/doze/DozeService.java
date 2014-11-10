@@ -449,10 +449,12 @@ public class DozeService extends DreamService {
 
         private void updateListener() {
             if (!mConfigured || mSensor == null) return;
-            if (mRequested && !mDisabled) {
+            if (mRequested && !mDisabled && !mRegistered) {
                 mRegistered = mSensors.requestTriggerSensor(this, mSensor);
+                if (DEBUG) Log.d(mTag, "requestTriggerSensor " + mRegistered);
             } else if (mRegistered) {
-                mSensors.cancelTriggerSensor(this, mSensor);
+                final boolean rt = mSensors.cancelTriggerSensor(this, mSensor);
+                if (DEBUG) Log.d(mTag, "cancelTriggerSensor " + rt);
                 mRegistered = false;
             }
         }
@@ -483,7 +485,8 @@ public class DozeService extends DreamService {
                 }
 
                 requestPulse();
-                setListening(true);  // reregister, this sensor only fires once
+                mRegistered = false;
+                updateListener();  // reregister, this sensor only fires once
 
                 // reset the notification pulse schedule, but only if we think we were not triggered
                 // by a notification-related vibration
