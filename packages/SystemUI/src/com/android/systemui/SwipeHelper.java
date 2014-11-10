@@ -453,7 +453,8 @@ public class SwipeHelper implements Gefingerpoken {
                             && !mTouchAboveFalsingThreshold;
 
                     boolean dismissChild = mCallback.canChildBeDismissed(mCurrView)
-                            && !falsingDetected && (childSwipedFastEnough || childSwipedFarEnough);
+                            && !falsingDetected && (childSwipedFastEnough || childSwipedFarEnough)
+                            && ev.getActionMasked() == MotionEvent.ACTION_UP;
 
                     if (dismissChild) {
                         // flingadingy
