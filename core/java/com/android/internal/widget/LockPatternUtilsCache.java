@@ -18,7 +18,9 @@ package com.android.internal.widget;
 
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.Log;
 
 /**
  * A decorator for {@link ILockSettings} that caches the key-value responses in memory.
@@ -28,9 +30,11 @@ import android.util.ArrayMap;
  */
 public class LockPatternUtilsCache implements ILockSettings {
 
-    private static final String HAS_LOCK_PATTERN_CACHE_KEY
+    private static final String TAG = "LockPatternUtilsCache";
+
+    public static final String HAS_LOCK_PATTERN_CACHE_KEY
             = "LockPatternUtils.Cache.HasLockPatternCacheKey";
-    private static final String HAS_LOCK_PASSWORD_CACHE_KEY
+    public static final String HAS_LOCK_PASSWORD_CACHE_KEY
             = "LockPatternUtils.Cache.HasLockPasswordCacheKey";
 
     private static LockPatternUtilsCache sInstance;
@@ -53,7 +57,7 @@ public class LockPatternUtilsCache implements ILockSettings {
 
     // ILockSettings
 
-    private LockPatternUtilsCache(ILockSettings service) {
+    public LockPatternUtilsCache(ILockSettings service) {
         mService = service;
         try {
             service.registerObserver(mObserver);
@@ -186,6 +190,7 @@ public class LockPatternUtilsCache implements ILockSettings {
     // Caching
 
     private Object peekCache(String key, int userId) {
+        if (!validateUserId(userId)) return null;
         synchronized (mCache) {
             // Safe to reuse mCacheKey, because it is not stored in the map.
             return mCache.get(mCacheKey.set(key, userId));
@@ -193,6 +198,7 @@ public class LockPatternUtilsCache implements ILockSettings {
     }
 
     private void putCache(String key, int userId, Object value) {
+        if (!validateUserId(userId)) return;
         synchronized (mCache) {
             // Create a new key, because this will be stored in the map.
             mCache.put(new CacheKey().set(key, userId), value);
@@ -200,9 +206,14 @@ public class LockPatternUtilsCache implements ILockSettings {
     }
 
     private void invalidateCache(String key, int userId) {
+        if (!validateUserId(userId)) return;
         synchronized (mCache) {
-            // Safe to reuse mCacheKey, because it is not stored in the map.
-            mCache.remove(mCacheKey.set(key, userId));
+            if (key != null) {
+                // Safe to reuse mCacheKey, because it is not stored in the map.
+                mCache.remove(mCacheKey.set(key, userId));
+            } else {
+                mCache.clear();
+            }
         }
     }
 
@@ -212,6 +223,14 @@ public class LockPatternUtilsCache implements ILockSettings {
             invalidateCache(key, userId);
         }
     };
+
+    private final boolean validateUserId(int userId) {
+        if (userId < UserHandle.USER_OWNER) {
+            Log.e(TAG, "User " + userId + " not supported: Must be a concrete user.");
+            return false;
+        }
+        return true;
+    }
 
     private static final class CacheKey {
         String key;
