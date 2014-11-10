@@ -16,14 +16,10 @@
 
 package android.widget;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.view.View;
@@ -38,9 +34,7 @@ import java.util.Locale;
 /**
  * This displays a list of months in a calendar format with selectable days.
  */
-class DayPickerView extends ListView implements AbsListView.OnScrollListener,
-        OnDateChangedListener {
-
+class DayPickerView extends ListView implements AbsListView.OnScrollListener {
     private static final String TAG = "DayPickerView";
 
     // How long the GoTo fling animation should last
@@ -49,12 +43,14 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
     // How long to wait after receiving an onScrollStateChanged notification before acting on it
     private static final int SCROLL_CHANGE_DELAY = 40;
 
-    private static int LIST_TOP_OFFSET = -1; // so that the top line will be under the separator
+    // so that the top line will be under the separator
+    private static final int LIST_TOP_OFFSET = -1;
+
+    private final SimpleMonthAdapter mAdapter = new SimpleMonthAdapter(getContext());
+
+    private final ScrollStateRunnable mScrollStateChangedRunnable = new ScrollStateRunnable(this);
 
     private SimpleDateFormat mYearFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
-
-    // These affect the scroll speed and feel
-    private float mFriction = 1.0f;
 
     // highlighted time
     private Calendar mSelectedDay = Calendar.getInstance();
@@ -62,7 +58,7 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
     private Calendar mMinDate = Calendar.getInstance();
     private Calendar mMaxDate = Calendar.getInstance();
 
-    private SimpleMonthAdapter mAdapter;
+    private OnDaySelectedListener mOnDaySelectedListener;
 
     // which month should be displayed/highlighted [0-11]
     private int mCurrentMonthDisplayed;
@@ -71,34 +67,27 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
     // used for tracking what state listview is in
     private int mCurrentScrollState = OnScrollListener.SCROLL_STATE_IDLE;
 
-    private DatePickerController mController;
     private boolean mPerformingScroll;
 
-    private ScrollStateRunnable mScrollStateChangedRunnable = new ScrollStateRunnable(this);
-
-    public DayPickerView(Context context, DatePickerController controller) {
+    public DayPickerView(Context context) {
         super(context);
 
-        init();
-        setController(controller);
-    }
-
-    public void setController(DatePickerController controller) {
-        if (mController != null) {
-            mController.unregisterOnDateChangedListener(this);
-        }
-        mController = controller;
-        mController.registerOnDateChangedListener(this);
-        setUpAdapter();
         setAdapter(mAdapter);
-        onDateChanged();
-    }
-
-    public void init() {
         setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         setDrawSelectorOnTop(false);
-
         setUpListView();
+
+        goTo(mSelectedDay, false, true, true);
+
+        mAdapter.setOnDaySelectedListener(mProxyOnDaySelectedListener);
+    }
+
+    public void setDay(Calendar day) {
+        goTo(day, false, true, true);
+    }
+
+    public void setFirstDayOfWeek(int firstDayOfWeek) {
+        mAdapter.setFirstDayOfWeek(firstDayOfWeek);
     }
 
     public void setRange(Calendar minDate, Calendar maxDate) {
@@ -113,54 +102,19 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
     }
 
     /**
-     * Constrains the supplied calendar to stay within the min and max
-     * calendars, returning <code>true</code> if the supplied calendar
-     * was modified.
+     * Sets the listener to call when the user selects a day.
      *
-     * @param value The calendar to constrain
-     * @param min The minimum calendar
-     * @param max The maximum calendar
-     * @return True if <code>value</code> was modified
+     * @param listener The listener to call.
      */
-    private boolean constrainCalendar(Calendar value, Calendar min, Calendar max) {
-        if (value.compareTo(min) < 0) {
-            value.setTimeInMillis(min.getTimeInMillis());
-            return true;
-        }
-
-        if (value.compareTo(max) > 0) {
-            value.setTimeInMillis(max.getTimeInMillis());
-            return true;
-        }
-
-        return false;
-    }
-
-    public void onChange() {
-        setUpAdapter();
-        setAdapter(mAdapter);
-    }
-
-    /**
-     * Creates a new adapter if necessary and sets up its parameters. Override
-     * this method to provide a custom adapter.
-     */
-    protected void setUpAdapter() {
-        if (mAdapter == null) {
-            mAdapter = new SimpleMonthAdapter(getContext(), mController);
-        } else {
-            mAdapter.setSelectedDay(mSelectedDay);
-            mAdapter.notifyDataSetChanged();
-        }
-        // refresh the view with the new parameters
-        mAdapter.notifyDataSetChanged();
+    public void setOnDaySelectedListener(OnDaySelectedListener listener) {
+        mOnDaySelectedListener = listener;
     }
 
     /*
      * Sets all the required fields for the list view. Override this method to
      * set a different list view behavior.
      */
-    protected void setUpListView() {
+    private void setUpListView() {
         // Transparent background on scroll
         setCacheColorHint(0);
         // No dividers
@@ -173,7 +127,7 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         setOnScrollListener(this);
         setFadingEdgeLength(0);
         // Make the scrolling behavior nicer
-        setFriction(ViewConfiguration.getScrollFriction() * mFriction);
+        setFriction(ViewConfiguration.getScrollFriction());
     }
 
     private int getDiffMonths(Calendar start, Calendar end) {
@@ -203,7 +157,7 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
      *            visible
      * @return Whether or not the view animated to the new location
      */
-    public boolean goTo(Calendar day, boolean animate, boolean setSelected, boolean forceScroll) {
+    private boolean goTo(Calendar day, boolean animate, boolean setSelected, boolean forceScroll) {
 
         // Set the selected day
         if (setSelected) {
@@ -392,11 +346,6 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         return firstPosition + mostVisibleIndex;
     }
 
-    @Override
-    public void onDateChanged() {
-        goTo(mController.getSelectedDay(), false, true, true);
-    }
-
     /**
      * Attempts to return the date that has accessibility focus.
      *
@@ -529,4 +478,18 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener,
         mPerformingScroll = true;
         return true;
     }
+
+    public interface OnDaySelectedListener {
+        public void onDaySelected(DayPickerView view, Calendar day);
+    }
+
+    private final SimpleMonthAdapter.OnDaySelectedListener
+            mProxyOnDaySelectedListener = new SimpleMonthAdapter.OnDaySelectedListener() {
+        @Override
+        public void onDaySelected(SimpleMonthAdapter adapter, Calendar day) {
+            if (mOnDaySelectedListener != null) {
+                mOnDaySelectedListener.onDaySelected(DayPickerView.this, day);
+            }
+        }
+    };
 }
