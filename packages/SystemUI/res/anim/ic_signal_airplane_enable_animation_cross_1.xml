@@ -15,27 +15,17 @@
      limitations under the License.
 -->
 <set xmlns:android="http://schemas.android.com/apk/res/android" >
+    <objectAnimator
+        android:duration="350"
+        android:propertyName="pathData"
+        android:valueFrom="M 7.54049682617,3.9430847168 c 0.0,0.0 31.5749816895,31.4499664307 31.5749816895,31.4499664307 "
+        android:valueTo="M 7.54049682617,3.9430847168 c 0.0,0.0 0.324981689453,0.399978637695 0.324981689453,0.399978637695 "
+        android:valueType="pathType"
+        android:interpolator="@interpolator/ic_signal_airplane_enable_cross_1_pathdata_interpolator" />
     <set
         android:ordering="sequentially" >
         <objectAnimator
-            android:duration="200"
-            android:propertyName="pathData"
-            android:valueFrom="M 7.54049682617,3.9430847168 c 0.0,0.0 31.5749816895,31.4499664307 31.5749816895,31.4499664307 "
-            android:valueTo="M 7.54049682617,3.9430847168 c 0.0,0.0 31.5749816895,31.4499664307 31.5749816895,31.4499664307 "
-            android:valueType="pathType"
-            android:interpolator="@android:interpolator/linear" />
-        <objectAnimator
-            android:duration="350"
-            android:propertyName="pathData"
-            android:valueFrom="M 7.54049682617,3.9430847168 c 0.0,0.0 31.5749816895,31.4499664307 31.5749816895,31.4499664307 "
-            android:valueTo="M 7.54049682617,3.9430847168 c 0.0,0.0 0.324981689453,0.399978637695 0.324981689453,0.399978637695 "
-            android:valueType="pathType"
-            android:interpolator="@interpolator/ic_signal_airplane_enable_cross_1_pathdata_interpolator" />
-    </set>
-    <set
-        android:ordering="sequentially" >
-        <objectAnimator
-            android:duration="533"
+            android:duration="333"
             android:propertyName="strokeAlpha"
             android:valueFrom="1"
             android:valueTo="1"

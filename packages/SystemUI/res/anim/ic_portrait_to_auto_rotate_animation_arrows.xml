@@ -18,7 +18,7 @@
     <set
         android:ordering="sequentially" >
         <objectAnimator
-            android:duration="333"
+            android:duration="133"
             android:propertyName="scaleX"
             android:valueFrom="0.9"
             android:valueTo="0.9"
@@ -33,7 +33,7 @@
     <set
         android:ordering="sequentially" >
         <objectAnimator
-            android:duration="333"
+            android:duration="133"
             android:propertyName="scaleY"
             android:valueFrom="0.9"
             android:valueTo="0.9"
@@ -45,19 +45,10 @@
             android:valueTo="1"
             android:interpolator="@android:interpolator/linear" />
     </set>
-    <set
-        android:ordering="sequentially" >
-        <objectAnimator
-            android:duration="200"
-            android:propertyName="rotation"
-            android:valueFrom="-221"
-            android:valueTo="-221"
-            android:interpolator="@android:interpolator/fast_out_slow_in" />
-        <objectAnimator
-            android:duration="617"
-            android:propertyName="rotation"
-            android:valueFrom="-221"
-            android:valueTo="0"
-            android:interpolator="@android:interpolator/fast_out_slow_in" />
-    </set>
+    <objectAnimator
+        android:duration="617"
+        android:propertyName="rotation"
+        android:valueFrom="-221"
+        android:valueTo="0"
+        android:interpolator="@android:interpolator/fast_out_slow_in" />
 </set>

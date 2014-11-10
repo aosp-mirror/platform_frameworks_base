@@ -20,9 +20,6 @@
         android:name="root"
         android:animation="@anim/ic_signal_airplane_disable_animation_root" />
     <target
-        android:name="ic_signal_airplane"
-        android:animation="@anim/ic_signal_airplane_disable_animation_ic_signal_airplane" />
-    <target
         android:name="mask"
         android:animation="@anim/ic_signal_airplane_disable_animation_mask" />
     <target
