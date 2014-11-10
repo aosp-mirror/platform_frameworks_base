@@ -191,16 +191,13 @@
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
 
-    <dimen name="segmented_button_spacing">4dp</dimen>
-    <dimen name="segmented_button_radius">2dp</dimen>
+    <dimen name="segmented_button_spacing">8dp</dimen>
+    <dimen name="borderless_button_radius">2dp</dimen>
 
     <!-- How far the expanded QS panel peeks from the header in collapsed state. -->
     <dimen name="qs_peek_height">8dp</dimen>
 
     <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
-
-    <!-- Explicit width of the zen toast window -->
-    <dimen name="zen_toast_width">224dp</dimen>
 
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>

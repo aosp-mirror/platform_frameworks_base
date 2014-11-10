@@ -16,6 +16,10 @@
 
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="?android:attr/colorControlHighlight">
-    <item android:id="@android:id/mask"
-          android:drawable="@android:color/white" />
+    <item android:id="@android:id/mask">
+        <shape>
+            <corners android:radius="@dimen/borderless_button_radius" />
+            <solid android:color="@android:color/white" />
+        </shape>
+    </item>
 </ripple>
