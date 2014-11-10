@@ -88,6 +88,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
+        filter.addAction(Intent.ACTION_USER_STARTING);
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
 
         mStorage = new LockSettingsStorage(context, new LockSettingsStorage.Callback() {
@@ -121,12 +122,16 @@ public class LockSettingsService extends ILockSettings.Stub {
                     final int parentSysUid = UserHandle.getUid(parentInfo.id, Process.SYSTEM_UID);
                     ks.syncUid(parentSysUid, userSysUid);
                 }
+            } else if (Intent.ACTION_USER_STARTING.equals(intent.getAction())) {
+                final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
+                mStorage.prefetchUser(userHandle);
             }
         }
     };
 
     public void systemReady() {
         migrateOldData();
+        mStorage.prefetchUser(UserHandle.USER_OWNER);
     }
 
     private void migrateOldData() {

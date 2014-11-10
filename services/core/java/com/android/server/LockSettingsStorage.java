@@ -49,25 +49,31 @@ class LockSettingsStorage {
     private static final String[] COLUMNS_FOR_QUERY = {
             COLUMN_VALUE
     };
+    private static final String[] COLUMNS_FOR_PREFETCH = {
+            COLUMN_KEY, COLUMN_VALUE
+    };
 
     private static final String SYSTEM_DIRECTORY = "/system/";
     private static final String LOCK_PATTERN_FILE = "gesture.key";
     private static final String LOCK_PASSWORD_FILE = "password.key";
 
+    private static final Object DEFAULT = new Object();
+
     private final DatabaseHelper mOpenHelper;
     private final Context mContext;
+    private final Cache mCache = new Cache();
     private final Object mFileWriteLock = new Object();
 
-    LockSettingsStorage(Context context, Callback callback) {
+    public LockSettingsStorage(Context context, Callback callback) {
         mContext = context;
         mOpenHelper = new DatabaseHelper(context, callback);
     }
 
-    void writeKeyValue(String key, String value, int userId) {
+    public void writeKeyValue(String key, String value, int userId) {
         writeKeyValue(mOpenHelper.getWritableDatabase(), key, value, userId);
     }
 
-    void writeKeyValue(SQLiteDatabase db, String key, String value, int userId) {
+    public void writeKeyValue(SQLiteDatabase db, String key, String value, int userId) {
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_KEY, key);
         cv.put(COLUMN_USERID, userId);
@@ -79,15 +85,24 @@ class LockSettingsStorage {
                     new String[] {key, Integer.toString(userId)});
             db.insert(TABLE, null, cv);
             db.setTransactionSuccessful();
+            mCache.putKeyValue(key, value, userId);
         } finally {
             db.endTransaction();
         }
 
     }
 
-    String readKeyValue(String key, String defaultValue, int userId) {
+    public String readKeyValue(String key, String defaultValue, int userId) {
+        int version;
+        synchronized (mCache) {
+            if (mCache.hasKeyValue(key, userId)) {
+                return mCache.peekKeyValue(key, defaultValue, userId);
+            }
+            version = mCache.getVersion();
+        }
+
         Cursor cursor;
-        String result = defaultValue;
+        Object result = DEFAULT;
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         if ((cursor = db.query(TABLE, COLUMNS_FOR_QUERY,
                 COLUMN_USERID + "=? AND " + COLUMN_KEY + "=?",
@@ -98,39 +113,77 @@ class LockSettingsStorage {
             }
             cursor.close();
         }
-        return result;
+        mCache.putKeyValueIfUnchanged(key, result, userId, version);
+        return result == DEFAULT ? defaultValue : (String) result;
     }
 
-    byte[] readPasswordHash(int userId) {
-        final byte[] stored = readFile(getLockPasswordFilename(userId), userId);
+    public void prefetchUser(int userId) {
+        int version;
+        synchronized (mCache) {
+            if (mCache.isFetched(userId)) {
+                return;
+            }
+            mCache.setFetched(userId);
+            version = mCache.getVersion();
+        }
+
+        Cursor cursor;
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        if ((cursor = db.query(TABLE, COLUMNS_FOR_PREFETCH,
+                COLUMN_USERID + "=?",
+                new String[] { Integer.toString(userId) },
+                null, null, null)) != null) {
+            while (cursor.moveToNext()) {
+                String key = cursor.getString(0);
+                String value = cursor.getString(1);
+                mCache.putKeyValueIfUnchanged(key, value, userId, version);
+            }
+            cursor.close();
+        }
+
+        // Populate cache by reading the password and pattern files.
+        readPasswordHash(userId);
+        readPatternHash(userId);
+    }
+
+    public byte[] readPasswordHash(int userId) {
+        final byte[] stored = readFile(getLockPasswordFilename(userId));
         if (stored != null && stored.length > 0) {
             return stored;
         }
         return null;
     }
 
-    byte[] readPatternHash(int userId) {
-        final byte[] stored = readFile(getLockPatternFilename(userId), userId);
+    public byte[] readPatternHash(int userId) {
+        final byte[] stored = readFile(getLockPatternFilename(userId));
         if (stored != null && stored.length > 0) {
             return stored;
         }
         return null;
     }
 
-    boolean hasPassword(int userId) {
-        return hasFile(getLockPasswordFilename(userId), userId);
+    public boolean hasPassword(int userId) {
+        return hasFile(getLockPasswordFilename(userId));
     }
 
-    boolean hasPattern(int userId) {
-        return hasFile(getLockPatternFilename(userId), userId);
+    public boolean hasPattern(int userId) {
+        return hasFile(getLockPatternFilename(userId));
     }
 
-    private boolean hasFile(String name, int userId) {
-        byte[] contents = readFile(name, userId);
+    private boolean hasFile(String name) {
+        byte[] contents = readFile(name);
         return contents != null && contents.length > 0;
     }
 
-    private byte[] readFile(String name, int userId) {
+    private byte[] readFile(String name) {
+        int version;
+        synchronized (mCache) {
+            if (mCache.hasFile(name)) {
+                return mCache.peekFile(name);
+            }
+            version = mCache.getVersion();
+        }
+
         RandomAccessFile raf = null;
         byte[] stored = null;
         try {
@@ -149,10 +202,11 @@ class LockSettingsStorage {
                 }
             }
         }
+        mCache.putFileIfUnchanged(name, stored, version);
         return stored;
     }
 
-    private void writeFile(String name, byte[] hash, int userId) {
+    private void writeFile(String name, byte[] hash) {
         synchronized (mFileWriteLock) {
             RandomAccessFile raf = null;
             try {
@@ -176,43 +230,37 @@ class LockSettingsStorage {
                     }
                 }
             }
+            mCache.putFile(name, hash);
         }
     }
 
     public void writePatternHash(byte[] hash, int userId) {
-        writeFile(getLockPatternFilename(userId), hash, userId);
+        writeFile(getLockPatternFilename(userId), hash);
     }
 
     public void writePasswordHash(byte[] hash, int userId) {
-        writeFile(getLockPasswordFilename(userId), hash, userId);
+        writeFile(getLockPasswordFilename(userId), hash);
     }
 
 
     private String getLockPatternFilename(int userId) {
-        String dataSystemDirectory =
-                android.os.Environment.getDataDirectory().getAbsolutePath() +
-                        SYSTEM_DIRECTORY;
-        userId = getUserParentOrSelfId(userId);
-        if (userId == 0) {
-            // Leave it in the same place for user 0
-            return dataSystemDirectory + LOCK_PATTERN_FILE;
-        } else {
-            return new File(Environment.getUserSystemDirectory(userId), LOCK_PATTERN_FILE)
-                    .getAbsolutePath();
-        }
+        return getLockCredentialFilePathForUser(userId, LOCK_PATTERN_FILE);
     }
 
     private String getLockPasswordFilename(int userId) {
+        return getLockCredentialFilePathForUser(userId, LOCK_PASSWORD_FILE);
+    }
+
+    private String getLockCredentialFilePathForUser(int userId, String basename) {
         userId = getUserParentOrSelfId(userId);
         String dataSystemDirectory =
                 android.os.Environment.getDataDirectory().getAbsolutePath() +
                         SYSTEM_DIRECTORY;
         if (userId == 0) {
             // Leave it in the same place for user 0
-            return dataSystemDirectory + LOCK_PASSWORD_FILE;
+            return dataSystemDirectory + basename;
         } else {
-            return new File(Environment.getUserSystemDirectory(userId), LOCK_PASSWORD_FILE)
-                    .getAbsolutePath();
+            return new File(Environment.getUserSystemDirectory(userId), basename).getAbsolutePath();
         }
     }
 
@@ -237,13 +285,17 @@ class LockSettingsStorage {
         synchronized (mFileWriteLock) {
             if (parentInfo == null) {
                 // This user owns its lock settings files - safe to delete them
-                File file = new File(getLockPasswordFilename(userId));
+                String name = getLockPasswordFilename(userId);
+                File file = new File(name);
                 if (file.exists()) {
                     file.delete();
+                    mCache.putFile(name, null);
                 }
-                file = new File(getLockPatternFilename(userId));
+                name = getLockPatternFilename(userId);
+                file = new File(name);
                 if (file.exists()) {
                     file.delete();
+                    mCache.putFile(name, null);
                 }
             }
         }
@@ -252,13 +304,14 @@ class LockSettingsStorage {
             db.beginTransaction();
             db.delete(TABLE, COLUMN_USERID + "='" + userId + "'", null);
             db.setTransactionSuccessful();
+            mCache.removeUser(userId);
         } finally {
             db.endTransaction();
         }
     }
 
 
-    interface Callback {
+    public interface Callback {
         void initialize(SQLiteDatabase db);
     }
 
@@ -301,6 +354,135 @@ class LockSettingsStorage {
 
             if (upgradeVersion != DATABASE_VERSION) {
                 Log.w(TAG, "Failed to upgrade database!");
+            }
+        }
+    }
+
+    /**
+     * Cache consistency model:
+     * - Writes to storage write directly to the cache, but this MUST happen within the atomic
+     *   section either provided by the database transaction or mWriteLock, such that writes to the
+     *   cache and writes to the backing storage are guaranteed to occur in the same order
+     *
+     * - Reads can populate the cache, but because they are no strong ordering guarantees with
+     *   respect to writes this precaution is taken:
+     *   - The cache is assigned a version number that increases every time the cache is modified.
+     *     Reads from backing storage can only populate the cache if the backing storage
+     *     has not changed since the load operation has begun.
+     *     This guarantees that no read operation can shadow a write to the cache that happens
+     *     after it had begun.
+     */
+    private static class Cache {
+        private final ArrayMap<CacheKey, Object> mCache = new ArrayMap<>();
+        private final CacheKey mCacheKey = new CacheKey();
+        private int mVersion = 0;
+
+        String peekKeyValue(String key, String defaultValue, int userId) {
+            Object cached = peek(CacheKey.TYPE_KEY_VALUE, key, userId);
+            return cached == DEFAULT ? defaultValue : (String) cached;
+        }
+
+        boolean hasKeyValue(String key, int userId) {
+            return contains(CacheKey.TYPE_KEY_VALUE, key, userId);
+        }
+
+        void putKeyValue(String key, String value, int userId) {
+            put(CacheKey.TYPE_KEY_VALUE, key, value, userId);
+        }
+
+        void putKeyValueIfUnchanged(String key, Object value, int userId, int version) {
+            putIfUnchanged(CacheKey.TYPE_KEY_VALUE, key, value, userId, version);
+        }
+
+        byte[] peekFile(String fileName) {
+            return (byte[]) peek(CacheKey.TYPE_FILE, fileName, -1 /* userId */);
+        }
+
+        boolean hasFile(String fileName) {
+            return contains(CacheKey.TYPE_FILE, fileName, -1 /* userId */);
+        }
+
+        void putFile(String key, byte[] value) {
+            put(CacheKey.TYPE_FILE, key, value, -1 /* userId */);
+        }
+
+        void putFileIfUnchanged(String key, byte[] value, int version) {
+            putIfUnchanged(CacheKey.TYPE_FILE, key, value, -1 /* userId */, version);
+        }
+
+        void setFetched(int userId) {
+            put(CacheKey.TYPE_FETCHED, "isFetched", "true", userId);
+        }
+
+        boolean isFetched(int userId) {
+            return contains(CacheKey.TYPE_FETCHED, "", userId);
+        }
+
+
+        private synchronized void put(int type, String key, Object value, int userId) {
+            // Create a new CachKey here because it may be saved in the map if the key is absent.
+            mCache.put(new CacheKey().set(type, key, userId), value);
+            mVersion++;
+        }
+
+        private synchronized void putIfUnchanged(int type, String key, Object value, int userId,
+                int version) {
+            if (!contains(type, key, userId) && mVersion == version) {
+                put(type, key, value, userId);
+            }
+        }
+
+        private synchronized boolean contains(int type, String key, int userId) {
+            return mCache.containsKey(mCacheKey.set(type, key, userId));
+        }
+
+        private synchronized Object peek(int type, String key, int userId) {
+            return mCache.get(mCacheKey.set(type, key, userId));
+        }
+
+        private synchronized int getVersion() {
+            return mVersion;
+        }
+
+        synchronized void removeUser(int userId) {
+            for (int i = mCache.size() - 1; i >= 0; i--) {
+                if (mCache.keyAt(i).userId == userId) {
+                    mCache.removeAt(i);
+                }
+            }
+
+            // Make sure in-flight loads can't write to cache.
+            mVersion++;
+        }
+
+
+        private static final class CacheKey {
+            static final int TYPE_KEY_VALUE = 0;
+            static final int TYPE_FILE = 1;
+            static final int TYPE_FETCHED = 2;
+
+            String key;
+            int userId;
+            int type;
+
+            public CacheKey set(int type, String key, int userId) {
+                this.type = type;
+                this.key = key;
+                this.userId = userId;
+                return this;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (!(obj instanceof CacheKey))
+                    return false;
+                CacheKey o = (CacheKey) obj;
+                return userId == o.userId && type == o.type && key.equals(o.key);
+            }
+
+            @Override
+            public int hashCode() {
+                return key.hashCode() ^ userId ^ type;
             }
         }
     }
