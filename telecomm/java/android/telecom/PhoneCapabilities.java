@@ -46,8 +46,10 @@ public final class PhoneCapabilities {
      */
     public static final int SWAP_CONFERENCE    = 0x00000008;
 
-    /** Call currently supports adding another call to this one. */
-    public static final int ADD_CALL           = 0x00000010;
+    /**
+     * @hide
+     */
+    public static final int UNUSED             = 0x00000010;
 
     /** Call supports responding via text option. */
     public static final int RESPOND_VIA_TEXT   = 0x00000020;
@@ -96,7 +98,7 @@ public final class PhoneCapabilities {
     public static final int DISCONNECT_FROM_CONFERENCE = 0x00002000;
 
     public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CONFERENCE | SWAP_CONFERENCE
-            | ADD_CALL | RESPOND_VIA_TEXT | MUTE | MANAGE_CONFERENCE | SEPARATE_FROM_CONFERENCE
+            | RESPOND_VIA_TEXT | MUTE | MANAGE_CONFERENCE | SEPARATE_FROM_CONFERENCE
             | DISCONNECT_FROM_CONFERENCE;
 
     /**
@@ -135,9 +137,6 @@ public final class PhoneCapabilities {
         }
         if (can(capabilities, SWAP_CONFERENCE)) {
             builder.append(" SWAP_CONFERENCE");
-        }
-        if (can(capabilities, ADD_CALL)) {
-            builder.append(" ADD_CALL");
         }
         if (can(capabilities, RESPOND_VIA_TEXT)) {
             builder.append(" RESPOND_VIA_TEXT");
