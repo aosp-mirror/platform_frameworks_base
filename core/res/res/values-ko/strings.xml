@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g>시간 <xliff:g id="MINUTES">%2$d</xliff:g>분"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g>시간 <xliff:g id="MINUTES">%2$d</xliff:g>분"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g>분"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g>분 <xliff:g id="SECONDS">%2$d</xliff:g>초"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g>분 <xliff:g id="SECONDS">%2$d</xliff:g>초"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>초"</string>
@@ -1767,11 +1769,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"화면을 고정 해제하려면 \'뒤로\'와 \'최근 사용\'을 동시에 길게 터치합니다."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"화면을 고정 해제하려면 \'최근 사용\'을 길게 터치합니다."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"화면이 고정되었습니다. 소속된 조직에서 고정 해제를 허용하지 않습니다."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"화면을 고정하시겠습니까?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"화면을 고정하면 단일 보기에서 디스플레이를 잠급니다.\n\n고정 해제하려면 \'뒤로\'와 \'최근 사용\'을 동시에 길게 터치합니다."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"화면을 고정하면 단일 보기에서 디스플레이를 잠급니다.\n\n고정 해제하려면 \'최근 사용\'을 길게 터치합니다."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"아니요"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"시작"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"화면 고정됨"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"화면 고정 해제됨"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"고정 해제 이전에 PIN 요청"</string>
