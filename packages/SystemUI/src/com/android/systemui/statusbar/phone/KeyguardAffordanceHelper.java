@@ -451,6 +451,10 @@ public class KeyguardAffordanceHelper {
         initIcons();
     }
 
+    public void onRtlPropertiesChanged() {
+        initIcons();
+    }
+
     public void reset(boolean animate) {
         if (mSwipeAnimator != null) {
             mSwipeAnimator.cancel();
