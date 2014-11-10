@@ -16,6 +16,7 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -45,7 +46,9 @@ import java.util.MissingResourceException;
  * alternative options when placing a phone call. When building a {@link PhoneAccount}, the app
  * should supply a valid {@link PhoneAccountHandle} that references the {@link ConnectionService}
  * implementation Telecom will use to interact with the app.
+ * @hide
  */
+@SystemApi
 public class PhoneAccount implements Parcelable {
 
     /**

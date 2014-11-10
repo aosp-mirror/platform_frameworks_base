@@ -1285,26 +1285,31 @@
         android:description="@string/permdesc_use_sip"
         android:label="@string/permlab_use_sip" />
 
-    <!-- Protects the ability to register any PhoneAccount with
+    <!-- @SystemApi Protects the ability to register any PhoneAccount with
          PhoneAccount#CAPABILITY_SIM_SUBSCRIPTION. This capability indicates that the PhoneAccount
-         corresponds to a device SIM. -->
+         corresponds to a device SIM.
+         @hide -->
     <permission android:name="android.permission.REGISTER_SIM_SUBSCRIPTION"
         android:permissionGroup="android.permission-group.PHONE_CALLS"
         android:protectionLevel="system|signature"
         android:description="@string/permdesc_register_sim_subscription"
         android:label="@string/permlab_register_sim_subscription" />
 
-    <!-- Protects the ability to register any PhoneAccount with
-         PhoneAccount#CAPABILITY_CALL_PROVIDER. -->
+    <!-- @SystemApi Protects the ability to register any PhoneAccount with
+         PhoneAccount#CAPABILITY_CALL_PROVIDER.
+         @hide -->
     <permission android:name="android.permission.REGISTER_CALL_PROVIDER"
         android:permissionGroup="android.permission-group.PHONE_CALLS"
+        android:protectionLevel="system|signature"
         android:description="@string/permdesc_register_call_provider"
         android:label="@string/permlab_register_call_provider" />
 
-    <!-- Protects the ability to register any PhoneAccount with
-         PhoneAccount#CAPABILITY_CONNECTION_MANAGER -->
+    <!-- @SystemApi Protects the ability to register any PhoneAccount with
+         PhoneAccount#CAPABILITY_CONNECTION_MANAGER
+         @hide -->
     <permission android:name="android.permission.REGISTER_CONNECTION_MANAGER"
         android:permissionGroup="android.permission-group.PHONE_CALLS"
+        android:protectionLevel="system|signature"
         android:description="@string/permdesc_connection_manager"
         android:label="@string/permlab_connection_manager" />
 
