@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ora <xliff:g id="MINUTES">%2$d</xliff:g> minuti"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ora <xliff:g id="MINUTES">%2$d</xliff:g> minuto"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minuti"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> minuto <xliff:g id="SECONDS">%2$d</xliff:g> secondi"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> minuto <xliff:g id="SECONDS">%2$d</xliff:g> secondo"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> secondi"</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Per sbloccare questa schermata, tocca e tieni premute contemporaneamente le opzioni Indietro e Panoramica."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Per sbloccare questa schermata, tocca e tieni premuta l\'opzione Panoramica."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"La schermata è bloccata. La tua organizzazione non ne consente lo sblocco."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Utilizzare il blocco su schermo?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Il blocco su schermo blocca il display in un\'unica visualizzazione.\n\nPer sbloccare, tocca e tieni premute contemporaneamente le opzioni Indietro e Panoramica."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Il blocco su schermo blocca il display in un\'unica visualizzazione.\n\nPer sbloccare, tocca e tieni premuta l\'opzione Panoramica."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"NO, GRAZIE"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"AVVIA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Schermata sbloccata"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN prima di sbloccare"</string>
@@ -1784,8 +1781,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Per aumentare la durata della batteria, la funzione Risparmio energetico riduce le prestazioni del dispositivo e limita vibrazione e gran parte dei dati in background. App di email, messaggistica e altre app basate sulla sincronizzazione potrebbero non essere aggiornate se non le apri.\n\nIl risparmio energetico si disattiva automaticamente quando il dispositivo è in carica."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Fino al termine del periodo di inattività previsto per le <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Fino al termine del periodo di inattività"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Per un minuto (fino alle ore <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"Per %1$d minuti (fino alle ore <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1805,8 +1801,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Fino alle ore <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Sempre"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Comprimi"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Fino alla prossima sveglia alle ore <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Fino alla prossima sveglia"</string>
 </resources>

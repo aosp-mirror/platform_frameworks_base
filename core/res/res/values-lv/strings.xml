@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Lai atspraustu šo ekrānu, vienlaicīgi pieskarieties pogām “Atpakaļ” un “Pārskats” un turiet tās."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Lai atspraustu šo ekrānu, pieskarieties pogai “Pārskats” un turiet to."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Ekrāns ir piesprausts. Jūsu organizācija nav atļāvusi atspraušanu."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Vai izmantot ekrāna piespraušanu?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Izmantojot ekrāna piespraušanu, ekrāns tiek bloķēts, lai tiktu rādīts viens skats.\n\nLai atspraustu ekrānu, vienlaicīgi pieskarieties pogām “Atpakaļ” un “Pārskats” un turiet tās."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Izmantojot ekrāna piespraušanu, ekrāns tiek bloķēts, lai tiktu rādīts viens skats.\n\nLai atspraustu ekrānu, pieskarieties pogai “Pārskats” un turiet to."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"NĒ, PALDIES"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"SĀKT"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrāns ir piesprausts"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrāns ir atsprausts"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pirms atspraušanas pieprasīt PIN"</string>

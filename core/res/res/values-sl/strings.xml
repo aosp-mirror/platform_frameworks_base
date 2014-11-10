@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Če želite odpeti ta zaslon, se hkrati dotaknite tipk Nazaj in Pregled ter ju pridržite."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Če želite odpeti ta zaslon, se dotaknite tipke Pregled in jo pridržite."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Zaslon je pripet. Vaša organizacija ne dovoli odpenjanja."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Želite uporabljati pripenjanje zaslona?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Pripenjanje zaslonov zaklene zaslon v enojnem pogledu.\n\nČe ga želite odpeti, se hkrati dotaknite tipk Nazaj in Pregled ter ju pridržite."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Pripenjanje zaslonov zaklene zaslon v enojnem pogledu.\n\nČe ga želite odpeti, se dotaknite tipke Pregled in jo pridržite."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"NE, HVALA"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"ZAŽENI"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pripet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Zaslon je odpet"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pred odpenjanjem vprašaj za PIN"</string>

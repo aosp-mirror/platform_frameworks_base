@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ঘন্টা <xliff:g id="MINUTES">%2$d</xliff:g> মিনিট"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ঘন্টা <xliff:g id="MINUTES">%2$d</xliff:g> মিনিট"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট <xliff:g id="SECONDS">%2$d</xliff:g> সেকেন্ড"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট <xliff:g id="SECONDS">%2$d</xliff:g> সেকেন্ড"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> সেকেন্ড"</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"এই স্ক্রীনটিকে আনপিন করতে, \'ফিরুন\' এবং \'এক নজরে\' একসাথে স্পর্শ করুন এবং ধরে রাখুন৷"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"এই স্ক্রীনটিকে আনপিন করতে, \'এক নজরে\' স্পর্শ করুন এবং ধরে রাখুন৷"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"স্ক্রীন পিন করা আছে। আপনার প্রতিষ্ঠান এটিকে পিনমুক্ত করার অনুমতি দেয়নি।"</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"স্ক্রীন পিন করা ব্যবহার করবেন?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"পিন করে রাখলে তা স্ক্রীনের প্রদর্শনকে একটি নির্দিষ্ট অবস্থায় লক করবে৷\n\nআনপিন করার জন্য, \'ফিরুন\' এবং \'এক নজরে\' একসাথে স্পর্শ করুন এবং ধরে রাখুন৷"</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"পিন করে রাখলে তা স্ক্রীনের প্রদর্শনকে একটি নির্দিষ্ট অবস্থায় লক করবে৷\n\n আনপিন করার জন্য, \'এক নজরে\' স্পর্শ করুন এবং ধরে রাখুন৷"</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"না, থাক"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"চালু করুন"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"স্ক্রীন পিন করা হয়েছে"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"পিন না করা স্ক্রীন"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"আনপিন করার আগে PIN চান"</string>
@@ -1784,8 +1781,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"আনপিন করার আগে পাসওয়ার্ড চান"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ব্যাটারির আয়ু বাড়াতে সহায়তার জন্য, ব্যাটারি সঞ্চয়কারী আপনার ডিভাইসের কার্য-সম্পাদনা কমিয়ে আনবে এবং কম্পন ও পশ্চাদভূমি ডেটাকে সীমিত করবে। ইমেল, বার্তাপ্রেরণ ও অন্যান্য অ্যাপ্লিকেশান, যেগুলি সিঙ্ক হওয়ার উপর নির্ভরশীল সেগুলিকে আপনি না খোলা পর্যন্ত সেগুলি আপডেট নাও হতে পারে।\n\nআপনার ডিভাইস চার্জ হওয়ার সময় ব্যাটারি সঞ্চয়কারী স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যাবে।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>টার সময়ে আপনার ডাউনটাইম শেষ হওয়া পর্যন্ত"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"আপনার ডাউনটাইম শেষ না হওয়া পর্যন্ত"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"এক মিনিটের জন্য (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> পর্যন্ত)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d মিনিটের জন্য (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> পর্যন্ত)"</item>
@@ -1805,8 +1801,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> পর্যন্ত"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"অনির্দিষ্টভাবে"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"সঙ্কুচিত করুন"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> এ পরবর্তী অ্যালার্ম পর্যন্ত"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"পরবর্তী অ্যালার্ম পর্যন্ত"</string>
 </resources>

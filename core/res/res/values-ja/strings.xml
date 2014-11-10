@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g>時間<xliff:g id="MINUTES">%2$d</xliff:g>分"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g>時間<xliff:g id="MINUTES">%2$d</xliff:g>分"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g>分"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g>分<xliff:g id="SECONDS">%2$d</xliff:g>秒"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g>分<xliff:g id="SECONDS">%2$d</xliff:g>秒"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"この画面の固定を解除するには[戻る]と[最近]を同時に押し続けます。"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"この画面の固定を解除するには[最近]を押し続けます。"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"画面が固定されています。会社/組織により解除は許可されていません。"</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"画面固定を使用しますか？"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"画面の固定では、1つの画面が表示されたままになります。\n\n解除するには、[戻る]と[最近]を同時に押し続けます。"</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"画面の固定では、1つの画面が表示されたままになります。\n\n解除するには、[最近]を押し続けます。"</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"いいえ"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"開始する"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"画面を固定しました"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"画面固定を解除しました"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"オフライン再生を解除する前にPINの入力を求める"</string>
@@ -1784,8 +1781,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"オフライン再生を解除する前にパスワードの入力を求める"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンス、バイブレーション、ほとんどのバックグラウンドデータを制限します。同期を使用するメールやメッセージなどのアプリは起動しないと更新されない場合があります。\n\nバッテリーセーバーは、端末の充電中は自動的にOFFになります。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>にダウンロードが終わるまで"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"ダウンタイム終了まで"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"1分間（<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>まで）"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d分間（<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>まで）"</item>
@@ -1805,8 +1801,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"制限なし"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"折りたたむ"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"次のアラーム（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）まで"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"次のアラームまで"</string>
 </resources>
