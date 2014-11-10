@@ -48,6 +48,7 @@ public class SignalClusterView
     private int mMobileStrengthId = 0, mMobileTypeId = 0;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
+    private int mAirplaneContentDescription;
     private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
     private boolean mIsMobileTypeIconWide;
 
@@ -160,9 +161,10 @@ public class SignalClusterView
     }
 
     @Override
-    public void setIsAirplaneMode(boolean is, int airplaneIconId) {
+    public void setIsAirplaneMode(boolean is, int airplaneIconId, int contentDescription) {
         mIsAirplaneMode = is;
         mAirplaneIconId = airplaneIconId;
+        mAirplaneContentDescription = contentDescription;
 
         apply();
     }
@@ -236,6 +238,8 @@ public class SignalClusterView
 
         if (mIsAirplaneMode) {
             mAirplane.setImageResource(mAirplaneIconId);
+            mAirplane.setContentDescription(mAirplaneContentDescription != 0 ?
+                    mContext.getString(mAirplaneContentDescription) : "");
             mAirplane.setVisibility(View.VISIBLE);
         } else {
             mAirplane.setVisibility(View.GONE);
