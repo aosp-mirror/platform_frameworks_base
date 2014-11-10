@@ -358,7 +358,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
             break;
         }
         case SkMask::kBW_Format: {
-            uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
+            uint32_t cacheX = 0, cacheY = 0;
             uint32_t row = (startY - TEXTURE_BORDER_SIZE) * cacheWidth + startX
                     - TEXTURE_BORDER_SIZE;
             static const uint8_t COLORS[2] = { 0, 255 };
