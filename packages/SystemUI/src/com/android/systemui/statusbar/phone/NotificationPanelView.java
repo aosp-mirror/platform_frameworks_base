@@ -26,6 +26,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
+import android.util.LayoutDirection;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -169,6 +170,7 @@ public class NotificationPanelView extends PanelView implements
     private int mQsFalsingThreshold;
 
     private float mKeyguardStatusBarAnimateAlpha = 1f;
+    private int mOldLayoutDirection;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -1586,6 +1588,14 @@ public class NotificationPanelView extends PanelView implements
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mAfforanceHelper.onConfigurationChanged();
+    }
+
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        if (layoutDirection != mOldLayoutDirection) {
+            mAfforanceHelper.onRtlPropertiesChanged();
+            mOldLayoutDirection = layoutDirection;
+        }
     }
 
     @Override
