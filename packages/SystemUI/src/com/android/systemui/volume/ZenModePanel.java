@@ -80,7 +80,6 @@ public class ZenModePanel extends LinearLayout {
     private final Interpolator mFastOutSlowInInterpolator;
     private final int mSubheadWarningColor;
     private final int mSubheadColor;
-    private final ZenToast mZenToast;
 
     private String mTag = TAG + "/" + Integer.toHexString(System.identityHashCode(this));
 
@@ -115,7 +114,6 @@ public class ZenModePanel extends LinearLayout {
         final Resources res = mContext.getResources();
         mSubheadWarningColor = res.getColor(R.color.system_warning_color);
         mSubheadColor = res.getColor(R.color.qs_subhead);
-        mZenToast = new ZenToast(mContext);
         if (DEBUG) Log.d(mTag, "new ZenModePanel");
     }
 
@@ -124,10 +122,12 @@ public class ZenModePanel extends LinearLayout {
         super.onFinishInflate();
 
         mZenButtons = (SegmentedButtons) findViewById(R.id.zen_buttons);
-        mZenButtons.addButton(R.string.interruption_level_none, Global.ZEN_MODE_NO_INTERRUPTIONS);
-        mZenButtons.addButton(R.string.interruption_level_priority,
+        mZenButtons.addButton(R.string.interruption_level_none, R.drawable.ic_zen_none,
+                Global.ZEN_MODE_NO_INTERRUPTIONS);
+        mZenButtons.addButton(R.string.interruption_level_priority, R.drawable.ic_zen_important,
                 Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
-        mZenButtons.addButton(R.string.interruption_level_all, Global.ZEN_MODE_OFF);
+        mZenButtons.addButton(R.string.interruption_level_all, R.drawable.ic_zen_all,
+                Global.ZEN_MODE_OFF);
         mZenButtons.setCallback(mZenButtonsCallback);
 
         mZenSubhead = findViewById(R.id.zen_subhead);
@@ -160,7 +160,6 @@ public class ZenModePanel extends LinearLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (DEBUG) Log.d(mTag, "onAttachedToWindow");
-        mZenToast.hide();
         mAttachedZen = getSelectedZen(-1);
         mSessionZen = mAttachedZen;
         mSessionExitCondition = copy(mExitCondition);
@@ -192,10 +191,6 @@ public class ZenModePanel extends LinearLayout {
             if (DEBUG) Log.d(mTag, "attachedZen: " + mAttachedZen + " -> " + selectedZen);
             if (selectedZen == Global.ZEN_MODE_NO_INTERRUPTIONS) {
                 mPrefs.trackNoneSelected();
-            }
-            if (selectedZen == Global.ZEN_MODE_NO_INTERRUPTIONS
-                    || selectedZen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
-                mZenToast.show(selectedZen);
             }
         }
     }
