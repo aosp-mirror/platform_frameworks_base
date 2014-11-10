@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ຊມ <xliff:g id="MINUTES">%2$d</xliff:g> ນທ"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ຊມ <xliff:g id="MINUTES">%2$d</xliff:g> ນທ"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> ນທ"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> ນທ <xliff:g id="SECONDS">%2$d</xliff:g> ວິ"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> ນທ <xliff:g id="SECONDS">%2$d</xliff:g> ວິ"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ວິ"</string>
@@ -718,7 +720,7 @@
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ອະນຸຍາດ​ໃຫ້ແອັບຯ​ສາມາດ​ຮັບສາຍ ແລະໂທອອກ​ຜ່ານ SIP ໄດ້"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ລົງ​ທະ​ບຽນ SIM ການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ​ໃໝ່"</string>
     <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ລົງ​ທະ​ບຽນ SIM ​ການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ​ໃໝ່."</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"ລົງ​ທະ​ບຽນການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມໃໝ່​"</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"ລົງ​ທະ​ບຽນການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມໃໝ່"</string>
     <string name="permdesc_register_call_provider" msgid="7034310263521081388">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ລົງ​ທະ​ບຽນການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມໃໝ່​."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"ຈັດ​ການ​ການ​ເຊື່ອມ​ຕໍ່​​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຈັດ​ການ​ການ​ເຊື່ອມ​ຕໍ່​​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ."</string>
@@ -1743,7 +1745,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">
@@ -1767,11 +1769,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ນີ້, ສຳ​ຜັດປຸ່ມ ​ກັບ​ຄືນ ແລະ ພາບ​ຮວມ ຄ້າງ​ໄວ້​ພ້ອມ​ກັນ."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດໜ້າ​ຈໍ​ນີ້, ສຳ​ຜັດ​ປຸ່ມ ພາບ​ຮວມ ຄ້າງ​ໄວ້."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"ໜ້າ​ຈໍ​ຖືກ​ປັກ​ໝຸດ​ໄວ້. ​ອົງ​ກອນ​ຂອງ​ທ່ານບໍ່​​ອະ​ນຸ​ຍາດ​ໃຫ້​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ​ໄດ້."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"ໃຊ້​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ບໍ່?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"​ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ຈະ​ເຮັດ​ໃຫ້​ການສະແດງ​ຜົນນັ້ນ​ລັອກ​ຢູ່​ໃນ​ມຸມມອງ​ດຽວ.\n\n​ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດ, ສຳ​ຜັດປຸ່ມ ​ກັບ​ຄືນ ແລະ ພາບ​ຮວມ ຄ້າງ​ໄວ້​ພ້ອມ​ກັນ."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"ການ​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ຈະ​ເຮັດ​ໃຫ້​ໃຫ້​ການແດງ​ຜົນນັ້ນ​ລັອກ​ຢູ່​ໃນ​ມຸມມອງ​ດຽວ.\n\n​ເພື່ອ​ຖອດ​ການ​ປັກ​ໝຸດ, ສຳ​ຜັດ​ປຸ່ມ ພາບ​ຮວມ ຄ້າງ​ໄວ້."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"ບໍ່, ຂອບ​ໃຈ"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"​ເລີ່ມ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"​ປັກ​ໝຸດ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"ຍົກ​ເລີກ​ການ​ປັກ​ໝຸນ​​ຫນ້າ​ຈໍ​ແລ້ວ"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"​ຖາມ​ຫາ PIN ກ່ອນ​ຍົກ​ເລີກ​ການປັກ​ໝຸດ"</string>
@@ -1779,8 +1776,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"​ຖາມ​ຫາ​ລະ​ຫັດ​ຜ່ານ​ກ່ອນ​ຍົກ​ເລີກ​ການ​ປັກ​ໝຸດ"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"ເພື່ອ​ຊ່ວຍ​ປັບ​ປຸງ​ອາ​ຍຸ​ແບັດ​ເຕ​ີ​ຣີ, ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະຫຼຸດ​ປະ​ສິດ​ທິ​ພາບ​​ຂອງ​ອຸ​ປະ​ກອນ​ທ່ານ​ລົງ ແລະ​ຈຳ​ກັດ​ການ​ສັ່ນເຕືອນ ຮວມ​ເຖິງຂໍ້​ມູນ​ພື້ນຫຼັງ​ສ່ວນ​ໃຫຍ່​ນຳ. ອີ​ເມວ, ການ​ສົ່ງ​ຂໍ້​ຄວາມ ແລະ​ແອັບຯ​ອື່ນໆ​ທີ່​ອີງ​ອາ​ໃສ​ການ​ຊິ້ງ​ຂໍ້​ມູນ​ອາດບໍ່​ມີ​ການ​ອັບ​ເດດ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ເປີດ​ພວກ​ມັນ​ຂຶ້ນ​ມາ.\n\n​ໂຕ​ປະ​ຢັດ​ແບັດ​ເຕີ​ຣີ​ຈະ​ປິດ​ໂດຍ​ອັດ​ຕະ​ໂນ​ມັດ​ເມື່ອ​ມີ​ອຸ​ປະ​ກອນ​ຖືກ​ສາກ​ໄຟ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ຈົນ​ກວ່າ​ດາວ​ທາມ​ຂອງ​ທ່ານ​ຈະ​ສິ້ນ​ສຸດ​ທີ່ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"​ຈົນ​ກວ່າ​ເວ​ລາ​ປິດ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ​ສິ້ນ​ສຸດ​ລົງ"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"​ເປັນ​ເວ​ລາ 1 ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"​ເປັນ​ເວ​ລາ %1$d ​ນາ​ທີ (ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1800,8 +1796,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"ຈົນ​ຮອດ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"ຢ່າງ​ບໍ່​ມີ​ກຳນົດ"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ຫຍໍ້"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"​ຈົນ​ກວ່າ​ໂມງ​ປຸກ​ຄັ້ງ​ຕໍ່​ໄປ​ໃນ​ເວ​ລາ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"​ຈົນ​ກວ່າ​ໂມງ​ປຸກ​ຄັ້ງຕໍ່​ໄປ"</string>
 </resources>

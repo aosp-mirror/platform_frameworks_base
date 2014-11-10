@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> цаг <xliff:g id="MINUTES">%2$d</xliff:g> минут"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> цаг <xliff:g id="MINUTES">%2$d</xliff:g> мин"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> мин"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> мин <xliff:g id="SECONDS">%2$d</xliff:g> секунд"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> мин <xliff:g id="SECONDS">%2$d</xliff:g> сек"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> сек"</string>
@@ -1767,11 +1769,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Энэ дэлгэцийг цуцлахын тулд Буцах болон Тойм харагдацыг зэрэг хүрч барина."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Энэ дэлгэцийг цуцлахын тулд Тойм харагдацанд хүрч барина."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Дэлгэцийг тогтоосон. Дэлгэц суллахыг таны байгууллага зөвшөөрөөгүй."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Дэлгэц тогтоогчийг ашиглах уу?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Дэлгэц тогтоогч нь дэлгэцийг нэг янзын харагдацаар түгжинэ.\n\nЦуцлахын тулд Буцах болон Тойм харагдацанд зэрэг хүрч барина."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Дэлгэц тогтоогч нь дэлгэцийг нэгэн янзын харагдацаар түгжинэ.\n\nЦуцлахын тулд Тойм харагдацанд хүрч барина."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"ҮГҮЙ"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"ЭХЛҮҮЛЭХ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Дэлгэцийг тогтоосон"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Дэлгэцийг сулласан"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Тогтоосныг суллахаас өмнө PIN асуух"</string>
@@ -1779,8 +1776,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Батерейны ашиглалтыг уртасгахын тулд батерей хэмнэгч нь таны төхөөрөмжийн ажиллагааг бууруулж, чичрэлт болон далд датаны ихэнх хувийг хязгаарлана. Имэйл, зурвас гэх мэт синк хийгддэг бусад апп-ууд таныг нээхээс нааш шинэчлэгдэхгүй байж болно.\n\nТаныг төхөөрөмжөө цэнэглэх үед батерей хэмнэгч автоматаар унтарна."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Таны уйтгартай байдал <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-д дуусах хүртэл"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Сул зогсолт дуусах хүртэл"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Нэг минутын турш (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> хүртэл)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d минутын турш (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> хүртэл)"</item>
@@ -1800,8 +1796,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> хүртэл"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Тодорхойгүй"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Хумих"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дахь дараагийн анхааруулга хүртэл"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Дараагийн анхааруулга хүртэл"</string>
 </resources>
