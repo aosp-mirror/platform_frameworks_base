@@ -607,23 +607,32 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
      */
     @Override
     public void onValueSelected(int pickerIndex, int newValue, boolean autoAdvance) {
-        if (pickerIndex == HOUR_INDEX) {
-            if (mAllowAutoAdvance && autoAdvance) {
-                updateHeaderHour(newValue, false);
-                setCurrentItemShowing(MINUTE_INDEX, true, false);
-                mDelegator.announceForAccessibility(newValue + ". " + mSelectMinutes);
-            } else {
-                updateHeaderHour(newValue, true);
-            }
-        } else if (pickerIndex == MINUTE_INDEX){
-            updateHeaderMinute(newValue, true);
-        } else if (pickerIndex == AMPM_INDEX) {
-            updateAmPmLabelStates(newValue);
-        } else if (pickerIndex == ENABLE_PICKER_INDEX) {
-            if (!isTypedTimeFullyLegal()) {
-                mTypedTimes.clear();
-            }
-            finishKbMode();
+        switch (pickerIndex) {
+            case HOUR_INDEX:
+                if (mAllowAutoAdvance && autoAdvance) {
+                    updateHeaderHour(newValue, false);
+                    setCurrentItemShowing(MINUTE_INDEX, true, false);
+                    mDelegator.announceForAccessibility(newValue + ". " + mSelectMinutes);
+                } else {
+                    updateHeaderHour(newValue, true);
+                }
+                break;
+            case MINUTE_INDEX:
+                updateHeaderMinute(newValue, true);
+                break;
+            case AMPM_INDEX:
+                updateAmPmLabelStates(newValue);
+                break;
+            case ENABLE_PICKER_INDEX:
+                if (!isTypedTimeFullyLegal()) {
+                    mTypedTimes.clear();
+                }
+                finishKbMode();
+                break;
+        }
+
+        if (mOnTimeChangedListener != null) {
+            mOnTimeChangedListener.onTimeChanged(mDelegator, getCurrentHour(), getCurrentMinute());
         }
     }
 
