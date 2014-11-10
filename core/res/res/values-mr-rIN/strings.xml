@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ता <xliff:g id="MINUTES">%2$d</xliff:g> मि"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ता <xliff:g id="MINUTES">%2$d</xliff:g> मि"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> मिनिटे"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> मि <xliff:g id="SECONDS">%2$d</xliff:g> से"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> मि <xliff:g id="SECONDS">%2$d</xliff:g> से"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंद"</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"ही स्क्रीन अनपिन करण्यासाठी, एकाच वेळी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"ही स्क्रीन अनपिन करण्यासाठी, विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"स्क्रीन पिन केली आहे. आपल्या संस्थेद्वारे अनपिन करण्यास अनुमती नाही."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"स्क्रीन पिन करणे वापरायचे?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"स्क्रीन पिन करणे एका एकल दृश्यामधील प्रदर्शन लॉक करते.\n\nअनपिन करण्यासाठी, एकाच वेळी परत आणि विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"स्क्रीन पिन करणे एका एकल दृश्यामधील प्रदर्शन लॉक करते.\n\nअनपिन करण्यासाठी, विहंगावलोकनास स्पर्श करा आणि धरून ठेवा."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"नाही, धन्यवाद"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"प्रारंभ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"स्क्रीन पिन केली"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"स्क्रीन अनपिन केली"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करण्‍यापूर्वी पिन साठी विचारा"</string>
@@ -1784,8 +1781,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"बॅटरीचे आयुष्य सुधारण्यात मदत होण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि अन्य अॅप्स आपण ते उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"आपला कार्य न करण्याचा कालावधी <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता समाप्त होईपर्यंत"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"आपला कार्य न करण्याचा कालावधी समाप्त होईपर्यंत"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"एका मिनिटासाठी (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> पर्यंत)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d मिनिटांसाठी (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> पर्यंत)"</item>
@@ -1805,8 +1801,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> पर्यंत"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"अनिश्‍चितपणे"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त करा"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता पुढील अलार्मपर्यंत"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"पुढील अलार्मपर्यंत"</string>
 </resources>

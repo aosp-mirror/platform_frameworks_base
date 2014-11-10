@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> t. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> t. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min."</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sek."</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Hvis du vil frigøre dette skærmbillede, skal du trykke på Tilbage og Oversigt på samme tid og holde fingeren nede."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Hvis du vil frigøre dette skærmbillede, skal du trykke på Oversigt og holde fingeren nede."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skærmen er fastgjort. Frigørelse er ikke tilladt af din organisation."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Vil du bruge Bliv i app?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Skærmfastholdelse låser skærmbilledet i en enkelt visning.\n\nDu frigør det ved at trykke på Tilbage og Oversigt på samme tid og holde fingeren nede."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Skærmfastholdelse låser skærmbilledet i en enkelt visning.\n\nDu frigør det ved at trykke på Oversigt og holde fingeren nede."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"NEJ TAK"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skærmen blev fastgjort"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skærmen blev frigjort"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Bed om pinkode inden frigørelse"</string>
@@ -1784,8 +1781,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Bed om adgangskode inden frigørelse"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"For at forbedre batteriets levetid reducerer batterisparefunktionen enhedens ydeevne og begrænser vibrationer og de fleste baggrundsdata. E-mail, chat og andre apps, der benytter synkronisering, opdateres ikke, medmindre du åbner dem.\n\nBatterisparefunktionen deaktiveres automatisk, når enheden oplades."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Indtil din nedetid slutter kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Indtil nedetiden ophører"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"I ét minut (indtil <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"I %1$d minutter (indtil <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1805,8 +1801,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Indtil <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Uendeligt"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skjul"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Indtil næste alarm kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Indtil næste alarm"</string>
 </resources>

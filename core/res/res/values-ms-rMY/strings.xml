@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> jam <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> jam <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minit"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> saat"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> saat"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> saat"</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Untuk menyahsemat skrin ini, sentuh dan tahan Kembali serta Ikhtisar pada masa yang sama."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Untuk menyahsemat skrin ini, sentuh dan tahan Ikhtisar."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skrin disemat. Menyahsemat tidak dibenarkan oleh organisasi anda."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Gunakan penyematan skrin?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Penyematan skrin mengunci paparan dalam pandangan tunggal.\n\nUntuk menyahsemat, sentuh dan tahan Kembali serta Ikhtisar pada masa yang sama."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Penyematan skrin mengunci paparan dalam pandangan tunggal.\n\nUntuk menyahsemat, sentuh dan tahan Ikhtisar."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"TIDAK, TERIMA KASIH"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"MULA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skrin disemat"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skrin dinyahsemat"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Minta PIN sebelum menyahsemat"</string>
@@ -1784,8 +1781,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Minta kata laluan sebelum menyahsemat"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Untuk membantu memperbaik hayat bateri, penjimat bateri mengurangkan prestasi peranti anda dan menghadkan getaran serta kebanyakan data latar belakang. E-mel, pemesejan dan apl lain yang bergantung pada penyegerakan mungkin tidak dikemas kini melainkan anda membuka apl tersebut.\n\nPenjimat bateri dimatikan secara automatik semasa peranti anda mengecas."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Sehingga waktu gendala anda berakhir pada <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Sehingga waktu gendala anda berakhir"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Selama satu minit (sehingga <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"Selama %1$d minit (sehingga <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1805,8 +1801,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Sehingga <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Selama-lamanya"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Runtuhkan"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Sehingga penggera seterusnya pada <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Sehingga penggera seterusnya"</string>
 </resources>

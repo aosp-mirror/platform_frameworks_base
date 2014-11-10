@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"Saa <xliff:g id="HOURS">%1$d</xliff:g> dak <xliff:g id="MINUTES">%2$d</xliff:g>"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"Saa <xliff:g id="HOURS">%1$d</xliff:g> dak <xliff:g id="MINUTES">%2$d</xliff:g>"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"Dakika <xliff:g id="MINUTES">%1$d</xliff:g>"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"Dak <xliff:g id="MINUTES">%1$d</xliff:g> sek <xliff:g id="SECONDS">%2$d</xliff:g>"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"Dak <xliff:g id="MINUTES">%1$d</xliff:g> sek <xliff:g id="SECONDS">%2$d</xliff:g>"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"Sekunde <xliff:g id="SECONDS">%1$d</xliff:g>"</string>
@@ -489,7 +491,7 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"kuandika rekodi ya simu"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Huruhusu programu kurekebisha rajisi ya kompyuta kibao yako, ikiwa ni pamoja na simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kufuta au kurekebisha rajisi ya simu yako."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Huruhusu programu kurekebisha rajisi ya simu yako, ikiwa ni pamoja na simu zinazoingia na kutoka. Huenda programu hasidi zikatumia hii ili kufuta au kurekebisha rajisi ya simu yako."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"soma kadi yako mwenyewe ya mawasiliano"</string>
+    <string name="permlab_readProfile" msgid="4701889852612716678">"kusoma kadi yako ya mawasiliano"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Inaruhusu programu kusoma taarifa ya kibinafsi ya maelezo mafupi yaliyohifadhiwa kwenye kifaa chako, kama vile jina lako na taarifa ya anwani. Hii inamaanisha kuwa programu inaweza kukutambua na inaweza kuwatumia wengine taarifa yako ya maelezo mafupi."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"rekebisha kadi yako mwenyewe ya mawasiliano"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Inaruhusu programu kubadilisha au kuongeza taarifa ya maelezo mafupi ya kibinafsi yaliyohifadhiwa kwenye kifaa chako, kama vile jina lako na taarifa ya anwani. Hii inamaanisha kuwa programu inaweza kukutambua na inaweza kutuma taarifa ya maelezo yako mafupi kwa wengine."</string>
@@ -511,7 +513,7 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ruhusu programu kufikia amri za ziada za mtoa huduma za mahali. Hii huenda ikaruhusu programu ikatize matumizi ya GPS au vyanzo vingine vya eneo."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"kibali ili kusakinisha mtoa huduma ya mahali"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Unda vyanzo vya eneo la majaribio vya kujaribu au kusakinisha mtoaji huduma mpya wa eneo. Hii inaruhusu programu kufuta eneo na/au hali zilizorudishwa na vyanzo vingine vya eneo kama vile GPS au watoaji huduma wa eneo."</string>
-    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"eneo sahihi (GPS na mtandao)"</string>
+    <string name="permlab_accessFineLocation" msgid="1191898061965273372">"kutambua eneo sahihi (GPS na mtandao)"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Inaruhusu programu kupata eneo lako sahihi kwa kutumia Mfumo wa Mkao Ulimwenguni (GPS) au vyanzo vya mtandao vya eneo kama vile minara na Wi-Fi. Lazima huduma hizi za eneo ziwashwe na kupatikana kwenye kifaa chako ili programu izitumie. Huenda programu zikatumia hii kutambua ulipo, na zinaweza kutumia kawi ya ziada ya betri."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"kukadiria eneo (kwenye mtandao)"</string>
     <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Inaruhusu programu kupata eneo lako la kukadiria. Eneo hili linatokana na huduma za maeneo kwa kutumia vyanzo vya mtandao vya eneo kama vile minara na Wi-Fi. Lazima huduma hizi za eneo ziwashwe na kupatikana kwenye kifaa chako ili programu izitumie. Huenda programu zikatumia hii kutambua ulipo kwa kukadiria."</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Ili ubanue skrini hii, gusa na ushikilie Nyuma na Muhtasari kwa wakati mmoja."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Ili ubanue skrini hii, gusa na ushikilie Muhtasari."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skrini imebandikwa. Ubanduaji hauruhusiwi na shirika lako."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Ungependa kutumia ubandikaji skrini?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Ubandikaji skrini hufunga skrini kwenye onyesho moja.\n\nIli uibanue, gusa na ushikilie Nyuma na Muhtasari kwa wakati mmoja."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Ubandikaji skrini hufunga skrini kwenye onyesho moja. \n\nIli uibanue, gusa na ushikilie Muhtasari."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"HAPANA, ASANTE"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"ANZA"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skrini imebandikwa"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skrini imebanduliwa"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Omba PIN kabla hujabandua"</string>

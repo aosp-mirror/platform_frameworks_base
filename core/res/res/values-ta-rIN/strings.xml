@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ம.நே. <xliff:g id="MINUTES">%2$d</xliff:g> நிமி."</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> மநே <xliff:g id="MINUTES">%2$d</xliff:g> நிமி"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> நிமிடங்கள்"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> நிமி <xliff:g id="SECONDS">%2$d</xliff:g> வி"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> நிமி <xliff:g id="SECONDS">%2$d</xliff:g> வி"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> வினாடிகள்"</string>
@@ -1772,11 +1774,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"இந்தத் திரையை விலக்க, பின் மற்றும் மேலோட்டப் பார்வையை ஒரே நேரத்தில் தொட்டுப் பிடித்திருக்கவும்."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"இந்தத் திரையை விலக்க, மேலோட்டப் பார்வையைத் தொட்டுப் பிடித்திருக்கவும்."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"திரை பின் செய்யப்பட்டது. பின்னை அகற்ற உங்கள் நிறுவனம் ஆதரிக்கவில்லை."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"திரையை பின் செய்தலைப் பயன்படுத்தவா?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"திரை பொருத்துதல், ஒரே காட்சியில் தோன்றுமாறு திரையைப் பூட்டும்.\n\nஅதை விலக்க, பின் மற்றும் மேலோட்டப் பார்வையை ஒரே நேரத்தில் தொட்டுப் பிடித்திருக்கவும்."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"திரை பொருத்துதல், ஒரே காட்சியில் தோன்றுமாறு திரையைப் பூட்டும்.\n\nஅதை விலக்க, மேலோட்டப் பார்வையைத் தொட்டுப் பிடித்திருக்கவும்."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"வேண்டாம், நன்றி"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"தொடங்கு"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"திரை பின் செய்யப்பட்டது"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"திரையின் பின் அகற்றப்பட்டது"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"அகற்றும் முன் PINஐக் கேள்"</string>
@@ -1784,8 +1781,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"பேட்டரியின் ஆயுட்காலத்தை அதிகரிக்க, பேட்டரி சேமிப்பான் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வுறுவதையும் பெரும்பாலான பின்புலத் தரவையும் வரம்பிடுகிறது. ஒத்திசைவைச் சார்ந்திருக்கும் மின்னஞ்சல், மெசேஜ், மேலும் பிற பயன்பாடுகளைத் திறக்கும் வரை, அவை புதுப்பிக்கப்படாமல் இருக்கலாம்.\n\nசாதனம் சார்ஜ் ஆகும் போது, பேட்டரி சேமிப்பான் தானாகவே முடக்கப்படும்."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> முடியும் வரை"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"செயலற்ற நேரம் முடியும் வரை"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"ஒரு நிமிடத்திற்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d நிமிடங்களுக்கு (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> வரை)"</item>
@@ -1805,8 +1801,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> வரை"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"வரையறையற்றது"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"சுருக்கு"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>க்கு ஒலிக்கும் அடுத்த அலாரம் வரை"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"அடுத்த அலாரம் வரை"</string>
 </resources>
