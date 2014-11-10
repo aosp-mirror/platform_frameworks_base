@@ -216,6 +216,18 @@ public final class Installer extends SystemService {
         return mInstaller.execute(builder.toString());
     }
 
+    public int markBootComplete(String instructionSet) {
+        if (!isValidInstructionSet(instructionSet)) {
+            Slog.e(TAG, "Invalid instruction set: " + instructionSet);
+            return -1;
+        }
+
+        StringBuilder builder = new StringBuilder("markbootcomplete");
+        builder.append(' ');
+        builder.append(instructionSet);
+        return mInstaller.execute(builder.toString());
+    }
+
     public boolean ping() {
         if (mInstaller.execute("ping") < 0) {
             return false;
