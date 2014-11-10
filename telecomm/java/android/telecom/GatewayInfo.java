@@ -34,7 +34,9 @@ import android.text.TextUtils;
  * <li> Call the appropriate gateway address.
  * <li> Display information about how the call is being routed to the user.
  * </ol>
+ * @hide
  */
+@SystemApi
 public class GatewayInfo implements Parcelable {
 
     private final String mGatewayProviderPackageName;

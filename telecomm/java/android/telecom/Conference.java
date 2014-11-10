@@ -16,6 +16,8 @@
 
 package android.telecom;
 
+import android.annotation.SystemApi;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +27,9 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Represents a conference call which can contain any number of {@link Connection} objects.
+ * @hide
  */
+@SystemApi
 public abstract class Conference {
 
     /** @hide */
