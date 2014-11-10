@@ -263,6 +263,21 @@ message is &quot;nack&quot;. A NACK message contains:</p>
 &lt;/message&gt;
 </pre>
 
+<p>Device Message Rate Exceeded:</p>
+
+<pre>&lt;message id=&quot;...&quot;&gt;
+  &lt;gcm xmlns=&quot;google:mobile:data&quot;&gt;
+  {
+    &quot;message_type&quot;:&quot;nack&quot;,
+    &quot;message_id&quot;:&quot;msgId1&quot;,
+    &quot;from&quot;:&quot;REGID&quot;,
+    &quot;error&quot;:&quot;DEVICE_MESSAGE_RATE_EXCEEDED&quot;,
+    &quot;error_description&quot;:&quot;Downstream message rate exceeded for this registration id&quot;
+  }
+  &lt;/gcm&gt;
+&lt;/message&gt;
+</pre>
+
 <p>The following table lists NACK error codes. Unless otherwise
 indicated, a NACKed message should not be retried. Unexpected NACK error codes
 should be treated the same as {@code INTERNAL_SERVER_ERROR}.</p>
@@ -303,8 +318,7 @@ message should be immediately retried over another connection.</td>
 <td>{@code DEVICE_MESSAGE_RATE_EXCEEDED}</td>
 <td>The rate of messages to a particular device is too high. You should reduce
 the number of messages sent to this device and should not immediately retry
-sending to this device. This error code replaces {@code QUOTA_EXCEEDED},
-which has been deprecated.</td>
+sending to this device. This error code is replacing {@code QUOTA_EXCEEDED}.</td>
 </tr>
 <tr>
   <td>{@code SERVICE_UNAVAILABLE}</td>
