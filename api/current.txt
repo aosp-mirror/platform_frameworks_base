@@ -28554,8 +28554,7 @@ package android.telecom {
 
   public final class PhoneCapabilities {
     method public static java.lang.String toString(int);
-    field public static final int ADD_CALL = 16; // 0x10
-    field public static final int ALL = 12543; // 0x30ff
+    field public static final int ALL = 12527; // 0x30ef
     field public static final int DISCONNECT_FROM_CONFERENCE = 8192; // 0x2000
     field public static final int HOLD = 1; // 0x1
     field public static final int MANAGE_CONFERENCE = 128; // 0x80
