@@ -111,7 +111,6 @@ class ClockRecoveryLoop {
     bool    last_error_est_valid_;
     int32_t last_error_est_usec_;
     float last_delta_f_;
-    int32_t integrated_error_;
     int32_t tgt_correction_;
     int32_t cur_correction_;
     LinearTransform time_to_cur_slew_;
