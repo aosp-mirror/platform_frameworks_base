@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -243,11 +245,13 @@ class LockSettingsStorage {
     }
 
 
-    private String getLockPatternFilename(int userId) {
+    @VisibleForTesting
+    String getLockPatternFilename(int userId) {
         return getLockCredentialFilePathForUser(userId, LOCK_PATTERN_FILE);
     }
 
-    private String getLockPasswordFilename(int userId) {
+    @VisibleForTesting
+    String getLockPasswordFilename(int userId) {
         return getLockCredentialFilePathForUser(userId, LOCK_PASSWORD_FILE);
     }
 
@@ -310,6 +314,15 @@ class LockSettingsStorage {
         }
     }
 
+    @VisibleForTesting
+    void closeDatabase() {
+        mOpenHelper.close();
+    }
+
+    @VisibleForTesting
+    void clearCache() {
+        mCache.clear();
+    }
 
     public interface Callback {
         void initialize(SQLiteDatabase db);
@@ -455,6 +468,10 @@ class LockSettingsStorage {
             mVersion++;
         }
 
+        synchronized void clear() {
+            mCache.clear();
+            mVersion++;
+        }
 
         private static final class CacheKey {
             static final int TYPE_KEY_VALUE = 0;
