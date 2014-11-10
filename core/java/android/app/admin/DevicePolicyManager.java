@@ -62,13 +62,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Public interface for managing policies enforced on a device.  Most clients
- * of this class must have published a {@link DeviceAdminReceiver} that the user
- * has currently enabled.
+ * Public interface for managing policies enforced on a device. Most clients of this class must be
+ * registered with the system as a
+ * <a href={@docRoot}guide/topics/admin/device-admin.html">device administrator</a>. Additionally,
+ * a device administrator may be registered as either a profile or device owner. A given method is
+ * accessible to all device administrators unless the documentation for that method specifies that
+ * it is restricted to either device or profile owners.
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
- * <p>For more information about managing policies for device adminstration, read the
+ * <p>For more information about managing policies for device administration, read the
  * <a href="{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>
  * developer guide.</p>
  * </div>
