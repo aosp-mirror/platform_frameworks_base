@@ -21,6 +21,7 @@
 #include "AaptAssets.h"
 #include "AaptUtil.h"
 #include "ResourceFilter.h"
+#include "SdkConstants.h"
 
 using android::String8;
 using android::Vector;
@@ -241,7 +242,7 @@ void applyVersionForCompatibility(ConfigDescription* config) {
 
     uint16_t minSdk = 0;
     if (config->density == ResTable_config::DENSITY_ANY) {
-        minSdk = SDK_L;
+        minSdk = SDK_LOLLIPOP;
     } else if (config->smallestScreenWidthDp != ResTable_config::SCREENWIDTH_ANY
             || config->screenWidthDp != ResTable_config::SCREENWIDTH_ANY
             || config->screenHeightDp != ResTable_config::SCREENHEIGHT_ANY) {
@@ -800,7 +801,7 @@ bool isDensityOnly(const ResTable_config& config) {
     }
 
     if (config.density == ResTable_config::DENSITY_ANY) {
-        if (config.sdkVersion != SDK_L) {
+        if (config.sdkVersion != SDK_LOLLIPOP) {
             // Someone modified the sdkVersion from the default, this is not safe to assume.
             return false;
         }
