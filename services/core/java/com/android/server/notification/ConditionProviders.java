@@ -51,6 +51,7 @@ public class ConditionProviders extends ManagedServices {
             = new ArrayMap<IBinder, IConditionListener>();
     private final ArrayList<ConditionRecord> mRecords = new ArrayList<ConditionRecord>();
     private final CountdownConditionProvider mCountdown = new CountdownConditionProvider();
+    private final NextAlarmTracker mNextAlarmTracker;
     private final DowntimeConditionProvider mDowntime = new DowntimeConditionProvider();
     private final NextAlarmConditionProvider mNextAlarm = new NextAlarmConditionProvider();
 
@@ -63,6 +64,7 @@ public class ConditionProviders extends ManagedServices {
         mZenModeHelper = zenModeHelper;
         mZenModeHelper.addCallback(new ZenModeHelperCallback());
         loadZenConfig();
+        mNextAlarmTracker = new NextAlarmTracker(context);
     }
 
     @Override
@@ -101,6 +103,7 @@ public class ConditionProviders extends ManagedServices {
         mCountdown.dump(pw, filter);
         mDowntime.dump(pw, filter);
         mNextAlarm.dump(pw, filter);
+        mNextAlarmTracker.dump(pw, filter);
     }
 
     @Override
@@ -111,6 +114,7 @@ public class ConditionProviders extends ManagedServices {
     @Override
     public void onBootPhaseAppsCanStart() {
         super.onBootPhaseAppsCanStart();
+        mNextAlarmTracker.init();
         mCountdown.attachBase(mContext);
         registerService(mCountdown.asInterface(), CountdownConditionProvider.COMPONENT,
                 UserHandle.USER_OWNER);
@@ -121,20 +125,13 @@ public class ConditionProviders extends ManagedServices {
         mNextAlarm.attachBase(mContext);
         registerService(mNextAlarm.asInterface(), NextAlarmConditionProvider.COMPONENT,
                 UserHandle.USER_OWNER);
-        mNextAlarm.setCallback(new NextAlarmConditionProvider.Callback() {
-            @Override
-            public boolean isInDowntime() {
-                return mDowntime.isInDowntime();
-            }
-        });
+        mNextAlarm.setCallback(new NextAlarmCallback());
     }
 
     @Override
     public void onUserSwitched() {
         super.onUserSwitched();
-        if (mNextAlarm != null) {
-            mNextAlarm.onUserSwitched();
-        }
+        mNextAlarmTracker.onUserSwitched();
     }
 
     @Override
@@ -571,6 +568,23 @@ public class ConditionProviders extends ManagedServices {
                     || mode == Global.ZEN_MODE_NO_INTERRUPTIONS)) {
                 mZenModeHelper.setZenMode(Global.ZEN_MODE_OFF, "downtimeExit");
             }
+        }
+
+        @Override
+        public NextAlarmTracker getNextAlarmTracker() {
+            return mNextAlarmTracker;
+        }
+    }
+
+    private class NextAlarmCallback implements NextAlarmConditionProvider.Callback {
+        @Override
+        public boolean isInDowntime() {
+            return mDowntime.isInDowntime();
+        }
+
+        @Override
+        public NextAlarmTracker getNextAlarmTracker() {
+            return mNextAlarmTracker;
         }
     }
 
