@@ -65,18 +65,17 @@ public abstract class CustomActionBarWrapper {
      * Returns a wrapper around different implementations of the Action Bar to provide a common API.
      *
      * @param decorContent the top level view returned by inflating
-                     * ?attr/windowActionBarFullscreenDecorLayout
+     *                     ?attr/windowActionBarFullscreenDecorLayout
      */
     @NonNull
     public static CustomActionBarWrapper getActionBarWrapper(@NonNull BridgeContext context,
             @NonNull SessionParams params, @NonNull View decorContent) {
         View view = decorContent.findViewById(R.id.action_bar);
         if (view instanceof Toolbar) {
-            return new ToolbarWrapper(context, params, ((Toolbar) view)
-            );
+            return new ToolbarWrapper(context, params, ((Toolbar) view));
         } else if (view instanceof ActionBarView) {
-            return new WindowActionBarWrapper(context, params, decorContent, ((ActionBarView) view)
-            );
+            return new WindowActionBarWrapper(context, params, decorContent,
+                    ((ActionBarView) view));
         } else {
             throw new IllegalStateException("Can't make an action bar out of " +
                     view.getClass().getSimpleName());
@@ -174,6 +173,13 @@ public abstract class CustomActionBarWrapper {
     @NonNull
     abstract DecorToolbar getDecorToolbar();
 
+    abstract int getMenuPopupElevation();
+
+    /**
+     * Margin between the menu popup and the action bar.
+     */
+    abstract int getMenuPopupMargin();
+
     // ---- The implementations ----
 
     /**
@@ -226,25 +232,38 @@ public abstract class CustomActionBarWrapper {
         DecorToolbar getDecorToolbar() {
             return mToolbar.getWrapper();
         }
+
+        @Override
+        int getMenuPopupElevation() {
+            return 10;
+        }
+
+        @Override
+        int getMenuPopupMargin() {
+            return 0;
+        }
     }
 
     /**
      * Holo theme uses {@link WindowDecorActionBar} as the action bar. This wrapper provides
      * access to it using a common API.
      */
-    private static class WindowActionBarWrapper extends CustomActionBarWrapper{
+    private static class WindowActionBarWrapper extends CustomActionBarWrapper {
 
         @NonNull
         private final WindowDecorActionBar mActionBar;
+        @NonNull
         private final ActionBarView mActionBarView;
+        @NonNull
+        private final View mDecorContentRoot;
         private MenuBuilder mMenuBuilder;
 
         public WindowActionBarWrapper(@NonNull BridgeContext context, @NonNull SessionParams params,
                 @NonNull View decorContentRoot, @NonNull ActionBarView actionBarView) {
-            super(context, params, new WindowDecorActionBar(decorContentRoot)
-            );
+            super(context, params, new WindowDecorActionBar(decorContentRoot));
             mActionBarView = actionBarView;
             mActionBar = ((WindowDecorActionBar) super.mActionBar);
+            mDecorContentRoot = decorContentRoot;
         }
 
         @Override
@@ -270,7 +289,7 @@ public abstract class CustomActionBarWrapper {
             }
 
             // Set action bar to be split, if needed.
-            ViewGroup splitView = (ViewGroup) mActionBarView.findViewById(R.id.split_action_bar);
+            ViewGroup splitView = (ViewGroup) mDecorContentRoot.findViewById(R.id.split_action_bar);
             if (splitView != null) {
                 mActionBarView.setSplitView(splitView);
                 Resources res = mContext.getResources();
@@ -312,6 +331,16 @@ public abstract class CustomActionBarWrapper {
         @Override
         ActionBarView getDecorToolbar() {
             return mActionBarView;
+        }
+
+        @Override
+        int getMenuPopupElevation() {
+            return 0;
+        }
+
+        @Override
+        int getMenuPopupMargin() {
+            return -ActionBarLayout.getPixelValue("10dp", mContext.getMetrics());
         }
 
         // TODO: Use an adapter, like List View to set up tabs.
