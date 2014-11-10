@@ -17,42 +17,28 @@
 #include "Rule.h"
 
 #include "SplitDescription.h"
+#include "TestRules.h"
 
 #include <algorithm>
-#include <string>
 #include <gtest/gtest.h>
+#include <string>
 #include <utils/String8.h>
 
 using namespace android;
+using namespace split::test;
 
 namespace split {
 
 TEST(RuleTest, generatesValidJson) {
-    sp<Rule> rule = new Rule();
-    rule->op = Rule::AND_SUBRULES;
+    Rule rule(AndRule()
+        .add(EqRule(Rule::SDK_VERSION, 7))
+        .add(OrRule()
+                .add(GtRule(Rule::SCREEN_DENSITY, 10))
+                .add(LtRule(Rule::SCREEN_DENSITY, 5))
+        )
+    );
 
-    sp<Rule> subrule = new Rule();
-    subrule->op = Rule::EQUALS;
-    subrule->key = Rule::SDK_VERSION;
-    subrule->longArgs.add(7);
-    rule->subrules.add(subrule);
-
-    subrule = new Rule();
-    subrule->op = Rule::OR_SUBRULES;
-    rule->subrules.add(subrule);
-
-    sp<Rule> subsubrule = new Rule();
-    subsubrule->op = Rule::GREATER_THAN;
-    subsubrule->key = Rule::SCREEN_DENSITY;
-    subsubrule->longArgs.add(10);
-    subrule->subrules.add(subsubrule);
-
-    subsubrule = new Rule();
-    subsubrule->op = Rule::LESS_THAN;
-    subsubrule->key = Rule::SCREEN_DENSITY;
-    subsubrule->longArgs.add(5);
-    subrule->subrules.add(subsubrule);
-
+    // Expected
     std::string expected(
             "{"
             "  \"op\": \"AND_SUBRULES\","
@@ -79,69 +65,36 @@ TEST(RuleTest, generatesValidJson) {
             "     }"
             "  ]"
             "}");
-    // Trim
     expected.erase(std::remove_if(expected.begin(), expected.end(), ::isspace), expected.end());
 
-    std::string result(rule->toJson().string());
-
-    // Trim
+    // Result
+    std::string result(rule.toJson().string());
     result.erase(std::remove_if(result.begin(), result.end(), ::isspace), result.end());
 
     ASSERT_EQ(expected, result);
 }
 
 TEST(RuleTest, simplifiesSingleSubruleRules) {
-    sp<Rule> rule = new Rule();
-    rule->op = Rule::AND_SUBRULES;
+    sp<Rule> rule = new Rule(AndRule()
+        .add(EqRule(Rule::SDK_VERSION, 7))
+    );
 
-    sp<Rule> subrule = new Rule();
-    subrule->op = Rule::EQUALS;
-    subrule->key = Rule::SDK_VERSION;
-    subrule->longArgs.add(7);
-    rule->subrules.add(subrule);
-
-    sp<Rule> simplified = Rule::simplify(rule);
-    EXPECT_EQ(Rule::EQUALS, simplified->op);
-    EXPECT_EQ(Rule::SDK_VERSION, simplified->key);
-    ASSERT_EQ(1u, simplified->longArgs.size());
-    EXPECT_EQ(7, simplified->longArgs[0]);
+    EXPECT_RULES_EQ(Rule::simplify(rule), EqRule(Rule::SDK_VERSION, 7));
 }
 
 TEST(RuleTest, simplifiesNestedSameOpSubrules) {
-    sp<Rule> rule = new Rule();
-    rule->op = Rule::AND_SUBRULES;
+    sp<Rule> rule = new Rule(AndRule()
+        .add(AndRule()
+            .add(EqRule(Rule::SDK_VERSION, 7))
+        )
+        .add(EqRule(Rule::SDK_VERSION, 8))
+    );
 
-    sp<Rule> subrule = new Rule();
-    subrule->op = Rule::AND_SUBRULES;
-    rule->subrules.add(subrule);
-
-    sp<Rule> subsubrule = new Rule();
-    subsubrule->op = Rule::EQUALS;
-    subsubrule->key = Rule::SDK_VERSION;
-    subsubrule->longArgs.add(7);
-    subrule->subrules.add(subsubrule);
-
-    subrule = new Rule();
-    subrule->op = Rule::EQUALS;
-    subrule->key = Rule::SDK_VERSION;
-    subrule->longArgs.add(8);
-    rule->subrules.add(subrule);
-
-    sp<Rule> simplified = Rule::simplify(rule);
-    EXPECT_EQ(Rule::AND_SUBRULES, simplified->op);
-    ASSERT_EQ(2u, simplified->subrules.size());
-
-    sp<Rule> simplifiedSubrule = simplified->subrules[0];
-    EXPECT_EQ(Rule::EQUALS, simplifiedSubrule->op);
-    EXPECT_EQ(Rule::SDK_VERSION, simplifiedSubrule->key);
-    ASSERT_EQ(1u, simplifiedSubrule->longArgs.size());
-    EXPECT_EQ(7, simplifiedSubrule->longArgs[0]);
-
-    simplifiedSubrule = simplified->subrules[1];
-    EXPECT_EQ(Rule::EQUALS, simplifiedSubrule->op);
-    EXPECT_EQ(Rule::SDK_VERSION, simplifiedSubrule->key);
-    ASSERT_EQ(1u, simplifiedSubrule->longArgs.size());
-    EXPECT_EQ(8, simplifiedSubrule->longArgs[0]);
+    EXPECT_RULES_EQ(Rule::simplify(rule),
+            AndRule()
+                .add(EqRule(Rule::SDK_VERSION, 7))
+                .add(EqRule(Rule::SDK_VERSION, 8))
+    );
 }
 
 } // namespace split

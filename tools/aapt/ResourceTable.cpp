@@ -10,6 +10,7 @@
 #include "XMLNode.h"
 #include "ResourceFilter.h"
 #include "ResourceIdCache.h"
+#include "SdkConstants.h"
 
 #include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
@@ -4254,7 +4255,7 @@ static bool isMinSdkVersionLOrAbove(const Bundle* bundle) {
         }
 
         const int minSdk = atoi(bundle->getMinSdkVersion());
-        if (minSdk >= SDK_L) {
+        if (minSdk >= SDK_LOLLIPOP) {
             return true;
         }
     }
@@ -4345,7 +4346,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                     }
 
                     const ConfigDescription& config = entries.keyAt(ei);
-                    if (config.sdkVersion >= SDK_L) {
+                    if (config.sdkVersion >= SDK_LOLLIPOP) {
                         // We don't need to do anything if the resource is
                         // already qualified for version 21 or higher.
                         continue;
@@ -4367,9 +4368,9 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                     }
 
                     // Duplicate the entry under the same configuration
-                    // but with sdkVersion == SDK_L.
+                    // but with sdkVersion == SDK_LOLLIPOP.
                     ConfigDescription newConfig(config);
-                    newConfig.sdkVersion = SDK_L;
+                    newConfig.sdkVersion = SDK_LOLLIPOP;
                     entriesToAdd.add(key_value_pair_t<ConfigDescription, sp<Entry> >(
                             newConfig, new Entry(*e)));
 
@@ -4392,7 +4393,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                     if (bundle->getVerbose()) {
                         entriesToAdd[i].value->getPos()
                                 .printf("using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
-                                        SDK_L,
+                                        SDK_LOLLIPOP,
                                         String8(p->getName()).string(),
                                         String8(t->getName()).string(),
                                         String8(entriesToAdd[i].value->getName()).string(),
@@ -4419,7 +4420,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         return NO_ERROR;
     }
 
-    if (target->getResourceType() == "" || target->getGroupEntry().toParams().sdkVersion >= SDK_L) {
+    if (target->getResourceType() == "" || target->getGroupEntry().toParams().sdkVersion >= SDK_LOLLIPOP) {
         // Skip resources that have no type (AndroidManifest.xml) or are already version qualified with v21
         // or higher.
         return NO_ERROR;
@@ -4455,7 +4456,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
     }
 
     ConfigDescription newConfig(target->getGroupEntry().toParams());
-    newConfig.sdkVersion = SDK_L;
+    newConfig.sdkVersion = SDK_LOLLIPOP;
 
     // Look to see if we already have an overriding v21 configuration.
     sp<ConfigList> cl = getConfigList(String16(mAssets->getPackage()),
@@ -4477,7 +4478,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         if (bundle->getVerbose()) {
             SourcePos(target->getSourceFile(), -1).printf(
                     "using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
-                    SDK_L,
+                    SDK_LOLLIPOP,
                     mAssets->getPackage().string(),
                     newFile->getResourceType().string(),
                     String8(resourceName).string(),
