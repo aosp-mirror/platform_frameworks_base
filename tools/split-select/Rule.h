@@ -28,6 +28,7 @@ namespace split {
 
 struct Rule : public virtual android::RefBase {
     inline Rule();
+    Rule(const Rule& rhs);
 
     enum Operator {
         LESS_THAN = 1,
