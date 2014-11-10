@@ -1307,23 +1307,12 @@ get_mod_time(const char* filename, struct timeval times[2])
         fprintf(stderr, "stat '%s' failed: %s\n", filename, strerror(errno));
         return errno;
     }
-    times[0].tv_sec = st.st_atime;
-    times[1].tv_sec = st.st_mtime;
 
-    // If st_atime is a macro then struct stat64 uses struct timespec
-    // to store the access and modif time values and typically
-    // st_*time_nsec is not defined. In glibc, this is controlled by
-    // __USE_MISC.
-#ifdef __USE_MISC
-#if !defined(st_atime) || defined(st_atime_nsec)
-#error "Check if this __USE_MISC conditional is still needed."
-#endif
+    times[0].tv_sec = st.st_atim.tv_sec;
     times[0].tv_usec = st.st_atim.tv_nsec / 1000;
+
+    times[1].tv_sec = st.st_mtim.tv_sec;
     times[1].tv_usec = st.st_mtim.tv_nsec / 1000;
-#else
-    times[0].tv_usec = st.st_atime_nsec / 1000;
-    times[1].tv_usec = st.st_mtime_nsec / 1000;
-#endif
 
     return 0;
 }
