@@ -155,31 +155,32 @@ final class Session extends IWindowSession.Stub
 
     @Override
     public int add(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, Rect outContentInsets, InputChannel outInputChannel) {
+            int viewVisibility, Rect outContentInsets, Rect outStableInsets,
+            InputChannel outInputChannel) {
         return addToDisplay(window, seq, attrs, viewVisibility, Display.DEFAULT_DISPLAY,
-                outContentInsets, outInputChannel);
+                outContentInsets, outStableInsets, outInputChannel);
     }
 
     @Override
     public int addToDisplay(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, Rect outContentInsets,
+            int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets,
             InputChannel outInputChannel) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
-                outContentInsets, outInputChannel);
+                outContentInsets, outStableInsets, outInputChannel);
     }
 
     @Override
     public int addWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, Rect outContentInsets) {
+            int viewVisibility, Rect outContentInsets, Rect outStableInsets) {
         return addToDisplayWithoutInputChannel(window, seq, attrs, viewVisibility,
-                Display.DEFAULT_DISPLAY, outContentInsets);
+                Display.DEFAULT_DISPLAY, outContentInsets, outStableInsets);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, Rect outContentInsets) {
+            int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
-            outContentInsets, null);
+            outContentInsets, outStableInsets, null);
     }
 
     public void remove(IWindow window) {
