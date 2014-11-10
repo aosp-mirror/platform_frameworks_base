@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h et <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h et <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min et <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min et <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
@@ -1767,11 +1769,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Pour annuler l\'épinglage de cet écran, appuyez de manière prolongée sur Retour et Aperçu simultanément."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Pour annuler l\'épinglage, appuyez de manière prolongée sur Aperçu."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"L\'écran est épinglé. Votre organisation n\'autorise pas l\'annulation d\'épinglage."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Utiliser l\'épinglage d\'écran?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Lorsque vous épinglez l\'écran, celui-ci n\'affiche plus qu\'une seule vue.\n\nPour annuler l\'épinglage, appuyez de manière prolongée sur Retour et Aperçu simultanément."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Lorsque vous épinglez l\'écran, celui-ci n\'affiche plus qu\'une seule vue.\n\nPour annuler l\'épinglage, appuyez de manière prolongée sur Aperçu."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"NON, MERCI"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"COMMENCER"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Écran épinglé"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Épinglage d\'écran annulé"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Demander le NIP avant d\'annuler l\'épinglage"</string>

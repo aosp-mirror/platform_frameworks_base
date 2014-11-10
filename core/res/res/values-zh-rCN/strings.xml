@@ -34,6 +34,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g>小时<xliff:g id="MINUTES">%2$d</xliff:g>分钟"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g>小时<xliff:g id="MINUTES">%2$d</xliff:g>分钟"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g>分钟"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g>分钟<xliff:g id="SECONDS">%2$d</xliff:g>秒"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g>分钟<xliff:g id="SECONDS">%2$d</xliff:g>秒"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
@@ -1767,11 +1769,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"要取消固定此屏幕，请同时触摸并按住“返回”和“概览”按钮。"</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"要取消固定此屏幕，请触摸并按住概览按钮。"</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"屏幕处于固定状态。您所属的单位不允许取消固定。"</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"要固定屏幕吗？"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"固定屏幕后，设备会一直显示某一个屏幕。\n\n要取消固定屏幕，请同时触摸并按住“返回”和“概览”按钮。"</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"固定屏幕后，设备会一直显示某一个屏幕。\n\n要取消固定屏幕，请触摸并按住概览按钮。"</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"不用了"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"固定"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"已固定屏幕"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定屏幕"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消时要求输入PIN码"</string>

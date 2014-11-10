@@ -40,6 +40,8 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> с. <xliff:g id="MINUTES">%2$d</xliff:g> мүн"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> саат <xliff:g id="MINUTES">%2$d</xliff:g> мүн"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> мүн"</string>
+    <!-- no translation found for durationMinute (7155301744174623818) -->
+    <skip />
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> мүн. <xliff:g id="SECONDS">%2$d</xliff:g> сек"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> мүн. <xliff:g id="SECONDS">%2$d</xliff:g> сек"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> сек"</string>
@@ -2247,11 +2249,6 @@
     <string name="lock_to_app_toast" msgid="7570091317001980053">"Бул экранды бошотуу үчүн Артка жана Көз жүгүртүүнү чогуу басып, кармап туруңуз."</string>
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Бул экранды бошотуу үчүн Көз жүгүртүүнү басып, кармап туруңуз."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Экран кадалды. Уюмуңуздун уруксатысыз бошото албайсыз."</string>
-    <string name="lock_to_app_title" msgid="1682643873107812874">"Экран кадалсынбы?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Экран кадоосу дисплейди жалгыз көрүнүш менен бекитет.\n\nБошотуу үчүн Артка жана Көз жүгүртүүнү чогуу басып, кармап туруңуз."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Экран кадоосу дисплейди жалгыз көрүнүш менен бекитет.\n\n Бошотуу үчүн Көз жүгүртүүнү басып, кармап туруңуз."</string>
-    <string name="lock_to_app_negative" msgid="2259143719362732728">"ЖОК, РАХМАТ"</string>
-    <string name="lock_to_app_positive" msgid="7085139175671313864">"БАШТОО"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Экран кадалды"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Экран бошотулду"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Бошотуудан мурун PIN суралсын"</string>
