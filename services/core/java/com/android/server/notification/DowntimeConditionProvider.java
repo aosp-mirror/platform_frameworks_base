@@ -298,5 +298,6 @@ public class DowntimeConditionProvider extends ConditionProviderService {
 
     public interface Callback {
         void onDowntimeChanged(int downtimeMode);
+        NextAlarmTracker getNextAlarmTracker();
     }
 }
