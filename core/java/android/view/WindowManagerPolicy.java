@@ -865,12 +865,15 @@ public interface WindowManagerPolicy {
      * Return the insets for the areas covered by system windows. These values
      * are computed on the most recent layout, so they are not guaranteed to
      * be correct.
-     * 
+     *
      * @param attrs The LayoutParams of the window.
-     * @param contentInset The areas covered by system windows, expressed as positive insets
-     * 
+     * @param outContentInsets The areas covered by system windows, expressed as positive insets.
+     * @param outStableInsets The areas covered by stable system windows irrespective of their
+     *                        current visibility. Expressed as positive insets.
+     *
      */
-    public void getContentInsetHintLw(WindowManager.LayoutParams attrs, Rect contentInset);
+    public void getInsetHintLw(WindowManager.LayoutParams attrs, Rect outContentInsets,
+            Rect outStableInsets);
 
     /**
      * Called when layout of the windows is finished.  After this function has
