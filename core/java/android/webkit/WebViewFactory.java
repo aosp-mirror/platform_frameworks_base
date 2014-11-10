@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.app.ActivityManagerInternal;
 import android.app.Application;
 import android.app.AppGlobals;
@@ -46,6 +47,7 @@ import com.android.internal.os.Zygote;
  *
  * @hide
  */
+@SystemApi
 public final class WebViewFactory {
 
     private static final String CHROMIUM_WEBVIEW_FACTORY =
