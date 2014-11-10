@@ -77,6 +77,17 @@ listing in the Android SDK Manager.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Build Tools, Revision 21.1.1</a> <em>(November 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <p>Fixed multidex script issues.</p>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Build Tools, Revision 21.1</a> <em>(October 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
