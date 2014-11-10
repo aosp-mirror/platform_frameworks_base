@@ -706,9 +706,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onNewAvrAdded(HdmiDeviceInfo avr) {
         assertRunOnServiceThread();
-        if (getSystemAudioModeSetting()) {
-            addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
-        }
+        addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
         if (isArcFeatureEnabled()) {
             startArcAction(true);
         }
