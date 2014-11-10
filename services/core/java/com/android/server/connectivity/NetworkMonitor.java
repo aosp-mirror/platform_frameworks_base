@@ -46,6 +46,7 @@ import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
@@ -270,6 +271,11 @@ public class NetworkMonitor extends StateMachine {
                 Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED, 1) == 1;
 
         start();
+    }
+
+    @Override
+    protected void log(String s) {
+        Log.d(TAG + mNetworkAgentInfo.name(), s);
     }
 
     private class DefaultState extends State {
