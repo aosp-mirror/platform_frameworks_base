@@ -20,11 +20,11 @@
     android:viewportHeight="48"
     android:viewportWidth="48" >
     <group
-        android:name="ic_screen_rotation_48px_outlines"
+        android:name="icon"
         android:translateX="24"
         android:translateY="24" >
         <group
-            android:name="ic_screen_rotation_48px_outlines_pivot"
+            android:name="icon_pivot"
             android:translateX="-24.15"
             android:translateY="-24.25" >
             <group
