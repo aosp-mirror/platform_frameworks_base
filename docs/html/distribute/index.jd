@@ -7,15 +7,20 @@ page.metaDescription=The most visited store in the world for Android apps. Cloud
 
 @jd:body
 
-  <div class="resource-widget resource-carousel-layout col-16" 
+    <div class="resource-widget resource-carousel-layout col-16" 
     style="height:420px;margin-top:20px;padding-top:0"
-    data-query="type:youtube+tag:googleplay+tag:developerstory+tag:featured, type:blog+tag:googleplay+tag:distribute+tag:featured"
+    data-query="type:youtube+tag:googleplay+tag:developerstory+tag:featured"
     data-sortOdrder="-timestamp"
     data-maxResults="4"></div>
-  
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="type:blog+tag:googleplay+tag:distribute+tag:featured"
+    data-sortOrder=""
+    data-cardSizes="9x6"
+    data-maxResults="2"></div>
+
   <div class="resource-widget resource-flow-layout col-16"
     data-query="collection:launch/static"
     data-sortOrder=""
-    data-cardSizes="6x6,6x6,6x2x3,12x6,6x6,6x2x3,6x6,6x6,12x6,6x6"
+    data-cardSizes="6x2x3,6x6,6x6,6x6,6x6,6x2x3,6x2x3,6x6,6x6,6x6,6x6,6x6"
     data-maxResults="24"></div>
-
