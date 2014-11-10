@@ -183,8 +183,11 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
                 mHeaderYearTextView.getTextColors(), R.attr.state_selected,
                 headerSelectedTextColor));
 
-        mDayPickerView = new DayPickerView(mContext, this);
+        mDayPickerView = new DayPickerView(mContext);
+        mDayPickerView.setFirstDayOfWeek(mFirstDayOfWeek);
         mDayPickerView.setRange(mMinDate, mMaxDate);
+        mDayPickerView.setDay(mCurrentDate);
+        mDayPickerView.setOnDaySelectedListener(mOnDaySelectedListener);
 
         mYearPickerView = new YearPickerView(mContext);
         mYearPickerView.init(this);
@@ -333,7 +336,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         switch (viewIndex) {
             case MONTH_AND_DAY_VIEW:
-                mDayPickerView.onDateChanged();
+                mDayPickerView.setDay(getSelectedDay());
                 if (mCurrentView != viewIndex) {
                     mMonthAndDayLayout.setSelected(true);
                     mHeaderYearTextView.setSelected(false);
@@ -445,6 +448,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     @Override
     public void setFirstDayOfWeek(int firstDayOfWeek) {
         mFirstDayOfWeek = firstDayOfWeek;
+
+        mDayPickerView.setFirstDayOfWeek(firstDayOfWeek);
     }
 
     @Override
@@ -606,29 +611,17 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         }
     }
 
-    @Override
-    public void onDayOfMonthSelected(int year, int month, int day) {
-        mCurrentDate.set(Calendar.YEAR, year);
-        mCurrentDate.set(Calendar.MONTH, month);
-        mCurrentDate.set(Calendar.DAY_OF_MONTH, day);
-        updatePickers();
-        updateDisplay(true);
-    }
-
     private void updatePickers() {
         for (OnDateChangedListener listener : mListeners) {
             listener.onDateChanged();
         }
+
+        mDayPickerView.setDay(getSelectedDay());
     }
 
     @Override
     public void registerOnDateChangedListener(OnDateChangedListener listener) {
         mListeners.add(listener);
-    }
-
-    @Override
-    public void unregisterOnDateChangedListener(OnDateChangedListener listener) {
-        mListeners.remove(listener);
     }
 
     @Override
@@ -650,6 +643,22 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             setCurrentView(MONTH_AND_DAY_VIEW);
         }
     }
+
+    /**
+     * Listener called when the user selects a day in the day picker view.
+     */
+    private final DayPickerView.OnDaySelectedListener
+            mOnDaySelectedListener = new DayPickerView.OnDaySelectedListener() {
+        @Override
+        public void onDaySelected(DayPickerView view, Calendar day) {
+            mCurrentDate.setTimeInMillis(day.getTimeInMillis());
+
+            updatePickers();
+            updateDisplay(true);
+
+            tryVibrate();
+        }
+    };
 
     /**
      * Class for managing state storing/restoring.

@@ -27,16 +27,9 @@ interface DatePickerController {
 
     void onYearSelected(int year);
 
-    void onDayOfMonthSelected(int year, int month, int day);
-
     void registerOnDateChangedListener(OnDateChangedListener listener);
 
-    void unregisterOnDateChangedListener(OnDateChangedListener listener);
-
     Calendar getSelectedDay();
-
-    void setFirstDayOfWeek(int firstDayOfWeek);
-    int getFirstDayOfWeek();
 
     void tryVibrate();
 }
