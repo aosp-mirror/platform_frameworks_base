@@ -24,8 +24,7 @@
     <group
         android:name="ic_signal_location"
         android:translateX="21.9995"
-        android:translateY="25.73401"
-        android:alpha="0.3" >
+        android:translateY="25.73401" >
         <group
             android:name="ic_signal_location_pivot"
             android:translateX="-23.21545"
