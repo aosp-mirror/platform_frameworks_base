@@ -91,6 +91,6 @@
     <!-- Default rounded corner for controls -->
     <dimen name="control_corner_material">2dp</dimen>
 
-    <dimen name="alert_dialog_padding_material">24dp</dimen>
-    <dimen name="alert_dialog_padding_top_material">18dp</dimen>
+    <dimen name="dialog_padding_material">24dp</dimen>
+    <dimen name="dialog_padding_top_material">18dp</dimen>
 </resources>
