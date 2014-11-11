@@ -2084,7 +2084,7 @@ static JNINativeMethod gAssetManagerMethods[] = {
     { "getAssetAllocations", "()Ljava/lang/String;",
         (void*) android_content_AssetManager_getAssetAllocations },
     { "getGlobalAssetManagerCount", "()I",
-        (void*) android_content_AssetManager_getGlobalAssetCount },
+        (void*) android_content_AssetManager_getGlobalAssetManagerCount },
 };
 
 int register_android_content_AssetManager(JNIEnv* env)
