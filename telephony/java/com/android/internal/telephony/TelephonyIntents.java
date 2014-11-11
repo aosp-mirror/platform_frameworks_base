@@ -312,27 +312,7 @@ public class TelephonyIntents {
     public static final String EXTRA_SPN        = "spn";
 
     /**
-     * <p>Broadcast Action: It indicates one column of a siminfo record has been changed
-     * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>columnName</em> - The siminfo column that is updated.</li>
-     *   <li><em>stringContent</em> - The string value of the updated column.</li>
-     *   <li><em>intContent</em> - The int value of the updated column.</li>
-     * </ul>
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_SIMINFO_CONTENT_CHANGE
-            = "android.intent.action.ACTION_SIMINFO_CONTENT_CHANGE";
-
-    /**
      * <p>Broadcast Action: It indicates one column of a subinfo record has been changed
-     * The intent will have the following extra values:</p>
-     * <ul>
-     *   <li><em>columnName</em> - The siminfo column that is updated.</li>
-     *   <li><em>stringContent</em> - The string value of the updated column.</li>
-     *   <li><em>intContent</em> - The int value of the updated column.</li>
-     * </ul>
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -340,27 +320,13 @@ public class TelephonyIntents {
             = "android.intent.action.ACTION_SUBINFO_CONTENT_CHANGE";
 
     /**
-     * <p>Broadcast Action: It indicates siminfo update is completed when SIM inserted state change
-     * The intent will have the following extra values:</p>
-     * <p class="note">This is a protected intent that can only be sent
-     * by the system.
-     */
-    public static final String ACTION_SIMINFO_UPDATED
-            = "android.intent.action.ACTION_SIMINFO_UPDATED";
-
-    /**
      * <p>Broadcast Action: It indicates subinfo record update is completed
      * when SIM inserted state change
-     * The intent will have the following extra values:</p>
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
     public static final String ACTION_SUBINFO_RECORD_UPDATED
             = "android.intent.action.ACTION_SUBINFO_RECORD_UPDATED";
-
-    public static final String EXTRA_COLUMN_NAME = "columnName";
-    public static final String EXTRA_INT_CONTENT = "intContent";
-    public static final String EXTRA_STRING_CONTENT = "stringContent";
 
     /**
      * Broadcast Action: The default subscription has changed.  This has the following

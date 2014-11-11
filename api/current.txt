@@ -28423,6 +28423,7 @@ package android.telephony {
     method public void downloadMultimediaMessage(android.content.Context, java.lang.String, android.net.Uri, android.os.Bundle, android.app.PendingIntent);
     method public android.os.Bundle getCarrierConfigValues();
     method public static android.telephony.SmsManager getDefault();
+    method public static int getDefaultSmsSubscriptionId();
     method public static android.telephony.SmsManager getSmsManagerForSubscriber(int);
     method public int getSubId();
     method public void injectSmsPdu(byte[], java.lang.String, android.app.PendingIntent);
@@ -28541,7 +28542,7 @@ package android.telephony {
     field public byte[] encodedScAddress;
   }
 
-  public class SubInfoRecord implements android.os.Parcelable {
+  public class SubscriptionInfo implements android.os.Parcelable {
     method public android.graphics.Bitmap createIconBitmap(android.content.Context);
     method public int describeContents();
     method public int getDataRoaming();
@@ -28555,25 +28556,23 @@ package android.telephony {
     method public int getSimSlotIndex();
     method public int getSubscriptionId();
     method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.SubInfoRecord> CREATOR;
+    field public static final android.os.Parcelable.Creator<android.telephony.SubscriptionInfo> CREATOR;
+  }
+
+  public class SubscriptionListener {
+    ctor public SubscriptionListener();
+    ctor public SubscriptionListener(android.os.Looper);
+    method public void onSubscriptionInfoChanged();
+    field public static final int LISTEN_SUBSCRIPTION_INFO_LIST_CHANGED = 1; // 0x1
   }
 
   public class SubscriptionManager implements android.provider.BaseColumns {
-    method public static java.util.List<android.telephony.SubInfoRecord> getActiveSubInfoList();
-    method public static int getDefaultSmsSubId();
-    method public static int getSlotId(int);
-    method public static android.telephony.SubInfoRecord getSubInfoForSubscriber(int);
-    method public static java.util.List<android.telephony.SubInfoRecord> getSubInfoUsingSlotId(int);
-    method public static boolean isValidSubId(int);
-    field public static final int ASK_USER_SUB_ID = -1001; // 0xfffffc17
-    field public static final int DEFAULT_PHONE_ID = 2147483647; // 0x7fffffff
-    field public static final int DEFAULT_SUB_ID = 2147483647; // 0x7fffffff
-    field public static final int INVALID_PHONE_ID = -1000; // 0xfffffc18
-    field public static final int INVALID_SLOT_ID = -1000; // 0xfffffc18
+    method public static java.util.List<android.telephony.SubscriptionInfo> getActiveSubscriptionInfoList();
+    method public static android.telephony.SubscriptionInfo getSubscriptionInfoForSubscriber(int);
+    method public static java.util.List<android.telephony.SubscriptionInfo> getSubscriptionInfoUsingSlotId(int);
+    method public static void register(android.content.Context, android.telephony.SubscriptionListener, int);
+    method public static void unregister(android.content.Context, android.telephony.SubscriptionListener);
     field public static final int INVALID_SUB_ID = -1000; // 0xfffffc18
-    field public static final java.lang.String MCC = "mcc";
-    field public static final java.lang.String MNC = "mnc";
-    field public static final int SIM_NOT_INSERTED = -1; // 0xffffffff
   }
 
   public class TelephonyManager {

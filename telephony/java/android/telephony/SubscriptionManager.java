@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -26,6 +27,7 @@ import android.os.ServiceManager;
 import android.os.RemoteException;
 
 import com.android.internal.telephony.ISub;
+import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
 
 import java.util.ArrayList;
@@ -43,27 +45,28 @@ public class SubscriptionManager implements BaseColumns {
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
 
-    /** An invalid phone identifier */
-    public static final int INVALID_PHONE_ID = -1000;
+    /** An invalid subscription identifier */
+    public static final int INVALID_SUB_ID = -1000;
 
-    /** Indicates the caller wants the default phone id. */
-    public static final int DEFAULT_PHONE_ID = Integer.MAX_VALUE;
+    /** An invalid phone identifier */
+    /** @hide */
+    public static final int INVALID_PHONE_ID = -1;
 
     /** An invalid slot identifier */
-    public static final int INVALID_SLOT_ID = -1000;
+    /** @hide */
+    public static final int INVALID_SLOT_ID = -1;
+
+    /** Indicates the caller wants the default sub id. */
+    /** @hide */
+    public static final int DEFAULT_SUB_ID = Integer.MAX_VALUE;
+
+    /** Indicates the caller wants the default phone id. */
+    /** @hide */
+    public static final int DEFAULT_PHONE_ID = Integer.MAX_VALUE;
 
     /** Indicates the caller wants the default slot id. */
     /** @hide */
     public static final int DEFAULT_SLOT_ID = Integer.MAX_VALUE;
-
-    /** Indicates the user should be asked which subscription to use. */
-    public static final int ASK_USER_SUB_ID = -1001;
-
-    /** An invalid subscription identifier */
-    public static final int INVALID_SUB_ID = -1000;
-
-    /** Indicates the caller wants the default sub id. */
-    public static final int DEFAULT_SUB_ID = Integer.MAX_VALUE;
 
     /** Minimum possible subid that represents a subscription */
     /** @hide */
@@ -76,31 +79,6 @@ public class SubscriptionManager implements BaseColumns {
 
     /** @hide */
     public static final Uri CONTENT_URI = Uri.parse("content://telephony/siminfo");
-
-    /** @hide */
-    public static final int DEFAULT_INT_VALUE = -100;
-
-    /** @hide */
-    public static final String DEFAULT_STRING_VALUE = "N/A";
-
-    /** @hide */
-    public static final int EXTRA_VALUE_NEW_SIM = 1;
-
-    /** @hide */
-    public static final int EXTRA_VALUE_REMOVE_SIM = 2;
-    /** @hide */
-    public static final int EXTRA_VALUE_REPOSITION_SIM = 3;
-    /** @hide */
-    public static final int EXTRA_VALUE_NOCHANGE = 4;
-
-    /** @hide */
-    public static final String INTENT_KEY_DETECT_STATUS = "simDetectStatus";
-    /** @hide */
-    public static final String INTENT_KEY_SIM_COUNT = "simCount";
-    /** @hide */
-    public static final String INTENT_KEY_NEW_SIM_SLOT = "newSIMSlot";
-    /** @hide */
-    public static final String INTENT_KEY_NEW_SIM_STATUS = "newSIMStatus";
 
     /**
      * The ICC ID of a SIM.
@@ -116,6 +94,7 @@ public class SubscriptionManager implements BaseColumns {
     public static final String SIM_ID = "sim_id";
 
     /** SIM is not inserted */
+    /** @hide */
     public static final int SIM_NOT_INSERTED = -1;
 
     /**
@@ -237,12 +216,14 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * TelephonyProvider column name for the MCC associated with a SIM.
      * <P>Type: INTEGER (int)</P>
+     * @hide
      */
     public static final String MCC = "mcc";
 
     /**
      * TelephonyProvider column name for the MNC associated with a SIM.
      * <P>Type: INTEGER (int)</P>
+     * @hide
      */
     public static final String MNC = "mnc";
 
@@ -261,17 +242,70 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /**
-     * Get the SubInfoRecord associated with the subId
-     * @param subId The unique SubInfoRecord index in database
-     * @return SubInfoRecord, maybe null
+     * Register for changes to events defined by SubscriptionListener.LISTEN_Xxx. Some of
+     * the events will fire as registration completes, this could be before or after
+     * this method returns.
+     *
+     * @param listener an instance of SubscriptionListner with overridden methods the
+     *                 overridden method should match the bits defined in events.
+     * @param events is one or more of the SubscriptionListener.LISTEN_Xxx bits
      */
-    public static SubInfoRecord getSubInfoForSubscriber(int subId) {
+    public static void register(Context context, SubscriptionListener listener, int events) {
+        String pkgForDebug = context != null ? context.getPackageName() : "<unknown>";
+        if (DBG) {
+            logd("SubscriptionManager listen pkgForDebug=" + pkgForDebug
+                    + " events=0x" + Integer.toHexString(events) + " listener=" + listener);
+        }
+        try {
+            // We use the TelephonyRegistry as its runs in the system and thus is always
+            // available where as SubscriptionController could crash and not be available
+            ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
+                    "telephony.registry"));
+            if (tr != null) {
+                tr.registerSubscriptionListener(pkgForDebug, listener.callback, events);
+            }
+        } catch (RemoteException ex) {
+            // Should not happen
+        }
+    }
+
+    /**
+     * Unregister the listener.
+     *
+     * @param context
+     * @param listener
+     */
+    public static void unregister(Context context, SubscriptionListener listener) {
+        String pkgForDebug = context != null ? context.getPackageName() : "<unknown>";
+        if (DBG) {
+            logd("SubscriptionManager unregister pkgForDebug=" + pkgForDebug
+                    + " listener=" + listener);
+        }
+        try {
+            // We use the TelephonyRegistry as its runs in the system and thus is always
+            // available where as SubscriptionController could crash and not be available
+            ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
+                    "telephony.registry"));
+            if (tr != null) {
+                tr.unregisterSubscriptionListener(pkgForDebug, listener.callback);
+            }
+        } catch (RemoteException ex) {
+            // Should not happen
+        }
+    }
+
+    /**
+     * Get the SubscriptionInfo associated with the subId
+     * @param subId The unique SubscriptionInfo index in database
+     * @return SubscriptionInfo, maybe null
+     */
+    public static SubscriptionInfo getSubscriptionInfoForSubscriber(int subId) {
         if (!isValidSubId(subId)) {
-            logd("[getSubInfoForSubscriberx]- invalid subId");
+            logd("[getSubscriptionInfoForSubscriber]- invalid subId");
             return null;
         }
 
-        SubInfoRecord subInfo = null;
+        SubscriptionInfo subInfo = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -287,19 +321,19 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /**
-     * Get the SubInfoRecord according to an IccId
+     * Get the SubscriptionInfo according to an IccId
      * @param iccId the IccId of SIM card
-     * @return SubInfoRecord List, maybe empty but not null
+     * @return SubscriptionInfo List, maybe empty but not null
      * @hide
      */
-    public static List<SubInfoRecord> getSubInfoUsingIccId(String iccId) {
-        if (VDBG) logd("[getSubInfoUsingIccId]+ iccId=" + iccId);
+    public static List<SubscriptionInfo> getSubscriptionInfoUsingIccId(String iccId) {
+        if (VDBG) logd("[getSubscriptionInfoUsingIccId]+ iccId=" + iccId);
         if (iccId == null) {
-            logd("[getSubInfoUsingIccId]- null iccid");
+            logd("[getSubscriptionInfoUsingIccId]- null iccid");
             return null;
         }
 
-        List<SubInfoRecord> result = null;
+        List<SubscriptionInfo> result = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -312,24 +346,24 @@ public class SubscriptionManager implements BaseColumns {
 
 
         if (result == null) {
-            result = new ArrayList<SubInfoRecord>();
+            result = new ArrayList<SubscriptionInfo>();
         }
         return result;
     }
 
     /**
-     * Get the SubInfoRecord according to slotId
+     * Get the SubscriptionInfo according to slotId
      * @param slotId the slot which the SIM is inserted
-     * @return SubInfoRecord list, maybe empty but not null
+     * @return SubscriptionInfo list, maybe empty but not null
      */
-    public static List<SubInfoRecord> getSubInfoUsingSlotId(int slotId) {
+    public static List<SubscriptionInfo> getSubscriptionInfoUsingSlotId(int slotId) {
         // FIXME: Consider never returning null
         if (!isValidSlotId(slotId)) {
-            logd("[getSubInfoUsingSlotId]- invalid slotId");
+            logd("[getSubscriptionInfoUsingSlotId]- invalid slotId");
             return null;
         }
 
-        List<SubInfoRecord> result = null;
+        List<SubscriptionInfo> result = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -342,21 +376,21 @@ public class SubscriptionManager implements BaseColumns {
 
 
         if (result == null) {
-            result = new ArrayList<SubInfoRecord>();
+            result = new ArrayList<SubscriptionInfo>();
         }
         return result;
     }
 
     /**
-     * Get all the SubInfoRecord(s) in subInfo database
-     * @return List of all SubInfoRecords in database, include those that were inserted before
+     * Get all the SubscriptionInfo(s) in subInfo database
+     * @return List of all SubscriptionInfos in database, include those that were inserted before
      * maybe empty but not null.
      * @hide
      */
-    public static List<SubInfoRecord> getAllSubInfoList() {
-        if (VDBG) logd("[getAllSubInfoList]+");
+    public static List<SubscriptionInfo> getAllSubscriptionInfoList() {
+        if (VDBG) logd("[getAllSubscriptionInfoList]+");
 
-        List<SubInfoRecord> result = null;
+        List<SubscriptionInfo> result = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -368,17 +402,17 @@ public class SubscriptionManager implements BaseColumns {
         }
 
         if (result == null) {
-            result = new ArrayList<SubInfoRecord>();
+            result = new ArrayList<SubscriptionInfo>();
         }
         return result;
     }
 
     /**
-     * Get the SubInfoRecord(s) of the currently inserted SIM(s)
-     * @return Array list of currently inserted SubInfoRecord(s) maybe empty but not null
+     * Get the SubscriptionInfo(s) of the currently inserted SIM(s)
+     * @return Array list of currently inserted SubscriptionInfo(s) maybe empty but not null
      */
-    public static List<SubInfoRecord> getActiveSubInfoList() {
-        List<SubInfoRecord> result = null;
+    public static List<SubscriptionInfo> getActiveSubscriptionInfoList() {
+        List<SubscriptionInfo> result = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
@@ -390,7 +424,7 @@ public class SubscriptionManager implements BaseColumns {
         }
 
         if (result == null) {
-            result = new ArrayList<SubInfoRecord>();
+            result = new ArrayList<SubscriptionInfo>();
         }
         return result;
     }
@@ -400,8 +434,8 @@ public class SubscriptionManager implements BaseColumns {
      * @return all SIM count in database, include what was inserted before
      * @hide
      */
-    public static int getAllSubInfoCount() {
-        if (VDBG) logd("[getAllSubInfoCount]+");
+    public static int getAllSubscriptionInfoCount() {
+        if (VDBG) logd("[getAllSubscriptionInfoCount]+");
 
         int result = 0;
 
@@ -422,7 +456,7 @@ public class SubscriptionManager implements BaseColumns {
      * @return active SIM count
      * @hide
      */
-    public static int getActiveSubInfoCount() {
+    public static int getActiveSubscriptionInfoCount() {
         int result = 0;
 
         try {
@@ -438,19 +472,19 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /**
-     * Add a new SubInfoRecord to subinfo database if needed
+     * Add a new SubscriptionInfo to subinfo database if needed
      * @param iccId the IccId of the SIM card
      * @param slotId the slot which the SIM is inserted
      * @return the URL of the newly created row or the updated row
      * @hide
      */
-    public static Uri addSubInfoRecord(String iccId, int slotId) {
-        if (VDBG) logd("[addSubInfoRecord]+ iccId:" + iccId + " slotId:" + slotId);
+    public static Uri addSubscriptionInfoRecord(String iccId, int slotId) {
+        if (VDBG) logd("[addSubscriptionInfoRecord]+ iccId:" + iccId + " slotId:" + slotId);
         if (iccId == null) {
-            logd("[addSubInfoRecord]- null iccId");
+            logd("[addSubscriptionInfoRecord]- null iccId");
         }
         if (!isValidSlotId(slotId)) {
-            logd("[addSubInfoRecord]- invalid slotId");
+            logd("[addSubscriptionInfoRecord]- invalid slotId");
         }
 
         try {
@@ -500,7 +534,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * Set display name by simInfo index
      * @param displayName the display name of SIM card
-     * @param subId the unique SubInfoRecord index in database
+     * @param subId the unique SubscriptionInfo index in database
      * @return the number of records updated
      * @hide
      */
@@ -511,7 +545,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * Set display name by simInfo index with name source
      * @param displayName the display name of SIM card
-     * @param subId the unique SubInfoRecord index in database
+     * @param subId the unique SubscriptionInfo index in database
      * @param nameSource 0: NAME_SOURCE_DEFAULT_SOURCE, 1: NAME_SOURCE_SIM_SOURCE,
      *                   2: NAME_SOURCE_USER_INPUT, -1 NAME_SOURCE_UNDEFINED
      * @return the number of records updated or -1 if invalid subId
@@ -545,7 +579,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * Set phone number by subId
      * @param number the phone number of the SIM
-     * @param subId the unique SubInfoRecord index in database
+     * @param subId the unique SubscriptionInfo index in database
      * @return the number of records updated
      * @hide
      */
@@ -573,7 +607,7 @@ public class SubscriptionManager implements BaseColumns {
     /**
      * Set data roaming by simInfo index
      * @param roaming 0:Don't allow data when roaming, 1:Allow data when roaming
-     * @param subId the unique SubInfoRecord index in database
+     * @param subId the unique SubscriptionInfo index in database
      * @return the number of records updated
      * @hide
      */
@@ -602,6 +636,7 @@ public class SubscriptionManager implements BaseColumns {
      * Get slotId associated with the subscription.
      * @return slotId as a positive integer or a negative value if an error either
      * SIM_NOT_INSERTED or INVALID_SLOT_ID.
+     * @hide
      */
     public static int getSlotId(int subId) {
         if (!isValidSubId(subId)) {
@@ -724,8 +759,8 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static SubInfoRecord getDefaultVoiceSubInfo() {
-        return getSubInfoForSubscriber(getDefaultVoiceSubId());
+    public static SubscriptionInfo getDefaultVoiceSubscriptionInfo() {
+        return getSubscriptionInfoForSubscriber(getDefaultVoiceSubId());
     }
 
     /** @hide */
@@ -735,6 +770,7 @@ public class SubscriptionManager implements BaseColumns {
 
     /**
      * @return subId of the DefaultSms subscription or the value INVALID_SUB_ID if an error.
+     * @hide
      */
     public static int getDefaultSmsSubId() {
         int subId = INVALID_SUB_ID;
@@ -766,8 +802,8 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static SubInfoRecord getDefaultSmsSubInfo() {
-        return getSubInfoForSubscriber(getDefaultSmsSubId());
+    public static SubscriptionInfo getDefaultSmsSubscriptionInfo() {
+        return getSubscriptionInfoForSubscriber(getDefaultSmsSubId());
     }
 
     /** @hide */
@@ -806,8 +842,8 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static SubInfoRecord getDefaultDataSubInfo() {
-        return getSubInfoForSubscriber(getDefaultDataSubId());
+    public static SubscriptionInfo getDefaultDataSubscriptionInfo() {
+        return getSubscriptionInfoForSubscriber(getDefaultDataSubId());
     }
 
     /** @hide */
@@ -816,7 +852,7 @@ public class SubscriptionManager implements BaseColumns {
     }
 
     /** @hide */
-    public static void clearSubInfo() {
+    public static void clearSubscriptionInfo() {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
@@ -863,6 +899,7 @@ public class SubscriptionManager implements BaseColumns {
 
     /**
      * @return true if a valid subId else false
+     * @hide
      */
     public static boolean isValidSubId(int subId) {
         return subId > INVALID_SUB_ID ;
