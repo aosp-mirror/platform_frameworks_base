@@ -25,10 +25,6 @@
 namespace android {
 namespace filterfw {
 
-// GL Extensions that are dynamically looked up at runtime
-static PFNGLMAPBUFFEROESPROC    GLMapBufferOES    = NULL;
-static PFNGLUNMAPBUFFEROESPROC  GLUnmapBufferOES  = NULL;
-
 VertexFrame::VertexFrame(int size)
   : vbo_(0),
     size_(size) {
