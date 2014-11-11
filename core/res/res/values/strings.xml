@@ -1652,6 +1652,11 @@
     <string name="permdesc_controlWifiDisplay">Allows the app to control low-level features of Wifi displays.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_controlVpn">control Virtual Private Networks</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_controlVpn">Allows the app to control low-level features of Virtual Private Networks.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_captureAudioOutput">capture audio output</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_captureAudioOutput">Allows the app to capture and redirect audio output.</string>
