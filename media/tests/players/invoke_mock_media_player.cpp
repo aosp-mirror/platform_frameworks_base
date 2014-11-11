@@ -58,7 +58,7 @@ class Player: public MediaPlayerBase
     virtual bool        hardwareOutput() {return true;}
 
     virtual status_t    setDataSource(
-            const sp<IMediaHTTPService> &httpService,
+            const sp<IMediaHTTPService>& /* httpService */,
             const char *url,
             const KeyedVector<String8, String8> *) {
         ALOGV("setDataSource %s", url);
@@ -69,24 +69,28 @@ class Player: public MediaPlayerBase
         return OK;
     }
 
-    virtual status_t    setDataSource(int fd, int64_t offset, int64_t length) {return OK;}
+    virtual status_t    setDataSource(int /* fd */, int64_t /* offset */, int64_t /* length */) {
+        return OK;
+    }
     virtual status_t    setVideoSurfaceTexture(
-                                const sp<IGraphicBufferProducer>& bufferProducer) {return OK;}
-    virtual status_t    prepare() {return OK;}
-    virtual status_t    prepareAsync() {return OK;}
-    virtual status_t    start() {return OK;}
-    virtual status_t    stop() {return OK;}
-    virtual status_t    pause() {return OK;}
-    virtual bool        isPlaying() {return true;}
-    virtual status_t    seekTo(int msec) {return OK;}
-    virtual status_t    getCurrentPosition(int *msec) {return OK;}
-    virtual status_t    getDuration(int *msec) {return OK;}
+                                const sp<IGraphicBufferProducer>& /* bufferProducer */) {
+        return OK;
+    }
+    virtual status_t    prepare() { return OK; }
+    virtual status_t    prepareAsync() { return OK; }
+    virtual status_t    start() { return OK; }
+    virtual status_t    stop() { return OK; }
+    virtual status_t    pause() { return OK; }
+    virtual bool        isPlaying() { return true; }
+    virtual status_t    seekTo(int /* msec */) { return OK; }
+    virtual status_t    getCurrentPosition(int* /* msec */) { return OK; }
+    virtual status_t    getDuration(int* /* msec */) { return OK; }
     virtual status_t    reset() {return OK;}
-    virtual status_t    setLooping(int loop) {return OK;}
+    virtual status_t    setLooping(int /* loop */) { return OK; }
     virtual player_type playerType() {return TEST_PLAYER;}
     virtual status_t    invoke(const Parcel& request, Parcel *reply);
-    virtual status_t    setParameter(int key, const Parcel &request) {return OK;}
-    virtual status_t    getParameter(int key, Parcel *reply) {return OK;}
+    virtual status_t    setParameter(int /* key */, const Parcel& /* request */) { return OK; }
+    virtual status_t    getParameter(int /* key */, Parcel* /* reply */) { return OK; }
 
 
   private:
