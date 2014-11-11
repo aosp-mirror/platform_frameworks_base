@@ -140,6 +140,8 @@ public class ActivityTestMain extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.i(TAG, "Referrer: " + getReferrer());
+
         mAm = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
         if (savedInstanceState != null) {
             mOverrideConfig = savedInstanceState.getParcelable(KEY_CONFIGURATION);

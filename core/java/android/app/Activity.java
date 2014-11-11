@@ -693,6 +693,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ String mEmbeddedID;
     private Application mApplication;
     /*package*/ Intent mIntent;
+    /*package*/ String mReferrer;
     private ComponentName mComponent;
     /*package*/ ActivityInfo mActivityInfo;
     /*package*/ ActivityThread mMainThread;
@@ -4448,6 +4449,39 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Return information about who launched this activity.  If the launching Intent
+     * contains an {@link android.content.Intent#EXTRA_REFERRER Intent.EXTRA_REFERRER},
+     * that will be returned as-is; otherwise, if known, an
+     * {@link Intent#URI_ANDROID_APP_SCHEME android-app:} referrer URI containing the
+     * package name that started the Intent will be returned.  This may return null if no
+     * referrer can be identified -- it is neither explicitly specified, nor is it known which
+     * application package was involved.
+     *
+     * <p>If called while inside the handling of {@link #onNewIntent}, this function will
+     * return the referrer that submitted that new intent to the activity.  Otherwise, it
+     * always returns the referrer of the original Intent.</p>
+     *
+     * <p>Note that this is <em>not</em> a security feature -- you can not trust the
+     * referrer information, applications can spoof it.</p>
+     */
+    @Nullable
+    public Uri getReferrer() {
+        Intent intent = getIntent();
+        Uri referrer = intent.getParcelableExtra(Intent.EXTRA_REFERRER);
+        if (referrer != null) {
+            return referrer;
+        }
+        String referrerName = intent.getStringExtra(Intent.EXTRA_REFERRER_NAME);
+        if (referrerName != null) {
+            return Uri.parse(referrerName);
+        }
+        if (mReferrer != null) {
+            return new Uri.Builder().scheme("android-app").authority(mReferrer).build();
+        }
+        return null;
+    }
+
+    /**
      * Return the name of the package that invoked this activity.  This is who
      * the data in {@link #setResult setResult()} will be sent to.  You can
      * use this information to validate that the recipient is allowed to
@@ -5868,7 +5902,7 @@ public class Activity extends ContextThemeWrapper
             Application application, Intent intent, ActivityInfo info,
             CharSequence title, Activity parent, String id,
             NonConfigurationInstances lastNonConfigurationInstances,
-            Configuration config, IVoiceInteractor voiceInteractor) {
+            Configuration config, String referrer, IVoiceInteractor voiceInteractor) {
         attachBaseContext(context);
 
         mFragments.attachActivity(this, mContainer, null);
@@ -5891,6 +5925,7 @@ public class Activity extends ContextThemeWrapper
         mIdent = ident;
         mApplication = application;
         mIntent = intent;
+        mReferrer = referrer;
         mComponent = intent.getComponent();
         mActivityInfo = info;
         mTitle = title;

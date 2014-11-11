@@ -45,6 +45,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.Window;
+import com.android.internal.content.ReferrerIntent;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -1042,7 +1043,7 @@ public class Instrumentation {
         activity.attach(context, aThread, this, token, 0, application, intent,
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
-                new Configuration(), null);
+                new Configuration(), null, null);
         return activity;
     }
 
@@ -1207,7 +1208,17 @@ public class Instrumentation {
      * @param intent The new intent being received.
      */
     public void callActivityOnNewIntent(Activity activity, Intent intent) {
-        activity.onNewIntent(intent);
+        final String oldReferrer = activity.mReferrer;
+        try {
+            try {
+                activity.mReferrer = ((ReferrerIntent)intent).mReferrer;
+            } catch (ClassCastException e) {
+                activity.mReferrer = null;
+            }
+            activity.onNewIntent(intent);
+        } finally {
+            activity.mReferrer = oldReferrer;
+        }
     }
 
     /**

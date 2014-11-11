@@ -127,6 +127,7 @@ public class Am extends BaseCommand {
                 "       am screen-compat [on|off] <PACKAGE>\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
+                "       am to-app-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am start-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
@@ -229,6 +230,8 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am to-intent-uri: print the given Intent specification as an intent: URI.\n" +
                 "\n" +
+                "am to-app-uri: print the given Intent specification as an android-app: URI.\n" +
+                "\n" +
                 "am switch-user: switch to put USER_ID in the foreground, starting\n" +
                 "  execution of that user if it is currently stopped.\n" +
                 "\n" +
@@ -270,7 +273,7 @@ public class Am extends BaseCommand {
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
                 "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]\n" +
                 "        (to embed a comma into a string escape it using \"\\,\")\n" +
-                "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
+                "    [-n <COMPONENT>] [-p <PACKAGE>] [-f <FLAGS>]\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "    [--grant-persistable-uri-permission] [--grant-prefix-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
@@ -337,9 +340,11 @@ public class Am extends BaseCommand {
         } else if (op.equals("screen-compat")) {
             runScreenCompat();
         } else if (op.equals("to-uri")) {
-            runToUri(false);
+            runToUri(0);
         } else if (op.equals("to-intent-uri")) {
-            runToUri(true);
+            runToUri(Intent.URI_INTENT_SCHEME);
+        } else if (op.equals("to-app-uri")) {
+            runToUri(Intent.URI_ANDROID_APP_SCHEME);
         } else if (op.equals("switch-user")) {
             runSwitchUser();
         } else if (op.equals("start-user")) {
@@ -502,6 +507,12 @@ public class Am extends BaseCommand {
                 if (intent == baseIntent) {
                     hasIntentInfo = true;
                 }
+            } else if (opt.equals("-p")) {
+                String str = nextArgRequired();
+                intent.setPackage(str);
+                if (intent == baseIntent) {
+                    hasIntentInfo = true;
+                }
             } else if (opt.equals("-f")) {
                 String str = nextArgRequired();
                 intent.setFlags(Integer.decode(str).intValue());
@@ -607,7 +618,8 @@ public class Am extends BaseCommand {
         } else if (arg.indexOf(':') >= 0) {
             // The argument is a URI.  Fully parse it, and use that result
             // to fill in any data not specified so far.
-            baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME);
+            baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME
+                    | Intent.URI_ANDROID_APP_SCHEME);
         } else if (arg.indexOf('/') >= 0) {
             // The argument is a component name.  Build an Intent to launch
             // it.
@@ -1549,9 +1561,9 @@ public class Am extends BaseCommand {
         } while (packageName != null);
     }
 
-    private void runToUri(boolean intentScheme) throws Exception {
+    private void runToUri(int flags) throws Exception {
         Intent intent = makeIntent(UserHandle.USER_CURRENT);
-        System.out.println(intent.toUri(intentScheme ? Intent.URI_INTENT_SCHEME : 0));
+        System.out.println(intent.toUri(flags));
     }
 
     private class IntentReceiver extends IIntentReceiver.Stub {
