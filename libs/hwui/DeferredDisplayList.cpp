@@ -333,7 +333,7 @@ private:
 class RestoreToCountBatch : public Batch {
 public:
     RestoreToCountBatch(const StateOp* op, const DeferredDisplayState* state, int restoreCount) :
-            mOp(op), mState(state), mRestoreCount(restoreCount) {}
+            mState(state), mRestoreCount(restoreCount) {}
 
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int index) {
         DEFER_LOGD("batch %p restoring to count %d", this, mRestoreCount);
@@ -345,7 +345,6 @@ public:
 
 private:
     // we use the state storage for the RestoreToCountOp, but don't replay the op itself
-    const StateOp* mOp;
     const DeferredDisplayState* mState;
 
     /*
@@ -699,7 +698,6 @@ void DeferredDisplayList::discardDrawingBatches(const unsigned int maxIndex) {
     for (unsigned int i = mEarliestUnclearedIndex; i <= maxIndex; i++) {
         // leave deferred state ops alone for simplicity (empty save restore pairs may now exist)
         if (mBatches[i] && mBatches[i]->purelyDrawBatch()) {
-            DrawBatch* b = (DrawBatch*) mBatches[i];
             delete mBatches[i];
             mBatches.replaceAt(NULL, i);
         }

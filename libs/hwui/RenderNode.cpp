@@ -751,7 +751,6 @@ void RenderNode::issueOperationsOf3dChildren(ChildrenSelectMode mode,
         int restoreTo = renderer.save(SkCanvas::kMatrix_SaveFlag);
 
         DrawRenderNodeOp* childOp = zTranslatedNodes[drawIndex].value;
-        RenderNode* child = childOp->mRenderNode;
 
         renderer.concatMatrix(childOp->mTransformFromParent);
         childOp->mSkipInOrderDraw = false; // this is horrible, I'm so sorry everyone
@@ -900,7 +899,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                         initialTransform, zTranslatedNodes, renderer, handler);
 
 
-                for (int opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
+                for (size_t opIndex = chunk.beginOpIndex; opIndex < chunk.endOpIndex; opIndex++) {
                     DisplayListOp *op = mDisplayListData->displayListOps[opIndex];
 #if DEBUG_DISPLAY_LIST
                     op->output(level + 1);
@@ -908,7 +907,8 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
                     logBuffer.writeCommand(level, op->name());
                     handler(op, saveCountOffset, properties().getClipToBounds());
 
-                    if (CC_UNLIKELY(!mProjectedNodes.isEmpty() && opIndex == projectionReceiveIndex)) {
+                    if (CC_UNLIKELY(!mProjectedNodes.isEmpty() && projectionReceiveIndex >= 0 &&
+                        opIndex == static_cast<size_t>(projectionReceiveIndex))) {
                         issueOperationsOfProjectedChildren(renderer, handler);
                     }
                 }

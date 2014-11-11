@@ -30,9 +30,12 @@
 #define DEFAULT_TEXT_LARGE_CACHE_WIDTH 2048
 #define DEFAULT_TEXT_LARGE_CACHE_HEIGHT 512
 
-#define TEXTURE_BORDER_SIZE 1
-#if TEXTURE_BORDER_SIZE != 1
-# error TEXTURE_BORDER_SIZE other than 1 is not currently supported
+#ifdef TEXTURE_BORDER_SIZE
+  #if TEXTURE_BORDER_SIZE != 1
+    #error TEXTURE_BORDER_SIZE other than 1 is not currently supported
+  #endif
+#else
+  #define TEXTURE_BORDER_SIZE 1
 #endif
 
 #define CACHE_BLOCK_ROUNDING_SIZE 4
@@ -44,7 +47,7 @@
     #define GET_GLYPH(text) nextGlyph((const uint16_t**) &text)
     #define IS_END_OF_STRING(glyph) false
 
-    static glyph_t nextGlyph(const uint16_t** srcPtr) {
+    static inline glyph_t nextGlyph(const uint16_t** srcPtr) {
         const uint16_t* src = *srcPtr;
         glyph_t g = *src++;
         *srcPtr = src;

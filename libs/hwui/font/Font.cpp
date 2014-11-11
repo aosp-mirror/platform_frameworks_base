@@ -378,7 +378,7 @@ void Font::precache(const SkPaint* paint, const char* text, int numGlyphs) {
             break;
         }
 
-        CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph, true);
+        getCachedGlyph(paint, glyph, true);
         glyphsCount++;
     }
 }
@@ -402,8 +402,6 @@ void Font::render(const SkPaint* paint, const char* text, uint32_t start, uint32
 
     text += start;
     int glyphsCount = 0;
-
-    const SkPaint::Align align = paint->getTextAlign();
 
     while (glyphsCount < numGlyphs) {
         glyph_t glyph = GET_GLYPH(text);
