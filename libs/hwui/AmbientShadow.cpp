@@ -121,7 +121,7 @@ inline void computeBufferSize(int* totalVertexCount, int* totalIndexCount,
     *totalUmbraCount = 0;
     if (!isCasterOpaque) {
         // Add the centroid if occluder is translucent.
-        *totalVertexCount++;
+        (*totalVertexCount)++;
         *totalIndexCount += 2 * innerVertexCount + 1;
         *totalUmbraCount = innerVertexCount;
     }

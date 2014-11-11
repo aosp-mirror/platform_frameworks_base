@@ -349,8 +349,12 @@ CREATE_BRIDGE0(fence) {
     return NULL;
 }
 
+template <typename T>
+void UNUSED(T t) {}
+
 void RenderProxy::fence() {
     SETUP_TASK(fence);
+    UNUSED(args);
     postAndWait(task);
 }
 
