@@ -224,7 +224,7 @@ static void android_media_MediaCrypto_native_finalize(
 }
 
 static jboolean android_media_MediaCrypto_isCryptoSchemeSupportedNative(
-        JNIEnv *env, jobject thiz, jbyteArray uuidObj) {
+        JNIEnv *env, jobject /* thiz */, jbyteArray uuidObj) {
     jsize uuidLength = env->GetArrayLength(uuidObj);
 
     if (uuidLength != 16) {

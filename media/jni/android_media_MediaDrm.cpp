@@ -667,7 +667,7 @@ static void android_media_MediaDrm_native_finalize(
 }
 
 static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
-    JNIEnv *env, jobject thiz, jbyteArray uuidObj, jstring jmimeType) {
+    JNIEnv *env, jobject /* thiz */, jbyteArray uuidObj, jstring jmimeType) {
 
     if (uuidObj == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
@@ -1173,7 +1173,7 @@ static void android_media_MediaDrm_setPropertyByteArray(
 }
 
 static void android_media_MediaDrm_setCipherAlgorithmNative(
-    JNIEnv *env, jobject thiz, jobject jdrm, jbyteArray jsessionId,
+    JNIEnv *env, jobject /* thiz */, jobject jdrm, jbyteArray jsessionId,
     jstring jalgorithm) {
 
     sp<IDrm> drm = GetDrm(env, jdrm);
@@ -1197,7 +1197,7 @@ static void android_media_MediaDrm_setCipherAlgorithmNative(
 }
 
 static void android_media_MediaDrm_setMacAlgorithmNative(
-    JNIEnv *env, jobject thiz, jobject jdrm, jbyteArray jsessionId,
+    JNIEnv *env, jobject /* thiz */, jobject jdrm, jbyteArray jsessionId,
     jstring jalgorithm) {
 
     sp<IDrm> drm = GetDrm(env, jdrm);
@@ -1222,7 +1222,7 @@ static void android_media_MediaDrm_setMacAlgorithmNative(
 
 
 static jbyteArray android_media_MediaDrm_encryptNative(
-    JNIEnv *env, jobject thiz, jobject jdrm, jbyteArray jsessionId,
+    JNIEnv *env, jobject /* thiz */, jobject jdrm, jbyteArray jsessionId,
     jbyteArray jkeyId, jbyteArray jinput, jbyteArray jiv) {
 
     sp<IDrm> drm = GetDrm(env, jdrm);
@@ -1253,7 +1253,7 @@ static jbyteArray android_media_MediaDrm_encryptNative(
 }
 
 static jbyteArray android_media_MediaDrm_decryptNative(
-    JNIEnv *env, jobject thiz, jobject jdrm, jbyteArray jsessionId,
+    JNIEnv *env, jobject /* thiz */, jobject jdrm, jbyteArray jsessionId,
     jbyteArray jkeyId, jbyteArray jinput, jbyteArray jiv) {
 
     sp<IDrm> drm = GetDrm(env, jdrm);
@@ -1283,7 +1283,7 @@ static jbyteArray android_media_MediaDrm_decryptNative(
 }
 
 static jbyteArray android_media_MediaDrm_signNative(
-    JNIEnv *env, jobject thiz, jobject jdrm, jbyteArray jsessionId,
+    JNIEnv *env, jobject /* thiz */, jobject jdrm, jbyteArray jsessionId,
     jbyteArray jkeyId, jbyteArray jmessage) {
 
     sp<IDrm> drm = GetDrm(env, jdrm);
@@ -1313,7 +1313,7 @@ static jbyteArray android_media_MediaDrm_signNative(
 }
 
 static jboolean android_media_MediaDrm_verifyNative(
-    JNIEnv *env, jobject thiz, jobject jdrm, jbyteArray jsessionId,
+    JNIEnv *env, jobject /* thiz */, jobject jdrm, jbyteArray jsessionId,
     jbyteArray jkeyId, jbyteArray jmessage, jbyteArray jsignature) {
 
     sp<IDrm> drm = GetDrm(env, jdrm);
@@ -1342,7 +1342,7 @@ static jboolean android_media_MediaDrm_verifyNative(
 
 
 static jbyteArray android_media_MediaDrm_signRSANative(
-    JNIEnv *env, jobject thiz, jobject jdrm, jbyteArray jsessionId,
+    JNIEnv *env, jobject /* thiz */, jobject jdrm, jbyteArray jsessionId,
     jstring jalgorithm, jbyteArray jwrappedKey, jbyteArray jmessage) {
 
     sp<IDrm> drm = GetDrm(env, jdrm);
