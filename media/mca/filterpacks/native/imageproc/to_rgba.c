@@ -16,12 +16,14 @@
 
 #include <stdlib.h>
 
+#define ATTRIBUTE_UNUSED __attribute__((unused))
+
 int gray_to_rgb_process(const char** inputs,
                         const int* input_sizes,
                         int input_count,
                         char* output,
                         int output_size,
-                        void* user_data) {
+                        void* user_data ATTRIBUTE_UNUSED) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;
@@ -52,7 +54,7 @@ int rgba_to_rgb_process(const char** inputs,
                         int input_count,
                         char* output,
                         int output_size,
-                        void* user_data) {
+                        void* user_data ATTRIBUTE_UNUSED) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;
@@ -84,7 +86,7 @@ int gray_to_rgba_process(const char** inputs,
                          int input_count,
                          char* output,
                          int output_size,
-                         void* user_data) {
+                         void* user_data ATTRIBUTE_UNUSED) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;
@@ -116,7 +118,7 @@ int rgb_to_rgba_process(const char** inputs,
                         int input_count,
                         char* output,
                         int output_size,
-                        void* user_data) {
+                        void* user_data ATTRIBUTE_UNUSED) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;

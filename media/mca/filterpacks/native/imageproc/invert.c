@@ -16,12 +16,14 @@
 
 #include <android/log.h>
 
+#define ATTRIBUTE_UNUSED __attribute__((unused))
+
 int invert_process(const char** inputs,
                    const int* input_sizes,
                    int input_count,
                    char* output,
                    int output_size,
-                   void* user_data) {
+                   void* user_data ATTRIBUTE_UNUSED) {
   // Make sure we have exactly one input
   if (input_count != 1)
     return 0;

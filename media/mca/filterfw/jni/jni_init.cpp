@@ -27,7 +27,7 @@ using namespace android::filterfw;
 
 JavaVM* g_current_java_vm_ = NULL;
 
-jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
   // Set the current vm pointer
   g_current_java_vm_ = vm;
 

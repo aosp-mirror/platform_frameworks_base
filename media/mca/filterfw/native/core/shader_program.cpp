@@ -318,15 +318,15 @@ GLuint ShaderProgram::CompileShader(GLenum shader_type, const char* source) {
       ALOGE("Problem compiling shader! Source:");
       ALOGE("%s", source);
       std::string src(source);
-      unsigned int cur_pos = 0;
-      unsigned int next_pos = 0;
-      int line_number = 1;
+      size_t cur_pos = 0;
+      size_t next_pos = 0;
+      size_t line_number = 1;
       while ( (next_pos = src.find_first_of('\n', cur_pos)) != std::string::npos) {
         ALOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
         cur_pos = next_pos + 1;
         line_number++;
       }
-      ALOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
+      ALOGE("%03zu : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
 
       GLint log_length = 0;
       glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
