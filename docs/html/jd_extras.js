@@ -1407,5 +1407,44 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "keywords": ["distribute"],
     "type": "PDF DOWNLOAD (11MB)",
     "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "shareables/auto/AndroidAuto-media-apps.pdf",
+    "timestamp": null,
+    "image": "auto/images/assets/icons/media_app_playback.png",
+    "title": "Android Auto Media Apps UI Guidelines",
+    "summary": "Guidelines for designing audio apps that work with Auto. ",
+    "keywords": ["design", "Auto", "Automotive"],
+    "type": "PDF DOWNLOAD (1.1MB)",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "shareables/auto/AndroidAuto-messaging-apps.pdf",
+    "timestamp": null,
+    "image": "auto/images/assets/icons/messaging_app_notifications.png",
+    "title": "Android Auto Messaging Apps UI Guidelines",
+    "summary": "Guidelines for designing messaging apps that work with Auto. ",
+    "keywords": ["design", "Auto", "Automotive"],
+    "type": "PDF DOWNLOAD (628KB)",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
+    "url": "shareables/auto/AndroidAuto-custom-colors.pdf",
+    "timestamp": null,
+    "image": "auto/images/assets/icons/auto_app_in_simulator.png",
+    "title": "Android Auto Color Customization UI Guidelines",
+    "summary": "Guidelines for color-customizing apps that work with Auto. ",
+    "keywords": ["design", "Auto", "Automotive"],
+    "type": "PDF DOWNLOAD (779KB)",
+    "titleFriendly": ""
   }
 ]);
