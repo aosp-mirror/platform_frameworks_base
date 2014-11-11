@@ -176,6 +176,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                     if (buffer[i] == 0) {
                         final String rawEvent = new String(
                                 buffer, start, i - start, StandardCharsets.UTF_8);
+                        log("RCV <- {" + rawEvent + "}");
 
                         boolean releaseWl = false;
                         try {
@@ -196,6 +197,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                                 mResponseQueue.add(event.getCmdNumber(), event);
                             }
                         } catch (IllegalArgumentException e) {
+                            log("Problem parsing message: " + rawEvent + " - " + e);
                         } finally {
                             if (releaseWl) {
                                 mWakeLock.acquire();
@@ -207,6 +209,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                 }
                 if (start == 0) {
                     final String rawEvent = new String(buffer, start, count, StandardCharsets.UTF_8);
+                    log("RCV incomplete <- {" + rawEvent + "}");
                 }
 
                 // We should end at the amount we read. If not, compact then
