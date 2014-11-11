@@ -6134,7 +6134,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.isLayoutDirectionInherited()) {
+            if (child.isLayoutDirectionInherited() && !child.isPaddingResolved()) {
                 child.resolvePadding();
             }
         }
@@ -6149,7 +6149,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child.isLayoutDirectionInherited()) {
+            if (child.isLayoutDirectionInherited() && !child.areDrawablesResolved()) {
                 child.resolveDrawables();
             }
         }

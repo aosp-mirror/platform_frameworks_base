@@ -13174,7 +13174,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         // Should resolve Drawables before Padding because we need the layout direction of the
         // Drawable to correctly resolve Padding.
-        if (!isDrawablesResolved()) {
+        if (!areDrawablesResolved()) {
             resolveDrawables();
         }
         if (!isPaddingResolved()) {
@@ -13438,6 +13438,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void resetResolvedPadding() {
+        resetResolvedPaddingInternal();
+    }
+
+    /**
+     * Used when we only want to reset *this* view's padding and not trigger overrides
+     * in ViewGroup that reset children too.
+     */
+    void resetResolvedPaddingInternal() {
         mPrivateFlags2 &= ~PFLAG2_PADDING_RESOLVED;
     }
 
@@ -15974,6 +15982,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         onResolveDrawables(layoutDirection);
     }
 
+    boolean areDrawablesResolved() {
+        return (mPrivateFlags2 & PFLAG2_DRAWABLE_RESOLVED) == PFLAG2_DRAWABLE_RESOLVED;
+    }
+
     /**
      * Called when layout direction has been resolved.
      *
@@ -15993,11 +16005,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected void resetResolvedDrawables() {
-        mPrivateFlags2 &= ~PFLAG2_DRAWABLE_RESOLVED;
+        resetResolvedDrawablesInternal();
     }
 
-    private boolean isDrawablesResolved() {
-        return (mPrivateFlags2 & PFLAG2_DRAWABLE_RESOLVED) == PFLAG2_DRAWABLE_RESOLVED;
+    void resetResolvedDrawablesInternal() {
+        mPrivateFlags2 &= ~PFLAG2_DRAWABLE_RESOLVED;
     }
 
     /**
@@ -16297,10 +16309,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 padding = new Rect();
                 sThreadLocal.set(padding);
             }
-            resetResolvedDrawables();
+            resetResolvedDrawablesInternal();
             background.setLayoutDirection(getLayoutDirection());
             if (background.getPadding(padding)) {
-                resetResolvedPadding();
+                resetResolvedPaddingInternal();
                 switch (background.getLayoutDirection()) {
                     case LAYOUT_DIRECTION_RTL:
                         mUserPaddingLeftInitial = padding.right;
@@ -16500,7 +16512,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param bottom the bottom padding in pixels
      */
     public void setPadding(int left, int top, int right, int bottom) {
-        resetResolvedPadding();
+        resetResolvedPaddingInternal();
 
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
@@ -16592,7 +16604,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param bottom the bottom padding in pixels
      */
     public void setPaddingRelative(int start, int top, int end, int bottom) {
-        resetResolvedPadding();
+        resetResolvedPaddingInternal();
 
         mUserPaddingStart = start;
         mUserPaddingEnd = end;
