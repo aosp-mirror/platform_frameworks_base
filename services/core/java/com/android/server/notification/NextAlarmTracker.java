@@ -176,7 +176,7 @@ public class NextAlarmTracker {
         return true;
     }
 
-    private static String formatDuration(long millis) {
+    public static String formatDuration(long millis) {
         final StringBuilder sb = new StringBuilder();
         TimeUtils.formatDuration(millis, sb);
         return sb.toString();
@@ -196,7 +196,7 @@ public class NextAlarmTracker {
         return DateFormat.format(pattern, time).toString();
     }
 
-    private String formatAlarmDebug(AlarmClockInfo alarm) {
+    public String formatAlarmDebug(AlarmClockInfo alarm) {
         return formatAlarmDebug(alarm != null ? alarm.getTriggerTime() : 0);
     }
 
