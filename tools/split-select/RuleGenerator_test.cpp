@@ -47,10 +47,10 @@ TEST(RuleGeneratorTest, testAbiRules) {
 }
 
 TEST(RuleGeneratorTest, densityConstantsAreSane) {
-    EXPECT_LT(263, ConfigDescription::DENSITY_XHIGH);
-    EXPECT_GT(262, ConfigDescription::DENSITY_HIGH);
-    EXPECT_LT(363, ConfigDescription::DENSITY_XXHIGH);
-    EXPECT_GT(362, ConfigDescription::DENSITY_XHIGH);
+    EXPECT_LT(263, (int) ConfigDescription::DENSITY_XHIGH);
+    EXPECT_GT(262, (int) ConfigDescription::DENSITY_HIGH);
+    EXPECT_LT(363, (int) ConfigDescription::DENSITY_XXHIGH);
+    EXPECT_GT(362, (int) ConfigDescription::DENSITY_XHIGH);
 }
 
 TEST(RuleGeneratorTest, testDensityRules) {
