@@ -1,6 +1,8 @@
 #ifndef GraphicsJNI_DEFINED
 #define GraphicsJNI_DEFINED
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "SkBitmap.h"
 #include "SkDevice.h"
 #include "SkPixelRef.h"
@@ -8,6 +10,8 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkImageDecoder.h"
+#pragma GCC diagnostic pop
+
 #include <jni.h>
 
 class SkBitmapRegionDecoder;
