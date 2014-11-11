@@ -31,6 +31,7 @@ import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
+import java.net.ProtocolException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -282,7 +283,7 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
             if (offset > 0 && response != HttpURLConnection.HTTP_PARTIAL) {
                 // Some servers simply ignore "Range" requests and serve
                 // data from the start of the content.
-                throw new IOException();
+                throw new ProtocolException();
             }
 
             mInputStream =
@@ -330,6 +331,9 @@ public class MediaHTTPConnection extends IMediaHTTPConnection.Stub {
             }
 
             return n;
+        } catch (ProtocolException e) {
+            Log.w(TAG, "readAt " + offset + " / " + size + " => " + e);
+            return MEDIA_ERROR_UNSUPPORTED;
         } catch (NoRouteToHostException e) {
             Log.w(TAG, "readAt " + offset + " / " + size + " => " + e);
             return MEDIA_ERROR_UNSUPPORTED;
