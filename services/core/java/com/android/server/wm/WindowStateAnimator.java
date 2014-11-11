@@ -53,10 +53,13 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicy;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
 
+import com.android.internal.R;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
@@ -98,6 +101,7 @@ class WindowStateAnimator {
     int mAnimLayer;
     int mLastLayer;
     long mAnimationStartTime;
+    long mLastAnimationTime;
 
     SurfaceControl mSurfaceControl;
     SurfaceControl mPendingDestroySurface;
@@ -312,6 +316,7 @@ class WindowStateAnimator {
                     mAnimating = true;
                 }
                 if ((mAnimation != null) && mLocalAnimating) {
+                    mLastAnimationTime = currentTime;
                     if (stepAnimation(currentTime)) {
                         return true;
                     }
@@ -1794,11 +1799,14 @@ class WindowStateAnimator {
         if ((mLocalAnimating && mAnimationIsEntrance == isEntrance)
                 || mKeyguardGoingAwayAnimation) {
             // If we are trying to apply an animation, but already running
-            // an animation of the same type, or when we are playing the Keyguard dismissing
-            // animation, then just leave that one alone.
+            // an animation of the same type, then just leave that one alone.
 
-            // TODO: if mKeyguardGoingAwayAnimation and this is a exiting starting window, modify
-            // existing animation to fade it out as well.
+            // If we are in a keyguard exit animation, and the window should animate away, modify
+            // keyguard exit animation such that it also fades out.
+            if (mAnimation != null && mKeyguardGoingAwayAnimation
+                    && transit == WindowManagerPolicy.TRANSIT_PREVIEW_DONE) {
+                applyFadeoutDuringKeyguardExitAnimation();
+            }
             return true;
         }
 
@@ -1854,6 +1862,28 @@ class WindowStateAnimator {
         }
 
         return mAnimation != null;
+    }
+
+    private void applyFadeoutDuringKeyguardExitAnimation() {
+        long startTime = mAnimation.getStartTime();
+        long duration = mAnimation.getDuration();
+        long elapsed = mLastAnimationTime - startTime;
+        long fadeDuration = duration - elapsed;
+        if (fadeDuration <= 0) {
+            // Never mind, this would be no visible animation, so abort the animation change.
+            return;
+        }
+        AnimationSet newAnimation = new AnimationSet(false /* shareInterpolator */);
+        newAnimation.setDuration(duration);
+        newAnimation.setStartTime(startTime);
+        newAnimation.addAnimation(mAnimation);
+        Animation fadeOut = AnimationUtils.loadAnimation(
+                mContext, com.android.internal.R.anim.app_starting_exit);
+        fadeOut.setDuration(fadeDuration);
+        fadeOut.setStartOffset(elapsed);
+        newAnimation.addAnimation(fadeOut);
+        newAnimation.initialize(mWin.mFrame.width(), mWin.mFrame.height(), mAnimDw, mAnimDh);
+        mAnimation = newAnimation;
     }
 
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
