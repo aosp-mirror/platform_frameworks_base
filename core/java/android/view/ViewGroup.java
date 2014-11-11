@@ -2582,15 +2582,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * Returns true if this ViewGroup should be considered as a single entity for removal
      * when executing an Activity transition. If this is false, child elements will move
      * individually during the transition.
+     *
      * @return True if the ViewGroup should be acted on together during an Activity transition.
-     * The default value is false when the background is null and true when the background
-     * is not null or if {@link #getTransitionName()} is not null.
+     * The default value is true when there is a non-null background or if
+     * {@link #getTransitionName()} is not null or if a
+     * non-null {@link android.view.ViewOutlineProvider} other than
+     * {@link android.view.ViewOutlineProvider#BACKGROUND} was given to
+     * {@link #setOutlineProvider(ViewOutlineProvider)} and false otherwise.
      */
     public boolean isTransitionGroup() {
         if ((mGroupFlags & FLAG_IS_TRANSITION_GROUP_SET) != 0) {
             return ((mGroupFlags & FLAG_IS_TRANSITION_GROUP) != 0);
         } else {
-            return getBackground() != null || getTransitionName() != null;
+            final ViewOutlineProvider outlineProvider = getOutlineProvider();
+            return getBackground() != null || getTransitionName() != null ||
+                    (outlineProvider != null && outlineProvider != ViewOutlineProvider.BACKGROUND);
         }
     }
 
