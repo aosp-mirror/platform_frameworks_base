@@ -2813,9 +2813,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Prepare for a VPN application. This method is used by VpnDialogs
-     * and not available in ConnectivityManager. Permissions are checked
-     * in Vpn class.
+     * Prepare for a VPN application. This method is used by system-privileged apps.
+     * Permissions are checked in Vpn class.
      * @hide
      */
     @Override
@@ -2829,8 +2828,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     /**
      * Set whether the current VPN package has the ability to launch VPNs without
-     * user intervention. This method is used by system UIs and not available
-     * in ConnectivityManager. Permissions are checked in Vpn class.
+     * user intervention. This method is used by system-privileged apps.
+     * Permissions are checked in Vpn class.
      * @hide
      */
     @Override
