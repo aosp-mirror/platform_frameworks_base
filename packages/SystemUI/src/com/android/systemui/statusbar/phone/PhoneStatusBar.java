@@ -1309,6 +1309,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             // not immersive & a full-screen alert should be shown
             if (DEBUG) Log.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
             try {
+                EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
+                        notification.getKey());
                 notification.getNotification().fullScreenIntent.send();
             } catch (PendingIntent.CanceledException e) {
             }
@@ -1350,16 +1352,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void scheduleHeadsUpOpen() {
+        mHandler.removeMessages(MSG_SHOW_HEADS_UP);
         mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
     }
 
     @Override
     public void scheduleHeadsUpClose() {
+        mHandler.removeMessages(MSG_HIDE_HEADS_UP);
         mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
     }
 
     @Override
     public void scheduleHeadsUpEscalation() {
+        mHandler.removeMessages(MSG_ESCALATE_HEADS_UP);
         mHandler.sendEmptyMessage(MSG_ESCALATE_HEADS_UP);
     }
 
@@ -2194,6 +2199,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 if (DEBUG)
                     Log.d(TAG, "converting a heads up to fullScreen");
                 try {
+                    EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_ESCALATION,
+                            sbn.getKey());
                     notification.fullScreenIntent.send();
                 } catch (PendingIntent.CanceledException e) {
                 }
