@@ -23,23 +23,21 @@
     android:maxWidth="@dimen/resolver_max_width"
     android:maxCollapsedHeight="192dp"
     android:maxCollapsedHeightSmall="56dp"
-    android:id="@id/contentPanel"
-    >
+    android:id="@id/contentPanel">
 
     <TextView android:id="@+id/title"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_alwaysShow="true"
               android:minHeight="56dp"
-              android:textAppearance="?android:attr/textAppearanceMedium"
+              android:textAppearance="?attr/textAppearanceMedium"
               android:gravity="start|center_vertical"
-              android:paddingStart="16dp"
-              android:paddingEnd="16dp"
+              android:paddingStart="?attr/dialogPreferredPadding"
+              android:paddingEnd="?attr/dialogPreferredPadding"
               android:paddingTop="8dp"
               android:paddingBottom="8dp"
               android:background="@color/white"
-              android:elevation="8dp"
-              />
+              android:elevation="8dp" />
 
     <ListView
         android:layout_width="match_parent"
@@ -50,8 +48,7 @@
         android:background="@color/white"
         android:elevation="8dp"
         android:nestedScrollingEnabled="true"
-        android:divider="@null"
-        />
+        android:divider="@null" />
 
     <TextView android:id="@+id/empty"
               android:layout_width="match_parent"
