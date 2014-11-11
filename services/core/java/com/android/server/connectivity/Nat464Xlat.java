@@ -63,8 +63,8 @@ public class Nat464Xlat extends BaseNetworkObserver {
     //  - Idle: start() not called. Everything is null.
     //  - Starting: start() called. Interfaces are non-null. isStarted() returns true.
     //    mIsRunning is false.
-    //  - Running: start() called, and interfaceAdded() told us that mIface is up. Clat IP address
-    //    is non-null. mIsRunning is true.
+    //  - Running: start() called, and interfaceLinkStateChanged() told us that mIface is up.
+    //    mIsRunning is true.
     //
     // Once mIface is non-null and isStarted() is true, methods called by ConnectivityService on
     // its handler thread must not modify any internal state variables; they are only updated by the
@@ -236,10 +236,10 @@ public class Nat464Xlat extends BaseNetworkObserver {
     }
 
     @Override
-    public void interfaceAdded(String iface) {
+    public void interfaceLinkStateChanged(String iface, boolean up) {
         // Called by the InterfaceObserver on its own thread, so can race with stop().
-        if (isStarted() && mIface.equals(iface)) {
-            Slog.i(TAG, "interface " + iface + " added, mIsRunning " + mIsRunning + "->true");
+        if (isStarted() && up && mIface.equals(iface)) {
+            Slog.i(TAG, "interface " + iface + " is up, mIsRunning " + mIsRunning + "->true");
 
             if (!mIsRunning) {
                 LinkAddress clatAddress = getLinkAddress(iface);
