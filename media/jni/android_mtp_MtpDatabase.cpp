@@ -761,7 +761,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
     return result;
 }
 
-static void foreachentry(ExifEntry *entry, void *user) {
+static void foreachentry(ExifEntry *entry, void* /* user */) {
     char buf[1024];
     ALOGI("entry %x, format %d, size %d: %s",
             entry->tag, entry->format, entry->size, exif_entry_get_value(entry, buf, sizeof(buf)));
@@ -779,7 +779,6 @@ static long getLongFromExifEntry(ExifEntry *e) {
 
 MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
                                             MtpObjectInfo& info) {
-    char            date[20];
     MtpString       path;
     int64_t         length;
     MtpObjectFormat format;
@@ -807,9 +806,11 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     info.mDateModified = longValues[1];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
 
-//    info.mAssociationType = (format == MTP_FORMAT_ASSOCIATION ?
-//                            MTP_ASSOCIATION_TYPE_GENERIC_FOLDER :
-//                            MTP_ASSOCIATION_TYPE_UNDEFINED);
+    if ((false)) {
+        info.mAssociationType = (format == MTP_FORMAT_ASSOCIATION ?
+                                MTP_ASSOCIATION_TYPE_GENERIC_FOLDER :
+                                MTP_ASSOCIATION_TYPE_UNDEFINED);
+    }
     info.mAssociationType = MTP_ASSOCIATION_TYPE_UNDEFINED;
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
@@ -822,7 +823,9 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
 
         ExifData *exifdata = exif_data_new_from_file(path);
         if (exifdata) {
-            //exif_data_foreach_content(exifdata, foreachcontent, NULL);
+            if ((false)) {
+                exif_data_foreach_content(exifdata, foreachcontent, NULL);
+            }
 
             // XXX get this from exif, or parse jpeg header instead?
             ExifEntry *w = exif_content_get_entry(

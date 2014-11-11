@@ -42,7 +42,7 @@ static sp<IMediaCodecList> getCodecList(JNIEnv *env) {
 }
 
 static jint android_media_MediaCodecList_getCodecCount(
-        JNIEnv *env, jobject thiz) {
+        JNIEnv *env, jobject /* thiz */) {
     sp<IMediaCodecList> mcl = getCodecList(env);
     if (mcl == NULL) {
         // Runtime exception already pending.
@@ -52,7 +52,7 @@ static jint android_media_MediaCodecList_getCodecCount(
 }
 
 static jstring android_media_MediaCodecList_getCodecName(
-        JNIEnv *env, jobject thiz, jint index) {
+        JNIEnv *env, jobject /* thiz */, jint index) {
     sp<IMediaCodecList> mcl = getCodecList(env);
     if (mcl == NULL) {
         // Runtime exception already pending.
@@ -70,7 +70,7 @@ static jstring android_media_MediaCodecList_getCodecName(
 }
 
 static jint android_media_MediaCodecList_findCodecByName(
-        JNIEnv *env, jobject thiz, jstring name) {
+        JNIEnv *env, jobject /* thiz */, jstring name) {
     if (name == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return -ENOENT;
@@ -95,7 +95,7 @@ static jint android_media_MediaCodecList_findCodecByName(
 }
 
 static jboolean android_media_MediaCodecList_isEncoder(
-        JNIEnv *env, jobject thiz, jint index) {
+        JNIEnv *env, jobject /* thiz */, jint index) {
     sp<IMediaCodecList> mcl = getCodecList(env);
     if (mcl == NULL) {
         // Runtime exception already pending.
@@ -112,7 +112,7 @@ static jboolean android_media_MediaCodecList_isEncoder(
 }
 
 static jarray android_media_MediaCodecList_getSupportedTypes(
-        JNIEnv *env, jobject thiz, jint index) {
+        JNIEnv *env, jobject /* thiz */, jint index) {
     sp<IMediaCodecList> mcl = getCodecList(env);
     if (mcl == NULL) {
         // Runtime exception already pending.
@@ -144,7 +144,7 @@ static jarray android_media_MediaCodecList_getSupportedTypes(
 }
 
 static jobject android_media_MediaCodecList_getCodecCapabilities(
-        JNIEnv *env, jobject thiz, jint index, jstring type) {
+        JNIEnv *env, jobject /* thiz */, jint index, jstring type) {
     if (type == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return NULL;
@@ -262,7 +262,7 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     return caps;
 }
 
-static void android_media_MediaCodecList_native_init(JNIEnv *env) {
+static void android_media_MediaCodecList_native_init(JNIEnv* /* env */) {
 }
 
 static JNINativeMethod gMethods[] = {

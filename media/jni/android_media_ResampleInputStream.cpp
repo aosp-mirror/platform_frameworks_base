@@ -73,7 +73,7 @@ static const int nFir21 = sizeof(fir21) / sizeof(fir21[0]);
 static const int BUF_SIZE = 2048;
 
 
-static void android_media_ResampleInputStream_fir21(JNIEnv *env, jclass clazz,
+static void android_media_ResampleInputStream_fir21(JNIEnv *env, jclass /* clazz */,
          jbyteArray jIn,  jint jInOffset,
          jbyteArray jOut, jint jOutOffset,
          jint jNpoints) {
