@@ -1401,12 +1401,34 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.ORIGINATING_URI";
 
     /**
-     * Used as a URI extra field with {@link #ACTION_INSTALL_PACKAGE} and
-     * {@link #ACTION_VIEW} to indicate the HTTP referrer URI associated with the Intent
-     * data field or {@link #EXTRA_ORIGINATING_URI}.
+     * This extra can be used with any Intent used to launch an activity, supplying information
+     * about who is launching that activity.  This field contains a {@link android.net.Uri}
+     * object, typically an http: or https: URI of the web site that the referral came from;
+     * it can also use the {@link #URI_ANDROID_APP_SCHEME android-app:} scheme to identify
+     * a native application that it came from.
+     *
+     * <p>To retrieve this value in a client, use {@link android.app.Activity#getReferrer}
+     * instead of directly retrieving the extra.  It is also valid for applications to
+     * instead supply {@link #EXTRA_REFERRER_NAME} for cases where they can only create
+     * a string, not a Uri; the field here, if supplied, will always take precedence,
+     * however.</p>
+     *
+     * @see #EXTRA_REFERRER_NAME
      */
     public static final String EXTRA_REFERRER
             = "android.intent.extra.REFERRER";
+
+    /**
+     * Alternate version of {@link #EXTRA_REFERRER} that supplies the URI as a String rather
+     * than a {@link android.net.Uri} object.  Only for use in cases where Uri objects can
+     * not be created, in particular when Intent extras are supplied through the
+     * {@link #URI_INTENT_SCHEME intent:} or {@link #URI_ANDROID_APP_SCHEME android-app:}
+     * schemes.
+     *
+     * @see #EXTRA_REFERRER
+     */
+    public static final String EXTRA_REFERRER_NAME
+            = "android.intent.extra.REFERRER_NAME";
 
     /**
      * Used as an int extra field with {@link #ACTION_INSTALL_PACKAGE} and
@@ -3919,6 +3941,75 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int URI_INTENT_SCHEME = 1<<0;
 
+    /**
+     * Flag for use with {@link #toUri} and {@link #parseUri}: the URI string
+     * always has the "android-app:" scheme.  This is a variation of
+     * {@link #URI_INTENT_SCHEME} whose format is simpler for the case of an
+     * http/https URI being delivered to a specific package name.  The format
+     * is:
+     *
+     * <pre class="prettyprint">
+     * android-app://{package_id}/{scheme}/{host}/{path}{#Intent;...}</pre>
+     *
+     * <p>In this scheme, only the <code>pacakge_id</code> is required, and all
+     * other components can be included as desired.  Note that this can not be
+     * used with intents that have a {@link #setSelector}, since the base intent
+     * will always have an explicit package name.</p>
+     *
+     * <p>Some examples of how this scheme maps to Intent objects:</p>
+     * <table border="2" width="85%" align="center" frame="hsides" rules="rows">
+     *     <colgroup align="left" />
+     *     <colgroup align="left" />
+     *     <thead>
+     *     <tr><th>URI</th> <th>Intent</th></tr>
+     *     </thead>
+     *
+     *     <tbody>
+     *     <tr><td><code>android-app://com.example.app</code></td>
+     *         <td><table style="margin:0;border:0;cellpadding:0;cellspacing:0">
+     *             <tr><td>Action: </td><td>{@link #ACTION_MAIN}</td></tr>
+     *             <tr><td>Package: </td><td><code>com.example.app</code></td></tr>
+     *         </table></td>
+     *     </tr>
+     *     <tr><td><code>android-app://com.example.app/http/example.com</code></td>
+     *         <td><table style="margin:0;border:0;cellpadding:0;cellspacing:0">
+     *             <tr><td>Action: </td><td>{@link #ACTION_VIEW}</td></tr>
+     *             <tr><td>Data: </td><td><code>http://example.com/</code></td></tr>
+     *             <tr><td>Package: </td><td><code>com.example.app</code></td></tr>
+     *         </table></td>
+     *     </tr>
+     *     <tr><td><code>android-app://com.example.app/http/example.com/foo?1234</code></td>
+     *         <td><table style="margin:0;border:0;cellpadding:0;cellspacing:0">
+     *             <tr><td>Action: </td><td>{@link #ACTION_VIEW}</td></tr>
+     *             <tr><td>Data: </td><td><code>http://example.com/foo?1234</code></td></tr>
+     *             <tr><td>Package: </td><td><code>com.example.app</code></td></tr>
+     *         </table></td>
+     *     </tr>
+     *     <tr><td><code>android-app://com.example.app/<br />#Intent;action=com.example.MY_ACTION;end</code></td>
+     *         <td><table style="margin:0;border:0;cellpadding:0;cellspacing:0">
+     *             <tr><td>Action: </td><td><code>com.example.MY_ACTION</code></td></tr>
+     *             <tr><td>Package: </td><td><code>com.example.app</code></td></tr>
+     *         </table></td>
+     *     </tr>
+     *     <tr><td><code>android-app://com.example.app/http/example.com/foo?1234<br />#Intent;action=com.example.MY_ACTION;end</code></td>
+     *         <td><table style="margin:0;border:0;cellpadding:0;cellspacing:0">
+     *             <tr><td>Action: </td><td><code>com.example.MY_ACTION</code></td></tr>
+     *             <tr><td>Data: </td><td><code>http://example.com/foo?1234</code></td></tr>
+     *             <tr><td>Package: </td><td><code>com.example.app</code></td></tr>
+     *         </table></td>
+     *     </tr>
+     *     <tr><td><code>android-app://com.example.app/<br />#Intent;action=com.example.MY_ACTION;<br />i.some_int=100;S.some_str=hello;end</code></td>
+     *         <td><table border="" style="margin:0" >
+     *             <tr><td>Action: </td><td><code>com.example.MY_ACTION</code></td></tr>
+     *             <tr><td>Package: </td><td><code>com.example.app</code></td></tr>
+     *             <tr><td>Extras: </td><td><code>some_int=(int)100<br />some_str=(String)hello</code></td></tr>
+     *         </table></td>
+     *     </tr>
+     *     </tbody>
+     * </table>
+     */
+    public static final int URI_ANDROID_APP_SCHEME = 1<<1;
+
     // ---------------------------------------------------------------------
 
     private String mAction;
@@ -4179,8 +4270,8 @@ public class Intent implements Parcelable, Cloneable {
      * the scheme and full path.
      *
      * @param uri The URI to turn into an Intent.
-     * @param flags Additional processing flags.  Either 0 or
-     * {@link #URI_INTENT_SCHEME}.
+     * @param flags Additional processing flags.  Either 0,
+     * {@link #URI_INTENT_SCHEME}, or {@link #URI_ANDROID_APP_SCHEME}.
      *
      * @return Intent The newly created Intent object.
      *
@@ -4193,9 +4284,11 @@ public class Intent implements Parcelable, Cloneable {
     public static Intent parseUri(String uri, int flags) throws URISyntaxException {
         int i = 0;
         try {
-            // Validate intent scheme for if requested.
-            if ((flags&URI_INTENT_SCHEME) != 0) {
-                if (!uri.startsWith("intent:")) {
+            final boolean androidApp = uri.startsWith("android-app:");
+
+            // Validate intent scheme if requested.
+            if ((flags&(URI_INTENT_SCHEME|URI_ANDROID_APP_SCHEME)) != 0) {
+                if (!uri.startsWith("intent:") && !androidApp) {
                     Intent intent = new Intent(ACTION_VIEW);
                     try {
                         intent.setData(Uri.parse(uri));
@@ -4206,24 +4299,40 @@ public class Intent implements Parcelable, Cloneable {
                 }
             }
 
-            // simple case
             i = uri.lastIndexOf("#");
-            if (i == -1) return new Intent(ACTION_VIEW, Uri.parse(uri));
+            // simple case
+            if (i == -1) {
+                if (!androidApp) {
+                    return new Intent(ACTION_VIEW, Uri.parse(uri));
+                }
 
             // old format Intent URI
-            if (!uri.startsWith("#Intent;", i)) return getIntentOld(uri);
+            } else if (!uri.startsWith("#Intent;", i)) {
+                if (!androidApp) {
+                    return getIntentOld(uri);
+                } else {
+                    i = -1;
+                }
+            }
 
             // new format
             Intent intent = new Intent(ACTION_VIEW);
             Intent baseIntent = intent;
+            boolean explicitAction = false;
+            boolean inSelector = false;
 
             // fetch data part, if present
-            String data = i >= 0 ? uri.substring(0, i) : null;
             String scheme = null;
-            i += "#Intent;".length();
+            String data;
+            if (i >= 0) {
+                data = uri.substring(0, i);
+                i += 8; // length of "#Intent;"
+            } else {
+                data = uri;
+            }
 
             // loop over contents of Intent, all name=value;
-            while (!uri.startsWith("end", i)) {
+            while (i >= 0 && !uri.startsWith("end", i)) {
                 int eq = uri.indexOf('=', i);
                 if (eq < 0) eq = i-1;
                 int semi = uri.indexOf(';', i);
@@ -4232,6 +4341,9 @@ public class Intent implements Parcelable, Cloneable {
                 // action
                 if (uri.startsWith("action=", i)) {
                     intent.setAction(value);
+                    if (!inSelector) {
+                        explicitAction = true;
+                    }
                 }
 
                 // categories
@@ -4261,7 +4373,11 @@ public class Intent implements Parcelable, Cloneable {
 
                 // scheme
                 else if (uri.startsWith("scheme=", i)) {
-                    scheme = value;
+                    if (inSelector) {
+                        intent.mData = Uri.parse(value);
+                    } else {
+                        scheme = value;
+                    }
                 }
 
                 // source bounds
@@ -4272,6 +4388,7 @@ public class Intent implements Parcelable, Cloneable {
                 // selector
                 else if (semi == (i+3) && uri.startsWith("SEL", i)) {
                     intent = new Intent();
+                    inSelector = true;
                 }
 
                 // extra
@@ -4297,9 +4414,11 @@ public class Intent implements Parcelable, Cloneable {
                 i = semi + 1;
             }
 
-            if (intent != baseIntent) {
+            if (inSelector) {
                 // The Intent had a selector; fix it up.
-                baseIntent.setSelector(intent);
+                if (baseIntent.mPackage == null) {
+                    baseIntent.setSelector(intent);
+                }
                 intent = baseIntent;
             }
 
@@ -4308,6 +4427,47 @@ public class Intent implements Parcelable, Cloneable {
                     data = data.substring(7);
                     if (scheme != null) {
                         data = scheme + ':' + data;
+                    }
+                } else if (data.startsWith("android-app:")) {
+                    if (data.charAt(12) == '/' && data.charAt(13) == '/') {
+                        // Correctly formed android-app, first part is package name.
+                        int end = data.indexOf('/', 14);
+                        if (end < 0) {
+                            // All we have is a package name.
+                            intent.mPackage = data.substring(14);
+                            if (!explicitAction) {
+                                intent.setAction(ACTION_MAIN);
+                            }
+                            data = "";
+                        } else {
+                            // Target the Intent at the given package name always.
+                            String authority = null;
+                            intent.mPackage = data.substring(14, end);
+                            int newEnd;
+                            if (end < data.length() && (newEnd=data.indexOf('/', end+1)) >= 0) {
+                                // Found a scheme, remember it.
+                                scheme = data.substring(end+1, newEnd);
+                                end = newEnd;
+                                if (end < data.length() && (newEnd=data.indexOf('/', end+1)) >= 0) {
+                                    // Found a authority, remember it.
+                                    authority = data.substring(end+1, newEnd);
+                                    end = newEnd;
+                                }
+                            }
+                            if (scheme == null) {
+                                // If there was no scheme, then this just targets the package.
+                                if (!explicitAction) {
+                                    intent.setAction(ACTION_MAIN);
+                                }
+                                data = "";
+                            } else if (authority == null) {
+                                data = scheme + ":";
+                            } else {
+                                data = scheme + "://" + authority + data.substring(end);
+                            }
+                        }
+                    } else {
+                        data = "";
                     }
                 }
 
@@ -7084,14 +7244,53 @@ public class Intent implements Parcelable, Cloneable {
      * <p>You can convert the returned string back to an Intent with
      * {@link #getIntent}.
      *
-     * @param flags Additional operating flags.  Either 0 or
-     * {@link #URI_INTENT_SCHEME}.
+     * @param flags Additional operating flags.  Either 0,
+     * {@link #URI_INTENT_SCHEME}, or {@link #URI_ANDROID_APP_SCHEME}.
      *
      * @return Returns a URI encoding URI string describing the entire contents
      * of the Intent.
      */
     public String toUri(int flags) {
         StringBuilder uri = new StringBuilder(128);
+        if ((flags&URI_ANDROID_APP_SCHEME) != 0) {
+            if (mPackage == null) {
+                throw new IllegalArgumentException(
+                        "Intent must include an explicit package name to build an android-app: "
+                        + this);
+            }
+            uri.append("android-app://");
+            uri.append(mPackage);
+            String scheme = null;
+            if (mData != null) {
+                scheme = mData.getScheme();
+                if (scheme != null) {
+                    uri.append('/');
+                    uri.append(scheme);
+                    String authority = mData.getEncodedAuthority();
+                    if (authority != null) {
+                        uri.append('/');
+                        uri.append(authority);
+                        String path = mData.getEncodedPath();
+                        if (path != null) {
+                            uri.append(path);
+                        }
+                        String queryParams = mData.getEncodedQuery();
+                        if (queryParams != null) {
+                            uri.append('?');
+                            uri.append(queryParams);
+                        }
+                        String fragment = mData.getEncodedFragment();
+                        if (fragment != null) {
+                            uri.append('#');
+                            uri.append(fragment);
+                        }
+                    }
+                }
+            }
+            toUriFragment(uri, null, scheme == null ? Intent.ACTION_MAIN : Intent.ACTION_VIEW,
+                    mPackage, flags);
+            return uri.toString();
+        }
         String scheme = null;
         if (mData != null) {
             String data = mData.toString();
@@ -7121,27 +7320,38 @@ public class Intent implements Parcelable, Cloneable {
             uri.append("intent:");
         }
 
-        uri.append("#Intent;");
+        toUriFragment(uri, scheme, Intent.ACTION_VIEW, null, flags);
 
-        toUriInner(uri, scheme, flags);
+        return uri.toString();
+    }
+
+    private void toUriFragment(StringBuilder uri, String scheme, String defAction,
+            String defPackage, int flags) {
+        StringBuilder frag = new StringBuilder(128);
+
+        toUriInner(frag, scheme, defAction, defPackage, flags);
         if (mSelector != null) {
             uri.append("SEL;");
             // Note that for now we are not going to try to handle the
             // data part; not clear how to represent this as a URI, and
             // not much utility in it.
-            mSelector.toUriInner(uri, null, flags);
+            mSelector.toUriInner(frag, mSelector.mData != null ? mSelector.mData.getScheme() : null,
+                    null, null, flags);
         }
 
-        uri.append("end");
-
-        return uri.toString();
+        if (frag.length() > 0) {
+            uri.append("#Intent;");
+            uri.append(frag);
+            uri.append("end");
+        }
     }
 
-    private void toUriInner(StringBuilder uri, String scheme, int flags) {
+    private void toUriInner(StringBuilder uri, String scheme, String defAction,
+            String defPackage, int flags) {
         if (scheme != null) {
             uri.append("scheme=").append(scheme).append(';');
         }
-        if (mAction != null) {
+        if (mAction != null && !mAction.equals(defAction)) {
             uri.append("action=").append(Uri.encode(mAction)).append(';');
         }
         if (mCategories != null) {
@@ -7155,7 +7365,7 @@ public class Intent implements Parcelable, Cloneable {
         if (mFlags != 0) {
             uri.append("launchFlags=0x").append(Integer.toHexString(mFlags)).append(';');
         }
-        if (mPackage != null) {
+        if (mPackage != null && !mPackage.equals(defPackage)) {
             uri.append("package=").append(Uri.encode(mPackage)).append(';');
         }
         if (mComponent != null) {

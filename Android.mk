@@ -559,6 +559,7 @@ aidl_files := \
 	frameworks/base/core/java/android/content/pm/ProviderInfo.aidl \
 	frameworks/base/core/java/android/content/pm/PackageStats.aidl \
 	frameworks/base/core/java/android/content/pm/PermissionGroupInfo.aidl \
+	frameworks/base/core/java/android/content/pm/LabeledIntent.aidl \
 	frameworks/base/core/java/android/content/ComponentName.aidl \
 	frameworks/base/core/java/android/content/SyncStats.aidl \
 	frameworks/base/core/java/android/content/ContentValues.aidl \
