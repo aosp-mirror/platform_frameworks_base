@@ -8160,6 +8160,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private TaskRecord taskForIdLocked(int id) {
+        final TaskRecord task = recentTaskForIdLocked(id);
+        if (task != null) {
+            return task;
+        }
+
+        // Don't give up. Sometimes it just hasn't made it to recents yet.
+        return mStackSupervisor.anyTaskForIdLocked(id);
+    }
+
     private TaskRecord recentTaskForIdLocked(int id) {
         final int N = mRecentTasks.size();
             for (int i=0; i<N; i++) {
@@ -8380,7 +8390,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @return Returns true if the given task was found and removed.
      */
     private boolean removeTaskByIdLocked(int taskId, boolean killProcess) {
-        TaskRecord tr = recentTaskForIdLocked(taskId);
+        TaskRecord tr = taskForIdLocked(taskId);
         if (tr != null) {
             tr.removeTaskActivitiesLocked();
             cleanUpRemovedTaskLocked(tr, killProcess);
@@ -8455,7 +8465,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "moveTaskToBack()");
 
         synchronized(this) {
-            TaskRecord tr = recentTaskForIdLocked(taskId);
+            TaskRecord tr = taskForIdLocked(taskId);
             if (tr != null) {
                 if (tr == mStackSupervisor.mLockTaskModeTask) {
                     mStackSupervisor.showLockTaskToast();
@@ -8647,7 +8657,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                TaskRecord tr = recentTaskForIdLocked(taskId);
+                TaskRecord tr = taskForIdLocked(taskId);
                 return tr != null && tr.stack != null && tr.stack.isHomeStack();
             }
         } finally {
