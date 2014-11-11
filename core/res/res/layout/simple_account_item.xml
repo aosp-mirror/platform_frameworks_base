@@ -18,13 +18,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:minHeight="?attr/listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:paddingStart="16dip"
-    android:paddingEnd="?android:attr/scrollbarSize">
+    android:paddingStart="?attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?attr/scrollbarSize">
 
     <ImageView
-        android:id="@+android:id/icon"
+        android:id="@id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"/>
@@ -36,20 +36,20 @@
         android:layout_marginTop="6dip"
         android:layout_marginBottom="6dip"
         android:layout_weight="1">
-        <TextView android:id="@+android:id/title"
+        <TextView android:id="@id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textAppearance="?android:attr/textAppearanceListItem" />
-        <TextView android:id="@+android:id/summary"
+            android:textAppearance="?attr/textAppearanceListItem" />
+        <TextView android:id="@id/summary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@android:id/title"
-            android:layout_alignStart="@android:id/title"
+            android:layout_below="@id/title"
+            android:layout_alignStart="@id/title"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textAppearance="?android:attr/textAppearanceListItemSecondary"
-            android:textColor="?android:attr/textColorSecondary"/>
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textColor="?attr/textColorSecondary"/>
     </RelativeLayout>
 </LinearLayout>

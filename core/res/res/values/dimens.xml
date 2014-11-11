@@ -123,6 +123,9 @@
          be either a fraction or a dimension. -->
     <item type="dimen" name="dialog_min_width_minor">95%</item>
 
+    <!-- Default padding for dialogs. -->
+    <dimen name="dialog_padding">16dp</dimen>
+
     <!-- The width of the big icons in notifications. -->
     <dimen name="notification_large_icon_width">64dp</dimen>
     <!-- The width of the big icons in notifications. -->

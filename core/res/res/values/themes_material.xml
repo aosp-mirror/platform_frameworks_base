@@ -178,6 +178,7 @@ please see themes_device_defaults.xml.
         <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_material</item>
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_material</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title_material</item>
+        <item name="dialogPreferredPadding">@dimen/dialog_padding_material</item>
 
         <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@style/Theme.Material.Dialog.Alert</item>
@@ -529,6 +530,7 @@ please see themes_device_defaults.xml.
         <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons_material</item>
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title_material</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title_material</item>
+        <item name="dialogPreferredPadding">@dimen/dialog_padding_material</item>
 
         <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@style/Theme.Material.Light.Dialog.Alert</item>
@@ -1001,6 +1003,7 @@ please see themes_device_defaults.xml.
 
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material</item>
+        <item name="windowTitleBackgroundStyle">@style/DialogWindowTitleBackground.Material</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
         <item name="windowElevation">@dimen/floating_window_z</item>
         <item name="windowIsFloating">true</item>
@@ -1117,6 +1120,7 @@ please see themes_device_defaults.xml.
 
         <item name="windowFrame">@null</item>
         <item name="windowTitleStyle">@style/DialogWindowTitle.Material.Light</item>
+        <item name="windowTitleBackgroundStyle">@style/DialogWindowTitleBackground.Material.Light</item>
         <item name="windowBackground">@drawable/dialog_background_material</item>
         <item name="windowElevation">@dimen/floating_window_z</item>
         <item name="windowIsFloating">true</item>
