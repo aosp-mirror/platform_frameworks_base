@@ -39,6 +39,8 @@ include $(LOCAL_PATH)/libfilterfw.mk
 # gcc should always be placed at the end.
 LOCAL_EXPORT_LDLIBS := -llog -lgcc
 
+LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+
 # TODO: Build a shared library as well?
 include $(BUILD_STATIC_LIBRARY)
 
