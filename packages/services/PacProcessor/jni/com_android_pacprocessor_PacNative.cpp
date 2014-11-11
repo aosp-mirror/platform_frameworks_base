@@ -60,7 +60,7 @@ jstring string16ToJstring(JNIEnv* env, String16 string) {
     return env->NewString(str, len);
 }
 
-static jboolean com_android_pacprocessor_PacNative_createV8ParserNativeLocked(JNIEnv* env, 
+static jboolean com_android_pacprocessor_PacNative_createV8ParserNativeLocked(JNIEnv* /* env */,
         jobject) {
     if (proxyResolver == NULL) {
         logger = new ProxyErrorLogger();
@@ -72,7 +72,7 @@ static jboolean com_android_pacprocessor_PacNative_createV8ParserNativeLocked(JN
     return JNI_TRUE;
 }
 
-static jboolean com_android_pacprocessor_PacNative_destroyV8ParserNativeLocked(JNIEnv* env, 
+static jboolean com_android_pacprocessor_PacNative_destroyV8ParserNativeLocked(JNIEnv* /* env *,
         jobject) {
     if (proxyResolver != NULL) {
         delete logger;
