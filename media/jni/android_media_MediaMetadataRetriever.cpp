@@ -78,7 +78,6 @@ static MediaMetadataRetriever* getRetriever(JNIEnv* env, jobject thiz)
 static void setRetriever(JNIEnv* env, jobject thiz, MediaMetadataRetriever* retriever)
 {
     // No lock is needed, since it is called internally by other methods that are protected
-    MediaMetadataRetriever *old = (MediaMetadataRetriever*) env->GetLongField(thiz, fields.context);
     env->SetLongField(thiz, fields.context, (jlong) retriever);
 }
 

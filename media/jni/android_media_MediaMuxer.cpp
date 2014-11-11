@@ -41,7 +41,7 @@ static fields_t gFields;
 using namespace android;
 
 static jint android_media_MediaMuxer_addTrack(
-        JNIEnv *env, jclass clazz, jlong nativeObject, jobjectArray keys,
+        JNIEnv *env, jclass /* clazz */, jlong nativeObject, jobjectArray keys,
         jobjectArray values) {
     sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
     if (muxer == NULL) {
@@ -71,7 +71,7 @@ static jint android_media_MediaMuxer_addTrack(
 }
 
 static void android_media_MediaMuxer_writeSampleData(
-        JNIEnv *env, jclass clazz, jlong nativeObject, jint trackIndex,
+        JNIEnv *env, jclass /* clazz */, jlong nativeObject, jint trackIndex,
         jobject byteBuf, jint offset, jint size, jlong timeUs, jint flags) {
     sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
     if (muxer == NULL) {
@@ -146,7 +146,7 @@ static jlong android_media_MediaMuxer_native_setup(
 }
 
 static void android_media_MediaMuxer_setOrientationHint(
-        JNIEnv *env, jclass clazz, jlong nativeObject, jint degrees) {
+        JNIEnv *env, jclass /* clazz */, jlong nativeObject, jint degrees) {
     sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
     if (muxer == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException",
@@ -164,7 +164,7 @@ static void android_media_MediaMuxer_setOrientationHint(
 }
 
 static void android_media_MediaMuxer_setLocation(
-        JNIEnv *env, jclass clazz, jlong nativeObject, jint latitude, jint longitude) {
+        JNIEnv *env, jclass /* clazz */, jlong nativeObject, jint latitude, jint longitude) {
     MediaMuxer* muxer = reinterpret_cast<MediaMuxer *>(nativeObject);
 
     status_t res = muxer->setLocation(latitude, longitude);
@@ -175,7 +175,7 @@ static void android_media_MediaMuxer_setLocation(
     }
 }
 
-static void android_media_MediaMuxer_start(JNIEnv *env, jclass clazz,
+static void android_media_MediaMuxer_start(JNIEnv *env, jclass /* clazz */,
                                            jlong nativeObject) {
     sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
     if (muxer == NULL) {
@@ -193,7 +193,7 @@ static void android_media_MediaMuxer_start(JNIEnv *env, jclass clazz,
 
 }
 
-static void android_media_MediaMuxer_stop(JNIEnv *env, jclass clazz,
+static void android_media_MediaMuxer_stop(JNIEnv *env, jclass /* clazz */,
                                           jlong nativeObject) {
     sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
     if (muxer == NULL) {
@@ -212,7 +212,7 @@ static void android_media_MediaMuxer_stop(JNIEnv *env, jclass clazz,
 }
 
 static void android_media_MediaMuxer_native_release(
-        JNIEnv *env, jclass clazz, jlong nativeObject) {
+        JNIEnv* /* env */, jclass clazz, jlong nativeObject) {
     sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
     if (muxer != NULL) {
         muxer->decStrong(clazz);

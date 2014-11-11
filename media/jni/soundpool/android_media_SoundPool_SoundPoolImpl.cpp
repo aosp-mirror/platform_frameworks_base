@@ -312,7 +312,7 @@ static JNINativeMethod gMethods[] = {
 
 static const char* const kClassPathName = "android/media/SoundPool$SoundPoolImpl";
 
-jint JNI_OnLoad(JavaVM* vm, void* reserved)
+jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
 {
     JNIEnv* env = NULL;
     jint result = -1;

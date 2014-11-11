@@ -162,10 +162,6 @@ static void captureCallback(void* user,
         uint8_t *fft,
         uint32_t samplingrate) {
 
-    int arg1 = 0;
-    int arg2 = 0;
-    size_t size;
-
     visualizer_callback_cookie *callbackInfo = (visualizer_callback_cookie *)user;
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
@@ -486,7 +482,7 @@ android_media_visualizer_native_getEnabled(JNIEnv *env, jobject thiz)
 }
 
 static jintArray
-android_media_visualizer_native_getCaptureSizeRange(JNIEnv *env, jobject thiz)
+android_media_visualizer_native_getCaptureSizeRange(JNIEnv *env, jobject /* thiz */)
 {
     jintArray jRange = env->NewIntArray(2);
     jint *nRange = env->GetIntArrayElements(jRange, NULL);
@@ -498,7 +494,7 @@ android_media_visualizer_native_getCaptureSizeRange(JNIEnv *env, jobject thiz)
 }
 
 static jint
-android_media_visualizer_native_getMaxCaptureRate(JNIEnv *env, jobject thiz)
+android_media_visualizer_native_getMaxCaptureRate(JNIEnv* /* env */, jobject /* thiz */)
 {
     return (jint) Visualizer::getMaxCaptureRate();
 }

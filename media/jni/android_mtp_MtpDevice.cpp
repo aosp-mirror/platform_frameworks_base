@@ -91,14 +91,6 @@ MtpDevice* get_device_from_object(JNIEnv* env, jobject javaDevice)
     return (MtpDevice*)env->GetLongField(javaDevice, field_context);
 }
 
-static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
-    if (env->ExceptionCheck()) {
-        ALOGE("An exception was thrown by callback '%s'.", methodName);
-        LOGE_EX(env);
-        env->ExceptionClear();
-    }
-}
-
 // ----------------------------------------------------------------------------
 
 static jboolean
