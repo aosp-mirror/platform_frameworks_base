@@ -2599,5 +2599,6 @@
     <public type="attr" name="collapseContentDescription"/>
     <public type="attr" name="accessibilityTraversalBefore" />
     <public type="attr" name="accessibilityTraversalAfter" />
+    <public type="attr" name="dialogPreferredPadding" />
 
 </resources>

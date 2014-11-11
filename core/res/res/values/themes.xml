@@ -210,6 +210,7 @@ please see themes_device_defaults.xml.
         <item name="dialogTitleIconsDecorLayout">@layout/dialog_title_icons</item>
         <item name="dialogCustomTitleDecorLayout">@layout/dialog_custom_title</item>
         <item name="dialogTitleDecorLayout">@layout/dialog_title</item>
+        <item name="dialogPreferredPadding">@dimen/dialog_padding</item>
 
         <!-- AlertDialog attributes -->
         <item name="alertDialogTheme">@style/Theme.Dialog.Alert</item>

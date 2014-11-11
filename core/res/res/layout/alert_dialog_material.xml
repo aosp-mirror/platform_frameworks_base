@@ -31,9 +31,9 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical|start"
-            android:paddingStart="@dimen/alert_dialog_padding_material"
-            android:paddingEnd="@dimen/alert_dialog_padding_material"
-            android:paddingTop="@dimen/alert_dialog_padding_top_material">
+            android:paddingStart="?attr/dialogPreferredPadding"
+            android:paddingEnd="?attr/dialogPreferredPadding"
+            android:paddingTop="@dimen/dialog_padding_top_material">
             <ImageView android:id="@+id/icon"
                 android:layout_width="32dip"
                 android:layout_height="32dip"
@@ -74,13 +74,13 @@
                           style="@style/TextAppearance.Material.Subhead"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
-                          android:paddingStart="@dimen/alert_dialog_padding_material"
-                          android:paddingTop="@dimen/alert_dialog_padding_top_material"
-                          android:paddingEnd="@dimen/alert_dialog_padding_material" />
+                          android:paddingStart="?attr/dialogPreferredPadding"
+                          android:paddingTop="@dimen/dialog_padding_top_material"
+                          android:paddingEnd="?attr/dialogPreferredPadding" />
                 <Space android:id="@+id/textSpacerNoButtons"
                        android:visibility="gone"
                        android:layout_width="0dp"
-                       android:layout_height="@dimen/alert_dialog_padding_top_material" />
+                       android:layout_height="@dimen/dialog_padding_top_material" />
             </LinearLayout>
         </ScrollView>
         <View android:id="@+id/scrollIndicatorDown"
