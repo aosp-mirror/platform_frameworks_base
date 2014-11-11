@@ -112,6 +112,7 @@ public class DelegateClassAdapter extends ClassVisitor {
         //   The implementation of this 'delegate' method is done in layoutlib_bridge.
 
         int accessDelegate = access;
+        access = access & ~Opcodes.ACC_PRIVATE;  // If private, make it package protected.
 
         MethodVisitor mwOriginal = super.visitMethod(access, name + ORIGINAL_SUFFIX,
                                                      desc, signature, exceptions);
