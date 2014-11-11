@@ -414,6 +414,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     private ScrimController mScrimController;
+    private DozeScrimController mDozeScrimController;
 
     private final Runnable mAutohide = new Runnable() {
         @Override
@@ -741,6 +742,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mScrimController = new ScrimController(scrimBehind, scrimInFront, mScrimSrcModeEnabled);
         mScrimController.setBackDropView(mBackdrop);
         mStatusBarView.setScrimController(mScrimController);
+        mDozeScrimController = new DozeScrimController(mScrimController, context);
 
         mHeader = (StatusBarHeaderView) mStatusBarWindow.findViewById(R.id.header);
         mHeader.setActivityStarter(this);
@@ -3677,13 +3679,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mState != StatusBarState.KEYGUARD && !mNotificationPanel.isDozing()) {
             return;
         }
-        mNotificationPanel.setDozing(mDozing, mScrimController.isPulsing() /*animate*/);
+        mNotificationPanel.setDozing(mDozing, mDozeScrimController.isPulsing() /*animate*/);
         if (mDozing) {
             mStackScroller.setDark(true, false /*animate*/);
         } else {
             mStackScroller.setDark(false, false /*animate*/);
         }
-        mScrimController.setDozing(mDozing, mScrimController.isPulsing() /*animate*/);
+        mScrimController.setDozing(mDozing);
+        mDozeScrimController.setDozing(mDozing, mDozeScrimController.isPulsing() /* animate */);
     }
 
     public void updateStackScrollerState(boolean goingToFullShade) {
@@ -4060,7 +4063,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     }
 
     public void wakeUpIfDozing(long time, boolean fromTouch) {
-        if (mDozing && mScrimController.isPulsing()) {
+        if (mDozing && mDozeScrimController.isPulsing()) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             pm.wakeUp(time);
             if (fromTouch) {
@@ -4175,7 +4178,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         private void handlePulseWhileDozing(@NonNull PulseCallback callback) {
-            mScrimController.pulse(callback);
+            mDozeScrimController.pulse(callback);
         }
 
         private void handleStopDozing() {
