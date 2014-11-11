@@ -1571,7 +1571,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         return null;
     }
 
-    private void invalidateRenderingSize() {
+    public void invalidateRenderingSize() {
         mMeasuredScreenWidth = mMeasuredScreenHeight = -1;
     }
 
