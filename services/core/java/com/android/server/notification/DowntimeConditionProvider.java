@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.AlarmManager.AlarmClockInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -63,8 +64,10 @@ public class DowntimeConditionProvider extends ConditionProviderService {
     private final Calendar mCalendar = Calendar.getInstance();
     private final Context mContext = this;
     private final ArraySet<Integer> mDays = new ArraySet<Integer>();
+    private final ArraySet<Long> mFiredAlarms = new ArraySet<Long>();
 
     private boolean mConnected;
+    private NextAlarmTracker mTracker;
     private int mDowntimeMode;
     private ZenModeConfig mConfig;
     private Callback mCallback;
@@ -77,6 +80,7 @@ public class DowntimeConditionProvider extends ConditionProviderService {
         pw.println("    DowntimeConditionProvider:");
         pw.print("      mConnected="); pw.println(mConnected);
         pw.print("      mDowntimeMode="); pw.println(Global.zenModeToString(mDowntimeMode));
+        pw.print("      mFiredAlarms="); pw.println(mFiredAlarms);
     }
 
     public void attachBase(Context base) {
@@ -101,12 +105,15 @@ public class DowntimeConditionProvider extends ConditionProviderService {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
+        mTracker = mCallback.getNextAlarmTracker();
+        mTracker.addCallback(mTrackerCallback);
         init();
     }
 
     @Override
     public void onDestroy() {
         if (DEBUG) Slog.d(TAG, "onDestroy");
+        mTracker.removeCallback(mTrackerCallback);
         mConnected = false;
     }
 
@@ -183,35 +190,52 @@ public class DowntimeConditionProvider extends ConditionProviderService {
         }
     }
 
-    private int computeDowntimeMode(long time) {
-        if (mConfig == null || mDays.size() == 0) return Global.ZEN_MODE_OFF;
+    private boolean isInDowntime(long time) {
+        if (mConfig == null || mDays.size() == 0) return false;
         final long start = getTime(time, mConfig.sleepStartHour, mConfig.sleepStartMinute);
         long end = getTime(time, mConfig.sleepEndHour, mConfig.sleepEndMinute);
-        if (start == end) return Global.ZEN_MODE_OFF;
+        if (start == end) return false;
         if (end < start) {
             end = addDays(end, 1);
         }
-        final boolean inDowntime = isInDowntime(-1, time, start, end)
-                || isInDowntime(0, time, start, end);
-        return inDowntime ? (mConfig.sleepNone ? Global.ZEN_MODE_NO_INTERRUPTIONS
-                : Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) : Global.ZEN_MODE_OFF;
+        final boolean orAlarm = mConfig.sleepNone;
+        return isInDowntime(-1, time, start, end, orAlarm)
+                || isInDowntime(0, time, start, end, orAlarm);
     }
 
-    private boolean isInDowntime(int daysOffset, long time, long start, long end) {
+    private boolean isInDowntime(int daysOffset, long time, long start, long end, boolean orAlarm) {
         final int n = Calendar.SATURDAY;
         final int day = ((getDayOfWeek(time) - 1) + (daysOffset % n) + n) % n + 1;
         start = addDays(start, daysOffset);
         end = addDays(end, daysOffset);
+        if (orAlarm) {
+            end = findFiredAlarm(start, end);
+        }
         return mDays.contains(day) && time >= start && time < end;
     }
 
+    private long findFiredAlarm(long start, long end) {
+        final int N = mFiredAlarms.size();
+        for (int i = 0; i < N; i++) {
+            final long firedAlarm = mFiredAlarms.valueAt(i);
+            if (firedAlarm > start && firedAlarm < end) {
+                return firedAlarm;
+            }
+        }
+        return end;
+    }
+
     private void reevaluateDowntime() {
-        final int downtimeMode = computeDowntimeMode(System.currentTimeMillis());
+        final long now = System.currentTimeMillis();
+        final boolean inDowntimeNow = isInDowntime(now);
+        final int downtimeMode = inDowntimeNow ? (mConfig.sleepNone
+                ? Global.ZEN_MODE_NO_INTERRUPTIONS : Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
+                : Global.ZEN_MODE_OFF;
         if (DEBUG) Slog.d(TAG, "downtimeMode=" + downtimeMode);
         if (downtimeMode == mDowntimeMode) return;
         mDowntimeMode = downtimeMode;
         Slog.i(TAG, (isInDowntime() ? "Entering" : "Exiting" ) + " downtime");
-        ZenLog.traceDowntime(mDowntimeMode, getDayOfWeek(System.currentTimeMillis()), mDays);
+        ZenLog.traceDowntime(mDowntimeMode, getDayOfWeek(now), mDays);
         fireDowntimeChanged();
     }
 
@@ -266,14 +290,38 @@ public class DowntimeConditionProvider extends ConditionProviderService {
                 PendingIntent.FLAG_UPDATE_CURRENT);
         alarms.cancel(pendingIntent);
         if (mConfig.sleepMode != null) {
-            if (DEBUG) Slog.d(TAG, String.format("Scheduling %s for %s, %s in the future, now=%s",
-                    action, ts(time), time - now, ts(now)));
+            if (DEBUG) Slog.d(TAG, String.format("Scheduling %s for %s, in %s, now=%s",
+                    action, ts(time), NextAlarmTracker.formatDuration(time - now), ts(now)));
             alarms.setExact(AlarmManager.RTC_WAKEUP, time, pendingIntent);
         }
     }
 
     private static String ts(long time) {
         return new Date(time) + " (" + time + ")";
+    }
+
+    private void onEvaluateNextAlarm(AlarmClockInfo nextAlarm, long wakeupTime, boolean booted) {
+        if (!booted) return;  // we don't know yet
+        if (nextAlarm == null) return;  // not fireable
+        if (DEBUG) Slog.d(TAG, "onEvaluateNextAlarm " + mTracker.formatAlarmDebug(nextAlarm));
+        if (System.currentTimeMillis() > wakeupTime) {
+            if (DEBUG) Slog.d(TAG, "Alarm fired: " + mTracker.formatAlarmDebug(wakeupTime));
+            trimFiredAlarms();
+            mFiredAlarms.add(wakeupTime);
+        }
+        reevaluateDowntime();
+    }
+
+    private void trimFiredAlarms() {
+        // remove fired alarms over 2 days old
+        final long keepAfter = System.currentTimeMillis() - 2 * 24 * 60 * 60 * 1000;
+        final int N = mFiredAlarms.size();
+        for (int i = N - 1; i >= 0; i--) {
+            final long firedAlarm = mFiredAlarms.valueAt(i);
+            if (firedAlarm < keepAfter) {
+                mFiredAlarms.removeAt(i);
+            }
+        }
     }
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -293,6 +341,13 @@ public class DowntimeConditionProvider extends ConditionProviderService {
             }
             reevaluateDowntime();
             updateAlarms();
+        }
+    };
+
+    private final NextAlarmTracker.Callback mTrackerCallback = new NextAlarmTracker.Callback() {
+        @Override
+        public void onEvaluate(AlarmClockInfo nextAlarm, long wakeupTime, boolean booted) {
+            DowntimeConditionProvider.this.onEvaluateNextAlarm(nextAlarm, wakeupTime, booted);
         }
     };
 
