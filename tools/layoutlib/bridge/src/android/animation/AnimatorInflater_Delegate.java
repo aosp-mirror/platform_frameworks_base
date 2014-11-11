@@ -54,6 +54,6 @@ public class AnimatorInflater_Delegate {
     /*package*/ static ValueAnimator loadAnimator(Resources res, Theme theme,
             AttributeSet attrs, ValueAnimator anim, float pathErrorScale)
             throws NotFoundException {
-        return anim;
+        return AnimatorInflater.loadAnimator_Original(res, theme, attrs, anim, pathErrorScale);
     }
 }
