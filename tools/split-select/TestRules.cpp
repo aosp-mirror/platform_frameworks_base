@@ -75,7 +75,7 @@ const Rule AlwaysTrue() {
         const char*, const char*,
         const sp<Rule>& actual, const Rule& expected) {
     const String8 expectedStr(expected.toJson());
-    const String8 actualStr(actual != NULL ? actual->toJson() : "");
+    const String8 actualStr(actual != NULL ? actual->toJson() : String8());
 
     if (expectedStr != actualStr) {
         return ::testing::AssertionFailure()
