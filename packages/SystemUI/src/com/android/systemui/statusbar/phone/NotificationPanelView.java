@@ -523,7 +523,8 @@ public class NotificationPanelView extends PanelView implements
             case MotionEvent.ACTION_UP:
                 trackMovement(event);
                 if (mQsTracking) {
-                    flingQsWithCurrentVelocity();
+                    flingQsWithCurrentVelocity(
+                            event.getActionMasked() == MotionEvent.ACTION_CANCEL);
                     mQsTracking = false;
                 }
                 mIntercepting = false;
@@ -558,9 +559,9 @@ public class NotificationPanelView extends PanelView implements
         super.requestDisallowInterceptTouchEvent(disallowIntercept);
     }
 
-    private void flingQsWithCurrentVelocity() {
+    private void flingQsWithCurrentVelocity(boolean isCancelMotionEvent) {
         float vel = getCurrentVelocity();
-        flingSettings(vel, flingExpandsQs(vel));
+        flingSettings(vel, flingExpandsQs(vel) && !isCancelMotionEvent);
     }
 
     private boolean flingExpandsQs(float vel) {
@@ -729,7 +730,8 @@ public class NotificationPanelView extends PanelView implements
                 float fraction = getQsExpansionFraction();
                 if ((fraction != 0f || y >= mInitialTouchY)
                         && (fraction != 1f || y <= mInitialTouchY)) {
-                    flingQsWithCurrentVelocity();
+                    flingQsWithCurrentVelocity(
+                            event.getActionMasked() == MotionEvent.ACTION_CANCEL);
                 } else {
                     mScrollYOverride = -1;
                 }
