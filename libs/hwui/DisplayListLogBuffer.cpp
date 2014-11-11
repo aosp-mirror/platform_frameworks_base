@@ -80,7 +80,7 @@ void DisplayListLogBuffer::outputCommands(FILE *file)
 
         fprintf(file, "%*s%s\n", 2 * tmpBufferPtr->level, "", tmpBufferPtr->label);
 
-        OpLog* nextOp = tmpBufferPtr++;
+        tmpBufferPtr++;
         if (tmpBufferPtr > mBufferLast) {
             tmpBufferPtr = mBufferFirst;
         }

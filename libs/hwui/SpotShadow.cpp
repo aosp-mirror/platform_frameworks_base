@@ -795,11 +795,15 @@ inline void genNewPenumbraAndPairWithUmbra(const Vector2* penumbra, int penumbra
                     previousPenumbra * weightForPreviousPenumbra;
 
                 int skippedUmbraIndex = (previousClosestUmbraIndex + k + 1) % umbraLength;
-                verticesPair[verticesPairIndex++] = {newPenumbraIndex, skippedUmbraIndex};
+                verticesPair[verticesPairIndex].outerIndex = newPenumbraIndex;
+                verticesPair[verticesPairIndex].innerIndex = skippedUmbraIndex;
+                verticesPairIndex++;
                 newPenumbra[newPenumbraIndex++] = interpolatedPenumbra;
             }
         }
-        verticesPair[verticesPairIndex++] = {newPenumbraIndex, currentClosestUmbraIndex};
+        verticesPair[verticesPairIndex].outerIndex = newPenumbraIndex;
+        verticesPair[verticesPairIndex].innerIndex = currentClosestUmbraIndex;
+        verticesPairIndex++;
         newPenumbra[newPenumbraIndex++] = currentPenumbraVertex;
 
         previousClosestUmbraIndex = currentClosestUmbraIndex;

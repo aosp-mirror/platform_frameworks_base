@@ -212,7 +212,7 @@ void PathCache::removeTexture(PathTexture* texture) {
         // before attempting our cleanup
         const sp<Task<SkBitmap*> >& task = texture->task();
         if (task != NULL) {
-            SkBitmap* bitmap = task->getResult();
+            task->getResult();
             texture->clearTask();
         } else {
             // If there is a pending task, the path was not added
