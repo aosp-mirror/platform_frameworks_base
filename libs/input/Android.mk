@@ -27,14 +27,14 @@ LOCAL_SHARED_LIBRARIES := \
     libskia \
     libgui \
     libui \
-	libinput \
-	libinputflinger
+    libinput \
+    libinputflinger
 
 LOCAL_C_INCLUDES := \
     frameworks/native/services
 
 
-LOCAL_CFLAGS += -Wno-unused-parameter
+LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
 LOCAL_MODULE:= libinputservice
 
