@@ -172,6 +172,12 @@ static jint android_view_GLES20Canvas_getMaxTextureHeight(JNIEnv* env, jobject c
     return Caches::getInstance().maxTextureSize;
 }
 
+static void android_view_GLES20Canvas_setOverrideXfermode(JNIEnv* env, jobject clazz,
+        jlong rendererPtr, int xfermode) {
+    DisplayListRenderer* renderer = reinterpret_cast<DisplayListRenderer*>(rendererPtr);
+    renderer->setOverrideXfermode(xfermode);
+}
+
 // ----------------------------------------------------------------------------
 // State
 // ----------------------------------------------------------------------------
@@ -952,6 +958,8 @@ static JNINativeMethod gMethods[] = {
 
     { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_GLES20Canvas_getMaxTextureWidth },
     { "nGetMaximumTextureHeight", "()I",       (void*) android_view_GLES20Canvas_getMaxTextureHeight },
+
+    { "nSetOverrideXfermode", "(JI)V",       (void*) android_view_GLES20Canvas_setOverrideXfermode },
 
 #endif
 };
