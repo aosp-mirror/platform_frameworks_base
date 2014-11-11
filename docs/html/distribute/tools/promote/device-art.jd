@@ -66,7 +66,7 @@ feature image or screenshots for your Google Play app listing.</p>
   }
 
   .device-list {
-    padding: 0;
+    padding: 1em 0 0 0;
     margin: 0;
   }
 
@@ -187,6 +187,19 @@ feature image or screenshots for your Google Play app listing.</p>
       portSize: [1080,1920],
     },
     {
+      id: 'nexus_6',
+      title: 'Nexus 6',
+      url: 'http://www.google.com/nexus/6/',
+      physicalSize: 6,
+      physicalHeight: 6.27,
+      density: '560DPI',
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [489,327],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [327,489],
+      portSize: [1440, 2560],
+    },
+    {
       id: 'nexus_7',
       title: 'Nexus 7',
       url: 'http://www.google.com/nexus/7/',
@@ -201,6 +214,20 @@ feature image or screenshots for your Google Play app listing.</p>
       portSize: [800,1280]
     },
     {
+      id: 'nexus_9',
+      title: 'Nexus 9',
+      url: 'http://www.google.com/nexus/9/',
+      physicalSize: 9,
+      physicalHeight: 8.98,
+      actualResolution: [1536,2048],
+      density: 'XHDPI',
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [514,350],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [348,514],
+      portSize: [1536,2048],
+    },
+    {
       id: 'nexus_10',
       title: 'Nexus 10',
       url: 'http://www.google.com/nexus/10/',
@@ -212,19 +239,6 @@ feature image or screenshots for your Google Play app listing.</p>
       landOffset: [227,217],
       portRes: ['shadow', 'back', 'fore'],
       portOffset: [217,223],
-      portSize: [800,1280]
-    },
-    {
-      id: 'xoom',
-      title: 'Motorola XOOM',
-      url: 'http://www.google.com/phone/detail/motorola-xoom',
-      physicalSize: 10,
-      physicalHeight: 6.61,
-      density: 'MDPI',
-      landRes: ['shadow', 'back', 'fore'],
-      landOffset: [218,191],
-      portRes: ['shadow', 'back', 'fore'],
-      portOffset: [199,200],
       portSize: [800,1280],
       archived: true
     },
@@ -256,34 +270,6 @@ feature image or screenshots for your Google Play app listing.</p>
       portSize: [768,1280],
       archived: true
     },
-    {
-      id: 'galaxy_nexus',
-      title: 'Galaxy Nexus',
-      url: 'http://www.android.com/devices/detail/galaxy-nexus',
-      physicalSize: 4.65,
-      physicalHeight: 5.33,
-      density: 'XHDPI',
-      landRes: ['shadow', 'back', 'fore'],
-      landOffset: [371,199],
-      portRes: ['shadow', 'back', 'fore'],
-      portOffset: [216,353],
-      portSize: [720,1280],
-      archived: true
-    },
-    {
-      id: 'nexus_s',
-      title: 'Nexus S',
-      url: 'http://www.google.com/phone/detail/nexus-s',
-      physicalSize: 4.0,
-      physicalHeight: 4.88,
-      density: 'HDPI',
-      landRes: ['shadow', 'back', 'fore'],
-      landOffset: [247,135],
-      portRes: ['shadow', 'back', 'fore'],
-      portOffset: [134,247],
-      portSize: [480,800],
-      archived: true
-    }
   ];
 
   DEVICES = DEVICES.sort(function(x, y) { return x.physicalSize - y.physicalSize; });
