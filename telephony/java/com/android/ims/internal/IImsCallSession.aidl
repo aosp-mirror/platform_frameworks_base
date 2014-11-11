@@ -55,6 +55,13 @@ interface IImsCallSession {
     ImsCallProfile getLocalCallProfile();
 
     /**
+     * Gets the remote call profile that this session is associated with
+     *
+     * @return the remote call profile that this session is associated with
+     */
+    ImsCallProfile getRemoteCallProfile();
+
+    /**
      * Gets the value associated with the specified property of this session.
      *
      * @return the string value associated with the specified property
