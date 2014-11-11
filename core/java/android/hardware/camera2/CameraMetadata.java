@@ -450,6 +450,38 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_ZSL = 4;
 
+    /**
+     * <p>The camera device supports accurately reporting the sensor settings for many of
+     * the sensor controls while the built-in 3A algorithm is running.  This allows
+     * reporting of sensor settings even when these settings cannot be manually changed.</p>
+     * <p>The values reported for the following controls are guaranteed to be available
+     * in the CaptureResult, including when 3A is enabled:</p>
+     * <ul>
+     * <li>Exposure control<ul>
+     * <li>{@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime}</li>
+     * </ul>
+     * </li>
+     * <li>Sensitivity control<ul>
+     * <li>{@link CaptureRequest#SENSOR_SENSITIVITY android.sensor.sensitivity}</li>
+     * </ul>
+     * </li>
+     * <li>Lens controls (if the lens is adjustable)<ul>
+     * <li>{@link CaptureRequest#LENS_FOCUS_DISTANCE android.lens.focusDistance}</li>
+     * <li>{@link CaptureRequest#LENS_APERTURE android.lens.aperture}</li>
+     * </ul>
+     * </li>
+     * </ul>
+     * <p>This capability is a subset of the MANUAL_SENSOR control capability, and will
+     * always be included if the MANUAL_SENSOR capability is available.</p>
+     *
+     * @see CaptureRequest#LENS_APERTURE
+     * @see CaptureRequest#LENS_FOCUS_DISTANCE
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CaptureRequest#SENSOR_SENSITIVITY
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS = 5;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
@@ -1215,7 +1247,8 @@ public abstract class CameraMetadata<TKey> {
      * image while recording video) use case.</p>
      * <p>The camera device should take the highest-quality image
      * possible (given the other settings) without disrupting the
-     * frame rate of video recording.  </p>
+     * frame rate of video recording.<br />
+     * </p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;
