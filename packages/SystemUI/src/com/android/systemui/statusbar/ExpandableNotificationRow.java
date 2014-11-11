@@ -118,6 +118,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
 
     public void setStatusBarNotification(StatusBarNotification statusBarNotification) {
         mStatusBarNotification = statusBarNotification;
+        updateVetoButton();
     }
 
     public StatusBarNotification getStatusBarNotification() {
@@ -303,17 +304,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
      * @return Can the underlying notification be cleared?
      */
     public boolean isClearable() {
-        return mClearable;
-    }
-
-    /**
-     * Set whether the notification can be cleared.
-     *
-     * @param clearable
-     */
-    public void setClearable(boolean clearable) {
-        mClearable = clearable;
-        updateVetoButton();
+        return mStatusBarNotification != null && mStatusBarNotification.isClearable();
     }
 
     /**
