@@ -10791,9 +10791,7 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean canReceiveKeys, boolean hasFocus, boolean touchFullscreen) {
         synchronized (mWindowMap) {
             FakeWindowImpl fw = new FakeWindowImpl(this, looper, inputEventReceiverFactory,
-                    name, windowType,
-                    layoutParamsFlags, layoutParamsPrivateFlags, canReceiveKeys,
-                    hasFocus, touchFullscreen);
+                    name, windowType, layoutParamsFlags, canReceiveKeys, hasFocus, touchFullscreen);
             int i=0;
             while (i<mFakeWindows.size()) {
                 if (mFakeWindows.get(i).mWindowLayer <= fw.mWindowLayer) {
