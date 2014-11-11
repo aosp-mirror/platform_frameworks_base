@@ -908,12 +908,14 @@
 
         <!-- Theme to use for dialogs spawned from this theme. -->
         <attr name="dialogTheme" format="reference" />
-        <!-- Window decor layout to use in dialog mode with icons -->
+        <!-- Window decor layout to use in dialog mode with icons. -->
         <attr name="dialogTitleIconsDecorLayout" format="reference" />
-        <!-- Window decor layout to use in dialog mode with custom titles -->
+        <!-- Window decor layout to use in dialog mode with custom titles. -->
         <attr name="dialogCustomTitleDecorLayout" format="reference" />
-        <!-- Window decor layout to use in dialog mode with title only -->
+        <!-- Window decor layout to use in dialog mode with title only. -->
         <attr name="dialogTitleDecorLayout" format="reference" />
+        <!-- Preferred padding for dialog content. -->
+        <attr name="dialogPreferredPadding" format="dimension" />
 
         <!-- Theme to use for alert dialogs spawned from this theme. -->
         <attr name="alertDialogTheme" format="reference" />

@@ -476,6 +476,7 @@ package android {
     field public static final int dialogLayout = 16843255; // 0x10101f7
     field public static final int dialogMessage = 16843251; // 0x10101f3
     field public static final int dialogPreferenceStyle = 16842897; // 0x1010091
+    field public static final int dialogPreferredPadding = 16844037; // 0x1010505
     field public static final int dialogTheme = 16843528; // 0x1010308
     field public static final int dialogTitle = 16843250; // 0x10101f2
     field public static final int digits = 16843110; // 0x1010166

@@ -1128,6 +1128,15 @@ please see styles_device_defaults.xml.
         <item name="textAlignment">viewStart</item>
     </style>
 
+    <style name="DialogWindowTitleBackground.Material">
+        <item name="background">@null</item>
+        <item name="paddingStart">?attr/dialogPreferredPadding</item>
+        <item name="paddingEnd">?attr/dialogPreferredPadding</item>
+        <item name="paddingTop">@dimen/dialog_padding_top_material</item>
+    </style>
+
+    <style name="DialogWindowTitleBackground.Material.Light" />
+
     <style name="DialogWindowTitle.Material">
         <item name="maxLines">1</item>
         <item name="scrollHorizontally">true</item>
