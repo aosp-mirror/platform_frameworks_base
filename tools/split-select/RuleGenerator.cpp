@@ -38,7 +38,7 @@ sp<Rule> RuleGenerator::generateDensity(const Vector<int>& allDensities, size_t 
         densityRule->op = Rule::AND_SUBRULES;
 
         const bool hasAnyDensity = std::find(allDensities.begin(),
-                allDensities.end(), ResTable_config::DENSITY_ANY) != allDensities.end();
+                allDensities.end(), (int) ResTable_config::DENSITY_ANY) != allDensities.end();
 
         if (hasAnyDensity) {
             sp<Rule> version = new Rule();
