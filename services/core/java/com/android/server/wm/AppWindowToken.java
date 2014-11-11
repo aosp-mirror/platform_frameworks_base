@@ -252,11 +252,17 @@ class AppWindowToken extends WindowToken {
         return false;
     }
 
+    @Override
     void removeAllWindows() {
-        for (int winNdx = allAppWindows.size() - 1; winNdx >= 0; --winNdx) {
-            WindowState win = allAppWindows.get(winNdx);
-            if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) Slog.w(WindowManagerService.TAG,
-                    "removeAllWindows: removing win=" + win);
+        int winNdx;
+        while ((winNdx = allAppWindows.size()) > 0) {
+            WindowState win = allAppWindows.get(winNdx - 1);
+            if (WindowManagerService.DEBUG_WINDOW_MOVEMENT) {
+                Slog.w(WindowManagerService.TAG, "removeAllWindows: removing win=" + win);
+            }
+
+            // {@link WindowManagerService.removeWindowLocked} may remove multiple entries from
+            // {@link #allAppWindows} if the window to be removed has child windows.
             win.mService.removeWindowLocked(win.mSession, win);
         }
     }
