@@ -21,6 +21,7 @@ import android.os.PersistableBundle;
 import android.os.Trace;
 
 import com.android.internal.app.ResolverActivity;
+import com.android.internal.content.ReferrerIntent;
 import com.android.internal.util.XmlUtils;
 import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
@@ -128,7 +129,7 @@ final class ActivityRecord {
     final int requestCode;  // code given by requester (resultTo)
     ArrayList<ResultInfo> results; // pending ActivityResult objs we have received
     HashSet<WeakReference<PendingIntentRecord>> pendingResults; // all pending intents for this act
-    ArrayList<Intent> newIntents; // any pending new intents for single-top mode
+    ArrayList<ReferrerIntent> newIntents; // any pending new intents for single-top mode
     ActivityOptions pendingOptions; // most recently given options
     ActivityOptions returningOptions; // options that are coming back via convertToTranslucent
     HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
@@ -629,9 +630,9 @@ final class ActivityRecord {
         }
     }
 
-    void addNewIntentLocked(Intent intent) {
+    void addNewIntentLocked(ReferrerIntent intent) {
         if (newIntents == null) {
-            newIntents = new ArrayList<Intent>();
+            newIntents = new ArrayList<>();
         }
         newIntents.add(intent);
     }
@@ -640,7 +641,7 @@ final class ActivityRecord {
      * Deliver a new Intent to an existing activity, so that its onNewIntent()
      * method will be called at the proper time.
      */
-    final void deliverNewIntentLocked(int callingUid, Intent intent) {
+    final void deliverNewIntentLocked(int callingUid, Intent intent, String referrer) {
         // The activity now gets access to the data associated with this Intent.
         service.grantUriPermissionFromIntentLocked(callingUid, packageName,
                 intent, getUriPermissionsLocked(), userId);
@@ -649,14 +650,14 @@ final class ActivityRecord {
         // device is sleeping, then all activities are stopped, so in that
         // case we will deliver it if this is the current top activity on its
         // stack.
+        final ReferrerIntent rintent = new ReferrerIntent(intent, referrer);
         boolean unsent = true;
         if ((state == ActivityState.RESUMED || (service.isSleeping()
                         && task.stack.topRunningActivityLocked(null) == this))
                 && app != null && app.thread != null) {
             try {
-                ArrayList<Intent> ar = new ArrayList<Intent>();
-                intent = new Intent(intent);
-                ar.add(intent);
+                ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
+                ar.add(rintent);
                 app.thread.scheduleNewIntent(ar, appToken);
                 unsent = false;
             } catch (RemoteException e) {
@@ -668,7 +669,7 @@ final class ActivityRecord {
             }
         }
         if (unsent) {
-            addNewIntentLocked(new Intent(intent));
+            addNewIntentLocked(rintent);
         }
     }
 
