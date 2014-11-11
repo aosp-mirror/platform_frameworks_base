@@ -5,27 +5,28 @@ LOCAL_SRC_FILES:= \
     android_renderscript_RenderScript.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-        libandroid_runtime \
-        libandroidfw \
-        libnativehelper \
-        libRS \
-        libcutils \
-        liblog \
-        libskia \
-        libutils \
-        libui \
-        libgui
+    libandroid_runtime \
+    libandroidfw \
+    libnativehelper \
+    libRS \
+    libcutils \
+    liblog \
+    libskia \
+    libutils \
+    libui \
+    libgui
 
 LOCAL_STATIC_LIBRARIES :=
 
 rs_generated_include_dir := $(call intermediates-dir-for,SHARED_LIBRARIES,libRS,,)
 
 LOCAL_C_INCLUDES += \
-	$(JNI_H_INCLUDE) \
-	frameworks/rs \
-	$(rs_generated_include_dir)
+    $(JNI_H_INCLUDE) \
+    frameworks/rs \
+    $(rs_generated_include_dir)
 
 LOCAL_CFLAGS += -Wno-unused-parameter -std=c++11
+LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(addprefix $(rs_generated_include_dir)/,rsgApiFuncDecl.h)
 LOCAL_MODULE:= librs_jni
