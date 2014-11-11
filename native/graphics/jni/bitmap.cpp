@@ -15,7 +15,11 @@
  */
 
 #include <android/bitmap.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <GraphicsJNI.h>
+#pragma GCC diagnostic pop
 
 int AndroidBitmap_getInfo(JNIEnv* env, jobject jbitmap,
                           AndroidBitmapInfo* info) {
