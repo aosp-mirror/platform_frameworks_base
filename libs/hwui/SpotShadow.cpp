@@ -677,11 +677,13 @@ inline int getClosestUmbraIndex(const Vector2& pivot, const Vector2* polygon, in
     return resultIndex;
 }
 
+// Allow some epsilon here since the later ray intersection did allow for some small
+// floating point error, when the intersection point is slightly outside the segment.
 inline bool sameDirections(bool isPositiveCross, float a, float b) {
     if (isPositiveCross) {
-        return a >= 0 && b >= 0;
+        return a >= -EPSILON && b >= -EPSILON;
     } else {
-        return a <= 0 && b <= 0;
+        return a <= EPSILON && b <= EPSILON;
     }
 }
 
@@ -721,22 +723,23 @@ inline void genNewPenumbraAndPairWithUmbra(const Vector2* penumbra, int penumbra
         // For current penumbra vertex, starting from previousClosestUmbraIndex,
         // then check the next one until the distance increase.
         // The last one before the increase is the umbra vertex we need to pair with.
-        int currentUmbraIndex = previousClosestUmbraIndex;
-        float currentLengthSquared = (currentPenumbraVertex - umbra[currentUmbraIndex]).lengthSquared();
-        int currentClosestUmbraIndex = -1;
+        float currentLengthSquared =
+                (currentPenumbraVertex - umbra[previousClosestUmbraIndex]).lengthSquared();
+        int currentClosestUmbraIndex = previousClosestUmbraIndex;
         int indexDelta = 0;
         for (int j = 1; j < umbraLength; j++) {
             int newUmbraIndex = (previousClosestUmbraIndex + j) % umbraLength;
             float newLengthSquared = (currentPenumbraVertex - umbra[newUmbraIndex]).lengthSquared();
             if (newLengthSquared > currentLengthSquared) {
-                currentClosestUmbraIndex = (previousClosestUmbraIndex + j - 1) % umbraLength;
+                // currentClosestUmbraIndex is the umbra vertex's index which has
+                // currently found smallest distance, so we can simply break here.
                 break;
             } else {
                 currentLengthSquared = newLengthSquared;
                 indexDelta++;
+                currentClosestUmbraIndex = newUmbraIndex;
             }
         }
-        LOG_ALWAYS_FATAL_IF(currentClosestUmbraIndex == -1, "Can't find a closet umbra vertext at all");
 
         if (indexDelta > 1) {
             // For those umbra don't have  penumbra, generate new penumbra vertices by interpolation.
@@ -810,6 +813,9 @@ inline bool genPolyToCentroid(const Vector2* poly2d, int polyLength,
         const Vector2& centroid, Vector2* polyToCentroid) {
     for (int j = 0; j < polyLength; j++) {
         polyToCentroid[j] = poly2d[j] - centroid;
+        // Normalize these vectors such that we can use epsilon comparison after
+        // computing their cross products with another normalized vector.
+        polyToCentroid[j].normalize();
     }
     float refCrossProduct = 0;
     for (int j = 0; j < polyLength; j++) {
