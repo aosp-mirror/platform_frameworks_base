@@ -170,4 +170,5 @@ interface IConnectivityManager
 
     boolean addVpnAddress(String address, int prefixLength);
     boolean removeVpnAddress(String address, int prefixLength);
+    boolean setUnderlyingNetworksForVpn(in Network[] networks);
 }
