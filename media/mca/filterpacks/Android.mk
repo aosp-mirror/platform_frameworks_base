@@ -30,8 +30,6 @@ LOCAL_CFLAGS := -DANDROID
 
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
-include external/stlport/libstlport.mk
-
 include $(BUILD_STATIC_LIBRARY)
 
 ##

@@ -245,7 +245,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libnetd_client \
 	libsoundtrigger \
 	libminikin \
-	libstlport \
 	libprocessgroup \
 	libnativebridge \
 
@@ -262,7 +261,6 @@ LOCAL_C_INCLUDES += bionic/libc/private
 
 LOCAL_MODULE:= libandroid_runtime
 
-include external/stlport/libstlport.mk
 include $(BUILD_SHARED_LIBRARY)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))

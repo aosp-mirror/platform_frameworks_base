@@ -82,7 +82,7 @@ public:
     LinearAllocator * const mAllocator;
 
     SkPath* allocPathForFrame() {
-        mTempPaths.push_back();
+        mTempPaths.push_back(SkPath());
         return &mTempPaths.back();
     }
 
