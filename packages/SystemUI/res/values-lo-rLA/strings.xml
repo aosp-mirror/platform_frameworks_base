@@ -354,20 +354,12 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ຕັ້ງຄ່າ"</string>
     <string name="muted_by" msgid="6147073845094180001">"ຖືກ​ປິດ​ສຽງ​ໂດຍ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <!-- no translation found for screen_pinning_title (3273740381976175811) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description (1346522416878235405) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (8518446209564202557) -->
-    <skip />
-    <!-- no translation found for screen_pinning_positive (3783985798366751226) -->
-    <skip />
-    <!-- no translation found for screen_pinning_negative (3741602308343880268) -->
-    <skip />
-    <!-- no translation found for quick_settings_reset_confirmation_title (748792586749897883) -->
-    <skip />
-    <!-- no translation found for quick_settings_reset_confirmation_message (2235970126803317374) -->
-    <skip />
-    <!-- no translation found for quick_settings_reset_confirmation_button (2660339101868367515) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="3273740381976175811">"ປັກ​ໝຸດໜ້າ​ຈໍ​ແລ້ວ"</string>
+    <string name="screen_pinning_description" msgid="1346522416878235405">"ມັນ​ຈະ​ຮັກ​ສາ​ໜ້າ​ຈໍ​ໄວ້​ໃນ​ມຸມມອງ​ຂອງ​ທ່ານ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ຖອດ​ໝຸດ. ​ສຳ​ຜັດ​ປຸ່ມ ກັບ​ຄືນ ແລະ ພາບ​ຮວມ​ ຄ້າງ​ໄວ້​ພ້ອມ​ກັນ​ເພື່ອ​ຖອດ​ໝຸດ."</string>
+    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"ມັນ​ຈະ​ຮັກ​ສາ​ໜ້າ​ຈໍ​ໄວ້​ໃນ​ມຸມມອງ​ຂອງ​ທ່ານ​ຈົນ​ກວ່າ​ທ່ານ​ຈະ​ຖອດ​ໝຸດ. ​ສຳ​ຜັດ​ປຸ່ມ ພາບ​ຮວມ​ ຄ້າງ​ໄວ້​ເພື່ອ​ຖອດ​ໝຸດ."</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"ເຂົ້າໃຈແລ້ວ"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"ບໍ່, ຂອບໃຈ"</string>
+    <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"ເຊື່ອງ <xliff:g id="TILE_LABEL">%1$s</xliff:g> ຫຼື​ບໍ່?"</string>
+    <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"​ມັນ​ຈະ​ສະ​ແດງ​ຄືນ​ໃໝ່​ເມື່ອ​ທ່ານ​ເປີດ​ນຳ​ໃຊ້​ມັນ​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ຄັ້ງ​ຕໍ່​ໄປ."</string>
+    <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"ເຊື່ອງ"</string>
 </resources>
