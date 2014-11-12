@@ -2002,6 +2002,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         mStackScrollAlgorithm.onExpansionStopped();
         if (!mIsExpanded) {
             mOwnScrollY = 0;
+
+            // lets make sure nothing is in the overlay anymore
+            getOverlay().clear();
         }
     }
 
