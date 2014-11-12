@@ -39,9 +39,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.service.trust.ITrustAgentService;
 import android.service.trust.ITrustAgentServiceCallback;
-import android.service.trust.TrustAgentService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -160,7 +158,7 @@ public class TrustAgentWrapper {
                     mTrustManagerService.updateTrust(mUserId, false);
                     break;
                 case MSG_RESTART_TIMEOUT:
-                    unbind();
+                    destroy();
                     mTrustManagerService.resetAgent(mName, mUserId);
                     break;
                 case MSG_SET_TRUST_AGENT_FEATURES_COMPLETED:
@@ -367,7 +365,9 @@ public class TrustAgentWrapper {
         return mMessage;
     }
 
-    public void unbind() {
+    public void destroy() {
+        mHandler.removeMessages(MSG_RESTART_TIMEOUT);
+
         if (!mBound) {
             return;
         }
@@ -378,7 +378,6 @@ public class TrustAgentWrapper {
         mTrustAgentService = null;
         mSetTrustAgentFeaturesToken = null;
         mHandler.sendEmptyMessage(MSG_REVOKE_TRUST);
-        mHandler.removeMessages(MSG_RESTART_TIMEOUT);
     }
 
     public boolean isConnected() {

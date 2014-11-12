@@ -208,7 +208,8 @@ public class TrustManagerService extends SystemService {
         obsoleteAgents.addAll(mActiveAgents);
 
         for (UserInfo userInfo : userInfos) {
-            if (userInfo.partial || !userInfo.isEnabled() || userInfo.guestToRemove) continue;
+            if (userInfo == null || userInfo.partial || !userInfo.isEnabled()
+                    || userInfo.guestToRemove) continue;
             if (!userInfo.supportsSwitchTo()) continue;
             if (!mActivityManager.isUserRunning(userInfo.id)) continue;
             if (lockPatternUtils.getKeyguardStoredPasswordQuality(userInfo.id)
@@ -258,7 +259,7 @@ public class TrustManagerService extends SystemService {
                 if (info.agent.isManagingTrust()) {
                     trustMayHaveChanged = true;
                 }
-                info.agent.unbind();
+                info.agent.destroy();
                 mActiveAgents.remove(info);
             }
         }
@@ -290,7 +291,7 @@ public class TrustManagerService extends SystemService {
                 if (info.agent.isManagingTrust()) {
                     trustMayHaveChanged = true;
                 }
-                info.agent.unbind();
+                info.agent.destroy();
                 mActiveAgents.removeAt(i);
             }
         }
@@ -308,7 +309,7 @@ public class TrustManagerService extends SystemService {
                 if (info.agent.isManagingTrust()) {
                     trustMayHaveChanged = true;
                 }
-                info.agent.unbind();
+                info.agent.destroy();
                 mActiveAgents.removeAt(i);
             }
         }
