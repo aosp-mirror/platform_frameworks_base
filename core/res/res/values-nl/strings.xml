@@ -151,12 +151,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Te veel verwijderen voor <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tabletgeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Horlogegeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Telefoongeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netwerk kan worden gecontroleerd"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Door een onbekende derde partij"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Door <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Ik"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tabletopties"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Telefoonopties"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Stille modus"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Draadloos inschakelen"</string>
@@ -168,6 +172,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Belsoftware aan"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Uitschakelen..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Uw tablet wordt uitgeschakeld."</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Uw horloge wordt uitgeschakeld."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Uw telefoon wordt uitgeschakeld."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Wilt u afsluiten?"</string>
@@ -176,6 +182,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recent"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Geen recente apps."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tabletopties"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefoonopties"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Schermvergrendeling"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Uitschakelen"</string>
@@ -292,9 +300,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Hiermee kan de app verzoeken verzenden aan andere bericht-apps om gebeurtenissen voor reageren-via-berichten voor inkomende oproepen te verwerken."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"uw tekstberichten (SMS of MMS) lezen"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op uw tablet of simkaart. De app kan alle sms-berichten lezen, ongeacht inhoud of vertrouwelijkheid."</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Hiermee kan de app sms-berichten lezen die zijn opgeslagen op uw telefoon of simkaart. De app kan alle sms-berichten lezen, ongeacht inhoud of vertrouwelijkheid."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"uw tekstberichten (SMS of MMS) bewerken"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Hiermee kan de app naar de op uw tablet of simkaart opgeslagen sms\'jes schrijven. Schadelijke apps kunnen uw berichten mogelijk verwijderen."</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Hiermee kan de app naar de op uw telefoon of simkaart opgeslagen sms\'jes schrijven. Schadelijke apps kunnen uw berichten mogelijk verwijderen."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"tekstberichten (WAP) ontvangen"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Hiermee kan de app WAP-berichten ontvangen en verwerken. Dit betekent dat de app berichten die naar uw apparaat zijn verzonden, kan bijhouden of verwijderen zonder deze aan u weer te geven."</string>
@@ -388,6 +400,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"De app toestaan het scherm tijdelijk te bevriezen voor een volledige schermovergang."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"drukken op toetsen en bedieningselementen"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Hiermee kan de app de eigen invoergebeurtenissen (zoals toetsaanslagen) aan andere apps doorgeven. Schadelijke apps kunnen dit gebruiken om de tablet over te nemen."</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Hiermee kan de app de eigen invoergebeurtenissen (toetsaanslagen, enzovoort) aan andere apps doorgeven. Schadelijke apps kunnen dit gebruiken om de telefoon over te nemen."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"uw invoer en acties vastleggen"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Hiermee kan de app bijhouden op welke toetsen u drukt, zelfs wanneer u een andere app gebruikt (bijvoorbeeld wanneer u een wachtwoord typt). Dit is niet nodig voor normale apps."</string>
@@ -433,6 +447,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Hiermee kan de app ervoor zorgen dat het geleverde signaal wordt verzonden naar alle persistente processen."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"app altijd laten uitvoeren"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Hiermee kan de app gedeelten van zichzelf persistent maken in het geheugen. Dit kan de hoeveelheid geheugen beperken die beschikbaar is voor andere apps, waardoor de tablet trager kan worden."</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Hiermee kan de app gedeelten van zichzelf persistent maken in het geheugen. Dit kan de hoeveelheid geheugen beperken die beschikbaar is voor andere apps, waardoor de telefoon trager kan worden."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"apps verwijderen"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Hiermee kan de app Android-pakketten verwijderen. Schadelijke apps kunnen deze toestemming gebruiken om belangrijke apps te verwijderen."</string>
@@ -446,11 +462,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Hiermee kan de app nieuwe of bijgewerkte Android-pakketten installeren. Schadelijke apps kunnen hiermee nieuwe apps toevoegen met willekeurig belangrijke machtigingen."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"alle cachegegevens van app verwijderen"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Hiermee kan de app opslagruimte op de tablet vrij maken door bestanden te verwijderen uit de cachemappen van andere apps. Hierdoor worden andere apps mogelijk langzamer gestart, omdat ze gegevens opnieuw moeten ophalen."</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Hiermee kan de app opslagruimte op de telefoon vrij maken door bestanden te verwijderen uit de cachemappen van andere apps. Hierdoor worden andere apps mogelijk langzamer gestart, omdat ze gegevens opnieuw moeten ophalen."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"appbronnen verplaatsen"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Hiermee kan de app andere appbronnen verplaatsen van interne naar externe media en andersom."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"gevoelige logbestandsgegevens lezen"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Hiermee kan de app de verschillende logbestanden van het systeem lezen. De app kan op deze manier algemene informatie achterhalen over uw tabletgebruik, mogelijk inclusief persoonlijke of privé-informatie."</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Hiermee kan de app de verschillende logbestanden van het systeem lezen. De app kan op deze manier algemene informatie achterhalen over uw telefoongebruik, mogelijk inclusief persoonlijke of privé-informatie."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"elke mediadecoder gebruiken voor afspelen"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Hiermee kan de app alle geïnstalleerde mediadecoders gebruiken om te decoderen voor het afspelen."</string>
@@ -462,6 +482,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Hiermee kan de app lezen en schrijven naar elke bron die hoort bij de diagnostische groep, zoals bestanden in /dev. Hierdoor kan de systeemstabiliteit en -veiligheid worden beïnvloed. Dit mag ALLEEN worden gebruikt voor hardwarespecifieke diagnostiek door de fabrikant of provider."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"componenten van apps in- of uitschakelen"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Hiermee kan de app wijzigen of een component van een andere app wel of niet is ingeschakeld. Schadelijke apps kunnen dit gebruiken om belangrijke tabletfuncties uit te schakelen. U moet voorzichtig omgaan met deze toestemming, aangezien het mogelijk is dat onderdelen van apps onbruikbaar, inconsistent of instabiel worden."</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Hiermee kan de app wijzigen of een component van een andere app wel of niet is ingeschakeld. Schadelijke apps kunnen dit gebruiken om belangrijke telefoonfuncties uit te schakelen. U moet voorzichtig omgaan met deze toestemming, aangezien het mogelijk is dat onderdelen van apps onbruikbaar, inconsistent of instabiel worden."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"machtigingen verlenen of intrekken"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Toestaan dat een app specifieke machtigingen aan zichzelf of andere apps verleent of deze intrekt. Schadelijke apps kunnen dit gebruiken om toegang te krijgen tot functies waartoe u de apps geen toegang heeft gegeven."</string>
@@ -475,21 +497,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Hiermee kan de app de Google-serviceskaart wijzigen. Niet voor gebruik door normale apps."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"uitvoeren bij opstarten"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Hiermee kan de app zichzelf laten starten zodra het systeem is opgestart. Hierdoor kan het langer duren voordat de tablet is opgestart en een app kan altijd actief zijn, wat de tablet kan vertragen."</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Hiermee kan de app zichzelf starten zodra het systeem klaar is met opstarten. Hierdoor kan het langer duren voordat de telefoon is opgestart en kan de app de telefoonprocessen vertragen door altijd actief te zijn."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"sticky broadcast verzenden"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Hiermee kan de app sticky broadcasts verzenden die behouden blijven nadat de broadcast is beëindigd. Bij overmatig gebruik kan de tablet traag of instabiel worden omdat er te veel geheugenruimte wordt gebruikt."</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Hiermee kan de app sticky broadcasts verzenden die behouden blijven nadat de broadcast is beëindigd. Bij overmatig gebruik kan de telefoon traag of instabiel worden omdat er te veel geheugenruimte wordt gebruikt."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"uw contacten lezen"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op uw tablet, inclusief de frequentie waarmee u heeft gebeld, gemaild of op andere manieren heeft gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps uw contactgegevens opslaan, en schadelijke apps kunnen zonder uw medeweten contactgegevens delen."</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Hiermee kan de app gegevens lezen over de contacten die zijn opgeslagen op uw telefoon, inclusief de frequentie waarmee u heeft gebeld, gemaild of op andere manieren heeft gecommuniceerd met specifieke personen. Met deze toestemming kunnen apps uw contactgegevens opslaan, en schadelijke apps kunnen zonder uw medeweten contactgegevens delen."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"uw contacten aanpassen"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op uw tablet, inclusief de frequentie waarmee u heeft gebeld, gemaild of op andere manieren heeft gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Hiermee kan de app gegevens wijzigen over de contacten die zijn opgeslagen op uw telefoon, inclusief de frequentie waarmee u heeft gebeld, gemaild of op andere manieren heeft gecommuniceerd met specifieke contacten. Met deze toestemming kunnen apps contactgegevens verwijderen."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"gesprekkenlijst lezen"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Hiermee kan de app het gesprekkenlijst van uw tablet lezen, inclusief gegevens over inkomende en uitgaande oproepen. Met deze toestemming kunnen apps uw oproeploggegevens opslaan, en schadelijke apps kunnen logoproepgegevens zonder uw medeweten delen."</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Hiermee kan de app het gesprekkenlijst van uw telefoon lezen, inclusief gegevens over inkomende en uitgaande oproepen. Met deze toestemming kunnen apps uw oproeploggegevens opslaan, en schadelijke apps kunnen logoproepgegevens zonder uw medeweten delen."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"gesprekkenlijst schrijven"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Toestaan dat de app het gesprekkenlijst van uw tablet aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gesprekkenlijst wissen of aanpassen."</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Toestaan dat de app het gesprekkenlijst van uw telefoon aanpast, waaronder gegevens over inkomende en uitgaande oproepen. Schadelijke apps kunnen hiermee uw gesprekkenlijst wissen of aanpassen."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"uw eigen contactkaart lezen"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Hiermee kan de app persoonlijke profielgegevens lezen die op uw apparaat zijn opgeslagen, zoals uw naam en contactgegevens. Dit betekent dat de app u kan identificeren en uw profielgegevens naar anderen kan verzenden."</string>
@@ -503,9 +537,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Hiermee kan de app sociale updates van u en uw vrienden weergeven. Wees voorzichtig bij het delen van informatie: hiermee kan de app berichten produceren die afkomstig lijken te zijn van een vriend. Opmerking: deze toestemming kan niet worden afgedwongen voor alle sociale netwerken."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"agenda-afspraken en vertrouwelijke informatie lezen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Hiermee kan de app alle agenda-afspraken lezen die zijn opgeslagen op uw tablet, inclusief die van vrienden of collega\'s. De app kan uw agenda delen of uw agendagegevens opslaan, ongeacht vertrouwelijkheid of gevoeligheid."</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Hiermee kan de app alle agenda-afspraken lezen die zijn opgeslagen op uw telefoon, inclusief die van vrienden of collega\'s. De app kan uw agenda delen of uw agendagegevens opslaan, ongeacht vertrouwelijkheid of gevoeligheid."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"agenda-afspraken toevoegen of wijzigen en e-mails verzenden aan gasten zonder medeweten van de eigenaren"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Hiermee kan de app afspraken toevoegen, verwijderen en wijzigen die u kunt bewerken op uw tablet, inclusief afspraken van vrienden of collega\'s. Zo kan de app berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren, of afspraken aanpassen zonder medeweten van de eigenaar."</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Hiermee kan de app afspraken toevoegen, verwijderen en wijzigen die u kunt bewerken op uw telefoon, inclusief afspraken van vrienden of collega\'s. Zo kan de app berichten verzenden die afkomstig lijken te zijn van agenda-eigenaren, of afspraken aanpassen zonder medeweten van de eigenaar."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"neplocatiebronnen voor test"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Voorbeeld-locatiebronnen maken voor tests of een nieuwe locatieprovider instellen. Hiermee kan de app de locatie en/of status overschrijven van andere locatiebronnen zoals GPS of locatieproviders."</string>
@@ -550,12 +588,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"indicatielampje uitschakelen wanneer camera wordt gebruikt"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Staat toe dat een vooraf geïnstalleerde systeemapp het indicatielampje voor cameragebruik uitschakelt."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"tablet permanent uitschakelen"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"telefoon permanent uitschakelen"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Hiermee kan de app de gehele tablet permanent uitschakelen. Dit is erg gevaarlijk."</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Hiermee kan de app de gehele telefoon permanent uitschakelen. Dit is erg gevaarlijk."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"opnieuw opstarten van tablet afdwingen"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"telefoon nu opnieuw opstarten"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Hiermee kan de app de tablet opnieuw opstarten."</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Hiermee kan de app de telefoon opnieuw laten opstarten."</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"bestandssysteem van USB-opslag openen"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"bestandssysteem van SD-kaart openen"</string>
@@ -590,6 +636,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"alle telefoonnummers rechtstreeks bellen"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Hiermee kan de app elk telefoonnummer bellen zonder uw tussenkomst, inclusief alarmnummers. Schadelijke apps kunnen onnodige en illegale oproepen uitvoeren naar alarmdiensten."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"meteen starten met CDMA-tabletinstelling"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"meteen starten met CDMA-telefooninstelling"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Hiermee kan de app starten met CDMA-provisioning. Schadelijke apps kunnen de CDMA-provisioning onnodig starten."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"meldingen over locatie-updates beheren"</string>
@@ -605,20 +653,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"exacte telefoonstatus lezen"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Toestaan dat de app toegang krijgt tot de exacte telefoonstatus. Hiermee kan de app bepalen wat de echte oproepstatus is, of een oproep actief is of zich op de achtergrond bevindt, of er mislukte oproepen zijn, wat de exacte status van de gegevensverbinding is en of er mislukte gegevensverbindingen zijn."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"voorkomen dat tablet overschakelt naar slaapmodus"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"voorkomen dat telefoon overschakelt naar slaapmodus"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Hiermee kan de app voorkomen dat de tablet overschakelt naar de slaapmodus."</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Hiermee kan de app voorkomen dat de telefoon overschakelt naar de slaapmodus."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"infrarood verzenden"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Hiermee kan de app de infraroodzender van de tablet gebruiken."</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Hiermee kan de app de infraroodzender van de telefoon gebruiken."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"tablet in- of uitschakelen"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"telefoon in- of uitschakelen"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Hiermee kan de app de tablet in- of uitschakelen."</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Hiermee kan de app de telefoon in- of uitschakelen."</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"time-out van het scherm opnieuw instellen"</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"Hiermee kan de app de time-out van het scherm opnieuw instellen."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"uitvoeren in fabriekstestmodus"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Uitvoeren als fabrikanttest op laag niveau, waardoor toegang wordt gegeven tot de hardware van de tablet. Alleen beschikbaar als een tablet zich in de fabrikanttestmodus bevindt."</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Uitvoeren als fabrikanttest op laag niveau, waardoor toegang wordt gegeven tot de hardware van de telefoon. Alleen beschikbaar als een telefoon zich in de fabrikanttestmodus bevindt."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"achtergrond instellen"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Hiermee kan de app de systeemachtergrond instellen."</string>
@@ -628,14 +688,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Hiermee kan de app het systeem terugzetten naar de fabrieksinstellingen, waarbij alle gegevens, configuraties en geïnstalleerde apps worden verwijderd."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"tijd instellen"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Hiermee kan de app de kloktijd van de tablet wijzigen."</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Hiermee kan de app de kloktijd van de telefoon wijzigen."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"tijdzone instellen"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Hiermee kan de app de tijdzone van de tablet wijzigen."</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Hiermee kan de app de tijdzone van de telefoon wijzigen."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"fungeren als de AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Hiermee kan de app AccountAuthenticators aanroepen."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"accounts op het apparaat vinden"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Hiermee krijgt de app toegang tot de lijst met accounts die op de tablet bekend zijn. Dit kunnen ook accounts zijn die zijn gemaakt door apps die u heeft geïnstalleerd."</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Hiermee krijgt de app toegang tot de lijst met accounts die op de telefoon bekend zijn. Dit kunnen ook accounts zijn die zijn gemaakt door apps die u heeft geïnstalleerd."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"accounts maken en wachtwoorden instellen"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Hiermee kan de app de accountverificatiemogelijkheden van AccountManager gebruiken, inclusief het maken van accounts en het ophalen en instellen van de bijbehorende wachtwoorden."</string>
@@ -661,26 +727,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Hiermee kan de app zich koppelen aan en ontkoppelen van wifi-toegangspunten en wijzigingen aanbrengen in de apparaatconfiguratie voor wifi-netwerken."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wifi Multicast-ontvangst toestaan"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar uw tablet. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Hiermee kan de app pakketten ontvangen die via multicastadressen naar alle apparaten in een wifi-netwerk worden verzonden, niet alleen naar uw telefoon. Het stroomgebruik ligt hierbij hoger dan in de niet-multicastmodus."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth-instellingen openen"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Hiermee kan de app de lokale Bluetooth-tablet configureren en externe apparaten zoeken en koppelen."</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Hiermee kan de app de lokale Bluetooth-telefoon configureren en externe apparaten zoeken en koppelen."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Bluetooth-koppeling door app toestaan"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"De app toestaan te koppelen met externe apparaten zonder tussenkomst van de gebruiker."</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"De app toestaan te koppelen met externe apparaten zonder tussenkomst van de gebruiker."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"De app toestaan te koppelen met externe apparaten zonder tussenkomst van de gebruiker."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"toegang tot Bluetooth MAP-gegevens"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Hiermee krijgt de app toegang tot Bluetooth MAP-gegevens"</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Hiermee krijgt de app toegang tot Bluetooth MAP-gegevens"</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Hiermee krijgt de app toegang tot Bluetooth MAP-gegevens"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-verbinding maken en verbreken"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Hiermee kan de app bepalen of WiMAX is ingeschakeld en informatie bekijken over alle WiMAX-netwerken waarmee verbinding is gemaakt."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX-status wijzigen"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Hiermee kan de app de tablet verbinden met WiMAX-netwerken en de verbinding daarmee verbreken."</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Hiermee kan de app de telefoon verbinden met WiMAX-netwerken en de verbinding daarmee verbreken."</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"score toekennen aan netwerken"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Hiermee kan de app netwerken rangschikken en beïnvloeden aan welke netwerken de tablet de voorkeur moet geven."</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Hiermee kan de app netwerken rangschikken en beïnvloeden aan welke netwerken de telefoon de voorkeur moet geven."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"koppelen met Bluetooth-apparaten"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Hiermee kan de app de Bluetooth-configuratie van de tablet bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Hiermee kan de app de Bluetooth-configuratie van de telefoon bekijken en verbindingen met gekoppelde apparaten maken en accepteren."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Near Field Communication regelen"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Hiermee kan de app communiceren met NFC-tags (Near Field Communication), kaarten en lezers."</string>
@@ -760,6 +838,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"De lengte en tekens beheren die zijn toegestaan in wachtwoorden voor schermontgrendeling."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Pogingen voor schermontgrendeling bijhouden"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de tablet vergrendelen of alle gegevens op de tablet wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Bijhouden hoe vaak onjuiste wachtwoorden worden ingevoerd wanneer het scherm wordt ontgrendeld en de telefoon vergrendelen of alle gegevens op de telefoon wissen als te veel onjuiste wachtwoorden worden ingevoerd."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Het wachtwoord voor schermontgrendeling wijzigen"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Het wachtwoord voor schermontgrendeling wijzigen."</string>
@@ -767,6 +847,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Beheren hoe en wanneer het scherm wordt vergrendeld."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle gegevens wissen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"De gegevens van de tablet zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"De gegevens van de telefoon zonder waarschuwing wissen door de fabrieksinstellingen te herstellen."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Algemene proxy voor het apparaat instellen"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Stel de algemene proxy voor het apparaat in die moet worden gebruikt terwijl het beleid is geactiveerd. Alleen de eerste apparaatbeheerder stelt de algemene proxy in."</string>
@@ -915,6 +997,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Maximaal aantal pogingen voor Ontgrendelen via gezichtsherkenning overschreden"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Geen simkaart"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Geen SIM-kaart in tablet."</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Geen SIM-kaart in telefoon."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Plaats een simkaart."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"De simkaart ontbreekt of kan niet worden gelezen. Plaats een simkaart."</string>
@@ -937,10 +1021,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"U heeft uw wachtwoord <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getypt. \n\nProbeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"U heeft uw pincode <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getypt. \n\nProbeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt u gevraagd uw tablet te ontgrendelen met uw aanmeldingsgegevens voor Google.\n\n Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt u gevraagd uw telefoon te ontgrendelen met uw aanmeldingsgegevens voor Google.\n\n Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"U heeft <xliff:g id="NUMBER_0">%d</xliff:g> keer geprobeerd de tablet op een onjuiste manier te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen worden de fabrieksinstellingen hersteld op de tablet en gaan alle gebruikersgegevens verloren."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"U heeft nu <xliff:g id="NUMBER_0">%d</xliff:g> keer geprobeerd de telefoon op een onjuiste manier te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen worden de fabrieksinstellingen hersteld op de telefoon en gaan alle gebruikersgegevens verloren."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"U heeft <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de tablet op een onjuiste manier te ontgrendelen. De fabrieksinstellingen worden nu hersteld op de tablet."</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"U heeft <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de telefoon op een onjuiste manier te ontgrendelen. De fabrieksinstellingen worden nu hersteld op de telefoon."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Patroon vergeten?"</string>
@@ -1024,6 +1114,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Hiermee kan de app de geschiedenis lezen van alle URL\'s die in de systeemeigen browser zijn bezocht, en alle bladwijzers in de systeemeigen browser. Let op: deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"webbladwijzers en -geschiedenis schrijven"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op uw tablet. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden.."</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op uw telefoon. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"een alarm instellen"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Hiermee kan de app een alarm instellen in een geïnstalleerde wekkerapp. Deze functie wordt door sommige wekkerapps niet geïmplementeerd."</string>
@@ -1297,6 +1389,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Voer de gewenste pincode in:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"Pincode"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"De verbinding met het wifi-netwerk wordt tijdelijk uitgeschakeld terwijl de telefoon is verbonden met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"De verbinding met het wifi-netwerk wordt tijdelijk uitgeschakeld terwijl de telefoon verbonden is met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Teken invoegen"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS-berichten verzenden"</string>
@@ -1578,6 +1672,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Eén keer"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ondersteunt werkprofielen niet"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefoon"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Hoofdtelefoon"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Dockluidsprekers"</string>
@@ -1632,10 +1728,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"U heeft uw wachtwoord <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getypt. \n\nProbeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. \n\nProbeer het over <xliff:g id="NUMBER_1">%d</xliff:g> seconden opnieuw."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"U heeft <xliff:g id="NUMBER_0">%d</xliff:g> keer geprobeerd de tablet op een onjuiste manier te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen worden de fabrieksinstellingen hersteld op de tablet en gaan alle gebruikersgegevens verloren."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"U heeft nu <xliff:g id="NUMBER_0">%d</xliff:g> keer geprobeerd de telefoon op een onjuiste manier te ontgrendelen. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen worden de fabrieksinstellingen hersteld op de telefoon en gaan alle gebruikersgegevens verloren."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"U heeft <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de tablet op een onjuiste manier te ontgrendelen. De fabrieksinstellingen worden nu hersteld op de tablet."</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"U heeft <xliff:g id="NUMBER">%d</xliff:g> keer geprobeerd de telefoon op een onjuiste manier te ontgrendelen. De fabrieksinstellingen worden nu hersteld op de telefoon."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt u gevraagd uw tablet te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt u gevraagd uw telefoon te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwijderen"</string>
@@ -1776,8 +1878,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Vragen om wachtwoord voordat items worden losgemaakt"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Accubesparing beperkt de prestaties van uw apparaat, de trilfunctie en de meeste achtergrondgegevens om de accuduur te verlengen. Uw e-mail, online berichten en andere apps die gebruik maken van synchronisatie worden niet geüpdatet totdat u deze opent.\n\nAccubesparing wordt automatisch uitgeschakeld wanneer uw apparaat wordt opgeladen."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Totdat uw downtime eindigt om <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Tot uw downtime afloopt"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Eén minuut (tot <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d minuten (tot <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1797,8 +1898,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Voor onbepaalde tijd"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Samenvouwen"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Tot het volgende alarm om <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Tot het volgende alarm"</string>
 </resources>

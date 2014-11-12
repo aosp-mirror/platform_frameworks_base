@@ -151,12 +151,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Muitas exclusões de <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"O armazenamento do tablet está cheio. Exclua alguns arquivos para liberar espaço."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Armazenamento do relógio cheio. Exclua alguns arquivos para liberar espaço."</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"O armazenamento do telefone está cheio. Exclua alguns arquivos para liberar espaço."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"A rede pode ser monitorada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por terceiros desconhecidos"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Por <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opções do tablet"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Opções do telefone"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Modo silencioso"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Ativar sem fio"</string>
@@ -168,6 +172,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Campainha ligada"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Encerrando…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Seu tablet será desligado."</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Seu relógio será desligado."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"O seu telefone será desligado."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Deseja desligar?"</string>
@@ -176,6 +182,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recente"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Nenhum app recente"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opções do tablet"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opções do telefone"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloquear tela"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Desligar"</string>
@@ -292,9 +300,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Permite que o app envie solicitações a outros apps de mensagens para processar eventos de resposta por mensagem para chamadas recebidas."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ler suas mensagens de texto (SMS ou MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Permite que o app leia mensagens SMS armazenadas no tablet ou cartão SIM. Isso permite que o app leia todas as mensagens SMS, independentemente de seu conteúdo ou confidencialidade."</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Permite que o app leia mensagens SMS armazenadas no telefone ou cartão SIM. Isso permite que o app leia todas as mensagens SMS, independentemente de seu conteúdo ou confidencialidade."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"editar suas mensagens de texto (SMS ou MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Permite que o app grave mensagens SMS armazenadas em seu tablet ou cartão SIM. Apps maliciosos pode excluir  suas mensagens."</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Permite que o app grave mensagens SMS armazenadas no telefone ou cartão SIM. Apps maliciosos podem excluir suas mensagens."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"receber mensagens de texto (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Permite que o app receba e processe mensagens WAP. Esta permissão inclui a capacidade de monitorar ou excluir mensagens enviadas para você sem mostrá-las para você."</string>
@@ -388,6 +400,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Permite que o app congele temporariamente a tela para uma transição de tela inteira."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"pressionar as teclas e os botões de controle"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Permite que o app exiba seus próprios eventos de entrada (teclas pressionadas, etc.) para outros apps. Apps maliciosos podem usar isso para tomar conta do tablet."</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Permite que o app entregue seus próprios eventos de entrada (teclas pressionadas, etc,) para outros apps. Apps maliciosos podem usar esse recurso para assumir o controle do telefone."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"registrar o que você digita e as ações que realiza"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Permite que o app veja as teclas pressionadas mesmo quando você estiver interagindo com outro app, como ao digitar uma senha. Nunca deve ser necessário para apps normais."</string>
@@ -433,6 +447,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Permite que o app solicite o envio do sinal fornecido a todos os processos persistentes."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sempre executar o app"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Permite que o app torne partes de si mesmo persistentes na memória. Pode limitar a memória disponível para outros apps, deixando o tablet mais lento."</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Permite que o app torne partes de si mesmo persistentes na memória. Pode limitar a memória disponível para outros apps, deixando o telefone mais lento."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"excluir apps"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Permite que o app exclua pacotes Android. Apps maliciosos podem usar esse recurso para excluir apps importantes."</string>
@@ -446,11 +462,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Permite que o app instale pacotes novos ou atualizados do Android. Apps maliciosos podem usar esse recurso para adicionar novos apps com permissões arbitrariamente poderosas."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"excluir todos os dados do cache do app"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Permite que o app libere o armazenamento do tablet excluindo arquivos nos diretórios de cache de outros apps. Isso pode fazer com que outros apps iniciem mais lentamente, pois precisam recuperar seus dados."</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Permite que o app libere o armazenamento do telefone excluindo arquivos nos diretórios de cache de outros apps. Isso pode fazer com que outros apps iniciem mais lentamente, pois precisam recuperar seus dados."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"mover recursos de apps"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Permite que o app mova recursos de apps da mídia interna para mídia externa e vice-versa."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"ler dados de registro de informações confidenciais"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Permite que o app leia os diversos arquivos de registro do sistema. Isso permite que ele descubra informações gerais sobre o que você está fazendo com o tablet, inclusive informações pessoais ou particulares."</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permite que o app leia os diversos arquivos de registro do sistema. Isso permite que ele descubra informações gerais sobre o que você está fazendo com o telefone, inclusive possíveis informações pessoais ou privadas."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"usar qualquer decodificador de mídia para reprodução"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite que o app use qualquer decodificador de mídia instalado para reprodução."</string>
@@ -462,6 +482,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite que um app leia e grave em qualquer recurso que pertença ao grupo de diagnósticos, por exemplo, arquivos in/dev. Isso pode afetar a estabilidade e a segurança do sistema. Esse recurso deve ser usado APENAS para diagnósticos específicos do hardware realizados pelo fabricante ou pela operadora."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ativar ou desativar os componentes do app"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Permite que o app ative ou desative um componente de outro app. Apps maliciosos podem usar esse recurso para desativar recursos importantes do tablet. Tenha cuidado com essa permissão, pois é possível fazer com que os componentes do app fiquem inutilizáveis, inconsistentes ou instáveis."</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Permite que o app altere se um componente de outro app está ativado ou não. Apps maliciosos podem usar esse recurso para desativar recursos importantes do telefone. Deve-se tomar cuidado com essa permissão, uma vez que isso pode deixar os componentes do app inutilizáveis, inconsistentes ou instáveis."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"conceder ou revogar permissões"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Permite que um app conceda ou revogue permissões específicas para ele ou outros apps. Apps maliciosos podem usar isso para acessar recursos aos quais você não concedeu permissão."</string>
@@ -475,21 +497,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Permite que o app modifique o mapa de serviços do Google. Não deve ser usado em apps normais."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"executar na inicialização"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Permite que o app inicie-se logo que o sistema concluir a inicialização. Isso pode tornar a inicialização do tablet mais lenta e permitir que o app deixe o telefone mais lento por estar sempre em execução."</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Permite que o app inicie-se logo que o sistema concluir a inicialização. Isso pode tornar a inicialização do telefone mais lenta e permitir que o app deixe o telefone mais lento por estar sempre em execução."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"enviar transmissão persistente"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Permite que o app envie transmissões fixas, que permaneçam depois que a transmissão terminar. O uso excessivo pode desacelerar ou desestabilizar o tablet, fazendo com que ele utilize muita memória."</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Permite que o app envie transmissões fixas, que permanecem depois que a transmissão termina. O uso excessivo pode deixar o telefone lento ou instável, fazendo com que ele use muita memória."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"ler seus contatos"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Permite que o app leia dados dos contatos armazenados no tablet, incluindo a frequência com que você chamou, enviou e-mails ou se comunicou de qualquer outra forma com indivíduos específicos. Esta permissão autoriza o app a salvar seus dados de contato, e apps maliciosos podem compartilhar esses dados de contato sem seu conhecimento."</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Permite que o app leia dados dos contatos armazenados no telefone, incluindo a frequência com que você chamou, enviou e-mails ou se comunicou de qualquer outra forma com indivíduos específicos. Esta permissão autoriza o app a salvar seus dados de contato, e apps maliciosos podem compartilhar esses dados de contato sem seu conhecimento."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"modificar seus contatos"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Permite que o app modifique os dados sobre os contatos armazenados no tablet, incluindo a frequência com que você fez chamadas, enviou e-mails ou se comunicou de outras formas com contatos específicos. Esta permissão autoriza o app a excluir dados de contatos."</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Permite que o app modifique os dados dos contatos armazenados no telefone, incluindo a frequência com que você fez chamadas, enviou e-mails ou se comunicou de outras formas com contatos específicos. Esta permissão autoriza o app a excluir dados de contatos."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ler registro de chamadas"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Permite que o app leia o histórico de chamadas do tablet, incluindo dados de chamadas recebidas e realizadas. Esta permissão autoriza o app a salvar os dados de seu histórico de chamadas, e apps maliciosos podem compartilhar esses dados do histórico de chamadas sem seu conhecimento."</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Permite que o app leia o histórico de chamadas do telefone, incluindo dados de chamadas recebidas e realizadas. Esta permissão autoriza o app a salvar os dados de seu histórico de chamadas, e apps maliciosos podem compartilhar os dados de seu histórico de chamadas sem seu conhecimento."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"salvar no registo de chamadas"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Permite que o app modifique o registro de chamadas de seu tablet, incluindo dados sobre chamadas recebidas e efetuadas. Apps maliciosos podem usar esta permissão para apagar ou modificar seu registro de chamadas."</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Permite que o app modifique o registro de chamadas de seu telefone, incluindo dados sobre chamadas recebidas e efetuadas. Apps maliciosos podem usar esta permissão para apagar ou modificar seu registro de chamadas."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"ler próprio cartão de contato"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Permite que o app leia informações de perfil pessoal armazenadas no dispositivo, como seu nome e dados de contato. Isso significa que o app poderá identificá-lo e enviar suas informações de perfil para terceiros."</string>
@@ -503,9 +537,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Permite que o app exiba atualizações sociais de seus amigos. Tenha cuidado ao compartilhar informações: isto permite que o app produza mensagens aparentemente enviadas por amigos. Observação: pode não ser aplicável a todas as redes sociais."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"ler compromissos e informações confidenciais"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permite que o app leia todos os eventos do calendário armazenados no tablet, incluindo os de amigos ou colegas de trabalho. Pode permitir que o app compartilhe ou salve os dados do calendário, independentemente de sua confidencialidade."</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Permite que o app leia todos os eventos do calendário armazenados no telefone, incluindo os de amigos ou colegas de trabalho. Pode permitir que o app compartilhe ou salve os dados do calendário, independentemente de sua confidencialidade."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"adicionar ou modificar compromissos e enviar e-mail para os convidados sem o conhecimento dos donos"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Permite que o app adicione, remova e altere eventos que você pode modificar em seu tablet, incluindo os de amigos e colegas de trabalho. Isso pode permitir que o app envie mensagens que parecem ser de autoria do proprietário do calendário, ou modifique eventos sem conhecimento do proprietário."</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Permite que o app adicione, remova e altere eventos que você pode modificar em seu telefone, incluindo os de amigos e colegas de trabalho. Isso pode permitir que o app envie mensagens que parecem ser de autoria do proprietário do calendário, ou modifique eventos sem conhecimento do proprietário."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"fontes de locais fictícios para teste"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Criar fontes de localização simuladas para testar ou instalar um novo provedor de localização. Isso permite que o app substitua a localização e/ou o status retornado por outras fontes de localização, como o GPS ou provedores de localização."</string>
@@ -550,12 +588,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"desativar a transmissão do LED indicador quando a câmera estiver em uso"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Permite que um app do sistema pré-instalado desative o LED indicador de uso da câmera."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desativar permanentemente o tablet"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"desativar permanentemente o telefone"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Permite que o app desative todo o tablet permanentemente. Isso é muito perigoso."</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Permite que o app desative todo o telefone permanentemente. Isso é muito perigoso."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"forçar a reinicialização do tablet"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"forçar reinicialização do telefone"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Permite que o app force a reinicialização do tablet."</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Permite que o app force a reinicialização do telefone."</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"acess sist. arquiv armaz. USB"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"acessar sistema de arquivos do cartão SD"</string>
@@ -590,6 +636,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ligar diretamente para quaisquer números de telefone"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Permite que o app chame qualquer número de telefone, incluindo números de emergência, sem sua intervenção. Apps maliciosos podem fazer chamadas desnecessárias e ilegais para os serviços de emergência."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"iniciar a configuração do tablet CDMA diretamente"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"iniciar a configuração do telefone CDMA diretamente"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Permite que o app inicie o provisionamento CDMA. Apps maliciosos podem iniciar o provisionamento CDMA de maneira desnecessária."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"controlar as notificações de atualização do local"</string>
@@ -605,20 +653,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"ler estados precisos do telefone"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Permite que o app acesse estados precisos do telefone. Permite que o app determine o status real da chamada, se uma chamada está ativa em segundo plano, falhas em chamadas, o status preciso da conexão de dados e falhas na conexão de dados."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"impedir modo de inatividade do tablet"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"impedir modo de inatividade do telefone"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Permite que o app impeça o tablet de entrar no modo de inatividade."</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Permite que o app impeça o telefone de entrar no modo de inatividade."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"transmitir infravermelhos"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Permite que o app use o transmissor infravermelho do tablet."</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Permite que o app use o transmissor infravermelho do telefone."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ligar ou desligar o tablet"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ligar ou desligar o telefone"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Permite que o app ative ou desative o tablet."</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Permite que o app ative ou desative o telefone."</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"tempo limite de exibição"</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"Permite que o app redefina o tempo limite de exibição."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"executar no modo de teste de fábrica"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Executa como um teste do fabricante de nível inferior, permitindo o acesso completo ao hardware do tablet. Disponível apenas quando um tablet está em execução no modo de teste do fabricante."</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Executa como um teste do fabricante de nível inferior, permitindo o acesso completo ao hardware do telefone. Disponível apenas quando um telefone está em execução no modo de teste do fabricante."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"definir plano de fundo"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Permite que o app defina o plano de fundo do sistema."</string>
@@ -628,14 +688,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Permite que o app redefina completamente o sistema para as configurações de fábrica, apagando todos os dados, as configuração e os apps instalados."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"definir hora"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Permite que o app altere a hora do relógio do tablet."</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Permite que o app altere a hora do relógio do telefone."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"definir fuso horário"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Permite que o app altere o fuso horário do tablet."</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Permite que o app altera o fuso horário do telefone."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"agir como AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Permite que o app faça chamadas para AccountAuthenticators."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"encontrar contas no dispositivo"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Permite que o app obtenha a lista de contas conhecidas pelo tablet. Isso pode incluir todas as contas criadas pelos apps instalados."</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Permite que o app obtenha a lista de contas conhecidas pelo telefone. Isso pode incluir todas as contas criadas pelos apps instalados."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"criar contas e definir senhas"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Permite que o app use os recursos do autenticador de conta do AccountManager, incluindo a criação de contas e a obtenção e definição de senhas."</string>
@@ -661,26 +727,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Permite que o app conecte e desconecte dos pontos de acesso Wi-Fi e faça alterações nas configurações do dispositivo para redes Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitir recebimento de multicast Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Permite que o app receba pacotes enviados para todos os dispositivos em uma rede Wi-Fi usando endereços de difusão seletiva, e não apenas o tablet. Consome mais energia do que o modo não multicast."</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Permite que o app receba pacotes enviados para todos os dispositivos em uma rede Wi-Fi usando endereços de difusão seletiva, e não apenas o telefone. Consome mais energia do que o modo não multicast."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"acessar configurações de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite que um app configure o tablet Bluetooth local, descubra dispositivos remotos e emparelhe com eles."</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Permite que um app configure o telefone Bluetooth local, descubra e emparelhe com dispositivos remotos."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"permitir pareamento via Bluetooth pelo app"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Permite que o app faça pareamento com dispositivos remotos sem interação com o usuário."</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Permite que o app faça pareamento com dispositivos remotos sem interação com o usuário."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Permite que o app faça pareamento com dispositivos remotos sem interação com o usuário."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"acessar dados de Bluetooth MAP"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Permite que o app acesse os dados de Bluetooth MAP."</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Permite que o app acesse os dados de Bluetooth MAP."</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Permite que o app acesse os dados de Bluetooth MAP."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"conectar e desconectar do WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Permite que o app determine se o WiMAX está ativado e acesse informações sobre as redes WiMAX conectadas."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Alterar estado do WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permite que o app conecte e desconecte o tablet de redes WiMAX."</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permite que o app conecte e desconecte o telefone de redes WiMAX."</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"avaliar redes"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Permite que o app classifique as redes e influencie a escolha de redes pelo tablet."</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Permite que o app classifique as redes e influencie a escolha de redes pelo smartphone."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"parear com dispositivos Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permite que o app acesse a configuração do Bluetooth no tablet, além de fazer e aceitar conexões com dispositivos pareados."</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite que o app acesse a configuração do Bluetooth no telefone, além de fazer e aceitar conexões com dispositivos pareados."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar a comunicação a curta distância"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Permite que o app se comunique com leitores, cartões e etiqueta NFC (Comunicação a curta distância)."</string>
@@ -764,6 +842,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar o tamanho e os caracteres permitidos nas senhas de desbloqueio de tela."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorar tentativas de desbloqueio da tela"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitorar quantas vezes a senha foi digitada incorretamente ao desbloquear a tela e bloquear o tablet ou apagar todos os dados do tablet se a senha for digitada incorretamente muitas vezes."</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitorar quantas vezes a senha foi digitada incorretamente ao desbloquear a tela e bloquear o telefone ou apagar todos os dados do telefone se a senha for digitada incorretamente muitas vezes."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Alterar a senha para desbloqueio da tela"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Alterar a senha para desbloqueio da tela."</string>
@@ -771,6 +851,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar como e quando a tela é bloqueada."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Apagar todos os dados"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Apague os dados do tablet sem aviso redefinindo a configuração original."</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Apagar os dados do telefone sem aviso redefinindo a configuração original."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Definir o proxy global do dispositivo"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Configura o proxy global do dispositivo para ser usado enquanto a política estiver ativada. Somente o primeiro administrador do dispositivo pode configurar um verdadeiro proxy global."</string>
@@ -919,6 +1001,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"O número máximo de tentativas de Desbloqueio por reconhecimento facial foi excedido"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Sem cartão SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Não há um cartão SIM no tablet."</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Não há um cartão SIM no telefone."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Insera um cartão SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"O cartão SIM não foi inserido ou não é possível lê-lo. Insira um cartão SIM."</string>
@@ -941,10 +1025,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Você digitou sua senha incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Você digitou seu PIN incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes.\n\nTente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Se fizer mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas, será solicitado que você use o login do Google para desbloquear seu tablet.\n\n Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Se fizer mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas, será solicitado que você use o login do Google para desbloquear.\n\n Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Você tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas malsucedidas, o tablet será redefinido para o padrão de fábrica e todos os dados do usuário serão perdidos."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Você tentou desbloquear incorretamente o telefone <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas malsucedidas, o telefone será redefinido para o padrão de fábrica e todos os dados do usuário serão perdidos."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Você tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER">%d</xliff:g> vezes. O tablet será redefinido para o padrão de fábrica."</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Você tentou desbloquear incorretamente o telefone <xliff:g id="NUMBER">%d</xliff:g> vezes. O telefone será redefinido para o padrão de fábrica."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Tente novamente em <xliff:g id="NUMBER">%d</xliff:g> segundos."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Esqueceu o padrão?"</string>
@@ -1028,6 +1118,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Permite que o app leia o histórico de todos os URLs acessados no navegador e todos os favoritos do navegador. Observação: pode não ser aplicável a navegadores de terceiros e outros apps com capacidade de navegação na web."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"gravar seu histórico e seus favoritos da web"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Permite que o app modifique o histórico ou os favoritos do navegador armazenados no tablet. Pode permitir que o app apague ou modifique os dados do navegador. Observação: pode não ser aplicável a navegadores de terceiros e outros apps com capacidade de navegação na web."</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Permite que o app modifique o histórico ou os favoritos do navegador armazenados no telefone. Pode permitir que o app apague ou modifique os dados do navegador. Observação: pode não ser aplicável a navegadores de terceiros e outros apps com capacidade de navegação na web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"definir um alarme"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Permite que o app defina um alarme em um app despertador instalado. Alguns apps despertador podem não implementar este recurso."</string>
@@ -1241,8 +1333,7 @@
     <string name="smv_application" msgid="3307209192155442829">"O app <xliff:g id="APPLICATION">%1$s</xliff:g>, processo <xliff:g id="PROCESS">%2$s</xliff:g>, violou a política StrictMode imposta automaticamente."</string>
     <string name="smv_process" msgid="5120397012047462446">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> violou a política StrictMode imposta automaticamente."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"O Android está sendo atualizado..."</string>
-    <!-- no translation found for android_start_title (8418054686415318207) -->
-    <skip />
+    <string name="android_start_title" msgid="8418054686415318207">"O Android está iniciando..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Otimizando app <xliff:g id="NUMBER_0">%1$d</xliff:g> de <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Iniciando apps."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Concluindo a inicialização."</string>
@@ -1302,6 +1393,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Digite o PIN obrigatório:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"O tablet desconectará temporariamente da rede Wi-Fi enquanto estiver conectado a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"O telefone desconectará temporariamente da rede Wi-Fi enquanto estiver conectado a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Inserir caractere"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Enviando mensagens SMS"</string>
@@ -1583,6 +1676,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Só uma vez"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s não aceita perfis de trabalho"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Telefone"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Fones de ouvido"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Alto-falantes da dock"</string>
@@ -1637,10 +1732,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Você digitou sua senha incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Você tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas malsucedidas, o tablet será redefinido para o padrão de fábrica e todos os dados do usuário serão perdidos."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Você tentou desbloquear incorretamente o telefone <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Após mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas malsucedidas, o telefone será redefinido para o padrão de fábrica e todos os dados do usuário serão perdidos."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Você tentou desbloquear incorretamente o tablet <xliff:g id="NUMBER">%d</xliff:g> vezes. O tablet será redefinido para o padrão de fábrica."</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Você tentou desbloquear incorretamente o telefone <xliff:g id="NUMBER">%d</xliff:g> vezes. O telefone será redefinido para o padrão de fábrica."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Se fizer mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas, será solicitado que você use o login do Google para desbloquear seu tablet.\n\n Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Você desenhou sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Se fizer mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas incorretas, será solicitado que você use o login do Google para desbloquear.\n\n Tente novamente em <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Remover"</string>
@@ -1781,12 +1882,15 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pedir senha antes de liberar"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Para ajudar a melhorar a vida útil da bateria, a economia de bateria reduz o desempenho do dispositivo e restringe a vibração e a maioria dos dados em segundo plano. É possível que apps de e-mail, mensagens, entre outros que dependem de sincronização não sejam atualizados a menos que sejam abertos.\n\nA economia de bateria é desativada automaticamente quando o dispositivo estiver carregando."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Até o período de inatividade terminar às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
-    <!-- no translation found for zen_mode_duration_minutes_summary:one (3177683545388923234) -->
-    <!-- no translation found for zen_mode_duration_minutes_summary:other (2787867221129368935) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:one (597194865053253679) -->
-    <!-- no translation found for zen_mode_duration_hours_summary:other (2827214920627669898) -->
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Até que seu tempo de inatividade termine"</string>
+  <plurals name="zen_mode_duration_minutes_summary">
+    <item quantity="one" msgid="3177683545388923234">"Por um minuto (até às <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2787867221129368935">"Por %1$d minutos (até às <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
+  <plurals name="zen_mode_duration_hours_summary">
+    <item quantity="one" msgid="597194865053253679">"Por uma hora (até às <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+    <item quantity="other" msgid="2827214920627669898">"Por %1$d horas (até às <xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
+  </plurals>
   <plurals name="zen_mode_duration_minutes">
     <item quantity="one" msgid="9040808414992812341">"Por 1 minuto"</item>
     <item quantity="other" msgid="6924190729213550991">"Por %d minutos"</item>
@@ -1795,13 +1899,9 @@
     <item quantity="one" msgid="3480040795582254384">"Por 1 hora"</item>
     <item quantity="other" msgid="5408537517529822157">"Por %d horas"</item>
   </plurals>
-    <!-- no translation found for zen_mode_until (7336308492289875088) -->
-    <skip />
+    <string name="zen_mode_until" msgid="7336308492289875088">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Indefinidamente"</string>
-    <!-- no translation found for toolbar_collapse_description (2821479483960330739) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"Recolher"</string>
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Até o próximo alarme em <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Até o próximo alarme"</string>
 </resources>

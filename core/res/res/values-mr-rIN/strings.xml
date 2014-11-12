@@ -151,12 +151,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"खूप <xliff:g id="CONTENT_TYPE">%s</xliff:g> हटविणे."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"टॅब्लेट संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फाईल हटवा."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"पाहण्याचे संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फायली हटवा."</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"फोन संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फायली हटवा."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"नेटवर्कचे परीक्षण केले जाऊ शकते"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"एका अज्ञात तृतीय पक्षाद्वारे"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> द्वारे"</string>
     <string name="me" msgid="6545696007631404292">"मी"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"टॅब्लेट पर्याय"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"फोन पर्याय"</string>
     <string name="silent_mode" msgid="7167703389802618663">"मूक मोड"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"वायरलेस चालू करा"</string>
@@ -168,6 +172,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"रिंगर चालू"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"बंद होत आहे…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"आपला टॅब्लेट बंद होईल."</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"आपले घड्याळ बंद होईल."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"आपला फोन बंद होईल."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"आपण बंद करू इच्छिता?"</string>
@@ -176,6 +182,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"अलीकडील"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"अलीकडील कोणतेही अॅप्स नाहीत."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"टॅब्लेट पर्याय"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"फोन पर्याय"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"स्क्रीन लॉक"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"बंद"</string>
@@ -292,9 +300,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"अ‍ॅपला येणार्‍या कॉलसाठी संदेशाद्वारे-प्रतिसाद हाताळण्‍यासाठी इतर संदेशन अ‍ॅप्‍सना विनंत्‍या पाठविण्‍याची अनुमती देते."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"आपले मजकूर संदेश वाचा (SMS किंवा MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"आपल्या टॅब्लेटवर किंवा सिम कार्डवर संचयित केलेले SMS संदेश वाचण्यासाठी अॅप ला अनुमती देते. हे सामग्री किंवा गोपनीयतेकडे दुर्लक्ष करून, सर्व SMS संदेश वाचण्यासाठी अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"आपल्या फोनवर किंवा सिम कार्डवर संचयित केलेले SMS संदेश वाचण्यासाठी अॅप ला अनुमती देते. हे सामग्री किंवा गोपनीयतेकडे दुर्लक्ष करून, सर्व SMS संदेश वाचण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"आपले मजकूर संदेश सुधारित करा (SMS किंवा MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"आपल्या टॅब्लेटवर किंवा सिम कार्डवर संचयित केलेल्या SMS संदेशांवर लिहिण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपले संदेश हटवू शकतात."</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"आपल्या फोनवर किंवा सिम कार्डवर संचयित केलेल्या SMS संदेशांवर लिहिण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपले संदेश हटवू शकतात."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"मजकूर संदेश प्राप्त करा (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP संदेश प्राप्त करण्यास आणि त्यावर प्रक्रिया करण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपल्याला पाठविलेले संदेश आपल्याला न दर्शविता त्यांचे परीक्षण करण्याची आणि ते हटविण्याची क्षमता समाविष्ट करते."</string>
@@ -388,6 +400,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"एका पूर्ण-स्क्रीन संक्रमणाकरिता स्क्रीन तात्पुरती गोठविण्यास अनुप्रयोगास अनुमती देते."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"की आणि नियंत्रण बटणे दाबा"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"अॅप ला अन्य अॅप्समध्ये त्याचे स्वतःचे इनपुट इव्हेंट (की दाबणे इ.) वितरीत करण्यासाठी अनुमती देते. दुर्भावनापूर्ण अॅप्स टॅब्लेटचा ताबा घेण्यासाठी हे वापरू शकतात."</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"अॅप ला अन्य अॅप्समध्ये त्याचे स्वतःचे इनपुट इव्हेंट (की दाबणे, इ.) वितरीत करण्यासाठी अनुमती देते. दुर्भावनापूर्ण अॅप्स फोनचा ताबा घेण्यासाठी हे वापरू शकतात."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"आपण काय टाइप करता ते आणि आपण करता ती कारवाई वाचा"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"दुसर्‍या अॅप शी संवाद साधता तेव्हा देखील आपण दाबता त्या की पाहण्यासाठी अॅप ला अनुमती देते (जसे की संकेतशब्द टाइप करणे). सामान्य अॅप्ससाठी कधीही आवश्यकता नसते."</string>
@@ -433,6 +447,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"सर्व पुनरावर्ती प्रक्रियांवर पुरवठा केलेले सिग्नल पाठविण्यासाठी विनंती करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"अॅप नेहमी चालवा"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"अॅप ला मेमरीमध्ये कायम असलेले त्याचे स्वतःचे भाग बनविण्यास अनुमती देते. हे टॅब्लेट धीमा करून अन्य अॅप्सवर उपलब्ध असलेल्या मेमरीवर मर्यादा घालू शकते."</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"अॅप ला मेमरीमध्ये कायम असलेले त्याचे स्वतःचे भाग बनविण्यास अनुमती देते. हे फोन धीमा करून अन्य अॅप्सवर उपलब्ध असलेल्या मेमरीवर मर्यादा घालू शकते."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"अॅप्स हटवा"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Android पॅकेज हटविण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स महत्त्वाचे अॅप्स हटविण्यासाठी हे वापरू शकतात."</string>
@@ -446,11 +462,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"नवीन किंवा अद्यतनित केलेली Android पॅकेज स्थापित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स स्वेच्छेने प्रभावशाली परवानग्यांसह नवीन अॅप्स जोडण्याकरिता हे वापरू शकतात."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"सर्व अॅप कॅशे डेटा हटवा"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"अन्य अनुप्रयोगांच्या कॅशे निर्देशिकांमधील फाईल हटवून टॅब्लेट संचयन मोकळे करण्यासाठी अॅप ला अनुमती देते. यामुळे अन्य अनुप्रयोगांना त्यांचा डेटा पुन्हा-पुनर्प्राप्त करण्याची आवश्यकता असते म्हणून ते सुरू होण्यात जास्त वेळ लागू शकतो."</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"अन्य अनुप्रयोगांच्या कॅशे निर्देशिकांमधील फाईल हटवून फोन संचयन मोकळे करण्यासाठी अॅप ला अनुमती देते. यामुळे अन्य अनुप्रयोगांना त्यांचा डेटा पुन्हा-पुनर्प्राप्त करण्याची आवश्यकता असते म्हणून ते सुरू होण्यात जास्त वेळ लागू शकतो."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"अॅप संसाधने हलवा"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"अॅप संसाधने अंतर्गत मीडियावरून बाह्य मीडियावर हलविण्याची आणि याउलट करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"संवेदनशील लॉग डेटा वाचा"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"सिस्टीमच्या विविध लॉग फायलींवरून वाचन करण्यासाठी अॅप ला अनुमती देते. आपण टॅब्लेटसह काय करत आहात त्याविषयी, संभाव्यतः वैयक्तिक किंवा खाजगी माहिती समाविष्ट करून, सामान्य माहिती शोधण्यासाठी हे त्यास अनुमती देते."</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"सिस्टीमच्या विविध लॉग फायलींवरून वाचन करण्यासाठी अॅप ला अनुमती देते. आपण फोनसह काय करत आहात त्याविषयी, संभाव्यतः वैयक्तिक किंवा खाजगी माहिती समाविष्ट करून, सामान्य माहिती शोधण्यासाठी हे त्यास अनुमती देते."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"प्लेबॅकसाठी कोणतेही मीडिया डीकोडर वापरा"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"प्लेबॅककरिता डीकोड करण्यासाठी कोणतेही स्थापित केलेले मीडिया डीकोडर वापरण्यासाठी अॅप ला अनुमती देते."</string>
@@ -462,6 +482,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"संवाद गटाच्या मालकीचे कोणतेही संसाधन वाचण्यासाठी आणि त्यावर लिहिण्यासाठी अॅप ला अनुमती देते; उदाहरणार्थ, /dev मधील फायली. हे सिस्टीम स्थिरता आणि सुरक्षितता यावर संभाव्यतः प्रभाव करू शकते. हे केवळ निर्मात्याद्वारे किंवा ऑपरेटरद्वारे हार्डवेअर-विशिष्ट निदानांसाठी वापरले जावे."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"अॅप घटक सक्षम किंवा अक्षम करा"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"दुसर्‍या अॅप चा घटक सक्षम असला किंवा नसला तरीही तो बदलण्याची अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स महत्त्वाच्या टॅब्लेट क्षमता अक्षम करण्यासाठी हे वापरू शकतात. वापरता न येणारे, विसंगत किंवा अस्थिर स्थितीमध्ये अॅप घटक मिळविणे शक्य असल्याने, या परवानगीसोबत Care देखील वापरणे आवश्यक आहे."</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"दुसर्‍या अॅप चा घटक सक्षम असला किंवा नसला तरीही तो बदलण्याची अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स महत्त्वाच्या फोन क्षमता अक्षम करण्यासाठी हे वापरू शकतात. वापरता न येणारे, विसंगत किंवा अस्थिर स्थितीमध्ये अॅप घटक मिळविणे शक्य असल्याने, या परवानगीसोबत Care देखील वापरणे आवश्यक आहे."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"परवानग्या मंजूर करा किंवा मागे घ्या"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"अनुप्रयोगास त्याच्यासाठी किंवा अन्य अनुप्रयोगांसाठी विशिष्ट परवानग्या मंजूर करण्यासाठी किंवा रद्द करण्यासाठी अनुमती देते. दुर्भावनापूर्ण अनुप्रयोग याचा वापर आपण त्यांना मंजूर न केलेल्या वैशिष्ट्यांवर प्रवेश करण्यासाठी करू शकतात."</string>
@@ -475,21 +497,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Google सेवा नकाशा सुधारित करण्यासाठी अॅप ला अनुमती देते. सामान्य अॅप्सद्वारे वापरण्यासाठी नाही."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"सुरूवातीस चालवा"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"जसे सिस्टीम बूट करणे समाप्त करते तसे अॅप ला स्वतः प्रारंभ करण्यास अनुमती देते. यामुळे टॅब्लेट प्रारंभ करण्यास वेळ लागू शकतो आणि नेहमी चालू राहून एकंदर टॅब्लेटला धीमे करण्यास अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"जसे सिस्टीम बूट करणे समाप्त करते तसे अॅप ला स्वतः प्रारंभ करण्यास अनुमती देते. यामुळे फोन प्रारंभ करण्यास वेळ लागू शकतो आणि नेहमी चालू राहून एकंदर फोनला धीमे करण्यास अॅप ला अनुमती देते."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"रोचक प्रसारण पाठवा"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"रोचक प्रसारणे पाठविण्यासाठी अॅप ला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो टॅब्लेटला धीमा किंवा अस्थिर करू शकतो."</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"रोचक प्रसारणे पाठविण्यासाठी अॅप ला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो फोनला धीमा किंवा अस्थिर करू शकतो."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"आपले संपर्क वाचा"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"आपण कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संप्रेषण केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला संपर्क डेटा जतन करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा सामायिक करू शकतात."</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"आपण कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संप्रेषण केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या फोनवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला संपर्क डेटा जतन करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा सामायिक करू शकतात."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"आपले संपर्क सुधारित करा"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"आपण विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषण केलेल्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"आपण विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषण केलेल्या फ्रिक्वेन्सीसह, आपल्या फोनवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"कॉल लॉग वाचा"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टॅब्लेटचा कॉल लॉग वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला कॉल लॉग डेटा जतन करण्यासाठी अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय कॉल लॉग सामायिक करू शकतात."</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या फोनचा कॉल लॉग वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला कॉल लॉग डेटा जतन करण्यासाठी अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय कॉल लॉग सामायिक करू शकतात."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"कॉल लॉग लिहा"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या टॅब्लेटचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"येणार्‍या आणि केल्या जाणार्‍या कॉलविषयीच्या डेटासह, आपल्या फोनचा कॉल लॉग सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आपला कॉल लॉग मिटवण्यासाठी किंवा सुधारित करण्यासाठी याचा वापर करू शकतात."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"आपले स्वतःचे संपर्क कार्ड वाचा"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"आपले नाव आणि संपर्क माहिती यासारखी, आपल्या डिव्हाइसवर संचयित केलेली वैयक्तिक प्रोफाईल माहिती वाचण्यासाठी अॅप ला अनुमती देते. म्हणजेच आपल्याला अॅप ओळखू शकतो आणि इतरांना आपली प्रोफाईल माहिती पाठवू शकतो."</string>
@@ -503,9 +537,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"आपल्या मित्रांकडील सामाजिक अद्यतने प्रदर्शित करण्यासाठी अॅप ला अनुमती देते. माहिती सामायिक करताना सावधगिरी बाळगा -- हे मित्राकडून येत असल्याचे दिसू शकणारे संदेश उत्पन्न करण्यासाठी अॅप ला अनुमती देते. टीप: या परवानगीची अंमलबजावणी सर्व सामाजिक नेटवर्कवर केली जाऊ शकत नाही."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"कॅलेंडर इव्हेंट तसेच गोपनीय माहिती वाचा"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"मित्र किंवा सहकर्मींसह, आपल्या टॅब्लेटवर संचयित केलेले सर्व कॅलेंडर इव्हेंट वाचण्यासाठी अॅप ला अनुमती देते. यामुळे गोपनीयता किंवा संवेदनशीलता याकडे दुर्लक्ष करून, आपला कॅलेंडर डेटा सामायिक किंवा जतन करण्यासाठी अॅप ला अनुमती देऊ शकते."</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"मित्र किंवा सहकर्मींसह, आपल्या फोनवर संचयित केलेले सर्व कॅलेंडर इव्हेंट वाचण्यासाठी अॅप ला अनुमती देते. यामुळे गोपनीयता किंवा संवेदनशीलता याकडे दुर्लक्ष करून, आपला कॅलेंडर डेटा सामायिक किंवा जतन करण्यासाठी अॅप ला अनुमती देऊ शकते."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"कॅलेंडर इव्हेंट जोडा किंवा सुधारित करा आणि मालकांच्या माहितीशिवाय अतिथींना ईमेल पाठवा"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"मित्र किंवा सहकर्मी यांच्यासह, आपण आपल्या टॅब्लेटवर सुधारित करू शकता असे इव्हेंट जोडण्यासाठी, काढण्यासाठी, बदलण्यासाठी अॅप ला अनुमती देते. हे कॅलेंडर मालकांकडून येत असल्याचे दिसणारे संदेश पाठविण्यासाठी किंवा मालकांच्या माहितीशिवाय इव्हेंट सुधारित करण्यासाठी अॅप ला अनुमती देऊ शकते."</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"मित्र किंवा सहकर्मी यांच्यासह, आपण आपल्या फोनवर सुधारित करू शकता असे इव्हेंट जोडण्यासाठी, काढण्यासाठी, बदलण्यासाठी अॅप ला अनुमती देते. हे कॅलेंडर मालकांकडून येत असल्याचे दिसणारे संदेश पाठविण्यासाठी किंवा मालकांच्या माहितीशिवाय इव्हेंट सुधारित करण्यासाठी अॅप ला अनुमती देऊ शकते."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"चाचणीसाठी बनावट स्थान स्त्रोत"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"चाचणीसाठी किंवा नवीन स्थान प्रदाता स्थापित करण्यासाठी बनावट स्थान स्त्रोत तयार करा. हे GPS किंवा स्थान प्रदात्यांसारख्या स्थान आणि/किंवा अन्य स्थान स्त्रोतांकडून मिळालेली स्थिती अधिशून्य करण्यास अॅप ला अनुमती देते."</string>
@@ -550,12 +588,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"कॅमेरा वापरात असताना प्रक्षेपण सूचक LED अक्षम करा"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"पूर्व-स्‍थापित सिस्‍टम अनुप्रयोगाला कॅमेरा वापर सूचक LED अक्षम करण्‍याची अनुमती देते."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"टॅब्लेट कायमचा अक्षम करा"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"फोन कायमचा अक्षम करा"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"संपूर्ण टॅब्लेट कायमचा अक्षम करण्यासाठी अॅप ला अनुमती देते. हे खूप धोकादायक आहे."</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"संपूर्ण फोन कायमचा अक्षम करण्यासाठी अॅप ला अनुमती देते. हे खूप धोकादायक आहे."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"टॅब्लेट रीबूटची सक्ती करा"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"फोन रीबूटची सक्ती करा"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"रीबूट करण्यासाठी टॅब्लेटला सक्ती करण्याकरिता अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"रीबूट करण्यासाठी फोनला सक्ती करण्याकरिता अॅप ला अनुमती देते."</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB संचयन फाईलसिस्टमवर प्रवेश करा"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD कार्ड फाईलसिस्टमवर प्रवेश करा"</string>
@@ -590,6 +636,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"कोणत्याही फोन नंबरवर थेट कॉल करा"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"आपल्या हस्तक्षेपाशिवाय, आणीबाणीच्या नंबरसह, कोणत्याही फोन नंबरवर कॉल करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स आणीबाणीच्या सेवांवर अनावश्यक आणि बेकायदेशीर कॉल करू शकतात."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA टॅब्लेट सेटअप थेट प्रारंभ करा"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA फोन सेटअप थेट प्रारंभ करा"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"CDMA तरतूद प्रारंभ करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स CDMA तरतूद अनावश्यकपणे प्रारंभ करू शकतात."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"नियंत्रण स्थान अद्यतन सूचना"</string>
@@ -605,20 +653,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"अचूक फोन स्‍थिती वाचा"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"अ‍ॅपला अचूक फोन स्‍थितींमध्‍ये प्रवेश करण्‍याची अनुमती देते. ही परवानगी अ‍ॅपला वास्‍तविक कॉल स्‍थिती, कॉल सक्रिय आहे किंवा पार्श्वभूमीमध्‍ये आहे, कॉल अयशस्‍वी होतो, अचूक डेटा कनेक्‍शन स्‍थिती आणि डेटा कनेक्‍शन अयशस्‍वी होते ते निर्धारित करण्‍याची अनुमती देते."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टॅब्लेट निष्क्रिय होण्यापासून प्रतिबंधित करा"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"फोन निष्‍क्रिय होण्‍यापासून प्रतिबंधित करा"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"टॅब्लेटला निष्क्रिय होण्यापासून प्रतिबंधित करण्यासाठी अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"फोनला निष्क्रिय होण्यापासून प्रतिबंधित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"इन्फ्रारेड प्रक्षेपण करा"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"अ‍ॅप ला टॅब्‍लेटच्‍या इन्‍फ्रारेड ट्रान्‍समीटरचा वापर करण्‍याची अनुमती देते."</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"अ‍ॅप ला फोनच्‍या इन्‍फ्रारेड ट्रान्‍समीटरचा वापर करण्‍याची अनुमती देते."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"टॅब्लेट चालू किंवा बंद करा"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"फोन चालू किंवा बंद करा"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"टॅब्लेट चालू किंवा बंद करण्यासाठी अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"फोन चालू किंवा बंद करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"प्रदर्शन कालबाह्य रीसेट करा"</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"अ‍ॅपला प्रदर्शन कालबाह्य रीसेट करण्‍याची अनुमती देते."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"फॅक्टरी चाचणी मोडमध्ये चालवा"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"टॅब्लेट हार्डवेअरमध्‍ये पूर्ण प्रवेशाची अनुमती देऊन निम्‍न-दर्जा निर्माता चाचणी म्‍हणून चालवा. टॅब्लेट केवळ निर्माता चाचणी मोडमध्‍ये चालत असताना उपलब्‍ध."</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"फोन हार्डवेअरमध्‍ये पूर्ण प्रवेशाची अनुमती देऊन निम्‍न-दर्जा निर्माता चाचणी म्‍हणून चालवा. फोन केवळ निर्माता चाचणी मोडमध्‍ये चालत असताना उपलब्‍ध."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"वॉलपेपर सेट करा"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"सिस्टीम वॉलपेपर सेट करण्यासाठी अॅप ला अनुमती देते."</string>
@@ -628,14 +688,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"अॅप ला त्याच्या फॅक्टरी सेटिंग्जवर सिस्टीम पूर्णपणे रीसेट करण्यासाठी, सर्व डेटा मिटविण्यासाठी, कॉन्फिगरेशनसाठी आणि स्थापित केलेल्या अॅप्स साठी अनुमती देते."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"वेळ सेट करा"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"टॅब्लेटची घड्याळाची वेळ बदलण्यासाठी अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"फोनची घड्याळाची वेळ बदलण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"टाइम झोन सेट करा"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"टॅब्लेटचा टाइम झोन बदलण्यासाठी अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"फोनचा टाइम झोन बदलण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService म्हणून कार्य करा"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"AccountAuthenticators वर कॉल करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"डिव्हाइसवरील खाती शोधा"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"टॅब्लेटद्वारे ज्ञात खात्यांची सूची मिळवण्यासाठी अॅप ला अनुमती देते. यात आपण स्थापित केलेल्या अनुप्रयोगांद्वारे तयार केलेली कोणतीही खाती समाविष्ट होऊ शकतात."</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"फोनद्वारे ज्ञात खात्यांची सूची मिळवण्यासाठी अॅप ला अनुमती देते. यात आपण स्थापित केलेल्या अनुप्रयोगांद्वारे तयार केलेली कोणतीही खाती समाविष्ट करू शकतात."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"खाती तयार करा आणि संकेतशब्द सेट करा"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"खाती तयार करणे आणि त्यांचे संकेतशब्द मिळविणे आणि सेट करणे यासह, AccountManager च्या खाते प्रमाणकर्ता क्षमता वापरण्यासाठी अॅप ला अनुमती देते."</string>
@@ -661,26 +727,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"वाय-फाय प्रवेश बिंदूंवर कनेक्ट करण्यासाठी आणि त्यावरून डिस्कनेक्ट करण्यासाठी आणि वाय-फाय नेटवर्कसाठी डिव्हाइस कॉन्फिगरेशनमध्ये बदल करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"वाय-फाय मल्‍टिकास्‍ट रिसेप्‍शनला अनुमती द्या"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या टॅब्लेटवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक उर्जा वापरते."</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"मल्टिकास्ट पत्ते वापरून फक्त आपल्या फोनवर नाही, तर वाय-फाय नेटवर्कवरील सर्व डिव्हाइसेसवर पाठविलेले पॅकेट प्राप्त करण्यासाठी अॅप ला अनुमती देते. हे गैर-मल्टिकास्ट मोडपेक्षा अधिक उर्जा वापरते."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ब सेटिंग्जवर प्रवेश करा"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"स्थानिक ब टॅब्लेट कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइसेस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"स्थानिक ब फोन कॉन्फिगर करण्याकरिता आणि दूरस्थ डिव्हाइसेस शोधण्यासाठी आणि त्यासह जोडण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"अनुप्रयोगाद्वारे ब जोडणीला अनुमती द्या"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"अ‍ॅपला वापरकर्ता परस्‍परसंवादाशिवाय दूरस्‍थ डिव्‍हाइसेससह जोडण्‍याची अनुमती देते."</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"अ‍ॅपला वापरकर्ता परस्‍परसंवादाशिवाय दूरस्‍थ डिव्‍हाइसेससह जोडण्‍याची अनुमती देते."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"अ‍ॅपला वापरकर्ता परस्‍परसंवादाशिवाय दूरस्‍थ डिव्‍हाइसेससह जोडण्‍याची अनुमती देते."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"ब नकाशा डेटामध्ये प्रवेश करा"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"अॅपला ब नकाशा डेटामध्ये प्रवेश करण्याची अनुमती देते."</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"अॅपला ब नकाशा डेटामध्ये प्रवेश करण्याची अनुमती देते."</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"अॅपला ब नकाशा डेटामध्ये प्रवेश करण्याची अनुमती देते."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX कनेक्ट करा आणि त्यावरून डिस्कनेक्ट करा"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"WiMAX सक्षम केले आहे किंवा नाही आणि कनेक्ट केलेल्या कोणत्याही WiMAX नेटवर्क विषयीची माहिती निर्धारित करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX स्थिती बदला"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAX नेटवर्कवर टॅब्लेट कनेक्ट करण्यास आणि त्यावरून टॅब्लेट डिस्कनेक्ट करण्यास अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX नेटवर्कवर फोन कनेक्ट करण्यास आणि त्यावरून फोन डिस्कनेक्ट करण्यास अॅप ला अनुमती देते."</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"स्कोअर नेटवर्क"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"नेटवर्क रँक करण्यासाठी आणि टॅब्लेट प्राधान्य देत असलेल्या नेटवर्कच्या प्रभावासाठी अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"नेटवर्क रँक करण्यासाठी आणि फोन प्राधान्य देत असलेल्या नेटवर्कच्या प्रभावासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ब डिव्हाइसेससह जोडा"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"टॅब्लेटवर ब चे कॉन्फिगरेशन पाहण्यासाठी आणि जोडलेल्या डिव्हाइसेससह कनेक्शन करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"फोनवर ब चे कॉन्फिगरेशन पाहण्यासाठी आणि जोडलेल्या डिव्हाइसेससह कनेक्शन करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"फील्ड जवळील संप्रेषण नियंत्रित करा"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"फील्ड जवळील संप्रेषण (NFC) टॅग, कार्ड आणि वाचक यांच्यासह संप्रेषण करण्यासाठी अॅप ला अनुमती देते."</string>
@@ -760,6 +838,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्क्रीन-अनलॉक संकेतशब्दांमध्ये अनुमती दिलेली लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"स्क्रीन-अनलॉक प्रयत्नांचे परीक्षण करा"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"टाइप केलेल्या अयोग्य संकेतशब्दांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा टॅब्लेट लॉक करा किंवा बरेच संकेतशब्द टाइप केले असल्यास टॅब्लेटचा सर्व डेटा मिटवा."</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"टाइप केलेल्या अयोग्य संकेतशब्दांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा फोन लॉक करा किंवा बरेच संकेतशब्द टाइप केले असल्यास फोनचा सर्व डेटा मिटवा."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"स्क्रीन-अनलॉक संकेतशब्द बदला"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"स्क्रीन-अनलॉक संकेतशब्द बदला."</string>
@@ -767,6 +847,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"स्क्रीन कशी आणि केव्हा लॉक होते ते नियंत्रित करा."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"सर्व डेटा मिटवा"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय टॅब्लेटचा डेटा मिटवा."</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"फॅक्टरी डेटा रीसेट करून चेतावणीशिवाय फोनचा डेटा मिटवा."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"डिव्हाइस समग्र प्रॉक्सी सेट करा"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"धोरण सक्षम असताना वापरण्यासाठी डिव्हाइस समग्र प्रॉक्सी सेट करा. फक्त प्रथम डिव्हाइस प्रशासक परिणामकारक समग्र प्रॉक्सी सेट करते."</string>
@@ -915,6 +997,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"कमाल चेहरा अनलॉक प्रयत्न ओलांडले"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"सिम कार्ड नाही"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"टॅब्लेटमध्ये सिम कार्ड नाही."</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"फोनमध्ये सिम कार्ड नाही."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"एक सिम कार्ड घाला."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"सिम कार्ड गहाळ झाले आहे किंवा ते वाचनीय नाही. एक सिम कार्ड घाला."</string>
@@ -937,10 +1021,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"आपण आपला पिन <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा चुकीचा रेखांकित केला आहे. <xliff:g id="NUMBER_1">%d</xliff:g> अधिक अयशस्वी प्रयत्नांनंतर, आपल्याला आपले Google साइन इन वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा चुकीचा रेखांकित केला आहे. <xliff:g id="NUMBER_1">%d</xliff:g> अधिक अयशस्वी प्रयत्नांनंतर, आपल्याला आपले Google साइन इन वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"आपण <xliff:g id="NUMBER_0">%d</xliff:g> वेळा टॅब्लेट अनलॉक करण्याचे चुकीचे प्रयत्न केले. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, टॅब्लेट फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि सर्व वापरकर्ता डेटा गमावला जाईल."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"आपण <xliff:g id="NUMBER_0">%d</xliff:g> वेळा फोन अनलॉक करण्याचे चुकीचे प्रयत्न केले. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, फोन फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि सर्व वापरकर्ता डेटा गमावला जाईल."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"आपण <xliff:g id="NUMBER">%d</xliff:g> वेळा टॅब्लेट अनलॉक करण्याचे चुकीचे प्रयत्न केले. टॅब्लेट आता फॅक्टरी डीफॉल्टवर रीसेट केले जाईल."</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"आपण <xliff:g id="NUMBER">%d</xliff:g> वेळा फोन अनलॉक करण्याचे चुकीचे प्रयत्न केले. फोन आता फॅक्टरी डीफॉल्टवर रीसेट केला जाईल."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"नमुना विसरलात?"</string>
@@ -1024,6 +1114,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"ब्राउझरने भेट दिलेल्या सर्व URL चा इतिहास आणि ब्राउझरचे सर्व बुकमार्क वाचण्यास अॅप ला अनुमती देते. टीप: या परवानगीची तृतीय-पक्ष ब्राउझरद्वारे किंवा वेब ब्राउझिंग क्षमता असलेल्या अन्य अनुप्रयोगांद्वारे अंमलबजावणी करू शकत नाही."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"वेब बुकमार्क आणि इतिहास लिहा"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"आपल्या टॅब्लेटवर संचयित केलेला ब्राउझरचा इतिहास किंवा बुकमार्क सुधारित करण्यासाठी अॅप ला अनुमती देते. हे ब्राउझर डेटा मिटविण्यासाठी किंवा सुधारित करण्यासाठी अॅप ला अनुमती देते. टीप: ही परवानगी तृतीय पक्ष ब्राउझरद्वारे किंवा वेब ब्राउझिंग क्षमतांसह अन्य अनुप्रयोगांद्वारे अंमलबजावणी करण्याची टीप देऊ शकते."</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"आपल्या फोनवर संचयित केलेला ब्राउझरचा इतिहास किंवा बुकमार्क सुधारित करण्यासाठी अॅप ला अनुमती देते. हे ब्राउझर डेटा मिटविण्यासाठी किंवा सुधारित करण्यासाठी अॅप ला अनुमती देते. टीप: ही परवानगी तृतीय पक्ष ब्राउझरद्वारे किंवा वेब ब्राउझिंग क्षमतांसह अन्य अनुप्रयोगांद्वारे अंमलबजावणी करण्याची टीप देऊ शकते."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"अलार्म सेट करा"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"स्थापित केलेल्या अलार्म घड्याळ अॅपमध्ये अलार्म सेट करण्यासाठी अॅप ला अनुमती देते. काही अलार्म घड्याळ अॅप्स हे वैशिष्ट्य लागू करू शकत नाहीत."</string>
@@ -1297,6 +1389,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"आवश्यक पिन टाइप करा:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"पिन:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"टॅब्‍लेट <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ला कनेक्‍ट केलेले असताना तात्‍पुरते वाय-फाय वरून डिस्‍कनेक्‍ट होईल"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> वर फोन कनेक्ट केलेला असताना तो वाय-फाय वरून तात्पुरता डिस्कनेक्ट केला जाईल"</string>
     <string name="select_character" msgid="3365550120617701745">"वर्ण घाला"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS संदेश पाठवत आहे"</string>
@@ -1578,6 +1672,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"फक्त एकदाच"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s कार्य प्रोफाईलचे समर्थन करीत नाही"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"टॅब्लेट"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"फोन"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"हेडफोन"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"स्पीकर डॉक करा"</string>
@@ -1632,10 +1728,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने काढला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"आपण <xliff:g id="NUMBER_0">%d</xliff:g> वेळा टॅब्लेट अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. <xliff:g id="NUMBER_1">%d</xliff:g> आणखी अयशस्वी प्रयत्नांनंतर, टॅब्लेट फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि वापरकर्ता डेटा गमावेल."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"आपण <xliff:g id="NUMBER_0">%d</xliff:g> वेळा फोन अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. <xliff:g id="NUMBER_1">%d</xliff:g> आणखी अयशस्वी प्रयत्नांनंतर, फोन फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि वापरकर्ता डेटा गमावेल."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"आपण <xliff:g id="NUMBER">%d</xliff:g> वेळा टॅब्लेट अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. टॅब्लेट आता फॅक्टरी डीफॉल्ट वर रीसेट केला जाईल."</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"आपण <xliff:g id="NUMBER">%d</xliff:g> वेळा फोन अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. फोन आता फॅक्टरी डीफॉल्ट वर रीसेट केला जाईल."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, आपल्याला ईमेल खाते वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, आपल्याला ईमेल खाते वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"काढा"</string>
@@ -1776,8 +1878,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करण्‍यापूर्वी संकेतशब्दासाठी विचारा"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"बॅटरीचे आयुष्य सुधारण्यात मदत होण्यासाठी, बॅटरी बचतकर्ता आपल्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि अन्य अॅप्स आपण ते उघडल्याशिवाय अद्यतनित होऊ शकत नाहीत.\n\nआपले डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"आपला कार्य न करण्याचा कालावधी <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता समाप्त होईपर्यंत"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"आपला कार्य न करण्याचा कालावधी समाप्त होईपर्यंत"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"एका मिनिटासाठी (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> पर्यंत)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d मिनिटांसाठी (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> पर्यंत)"</item>
@@ -1797,8 +1898,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> पर्यंत"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"अनिश्‍चितपणे"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त करा"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता पुढील अलार्मपर्यंत"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"पुढील अलार्मपर्यंत"</string>
 </resources>

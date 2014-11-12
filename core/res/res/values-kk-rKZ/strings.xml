@@ -151,12 +151,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Тым көп <xliff:g id="CONTENT_TYPE">%s</xliff:g> жойылған."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Планшет жады толы. Орын босату үшін кейбір файлдарды жойыңыз."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Сағат жады толы. Орын босату үшін кейбір файлдарды жойыңыз."</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Телефон жады толы. Орын босату үшін кейбір файлдарды жойыңыз."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Желі бақылауда болуы мүмкін"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Белгісіз үшінші жақ арқылы"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> арқылы"</string>
     <string name="me" msgid="6545696007631404292">"Мен"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Планшет опциялары"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Телефон опциялары"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Үнсіз режим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Сымды қосу"</string>
@@ -168,6 +172,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Қоңырау қосулы"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Өшірілуде…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Планшет өшіріледі."</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Сағатыңыз өшіріледі."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон өшіріледі."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Өшіру керек пе?"</string>
@@ -176,6 +182,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Жуықта қолданылған"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Жақындағы қолданбалар жоқ"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Планшет опциялары"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"Телефон опциялары"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Экранды бекіту"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Өшіру"</string>
@@ -292,9 +300,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Қолданбаға басқа хабар жіберу қолданбаларына өтініш жолдап, келген қоңырауларға хабар жіберу арқылы жауап беру жұмысын жүктеу мүмкіндігін береді."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"өзіңіздің мәтін хабарларыңызды оқу (SMS немесе MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Қолданбаға планшетте сақталған SMS хабарларын немесе SIM картасын оқу мүмкіндігін береді. Бұл қолданбаға мазмұны немесе құпиялығына қарамастан барлық SMS хабарларын оқу мүмкіндігін береді."</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Қолданбаға телефонда сақталған SMS хабарларын немесе SIM картасын оқу мүмкіндігін береді. Бұл қолданбаға мазмұны немесе құпиялығына қарамастан барлық SMS хабарларын оқу мүмкіндігін береді."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"мәтін хабарларын жөндеу (SMS немесе MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Қолданбаға планшетте немесе SIM картасында сақталған SMS хабарларына жазуға рұқсат береді. Зиянкес қолданбалар хабарларыңызды жоюы мүмкін."</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Қолданбаға телефонда немесе SIM картасында сақталған SMS хабарларына жазуға рұқсат береді. Зиянкес қолданбалар хабарларыңызды жоюы мүмкін."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"мәтін хабарларын алу (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Қолданбаға WAP хабарларын алу және өңдеу мүмкіндігін береді. Бұл қолданба құрылғыңызға жіберілген хабарларды сізге көрсетпестен қабылдай және жоя алады дегенді білдіреді."</string>
@@ -388,6 +400,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Қолданбаға толық экран режиміне көшу үшін экранды уақытша қатыру мүмкіндігін береді."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"пернелер мен басқару түймелерін басу"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Қолданбаға жеке енгізу оқиғаларын (пернелерді басулар, т.б.) басқа қолданбаларға жеткізуге рұқсат береді. Зиянкес қолданбалар мұны планшетті басқаруды алу үшін пайдалануы мүмкін."</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Қолданбаға жеке енгізу оқиғаларын (пернелерді басулар, т.б.) басқа қолданбаларға жеткізуге рұқсат береді. Зиянкес қолданбалар мұны телефонды басқаруды алу үшін пайдалануы мүмкін."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"терілген жазбалар мен жасалған әрекеттерді тіркеу"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Қолданбаға тіпті басқа қолданбамен өзара әрекеттесіп жатқанда да (мысалы, құпия сөзді теріп жатқанда) сіз басқан пернелерді көруге рұқсат береді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
@@ -433,6 +447,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Қолданбаға берілген сигналдың барлық тұрақты процестерге жіберілуін сұрауға рұқсат береді."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"қолданбаны әрқашан жұмыс істейтін ету"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Қолданбаға өзінің бөліктерін жадта бекіндіру мүмкіндігін береді. Бұл басқа қолданбалардың жадқа қол жетімділігін шектеп, планшетті баяулатуы мүмкін."</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Қолданбаға өзінің бөліктерін жадта бекіндіру мүмкіндігін береді. Бұл басқа қолданбалардың жадқа қол жетімділігін шектеп, телефонды баяулатуы мүмкін."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"қолданбаларды жою"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Қолданбаға Android бумаларын жоюға рұқсат береді. Зиянкес қолданбалар мұны маңызды қолданбаларды жою үшін пайдалануы мүмкін."</string>
@@ -446,11 +462,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Қолданбаға жаңа немесе жаңартылған Android бумаларын орнатуға рұқсат береді. Зиянкес қолданбалар мұны кездейсоқ қуатты рұқсаттар бар жаңа қолданбаларды қосу үшін пайдалануы мүмкін."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"қолданбаның бүкіл кэш деректерін жою"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Қолданбаларға қолданбалардың кэштелген қалталарынан файлдарды жою арқылы планшет жадын босату мүмкіндігін береді. Бұл басқа қолданбалардың баяу қосылуына себеп болуы мүмкін, себебі оларға өз деректеріне қол жеткізу қажет болады."</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Қолданбаларға қолданбалардың кэштелген қалталарынан файлдарды жою арқылы телефон жадын босату мүмкіндігін береді. Бұл басқа қолданбалардың баяу қосылуына себеп болуы мүмкін, себебі оларға өз деректеріне қол жеткізу қажет болады."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"қолданба ресурстарын жылжыту"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Қолданбаға қолданба ресурстарын ішкіден сыртқы тасушыға және керісінше жылжытуға рұқсат береді."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"тіркелген маңызды деректерді оқу"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Қолданбаға жүйенің әр түрлі журнал файлдарын оқуға рұқсат береді. Бұл оған планшетпен не істеп жатқаныңыз туралы ақпаратты, мүмкін жеке немесе құпия ақпаратты қоса, ашуға рұқсат береді."</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Қолданбаға жүйенің әр түрлі журнал файлдарын оқуға рұқсат береді. Бұл оған телефонмен не істеп жатқаныңыз туралы ақпаратты, мүмкін жеке немесе құпия ақпаратты қоса, ашуға рұқсат береді."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ойнату үшін медиа декодерін қолдану"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Қолданбаға ойнату үшін орнатылған медиа декодерін қолдану мүмкіндігін береді."</string>
@@ -462,6 +482,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Қолданбаға diag тобы иелік ететін кез келген ресурсты оқуға және оған жазуға рұқсат береді; мысалы, /dev ішіндегі файлдарға. Бұл жүйенің тұрақтылығына және қауіпсіздігіне әсер етуі мүмкін. Мұны өндіруші немесе оператор ТЕК жабдықты диагностикалау үшін пайдалануы керек."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"қолданба құрамдастарын қосу немесе өшіру"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Қолданбаға басқа қолданбаның құрамдасы қосылған-қосылмаған болуын өзгертуге рұқсат береді. Зиянкес қолданбалар мұны маңызды планшет мүмкіндіктерін өшіру үшін пайдалануы мүмкін. Бұл рұқсатты абайлап пайдалану керек, өйткені қолданба құрамдастары пайдалану мүмкін емес, үйлесімді емес немесе тұрақсыз күйге келуі мүмкін."</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Қолданбаға басқа қолданбаның құрамдасы қосылған-қосылмаған болуын өзгертуге рұқсат береді. Зиянкес қолданбалар мұны маңызды телефон мүмкіндіктерін өшіру үшін пайдалануы мүмкін. Бұл рұқсатты абайлап пайдалану керек, өйткені қолданба құрамдастары пайдалану мүмкін емес, үйлесімді емес немесе тұрақсыз күйге келуі мүмкін."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"рұқсаттар беру немесе олардың күшін жою"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Қолданбаға осы үшін немесе басқа қолданбалар үшін ерекше рұқсат беру немесе рұқсат күшін жою мүмкіндігін береді. Залалды колданбалар бұны рұқсат берілмеген функцияларға кіру үшін қолдануы мүмкін."</string>
@@ -475,21 +497,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Қолданбаға Google қызметтерінің картасын өзгертуге рұқсат береді. Қалыпты қолданбалардың пайдалануына арналмаған."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"басталу барысында қосылу"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Қолданбаға жүйе жүктелуін аяқтағаннан кейін өзін іске қосуға рұқсат береді. Бұл планшеттің іске қосылуын ұзағырақ етуі және қолданбаның әрқашан жұмыс істеу арқылы жалпы планшетті баяулатуына мүмкіндік беруі мүмкін."</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Қолданбаға жүйе жүктелуін аяқтағаннан кейін өзін іске қосуға рұқсат береді. Бұл телефонның іске қосылуын ұзағырақ етуі және қолданбаның әрқашан жұмыс істеу арқылы жалпы телефонды баяулатуына мүмкіндік беруі мүмкін."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"жабысқақ ақпаратты жіберу"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Қолданбаға хабар тарату аяқталғанда сақталатын жабысқақ хабар тарату мүмкіндігін береді. Тым көп қолдану планшет жұмысын баяулатады немесе жадты көп қолдану арқылы жұмысын тұрақсыздандырады."</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Қолданбаға хабар тарату аяқталғанда сақталатын жабысқақ хабар тарату мүмкіндігін береді. Тым көп қолдану телефон жұмысын баяулатады немесе жадты көп қолдану арқылы жұмысын тұрақсыздандырады."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"контактілерді оқу"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Қолданбаға планшетте сақталған байланыстар, белгілі тұлғаларға шалынған қоңырау, хаттар немесе басқа байланыс түрінің жиіліктерін қоса, туралы ақпаратты оқу мүмкіндігін береді. Бұл рұқсат қолданбаға байланыстар туралы деректерді сақтау мүмкіндігін береді және залалды қолданбалар байланыстар туралы деректерді сіздің келісіміңізсіз бөлісуі ықтимал."</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Қолданбаға телефонда сақталған байланыстар, белгілі тұлғаларға шалынған қоңырау, хаттар немесе басқа байланыс түрінің жиіліктерін қоса, туралы ақпаратты оқу мүмкіндігін береді. Бұл рұқсат қолданбаға байланыстар туралы деректерді сақтау мүмкіндігін береді және залалды қолданбалар байланыстар туралы деректерді сіздің келісіміңізсіз бөлісуі ықтимал."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"контактілерді өзгерту"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Қолданбаға планшетте сақталған байланыстар, белгілі тұлғаларға шалынған қоңырау, хаттар немесе басқа байланыс түрінің жиіліктерін қоса, туралы ақпаратты өзгерту мүмкіндігін береді. Бұл рұқсат қолданбаға байланыстар туралы деректерді өшіру мүмкіндігін береді."</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Қолданбаға телефонда сақталған байланыстар, белгілі тұлғаларға шалынған қоңырау, хаттар немесе басқа байланыс түрінің жиіліктерін қоса, туралы ақпаратты өзгерту мүмкіндігін береді. Бұл рұқсат қолданбаға байланыстар туралы деректерді өшіру мүмкіндігін береді."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"қоңыраулар тіркеуін оқу"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Қолданбаға сіздің планшетіңіздегі қоңыраулар тіркеуін, кіріс және шығыс қоңырауларын қоса, оқу мүмкіндігін береді. Бұл рұқсат қолданбаға қоңырау тіркеу деректерін сақтау мүмкіндігін береді және залалды қолданбалар қоңырау тіркеу деректеріңізді сіздің келісіміңізсіз бөлісуі ықтимал."</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Қолданбаға сіздің телефоныңыздағы қоңыраулар тіркеуін, кіріс және шығыс қоңырауларын қоса, оқу мүмкіндігін береді. Бұл рұқсат қолданбаға қоңырау тіркеу деректерін сақтау мүмкіндігін береді және залалды қолданбалар қоңырау тіркеу деректеріңізді сіздің келісіміңізсіз бөлісуі ықтимал."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"қоңырау тіркеуді жазу"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Қолданбаға сіздің планшетіңіздегі қоңырау тіркеуін, келетін немесе шығатын қоңыраулар туралы деректерді қоса, өзгерту мүмкіндігін береді. Залалды қолданбалар бұны сіздің қоңырау тіркеуіңізді өшіру үшін қолдануы мүмкін."</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Қолданбаға сіздің телефоныңыздың қоңырау тіркеуін, келетін немесе шығатын қоңыраулар туралы деректерді қоса, өзгерту мүмкіндігін береді. Залалды қолданбалар бұны сіздің қоңырау тіркеуіңізді өшіру үшін қолдануы мүмкін."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"өзіңіздің контакт картаңызды оқу"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Қолданбаға құрылғыда сақталған сіздің аты-жөніңіз және байланыс ақпаратыңыз сияқты жеке ақпаратты оқу мүмкіндігін береді. Бұл қолданба сізді анықтап, сіз туралы жеке ақпаратты басқаларға жібере алады дегенді білдіреді."</string>
@@ -503,9 +537,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Қолданбаға сіздің достарыңыздың әлеуметтік желі жаңартуларын көрсету мүмкіндігін береді. Ақпарат бөліскенде абай болыңыз -- бұл қолданбаға сіздің досыңыздан келген сияқты болып көрінетін хабар жіберу мүмкіндігін береді. Есіңізде болсын: әлеуметтік желілер бұл рұқсатты қолданбауы мүмкін."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"күнтізбе шаралары мен құпия ақпаратты оқу"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Қолданбаға планшетте сақталған барлық күнтізбе шараларын, достар немесе әріптестердің шараларын қоса, оқу мүмкіндігін береді. Бұл қолданбаға күнтізбе деректерін, құпиялығы мен сезімталдығына қарамастан, бөлісу немесе сақтау мүмкіндігін беруі ықтимал."</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Қолданбаға телефонда сақталған барлық күнтізбе шараларын, достар немесе әріптестердің шараларын қоса, оқу мүмкіндігін береді. Бұл қолданбаға күнтізбе деректерін, құпиялығы мен сезімталдығына қарамастан, бөлісу немесе сақтау мүмкіндігін беруі ықтимал."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"күнтізбе шараларын қосу немесе өзгерту және пайдаланушының қатысуынсыз қонақтардың эл. пошталарына жіберу."</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Қолданбаға планшеттегі сізге өзгертуге болатын шараларды, достарыңыз бен әріптестеріңіздің шараларын қоса, қосу, алу және өзгерту мүмкіндігін береді. Бұл қолданбаға күнтізбе иелерінен келген сияқты көрсетілетін хабарлар жіберу немесе иесінің хабарынсыз шараларды өзгерту мүмкіндігін береді."</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Қолданбаға телефондағы сізге өзгертуге болатын шараларды, достарыңыз бен әріптестеріңіздің шараларын қоса, қосу, алу және өзгерту мүмкіндігін береді. Бұл қолданбаға күнтізбе иелерінен келген сияқты көрсетілетін хабарлар жіберу немесе иесінің хабарынсыз шараларды өзгерту мүмкіндігін береді."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"тест үшін аймақ көздеріне еліктеу"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Тексеру үшін жасанды аймақ көздерін жасақтаңыз немесе жаңа аймақ жабдықтаушы орнатыңыз. Бұл қолданбаға аймақты және/немесе GPS немесе аймақ жабдықтаушы сияқты аймақ көздерінен оралған күйлерін үстінен жазу мүмкіндігін береді."</string>
@@ -550,12 +588,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"камера қолданыста болғанда жарық диодты шамы бар көрсеткішті өшіру"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Алдын ала орнатылған жүйе қолданбасына камераның жарық диодты көрсеткішті қолдануын өшіру мүмкіндігін береді."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"планшетті мүлдем өшіру"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"телефонды мүлдем өшіру"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Қолданбаға бүкіл планшетті біржола өшіруге рұқсат береді. Бұл өте қауіпті."</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Қолданбаға бүкіл телефонды біржола өшіруге рұқсат береді. Бұл өте қауіпті."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"планшетті күштеп қайта қосу"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"телефонды күштеп қайта қосу"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Қолданбаға планшетті мәжбүрлеп қайта жүктеуге рұқсат береді."</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Қолданбаға телефонды мәжбүрлеп қайта жүктеуге рұқсат береді."</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB жадының файлжүйесіне кіру"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD картасының файлжүйесіне кіру"</string>
@@ -590,6 +636,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"кез келген нөмірлерге тікелей телефон шалу"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Қолданбаға араласуыңызсыз кез келген телефон нөміріне, соның ішінде, төтенше нөмірлерге қоңырау шалуға рұқсат береді. Зиянкес қолданбалар төтенше қызметтерге қажет емес және заңсыз қоңыраулар шалуы мүмкін."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"тікелей CDMA планшет орнатуларын бастау"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"тікелей CDMA телефон орнатуларын бастау"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Қолданбаға CDMA дайындауды бастауға рұқсат береді. Зиянкес қолданбалар CDMA дайындауды қажет емес кезде бастауы мүмкін."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"аймақ жаңарту хабарларын басқару"</string>
@@ -605,20 +653,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"телефонның нақты күйлерін оқу"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Қолданбаның телефонның нақты күйлерін анықтау мүмкіндігін ұсынады. Бұл рұқсат қолданбаға қоңыраудың нағыз күйін анықтауға, яғни, қоңыраудың сол сәтте немесе артқы шепте орын алуын, сәтсіз қоңырауларды, деректердің нақты  байланысын немесе іске аспаған байланыстарды анықтау мүмкіндігін береді."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"планшетті ұйқыдан бөгеу"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"телефонды ұйқыдан бөгеу"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Қолданбаға планшеттің ұйқыға кетуін болдырмауға рұқсат береді."</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Қолданбаға телефонның ұйқыға кетуін болдырмауға рұқсат береді."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"инфрақызыл қабылдау"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Қолданбаға планшеттің инфрақызыл қабылдағышын қолдану мүмкіндігін береді."</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Қолданбаға телефонның инфрақызыл қабылдағышын қолдану мүмкіндігін береді."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"планшетті қосу немесе өшіру"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"телефонды қуат көзіне қосу немесе ажырату"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Қолданбаға планшетті қосуға немесе өшіруге рұқсат береді."</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Қолданбаға телефонды қосуға немесе өшіруге рұқсат береді."</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"дисплейдің күту уақытының бітуін қалпына келтіру"</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"Қолданбаға дисплейдің күту уақытының бітуін қалпына келтіруге рұқсат етеді."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"зауыт тесті режимінде жүргізу"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Төмен деңгейлі өндіріс тесті ретінде қосып, планшеттің қатты дискісіне кіру мүмкіндігін беру. Планшет өндіріс тесті режимінде жұмыс істегенде ғана қол жетімді."</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Төмен деңгейлі өндіріс тесті ретінде қосып, телефонның қатты дискісіне кіру мүмкіндігін беру. Телефон өндіріс тесті режимінде жұмыс істегенде ғана қол жетімді."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"артқы фонды орнату"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Қолданбаға жүйелік экранның артқы фонын орнатуға рұқсат береді."</string>
@@ -628,14 +688,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Қолданбаға барлық деректерді, конфигурацияны және орнатылған қолданбаларды өшіріп, жүйенің зауыттық параметрлерін толығымен қалпына келтіруге рұқсат береді."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"уақыт реттеу"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Қолданбаға планшет сағатының уақытын өзгертуге рұқсат береді."</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Қолданбаға телефон сағатының уақытын өзгертуге рұқсат береді."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"уақыт аймағын реттеу"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Қолданбаға планшеттің уақыт белдеуін өзгертуге рұқсат береді."</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Қолданбаға телефонның уақыт белдеуін өзгертуге рұқсат береді."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"Есептік менеджер қызметі ретінде әрекет ету"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Қолданбаға ЕсептікжазбаРастаушыларына қоңырау шалу мүмкіндігін береді."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"құрылғыдағы есептік жазбаларды табу"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Қолданбаға планшет арқылы белгілі есептік жазбалар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған есептік жазбалар да қамтылуы мүмкін."</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Қолданбаға телефон арқылы белгілі есептік жазбалар тізімін алу мүмкіндігін береді. Сіз орнатқан қолданбалар жасақтаған есептік жазбалар да қамтылуы мүмкін."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"есептік жазбалар жасақтап, кілстсөздер тағайындау"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Қолданбаға AccountManager есептік жазба аутентификаторы мүмкіндіктерін пайдалануға, соның ішінде, есептік жазбаларды жасауға және олардың құпия сөздерін орнатуға рұқсат береді."</string>
@@ -661,26 +727,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Қолданбаларға Wi-Fi нүктелеріне қосылу және ажырау және Wi-Fi желілеріне арналған құрылғы конфигурацияларына өзгерістер енгізу мүмкіндігін береді."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi бірнеше мекенжайға ақпарат тарату мүмкіндігі"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Қолданбаға Wi-Fi желісіндегі барлық құрылғыларға мекенжайлар тобы арқылы, сіздің планшетіңіз арқылы ғана емес, жіберілген жинақтарды алу мүмкіндігін береді. Бұл мекенжайлар тобы емес режимге қарағанда қуатты көбірек тұтынуы мүмкін."</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Қолданбаға Wi-Fi желісіндегі барлық құрылғыларға мекенжайлар тобы арқылы, сіздің телефоныңыз арқылы ғана емес, жіберілген жинақтарды алу мүмкіндігін береді. Бұл мекенжайлар тобы емес режимге қарағанда қуатты көбірек тұтынуы мүмкін."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Bluetooth параметрлеріне кіру"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Қолданбаға жергілікті Bluetooth планшетін конфигурациялауға, әрі қашықтағы құрылғыларды табуға және олармен жұптауға рұқсат береді."</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Қолданбаға жергілікті Bluetooth телефонын конфигурациялауға, әрі қашықтағы құрылғыларды табуға және олармен жұптауға рұқсат береді."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Қолданбаның Bluetooth байланысымен жұпталу мүмкіндігі"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Қолданбаның қашықтан басқарылатын құрылығыларымен пайдаланушының қатысуынсыз жұпталу мүмкіндігін береді."</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Қолданбаның қашықтан басқарылатын құрылығыларымен пайдаланушының қатысуынсыз жұпталу мүмкіндігін береді."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Қолданбаның қашықтан басқарылатын құрылығыларымен пайдаланушының қатысуынсыз жұпталу мүмкіндігін береді."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Bluetooth MAP деректеріне қатынасу"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Қолданбаға Bluetooth MAP деректеріне қатынасуға рұқсат етеді."</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Қолданбаға Bluetooth MAP деректеріне қатынасуға рұқсат етеді."</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Қолданбаға Bluetooth MAP деректеріне қатынасуға рұқсат етеді."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX байланысына жалғану және ажырау"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Қолданбаға WiMAX қосылғаны және қосылған қандай да WiMAX желісі жайлы ақпаратты анықтау мүмкіндігін береді."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX күйін өзгерту"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Қолданбаларға планшетті WiMAX желілеріне қосу және ажырату мүмкіндіктерін береді."</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Қолданбаларға телефонды WiMAX желілеріне қосу және ажырату мүмкіндіктерін береді."</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"желілерді бағалау"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Қолданбаға желілерді бағалауға және планшет қай желілерді жөн көруі керектігіне әсер етуге рұқсат береді."</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Қолданбаға желілерді бағалауға және телефон қай желілерді жөн көруі керектігіне әсер етуге рұқсат береді."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Bluetooth құрылғыларымен жұпталу"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Қолданбаға планшеттегі Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді."</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Қолданбаға телефондағы Bluetooth конфигурациясын көру және жұпталған құрылғымен байланыс орнату немесе қабылдау мүмкіндігін береді"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Жақын Өріс Байланысын басқару"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Қолданбаға NFC белгілерімен, карталармен және оқу құралдарымен байланысуға рұқсат береді."</string>
@@ -760,6 +838,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Экранды ашу кілтсөздерінің ұзындығы мен қолдануға болатын таңбаларды басқару."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Экранды ашу әркеттерін бақылау"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және планшетті бекіту немесе тым көп қате құпия сөздер терілген болса, планшеттің бүкіл деректерін өшіру."</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Экран бекітпесін ашқан кезде терілген қате құпия сөздердің санын бақылау және телефонды бекіту немесе тым көп қате құпия сөздер терілген болса, телефонның бүкіл деректерін өшіру."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Экранды ашу кілтсөзін өзгерту"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Экранды ашу кілтсөзін өзгерту."</string>
@@ -767,6 +847,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Экранның қашан және қалай бекітілетінін басқару."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Барлық деректерді өшіру"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Планшет дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Телефон дерекқорын ескертусіз, зауыттық дерекқорын қайта реттеу арқылы өшіру."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Құрылғы жаһандық прокси қызметін орнату"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Саясат қосылғанда қолдану үшін құрылғы жаһандық прокси қызметін орнату. Бірінші құрылғы әкімшісі ғана қолданыстағы жаһандық проксиді орнатады."</string>
@@ -915,6 +997,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Бет-әлпет арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM картасы жоқ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Планшетте SIM картасы жоқ."</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Телефонда SIM картасы жоқ."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM картасын салыңыз."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM картасы жоқ немесе оны оқу мүмкін емес. SIM картасына салыңыз."</string>
@@ -937,10 +1021,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Құпия сөзді <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"PIN кодын <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін әркетті қайталаңыз."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате салдыңыз. Тағы <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін сізден Google жүйесіне кіріп планшет бекітпесін ашу сұралады.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Бекітпесін ашу өрнегін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате салдыңыз. Тағы <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін сізден Google жүйесіне кіріп телефон бекітпесін ашу сұралады.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Планшеттің бекітпесін ашуға <xliff:g id="NUMBER_0">%d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін, телефон зауыттың бастапқы параметрлеріне қайта реттеледі және пайдаланушы деректері жоғалады."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Телефонның бекітпесін ашуға <xliff:g id="NUMBER_0">%d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін, телефон зауыттың бастапқы параметрлеріне қайта реттеледі және пайдаланушы деректері жоғалады."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Планшетті ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Планшет зауыттың бастапқы параметрлеріне қайта реттеледі."</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Телефонды ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Телефон зауыттың бастапқы параметрлеріне қайта реттеледі."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Кескінді ұмытып қалдыңыз ба?"</string>
@@ -1024,6 +1114,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Қолданбаларға Браузер кіріп шыққан барлық URL тарихын және Браузер бетбелгілерін оқу мүмкіндігін береді. Есіңізде болсын: бұл рұқсатты үшінші жақ браузерлері немесе веб шолу қабілеті бар басқа қолданбалар қолданбауы мүмкін."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"веб бетбелгілер және тарих жазу"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Қолданбаларға планшетте сақталған Браузер кіріп шыққан барлық URL тарихын және Браузер бетбелгілерін оқу мүмкіндігін береді. Есіңізде болсын: бұл рұқсатты үшінші жақ браузерлері немесе веб шолу қабілеті бар басқа қолданбалар қолданбауы мүмкін."</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Қолданбаларға телефонда сақталған Браузер кіріп шыққан барлық URL тарихын және Браузер бетбелгілерін өзгерту мүмкіндігін береді. Есіңізде болсын: бұл рұқсатты үшінші жақ браузерлері немесе веб шолу қабілеті бар басқа қолданбалар қолданбауы мүмкін."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"дабылды орнату"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Қолданбаға орнатылған оятқыш қолданбасында дабылды орнатуға рұқсат береді. Кейбір қолданбаларда бұл мүмкіндік іске асырылмауы мүмкін."</string>
@@ -1297,6 +1389,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Өтінілген PIN кодты теру:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Планшет <xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысына қосылғанша Wi-Fi байланысынан уақытша ажыратылады"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> құрылғысына жалғанып тұрғанда телефон уақытша Wi-Fi байланысынан ажыратылады"</string>
     <string name="select_character" msgid="3365550120617701745">"Таңба енгізу"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS хабарларын жіберу"</string>
@@ -1578,6 +1672,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Бір рет қана"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s жұмыс профилін қолдамайды"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Планшет"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Телефон"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Құлақаспаптар"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Үндеткіштерді қондыру"</string>
@@ -1632,10 +1728,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Кілсөзді <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Бекітпесін ашу кескінін <xliff:g id="NUMBER_0">%d</xliff:g> қате сыздыңыз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әркеттеніңіз."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Планшетті ашуға <xliff:g id="NUMBER_0">%d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін телефоныңыз бастапқы зауыттық параметрлеріне қайта реттеледі және барлық пайдаланушы деректері жойылады."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Телефонды ашуға <xliff:g id="NUMBER_0">%d</xliff:g> рет қате әрекеттендіңіз. <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін телефоныңыз бастапқы зауыттық параметрлеріне қайта реттеледі және барлық пайдаланушы деректері жойылады."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Планшетті ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Планшет бастапқы зауыттық параметрлеріне қайта реттеледі."</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Телефонды ашуға <xliff:g id="NUMBER">%d</xliff:g> рет қате әрекеттендіңіз. Телефон бастапқы зауыттық параметрлеріне қайта реттеледі."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате сыздыңыз. After <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін планшетіңізді есептік жазба арқылы ашу өтінішін аласыз.\n\n  <xliff:g id="NUMBER_2">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате сыздыңыз. <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін телефоныңызды есептік жазба арқылы ашу өтінішін аласыз. \n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып тастау"</string>
@@ -1776,8 +1878,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Босату алдында құпия сөзді сұрау"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"Батареяның қызмет мерзімін жақсарту үшін батарея үнемдегіш құрылғының өнімділігін азайтады және діріл мен фондық деректердің көпшілігін шектейді. Синхрондауды қажет ететін электрондық пошта, хабар алмасу және басқа қолданбалар ашқанша жаңартылмауы мүмкін.\n\nБатарея үнемдегіш құрылғы зарядталып жатқанда автоматты түрде өшеді."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> уақытында әрекетсіздік аяқталғанша"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"Бос тұру уақыты аяқталғанша"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"Бір минут бойы (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> дейін)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d минут бойы (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> дейін)"</item>
@@ -1797,8 +1898,6 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"Белгісіз уақыт бойы"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Тасалау"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> уақытындағы келесі дабылға дейін"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Келесі дабылға дейін"</string>
 </resources>
