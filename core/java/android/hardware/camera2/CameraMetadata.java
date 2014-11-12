@@ -807,9 +807,21 @@ public abstract class CameraMetadata<TKey> {
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are used by the camera
      * device, along with android.flash.* fields, if there's
      * a flash unit for this camera device.</p>
+     * <p>Note that auto-white balance (AWB) and auto-focus (AF)
+     * behavior is device dependent when AE is in OFF mode.
+     * To have consistent behavior across different devices,
+     * it is recommended to either set AWB and AF to OFF mode
+     * or lock AWB and AF before setting AE to OFF.
+     * See {@link CaptureRequest#CONTROL_AWB_MODE android.control.awbMode}, {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode},
+     * {@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock}, and {@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger}
+     * for more details.</p>
      * <p>LEGACY devices do not support the OFF mode and will
      * override attempts to use this value to ON.</p>
      *
+     * @see CaptureRequest#CONTROL_AF_MODE
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
+     * @see CaptureRequest#CONTROL_AWB_LOCK
+     * @see CaptureRequest#CONTROL_AWB_MODE
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY
