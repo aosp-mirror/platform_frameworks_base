@@ -167,7 +167,6 @@ LOCAL_STATIC_LIBRARIES := \
 LOCAL_CFLAGS += $(aaptCFlags)
 LOCAL_CPPFLAGS += -Wno-non-virtual-dtor
 
-include external/stlport/libstlport.mk
 include $(BUILD_EXECUTABLE)
 
 endif # Not SDK_ONLY

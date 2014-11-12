@@ -16,7 +16,7 @@
 
 #include <jni.h>
 
-#include <hash_map>
+#include <unordered_map>
 #include <string>
 
 #include "base/utilities.h"
@@ -188,8 +188,8 @@ class ObjectPool {
         id_field_name_(id_fld_name),
         next_id_(0) { }
 
-    typedef std::hash_map<int, T*>    CObjMap;
-    typedef std::hash_map<int, bool>  FlagMap;
+    typedef std::unordered_map<int, T*>    CObjMap;
+    typedef std::unordered_map<int, bool>  FlagMap;
     static ObjectPool* instance_;
     std::string jclass_name_;
     std::string id_field_name_;
