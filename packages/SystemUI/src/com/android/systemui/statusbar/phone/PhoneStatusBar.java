@@ -3123,18 +3123,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     protected void dismissKeyguardThenExecute(final OnDismissAction action,
             boolean afterKeyguardGone) {
         if (mStatusBarKeyguardViewManager.isShowing()) {
-            if (UnlockMethodCache.getInstance(mContext).isMethodInsecure()
-                    && mNotificationPanel.isLaunchTransitionRunning() && !afterKeyguardGone) {
-                action.onDismiss();
-                mNotificationPanel.setLaunchTransitionEndRunnable(new Runnable() {
-                    @Override
-                    public void run() {
-                        mStatusBarKeyguardViewManager.dismiss();
-                    }
-                });
-            } else {
-                mStatusBarKeyguardViewManager.dismissWithAction(action, afterKeyguardGone);
-            }
+            mStatusBarKeyguardViewManager.dismissWithAction(action, afterKeyguardGone);
         } else {
             action.onDismiss();
         }
