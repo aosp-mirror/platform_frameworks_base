@@ -250,6 +250,15 @@ public class Canvas {
     public void insertInorderBarrier() {}
 
     /**
+     * Set a transfer mode that overrides any transfer modes
+     * in paints used for drawing. Pass null to disable this
+     * override. Only implemented in GLES20Canvas.
+     *
+     * @hide
+     */
+    public void setOverrideXfermode(@Nullable PorterDuff.Mode xfermode) {}
+
+    /**
      * Return true if the device that the current layer draws into is opaque
      * (i.e. does not support per-pixel alpha).
      *

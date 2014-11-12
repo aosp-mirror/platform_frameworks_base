@@ -994,4 +994,15 @@ class GLES20Canvas extends HardwareCanvas {
             int indexOffset, int indexCount, Paint paint) {
         // TODO: Implement
     }
+
+    @Override
+    public void setOverrideXfermode(PorterDuff.Mode xfermode) {
+        int xfermodeValue = -1;
+        if (xfermode != null) {
+            xfermodeValue = xfermode.nativeInt;
+        }
+        nSetOverrideXfermode(mRenderer, xfermodeValue);
+    }
+
+    private static native void nSetOverrideXfermode(long renderer, int xfermode);
 }
