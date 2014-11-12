@@ -60,9 +60,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IPowerManager;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RecoverySystem;
 import android.os.RemoteCallback;
@@ -205,7 +205,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     final LocalService mLocalService;
 
-    IPowerManager mIPowerManager;
+    final PowerManager mPowerManager;
+    final PowerManagerInternal mPowerManagerInternal;
+
     IWindowManager mIWindowManager;
     NotificationManager mNotificationManager;
 
@@ -926,8 +928,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         mUserManager = UserManager.get(mContext);
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_DEVICE_ADMIN);
-        mWakeLock = ((PowerManager)context.getSystemService(Context.POWER_SERVICE))
-                .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
+        mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DPM");
         mLocalService = new LocalService();
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -1037,14 +1040,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    private IPowerManager getIPowerManager() {
-        if (mIPowerManager == null) {
-            IBinder b = ServiceManager.getService(Context.POWER_SERVICE);
-            mIPowerManager = IPowerManager.Stub.asInterface(b);
-        }
-        return mIPowerManager;
     }
 
     private IWindowManager getWindowManager() {
@@ -2730,12 +2725,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
 
             policy.mLastMaximumTimeToLock = timeMs;
-
-            try {
-                getIPowerManager().setMaximumScreenOffTimeoutFromDeviceAdmin((int)timeMs);
-            } catch (RemoteException e) {
-                Slog.w(LOG_TAG, "Failure talking with power manager", e);
-            }
+            mPowerManagerInternal.setMaximumScreenOffTimeoutFromDeviceAdmin((int)timeMs);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -2790,7 +2780,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             // Power off the display
-            getIPowerManager().goToSleep(SystemClock.uptimeMillis(),
+            mPowerManager.goToSleep(SystemClock.uptimeMillis(),
                     PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN, 0);
             // Ensure the device is locked
             new LockPatternUtils(mContext).requireCredentialEntry(UserHandle.USER_ALL);

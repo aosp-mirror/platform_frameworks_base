@@ -3141,21 +3141,6 @@ public final class PowerManagerService extends SystemService
         }
 
         /**
-         * Used by device administration to set the maximum screen off timeout.
-         *
-         * This method must only be called by the device administration policy manager.
-         */
-        @Override // Binder call
-        public void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                setMaximumScreenOffTimeoutFromDeviceAdminInternal(timeMs);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        /**
          * Used by the settings application and brightness control widgets to
          * temporarily override the current screen brightness setting so that the
          * user can observe the effect of an intended settings change without applying
@@ -3297,6 +3282,11 @@ public final class PowerManagerService extends SystemService
         @Override
         public void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis) {
             setUserActivityTimeoutOverrideFromWindowManagerInternal(timeoutMillis);
+        }
+
+        @Override
+        public void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs) {
+            setMaximumScreenOffTimeoutFromDeviceAdminInternal(timeMs);
         }
 
         @Override

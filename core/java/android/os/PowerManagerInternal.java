@@ -56,6 +56,13 @@ public abstract class PowerManagerInternal {
     public abstract void setUserActivityTimeoutOverrideFromWindowManager(long timeoutMillis);
 
     /**
+     * Used by device administration to set the maximum screen off timeout.
+     *
+     * This method must only be called by the device administration policy manager.
+     */
+    public abstract void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs);
+
+    /**
      * Used by the dream manager to override certain properties while dozing.
      *
      * @param screenState The overridden screen state, or {@link Display.STATE_UNKNOWN}
