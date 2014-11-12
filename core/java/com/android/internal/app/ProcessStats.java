@@ -2746,6 +2746,7 @@ public final class ProcessStats implements Parcelable {
         pw.print("total");
         dumpAdjTimesCheckin(pw, ",", mMemFactorDurations, mMemFactor,
                 mStartTime, now);
+        pw.println();
         if (mSysMemUsageTable != null) {
             pw.print("sysmemusage");
             for (int i=0; i<mSysMemUsageTableSize; i++) {
