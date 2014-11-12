@@ -17,11 +17,13 @@
 package com.android.systemui;
 
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -29,6 +31,8 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
@@ -42,7 +46,7 @@ public class BatteryMeterView extends View implements DemoMode,
 
     private static final boolean ENABLE_PERCENT = true;
     private static final boolean SINGLE_DIGIT_PERCENT = false;
-    private static final boolean SHOW_100_PERCENT = false;
+    private static final boolean SHOW_100_PERCENT = true;
 
     private static final int FULL = 96;
 
@@ -75,6 +79,9 @@ public class BatteryMeterView extends View implements DemoMode,
 
     private BatteryController mBatteryController;
     private boolean mPowerSaveEnabled;
+    
+    // status bar native batter percentage
+    private Context mContext;
 
     private class BatteryTracker extends BroadcastReceiver {
         public static final int UNKNOWN_LEVEL = -1;
@@ -149,7 +156,33 @@ public class BatteryMeterView extends View implements DemoMode,
         }
     }
 
+    class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_NATIVE_BATTERY_PERCENTAGE), false, this,
+                    UserHandle.USER_ALL);
+            update();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            update();
+        }
+    }
+
+    public void update() {
+        mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_NATIVE_BATTERY_PERCENTAGE, 0);
+        postInvalidate();
+    }
+
     BatteryTracker mTracker = new BatteryTracker();
+    SettingsObserver mSettingsObserver;
 
     @Override
     public void onAttachedToWindow() {
@@ -185,6 +218,10 @@ public class BatteryMeterView extends View implements DemoMode,
     public BatteryMeterView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
+        mContext = context;
+        mSettingsObserver = new SettingsObserver(new Handler());
+        mSettingsObserver.observe();
+
         final Resources res = context.getResources();
         TypedArray atts = context.obtainStyledAttributes(attrs, R.styleable.BatteryMeterView,
                 defStyle, 0);
@@ -202,8 +239,8 @@ public class BatteryMeterView extends View implements DemoMode,
         levels.recycle();
         colors.recycle();
         atts.recycle();
-        mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
-                context.getContentResolver(), "status_bar_show_battery_percent", 0);
+//        mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
+//                context.getContentResolver(), "status_bar_show_battery_percent", 0);
         mWarningString = context.getString(R.string.battery_meter_very_low_overlay_symbol);
         mCriticalLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
@@ -442,6 +479,13 @@ public class BatteryMeterView extends View implements DemoMode,
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    public void setShowPercentage(boolean show) {
+        if (ENABLE_PERCENT) {
+            mShowPercent = show;
+            postInvalidate();
+        }
     }
 
     private boolean mDemoMode;
