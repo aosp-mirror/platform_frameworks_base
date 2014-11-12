@@ -49,5 +49,4 @@ LOCAL_SHARED_LIBRARIES := \
 # part of a system image.
 LOCAL_PRELINK_MODULE := false
 
-include external/stlport/libstlport.mk
 include $(BUILD_SHARED_LIBRARY)

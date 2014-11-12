@@ -151,7 +151,6 @@ LOCAL_SHARED_LIBRARIES := \
 LOCAL_STATIC_LIBRARIES := \
     libexpat_static
 
-include external/stlport/libstlport.mk
 include $(BUILD_EXECUTABLE)
 
 endif # Not SDK_ONLY

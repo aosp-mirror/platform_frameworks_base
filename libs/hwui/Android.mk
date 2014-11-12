@@ -115,7 +115,6 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 
     LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
-    include external/stlport/libstlport.mk
     include $(BUILD_SHARED_LIBRARY)
 
     include $(call all-makefiles-under,$(LOCAL_PATH))
