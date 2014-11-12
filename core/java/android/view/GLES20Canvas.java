@@ -885,6 +885,9 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawText(CharSequence text, int start, int end, float x, float y, Paint paint) {
+        if ((start | end | (end - start) | (text.length() - end)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
         if (text instanceof String || text instanceof SpannedString ||
                 text instanceof SpannableString) {
             nDrawText(mRenderer, text.toString(), start, end, x, y, paint.mBidiFlags,

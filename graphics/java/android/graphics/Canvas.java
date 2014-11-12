@@ -1644,6 +1644,9 @@ public class Canvas {
      */
     public void drawText(@NonNull CharSequence text, int start, int end, float x, float y,
             @NonNull Paint paint) {
+        if ((start | end | (end - start) | (text.length() - end)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
             native_drawText(mNativeCanvasWrapper, text.toString(), start, end, x, y,
