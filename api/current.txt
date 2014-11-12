@@ -28511,8 +28511,8 @@ package android.telephony {
     method public android.os.Bundle getCarrierConfigValues();
     method public static android.telephony.SmsManager getDefault();
     method public static int getDefaultSmsSubscriptionId();
-    method public static android.telephony.SmsManager getSmsManagerForSubscriber(int);
-    method public int getSubId();
+    method public static android.telephony.SmsManager getSmsManagerForSubscriptionId(int);
+    method public int getSubscriptionId();
     method public void injectSmsPdu(byte[], java.lang.String, android.app.PendingIntent);
     method public void sendDataMessage(java.lang.String, java.lang.String, short, byte[], android.app.PendingIntent, android.app.PendingIntent);
     method public void sendMultimediaMessage(android.content.Context, android.net.Uri, java.lang.String, android.os.Bundle, android.app.PendingIntent);
@@ -28544,6 +28544,7 @@ package android.telephony {
     field public static final java.lang.String MMS_CONFIG_NOTIFY_WAP_MMSC_ENABLED = "enabledNotifyWapMMSC";
     field public static final java.lang.String MMS_CONFIG_RECIPIENT_LIMIT = "recipientLimit";
     field public static final java.lang.String MMS_CONFIG_SEND_MULTIPART_SMS_AS_SEPARATE_MESSAGES = "sendMultipartSmsAsSeparateMessages";
+    field public static final java.lang.String MMS_CONFIG_SHOW_CELL_BROADCAST_APP_LINKS = "config_cellBroadcastAppLinks";
     field public static final java.lang.String MMS_CONFIG_SMS_DELIVERY_REPORT_ENABLED = "enableSMSDeliveryReports";
     field public static final java.lang.String MMS_CONFIG_SMS_TO_MMS_TEXT_LENGTH_THRESHOLD = "smsToMmsTextLengthThreshold";
     field public static final java.lang.String MMS_CONFIG_SMS_TO_MMS_TEXT_THRESHOLD = "smsToMmsTextThreshold";
@@ -28559,7 +28560,6 @@ package android.telephony {
     field public static final int MMS_ERROR_RETRY = 6; // 0x6
     field public static final int MMS_ERROR_UNABLE_CONNECT_MMS = 3; // 0x3
     field public static final int MMS_ERROR_UNSPECIFIED = 1; // 0x1
-    field public static final java.lang.String MMS_SHOW_CELL_BROADCAST_APP_LINKS = "config_cellBroadcastAppLinks";
     field public static final int RESULT_ERROR_GENERIC_FAILURE = 1; // 0x1
     field public static final int RESULT_ERROR_NO_SERVICE = 4; // 0x4
     field public static final int RESULT_ERROR_NULL_PDU = 3; // 0x3
