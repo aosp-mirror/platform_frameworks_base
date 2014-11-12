@@ -29,7 +29,7 @@ import java.io.OutputStream;
  */
 public class Picture {
     private Canvas mRecordingCanvas;
-    private final long mNativePicture;
+    private long mNativePicture;
 
     private static final int WORKING_STREAM_STORAGE = 16 * 1024;
 
@@ -60,6 +60,7 @@ public class Picture {
     protected void finalize() throws Throwable {
         try {
             nativeDestructor(mNativePicture);
+            mNativePicture = 0;
         } finally {
             super.finalize();
         }

@@ -142,6 +142,7 @@ public class PathMeasure {
 
     protected void finalize() throws Throwable {
         native_destroy(native_instance);
+        native_instance = 0;  // Other finalizers can still call us.
     }
 
     private static native long native_create(long native_path, boolean forceClosed);
@@ -154,6 +155,6 @@ public class PathMeasure {
     private static native boolean native_nextContour(long native_instance);
     private static native void native_destroy(long native_instance);
 
-    /* package */private final long native_instance;
+    /* package */private long native_instance;
 }
 

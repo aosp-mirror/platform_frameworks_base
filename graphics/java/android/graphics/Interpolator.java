@@ -147,11 +147,12 @@ public class Interpolator {
     @Override
     protected void finalize() throws Throwable {
         nativeDestructor(native_instance);
+        native_instance = 0;  // Other finalizers can still call us.
     }
     
     private int mValueCount;
     private int mFrameCount;
-    private final long native_instance;
+    private long native_instance;
 
     private static native long nativeConstructor(int valueCount, int frameCount);
     private static native void nativeDestructor(long native_instance);
