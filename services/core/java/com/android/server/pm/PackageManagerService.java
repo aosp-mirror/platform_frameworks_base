@@ -1423,8 +1423,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "No SYSTEMSERVERCLASSPATH found!");
             }
 
-            boolean didDexOptLibraryOrTool = false;
-
             final List<String> allInstructionSets = getAllInstructionSets();
             final String[] dexCodeInstructionSets =
                 getDexCodeInstructionSets(allInstructionSets.toArray(new String[allInstructionSets.size()]));
@@ -1457,7 +1455,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                                 } else {
                                     mInstaller.patchoat(lib, Process.SYSTEM_UID, true, dexCodeInstructionSet);
                                 }
-                                didDexOptLibraryOrTool = true;
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Library not found: " + lib);
@@ -1508,10 +1505,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                                                                                  false);
                             if (dexoptRequired == DexFile.DEXOPT_NEEDED) {
                                 mInstaller.dexopt(path, Process.SYSTEM_UID, true, dexCodeInstructionSet);
-                                didDexOptLibraryOrTool = true;
                             } else if (dexoptRequired == DexFile.PATCHOAT_NEEDED) {
                                 mInstaller.patchoat(path, Process.SYSTEM_UID, true, dexCodeInstructionSet);
-                                didDexOptLibraryOrTool = true;
                             }
                         } catch (FileNotFoundException e) {
                             Slog.w(TAG, "Jar not found: " + path);
