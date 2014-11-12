@@ -36,7 +36,6 @@ static struct {
     jfieldID inputChannel;
     jfieldID name;
     jfieldID layoutParamsFlags;
-    jfieldID layoutParamsPrivateFlags;
     jfieldID layoutParamsType;
     jfieldID dispatchingTimeoutNanos;
     jfieldID frameLeft;
@@ -113,8 +112,6 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo->layoutParamsFlags = env->GetIntField(obj,
             gInputWindowHandleClassInfo.layoutParamsFlags);
-    mInfo->layoutParamsPrivateFlags = env->GetIntField(obj,
-            gInputWindowHandleClassInfo.layoutParamsPrivateFlags);
     mInfo->layoutParamsType = env->GetIntField(obj,
             gInputWindowHandleClassInfo.layoutParamsType);
     mInfo->dispatchingTimeout = env->GetLongField(obj,
@@ -250,9 +247,6 @@ int register_android_server_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.layoutParamsFlags, clazz,
             "layoutParamsFlags", "I");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.layoutParamsPrivateFlags, clazz,
-            "layoutParamsPrivateFlags", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.layoutParamsType, clazz,
             "layoutParamsType", "I");
