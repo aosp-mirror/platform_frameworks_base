@@ -285,7 +285,6 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
 
     private void inflateChildElements(Resources r, XmlPullParser parser, AttributeSet attrs,
             Theme theme) throws XmlPullParserException, IOException {
-        TypedArray a;
         int type;
 
         final int innerDepth = parser.getDepth()+1;
@@ -300,7 +299,8 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                 continue;
             }
 
-            a = obtainAttributes(r, theme, attrs, R.styleable.AnimationDrawableItem);
+            final TypedArray a = obtainAttributes(r, theme, attrs,
+                    R.styleable.AnimationDrawableItem);
 
             final int duration = a.getInt(R.styleable.AnimationDrawableItem_duration, -1);
             if (duration < 0) {
@@ -308,14 +308,11 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                         + ": <item> tag requires a 'duration' attribute");
             }
 
-            final int drawableRes = a.getResourceId(R.styleable.AnimationDrawableItem_drawable, 0);
+            Drawable dr = a.getDrawable(R.styleable.AnimationDrawableItem_drawable);
 
             a.recycle();
 
-            Drawable dr;
-            if (drawableRes != 0) {
-                dr = r.getDrawable(drawableRes, theme);
-            } else {
+            if (dr == null) {
                 while ((type=parser.next()) == XmlPullParser.TEXT) {
                     // Empty
                 }
