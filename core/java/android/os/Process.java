@@ -689,6 +689,20 @@ public class Process {
     }
 
     /**
+     * Tries to establish a connection to the zygote that handles a given {@code abi}. Might block and retry if the
+     * zygote is unresponsive. This method is a no-op if a connection is already open.
+     *
+     * @hide
+     */
+    public static void establishZygoteConnectionForAbi(String abi) {
+        try {
+            openZygoteSocketIfNeeded(abi);
+        } catch (ZygoteStartFailedEx ex) {
+            throw new RuntimeException("Unable to connect to zygote for abi: " + abi, ex);
+        }
+    }
+
+    /**
      * Tries to open socket to Zygote process if not already open. If
      * already open, does nothing.  May block and retry.
      */
