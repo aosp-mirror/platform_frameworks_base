@@ -54,7 +54,6 @@ static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass clazz,
 
 static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr) {
-    const size_t MAX_SECTION_NAME_LEN = 127;
     ScopedStringChars jchars(env, nameStr);
     String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
     sanitizeString(utf8Chars);
@@ -72,7 +71,6 @@ static void android_os_Trace_nativeTraceEnd(JNIEnv* env, jclass clazz,
 
 static void android_os_Trace_nativeAsyncTraceBegin(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr, jint cookie) {
-    const size_t MAX_SECTION_NAME_LEN = 127;
     ScopedStringChars jchars(env, nameStr);
     String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
     sanitizeString(utf8Chars);
@@ -83,7 +81,6 @@ static void android_os_Trace_nativeAsyncTraceBegin(JNIEnv* env, jclass clazz,
 
 static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr, jint cookie) {
-    const size_t MAX_SECTION_NAME_LEN = 127;
     ScopedStringChars jchars(env, nameStr);
     String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
     sanitizeString(utf8Chars);
@@ -138,6 +135,7 @@ int register_android_os_Trace(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/os/Trace",
             gTraceMethods, NELEM(gTraceMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    (void)res;
 
     return 0;
 }

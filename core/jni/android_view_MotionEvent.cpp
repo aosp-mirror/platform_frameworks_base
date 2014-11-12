@@ -296,7 +296,6 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
         jfloat* outValues = static_cast<jfloat*>(env->GetPrimitiveArrayCritical(
                 outValuesArray, NULL));
 
-        const float* values = rawPointerCoords->values;
         uint32_t index = 0;
         do {
             uint32_t axis = bits.clearFirstMarkedBit();
@@ -873,6 +872,7 @@ int register_android_view_MotionEvent(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/MotionEvent",
             gMotionEventMethods, NELEM(gMotionEventMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    (void)res;
 
     FIND_CLASS(gMotionEventClassInfo.clazz, "android/view/MotionEvent");
     gMotionEventClassInfo.clazz = jclass(env->NewGlobalRef(gMotionEventClassInfo.clazz));

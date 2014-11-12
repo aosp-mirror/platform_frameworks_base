@@ -26,18 +26,6 @@
 
 namespace android {
 
-// Do an sprintf starting at offset n, abort on overflow
-static int snprintfcat(char* buf, int off, int size, const char* format, ...)
-        __attribute__((__format__(__printf__, 4, 5)));
-static int snprintfcat(char* buf, int off, int size, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    int n = vsnprintf(buf + off, size - off, format, args);
-    LOG_ALWAYS_FATAL_IF(n >= size - off, "String overflow in setting layout properties");
-    va_end(args);
-    return off + n;
-}
-
 void MinikinUtils::doLayout(Layout* layout, const Paint* paint, int bidiFlags, TypefaceImpl* typeface,
         const uint16_t* buf, size_t start, size_t count, size_t bufSize) {
     TypefaceImpl* resolvedFace = TypefaceImpl_resolveDefault(typeface);

@@ -421,6 +421,7 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/InputEventReceiver",
             gMethods, NELEM(gMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    (void)res;
 
     FIND_CLASS(gInputEventReceiverClassInfo.clazz, "android/view/InputEventReceiver");
 
