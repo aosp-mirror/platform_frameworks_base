@@ -27,6 +27,8 @@
 
 #include "common_time_server.h"
 
+#include <inttypes.h>
+
 namespace android {
 
 //
@@ -286,7 +288,7 @@ void CommonTimeServer::reevaluateAutoDisableState(bool commonClockHasClients) {
 #define checked_percentage(a, b) ((0 == b) ? 0.0f : ((100.0f * a) / b))
 
 status_t CommonTimeServer::dumpClockInterface(int fd,
-                                              const Vector<String16>& args,
+                                              const Vector<String16>& /* args */,
                                               size_t activeClients) {
     AutoMutex _lock(&mLock);
     const size_t SIZE = 256;
@@ -308,15 +310,15 @@ status_t CommonTimeServer::dumpClockInterface(int fd,
         synced     = (OK == mCommonClock.localToCommon(localTime, &commonTime));
         sockaddrToString(mMasterEP, mMasterEPValid, maStr, sizeof(maStr));
 
-        dump_printf("Common Clock Service Status\nLocal time     : %lld\n",
+        dump_printf("Common Clock Service Status\nLocal time     : %" PRId64 "\n",
                     localTime);
 
         if (synced)
-            dump_printf("Common time    : %lld\n", commonTime);
+            dump_printf("Common time    : %" PRId64 "\n", commonTime);
         else
             dump_printf("Common time    : %s\n", "not synced");
 
-        dump_printf("Timeline ID    : %016llx\n", mTimelineID);
+        dump_printf("Timeline ID    : %016" PRIu64 "\n", mTimelineID);
         dump_printf("State          : %s\n", stateToString(mState));
         dump_printf("Master Addr    : %s\n", maStr);
 
@@ -349,10 +351,10 @@ status_t CommonTimeServer::dumpClockInterface(int fd,
             int64_t localDelta, usecDelta;
             localDelta = localTime - mClient_LastGoodSyncRX;
             usecDelta  = mCommonClock.localDurationToCommonDuration(localDelta);
-            dump_printf("Last Good RX   : %lld uSec ago\n", usecDelta);
+            dump_printf("Last Good RX   : %" PRId64 " uSec ago\n", usecDelta);
         }
 
-        dump_printf("Active Clients : %u\n", activeClients);
+        dump_printf("Active Clients : %zu\n", activeClients);
         mClient_PacketRTTLog.dumpLog(fd, mCommonClock);
         mStateChangeLog.dumpLog(fd);
         mElectionLog.dumpLog(fd);
@@ -363,7 +365,7 @@ status_t CommonTimeServer::dumpClockInterface(int fd,
 }
 
 status_t CommonTimeServer::dumpConfigInterface(int fd,
-                                               const Vector<String16>& args) {
+                                               const Vector<String16>& /* args */) {
     AutoMutex _lock(&mLock);
     const size_t SIZE = 256;
     char buffer[SIZE];
@@ -383,7 +385,7 @@ status_t CommonTimeServer::dumpConfigInterface(int fd,
                     "Bound Interface           : %s\n",
                     mBindIfaceValid ? mBindIface.string() : "<unbound>");
         dump_printf("Master Election Endpoint  : %s\n", meStr);
-        dump_printf("Master Election Group ID  : %016llx\n", mSyncGroupID);
+        dump_printf("Master Election Group ID  : %016" PRIu64 "\n", mSyncGroupID);
         dump_printf("Master Announce Interval  : %d mSec\n",
                     mMasterAnnounceIntervalMs);
         dump_printf("Client Sync Interval      : %d mSec\n",
@@ -419,12 +421,12 @@ void CommonTimeServer::PacketRTTLog::dumpLog(int fd, const CommonClock& cclk) {
         if (rxTimes[i]) {
             int64_t delta = rxTimes[i] - txTimes[i];
             int64_t deltaUsec = cclk.localDurationToCommonDuration(delta);
-            dump_printf("pkt[%2d] : localTX %12lld localRX %12lld "
+            dump_printf("pkt[%2d] : localTX %12" PRId64 " localRX %12" PRId64 " "
                         "(%.3f msec RTT)\n",
                         ndx, txTimes[i], rxTimes[i],
                         static_cast<float>(deltaUsec) / 1000.0);
         } else {
-            dump_printf("pkt[%2d] : localTX %12lld localRX never\n",
+            dump_printf("pkt[%2d] : localTX %12" PRId64 " localRX never\n",
                         ndx, txTimes[i]);
         }
         i = (i + 1) % RTT_LOG_SIZE;
