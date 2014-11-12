@@ -72,6 +72,9 @@ import android.provider.Settings;
 import android.provider.Telephony.Carriers;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.SmsMessage;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionListener;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
@@ -88,6 +91,7 @@ import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -452,25 +456,34 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     || Intent.ACTION_SCREEN_OFF.equals(action)
                     || Intent.ACTION_SCREEN_ON.equals(action)) {
                 updateLowPowerMode();
-            } else if (action.equals(SIM_STATE_CHANGED)
-                    || action.equals(TelephonyIntents.ACTION_SUBINFO_CONTENT_CHANGE)
-                    || action.equals(TelephonyIntents.ACTION_SUBINFO_RECORD_UPDATED)) {
-                Log.d(TAG, "received SIM realted action: " + action);
-                TelephonyManager phone = (TelephonyManager)
-                        mContext.getSystemService(Context.TELEPHONY_SERVICE);
-                String mccMnc = phone.getSimOperator();
-                if (!TextUtils.isEmpty(mccMnc)) {
-                    Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
-                    synchronized (mLock) {
-                        reloadGpsProperties(context, mProperties);
-                        mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
-                    }
-                } else {
-                    Log.d(TAG, "SIM MCC/MNC is still not available");
-                }
+            } else if (action.equals(SIM_STATE_CHANGED)) {
+                subscriptionOrSimChanged(context);
             }
         }
     };
+
+    private final SubscriptionListener mSubscriptionListener = new SubscriptionListener() {
+        @Override
+        public void onSubscriptionInfoChanged() {
+            subscriptionOrSimChanged(mContext);
+        }
+    };
+
+    private void subscriptionOrSimChanged(Context context) {
+        Log.d(TAG, "received SIM realted action: ");
+        TelephonyManager phone = (TelephonyManager)
+                mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        String mccMnc = phone.getSimOperator();
+        if (!TextUtils.isEmpty(mccMnc)) {
+            Log.d(TAG, "SIM MCC/MNC is available: " + mccMnc);
+            synchronized (mLock) {
+                reloadGpsProperties(context, mProperties);
+                mNIHandler.setSuplEsEnabled(mSuplEsEnabled);
+            }
+        } else {
+            Log.d(TAG, "SIM MCC/MNC is still not available");
+        }
+    }
 
     private void checkSmsSuplInit(Intent intent) {
         SmsMessage[] messages = Intents.getMessagesFromIntent(intent);
@@ -626,6 +639,16 @@ public class GpsLocationProvider implements LocationProviderInterface {
                                                 mNetInitiatedListener,
                                                 mSuplEsEnabled);
 
+        // TODO: When this object "finishes" we should unregister by invoking
+        // SubscriptionManager.unregister(mContext, mSubscriptionListener);
+        // This is not strictly necessary because it will be unregistered if the
+        // notification fails but it is good form.
+
+        // Register for SubscriptionInfo list changes which is guaranteed
+        // to invoke onSubscriptionInfoChanged the first time.
+        SubscriptionManager.register(mContext, mSubscriptionListener,
+                SubscriptionListener.LISTEN_SUBSCRIPTION_INFO_LIST_CHANGED);
+
         // construct handler, listen for events
         mHandler = new ProviderHandler(looper);
         listenForBroadcasts();
@@ -735,10 +758,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(SIM_STATE_CHANGED);
-        // TODO: remove the use TelephonyIntents. We are using it because SIM_STATE_CHANGED
-        // is not reliable at the moment.
-        intentFilter.addAction(TelephonyIntents.ACTION_SUBINFO_CONTENT_CHANGE);
-        intentFilter.addAction(TelephonyIntents.ACTION_SUBINFO_RECORD_UPDATED);
         mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, mHandler);
     }
 
