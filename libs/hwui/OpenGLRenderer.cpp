@@ -473,8 +473,6 @@ bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
             && layer->renderNode.get() && layer->renderNode->isRenderable()) {
         ATRACE_CALL();
 
-        Rect& dirty = layer->dirtyRect;
-
         if (inFrame) {
             endTiling();
             debugOverdraw(false, false);
@@ -762,8 +760,10 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
  */
 bool OpenGLRenderer::createLayer(float left, float top, float right, float bottom,
         const SkPaint* paint, int flags, const SkPath* convexMask) {
-    LAYER_LOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
-    LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
+    if (kDebugLayers) {
+        ALOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
+        ALOGD("Layer cache size = %d", mCaches.layerCache.getSize());
+    }
 
     const bool fboLayer = flags & SkCanvas::kClipToLayer_SaveFlag;
 
@@ -941,7 +941,9 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
     // Failing to add the layer to the cache should happen only if the layer is too large
     layer->setConvexMask(NULL);
     if (!mCaches.layerCache.put(layer)) {
-        LAYER_LOGD("Deleting layer");
+        if (kDebugLayers) {
+            ALOGD("Deleting layer");
+        }
         layer->decStrong(0);
     }
 }
@@ -1959,8 +1961,6 @@ void OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t
 }
 
 void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, const SkPaint* paint) {
-    int color = paint != NULL ? paint->getColor() : 0;
-
     float x = left;
     float y = top;
 
@@ -2382,7 +2382,7 @@ void OpenGLRenderer::drawVertexBuffer(float translateX, float translateY,
     setupDrawShaderUniforms(getShader(paint));
 
     const void* vertices = vertexBuffer.getBuffer();
-    bool force = mCaches.unbindMeshBuffer();
+    mCaches.unbindMeshBuffer();
     mCaches.bindPositionVertexPointer(true, vertices, isAA ? gAlphaVertexStride : gVertexStride);
     mCaches.resetTexCoordsVertexPointer();
 
@@ -3183,14 +3183,6 @@ void OpenGLRenderer::drawRects(const float* rects, int count, const SkPaint* pai
     }
 
     drawColorRects(rects, count, paint, false, true, true);
-}
-
-static void mapPointFakeZ(Vector3& point, const mat4& transformXY, const mat4& transformZ) {
-    // map z coordinate with true 3d matrix
-    point.z = transformZ.mapZ(point);
-
-    // map x,y coordinates with draw/Skia matrix
-    transformXY.mapPoint(point.x, point.y);
 }
 
 void OpenGLRenderer::drawShadow(float casterAlpha,
