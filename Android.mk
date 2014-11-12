@@ -733,14 +733,14 @@ sample_groups := -samplegroup Background \
                  -samplegroup Content \
                  -samplegroup Input \
                  -samplegroup Media \
+                 -samplegroup Notification \
                  -samplegroup RenderScript \
                  -samplegroup Security \
                  -samplegroup Sensors \
                  -samplegroup Testing \
                  -samplegroup UI \
                  -samplegroup Views \
-                 -samplegroup Wearable \
-                 -samplegroup Notification
+                 -samplegroup Wearable
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
