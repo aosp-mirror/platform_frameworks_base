@@ -160,11 +160,27 @@ public class DisconnectCause {
      */
     public static final int OUTGOING_CANCELED = 44;
 
+    /**
+     * The call, which was an IMS call, disconnected because it merged with another call.
+     */
+    public static final int IMS_MERGED_SUCCESSFULLY = 45;
+
+    //*********************************************************************************************
+    // When adding a disconnect type:
+    // 1) Please assign the new type the next id value below.
+    // 2) Increment the next id value below to a new value.
+    // 3) Update MAXIMUM_VALID_VALUE to the new disconnect type.
+    // 4) Update toString() with the newly added disconnect type.
+    // 5) Update android.telecom.DisconnectCauseUtil with any mappings to a telecom.DisconnectCause.
+    //
+    // NextId: 46
+    //*********************************************************************************************
+
     /** Smallest valid value for call disconnect codes. */
     public static final int MINIMUM_VALID_VALUE = NOT_DISCONNECTED;
 
     /** Largest valid value for call disconnect codes. */
-    public static final int MAXIMUM_VALID_VALUE = OUTGOING_CANCELED;
+    public static final int MAXIMUM_VALID_VALUE = IMS_MERGED_SUCCESSFULLY;
 
     /** Private constructor to avoid class instantiation. */
     private DisconnectCause() {
@@ -262,6 +278,8 @@ public class DisconnectCause {
             return "OUTGOING_FAILURE";
         case OUTGOING_CANCELED:
             return "OUTGOING_CANCELED";
+        case IMS_MERGED_SUCCESSFULLY:
+            return "IMS_MERGED_SUCCESSFULLY";
         default:
             return "INVALID: " + cause;
         }
