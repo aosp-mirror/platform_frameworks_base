@@ -1452,14 +1452,13 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (receiver == null) {
             receiver = new Receiver(listener, null, pid, uid, packageName, workSource,
                     hideFromAppOps);
-            mReceivers.put(binder, receiver);
-
             try {
                 receiver.getListener().asBinder().linkToDeath(receiver, 0);
             } catch (RemoteException e) {
                 Slog.e(TAG, "linkToDeath failed:", e);
                 return null;
             }
+            mReceivers.put(binder, receiver);
         }
         return receiver;
     }
