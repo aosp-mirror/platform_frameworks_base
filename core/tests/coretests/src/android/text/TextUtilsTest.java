@@ -353,6 +353,7 @@ public class TextUtilsTest extends TestCase {
         assertNull("null CharSequence should generate null from parcel", text);
         p = Parcel.obtain();
         TextUtils.writeToParcel("test", p, 0);
+        p.setDataPosition(0);
         text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
         assertEquals("conversion to/from parcel failed", "test", text);
     }
