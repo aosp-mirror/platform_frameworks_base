@@ -179,6 +179,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         SECURE_SETTINGS_WHITELIST = new HashSet();
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.SKIP_FIRST_USE_HINTS);
+        SECURE_SETTINGS_WHITELIST.add(Settings.Secure.INSTALL_NON_MARKET_APPS);
 
         SECURE_SETTINGS_DEVICEOWNER_WHITELIST = new HashSet();
         SECURE_SETTINGS_DEVICEOWNER_WHITELIST.addAll(SECURE_SETTINGS_WHITELIST);
