@@ -935,7 +935,15 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * being visible.
      */
     boolean isOnScreen() {
-        if (!mHasSurface || !mPolicyVisibility || mDestroying) {
+        return mPolicyVisibility && isOnScreenIgnoringKeyguard();
+    }
+
+    /**
+     * Like isOnScreen(), but ignores any force hiding of the window due
+     * to the keyguard.
+     */
+    boolean isOnScreenIgnoringKeyguard() {
+        if (!mHasSurface || mDestroying) {
             return false;
         }
         final AppWindowToken atoken = mAppToken;
