@@ -17,46 +17,50 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/time_header"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="@dimen/timepicker_separator_padding"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="bottom"
+        android:orientation="horizontal">
+
         <TextView
             android:id="@+id/hours"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/separator"
-            android:layout_centerVertical="true" />
+            android:gravity="end" />
+
         <TextView
             android:id="@+id/separator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/timepicker_separator_padding"
-            android:paddingRight="@dimen/timepicker_separator_padding"
-            android:layout_centerInParent="true"
+            android:layout_marginLeft="@dimen/timepicker_separator_padding"
+            android:layout_marginRight="@dimen/timepicker_separator_padding"
             android:importantForAccessibility="no" />
+
         <TextView
             android:id="@+id/minutes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/separator"
-            android:layout_centerVertical="true" />
+            android:gravity="start" />
+
         <LinearLayout
             android:id="@+id/ampm_layout"
-            android:layout_alignBaseline="@+id/minutes"
-            android:layout_toEndOf="@+id/separator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:baselineAlignedChildIndex="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:baselineAlignedChildIndex="1">
             <CheckedTextView
                 android:id="@+id/am_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="@dimen/timepicker_ampm_horizontal_padding"
-                android:paddingTop="@dimen/timepicker_ampm_vertical_padding"
                 android:paddingEnd="@dimen/timepicker_ampm_horizontal_padding"
-                android:paddingBottom="@dimen/timepicker_am_bottom_padding"
+                android:paddingTop="@dimen/timepicker_ampm_vertical_padding"
                 android:lines="1"
                 android:ellipsize="none" />
             <CheckedTextView
@@ -64,11 +68,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="@dimen/timepicker_ampm_horizontal_padding"
-                android:paddingTop="@dimen/timepicker_pm_top_padding"
                 android:paddingEnd="@dimen/timepicker_ampm_horizontal_padding"
-                android:paddingBottom="@dimen/timepicker_ampm_vertical_padding"
+                android:paddingTop="@dimen/timepicker_pm_top_padding"
                 android:lines="1"
                 android:ellipsize="none" />
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 </FrameLayout>
