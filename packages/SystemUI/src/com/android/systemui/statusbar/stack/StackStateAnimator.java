@@ -794,6 +794,11 @@ public class StackStateAnimator {
                         mHostLayout.getOverlay().remove(changingView);
                     }
                 });
+            }  else if (event.animationType ==
+                NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
+                // A race condition can trigger the view to be added to the overlay even though
+                // it is swiped out. So let's remove it
+                mHostLayout.getOverlay().remove(changingView);
             }
             mNewEvents.add(event);
         }
