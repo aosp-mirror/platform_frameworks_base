@@ -124,6 +124,11 @@ public class PhoneAccount implements Parcelable {
      */
     public static final int NO_COLOR = -1;
 
+    /**
+     * Indicating no resource ID is set.
+     */
+    public static final int NO_RESOURCE_ID = -1;
+
     private final PhoneAccountHandle mAccountHandle;
     private final Uri mAddress;
     private final Uri mSubscriptionAddress;
@@ -131,7 +136,8 @@ public class PhoneAccount implements Parcelable {
     private final int mIconResId;
     private final String mIconPackageName;
     private final Bitmap mIconBitmap;
-    private final int mColor;
+    private final int mIconTint;
+    private final int mHighlightColor;
     private final CharSequence mLabel;
     private final CharSequence mShortDescription;
     private final List<String> mSupportedUriSchemes;
@@ -147,7 +153,8 @@ public class PhoneAccount implements Parcelable {
         private int mIconResId;
         private String mIconPackageName;
         private Bitmap mIconBitmap;
-        private int mColor = NO_COLOR;
+        private int mIconTint = NO_COLOR;
+        private int mHighlightColor = NO_COLOR;
         private CharSequence mLabel;
         private CharSequence mShortDescription;
         private List<String> mSupportedUriSchemes = new ArrayList<String>();
@@ -174,7 +181,8 @@ public class PhoneAccount implements Parcelable {
             mIconResId = phoneAccount.getIconResId();
             mIconPackageName = phoneAccount.getIconPackageName();
             mIconBitmap = phoneAccount.getIconBitmap();
-            mColor = phoneAccount.getColor();
+            mIconTint = phoneAccount.getIconTint();
+            mHighlightColor = phoneAccount.getHighlightColor();
             mLabel = phoneAccount.getLabel();
             mShortDescription = phoneAccount.getShortDescription();
             mSupportedUriSchemes.addAll(phoneAccount.getSupportedUriSchemes());
@@ -214,46 +222,76 @@ public class PhoneAccount implements Parcelable {
         }
 
         /**
-         * Sets the icon resource ID. See {@link PhoneAccount#getIconResId}.
+         * Sets the icon. See {@link PhoneAccount#createIconDrawable}.
          *
-         * @param value The resource ID of the icon.
+         * @param packageContext The package from which to load an icon.
+         * @param iconResId The resource in {@code iconPackageName} representing the icon.
          * @return The builder.
          */
-        public Builder setIconResId(int value) {
-            this.mIconResId = value;
+        public Builder setIcon(Context packageContext, int iconResId) {
+            return setIcon(packageContext.getPackageName(), iconResId);
+        }
+
+        /**
+         * Sets the icon. See {@link PhoneAccount#createIconDrawable}.
+         *
+         * @param iconPackageName The package from which to load an icon.
+         * @param iconResId The resource in {@code iconPackageName} representing the icon.
+         * @return The builder.
+         */
+        public Builder setIcon(String iconPackageName, int iconResId) {
+            return setIcon(iconPackageName, iconResId, NO_COLOR);
+        }
+
+        /**
+         * Sets the icon. See {@link PhoneAccount#createIconDrawable}.
+         *
+         * @param packageContext The package from which to load an icon.
+         * @param iconResId The resource in {@code iconPackageName} representing the icon.
+         * @param iconTint A color with which to tint this icon.
+         * @return The builder.
+         */
+        public Builder setIcon(Context packageContext, int iconResId, int iconTint) {
+            return setIcon(packageContext.getPackageName(), iconResId, iconTint);
+        }
+
+        /**
+         * Sets the icon. See {@link PhoneAccount#createIconDrawable}.
+         *
+         * @param iconPackageName The package from which to load an icon.
+         * @param iconResId The resource in {@code iconPackageName} representing the icon.
+         * @param iconTint A color with which to tint this icon.
+         * @return The builder.
+         */
+        public Builder setIcon(String iconPackageName, int iconResId, int iconTint) {
+            this.mIconPackageName = iconPackageName;
+            this.mIconResId = iconResId;
+            this.mIconTint = iconTint;
             return this;
         }
 
         /**
-         * Sets the icon package name. See {@link PhoneAccount#getIconPackageName}.
+         * Sets the icon. See {@link PhoneAccount#createIconDrawable}.
          *
-         * @param value The name of the package from which to load the icon.
+         * @param iconBitmap The icon bitmap.
          * @return The builder.
          */
-        public Builder setIconPackageName(String value) {
-            this.mIconPackageName = value;
+        public Builder setIcon(Bitmap iconBitmap) {
+            this.mIconBitmap = iconBitmap;
+            this.mIconPackageName = null;
+            this.mIconResId = NO_RESOURCE_ID;
+            this.mIconTint = NO_COLOR;
             return this;
         }
 
         /**
-         * Sets the icon bitmap. See {@link PhoneAccount#getIconBitmap}.
+         * Sets the highlight color. See {@link PhoneAccount#getHighlightColor}.
          *
-         * @param value The icon bitmap.
+         * @param value The highlight color.
          * @return The builder.
          */
-        public Builder setIconBitmap(Bitmap value) {
-            this.mIconBitmap = value;
-            return this;
-        }
-
-        /**
-         * Sets the color. See {@link PhoneAccount#getColor}.
-         *
-         * @param value The resource ID of the icon.
-         * @return The builder.
-         */
-        public Builder setColor(int value) {
-            this.mColor = value;
+        public Builder setHighlightColor(int value) {
+            this.mHighlightColor = value;
             return this;
         }
 
@@ -318,7 +356,8 @@ public class PhoneAccount implements Parcelable {
                     mIconResId,
                     mIconPackageName,
                     mIconBitmap,
-                    mColor,
+                    mIconTint,
+                    mHighlightColor,
                     mLabel,
                     mShortDescription,
                     mSupportedUriSchemes);
@@ -333,7 +372,8 @@ public class PhoneAccount implements Parcelable {
             int iconResId,
             String iconPackageName,
             Bitmap iconBitmap,
-            int color,
+            int iconTint,
+            int highlightColor,
             CharSequence label,
             CharSequence shortDescription,
             List<String> supportedUriSchemes) {
@@ -344,7 +384,8 @@ public class PhoneAccount implements Parcelable {
         mIconResId = iconResId;
         mIconPackageName = iconPackageName;
         mIconBitmap = iconBitmap;
-        mColor = color;
+        mIconTint = iconTint;
+        mHighlightColor = highlightColor;
         mLabel = label;
         mShortDescription = shortDescription;
         mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
@@ -474,7 +515,7 @@ public class PhoneAccount implements Parcelable {
      * this method of indicating the icon rather than using {@link #getIconBitmap()}, since it
      * leads to less resource usage.
      * <p>
-     * Clients wishing to display a {@code PhoneAccount} should use {@link #getIcon(Context)}.
+     * Clients wishing to display a {@code PhoneAccount} should use {@link #createIconDrawable(Context)}.
      *
      * @return A resource ID.
      */
@@ -488,7 +529,7 @@ public class PhoneAccount implements Parcelable {
      * If this property is {@code null}, the resource {@link #getIconResId()} will be loaded from
      * the package in the {@link ComponentName} of the {@link #getAccountHandle()}.
      * <p>
-     * Clients wishing to display a {@code PhoneAccount} should use {@link #getIcon(Context)}.
+     * Clients wishing to display a {@code PhoneAccount} should use {@link #createIconDrawable(Context)}.
      *
      * @return A package name.
      */
@@ -497,12 +538,12 @@ public class PhoneAccount implements Parcelable {
     }
 
     /**
-     * A highlight color to use in displaying information about this {@code PhoneAccount}.
+     * A tint to apply to the icon of this {@code PhoneAccount}.
      *
      * @return A hexadecimal color value.
      */
-    public int getColor() {
-        return mColor;
+    public int getIconTint() {
+        return mIconTint;
     }
 
     /**
@@ -511,12 +552,22 @@ public class PhoneAccount implements Parcelable {
      * If this property is specified, it is to be considered the preferred icon. Otherwise, the
      * resource specified by {@link #getIconResId()} should be used.
      * <p>
-     * Clients wishing to display a {@code PhoneAccount} should use {@link #getIcon(Context)}.
+     * Clients wishing to display a {@code PhoneAccount} should use
+     * {@link #createIconDrawable(Context)}.
      *
      * @return A bitmap.
      */
     public Bitmap getIconBitmap() {
         return mIconBitmap;
+    }
+
+    /**
+     * A highlight color to use in displaying information about this {@code PhoneAccount}.
+     *
+     * @return A hexadecimal color value.
+     */
+    public int getHighlightColor() {
+        return mHighlightColor;
     }
 
     /**
@@ -528,25 +579,26 @@ public class PhoneAccount implements Parcelable {
      *
      * @return An icon for this {@code PhoneAccount}.
      */
-    public Drawable getIcon(Context context) {
+    public Drawable createIconDrawable(Context context) {
         if (mIconBitmap != null) {
             return new BitmapDrawable(context.getResources(), mIconBitmap);
         }
 
         if (mIconResId != 0) {
-            String packageName = mIconPackageName == null
-                    ? mAccountHandle.getComponentName().getPackageName()
-                    : mIconPackageName;
-
             try {
-                Context packageContext = context.createPackageContext(packageName, 0);
+                Context packageContext = context.createPackageContext(mIconPackageName, 0);
                 try {
-                    return packageContext.getDrawable(mIconResId);
+                    Drawable iconDrawable = packageContext.getDrawable(mIconResId);
+                    if (mIconTint != NO_COLOR) {
+                        iconDrawable.setTint(mIconTint);
+                    }
+                    return iconDrawable;
                 } catch (NotFoundException | MissingResourceException e) {
-                    Log.e(this, e, "Cannot find icon %d in package %s", mIconResId, packageName);
+                    Log.e(this, e, "Cannot find icon %d in package %s",
+                            mIconResId, mIconPackageName);
                 }
             } catch (PackageManager.NameNotFoundException e) {
-                Log.w(this, "Cannot find package %s", packageName);
+                Log.w(this, "Cannot find package %s", mIconPackageName);
             }
         }
 
@@ -564,17 +616,37 @@ public class PhoneAccount implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeParcelable(mAccountHandle, 0);
-        out.writeParcelable(mAddress, 0);
-        out.writeParcelable(mSubscriptionAddress, 0);
+        if (mAccountHandle == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(1);
+            mAccountHandle.writeToParcel(out, flags);
+        }
+        if (mAddress == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(1);
+            mAddress.writeToParcel(out, flags);
+        }
+        if (mSubscriptionAddress == null) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(1);
+            mSubscriptionAddress.writeToParcel(out, flags);
+        }
         out.writeInt(mCapabilities);
         out.writeInt(mIconResId);
         out.writeString(mIconPackageName);
-        out.writeParcelable(mIconBitmap, 0);
-        out.writeInt(mColor);
+        if (mIconBitmap == null) {
+            out.writeInt(0);
+        } else {
+            mIconBitmap.writeToParcel(out, flags);
+        }
+        out.writeInt(mIconTint);
+        out.writeInt(mHighlightColor);
         out.writeCharSequence(mLabel);
         out.writeCharSequence(mShortDescription);
-        out.writeList(mSupportedUriSchemes);
+        out.writeStringList(mSupportedUriSchemes);
     }
 
     public static final Creator<PhoneAccount> CREATOR
@@ -591,22 +663,34 @@ public class PhoneAccount implements Parcelable {
     };
 
     private PhoneAccount(Parcel in) {
-        ClassLoader classLoader = PhoneAccount.class.getClassLoader();
-
-        mAccountHandle = in.readParcelable(getClass().getClassLoader());
-        mAddress = in.readParcelable(getClass().getClassLoader());
-        mSubscriptionAddress = in.readParcelable(getClass().getClassLoader());
+        if (in.readInt() > 0) {
+            mAccountHandle = PhoneAccountHandle.CREATOR.createFromParcel(in);
+        } else {
+            mAccountHandle = null;
+        }
+        if (in.readInt() > 0) {
+            mAddress = Uri.CREATOR.createFromParcel(in);
+        } else {
+            mAddress = null;
+        }
+        if (in.readInt() > 0) {
+            mSubscriptionAddress = Uri.CREATOR.createFromParcel(in);
+        } else {
+            mSubscriptionAddress = null;
+        }
         mCapabilities = in.readInt();
         mIconResId = in.readInt();
         mIconPackageName = in.readString();
-        mIconBitmap = in.readParcelable(getClass().getClassLoader());
-        mColor = in.readInt();
+        if (in.readInt() > 0) {
+            mIconBitmap = Bitmap.CREATOR.createFromParcel(in);
+        } else {
+            mIconBitmap = null;
+        }
+        mIconTint = in.readInt();
+        mHighlightColor = in.readInt();
         mLabel = in.readCharSequence();
         mShortDescription = in.readCharSequence();
-
-        List<String> supportedUriSchemes = new ArrayList<>();
-        in.readList(supportedUriSchemes, classLoader);
-        mSupportedUriSchemes = Collections.unmodifiableList(supportedUriSchemes);
+        mSupportedUriSchemes = Collections.unmodifiableList(in.createStringArrayList());
     }
 
     @Override
