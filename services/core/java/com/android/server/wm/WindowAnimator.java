@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static com.android.server.wm.WindowManagerService.DEBUG_KEYGUARD;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowManagerService.LayoutFields.SET_WALLPAPER_MAY_CHANGE;
@@ -330,7 +331,9 @@ public class WindowAnimator {
                             + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
                     final boolean hideWhenLocked = !((win.mIsImWindow && showImeOverKeyguard) ||
-                            (appShowWhenLocked != null && appShowWhenLocked == win.mAppToken));
+                            (appShowWhenLocked != null && (appShowWhenLocked == win.mAppToken ||
+                                    // Show error dialogs over apps that dismiss keyguard.
+                                    (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0)));
                     if (((mForceHiding == KEYGUARD_ANIMATING_IN)
                                 && (!winAnimator.isAnimating() || hideWhenLocked))
                             || ((mForceHiding == KEYGUARD_SHOWN) && hideWhenLocked)) {
