@@ -160,6 +160,9 @@ JNIAudioPortCallback::~JNIAudioPortCallback()
 {
     // remove global references
     JNIEnv *env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        return;
+    }
     env->DeleteGlobalRef(mObject);
     env->DeleteGlobalRef(mClass);
 }
@@ -167,7 +170,9 @@ JNIAudioPortCallback::~JNIAudioPortCallback()
 void JNIAudioPortCallback::sendEvent(int event)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-
+    if (env == NULL) {
+        return;
+    }
     env->CallStaticVoidMethod(mClass, gPostEventFromNative, mObject,
                               event, 0, 0, NULL);
     if (env->ExceptionCheck()) {
