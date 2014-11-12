@@ -289,14 +289,14 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
             }
 
             beginTheta += dTheta;
-            Vector2 beginRadialOffset = {cos(beginTheta), sin(beginTheta)};
+            Vector2 beginRadialOffset = {cosf(beginTheta), sinf(beginTheta)};
             paintInfo.scaleOffsetForStrokeWidth(beginRadialOffset);
             Vertex::set(&buffer[capOffset],
                     vertices[0].x + beginRadialOffset.x,
                     vertices[0].y + beginRadialOffset.y);
 
             endTheta += dTheta;
-            Vector2 endRadialOffset = {cos(endTheta), sin(endTheta)};
+            Vector2 endRadialOffset = {cosf(endTheta), sinf(endTheta)};
             paintInfo.scaleOffsetForStrokeWidth(endRadialOffset);
             Vertex::set(&buffer[allocSize - 1 - capOffset],
                     vertices[lastIndex].x + endRadialOffset.x,
@@ -467,7 +467,7 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
         for (int i = 0; i < extra; i++) {
             theta += dTheta;
 
-            Vector2 radialOffset = {cos(theta), sin(theta)};
+            Vector2 radialOffset = {cosf(theta), sinf(theta)};
 
             // scale to compensate for pinching at sharp angles, see totalOffsetFromNormals()
             radialOffset *= radialScale;

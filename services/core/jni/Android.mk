@@ -27,8 +27,6 @@ LOCAL_SRC_FILES += \
     $(LOCAL_REL_DIR)/com_android_server_PersistentDataBlockService.cpp \
     $(LOCAL_REL_DIR)/onload.cpp
 
-include external/stlport/libstlport.mk
-
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
     frameworks/base/services \
@@ -37,8 +35,8 @@ LOCAL_C_INCLUDES += \
     frameworks/native/services \
     libcore/include \
     libcore/include/libsuspend \
-	$(call include-path-for, libhardware)/hardware \
-	$(call include-path-for, libhardware_legacy)/hardware_legacy \
+    $(call include-path-for, libhardware)/hardware \
+    $(call include-path-for, libhardware_legacy)/hardware_legacy \
 
 LOCAL_SHARED_LIBRARIES += \
     libandroid_runtime \

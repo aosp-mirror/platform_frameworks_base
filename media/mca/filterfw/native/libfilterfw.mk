@@ -18,9 +18,6 @@ FFW_PATH := $(call my-dir)
 
 # Uncomment the requirements below, once we need them:
 
-# STLport
-include external/stlport/libstlport.mk
-
 # Neven FaceDetect SDK
 #LOCAL_C_INCLUDES += external/neven/FaceRecEm/common/src/b_FDSDK \
 #	external/neven/FaceRecEm/common/src \
