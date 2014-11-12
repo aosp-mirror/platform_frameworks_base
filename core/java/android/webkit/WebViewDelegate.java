@@ -97,7 +97,7 @@ public final class WebViewDelegate {
      * @param canvas a hardware accelerated canvas (see {@link Canvas#isHardwareAccelerated()})
      * @param nativeDrawGLFunctor the pointer to the native functor that implements
      *        system/core/include/utils/Functor.h
-     * @throw IllegalArgumentException if the canvas is not hardware accelerated
+     * @throws IllegalArgumentException if the canvas is not hardware accelerated
      */
     public void callDrawGlFunction(Canvas canvas, long nativeDrawGLFunctor) {
         if (!(canvas instanceof HardwareCanvas)) {
