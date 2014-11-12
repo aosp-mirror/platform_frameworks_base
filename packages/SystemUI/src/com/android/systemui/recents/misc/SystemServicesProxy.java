@@ -244,6 +244,7 @@ public class SystemServicesProxy {
 
         Bitmap thumbnail = SystemServicesProxy.getThumbnail(mAm, taskId);
         if (thumbnail != null) {
+            thumbnail.setHasAlpha(false);
             // We use a dumb heuristic for now, if the thumbnail is purely transparent in the top
             // left pixel, then assume the whole thumbnail is transparent. Generally, proper
             // screenshots are always composed onto a bitmap that has no alpha.
