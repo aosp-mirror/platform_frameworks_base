@@ -38,7 +38,7 @@ public:
     ANDROID_API DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer);
     ANDROID_API ~DeferredLayerUpdater();
 
-    ANDROID_API bool setSize(uint32_t width, uint32_t height) {
+    ANDROID_API bool setSize(int width, int height) {
         if (mWidth != width || mHeight != height) {
             mWidth = width;
             mHeight = height;
@@ -83,8 +83,8 @@ public:
 
 private:
     // Generic properties
-    uint32_t mWidth;
-    uint32_t mHeight;
+    int mWidth;
+    int mHeight;
     bool mBlend;
     SkColorFilter* mColorFilter;
     int mAlpha;
