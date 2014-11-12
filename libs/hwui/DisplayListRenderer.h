@@ -20,6 +20,7 @@
 #include <SkMatrix.h>
 #include <SkPaint.h>
 #include <SkPath.h>
+#include <SkPorterDuff.h>
 #include <cutils/compiler.h>
 
 #include "DisplayListLogBuffer.h"
@@ -161,6 +162,15 @@ public:
     void setHighContrastText(bool highContrastText) {
         mHighContrastText = highContrastText;
     }
+
+    void setOverrideXfermode(int xfermode) {
+        if (xfermode != -1) {
+            SkPorterDuff::Mode porterDuffMode = static_cast<SkPorterDuff::Mode>(xfermode);
+            xfermode = SkPorterDuff::ToXfermodeMode(porterDuffMode);
+        }
+        mOverrideXfermode = xfermode;
+    };
+
 private:
     enum DeferredBarrierType {
         kBarrier_None,
@@ -220,18 +230,26 @@ private:
     inline const SkPaint* refPaint(const SkPaint* paint) {
         if (!paint) return NULL;
 
-        const SkPaint* paintCopy = mPaintMap.valueFor(paint);
-        if (paintCopy == NULL
-                || paintCopy->getGenerationID() != paint->getGenerationID()
-                // We can't compare shader pointers because that will always
-                // change as we do partial copying via wrapping. However, if the
-                // shader changes the paint generationID will have changed and
-                // so we don't hit this comparison anyway
-                || !(paint->getShader() && paintCopy->getShader()
-                        && paint->getShader()->getGenerationID() == paintCopy->getShader()->getGenerationID())) {
-            paintCopy = copyPaint(paint);
-            // replaceValueFor() performs an add if the entry doesn't exist
-            mPaintMap.replaceValueFor(paint, paintCopy);
+        const SkPaint* paintCopy;
+
+        if (mOverrideXfermode != -1) {
+            SkPaint* overriddenPaint = copyPaint(paint);
+            overriddenPaint->setXfermodeMode(static_cast<SkXfermode::Mode>(mOverrideXfermode));
+            paintCopy = overriddenPaint;
+        } else {
+            paintCopy = mPaintMap.valueFor(paint);
+            if (paintCopy == NULL
+                    || paintCopy->getGenerationID() != paint->getGenerationID()
+                    // We can't compare shader pointers because that will always
+                    // change as we do partial copying via wrapping. However, if the
+                    // shader changes the paint generationID will have changed and
+                    // so we don't hit this comparison anyway
+                    || !(paint->getShader() && paintCopy->getShader()
+                            && paint->getShader()->getGenerationID() == paintCopy->getShader()->getGenerationID())) {
+                paintCopy = copyPaint(paint);
+                // replaceValueFor() performs an add if the entry doesn't exist
+                mPaintMap.replaceValueFor(paint, paintCopy);
+            }
         }
 
         return paintCopy;
@@ -303,6 +321,9 @@ private:
     bool mHasDeferredTranslate;
     DeferredBarrierType mDeferredBarrierType;
     bool mHighContrastText;
+
+    // -1 if unset, or SkXfermode::Mode value if set
+    int mOverrideXfermode;
 
     int mRestoreSaveCount;
 
