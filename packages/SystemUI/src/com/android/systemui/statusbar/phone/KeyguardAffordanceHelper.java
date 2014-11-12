@@ -46,7 +46,6 @@ public class KeyguardAffordanceHelper {
 
     private FlingAnimationUtils mFlingAnimationUtils;
     private Callback mCallback;
-    private int mTrackingPointer;
     private VelocityTracker mVelocityTracker;
     private boolean mSwipingInProgress;
     private float mInitialTouchX;
@@ -65,6 +64,7 @@ public class KeyguardAffordanceHelper {
     private Animator mSwipeAnimator;
     private int mMinBackgroundRadius;
     private boolean mMotionPerformedByUser;
+    private boolean mMotionCancelled;
     private AnimatorListenerAdapter mFlingEndListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
@@ -117,13 +117,11 @@ public class KeyguardAffordanceHelper {
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        int pointerIndex = event.findPointerIndex(mTrackingPointer);
-        if (pointerIndex < 0) {
-            pointerIndex = 0;
-            mTrackingPointer = event.getPointerId(pointerIndex);
+        if (mMotionCancelled && event.getActionMasked() != MotionEvent.ACTION_DOWN) {
+            return false;
         }
-        final float y = event.getY(pointerIndex);
-        final float x = event.getX(pointerIndex);
+        final float y = event.getY();
+        final float x = event.getX();
 
         boolean isUp = false;
         switch (event.getActionMasked()) {
@@ -137,22 +135,12 @@ public class KeyguardAffordanceHelper {
                 initVelocityTracker();
                 trackMovement(event);
                 mMotionPerformedByUser = false;
+                mMotionCancelled = false;
                 break;
-
-            case MotionEvent.ACTION_POINTER_UP:
-                final int upPointer = event.getPointerId(event.getActionIndex());
-                if (mTrackingPointer == upPointer) {
-                    // gesture is ongoing, find a new pointer to track
-                    final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
-                    final float newY = event.getY(newIndex);
-                    final float newX = event.getX(newIndex);
-                    mTrackingPointer = event.getPointerId(newIndex);
-                    mInitialTouchY = newY;
-                    mInitialTouchX = newX;
-                    mTranslationOnDown = mTranslation;
-                }
+            case MotionEvent.ACTION_POINTER_DOWN:
+                mMotionCancelled = true;
+                endMotion(event, true /* forceSnapBack */);
                 break;
-
             case MotionEvent.ACTION_MOVE:
                 final float w = x - mInitialTouchX;
                 trackMovement(event);
@@ -174,18 +162,21 @@ public class KeyguardAffordanceHelper {
             case MotionEvent.ACTION_UP:
                 isUp = true;
             case MotionEvent.ACTION_CANCEL:
-                mTrackingPointer = -1;
                 trackMovement(event);
-                if (mSwipingInProgress) {
-                    flingWithCurrentVelocity(!isUp);
-                }
-                if (mVelocityTracker != null) {
-                    mVelocityTracker.recycle();
-                    mVelocityTracker = null;
-                }
+                endMotion(event, !isUp);
                 break;
         }
         return true;
+    }
+
+    private void endMotion(MotionEvent event, boolean forceSnapBack) {
+        if (mSwipingInProgress) {
+            flingWithCurrentVelocity(forceSnapBack);
+        }
+        if (mVelocityTracker != null) {
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+        }
     }
 
     private void setSwipingInProgress(boolean inProgress) {
