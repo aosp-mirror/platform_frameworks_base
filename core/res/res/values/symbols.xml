@@ -1579,6 +1579,7 @@
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromPowerKey" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromKey" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromMotion" />
+  <java-symbol type="bool" name="config_allowTheaterModeWakeFromMotionWhenNotDreaming" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromLidSwitch" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromDock" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromWindowLayout" />
