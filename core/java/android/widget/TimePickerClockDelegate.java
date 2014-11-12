@@ -23,7 +23,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
@@ -100,9 +99,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
     private int mPmKeyCode;
 
     // Accessibility strings.
-    private String mHourPickerDescription;
     private String mSelectHours;
-    private String mMinutePickerDescription;
     private String mSelectMinutes;
 
     // Most recent time announcement values for accessibility.
@@ -122,9 +119,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
                 Context.LAYOUT_INFLATER_SERVICE);
         final Resources res = mContext.getResources();
 
-        mHourPickerDescription = res.getString(R.string.hour_picker_description);
         mSelectHours = res.getString(R.string.select_hours);
-        mMinutePickerDescription = res.getString(R.string.minute_picker_description);
         mSelectMinutes = res.getString(R.string.select_minutes);
 
         String[] amPmStrings = TimePickerSpinnerDelegate.getAmPmStrings(context);
@@ -152,6 +147,11 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
             mSeparatorView.setTextAppearance(context, headerTimeTextAppearance);
             mMinuteView.setTextAppearance(context, headerTimeTextAppearance);
         }
+
+        // Now that we have text appearances out of the way, make sure the hour
+        // and minute views are correctly sized.
+        mHourView.setMinWidth(computeStableWidth(mHourView, 24));
+        mMinuteView.setMinWidth(computeStableWidth(mMinuteView, 60));
 
         // TODO: This can be removed once we support themed color state lists.
         final int headerSelectedTextColor = a.getColor(
@@ -206,6 +206,23 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         initialize(currentHour, currentMinute, false /* 12h */, HOUR_INDEX);
     }
 
+    private int computeStableWidth(TextView v, int maxNumber) {
+        int maxWidth = 0;
+
+        for (int i = 0; i < maxNumber; i++) {
+            final String text = String.format("%02d", i);
+            v.setText(text);
+            v.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+
+            final int width = v.getMeasuredWidth();
+            if (width > maxWidth) {
+                maxWidth = width;
+            }
+        }
+
+        return maxWidth;
+    }
+
     private void initialize(int hourOfDay, int minute, boolean is24HourView, int index) {
         mInitialHourOfDay = hourOfDay;
         mInitialMinute = minute;
@@ -242,47 +259,20 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         setCurrentItemShowing(index, false, true);
     }
 
-    private int computeMaxWidthOfNumbers(int max) {
-        TextView tempView = new TextView(mContext);
-        tempView.setTextAppearance(mContext, R.style.TextAppearance_Material_TimePicker_TimeLabel);
-        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-        tempView.setLayoutParams(lp);
-        int maxWidth = 0;
-        for (int minutes = 0; minutes < max; minutes++) {
-            final String text = String.format("%02d", minutes);
-            tempView.setText(text);
-            tempView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-            maxWidth = Math.max(maxWidth, tempView.getMeasuredWidth());
-        }
-        return maxWidth;
-    }
-
     private void updateHeaderAmPm() {
         if (mIs24HourView) {
             mAmPmLayout.setVisibility(View.GONE);
         } else {
-            final String bestDateTimePattern = DateFormat.getBestDateTimePattern(
-                    mCurrentLocale, "hm");
-            boolean amPmOnLeft = bestDateTimePattern.startsWith("a");
-            if (TextUtils.getLayoutDirectionFromLocale(mCurrentLocale) ==
-                    View.LAYOUT_DIRECTION_RTL) {
-                amPmOnLeft = !amPmOnLeft;
+            // Ensure that AM/PM layout is in the correct position.
+            final String dateTimePattern = DateFormat.getBestDateTimePattern(mCurrentLocale, "hm");
+            final boolean amPmAtStart = dateTimePattern.startsWith("a");
+            final ViewGroup parent = (ViewGroup) mAmPmLayout.getParent();
+            final int targetIndex = amPmAtStart ? 0 : parent.getChildCount() - 1;
+            final int currentIndex = parent.indexOfChild(mAmPmLayout);
+            if (targetIndex != currentIndex) {
+                parent.removeView(mAmPmLayout);
+                parent.addView(mAmPmLayout, targetIndex);
             }
-
-            final ViewGroup.MarginLayoutParams params =
-                    (ViewGroup.MarginLayoutParams) mAmPmLayout.getLayoutParams();
-
-            if (amPmOnLeft) {
-                params.leftMargin = 0;
-                params.rightMargin = computeMaxWidthOfNumbers(12 /* for hours */);
-            } else {
-                params.leftMargin = computeMaxWidthOfNumbers(60 /* for minutes */);
-                params.rightMargin = 0;
-            }
-
-            mAmPmLayout.setLayoutParams(params);
-            mAmPmLayout.setVisibility(View.VISIBLE);
 
             updateAmPmLabelStates(mInitialHourOfDay < 12 ? AM : PM);
         }
