@@ -54,7 +54,7 @@ static void set_accessory_string(JNIEnv *env, int fd, int cmd, jobjectArray strA
     char buffer[256];
 
     buffer[0] = 0;
-    int length = ioctl(fd, cmd, buffer);
+    ioctl(fd, cmd, buffer);
     if (buffer[0]) {
         jstring obj = env->NewStringUTF(buffer);
         env->SetObjectArrayElement(strArray, index, obj);
