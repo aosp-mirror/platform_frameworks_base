@@ -10928,6 +10928,7 @@ package android.graphics {
     method public boolean canClip();
     method public float getAlpha();
     method public boolean isEmpty();
+    method public void offset(int, int);
     method public void set(android.graphics.Outline);
     method public void setAlpha(float);
     method public void setConvexPath(android.graphics.Path);
