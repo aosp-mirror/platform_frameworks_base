@@ -1,0 +1,11 @@
+page.title=Notification
+@jd:body
+
+
+<div id="samples" class="notification">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>
