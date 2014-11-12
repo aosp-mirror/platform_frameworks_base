@@ -2614,6 +2614,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // Set default cdma call auto retry
             loadSetting(stmt, Settings.Global.CALL_AUTO_RETRY, 0);
 
+            // Set default simplified carrier network settings to 0
+            loadSetting(stmt, Settings.Global.HIDE_CARRIER_NETWORK_SETTINGS, 0);
+
             // Set the preferred network mode to target desired value or Default
             // value defined in RILConstants
             int type;
