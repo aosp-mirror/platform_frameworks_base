@@ -149,12 +149,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"ဖျက်ရန် <xliff:g id="CONTENT_TYPE">%s</xliff:g> များစွာရှိ"</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"တက်ဘလက်တွင် သိမ်းဆည်းသော နေရာ ကုန်သွားပါပြီ။ တချို့ ဖိုင်များ ဖျက်စီးခြင်းဖြင့် နေရာလွတ် ပြုလုပ်ပါ"</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"သိုလှောင်ခန်း နေရာ ပြည့်နေပြီ။ နေရာ လွတ်လာရန် ဖိုင် အချို့ကို ဖျက်ပါ။"</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"ဖုန်းတွင် သိမ်းဆည်းသော နေရာ ကုန်သွားပါပြီ။ တချို့ ဖိုင်များ ဖျက်စီးခြင်းဖြင့် နေရာလွတ် ပြုလုပ်ပါ"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ကွန်ရက်ကို စောင့်ကြည့်စစ်ဆေးခံရနိုင်သည်"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"အမျိုးအမည်မသိ တတိယ ပါတီဖြင့်"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ဖြင့်"</string>
     <string name="me" msgid="6545696007631404292">"ကျွန်ုပ်"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ဖုန်းဆိုင်ရာရွေးချယ်မှုများ"</string>
     <string name="silent_mode" msgid="7167703389802618663">"အသံတိတ်စနစ်"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"wirelessအားဖွင့်မည်"</string>
@@ -166,6 +170,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"ဖုန်းမြည်သံဖွင့်ထားသည်"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"စက်ပိတ်ပါမည်"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"သင့်တက်ဘလက်အား စက်ပိတ်ပါမည်"</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"သင်၏ ကြည့်ရှုမှု ပိတ်ပစ်မည်။"</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"သင့်ဖုန်းအား စက်ပိတ်ပါမည်"</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"သင်က ပိတ်ပစ်မှာကို လိုပါသလား?"</string>
@@ -174,6 +180,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"လတ်တလော"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"မကြာမီတုန်းက appများ မရှိပါ"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"ဖုန်းဆိုင်ရာရွေးချယ်မှုများ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ဖုန်းမျက်နှာပြင်အား သော့ချရန်"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ပါဝါပိတ်ရန်"</string>
@@ -290,9 +298,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"အပလီကေးရှင်းအား တခြား စာအပြန်အလှန် ပို့ဆောင်မှု ပေးသော အပလီကေးရှင်းများဆီကို ဖုန်းခေါ်ဆိုမှု များအတွက် စာပို့ခြင်းဖြင့် ပြန်လည် ဖြေဆိုသော တောင်းဆိုမှု များ ခွင့်ပြုခြင်း"</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"သင့်ရဲ့ စာပေးပို့ခြင်းများ ဖတ်ခြင်း (စာတို နှင့် ရုပ်သံစာ)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"အပလီကေးရှင်းအား တက်ဘလက် သို့မဟုတ် ဆင်းမ်ကဒ်မှာ သိမ်းဆည်းထားသော စာတိုများ ဖတ်ရှုခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် အကြာင်းအရာ သို့မဟုတ် ယုံကြည်စိတ်ချရမှုကို ဂရုမပြုပဲ စာတိုအားလုံးကို ဖတ်နိုင်ပါလိမ်မည်။"</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"အပလီကေးရှင်းအား ဖုန်း သို့မဟုတ် ဆင်းမ်ကဒ်မှာ သိမ်းဆည်းထားသော စာတိုများ ဖတ်ရှုခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် အကြာင်းအရာ သို့မဟုတ် ယုံကြည်စိတ်ချရမှုကို ဂရုမပြုပဲ စာတိုအားလုံးကို ဖတ်နိုင်ပါလိမ်မည်။"</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"သင့်ရဲ့ စာပေးပို့ခြင်းများ ပြင်ခြင်း (စာတို နှင့် ရုပ်သံစာ)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"appအား သင်၏ တက်ဘလက် သို့မဟုတ် ဆင်းမ်ကဒ်ထဲမှာ သိုလှောင်ထားသည့် စာတိုများသို့ ရေးခွင့် ပြုသည်။ ကြံဖန် appများက သင်၏ စာတိုမျာကို ဖျက်ပစ်နိုင်သည်။"</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"appအား သင်၏ ဖုန်း သို့မဟုတ် ဆင်းမ်ကဒ်ထဲမှာ သိုလှောင်ထားသည့် စာတိုများသို့ ရေးခွင့် ပြုသည်။ ကြံဖန် appများက သင်၏ စာတိုမျာကို ဖျက်ပစ်နိုင်သည်။"</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"စာပို့ခြင်းအား လက်ခံရယူခြင်း (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"အပလီကေးရှင်းအား WAP စာများ လက်ခံခြင်း၊ ဆောင်ရွက်ခြင်း ခွင့်ပြုပါ။ ဤခွင့်ပြုချက်တွင် အပလီကေးရှင်းအနေဖြင့် သင် လက်ခံရရှိသော စာများအား သင့်အား မပြပဲစောင့်ကြည့်ခွင့်နှင့် ဖျက်ပစ်ခွင့်များ ပါဝင်ပါသည်။"</string>
@@ -386,6 +398,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"အပလီကေးရှင်းအား ဖန်သားပြည့် ပြသမှုအတွက် ပြောင်းလဲစဉ် ဖန်သားပြင်အား ခဏရပ်ခွင့်ပြုရန်"</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"ခလုတ်များနှင့် ထိန်းချုပ်သည့်ခလုတ်များကို နှိပ်ခြင်း"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"appအား ၎င်းကိုယ်နှိုက်၏ ထည့်သွင်းမှုများ (ခလုတ် နှိပ်မှုများ၊ စသဖြင့်)ကို ထည့်ပေးခွင့် ပြုသည်။ ကြံဖန် appများက ၎င်းကို အသုံးပြုပြီး တက်ဘလက်၏ နေရာကို ရယူနိုင်သည်။"</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"appအား ၎င်းကိုယ်နှိုက်၏ ထည့်သွင်းမှုများ (ခလုတ် နှိပ်မှုများ၊ စသဖြင့်)ကို ထည့်ပေးခွင့် ပြုသည်။ ကြံဖန် appများက ၎င်းကို အသုံးပြုပြီး ဖုန်း၏ နေရာကို ရယူနိုင်သည်။"</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"သင်မည်သည်ကိုရိုက်သွင်းသည်နှင့် လှုပ်ရှားမှုများကို မှတ်တမ်းတင်ခြင်း"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"appအား သင် နှိပ်သည့် ခလုတ်များကို၊ သင်က အခြား app တစ်ခုနှင့် (စကားဝှက် ရိုက်ထည့်မှုလို) အပြန်အလှန် တုံ့ပြန်နေချိန်မှာတောင်၊ စောင့်ကြည့်ခွင့် ပြုသည်။"</string>
@@ -433,6 +447,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"appအား ပို့နေသော အချက်ပြမှုကို ရှိနေကြသည့် လုပ်ငန်းစဉ် အားလုံးထံသို့ ပို့ရေးကို တောင်းဆိုခွင့် ပေးသည်။"</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"appကို အမြဲတမ်း အလုပ်လုပ်စေခြင်း"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"အပလီကေးရှင်းအား မှတ်ဉာဏ်ထဲတွင် ရေရှည်သိမ်းဆည်ထားရန် ခွင့်ပြုပါ။ ဒီခွင့်ပြုချက်ကြောင့် တခြားအပလီကေးရှင်းအများအတွက် မှတ်ဉာဏ်ရရှိမှု နည်းသွားနိုင်ပြီး တက်ဘလက်လည်း နှေးသွားနိုင်ပါသည်။"</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"အပလီကေးရှင်းအား မှတ်ဉာဏ်ထဲတွင် ရေရှည်သိမ်းဆည်ထားရန် ခွင့်ပြုပါ။ ဒီခွင့်ပြုချက်ကြောင့် တခြားအပလီကေးရှင်းအများအတွက် မှတ်ဉာဏ်ရရှိမှု နည်းသွားနိုင်ပြီး ဖုန်းလည်း နှေးသွားနိုင်ပါသည်။"</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"appများကို ဖျက်ရန်"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"appအား အန်ဒရွိုက် အထုပ်များကို ဖျက်ခွင့် ပြုသည်။ အကြံအဖန် appများက ၎င်းကို အသုံးပြုပြီး အရေးကြီးသည့် appများကို ဖျက်ပစ်နိုင်သည်။"</string>
@@ -446,11 +462,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"appအား အန်ဒရွိုက် အထုပ် အသစ် သို့မဟုတ် မွမ်းမံပြီးကို တပ်ဆင်ခွင့် ပြုသည်။ ကြံဖန် appများက ၎င်းကို အသုံးပြုပြီး ထင်ရာလုပ်နိုင်သော ကြီးမားသည့် ခွင့်ပြုချက်များ ရှိမည့် appများကို ထည့်ပေးနိုင်ကြသည်။"</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"app ကက်ရှ ဒေတာ အားလုံးကို ဖျက်ပစ်ရန်"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"အပလီကေးရှင်းမှာ တခြား အပလီကေးရှင်းများမှ ဒေတာများအား ယာယီ သိုလှောင်မှုနေရာမှ ဖျက်ပစ်ပြီး နေရာလွတ် လုပ်ခွင့်ပြုပါ။ ဒီလိုလုပ်ခြင်းဖြင့် တခြား အပလီကေးရှင်းများ စတင်ရာတွင် နှေးကွေးမှု ဖြစ်စေနိုင်ပါသည်။"</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"အပလီကေးရှင်းမှာ တခြား အပလီကေးရှင်းများမှ ဒေတာများအား ယာယီ သိုလှောင်မှုနေရာမှ ဖျက်ပစ်ပြီး နေရာလွတ် လုပ်ခွင့်ပြုပါ။ ဒီလိုလုပ်ခြင်းဖြင့် တခြား အပလီကေးရှင်းများ စတင်ရာတွင် နှေးကွေးမှု ဖြစ်စေနိုင်ပါသည်။"</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"app အရင်းအမြစ်များကို ဖယ်ရှားခြင်း"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"appအား ဖယ်ရှားရနိုင်သော သိုလှောင်ခန်းကို app၏ အရင်းအမြစ်များကို အတွင်းမှ အပြင်သို့ ရွှေ့ပြောင်းခြင်း နှင့် ပြောင်းပြန်လုပ်ခြင်းကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"တုံ့ပြန်မှုလွယ်သောစာ​ရင်းဒေတာအားဖတ်ခြင်း"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"appအား စနစ်၏ လော့ဂ် ဖိုင် အမျိုးမျိုးတို့ကို ဖတ်ကြားခွင့် ပြုသည်။ သို့ဖြစ်၍ ၎င်းသည် သင်က တက်ဘလက်နှင့် ဘာတွေ လုပ်ကိုင်နေကြောင်း အထွေထွေ အချက်အလက်များကို၊ ဖြစ်နိုင်သည်မှာ ကိုယ်ရေး သို့မဟုတ် ပုဂ္ဂိုလ်ရေး အချက်အလက်များ အပါအဝင် တို့ကိုပါ၊ ရှာတွေ့သိလာနိုင်သည်။"</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"appအား စနစ်၏ လော့ဂ် ဖိုင် အမျိုးမျိုးတို့ကို ဖတ်ကြားခွင့် ပြုသည်။ သို့ဖြစ်၍ ၎င်းသည် သင်က ဖုန်းနှင့် ဘာတွေ လုပ်ကိုင်နေကြောင်း အထွေထွေ အချက်အလက်များကို၊ ဖြစ်နိုင်သည်မှာ ကိုယ်ရေး သို့မဟုတ် ပုဂ္ဂိုလ်ရေး အချက်အလက်များ အပါအဝင် တို့ကိုပါ၊ ရှာတွေ့သိလာနိုင်သည်။"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"မည်သည့် မီဒီယာ ဒီကုဒ်ဒါမဆို ပြသရာတွင် သုံးရန်"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"အပလီကေးရှင်းအား သွင်းထားသည့် မီဒီယာ ဒီကုဒ်ဒါ အား သုံးပြီး ဖွင့်ရန် ဒီကုဒ် လုပ်ခွင့် ပြုပါ"</string>
@@ -462,6 +482,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"appအား diag အုပ်စု ပိုင်ဆိုင်သည့် မည်သည့် အရင်းအမြစ်ကို မဆို ရေးခြင်း နှင့် ဖတ်ခြင်းကို ခွင့်ပြုသည်၊ ဥပမာ၊ /dev ထဲက ဖိုင်များ။ ၎င်းက စနစ်၏ တည်ငြိမ်မှု နှင့် လုံခြုံမှုကို ထိပါးနိုင်သည့် အလားအလာ ရှိသည်။ ထုတ်လုပ်သူ သို့မဟုတ် အော်ပရေတာက ဟာ့ဒ်ဝဲ ဆိုင်ရာ ပြဿနာ ရှာဖွေ စူးစမ်းမှု အတွက်သာ ၎င်းကို အသုံးပြုရမည်။"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"app အစိတ်အပိုင်းများကို ဖွင့်ခြင်း သို့မဟုတ် ပိတ်ခြင်း"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"appအား အခြား app တစ်ခု၏ အစိတ်အပိုင်း တစ်ခုမှာ ဖွင့်ထားသည် ဖြစ်စေ ဖွင့်မထားသည် ဖြစ်စေ ပြောင်းလဲခွင့် ပြုသည်။ အကြံအဖန် appများက ၎င်းကို အသုံးပြုပြီး အရေးကြီးသည့် တက်ဘလက်၏ လုပ်နိုင်စွမ်းကို ပိတ်ပစ်နိုင်သည်။ app၏ အစိတ်အပိုင်းများကို သုံးမရအောင်၊ စနစ်မမှန်အောင် သို့မဟုတ် အခြေအနေ မတည်ငြိမ်အောင် လုပ်၍ ရနိုင်သောကြောင့် ဒီ ခွင့်ပြုချက်ကို သုံးရာတွင် သတိထားရန် လိုအပ်သည်။"</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"appအား အခြား app တစ်ခု၏ အစိတ်အပိုင်း တစ်ခုမှာ ဖွင့်ထားသည် ဖြစ်စေ ဖွင့်မထားသည် ဖြစ်စေ ပြောင်းလဲခွင့် ပြုသည်။ အကြံအဖန် appများက ၎င်းကို အသုံးပြုပြီး အရေးကြီးသည့် ဖုန်း၏ လုပ်နိုင်စွမ်းကို ပိတ်ပစ်နိုင်သည်။ app၏ အစိတ်အပိုင်းများကို သုံးမရအောင်၊ စနစ်မမှန်အောင် သို့မဟုတ် အခြေအနေ မတည်ငြိမ်အောင် လုပ်၍ ရနိုင်သောကြောင့် ဒီ ခွင့်ပြုချက်ကို သုံးရာတွင် သတိထားရန် လိုအပ်သည်။"</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"ခွင့်ပြုချက် ထောက်ခံခြင်း သို့ ပယ်ဖျက်ခြင်း"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"အပလီကေးရှင်းအား ကိုယ်တိုင် ဒါမှမဟုတ် တခြား အပလီကေးရှင်းအတွက် ခွင့်ပြုချက်များအား ခွင့်ပြုခြင်း၊ပယ်ဖျယ်ခြင်း လုပ်ခွင့်ပြုပါ။ အန္တရာယ်ရှိသော အပလီကေးရှင်းများမှ ဒီခွင့်ပြုချက်အားသုံးပြီး အခွင့်မရှိသော စွမ်းဆောင်ချက်များအား သုံးနိုင်ပါသည်"</string>
@@ -475,21 +497,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"appအယဒ Google ဝန်ဆောင်မှုများ မြေပုံကို မွမ်းမံခွင့် ပြုသည်။ သာမန် appများ အသုံးပြုရန် မဟုတ်ပါ။"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"အစတွင် လုပ်ဆောင်ရန်"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"appအား စနစ်၏ စတင်မှု ပြီးဆုံးသည့်နှင့် မိမိကိုမိမိ စတင်ခွင့် ပြုသည်။ သို့ဖြစ်၍ ဖုန်း စတင်မှုမှာ အချိန် ပိုကြာနိုင်ပြီး appက တချိန်လုံး အလုပ်လုပ်နေခြင်းကြောင့် တက်ဘလက်၏ အလုပ် တစ်ခုလုံးကို နှေးကွေးလာစေနိုင်သည်။"</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"appအား စနစ်၏ စတင်မှု ပြီးဆုံးသည့်နှင့် မိမိကိုမိမိ စတင်ခွင့် ပြုသည်။ သို့ဖြစ်၍ ဖုန်း စတင်မှုမှာ အချိန် ပိုကြာနိုင်ပြီး appက တချိန်လုံး အလုပ်လုပ်နေခြင်းကြောင့် ဖုန်း၏ အလုပ် တစ်ခုလုံးကို နှေးကွေးလာစေနိုင်သည်။"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ကြာရှည်ခံ ထုတ်လွှတ်မှု အားပေးပို့ခြင်း"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"အပလီကေးရှင်းအား ကြာရှည်ခံ ထုတ်လွှင့်မှု ပြုပါ။ ဒီထုတ်လွှင့်မှုများဟာ ထုတ်လွှင့်မှု ပြီးဆုံးပြီးသွားတည့်တိုင် ကျန်နေမည် ဖြစ်ပါသည်။ အလွန်အကျွံသုံးခြင်းကြောင့် မက်မိုရီ အသုံးများပြီး တက်ဘလက်နှေးခြင်း၊ မတည်ငြိမ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"အပလီကေးရှင်းအား ကြာရှည်ခံ ထုတ်လွှင့်မှု ပြုပါ။ ဒီထုတ်လွှင့်မှုများဟာ ထုတ်လွှင့်မှု ပြီးဆုံးပြီးသွားတည့်တိုင် ကျန်နေမည် ဖြစ်ပါသည်။ အလွန်အကျွံသုံးခြင်းကြောင့် မှတ်ဉာဏ်အသုံးများပြီး ဖုန်းနှေးခြင်း၊ မတည်ငြိမ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"အဆက်အသွယ်များအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"အပလီကေးရှင်းအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်အကြိမ်ရေ၊ တခြားဆက်သွယ်မှုများစသည်ကဲ့သို့ သင့်တက်ဘလက်မှာ သိမ်းဆည်းထားသော အဆက်အသွယ်များရဲ့ အချက်အလက်ကို ဖတ်ခွင့်ပြုပါ။ ဤသို့ခွင့်ပြုခြင်းအားဖြင့် အပလီကေးရှင်းများကို သင့် အဆက်အသွယ်၏ အချက်မလက်များကို သိမ်းဆည်းရန် ခွင့်ပြုပြီး အန္တရာယ်ရှိသော အပလီကေးရှင်းများမှ ထိုအချက်အလက်များ ကို သင် မသိစေပဲ ဖြန့်ဝေနိုင််မည် ဖြစ်ပါသည်။"</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"အပလီကေးရှင်းအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်အကြိမ်ရေ၊ တခြားဆက်သွယ်မှုများစသည်ကဲ့သို့ သင့်ဖုန်းမှာ သိမ်းဆည်းထားသော အဆက်အသွယ်များရဲ့ အချက်အလက်ကို ဖတ်ခွင့်ပြုပါ။ ဤသို့ခွင့်ပြုခြင်းအားဖြင့် အပလီကေးရှင်းများကို သင့် အဆက်အသွယ်၏ အချက်မလက်များကို သိမ်းဆည်းရန် ခွင့်ပြုပြီး အန္တရာယ်ရှိသော အပလီကေးရှင်းများမှ ထိုအချက်အလက်များ ကို သင် မသိစေပဲ ဖြန့်ဝေနိုင််မည် ဖြစ်ပါသည်။"</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"အဆက်အသွယ်များအား ပြင်ဆင်ခြင်း"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"အပလီကေးရှင်းအား သင့်တက်ဘလက်မှာ သိမ်းဆည်းထားသော အဆက်အသွယ်များရဲ့ အချက်အလက် (အထူးအဆက်အသွယ်များအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်ပို့သောအကြိမ်ရေ သို့ အခြားနည်းလမ်းဖြင့်ဆက်သွယ်မှုများ) ကို ပြင်ဆင်ခွင့်ပြုခြင်း။ ဒီခွင့်ပြုချက်က အပလီကေးရှင်းများအား အဆက်အသွယ် အချက်အလက်များ ဖျက်စီးခြင်း လုပ်ဆောင်စေနိုင်မှာ ဖြစ်ပါသည်။"</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"အပလီကေးရှင်းအား သင့်ဖုန်းမှာ သိမ်းဆည်းထားသော အဆက်အသွယ်များရဲ့ အချက်အလက် (အထူးအဆက်အသွယ်များအား ခေါ်ဆိုသော အကြိမ်ရေ၊ အီးမေးလ်ပို့သောအကြိမ်ရေ သို့ အခြားနည်းလမ်းဖြင့်ဆက်သွယ်မှုများ) ကို ပြင်ဆင်ခွင့်ပြုခြင်း။ ဒီခွင့်ပြုချက်က အပလီကေးရှင်းများအား အဆက်အသွယ် အချက်အလက်များ ဖျက်စီးခြင်း လုပ်ဆောင်စေနိုင်မှာ ဖြစ်ပါသည်။"</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ခေါ်ဆိုမှု မှတ်တမ်းအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"အပလီကေးရှင်းအား တက်ဘလက်၏ အထွက် အဝင် ခေါ်ဆိုမှုများ အပါအဝင် ခေါ်ဆိုမှု မှတ်တမ်းအား ကြည့်ရှုခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် ခေါ်ဆိုမှု မှတ်တမ်းအား သိုလှောင်ခြင်း၊ မျှဝေခြင်းများကို သင် မသိရှိပဲ ပြုလုပ်နိုင်မှာ ဖြစ်ပါသည်"</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"အပလီကေးရှင်းအား ဖုန်း၏ အဝင်အထွက် ခေါ်ဆိုမှုများ အပါအဝင် ခေါ်ဆိုမှု မှတ်တမ်းအား ကြည့်ရှုခွင့်ပြုပါ။ အပလီကေးရှင်းအနေဖြင့် ခေါ်ဆိုမှု မှတ်တမ်းအား သိုလှောင်ခြင်း၊ မျှဝေခြင်းများကို သင် မသိရှိပဲ ပြုလုပ်နိုင်မှာ ဖြစ်ပါသည်။"</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"ခေါ်ဆိုမှုမှတ်တမ်း ရေးသားခြင်း"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"အပလီကေးရှင်းအား သင့်တက်ဘလက်၏ ဖုန်းခေါ်ဆိုမှု မှတ်တမ်း (အဝင်အထွက်ခေါ်ဆိုမှု အချက်အလက်များ) ကို ပြင်ဆင်ခွင့် ပေးခြင်း။ အန္တရာယ်ရှိ အပလီကေးရှင်းများမှ ဤအချက်ကို အသုံးပြု၍ သင့် ဖုန်းခေါ်ဆိုမှု မှတ်တမ်းကို ဖျက်ပစ်ခြင်း၊ ပြင်ဆင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်"</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"အပလီကေးရှင်းအား သင့်ဖုန်း၏ ဖုန်းခေါ်ဆိုမှု မှတ်တမ်း (အဝင်အထွက်ခေါ်ဆိုမှု အချက်အလက်များ) ကို ပြင်ဆင်ခွင့် ပေးခြင်း။ အန္တရာယ်ရှိ အပလီကေးရှင်းများမှ ဤအချက်ကို အသုံးပြု၍ သင့် ဖုန်းခေါ်ဆိုမှု မှတ်တမ်းကို ဖျက်ပစ်ခြင်း၊ ပြင်ဆင်ခြင်းများ ပြုလုပ်နိုင်ပါသည်"</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"သင့်ရဲ့ အဆက်အသွယ် ကဒ် အား ဖတ်ခြင်း"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"အပလီကေးရှင်းအား စက်မှာ သိမ်းထားသော သင့်နာမည် နှင့် အဆက်အသွယ် သတင်းအချက်အလက်များကဲ့သို့သော ကိုယ်ရေးကိုယ်တာ အချက်အလက်များအား ဖတ်ခွင့် ပြုခြင်း။ အပလီကေးရှင်းမှ သင့်အား သိရှိနိုင်ပြီး သင့်ကိုယ်ရေးအချက်အလက်များအား အခြားသူများကို ပေးပို့နိုင်ပါသည်"</string>
@@ -503,9 +537,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"အပလီကေးရှင်းအား သူငယ်ချင်းများရဲ့ ဆိုရှယ်နက်ဝဘ်မှနောက်ဆုံးပေါ် အချက်အလက်များအား ဖန်သားပြင်ပေါ်တွင် ပြခွင့်ပြုရန်။ သတင်းအချက်အလက် မျှဝေခြင်းတွင် သတိပြုရန် -- ဤသို့ ခွင့်ပြုခြင်းဖြင့် အပလီကေးရှင်းမှ  သူငယ်ချင်းများထံမှ လာသကဲ့သို့ သတင်းများ ပြုလုပ်နိုင်ပါသည်။ မှတ်ချက်၊ ဤခွင့်ပြုချက်အား ဆိုရှယ်နက်ဝဘ် အားလုံးတွင် ခွင့်ပြုခြင်း မလုပ်သင့်ပါ။"</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"ပြက္ခဒိန်အဖြစ်အပျက်များနှင့် လှို့ဝှက်အချက်အလက်များအား ဖတ်ခြင်း"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"အပလီကေးရှင်းအား တက်ဘလက်ထဲတွင် သိမ်းထားသော သူငယ်ချင်းနှင့် လုပ်ဖော်ကိုင်ဘက်များ၏ ပြက္ခဒိန် အဖြစ်အပျက်များအပါအဝင် အားလုံးကို ဖတ်ရှုခွင့်ပြုပါ။ ဒီခွင့်ပြုချက်ကြောင့် အပလီကေးရှင်းမှ ပြက္ခဒိန် အဖြစ်အပျက်များအား လျှို့ဝှက်မှု သို့ ဂရုပြုမှု ကို ထည့်သွင်းမစဉ်းစားပဲ သိမ်းဆည်းခြင်း၊ မျှဝေခြင်း ပြုလုပ်စေနိုင်ပါသည်"</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"အပလီကေးရှင်းအားဖုန်းထဲတွင် သိမ်းထားသော သူငယ်ချင်းနှင့် လုပ်ဖော်ကိုင်ဘက်များ၏ ပြက္ခဒိန် အဖြစ်အပျက်များအပါအဝင် အားလုံးကို ဖတ်ရှုခွင့်ပြုပါ။ ဒီခွင့်ပြုချက်ကြောင့် အပလီကေးရှင်းမှ ပြက္ခဒိန် အဖြစ်အပျက်များအား လျှို့ဝှက်မှု သို့ ဂရုပြုမှု ကို ထည့်သွင်းမစဉ်းစားပဲ သိမ်းဆည်းခြင်း၊ မျှဝေခြင်း ပြုလုပ်စေနိုင်ပါသည်"</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ပြက္ခဒိန်အဖြစ်အပျက်များကို ထပ်ထည့်ရန် သို့မဟုတ် မွမ်းမံရန်နှင့် ပိုင်ရှင်၏အသိမပေးပဲ ဧည့်သည်များထံ အီးမေးလ်ပို့ရန်"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"အပလီကေးရှင်းအား သင်၏ တက်ဘလက်တွင် သူငယ်ချင်း အလုပ်ဖော်များ အပါအဝင် သင်၏ ပြောင်းလဲအဖြစ်အပျက်များအား ထည့်ခြင်း၊ ထုတ်ခြင်းအား ခွင့်ပြုရန်။ ဤခွင့်ပြုချက်သည် အပလီကေးရှင်းအား သတင်းများပို့ခြင်းကို ပြက္ခဒိန်ပိုင်ရှင်ဆီမှ လာသလို အနေဖြင့် ပေးပို့ခြင်း သို့မဟုတ် အဖြစ်အပျက်များကို ပိုင်ရှင်မသိပဲ ပြင်ဆင်နိုင်ပါသည်။"</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"အပလီကေးရှင်းအား သင်၏ ဖုန်းတွင် သူငယ်ချင်း အလုပ်ဖော်များ အပါအဝင် သင်၏ ပြောင်းလဲအဖြစ်အပျက်များအား ထည့်ခြင်း၊ ထုတ်ခြင်းအား ခွင့်ပြုရန်။ ဤခွင့်ပြုချက်သည် အပလီကေးရှင်းအား သတင်းများပို့ခြင်းကို ပြက္ခဒိန်ပိုင်ရှင်ဆီမှ လာသလို အနေဖြင့် ပေးပို့ခြင်း သို့မဟုတ် အဖြစ်အပျက်များကို ပိုင်ရှင်မသိပဲ ပြင်ဆင်နိုင်ပါသည်။"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"စမ်းသပ်ရန်အတွက် တည်နေရာပုံစံတုမူရင်း"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"စမ်းသပ်ရန် သို့ နေရာပြပံ့ပို့းမှု အသစ်သွင်းရန် တည်နေရာဇစ်မြစ်အတုကို ဖန်တီးပါ။ ဤသို့လုပ်ခြင်းအားဖြင့် အပလီကေးရှင်းမှ တည်နေရာကို ကျော်ဖြတ်ပြင်ဆင်ခြင်းနှင်ူ ဂျီပီအက်စ် သို့ နေရာပြပံ့ပိုးမှုကဲ့သို့သော အခြား တည်နေရာဇစ်မြစ်များ၏ အခြေအနေကို ပြန်ပို့ပေးနိုင်မည်ဖြစ်သည်။"</string>
@@ -550,12 +588,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"ထုတ်လွှင့်မှုပြ အချက်ပေး မီးအား ကင်မရာ သုံးနေစဉ် ပိတ်ရန်"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"ကြိုတင်သွင်းထားသော စစ်စတန် စနစ်တစ်ခုကို ကင်မရာ သုံးနေသော မီးအား ထိန်းချုပ်ခွင့်ပေးခြင်း"</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"တက်ပလက်ကို အမြဲတမ်း အလုပ်မလုပ်ရန်ပိတ်ခြင်း"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"ဖုန်းကို အမြဲတမ်း အလုပ်မလုပ်ရန်ပိတ်ခြင်း"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"appအား တက်ဘလက် တစ်ခုလုံးကို ထာဝရ ပိတ်ပစ်ခွင် ပြုသည်။ ၎င်းမှာ အထူး အန္တရာယ် ရှိနိုင်သည်။"</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"appအား ဖုန်း တစ်ခုလုံးကို ထာဝရ ပိတ်ပစ်ခွင် ပြုသည်။ ၎င်းမှာ အထူး အန္တရာယ် ရှိနိုင်သည်။"</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"တက်ဘလက် မဖြစ်မနေပြန်လည်စတင်လုပ်ဆောင်ရန်"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"ဖုန်းကို မဖြစ်မနေပြန်လည်စတင်လုပ်ဆောင်ရန်"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"appအား တက်ဘလက်ကို ပြန်စတင်ရန် အတင်းအကြပ် ပြုလုပ်ခွင့် ပြုပါသည်။"</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"appအား ဖုန်းကို ပြန်စတင်ရန် အတင်းအကြပ် ပြုလုပ်ခွင့် ပြုပါသည်။"</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USBသိုလှောင်ရာဖိုင်စနစ်အား အသုံးပြုခွင့်ပေးရန်"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SDကတ် ဖိုင် စနစ် အား အသုံးပြုခွင့်ပေးရန်"</string>
@@ -590,6 +636,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"မည်သည့်ဖုန်းနံပါတ်မဆိုအားတိုက်ရိုက်ခေါ်ဆိုခြင်း"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"appအား ဘယ် ဖုန်း နံပါတ်ကိုမဆို၊ အရေးပေါ် နံပါတ်များ အပါအဝင်ကို၊ သင်၏ စွက်ဖက်မှု မပါဘဲ၊ ခေါ်ဆိုခွင့် ပြုသည်။ အကြံအဖန် appများက အရေးပေါ် ဝန်ဆောင်မှုများ ထံသို့ မလိုလားအပ်သော သို့မဟုတ် တရားမဝင်သော ခေါ်ဆိုမှုများ ပြုလုပ်လာနိုင်ကြမည်။"</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMAတက်ပလက်အစသတ်မှတ်ခြင်းကို တိုက်ရိုက်စတင်ရန်"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMAဖုန်း အစသတ်မှတ်ခြင်းကို တိုက်ရိုက်စတင်ရန်"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"appအား CDMA အတွက် စီမံလုပ်ကိုင်မှုကို စတင်ခွင့် ပြုသည်။ ကြံဖန် appများက မလိုအပ်ဘဲနှင့် CDMA အတွက် စီမံလုပ်ကိုင်မှုကို စတင်နိုင်ကြသည်။"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"တည်နေရာအဆင့်မြှင့်ခြင်းသတိပေးချက်အားထိန်းချုပ်ရန်"</string>
@@ -605,20 +653,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"ဖုန်းရဲ့ တိကျသော အခြေအနေအား ဖတ်ရှုခြင်း"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"အပလီကေးရှင်းအား ဖုန်းရဲ့ အခြေအနေအတိအကျကို ယူသုံးခွင့် ပြုခြင်း။. ဒီအခွင့်အရေးက အပလီကေးရှင်း ကို ဖုန်းခေါ်ဆိုမှု အခြေအနေ၊ လက်ရှိ ဖုန်းခေါ်နေမှု ရှိမရှိ၊ ဒါမှမဟုတ် နောက်ခံမှာ ဖုန်းခေါ်နေမှု၊ ဖုန်းခေါ်ဆို​အောင်မြင်မှု၊ ဒေတာဆက်သွယ်မှု အခြေအနေ နဲ့ မအောင်မြင်မှု တွေကို သိရှိစေပါသည်။"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"တက်ပလက်အား ပိတ်ခြင်းမှ ကာကွယ်ခြင်း"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ဖုန်းအနားယူခြင်းမပြုလုပ်စေရန်"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"appအား တက်ဘလက်ကို အနားမယူနိုင်အောင် ဟန့်တားခွင့် ပြုသည်။"</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"appအား ဖုန်းကို အနားမယူနိုင်အောင် ဟန့်တားခွင့် ပြုသည်။"</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"အနီအောက်ရောင်ခြည် ထုတ်လွှတ်ခြင်း"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"အပလီကေးရှင်းအား တက်ဘလက်ရဲ့ အနီအောက်ရောင်ခြည် ထုတ်လွှတ်ခြင်းအား သုံးခွင့်ပေးခြင်း"</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"အပလီကေးရှင်းအား ဖုန်းရဲ့ အနီအောက်ရောင်ခြည် ထုတ်လွှတ်ခြင်းအား သုံးခွင့်ပေးခြင်း"</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"တက်ဘလက် အဖွင့်အပိတ်"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ဖုန်းဖွင့် (သို့)ပိတ်"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"appအား တက်ဘလက်ကို ဖွင့် သို့မဟုတ် ပိတ်ခွင့် ပြုသည်။"</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"appအား ဖုန်းကို ဖွင့် သို့မဟုတ် ပိတ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"မျက်နှာပြင်မှိန်ချိန် ပြန်ညှိရန်"</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"မျက်နှာပြင်မှိန်ချိန် ပြန်ညှိရန် app ကိုခွင့်ပြုပါ။"</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"စက်ရုံစမ်းသပ်စနစ်ဖြင့် အလုပ်လုပ်ဆောင်စေရန်"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ထုတ်လုပ်သူ၏အနိမ့်စားအဆင့်စမ်းသပ်မှုအနေဖြင့်လုပ်ဆောင်စေမည် တက်ပလက်စက်အား လုံးဝဝင်ရောက်ကြည့်ရှုရန်ခွင့်ပြုမည်။ တက်ပလက်မှာ ထုတ်လုပ်သူ၏စမ်းသပ်မှုစနစ်ဖြင့် လုပ်ဆောင်နေစဥ်သာ ရရှိမည်။"</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ထုတ်လုပ်သူ၏အနိမ့်စားအဆင့်စမ်းသပ်မှုအနေဖြင့်လုပ်ဆောင်စေမည် ဖုန်းစက်အား လုံးဝဝင်ရောက်ကြည့်ရှုရန်ခွင့်ပြုမည် ဖုန်းမှာ ထုတ်လုပ်သူ၏စမ်းသပ်မှုစနစ်ဖြင့် လုပ်ဆောင်နေစဥ်သာ ရရှိမည်"</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"နောက်ခံအား သတ်မှတ်ရန်"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"appအား စနစ် နောက်ခံပုံကို သတ်မှတ်ခွင့် ပြုသည်။"</string>
@@ -628,14 +688,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"appအား စနစ်ကို စက်ရုံအတိုင်း လုံးဝ ပြန်ညှိခြင်း၊ ဒေတာများ၊ စီစင်ဖွဲ့စည်းမှု နှင့် တပ်ဆင်ပြီး appများ အားလုံးကို ဖျက်ပစ်ခြင်း လုပ်ခွင့် ပြုသည်။"</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"အချိန်သတ်မှတ်ရန်"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"appအား တက်ဘလက်၏ နာရီ အချိန်ကို ပြောင်းလဲခွင့် ပြုသည်။"</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"appအား ဖုန်း၏ နာရီ အချိန်ကို ပြောင်းလဲခွင့် ပြုသည်။"</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"အချိန်ဇုန်းအား သတ်မှတ်ခြင်း"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"appအား တက်ဘလက်၏ နာရီ ဇုန်ကို ပြောင်းလဲခွင့် ပြုသည်။"</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"appအား ဖုန်း၏ နာရီ ဇုန်ကို ပြောင်းလဲခွင့် ပြုသည်။"</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerServiceအနေဖြင့်ပြုမူရန်"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"အပလီကေးရှင်းအား အကောင့် စစ်ဆေးသော အရာများအား ဖုန်းခေါ်ခွင့်ပြုပါ"</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"စက်ပေါ်မှာ အကောင့်များ ရှာဖွေခြင်း"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"အပလီကေးရှင်းအား တက်ဘလက်မှ သိရှိထားသော အကောင့်များအား ရယူခွင့်ပေးပါ။ ဒီထဲတွင် သင် ထည့်သွင်းထားသော အပလီကေးရှင်းများမှတဆင့် ပြုလုပ်ထားသော အကောင့်များပါ ပါဝင်နိုင်ပါသည်။"</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"အပလီကေးရှင်းအား ဖုန်းမှ သိရှိထားသော အကောင့်စာရင်းများအား ရယူခွင့်ပေးပါ။ ဒီထဲတွင် သင် ထည့်သွင်းထားသော အပလီကေးရှင်းများမှတဆင့် ပြုလုပ်ထားသော အကောင့်များပါ ပါဝင်နိုင်ပါသည်။"</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"အကောင့်များ ဖန်တီးရန်နှင့် စကားဝှက်များ ရွေးချယ်ရန်"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"appအား အကောင့် မန်နေဂျာ၏ အကောင့် စိစစ်ရေး လုပ်နိုင်စွမ်းများကို၊ အကောင့်များ ဖန်တီးခြင်း နှင့် ၎င်းတို့၏ စကားဝှက်များကို ရယူခြင်း နှင့် သတ်မှတ်ခြင်း အပါအဝင်ကို၊ အသုံးချခွင့် ပြုသည်။"</string>
@@ -661,26 +727,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"အပလီကေးရှင်းအား ဝိုင်ဖိုင်တည်နေရာများအား ဆက်သွယ်ခြင်း၊ ဆက်သွယ်မှု ရပ်ဆိုင်းခြင်း၊ ဝိုင်ဖိုင်ကွန်ရက်အတွက် စက်အပြင်အဆင်များ ပြုလုပ်ခြင်း ခွင့်ပြုပါ"</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi Multicastလက်ခံခြင်းကိုခွင့်ပြုရန်"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"အပလီကေးရှင်းအား ဝိုင်ဖိုင်ကွန်ရက်ပေါ်တွင် သင့်တက်ဘလက်တစ်ခုထဲအားမဟုတ်ပဲ multicast လိပ်စာအား သုံးပြီး လွှင့်ထုတ်သော အချက်အလက်များ လက်ခံခွင့် ပြုပါ။ ဒီလိုသုံးခြင်းမှာ  non-multicast ထက် ဘက်ထရီ ပိုကုန်ပါသည်။"</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"အပလီကေးရှင်းအား ဝိုင်ဖိုင်နက်ဘ်ပေါ်တွင် သင့်ဖုန်းတစ်ခုထဲအားမဟုတ်ပဲ multicast လိပ်စာအား သုံးပြီး လွှင့်ထုတ်သော အချက်အလက်များ လက်ခံခွင့် ပြုပါ။ ဒီလိုသုံးခြင်းမှာ non-multicast ထက် ဘက်ထရီ ပိုကုန်ပါသည်။"</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ဘလူးတု ဆက်တင်များအား သုံးခွင့်ပေးရန်"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"appအား ဒေသန္တရ ဘလူးတုသ် တက်ဘလက်ကို စီစဉ်ဖွဲ့စည်းခွင့်ကို၎င်း၊ အဝေးထိန်း ကိရိယာများကို ရှာကြံလျက် ချိတ်တွဲခွင့်ကို၎င်း ပေးထားသည်။"</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"appအား ဒေသန္တရ ဘလူးတုသ် ဖုန်းကို စီစဉ်ဖွဲ့စည်းခွင့်ကို၎င်း၊ အဝေးထိန်း ကိရိယာများကို ရှာကြံလျက် ချိတ်တွဲခွင့်ကို၎င်း ပေးထားသည်။"</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"အပလီကေးရှင်းသုံးပြီး ဘလူးတုသ်နှင့် ပူးတွဲချိတ်ဆက်ခြင်း အား ခွင့်ပြုရန်"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"အပလီကေးရှင်းကို အဝေးက စက်များနဲ့ ကိုင်ထားသူ မလုပ်ဆောင်ပဲ ပူးတွဲခွင့်ပေးခြင်း"</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"အပလီကေးရှင်းကို အဝေးက စက်များနဲ့ ကိုင်ထားသူ မလုပ်ဆောင်ပဲ ပူးတွဲခွင့်ပေးခြင်း"</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"အပလီကေးရှင်းကို အဝေးက စက်များနဲ့ ကိုင်ထားသူ မလုပ်ဆောင်ပဲ ပူးတွဲခွင့်ပေးခြင်း"</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"ဘလူးတုသ် MAP ဒေတာကို ရယူသုံးရန်"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"appအား ဘလူးတုသ် MAP ဒေတာကို ရယူသုံးခွင့် ပြုသည်။"</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"appအား ဘလူးတုသ် MAP ဒေတာကို ရယူသုံးခွင့် ပြုသည်။"</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"appအား ဘလူးတုသ် MAP ဒေတာကို ရယူသုံးခွင့် ပြုသည်။"</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ဝိုင်မက်စ် နှင့် ချိတ်ဆက်ရန်နှင့် ဆက်သွယ်မှု ဖြတ်တောက်ရန်"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"အပလီကေးရှင်းအား ဝိုင်မက်စ် အခြေအနေ ကြည့်ခွင့်ပေးရန် ဥပမာ ဝိုင်မက်စ် ဖွင့်ထား မထား၊ ဝိုင်မက်စ် ချိတ်ဆက်ထားသော ကွန်ရက်အခြေအနေ"</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ဝိုက်မက်စ် အခြေအနေအား ပြင်ရန်"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"အပလီကေးရှင်းအား တက်ဘလက်ကို ဝိုင်မက်စ် ကွန်ရက်များနဲ့ ဆက်သွယ်ခြင်း၊ ဆက်သွယ်မှု ရပ်ဆိုင်းခြင်းများ လုပ်ခွင့်ပြုပါ"</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"အပလီကေးရှင်းအား ဖုန်းကို ဝိုင်မက်စ် ကွန်ရက်များနဲ့ ဆက်သွယ်ခြင်း၊ ဆက်သွယ်မှု ရပ်ဆိုင်းခြင်းများ လုပ်ခွင့်ပြုပါ"</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"ကွန်ရက်များကို အမှတ်ပေးခြင်း"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"appအား ကွန်ရက်များကို အဆင့်အတန်း သတ်မှတ်ခွင့် ပြုကာ တက်ဘလက် အနေနှင့် မည်သည့် ကွန်ရက်ကို ပိုနှစ်ခြိုက်သင့်ကြောင်းကို ဆုံးဖြတ်စေနိုင်သည်။"</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"appအား ကွန်ရက်များကို အဆင့်အတန်း သတ်မှတ်ခွင့် ပြုကာ ဖုန်း အနေနှင့် မည်သည့် ကွန်ရက်ကို ပိုနှစ်ခြိုက်သင့်ကြောင်းကို ဆုံးဖြတ်စေနိုင်သည်။"</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ဘလူးတု စက်များနှင့် အတူတွဲချိတ်ရန်"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"အပလီကေးရှင်းအား တက်ဘလက်ပေါ်မှ ဘလူးတုသ် အပြင်အဆင်အား ကြည့်ခွင့်၊ တခြားစက်များနဲ့ ဆက်သွယ်ခြင်း၊ ဆက်သွယ်ခြင်းကို လက်ခံခွင့်ပြုပါ။"</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"အပလီကေးရှင်းအား ဖုန်းမှဘလူးတု အပြင်အဆင်အား ကြည့်ခွင့်၊ တခြားစက်များနဲ့ ဆက်သွယ်ခြင်း၊ ဆက်သွယ်ခြင်းကို လက်ခံခွင့်ပြုပါ။"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Near Field Communicationအား ထိန်းချုပ်ရန်"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"appအား တာတို စက်ကွင်း ဆက်သွယ်ရေး (NFC) တဲဂ်များ၊ ကဒ်များ နှင့် ဖတ်ကြသူတို့နှင့် ဆက်သွယ်ပြောဆိုခွင့် ပြုသည်။"</string>
@@ -762,6 +840,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"မျက်နှာပြင် သော့ဖွင့်ရန် လိုအပ်သော စကားလုံးအရေအတွက်နှင့် အမျိုးအစားအား ထိန်းချုပ်ရန်"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"မော်နီတာမျက်နှာပြင်ဖွင့်ရန် ကြိုးစားခွင့်များ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"မျက်နှာပြင်ကို သော့ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက်၊ စကားဝှက် ရိုက်ထည့်မှု သိပ်များနေလျှင် တက်ဘလက်ကို သော့ခတ်ရန် သို့မဟုတ် တက်ဘလက် ဒေတာ အားလုံးကို ဖျက်ပစ်ရန်။"</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"မျက်နှာပြင်ကို သော့ဖွင့်ရန် အတွက် စကားဝှက် မမှန်မကန် ထည့်သွင်းမှု အရေအတွက်ကို စောင့်ကြည့်လျက်၊ စကားဝှက် ရိုက်ထည့်မှု သိပ်များနေလျှင် ဖုန်းကို သော့ခတ်ရန် သို့မဟုတ် ဖုန်း ဒေတာ အားလုံးကို ဖျက်ပစ်ရန်။"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"မျက်နှာပြင်ဖွင့်ရန်စကားဝှက်အား ပြောင်းခြင်း"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"မျက်နှာပြင်ဖွင့်ရန်စကားဝှက်အား ပြောင်းခြင်း"</string>
@@ -769,6 +849,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"မည်သည့်အချိန်တွင် ဖန်သားပြင်အား မည်ကဲ့သို့နည်းဖြင် သော့ချရန် ထိန်းချုပ်ခြင်း"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ဒေတာအားလုံးအားဖျက်ခြင်း"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"စက်ရုံထုတ် အခြေအနေအား ပြန်ပြောင်းခြင်းဖြင့် တက်ဘလက်ရှိ အချက်အလက်များအား ကြိုတင်သတိပေးမှုမရှိပဲ ဖျက်စီးရန်"</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"စက်ရုံထုတ် အခြေအနေအား ပြန်ပြောင်းခြင်းဖြင့် ဖုန်းရှိ အချက်အလက်များအား ကြိုတင်သတိပေးမှုမရှိပဲ ဖျက်စီးရန်"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"တကမာ္ဘလုံးဆိုင်ရာပရော်စီကို သတ်မှတ်ခြင်း"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"မူဝါဒအသုံးပြုခွင့်ရလျှင် စက်ပစ္စည်းတကမ္ဘာလုံးဆိုင်ရာပရော်စီအားသုံးရန် သတ်မှတ်ခြင်း။ ပထမဦးဆုံးသောစက်၏ထိန်းချုပ်သူသာ တကမ္ဘာလုံးဆိုင်ရာပရော်စီသာအားအကျိုးသက်ရောက်စေရန် သတ်မှတ်နိုင်သည်။"</string>
@@ -917,6 +999,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"မျက်မှာမှတ် သော့ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"တက်ပလက်ထဲတွင်း ဆင်းကဒ် မရှိပါ"</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ဖုန်းထဲတွင် ဆင်းကဒ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ဆင်းမ်ကဒ် ထည့်ပါ"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"ဆင်းမ်ကဒ် မရှိဘူး သို့မဟုတ် ဖတ်မရပါ။ ဆင်းမ်ကဒ် တစ်ခုကို ထည့်ပါ။"</string>
@@ -939,10 +1023,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"သင်သည် စကားဝှက်ကို  <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် မမှန်မကန် ရိုက်ခဲ့ပြီ။ \n\n ထပ်ပြီးတော့ <xliff:g id="NUMBER_1">%d</xliff:g> စက္ကန့်အကြာ စမ်းကြည့်ပါ။"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"သင်သည် သင်၏ PIN <xliff:g id="NUMBER_0">%d</xliff:g>ကို ကြိမ် မမှန်မကန် ရိုက်ခဲ့ပြီ။ \n\n ထပ်ပြီးတော့ <xliff:g id="NUMBER_1">%d</xliff:g> စက္ကန့်အကြာ စမ်းကြည့်ပါ။"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"သင်သည် သော့ဖွင့် ပုံစံကို<xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် မမှန်မကန် ရေးဆွဲခဲ့သည်။ နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> မအောင်မြင်သည့် ကြိုးပမ်းမှု နောက်မှာ၊ သင်၏ တက်ဘလက်ကို Google လက်မှတ်ထိုး ဝင်မှုဖြင့် ဖွင့်ရန် တောင်းဆိုခံရမည်။ \n\n ထပ်ပြီး <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့် အကြာမှာ စမ်းကြည့်ပါ။"</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"သင်သည် သော့ဖွင့် ပုံစံကို <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် မမှန်မကန် ရေးဆွဲခဲ့သည်။ နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> မအောင်မြင်သည့် ကြိုးပမ်းမှု နောက်မှာ၊ သင်၏ ဖုန်းကို Google လက်မှတ်ထိုး ဝင်မှုဖြင့် ဖွင့်ရန် တောင်းဆိုခံရမည်။ \n\n ထပ်ပြီး <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့် အကြာမှာ စမ်းကြည့်ပါ။"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"သင့်Tabletအား မှားယွင်းစွာ <xliff:g id="NUMBER_0">%d</xliff:g>ကြိမ်ဖွင့်ရန် ကြိုးစားနေပါသည်။ နောက်ထပ်<xliff:g id="NUMBER_1">%d</xliff:g>ကြိမ်မအောင်မြင်ပါက မူလစက်ရုံ အနေအထားသို့ပြန်လည်ရောက်ရှိကာ အသုံးပြုသူ၏ဒေတာအားလုံးဆုံးရှုံးပါမည်။"</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"သင့်ဖုန်းအား မှားယွင်းစွာ <xliff:g id="NUMBER_0">%d</xliff:g>ကြိမ်ဖွင့်ရန် ကြိုးစားနေပါသည်။ နောက်ထပ်<xliff:g id="NUMBER_1">%d</xliff:g>ကြိမ်မအောင်မြင်ပါက မူလစက်ရုံ အနေအထားသို့ပြန်လည်ရောက်ရှိကာ အသုံးပြုသူ၏ဒေတာအားလုံးဆုံးရှုံးပါမည်။"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"သင့်Tabletအား မှားယွင်းစွာ <xliff:g id="NUMBER">%d</xliff:g>ကြိမ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ယခုဖုန်းကိုမူလစက်ရုံအနေအထားသို့ပြန်လည်ရောက်ရှိပါမည်။"</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"သင့်ဖုန်းအား မှားယွင်းစွာ <xliff:g id="NUMBER">%d</xliff:g>ကြိမ်ဖွင့်ရန် ကြိုးစားခဲ့ပါသည်။ ယခုဖုန်းကို မူလစက်ရုံအနေအထားသို့ပြန်လည်ရောက်ရှိပါမည်။"</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်ကြိုးစားပါ"</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"ပုံစံအားမေ့နေပါသလား"</string>
@@ -1026,6 +1116,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"အပလီကေးရှင်းအား ဘရောင်ဇာမှ ယခင် သွားရောက်ထားသော URLများ၊ နေရာ အမှတ်အသားများအား ကြည့်ရှုခွင့်ပြုပါ။ မှတ်ချက်။ ဒီခွင့်ပြုချက်ကို တတိယပါတီ ဘရောင်ဇာများ နှင့် တခြား အပလီကေးရှင်းများမှ လုပ်ဆောင်မည် မဟုတ်ပါ။"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"သင့်ရဲ့ ဝဘ် အမှတ်နေရာများနှင့် သွားလာသော မှတ်တမ်း ရေးခြင်း"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"အပလီကေးရှင်းအား ဘရောင်ဇာမှ မှတ်တမ်း သို့ မှတ်သားမှု အမှတ်များအား ပြင်ဆင်ခွင့် ပေးခြင်း။ အပလီကေးရှင်းမှ ဘရောင်ဇာ မှတ်တမ်းများကို ဖျက်ပစ်ခွင့် သို့ ပြင်ဆင်ခွင့် ရှိပါမည်။ မှတ်ချက်။ ဤခွင့်ပြုချက်ကို တတိယပါတီ ဘရောင်ဇာများ၊ တခြား အပလီကေးရှင်းများမှ သုံးမည် မဟုတ်ပါ။"</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"အပလီကေးရှင်းအား ဘရောင်ဇာမှ မှတ်တမ်း သို့ မှတ်သားမှု အမှတ်များအား ပြင်ဆင်ခွင့် ပေးခြင်း။ အပလီကေးရှင်းမှ ဘရောင်ဇာ မှတ်တမ်းများကို ဖျက်ပစ်ခွင့် သို့ ပြင်ဆင်ခွင့် ရှိပါမည်။ မှတ်ချက်။ ဒီခွင့်ပြုချက်ကို တတိယပါတီ ဘရောင်ဇာများ၊ တခြား အပလီကေးရှင်းများမှ သုံးမည် မဟုတ်ပါ။"</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"နှိုးစက်သတ်မှတ်ရန်"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"appအား တပ်ဆင်ထားသည့် နှိုးစက်နာရီ app ထဲတွင် နှိုးစက်ကို သတ်မှတ်ခွင့် ပြုသည်။ အချို့ နှိုးစက် appများက ထိုအင်္ဂါရပ်ကို ပြီးမြောက်အောင် မလုပ်နိုင်ကြပါ။"</string>
@@ -1302,6 +1394,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"လိုအပ်သော ပင် နံပါတ် ရိုက်ရန်:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ပင် နံပါတ်:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> နှင့် ဆက်သွယ်ထားစဉ် တက်ဘလက်ဟာ ဝိုင်ဖိုင် နှင့် ဆက်သွယ်မှု ရပ်ဆိုင်းထားမှာ ဖြစ်ပါတယ်"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ကို ဆက်သွယ်ထားစဉ် ဖုန်းအား ဝိုင်ဖိုင်မှ ဆက်သွယ်မှု ရပ်ဆိုင်းထားပါမည်"</string>
     <string name="select_character" msgid="3365550120617701745">"စာရိုက်ထည့်ရန်"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"စာတိုပို့စနစ်(SMS)ဖြင့် စာများ ပို့သည်"</string>
@@ -1583,6 +1677,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"တစ်ခါတည်း"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s က အလုပ်ပရိုဖိုင်ကို မပံ့ပိုးပါ။"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"တက်ဘလက်"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ဖုန်း"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"နားကြပ်"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"အထိုင်ရှိသော စပီကာများ"</string>
@@ -1637,10 +1733,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"သင်သည် စကားဝှက်ကို  <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ် မှားရိုက်ပြီးပါပြီ။ \n\n <xliff:g id="NUMBER_1">%d</xliff:g> စက္ကန့်အကြာ ပြန်လည်ကြိုးစားပါ"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"သင် ပုံစံဆွဲ သော့ဖွင့်ခြင်းကို <xliff:g id="NUMBER_0">%d</xliff:g> ကြိမ်မြောက် မအောင်မြင်ပါ။ \n\n<xliff:g id="NUMBER_1">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"သင့်တက်ဘလက်အား သော့ဖွင့်ရန် မအောင်မြင်သော အကြိမ်ရေ <xliff:g id="NUMBER_0">%d</xliff:g>  ကြိုးစားပြီးပါပြီ။ နောက်ထပ်  <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မအောင်မြင်ပါက၊ တက်ဘလက်က စက်ရုံထွက် အခြေအနေကို ပြန်လည် ရောက်ရှိသွားမည်ဖြစ်ပြီး ဒေတာအားလုံး ဆုံးရှုံးသွားပါမည်။"</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"သင့်ဖုန်းအား သော့ဖွင့်ရန် မအောင်မြင်သော အကြိမ်ရေ <xliff:g id="NUMBER_0">%d</xliff:g> ကြိုးစားပြီးပါပြီ။ နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မအောင်မြင်ပါက၊ ဖုန်းက စက်ရုံထွက် အခြေအနေကို ပြန်လည် ရောက်ရှိသွားမည်ဖြစ်ပြီး ဒေတာအားလုံး ဆုံးရှုံးသွားပါမည်။"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"သင့်တက်ဘလက် အား သော့ဖွင့်ရန် မအောင်မြင်သော အကြိမ်ရေ <xliff:g id="NUMBER">%d</xliff:g> ကြိုးစားပြီးပါပြီ။ တက်ဘလက်က စက်ရုံထွက် အခြေအနေကို ပြန်လည် ရောက်ရှိသွားပါတော့မည်။"</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"သင့်ဖုန်းအား သော့ဖွင့်ရန် မအောင်မြင်သော အကြိမ်ရေ <xliff:g id="NUMBER">%d</xliff:g>  ကြိုးစားပြီးပါပြီ။ ဖုန်းက စက်ရုံထွက် အခြေအနေကို ပြန်လည် ရောက်ရှိသွားပါတော့မည်။"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"သင် ပုံဖော်၍သော့ဖွင့်ခြင်းကို  <xliff:g id="NUMBER_0">%d</xliff:g> အကြိမ် မှန်ကန်စွာ မပြုလုပ်နိုင်ပါ။  နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မမှန်ကန်ပါက သင့်တက်ဘလက်အား အီးမေးလ်အသုံးပြု၍ သော့ဖွင့်ရန် တောင်းဆိုပါလိမ့်မည်။ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"သင် ပုံဖော်၍သော့ဖွင့်ခြင်းကို <xliff:g id="NUMBER_0">%d</xliff:g> အကြိမ် မှန်ကန်စွာ မပြုလုပ်နိုင်ပါ။ နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မမှန်ကန်ပါက သင့်ဖုန်းအား အီးမေးလ်အသုံးပြု၍ သော့ဖွင့်ရန် တောင်းဆိုပါလိမ့်မည်။ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ဖယ်ရှားရန်"</string>

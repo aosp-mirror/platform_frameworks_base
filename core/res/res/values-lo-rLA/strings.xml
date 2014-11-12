@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ຊມ <xliff:g id="MINUTES">%2$d</xliff:g> ນທ"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ຊມ <xliff:g id="MINUTES">%2$d</xliff:g> ນທ"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> ນທ"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> ​ນ​ທ"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> ນທ <xliff:g id="SECONDS">%2$d</xliff:g> ວິ"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> ນທ <xliff:g id="SECONDS">%2$d</xliff:g> ວິ"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ວິ"</string>
@@ -149,12 +148,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"ມີການລຶບ <xliff:g id="CONTENT_TYPE">%s</xliff:g> ຫຼາຍເກີນໄປ."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ພື້ນທີ່ຈັດເກັບຂໍ້ມູນໃນແທັບເລັດເຕັມ. ລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ໃນ​ໂມງ​ເຕັມ​ແລ້ວ. ໃຫ້​ລຶບ​ໄຟ​ລ໌​ບາງ​ອັນ​ທີ່ບໍ່​ໄດ້​ໃຊ້​ອອກ​ເພື່ອ​ເພີ່ມ​ເນື້ອ​ທີ່​ຫວ່າງ."</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"ພື້ນທີ່ໃນໂທລະສັບເຕັມແລ້ວ. ກະລຸນາລຶບບາງໄຟລ໌ອອກເພື່ອເພີ່ມພື້ນທີ່ຫວ່າງ."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ການນຳໃຊ້ເຄືອຂ່າຍອາດມີການກວດສອບຕິດຕາມ"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"ໂດຍບຸກຄົນທີສາມທີ່ບໍ່ຮູ້ຈັກ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"ໂດຍ <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"ຂ້າພະເຈົ້າ"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ໂຕເລືອກແທັບເລັດ"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ໂຕເລືອກໂທລະສັບ"</string>
     <string name="silent_mode" msgid="7167703389802618663">"ໂໝດປິດສຽງ"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"ເປີດລະບົບໄຮ້ສາຍ"</string>
@@ -166,6 +169,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"ເປີດສຽງໂທເຂົ້າແລ້ວ"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"ກຳລັງປິດລະບົບລົງ..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"ແທັບເລັດຂອງທ່ານຈະຖືກປິດ."</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"ໂມງ​ຂອງ​ທ່ານ​ຈະ​ຖືກ​ປິດ​ໄວ້."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"ໂທລະສັບຂອງທ່ານຈະຖືກປິດ."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"ທ່ານຕ້ອງການທີ່ຈະປິດບໍ່?"</string>
@@ -174,6 +179,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"ຫາກໍໃຊ້"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ບໍ່ມີແອັບຯຫຼ້າສຸດ"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"ໂຕເລືອກແທັບເລັດ"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"ໂຕເລືອກໂທລະສັບ"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"ລັອກໜ້າຈໍ"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"ປິດ"</string>
@@ -290,9 +297,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງຄຳຂໍ ໄປຫາແອັບຯຂໍ້ຄວາມອື່ນໆເພື່ອຈັດການ ກໍລະນີການຕອບດ້ວຍຂໍ້ຄວາມ ສຳລັບສາຍທີ່ໂທເຂົ້າມາ."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"ອ່ານຂໍ້ຄວາມຂອງທ່ານ (SMS ຫຼື MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານ SMS ທີ່ບັນທຶກໄວ້ໃນແທັບເລັດ ຫຼື SIM card ຂອງທ່ານ. ຄຸນສົມບັດນີ້ຈະເຮັດໃຫ້ແອັບຯສາມາດອ່ານຂໍ້ຄວາມ SMS ທັງໝົດໄດ້ ບໍ່ເນື້ອຫາຂອງມັນຈະແມ່ນຫຍັງກໍຕາມ."</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານຂໍ້ຄວາມ SMS ທີ່ເກັບໄວ້ໃນໂທລະສັບຂອງທ່ານ ຫຼືຊິມກາດ. ນີ້ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານຂໍ້ຄວາມ SMS ທັງໝົດ, ໂດຍບໍ່ຄຳນຶງເຖິງເນື້ອຫາ ຫຼືຄວາມລັບ."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"ແກ້ໄຂຂໍ້ຄວາມຂອງທ່ານ (SMS ຫຼື MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"ອະນຸຍາດໃຫ້ແອັບຯຂຽນຂໍ້ຄວາມ SMS ທີ່ບັນທຶກໄວ້ໃນແທັບເລັດຂອງທ່ານ ຫຼືຊິມກາດຂອງທ່ານ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດລຶບຂໍ້ຄວາມຂອງທ່ານໄດ້."</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"ອະນຸຍາດໃຫ້ແອັບຯ ຂຽນລົງໃສ່ຂໍ້ຄວາມ SMS ທີ່ເກັບໄວ້ໃນໂທລະສັບ ຫຼືຊິມກາດຂອງທ່ານ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດລຶບຂໍ້ຄວາມຂອງທ່ານໄດ້."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"ຮັບຂໍ້ຄວາມສັ້ນ (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"ອະນຸຍາດໃຫ້ແອັບຯຮັບ ແລະປະມວນຜົນຂໍ້ຄວາມ WAP. ການອະນຸຍາດນີ້ຮວມເຖິງຄວາມສາມາດໃນການກວດເບິ່ງ ແລະລຶບຂໍ້ຄວາມທີ່ສົ່ງແລ້ວ ໂດຍບໍ່ຕ້ອງສະແດງໃຫ້ທ່ານເຫັນ."</string>
@@ -386,6 +397,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນຄ້າງໜ້າຈໍໄວ້ຊົ່ວຄາວ ສຳລັບການປ່ຽນເປັນແບບເຕັມໜ້າຈໍ."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"ກົດປຸ່ມແລະປຸ່ມຄວບຄຸມ"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"ອະນຸຍາດໃຫ້ແອັບຯສົ່ງກິດຈະກຳການປ້ອນຂໍ້ມູນຂອງມັນ (ເຊັ່ນ: ການກົດປຸ່ມ ແລະອື່ນໆ) ຫາແອັບຯອື່ນ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ ເພື່ອຄວບຄຸມແທັບເລັດໄດ້."</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"ອະນຸຍາດໃຫ້ແອັບຯ ສົ່ງການປ້ອນຂໍ້ມູນຂອງຕົນເອງ (ການກົດປຸ່ມ ແລະອື່ນໆ.) ໃຫ້ແອັບຯອື່ນ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ສາມາດໃຊ້ສິ່ງນີ້ເພື່ອຍຶດເອົາການຄວບຄຸມໂທລະສັບທັງໝົດໄດ້."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"ບັນທຶກສິ່ງທີ່ທ່ານພິມ ແລະການກະທຳທີ່ທ່ານເຮັດ"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"ອະນຸຍາດໃຫ້ແອັບຯເບິ່ງການກົດປຸ່ມຂອງທ່ານ ເມື່ອມີປະຕິສຳພັນກັບແອັບຯອື່ນ (ເຊັ່ນ: ການພິມລະຫັດຜ່ານ). ແອັບຯທົ່ວໄປບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
@@ -433,6 +446,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"ອະນຸຍາດໃຫ້ແອັບຯຮ້ອງຂໍໃຫ້ສົ່ງສັນຍານ ແຈ້ງໄປຫາໂປຣເຊສທີ່ຍັງເຮັດວຽກຢູ່ທັງໝົດ."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"ເຮັດໃຫ້ແອັບຯເຮັດວຽກຕະຫຼອດເວລາ"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"ອະນຸຍາດໃຫ້ແອັບຯ ສາມາດເຮັດໃຫ້ບາງພາກສ່ວນຂອງມັນເອັງ ຄົງໂຕໃນໜ່ວຍຄວາມຈຳ. ສິ່ງນີ້ສາມາດຈຳກັດໜ່ວຍຄວາມຈຳທີ່ສາມາດໃຊ້ໄດ້ໂດຍແອັບຯອື່ນ ເຮັດໃຫ້ແທັບເລັດຊ້າລົງ."</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"ອະນຸຍາດໃຫ້ແອັບຯເຮັດໃຫ້ສ່ວນນຶ່ງຂອງຕົນເອງ ຄົງຢູ່ຖາວອນໃນໜ່ວຍຄວາມຈຳ ເຊິ່ງອາດສາມາດ ເຮັດໃຫ້ການນຳໃຊ້ໜ່ວຍຄວາມຈຳຂອງແອັບຯ ອື່ນຖືກຈຳກັດ ສົ່ງຜົນເຮັດໃຫ້ມືຖືຂອງທ່ານເຮັດວຽກຊ້າລົງໄດ້."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"ລຶບແອັບຯ"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"ອະນຸຍາດໃຫ້ແອັບຯລຶບແພັກເກັດ Android ຕ່າງໆໄດ້. ແອັບຯອັນຕະລາຍອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລຶບແອັບຯທີ່ສຳຄັນໄດ້."</string>
@@ -446,11 +461,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"ອະນຸຍາດໃຫ້ແອັບຯຕິດຕັ້ງແພັກເກດ Android ໃໝ່ ຫຼືແພັກເກດທີ່ອັບເດດແລ້ວ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ ເພື່ອສ້າງແອັບຯໃໝ່ທີ່ມີສິດອະນຸຍາດສູງກວ່າໄດ້."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"ລຶບຂໍ້ມູນ cache ຂອງແອັບຯທັງໝົດ"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"ອະນຸຍາດໃຫ້ແອັບຯສ້າງພື້ນທີ່ຫວ່າງໃນແທັບເລັດ ໂດຍການລຶບໄຟລ໌ໃນໄດເຣັກທໍຣີ cache ຂອງແອັບພລິເຄຊັນອື່ນ. ຄຸນສົມບັດນີ້ອາດເຮັດໃຫ້ແອັບພລິເຄຊັນອື່ນ ເລີ່ມເຮັດວຽກຊ້າລົງເພາະຕ້ອງຂຽນຂໍ້ມູນຄືນໃໝ່."</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນເພີ່ມເນື້ອທີ່ຫວ່າງໃຫ້ໂທລະສັບ ໂດຍການລຶບໄຟລ໌ໃນໄດເຣັກທໍຣີ cache ຂອງແອັບພລິເຄຊັນອື່ນໆ. ການກະທຳນີ້ອາດເຮັດໃຫ້ແອັບພລິເຄຊັນອື່ນ ເຮັດວຽກໄດ້ຊ້າລົງເນື່ອງຈາກພວກມັນຕ້ອງໄດ້ດຶງຂໍ້ມູນຄືນໃໝ່."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"ຍ້າຍຊັບພະຍາກອນແອັບຯ"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"ອະນຸຍາດໃຫ້ແອັບຯຍ້າຍແຫລ່ງຊັບພະຍາກອນແອັບຯ ຈາກບ່ອນຈັດເກັບຂໍ້ມູນພາຍໃນ ສູ່ບ່ອນຈັດເກັບຂໍ້ມູນພາຍນອກ ແລະໃນທາງກັບກັນໄດ້."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"ອ່ານຂໍ້ມູນບັນທຶກທີ່ສຳຄັນ"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານໄຟລ໌ບັນທຶກລະບົບຕ່າງໆຂອງລະບົບ. ຄຸນສົມບັດນີ້ຈະອະນຸຍາດໃຫ້ແອັບຯ ສາມາດຄົ້ນພົບຂໍ້ມູນທົ່ວໄປ ກ່ຽວກັບສິ່ງທີ່ທ່ານກຳລັງເຮັດກັບແທັບເລັດ ເຊິ່ງອາດຮວມເຖິງຂໍ້ມູນສ່ວນໂຕນຳໄດ້."</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານໄຟລ໌ບັນທຶກລະບົບຕ່າງໆຂອງລະບົບ. ຄຸນສົມບັດນີ້ຈະອະນຸຍາດໃຫ້ແອັບຯ ສາມາດຄົ້ນພົບຂໍ້ມູນທົ່ວໄປ ກ່ຽວກັບສິ່ງທີ່ທ່ານກຳລັງເຮັດກັບໂທລະສັບ ເຊິ່ງອາດຮວມເຖິງຂໍ້ມູນສ່ວນໂຕນຳໄດ້."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ໃຊ້ຕົວຖອດລະຫັດໃດກໍໄດ້ເພື່ອການຫຼິ້ນ"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ອະນຸຍາດໃຫ້ແອັບຯໃຊ້ທຸກຕົວຖອດລະຫັດສື່ທີ່ຕິດຕັ້ງໄວ້ແລ້ວ ເພື່ອການຖອດລະຫັດການຫຼິ້ນໄຟລ໌ຕ່າງໆ."</string>
@@ -462,6 +481,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນອ່ານ ແລະຂຽນ ໃສ່ທຸກຊັບພະຍາກອນທີ່ເປັນຂອງກຸ່ມວິນິໄສ; ຕົວຢ່າງ: ໄຟລ໌ໃນ /dev. ສິ່ງນີ້ອາດສົ່ງຜົນກະທົບຕໍ່ຄວາມສະຖຽນ ແລະຄວາມປອດໄພຂອງລະບົບ. ສິ່ງນີ້ຄວນໃຊ້ສຳຫຼັບການວິເຄາະບັນຫາຈຳເພາະ ຂອງບາງຮາດແວໂດຍຜູ່ຜະລິດ ຫຼືຜູ່ປະຕິບັດການເທົ່ານັ້ນ."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ເປີດ ຫຼືປິດນຳໃຊ້ອົງປະກອບຂອງແອັບຯ"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"ອະນຸຍາດໃຫ້ແອັບຯ ປ່ຽນແປງອົງປະກອບຂອງແອັບຯອື່ນ ວ່າຖືກເປີດນຳໃຊ້ ຫຼືບໍ່. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອປິດການນຳໃຊ້ຄວາມສາມາດສຳຄັນຂອງແທັບເລັດ. ການກຳນົດສິດນີ້ຄວນຖືກໃຊ້ຢ່າງລະມັດລະວັງ, ເພາະມັນເປັນໄປໄດ້ທີ່ຈະເຮັດໃຫ້ອົງປະກອບຂອງແອັບຯຢູ່ໃນສະຖານະ ໃຊ້ການບໍ່ໄດ້, ບໍ່ແນ່ນອນ ຫຼືບໍ່ສະຖຽນ."</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"ອະນຸຍາດໃຫ້ແອັບຯ ປ່ຽນແປງອົງປະກອບຂອງແອັບຯອື່ນ ວ່າຖືກເປີດນຳໃຊ້ ຫຼືບໍ່. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອປິດການນຳໃຊ້ຄວາມສາມາດສຳຄັນຂອງໂທລະສັບ. ການກຳນົດສິດນີ້ຄວນຖືກໃຊ້ຢ່າງລະມັດລະວັງ, ເພາະມັນເປັນໄປໄດ້ທີ່ຈະເຮັດໃຫ້ອົງປະກອບຂອງແອັບຯຢູ່ໃນສະຖານະ ໃຊ້ການບໍ່ໄດ້, ບໍ່ແນ່ນອນ ຫຼືບໍ່ສະຖຽນ."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"ອະນຸມັດ ຫຼືຖອດຖານການອະນຸຍາດ"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນອະນຸມັດ ຫຼືຖອນການອະນຸມັດສິດໃດນຶ່ງສຳລັບໂຕມັນເອງ ຫຼືແອັບພລິເຄຊັນອື່ນໆ. ແອັບພລິເຄຊັນທີ່ເປັນອັນຕະລາຍ ອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອເຂົ້າເຖິງຄຸນສົມບັດບາງຢ່າງທີ່ທ່ານບໍ່ໄດ້ອະນຸມັດໃຫ້ພວກມັນ."</string>
@@ -475,21 +496,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂການວາງແຜນບໍລິການ Google. ບໍ່ໄດ້ໃຊ້ສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"ເຮັດວຽກໃນຕອນລະບົບເລີ່ມ"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"ອະນຸຍາດໃຫ້ແອັບຯ ເປີດໂຕມັນເອງທັນທີທີ່ເປີດລະບົບຂຶ້ນມາສຳເລັດ. ນີ້ສາມາດເຮັດໃຫ້ການເລີ່ມເປີດຂອງແທັບເລັດໃຊ້ເວລາດົນຂຶ້ນ ແລະເຮັດໃຫ້ການເຮັດວຽກໂດຍຮວມຂອງແທັບເລັດຊ້າລົງ ໂດຍການເຮັດວຽກຕະຫຼອດເວລາ."</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"ອະນຸຍາດໃຫ້ແອັບຯ ເປີດໂຕມັນເອງທັນທີທີ່ລະບົບສຳເລັດເປີດເຄື່ອງ. ນີ້ສາມາດເຮັດໃຫ້ການເລີ່ມເປີດຂອງໂທລະສັບໃຊ້ເວລາດົນຂຶ້ນ ແລະປ່ອຍໃຫ້ແອັບຯ ເຮັດໃຫ້ໂທລະສັບໂດຍຮວມຊ້າລົງ ດ້ວຍການເຮັດວຽກຢູ່ຕະຫຼອດເວລາ."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ສົ່ງການກະຈາຍສັນຍານແບບຍຶດຕິດ"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນສົ່ງການກະຈາຍສັນຍານແບບຍຶດຕິດ, ທີ່ຍັງຄົງເຫຼືອຫຼັງຈາກການກະຈາຍສັນຍານສິ້ນສຸດລົງ. ການນຳໃຊ້ແບບມະຫາສານອາດເຮັດໃຫ້ແທັບເລັດຊ້າ ຫຼືບໍ່ສະຖຽນ ໂດຍການໃຊ້ໜ່ວຍຄວາມຈຳຫຼາຍເກີນໄປ."</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນສົ່ງການກະຈາຍສັນຍານແບບຍຶດຕິດ, ທີ່ຍັງຄົງເຫຼືອຫຼັງຈາກການກະຈາຍສັນຍານສິ້ນສຸດລົງ. ການນຳໃຊ້ແບບມະຫາສານອາດເຮັດໃຫ້ໂທລະສັບຊ້າ ຫຼືບໍ່ສະຖຽນ ໂດຍການໃຊ້ໜ່ວຍຄວາມຈຳຫຼາຍເກີນໄປ."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"ອ່ານລາຍຊື່ຜູ່ຕິດຕໍ່ຂອງທ່ານ"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ່ຕິດຕໍ່ໃນແທັບເລັດຂອງທ່ານ, ຮວມເຖິງຂໍ້ມູນການຈຳນວນການຕິດຕໍ່ຕ່າງໆເຊັ່ນ: ການໂທ, ອີເມວ, ຫຼືຕິດຕໍ່ຫາໃນທາງອື່ນໆກັບບຸກຄົນໃດນຶ່ງໄດ້. ການອະນຸຍາດນີ້ເຮັດໃຫ້ແອັບຯ ສາມາດບັນທຶກຂໍ້ມູນຜູ່ຕິດຕໍ່ຂອງທ່ານ ແລະແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດສົ່ງຕໍ່ຂໍ້ມູນເຫຼົ່ານັ້ນໂດຍທີ່ທ່ານບໍ່ຮູ້ໂຕ."</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ່ຕິດຕໍ່ທີ່ເກັບໄວ້ໃນໂທລະສັບຂອງທ່ານ ຮວມເຖິງຄວາມຖີ່ການໂທ, ການສົ່ງສົ່ງອີເມວ ຫຼືການສື່ສານໃນຮູບແບບອື່ນກັບບຸກຄົນໃດນຶ່ງ. ການອະນຸຍາດເຮັດໃຫ້ແອັບຯ ສາມາດບັນທຶກຂໍ້ມູນລາຍຊື່ຜູ່ຕິດຕໍ່ຂອງທ່ານ ແລະແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດເຜີຍແຜ່ຂໍ້ມູນຂອງທ່ານໂດຍທີ່ທ່ານບໍ່ໄດ້ຮັບຮູ້."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"ແກ້ໄຂລາຍຊື່ຜູ່ຕິດຕໍ່ຂອງທ່ານ"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ່ຕິດຕໍ່ຂອງທ່ານທີ່ເກັບໄວ້ໃນແທັບເລັດ ຮວມທັງຄວາມຖີ່ໃນການໂທ, ການສົ່ງອີເມວ ຫຼືການສື່ສານໃນຮູບແບບອື່ນຂອງທ່ານກັບລາຍຊື່ຜູ່ຕິດຕໍ່ໃດນຶ່ງ. ການກຳນົດສິດນີ້ເຮັດໃຫ້ແອັບຯສາມາດລຶບຂໍ້ມູນລາຍຊື່ຜູ່ຕິດຕໍ່ໄດ້."</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂຂໍ້ມູນກ່ຽວກັບລາຍຊື່ຜູ່ຕິດຕໍ່ ທີ່ບັນທຶກໃນໂທລະສັບຂອງທ່ານ ຮວມທັງຄວາມຖີ່ຂອງການໂທ, ການອີເມວ ຫຼືການຕິດຕໍ່ໃນຮູບແບບອື່ນກັບລາຍຊື່ຜູ່ຕິດຕໍ່ໃດນຶ່ງນຳ. ການອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຯ ສາມາດລຶບຂໍ້ມູນລາຍຊື່ຜູ່ຕິດຕໍ່ໄດ້."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"ອ່ານບັນທຶກການໂທ"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານບັນທຶກການໂທຂອງແທັບເລັດທ່ານ ຮວມທັງຂໍ້ມູນການໂທເຂົ້າ ແລະການໂທອອກ. ການກຳນົດສິດນີ້ເຮັດໃຫ້ແອັບຯສາມາດ ບັນທຶກຂໍ້ມູນການໂທຂອງທ່ານ ແລະແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດຈະເຜີຍແຜ່ຂໍ້ມູນການໂທໂດຍທີ່ທ່ານບໍ່ຮັບຮູ້."</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານບັນທຶກການໂທຂອງໂທລະສັບທ່ານ ຮວມທັງຂໍ້ມູນກ່ຽວກັບສາຍໂທເຂົ້າ ແລະໂທອອກ. ການອະນຸຍາດນີ້ຈະເຮັດໃຫ້ແອັບຯ ສາມາດບັນທຶກຂໍ້ມູນການໂທ ແລະເຮັດໃຫ້ແອັບຯທີ່ເປັນອັນຕະລາຍສາມາດ ສົ່ງຕໍ່ຂໍ້ມູນບັນທຶກການໂທໂດຍບໍ່ໃຫ້ທ່ານຮູ້ໄດ້."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"ຂຽນຂໍ້ມູນການໂທ"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂບັນທຶກການໂທຂອງແທັບເລັດ ຮວມທັງຂໍ້ມູນກ່ຽວກັບການໂທອອກ ແລະໂທເຂົ້ານຳ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໃຊ້ຄຸນສົມບັດນີ້ເພື່ອລຶບ ຫຼືແກ້ໄຂບັນທຶກການໂທຂອງທ່ານໄດ້."</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂລາຍການການໂທໃນໂທລະສັບຂອງທ່ານ, ຮວມທັງຂໍ້ມູນກ່ຽວກັບສາຍໂທເຂົ້າ ແລະການໂທອອກ. ແອັບຯທີ່ເປັນອັນຕະລາຍ ອາດໃຊ້ຄວາມສາມາດນີ້ ເພື່ອລຶບ ຫຼືແກ້ໄຂລາຍການການໂທຂອງທ່ານໄດ້."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"ອ່ານບັດລາຍຊື່ຜູ່ຕິດຕໍ່ຂອງທ່ານເອງ"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານຂໍ້ມູນໂປໄຟລ໌ສ່ວນໂຕໃນອຸປະກອນຂອງທ່ານເຊັ່ນ: ຊື່ຂອງທ່ານ ແລະຂໍ້ມູນການຕິດຕໍ່ຂອງທ່ານ. ນີ້ໝາຍຄວາມວ່າແອັບຯຈະສາມາດລະບຸໂຕຕົນຂອງທ່ານ ແລະສົ່ງຂໍ້ມູນໂປຣໄຟລ໌ຂອງທ່ານໃຫ້ຜູ່ອື່ນໄດ້."</string>
@@ -503,9 +536,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"ອະນຸຍາດໃຫ້ແອັບຯສະແດງການອັບເດດຈາກໝູ່ຂອງທ່ານ. ຄວນລະວັງໃນການແປ່ງປັນຂໍ້ມູນ. ມັນຈະໄປອະນຸຍາດໃຫ້ແອັບຯ ສ້າງຂໍ້ຄວາມທີ່ອ້າງວ່າມາຈາກໝູ່ຂອງທ່ານ. ໝາຍເຫດ: ການອະນຸຍາດອາດບໍ່ຖືກບັງຄັບ ໃນບໍລິການເຄືອຂ່າຍສັງຄອມອອນລາຍທຸກອັນ."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"ອ່ານກຳນົດການໃນປະຕິທິນຮວມທັງຂໍ້ມູນຄວາມລັບ"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານການນັດໝາຍທັງໝົດທີ່ມີບັນທຶກໃນແທັບເລັດຂອງທ່ານ, ຮວມທັງຂອງໝູ່ ຫຼືໝູ່ທີ່ເຮັດວຽກນຳກັນໄດ້ ເຊິ່ງອາດເຮັດໃຫ້ແອັບຯສາມາດສົ່ງຕໍ່ ຫຼືບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ ບໍ່ວ່າຈະເປັນເລື່ອງຄວາມລັບ ຫຼືເລື່ອງລະອຽດອ່ອນແບບໃດກໍຕາມ."</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານກຳນົດການໃນປະຕິທິນທັງໝົດ ທີ່ເກັບໄວ້ໃນໂທລະສັບຂອງທ່ານ, ຮວມເຖິງຂອງໝູ່ຄູ່ ຫຼືເພື່ອນຮ່ວມວຽກ. ນີ້ອາດຈະເຮັດໃຫ້ແອັບຯສາມາດເຜີຍແຜ່ ຫຼືບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ, ໂດຍບໍ່ຄຳນຶງເຖິງ ຄວາມລະອຽດອ່ອນ ຫຼືຄວາມລັບໃດໆໄດ້."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"ເພີ່ມ ຫຼືແກ້ໄຂນັດໝາຍໃນປະຕິທິນ ແລະສົ່ງອີເມວຫາຜູ່ເຂົ້າຮ່ວມໂດຍບໍ່ຕ້ອງໃຫ້ເຈົ້າຂອງຮັບຮູ້"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ອະນຸຍາດໃຫ້ແອັບຯເພີ່ມ, ລຶບ ແລະປ່ຽນກິດຈະກຳທີ່ທ່ານສາມາດແກ້ໄຂ ໃນແທັບເລັດຂອງທ່ານໄດ້ ຮວມທັງກິດຈະກຳຂອງໝູ່ ຫຼືໝູ່ຮ່ວມເຮັດວຽກ ເຊິ່ງອາດອະນຸຍາດໃຫ້ແອັບຯສົ່ງຂໍ້ຄວາມທີ່ຄືກັບວ່າ ມາຈາກເຈົ້າຂອງປະຕິທິນ ຫຼືແກ້ໄຂການນັດໝາຍໄດ້ ໂດຍບໍ່ໃຫ້ເຈົ້າຂອງຮັບຮູ້."</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ອະນຸຍາດໃຫ້ແອັບຯ ເພີ່ມ, ລຶບ, ປ່ຽນແປງນັດໝາຍທີ່ທ່ານສາມາດແກ້ໄຂໄດ້ໃນໂທລະສັບຂອງທ່ານ, ຮວມທັງຂອງໝູ່ຄູ່ ຫຼືເພື່ອນຮ່ວມວຽກ. ນີ້ອາດເຮັດໃຫ້ແອັບຯສາມາດສົ່ງຂໍ້ຄວາມ ທີ່ເບິ່ງຄືວ່າມາຈາກເຈົ້າຂອງປະຕິທິນ ຫຼືແກ້ໄຂນັດໝາຍໂດຍທີ່ທ່ານບໍ່ໄດ້ຮັບຮູ້ໄດ້."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"ຈຳລອງແຫລ່ງຂໍ້ມູນສະຖານທີ່ເພື່ອການທົດສອບ"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"ສ້າງແຫລ່ງຂໍ້ມູນຈຳລອງຂອງສະຖານທີ່ ເພື່ອການທົດສອບ ຫຼືຕິດຕັ້ງແຫລ່ງຂໍ້ມູນສະຖານທີ່ໃໝ່. ນີ້ຈະອະນຸຍາດໃຫ້ແອັບຯສາມາດຂຽນທັບຂໍ້ມູນຂອງສະຖານທີ່ ແລະ/ຫຼື ຂໍ້ມູນທີ່ສົ່ງກັບມາຈາກແຫລ່ງຂໍ້ມູນສະຖານທີ່ອື່ນ ເຊັ່ນ: GPS ຫຼືແຫລ່ງຂໍ້ມູນສະຖານທີ່ອື່ນໄດ້."</string>
@@ -550,12 +587,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"ປິດໄຟສັນຍານ LED ເມື່ອນຳໃຊ້ກ້ອງ"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນທີ່ມາກັບໂຕເຄື່ອງ ປິດການນຳໃຊ້ໄຟ LED ໃນກ້ອງຖ່າຍຮູບ."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"ປິດການນຳໃຊ້ແທັບເລັດຖາວອນ"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"ປິດການເຮັດວຽກຂອງໂທລະສັບຖາວອນ"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"ອະນຸຍາດໃຫ້ແອັບຯປິດການນຳໃຊ້ແທັບເລັດທັງໝົດໂດຍຖາວອນ. ຄຸນສົມບັດນີ້ເປັນສິ່ງອັນຕະລາຍຫຼາຍ."</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"ອະນຸຍາດໃຫ້ແອັບຯປິດການນຳໃຊ້ໂທລະສັບທັງໝົດແບບຖາວອນ. ອັນຕະລາຍຫຼາຍ."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"ບັງຄັບໃຫ້ແທັບເລັດປິດແລ້ວເປີດໃໝ່"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"ບັງຄັບໃຫ້ໂທລະສັບປິດແລ້ວເປີດໃໝ່"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"ອະນຸຍາດໃຫ້ແອັບຯ ບັງຄັບແທັບເລັດໃຫ້ປິດເປີດໃໝ່."</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"ອະນຸຍາດໃຫ້ແອັບຯ ບັງຄັບໃຫ້ໂທລະສັບປິດເປີດໃໝ່."</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"ເຂົ້າເຖິງໄຟລ໌ລະບົບຂອງບ່ອນຈັດເກັບຂໍ້ມູນ USB"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"ເຂົ້າເຖິງໄຟລ໌ລະບົບຂອງ SD card"</string>
@@ -590,6 +635,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ໂທໂດຍກົງໄປຫາເບີໂທໃດກໍໄດ້"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"ອະນຸຍາດໃຫ້ແອັບຯໂທອອກຫາເບີໂທລະສັບໃດກໍໄດ້, ຮວມທັງເບີສຸກເສີນ, ໂດຍບໍ່ມີການແຊກແຊງຂອງທ່ານ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດໂທອອກໂດຍບໍ່ຈຳເປັນ ແລະໂທຫາບໍລິການເບີສຸກເສີນແບບຜິດກົດໝາຍ."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"ເລີ່ມການຕັ້ງຄ່າແທັບເລັດ CDMA ໂດຍກົງ"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"ເລີ່ມການຕັ້ງຄ່າໂທລະສັບ CDMA ໂດຍກົງ"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"ອະນຸຍາດໃຫ້ແອັບຯເລີ່ມການເຮັດວຽກຂອງ CDMA. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດເລີ່ມການເຮັດວຽກຂອງ CDMA ໂດຍບໍ່ຈຳເປັນ."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"ຄວບຄຸມການແຈ້ງເຕືອນອັບເດດສະຖານທີ່"</string>
@@ -605,20 +652,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"ອ່ານ​ຄ່າ​ສະ​ຖາ​ນະ​ລະ​ອຽດ​ຂອງ​ໂທ​ລະ​ສັບ"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າ​ເຖິງ​ສະ​ຖາ​ນະ​ໂດຍ​ລະ​ອຽດ​ຂອງ​ໂທ​ລະ​ສັບ. ການ​ອະ​ນຸ​ຍາດ​ນີ້​ຈະ​ຍິນຍອມ​ໃຫ້​ແອັບຯ​ກວດ​ສອບ​ສະ​ຖານ​ະ​ການ​ໂທ​ແທ້ໆ ວ່າ​ກຳ​ລັງ​ດຳ​ເນີນ​ຢູ່ ຫຼື​ຢູ່​ໃນ​ແບັກ​ກ​ຣາວ, ຄວາມລົ້ມ​ເຫລວ​ຂອງ​ການ​ໂທ, ສະ​ຖາ​ນະ​ການ​ເຊື່ອມ​ຕໍ່​ຂໍ້​ມູນ​ແບບ​ລະ​ອຽດ ແລະ​ຄວາມ​ລົ້ມ​ເຫລວ​ຂອງ​ການ​ເຊື່ອມ​ຕໍ່​ຂໍ້​ມູນ."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ຂັດຂວາງບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ຂັດຂວາງບໍ່ໃຫ້ໂທລະສັບປິດໜ້າຈໍ"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"ອະນຸຍາດໃຫ້ແອັບຯ ປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍແທັບເລັດ."</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"ອະນຸຍາດໃຫ້ແອັບຯປ້ອງກັນບໍ່ໃຫ້ປິດໜ້າຈໍໂທລະສັບ."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"ສົ່ງອິນຟຣາເຣດ"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"ອະນຸຍາດໃຫ້ແອັບຯໃຊ້ການສົ່ງອິນຟຣາເຣດຂອງແທັບເລັດໄດ້."</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ອະນຸຍາດໃຫ້ແອັບຯໃຊ້ການສົ່ງອິນຟຣາເຣດຂອງໂທລະສັບໄດ້."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"ເປີດ ຫຼືປິດແທັບເລັດ"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"ເປີດ ຫຼືປິດໂທລະສັບ"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"ອະນຸຍາດໃຫ້ແອັບຯເປີດ ຫຼືປິດແທັບເລັດ."</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນປິດ ຫຼືເປີດແທັບເລັດໄດ້."</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"ຣີ​ເຊັດ​ໄລ​​ຍະ​ເວ​ລາ​ກ່ອນ​ປິດ​ໜ້າ​ຈໍ."</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຣີ​ເຊັດ​ໄລ​​ຍະ​ເວ​ລາ​ກ່ອນ​ປິດ​ໜ້າ​ຈໍ."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ເຮັດວຽກໃນໂໝດການທົດສອບຂອງໂຮງງານ"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"ເຮັດວຽກໃນຮູບແບບທົດສອບໃນລະດັບຕໍ່າຂອງຜູ່ຜະລິດ, ອະນຸຍາດການເຂົ້າເຖິງແບບເຕັມຮູບແບບຫາຮາດແວຂອງແທັບເລັດ. ໃຊ້ໄດ້ສະເພາະໃນເວລາທີ່ແທັບເລັດກຳລັງຢູ່ໃນໂໝດ ການທົດສອບຂອງຜູ່ຜະລິດgmqjkoaho."</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ເປີດໃຊ້ໃນແບບການທົດສອບຂອງຜູ່ລະລິດໃນລະດັບຕໍ່າ, ອະນຸຍາດການເຂົ້າເຖິງຮາດແວຂອງໂທລະສັບແບບສົມບູນ. ສະເພາະເມື່ອໂທລະສັບຖືກເປີດໃຊ້ ໃນໂໝດການທົດສອບຂອງຜູ່ຜະລິດເທົ່ານັ້ນ."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ຕັ້ງພາບພື້ນຫຼັງ"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າພາບພື້ນຫຼັງຂອງລະບົບໄດ້."</string>
@@ -628,14 +687,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"ອະນຸຍາດໃຫ້ແອັບຯ ຣີເຊັດຄ່າທັງໝົດຂອງລະບົບໃຫ້ກັບໄປເປັນແບບທີ່ມາຈາກໂຮງງານ, ລຶບຂໍ້ມູນ, ການຕັ້ງຄ່າ ແລະແອັບຯທີ່ໄດ້ຕິດຕັ້ງໄວ້ທັງໝົດ."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"ຕັ້ງເວລາ"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"ອະນຸຍາດໃຫ້ແອັບຯປ່ຽນເວລາຂອງໂມງໃນແທັບເລັດໄດ້."</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"ອະນຸຍາດໃຫ້ແອັບຯປ່ຽນເວລາຂອງໂມງໃນໂທລະສັບໄດ້."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"ຕັ້ງເຂດເວລາ"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"ອະນຸຍາດໃຫ້ແອັບຯປ່ຽນເຂດເວລາຂອງແທັບເລັດ."</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"ອະນຸຍາດໃຫ້ແອັບຯ ປ່ຽນເຂດເວລາຂອງໂທລະສັບ."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"ເຮັດໜ້າທີ່ເປັນ AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"ອະນຸຍາດໃຫ້ແອັບຯເອີ້ນຫາ AccountAuthenticators."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"ຊອກຫາບັນຊີໃນອຸປະກອນ"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"ອະນຸຍາດໃຫ້ແອັບຯຮັບເອົາລາຍການຂອງບັນຊີທີ່ຮູ້ຈັກໂດຍແທັບເລັດ. ນີ້ອາດຮວມທັງບັນຊີຕ່າງໆ ທີ່ຖືກສ້າງໂດຍແອັບພລິເຄຊັນທີ່ທ່ານໄດ້ຕິດຕັ້ງໄວ້."</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນ ດຶງຂໍ້ມູນລາຍຊື່ຂອງບັນຊີທີ່ໂທລະສັບມີ ເຊິ່ງອາດຮວມເຖິງບັນຊີທີ່ໃດໆທີ່ສ້າງຂຶ້ນ ໂດຍແອັບພລິເຄຊັນທີ່ທ່ານຕິດຕັ້ງໄວ້."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"ສ້າງບັນຊີ ແລະຕັ້ງລະຫັດຜ່ານ"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"ອະນຸຍາດໃຫ້ແອັບຯ ໃຊ້ຄວາມສາມາດຂອງຕົວພິສູດສິດບັນຊີຂອງ AccountManager ຮວມທັງການສ້າງບັນຊີ, ການຂໍເບິ່ງ ແລະຕັ້ງຄ່າລະຫັດຜ່ານ."</string>
@@ -661,26 +726,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"ອະນຸຍາດໃຫ້ແອັບຯເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ຈາກຈຸດເຊື່ອມຕໍ່ Wi-Fi ແລະໃຫ້ສາມາດປ່ຽນແປງຄ່າຂອງອຸປະກອນສຳລັບເຄືອຂ່າຍ Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ອະນຸຍາດການຮັບ Wi-Fi Multicast"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"ອະນຸຍາດໃຫ້ແອັບຯຮັບຂໍ້ມູນແພັກເກັດ ທີ່ຖືກສົ່ງ ໄປຫາທຸກອຸປະກອນໃນເຄືອຂ່າຍ WiFi ໂດຍການນຳໃຊ້ການກະຈາຍຂໍ້ມູນໃນວົງກວ້າງ, ບໍ່ແມ່ນສະເພາະແທັບເລັດຂອງທ່ານ. ມັນໃຊ້ພະລັງງານຫຼາຍກວ່າໂຫມດກະຈາຍຂໍ້ມູນແບບໂດຍກົງ."</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"ອະນຸຍາດໃຫ້ແອັບຯ ຮັບຂໍ້ມູນແພັກເກດທີ່ສົ່ງໄປໃຫ້ທຸກອຸປະກອນໃນເຄືອຂ່າຍ Wi-Fi ໂດຍໃຊ້ທີ່ຢູ່ multicast ບໍ່ສະເພາະພຽງໂທລະສັບຂອງທ່ານ, ເຊິ່ງຈະໃຊ້ພະລັງງານຫຼາຍກວ່າໃນໂໝດທີ່ບໍ່ແມ່ນ multicast."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"ເຂົ້າເຖິງການຕັ້ງຄ່າ Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າແທັບເລັດ Bluetooth ພາຍໃນ ແລະຊອກຫາ ແລະເຊື່ອມຕໍ່ໄວ້ກັບອຸປະກອນພາຍນອກ."</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງຄ່າ Bluetooth ໃນໂທລະສັບ ເພື່ອຊອກຫາ ແລະການເຊື່ອມຕໍ່ກັບອຸປະກອນໄຮ້ສາຍພາຍນອກ."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນຈັບຄູ່ Bluetooth"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"ອະນຸຍາດໃຫ້ແອັບຯ ຈັບຄູ່ອຸປະກອນຈາກໄລຍະໄກ ໂດຍຜູ່ໃຊ້ບໍ່ຕ້ອງເຮັດຫຍັງ."</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"ອະນຸຍາດໃຫ້ແອັບຯ ຈັບຄູ່ອຸປະກອນຈາກໄລຍະໄກ ໂດຍຜູ່ໃຊ້ບໍ່ຕ້ອງເຮັດຫຍັງ."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"ອະນຸຍາດໃຫ້ແອັບຯ ຈັບຄູ່ອຸປະກອນຈາກໄລຍະໄກ ໂດຍຜູ່ໃຊ້ບໍ່ຕ້ອງເຮັດຫຍັງ."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"​ເຂົ້າ​ເຖິງ​ຂໍ້​ມູນ Bluetooth MAP"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າ​ເຖິງ​ຂໍ້​ມູນ Bluetooth MAP ໄດ້."</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າ​ເຖິງ​ຂໍ້​ມູນ Bluetooth MAP ໄດ້."</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າ​ເຖິງ​ຂໍ້​ມູນ Bluetooth MAP ໄດ້."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ຈາກ WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"ອະນຸຍາດໃຫ້ແອັບຯກວດເບິ່ງວ່າ WiMAX ຖືກເປີດນຳໃຊ້ຢູ່ບໍ່ ແລະຂໍ້ມູນກ່ຽວກັບເຄືອຂ່າຍ WiMAX ອື່ນໆທີ່ກຳລັງເຊື່ອມຕໍ່ຢູ່."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"ປ່ຽນສະຖານະ WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"ອະນຸຍາດໃຫ້ແອັບຯເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ແທັບເລັດຈາກເຄືອຂ່າຍ WiMAX."</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"ອະນຸຍາດໃຫ້ແອັບຯເຊື່ອມຕໍ່ ແລະຕັດການເຊື່ອມຕໍ່ຂອງໂທລະສັບຈາກເຄືອຂ່າຍ WiMax ໄດ້."</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"ຄະແນນ​ເຄືອ​ຂ່າຍ"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຈັດ​ລຳ​ດັບ​ເຄືອ​ຂ່າຍ ແລະ ຊ່ວຍ​ຕັດ​ສິນ​ໃຈ​ວ່າ​ເຄືອ​ຂ່າຍ​ໃດ​ທີ່​​ແທັບ​ເລັດ​ຄວນ​ນຳ​ໃຊ້."</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຈັດ​ລຳ​ດັບ​ເຄືອ​ຂ່າຍ ແລະ ຊ່ວຍ​ຕັດ​ສິນ​ໃຈ​ວ່າ​ເຄືອ​ຂ່າຍ​ໃດ​ທີ່​ໂທ​ລະ​ສັບ​ຄວນ​ນຳ​ໃຊ້."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ຈັບຄູ່ກັບອຸປະກອນ Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"ອະນຸຍາດໃຫ້ແອັບຯເບິ່ງການຕັ້ງຄ່າຂອງ Bluetooth ໃນແທັບເລັດ ຕະຫຼອດຈົນເຊື່ອມຕໍ່ ແລະຍອມຮັບການເຊື່ອມຕໍ່ກັບອຸປະກອນທີ່ຈັບຄູ່ກັນແລ້ວ."</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ອະນຸຍາດໃຫ້ແອັບຯເບິ່ງການຕັ້ງຄ່າຂອງ Bluetooth ໃນໂທລະສັບ, ຮວມທັງໃຫ້ສ້າງ ແລະຮັບການເຊື່ອມຕໍ່ຈາກອຸປະກອນທີ່ຈັບຄູ່ກັນ."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ຄວບຄຸມ Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"ອະນຸຍາດໃຫ້ແອັບຯຕິດຕໍ່ສື່ສານກັບປ້າຍກຳກັບ, ບັດ ແລະໂຕອ່ານຂອງການສື່ສານໄລຍະສັ້ນ (NFC)."</string>
@@ -762,6 +839,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ຄວບຄຸມຄວາມຍາວຂອງໂຕອັກສອນທີ່ສາມາດໃຊ້ກັບລະຫັດປົດລັອກໜ້າຈໍ"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານທີ່ບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກແທັບເລັດ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງແທັບເລັດ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"ຕິດຕາມເບິ່ງຈຳນວນການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ ໃນເວລາປົດລັອກໜ້າຈໍ ແລະລັອກໂທລະສັບ ຫຼືລຶບຂໍ້ມູນທັງໝົດຂອງໂປລະສັບ ຖ້າມີການພິມລະຫັດຜ່ານບໍ່ຖືກຕ້ອງຫຼາຍເທື່ອເກີນໄປ."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"ປ່ຽນລະຫັດລັອກໜ້າຈໍ"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"ປ່ຽນລະຫັດປົດລັອກໜ້າຈໍ"</string>
@@ -769,6 +848,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"ຄວບຄຸມວ່າໜ້າຈໍຄວນຈະຖືກລັອກເມື່ອໃດ ແລະແນວໃດ"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"ລຶບຂໍ້ມູນທັງໝົດ"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ລຶບຂໍ້ມູນຂອງແທັບເລັດໂດຍບໍ່ມີການເຕືອນ ໂດຍການຣີເຊັດກັບຄືນໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ."</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ລຶບຂໍ້ມູນຂອງໂທລະສັບໂດຍບໍ່ມີການເຕືອນ ໂດຍການຣີເຊັດກັບຄືນໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"ປ່ຽນ proxy ຮວມຂອງອຸປະກອນ"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"ຕັ້ງໃຫ້ພຣັອກຊີສ່ວນກາງຂອງອຸປະກອນ ທີ່ຈະໃຊ້ໃນຂະນະທີ່ເປີດນຳໃຊ້ນະໂຍບາຍ. ສະເເພາະຜູ່ເບິ່ງແຍງອຸປະກອນຄົນທຳອິດເທົ່ານັ້ນ ທີ່ຈະຕັ້ງຄ່າພຣັອກຊີສ່ວນກາງທີ່ມີຜົນນຳໃຊ້ໄດ້."</string>
@@ -917,6 +998,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ຄວາມພະຍາຍາມປົດລັອກດ້ວຍໜ້ານັ້ນ ເກີນຈຳນວນທີ່ກຳນົດແລ້ວ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"ບໍ່ມີ SIM card."</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"ບໍ່ມີຊິມກາດໃນແທັບເລັດ."</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ບໍ່ມີ SIM card ໃນໂທລະສັບ."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ໃສ່ຊິມກາດ."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"ບໍ່ມີຊິມກາດ ຫຼືອ່ານຊິມກາດບໍ່ໄດ້. ໃສ່ຊິມກາດ."</string>
@@ -939,10 +1022,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"ທ່ານພິມລະຫັດຜ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. \n\nໃຫ້ລອງໃໝ່ອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"ທ່ານພິມລະຫັດ PIN ຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. \n\nລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກແທັບເລັດຂອງທ່ານ ດ້ວຍການເຂົ້າສູ່ລະບົບຂອງ Google.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%d</xliff:g> ວິນາທີ."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກແຕ້ມຜິດອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ, ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານ ດ້ວຍການເຂົ້າສູ່ລະບົບ Google.\n\n ລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_2">%d</xliff:g> ວິນາທີ."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"ທ່ານພະຍາຍາມປັດລັອກແທັບເລັດຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຜິດອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ, ແທັບເລັດຈະຖືກຣີເຊັດໃຫ້ເປັນແບບທີ່ມາຈາກໂຮງງານ ແລະຂໍ້ມູນທັງໝົດຈະຖືກຫາຍໄປ."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບເປັນຈຳນວນ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກການພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອແລ້ວບໍ່ສຳເລັດຜົນ, ໂທລະສັບຈະຖືກຕັ້ງຄ່າໃຫ້ເປັນຄ່າຈາກໂຮງງານ ແລະຂໍ້ມູນທັງໝົດຈະສູນຫາຍໄປ."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"ທ່ານພະຍາຍາມປົດລັອກແທັບເລັດຜິດ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ຕອນນີ້ແທັບເລັດຈະຖືກຣີເຊັດເປັນຄ່າຈາກໂຮງງານ."</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບຜິດ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ໂທລະສັບຈະຖືກຣີເຊັດໃຫ້ເປັນຄ່າທີ່ມາຈາກໂຮງງານ."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"ທົດລອງອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER">%d</xliff:g> ວິນາທີ."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"ລືມຮູບແບບປົດລັອກ?"</string>
@@ -1026,6 +1115,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"ອະນຸຍາດໃຫ້ແອັບຯ ອ່ານປະຫວັດຂອງ URL ທັງໝົດທີ່ໂປຣແກຣມທ່ອງເວັບເຄີຍເຂົ້າເບິ່ງ ຮວມທັງ ບຸກມາກທັງໝົດຂອງໂປຣແກຣມທ່ອງເວັບນຳ. ໝາຍເຫດ: ການກຳນົດສິດນີ້ ອາດບໍ່ໄດ້ບັງຄັບໃຊ້ໃນໂປຣແກຣມທ່ອງເວັບພາກສ່ວນທີສາມ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ມີຄວາມສາມາດທ່ອງເວັບ."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"ຂຽນຂໍ້ມູນບຸກມາກ ແລະປະຫວັດເວັບໄຊ"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"ອະນຸຍາດໃຫ້ແອັບຯແກ້ໄຂປະຫວັດໃນການທ່ອງເວັບ ຫຼືບຸກມາກທີ່ບັນທຶກໃນແທັບເລັດຂອງທ່ານ. ນີ້ອາດອະນຸຍາດໃຫ້ແອັບຯລຶບ ຫຼືແກ້ໄຂຂໍ້ມູນໂປຣແກຣມທ່ອງເວັບໄດ້. ໝາຍເຫດ: ການອະນຸຍາດນີ້ອາດເປັນຜົນບັງຄັບໃຊ້ ຈາກໂປຣແກຣມທ່ອງເວັບພາຍນອກ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ສາມາດເຂົ້າເວັບໄດ້."</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"ອະນຸຍາດໃຫ້ແອັບຯ ແກ້ໄຂປະຫວັດໂປຣແກຣມທ່ອງເວັບ ຫຼືບຸກມາກທີ່ເກັບໄວ້ໃນໂທລະສັບຂອງທ່ານ. ນີ້ອາດອະນຸຍາດໃຫ້ແອັບຯລຶບ ຫຼືແກ້ໄຂຂໍ້ມູນໂປຣແກຣມທ່ອງເວັບ. ໝາຍເຫດ: ການກຳນົດສິດນີ້ ອາດບໍ່ໄດ້ຖືກບັງຄັບໃຊ້ໃນໂປຣແກຣມທ່ອງເວັບພາກສ່ວນທີສາມ ຫຼືແອັບພລິເຄຊັນອື່ນທີ່ມີຄວາມສາມາດທ່ອງເວັບ."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"ຕັ້ງການແຈ້ງເຕືອນ"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ອະນຸຍາດໃຫ້ແອັບຯຕັ້ງໂມງປຸກໃນແອັບຯໂມງປຸກທີ່ຕິດຕັ້ງໄວ້. ບາງແອັບຯໂມງປຸກອາດບໍ່ມີຄຸນສົມບັດແບບນີ້ເທື່ອ."</string>
@@ -1302,6 +1393,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"ພິມລະຫັດ PIN:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"ແທັບເລັດຈະຖືກຕັດການເຊື່ອມຕໍ່ຈາກ Wi-Fi ເປັນການຊົ່ວຄາວ ໃນຂະນະທີ່ມັນເຊື່ອມຕໍ່ກັບ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ຢູ່."</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ໂທລະສັບຈະຖືກຢຸດການເຊື່ອມຕໍ່ຊົ່ວຄາວຈາກ Wi-Fi ໃນຂະນະທີ່ມັນເຊື່ອມຕໍ່ກັບ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"ໃສ່ໂຕອັກສອນ"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"ກຳລັງສົ່ງຂໍ້ຄວາມ SMS"</string>
@@ -1583,6 +1676,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ຄັ້ງດຽວ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ບໍ່​ຮອງ​ຮັບ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ​ຂອງ​ທ່ານ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ແທັບເລັດ"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ໂທລະສັບ"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"ຫູຟັງ"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"ບ່ອນຕັ້ງລຳໂພງ"</string>
@@ -1637,10 +1732,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"ທ່ານພິມລະຫັດຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. \n\nລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. \n\nກະລຸນາລອງໃໝ່ໃນອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ສຳເລັດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ແທັບເລັດຂອງທ່ານຈະຖືກຕັ້ງ ໃຫ້ກັບໄປໃຊ້ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານຄືນໃໝ່ ແລະຂໍ້ມູນຜູ່ໃຊ້ທັງໝົດຈະສູນຫາຍໄປ."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ສຳເລັດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ໂທລະສັບຂອງທ່ານຈະຖືກຕັ້ງ ໃຫ້ກັບໄປໃຊ້ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານຄືນໃໝ່ ແລະຂໍ້ມູນຜູ່ໃຊ້ທັງໝົດຈະສູນຫາຍໄປ."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກແທັບເລັດບໍ່ສຳເລັດ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ຕອນນີ້ແທັບເລັດຈະຖືກຕັ້ງໃຫ້ກັບໄປໃຊ້ຄ່າເລີ່ມຕົ້ນຈາກໂຮງງານ."</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ທ່ານໄດ້ພະຍາຍາມປົດລັອກໂທລະສັບບໍ່ຖືກ <xliff:g id="NUMBER">%d</xliff:g> ເທື່ອແລ້ວ. ຕອນນີ້ໂທລະສັບຈະຖືກຣີເຊັດເປັນຄ່າຈາກໂຮງງານ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກແຕ້ມຜິດອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ, ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກແທັບເລັດຂອງທ່ານ ດ້ວຍການເຂົ້າສູ່ລະບົບໂດຍໃຊ້ອີເມວຂອງທ່ານ.\n\n ກະລຸນາລອງໃໝ່ອີກຄັ້ງໃນອີກ <xliff:g id="NUMBER_2">%d</xliff:g> ວິນາທີ."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ທ່ານແຕ້ມຮູບແບບປົດລັອກຂອງທ່ານຜິດ <xliff:g id="NUMBER_0">%d</xliff:g> ເທື່ອແລ້ວ. ຫຼັງຈາກຄວາມພະຍາຍາມອີກ <xliff:g id="NUMBER_1">%d</xliff:g> ເທື່ອ ທ່ານຈະຖືກຖາມໃຫ້ປົດລັອກໂທລະສັບຂອງທ່ານດ້ວຍບັນຊີອີເມວ.\n\n ລອງໃໝ່ອີກຄັ້ງໃນ <xliff:g id="NUMBER_2">%d</xliff:g> ວິນາທີ."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ລຶບອອກ"</string>

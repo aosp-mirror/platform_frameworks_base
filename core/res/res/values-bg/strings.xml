@@ -149,12 +149,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Изтриванията за <xliff:g id="CONTENT_TYPE">%s</xliff:g> са твърде много."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Хранилището на таблета е пълно. Изтрийте файлове, за да освободите място."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Хранилището на часовника е пълно. Изтрийте файлове, за да освободите място."</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Хранилището на телефона е пълно. Изтрийте файлове, за да освободите място."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Мрежата може да се наблюдава"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"От неизвестна трета страна"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"От <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="me" msgid="6545696007631404292">"Аз"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Опции за таблета"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Опции на телефона"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Тих режим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Включване на радиото"</string>
@@ -166,6 +170,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Звъненето е включено"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Изключва се..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таблетът ви ще се изключи."</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Часовникът ви ще се изключи."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефонът ви ще се изключи."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Искате ли да изключите?"</string>
@@ -174,6 +180,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Скорошни"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Няма скорошни приложения."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Опции за таблета"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"Опции на телефона"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Заключване на екрана"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Изключване"</string>
@@ -290,9 +298,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Разрешава на приложението да изпраща заявки до други приложения за съобщения, за да обработва покани за отговор чрез SMS за входящите обаждания."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"четене на текстовите ви съобщения (SMS или MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Разрешава на приложението да чете SMS съобщенията, съхранени на таблета или SIM картата ви. Това разрешение му позволява да чете всички съобщения независимо от съдържанието или поверителността."</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Разрешава на приложението да чете SMS съобщенията, съхранени на телефона или SIM картата ви. Това разрешение му позволява да чете всички съобщения независимо от съдържанието или поверителността."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"редактиране на текстовите ви съобщения (SMS или MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Разрешава на приложението да записва в SMS съобщенията, съхранени в таблета или в SIM картата ви. Злонамерените приложения могат да изтрият съобщенията ви."</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Разрешава на приложението да записва в SMS съобщенията, съхранени в телефона или в SIM картата ви. Злонамерените приложения могат да изтрият съобщенията ви."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"получаване на текстови съобщения (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Разрешава на приложението да получава и обработва WAP съобщения. Това разрешение включва възможността да наблюдава или изтрива изпратените до вас, без да ви ги покаже."</string>
@@ -386,6 +398,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Разрешава на приложението временно да фиксира екрана за преход към цял екран."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"натискане на клавиши и бутони за управление"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Разрешава на приложението да предава свои собствени събития при въвеждане (натискания на клавиши и др.) на други приложения. Злонамерените приложения могат да използват това, за да завладеят таблета."</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Разрешава на приложението да предава свои собствени събития при въвеждане (натискания на клавиши и др.) на други приложения. Злонамерените приложения могат да използват това, за да завладеят телефона."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"запис на въвежданото от вас и вашите действия"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Разрешава на приложенията да наблюдават кои клавиши натискате дори и когато взаимодействате с друго приложение (например когато въвеждате парола). Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
@@ -433,6 +447,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Разрешава на приложението да подаде заявка предоставеният сигнал да се изпрати до всички постоянни процеси."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"задаване на постоянно изпълнение на приложението"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Разрешава на приложението да прави части от себе си постоянни в паметта. Това може да ограничи наличната за другите приложения, забавяйки таблета."</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Разрешава на приложението да прави части от себе си постоянни в паметта. Това може да ограничи наличната за другите приложения, забавяйки телефона."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"изтриване на приложения"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Разрешава на приложението да изтрива пакети от Android. Злонамерените приложения могат да използват това, за да изтрият важни приложения."</string>
@@ -446,11 +462,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Разрешава на приложението да инсталира нови или актуализирани пакети от Android. Злонамерените приложения могат да използват това, за да добавят нови приложения с произволно мощни разрешения."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"изтриване на всички данни от кеша на приложението"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Разрешава на приложението да освобождава място в хранилището на таблета, като изтрива файлове в директориите за кеш на други приложения. Това може да доведе до по-бавното стартиране на другите приложения, защото те трябва да извличат отново данните си."</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Разрешава на приложението да освобождава място в хранилището на телефона, като изтрива файлове в директориите за кеш на други приложения. Това може да доведе до по-бавното стартиране на другите приложения, защото те трябва да извличат отново данните си."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"преместване на ресурси на приложенията"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Разрешава на приложението да мести ресурси на приложения от вътрешни към външни носители и обратно."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"четене на поверителни данни от регистрационните файлове"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Разрешава на приложението да чете от различните регистрационни файлове на системата. Това му позволява да получи обща информация какво правите с таблета, потенциално включително и лични или поверителни данни."</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Разрешава на приложението да чете от различните регистрационни файлове на системата. Това му позволява да получи обща информация какво правите с телефона, потенциално включително и лични или поверителни данни."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"използване на всеки медиен декодер за възпроизвеждане"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Разрешава на приложението да използва всеки инсталиран медиен декодер с цел декодиране за възпроизвеждане."</string>
@@ -462,6 +482,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Разрешава на приложението да чете и записва във всеки ресурс, притежаван от групата diag, например файловете в /dev. Това потенциално може да засегне стабилността и сигурността на системата. То трябва да се използва САМО за диагностика, конкретно за хардуера, от страна на производителя или оператора."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"активиране или деактивиране на компоненти на приложенията"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Разрешава на приложението да активира или деактивира компонент на друго приложение. Злонамерените приложения могат да използват това, за да деактивират важни възможности на таблета. С това разрешение трябва да се внимава, тъй като компонентите на приложенията може да бъдат приведени в неизползваемо, несъгласувано или нестабилно състояние."</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Разрешава на приложението да активира или деактивира компонент на друго приложение. Злонамерените приложения могат да използват това, за да деактивират важни възможности на телефона. С това разрешение трябва да се внимава, тъй като компонентите на приложенията може да бъдат приведени в неизползваемо, несъгласувано или нестабилно състояние."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"даване или отмяна на разрешения"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Разрешава на приложението да дава или отменя конкретни разрешения за себе си или други приложения. Злонамерените програми могат да използват това, за да осъществяват неразрешен от вас достъп до функции."</string>
@@ -475,21 +497,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Разрешава на приложението да променя картата на услугите на Google. Не е предназначено за нормални приложения."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"стартиране при пускане"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Разрешава на приложението да се стартира веднага щом системата завърши зареждането си. Това може да доведе до по-бавно стартиране на таблета и да позволи на приложението да забави таблета като цяло, тъй като се изпълнява постоянно."</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Разрешава на приложението да се стартира веднага щом системата завърши зареждането си. Това може да доведе до по-бавно стартиране на телефона и да позволи на приложението да забави телефона като цяло, тъй като се изпълнява постоянно."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"изпращане на оставащи излъчвания"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Разрешава на приложението да изпраща оставащи излъчвания, които се запазват след края на излъчването. Прекалената употреба може да причини бавна или нестабилна работа на таблета, като го накара да използва твърде много памет."</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Разрешава на приложението да изпраща оставащи излъчвания, които се запазват след края на излъчването. Прекалената употреба може да причини бавна или нестабилна работа на телефона, като го накара да използва твърде много памет."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"четене на контактите ви"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Разрешава на приложението да чете данни за съхранените на таблета ви контакти, включително честотата на обаждане, изпращане на имейли или общуване по друг начин с конкретни лица. Това разрешение позволява на приложенията да запазват информацията за контактите ви, а злонамерените могат да я споделят без ваше знание."</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Разрешава на приложението да чете данни за съхранените на телефона ви контакти, включително честотата на обаждане, изпращане на имейли или общуване по друг начин с конкретни лица. Това разрешение позволява на приложенията да запазват информацията за контактите ви, а злонамерените могат да я споделят без ваше знание."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"промяна на контактите ви"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Разрешава на приложението да променя данните за съхранените на таблета ви контакти, включително честотата на обаждане, изпращане на имейли или общуване по друг начин с конкретни контакти. Това разрешение му позволява да изтрива информацията за тях."</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Разрешава на приложението да променя данните за съхранените на телефона ви контакти, включително честотата на обаждане, изпращане на имейли или общуване по друг начин с конкретни контакти. Това разрешение му позволява да изтрива информацията за тях."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"четене на списъка с обаждания"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Разрешава на приложението да чете списъка с обаждания на таблета ви, включително данните за входящите и изходящите обаждания. Това разрешение позволява на приложенията да запазват информацията от списъка, а злонамерените могат да я споделят без ваше знание."</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Разрешава на приложението да чете списъка с обаждания на телефона ви, включително данните за входящите и изходящите обаждания. Това разрешение позволява на приложенията да запазват информацията от списъка, а злонамерените могат да я споделят без ваше знание."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"запис на списъка с обаждания"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Разрешава на приложението да променя списъка с обаждания на таблета ви, включително данните за входящите и изходящите обаждания. Злонамерените приложения могат да използват това, за да изтрият или променят този списък."</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Разрешава на приложението да променя списъка с обаждания на телефона ви, включително данните за входящите и изходящите обаждания. Злонамерените приложения могат да използват това, за да изтрият или променят този списък."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"четене на собств. ви карт. с данни за контакт"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Разрешава на приложението да чете информацията от личния потребителски профил, съхранена на устройството ви, например вашето име и данни за връзка. Това означава, че приложението може да ви идентифицира и да изпраща информацията за потребителския ви профил на други хора."</string>
@@ -503,9 +537,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Разрешава на приложението да показва социални актуализации от приятелите ви. Бъдете внимателни при споделянето на информация – това позволява на приложението да генерира съобщения, които изглежда, че идват от приятел. Забележка: Възможно е ограниченията на разрешението да не могат да бъдат наложени във всички социални мрежи."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"четене на събития от календари плюс поверителна информация"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Разрешава на приложението да чете всички събития от календари, съхранени на таблета ви, включително тези на приятели или колеги. Това може да му позволи да споделя или запазва данните от календара ви независимо от поверителността."</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Разрешава на приложението да чете всички събития от календари, съхранени на телефона ви, включително тези на приятели или колеги. Това може да му позволи да споделя или запазва данните от календара ви независимо от поверителността."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"добавяне или промяна на събития от календари и изпращане на имейл до гости без знанието на собствениците"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Разрешава на приложението да добавя, премахва и променя събития, които можете да променяте на таблета си, включително тези на приятели или колеги. Това може да му позволи да изпраща съобщения, които изглежда, че идват от собствениците на календарите, или да променя събития без знанието на собствениците."</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Разрешава на приложението да добавя, премахва и променя събития, които можете да променяте на телефона си, включително тези на приятели или колеги. Това може да му позволи да изпраща съобщения, които изглежда, че идват от собствениците на календарите, или да променя събития без знанието на собствениците."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"имитиране на източници на местоположение за тестване"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Създаване на мними източници на местоположение за тестване или инсталиране на нов доставчик на местоположение. Това разрешава на приложението да заменя местоположението и/или състоянието, връщано от други източници, като GPS или доставчиците."</string>
@@ -550,12 +588,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"деактивиране на светодиодния индикатор за предаване, когато камерата се използва"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Разрешава на предварително инсталирано системно приложение да деактивира светодиодния индикатор за използване на камерата."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"деактивиране на таблета за постоянно"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"деактивиране на телефона за постоянно"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Разрешава на приложението да деактивира целия таблет за постоянно. Това е много опасно."</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Разрешава на приложението да деактивира целия телефон за постоянно. Това е много опасно."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"принудително рестартиране на таблета"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"принудително рестартиране на телефона"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Разрешава на приложението принудително да рестартира таблета."</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Разрешава на приложението принудително да рестартира телефона."</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"достъп до файл. система на USB хран."</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"достъп до файловата система на SD картата"</string>
@@ -590,6 +636,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"директно обаждане до всички телефонни номера"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Разрешава на приложението да се обажда без ваша намеса до всеки телефонен номер, включително спешни номера. Злонамерените приложения могат да извършват ненужни и незаконни обаждания до спешните служби."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"директно стартиране на настройката на таблета през CDMA"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"директно стартиране на настройката на телефона през CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Разрешава на приложението да стартира обезпечаване за CDMA. Злонамерените приложения могат ненужно да стартират този процес."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"контролиране на известията за актуализиране на местоположението"</string>
@@ -605,20 +653,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"четене на точните състояния на телефона"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Позволява на приложението да осъществява достъп до точните състояния на телефона. С това разрешение то може да определи действителното състояние на обаждането – дали е активно, или е на заден план, дали е неуспешно, точното състояние на връзката за пренос на данни и неуспешната връзка за пренос."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"предотвратяване на спящия режим на таблета"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"предотвратява спящ режим на телефона"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Разрешава на приложението да предотвратява преминаването на таблета в спящ режим."</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Разрешава на приложението да предотвратява преминаването на телефона в спящ режим."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"предаване чрез инфрачервени лъчи"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Разрешава на приложението да използва инфрачервения предавател на таблета."</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Разрешава на приложението да използва инфрачервения предавател на телефона."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"включване или изключване на таблета"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"включване или изключване на телефона"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Разрешава на приложението да включва или изключва таблета."</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Разрешава на приложението да включва или изключва телефона."</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"нулиране на времето за изчакване на екрана"</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"Разрешава на приложението да нулира времето за изчакване на екрана."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"изпълнение в режим на фабричен тест"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Изпълнява се като тест на ниско ниво от производителя, което позволява пълен достъп до хардуера на таблета. Налице е само когато таблетът работи в режим на тест от производителя."</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Изпълнява се като тест на ниско ниво от производителя, което позволява пълен достъп до хардуера на телефона. Налице е само когато телефонът работи в режим на тест от производителя."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"задаване на тапет"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Разрешава на приложението да задава системния тапет."</string>
@@ -628,14 +688,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Разрешава на приложението изцяло да възстанови системата до фабричните настройки, изтривайки всички данни, конфигурацията и инсталираните приложения."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"задаване на часа"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Разрешава на приложението да променя часа на таблета."</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Разрешава на приложението да променя часа на телефона."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"задаване на часовата зона"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Разрешава на приложението да променя часовата зона на таблета."</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Разрешава на приложението да променя часовата зона на телефона."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"действие като AccountManagerService"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Разрешава на приложението да извиква модули AccountAuthenticator."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"намиране на профили на устройството"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Разрешава на приложението да получава списъка с профили, известни на таблета. Това може да включва и създадените от инсталирани от вас приложения"</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Разрешава на приложението да получава списъка с профили, известни на телефона. Това може да включва и създадените от инсталирани от вас приложения."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"създаване на профили и задаване на пароли"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Разрешава на приложението да използва възможностите на AccountManager за удостоверяване на профили, включително създаване на профили и получаване и задаване на паролите им."</string>
@@ -661,26 +727,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Разрешава на приложението да се свързва към точки за достъп до Wi-Fi и да прекратява връзката с тях, както и да извършва промени в конфигурацията на устройствата за Wi-Fi мрежи."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"разрешаване на приемане на мултикаст през Wi-Fi мрежата"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Разрешава на приложението да получава пакети, изпратени до всички устройства в Wi-Fi мрежа посредством адреси за мултикаст, а не само до таблета ви. Консумира се повече енергия отколкото в режим без мултикаст."</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Разрешава на приложението да получава пакети, изпратени до всички устройства в Wi-Fi мрежа посредством адреси за мултикаст, а не само до телефона ви. Консумира се повече енергия отколкото в режим без мултикаст."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"достъп до настройките за Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Разрешава на приложението да конфигурира локалния таблет с Bluetooth, както и да открива и да се сдвоява с отдалечени устройства."</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Разрешава на приложението да конфигурира локалния телефон с Bluetooth, както и да открива и да се сдвоява с отдалечени устройства."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"разрешаване на сдвояване чрез Bluetooth от приложението"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Разрешава на приложението да се сдвоява с отдалечени устройства без потребителско взаимодействие."</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Разрешава на приложението да се сдвоява с отдалечени устройства без потребителско взаимодействие."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Разрешава на приложението да се сдвоява с отдалечени устройства без потребителско взаимодействие."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"достъп до данни чрез Bluetooth MAP"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Разрешава на приложението да осъществява достъп до данни чрез Bluetooth MAP."</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Разрешава на приложението да осъществява достъп до данни чрез Bluetooth MAP."</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Разрешава на приложението да осъществява достъп до данни чрез Bluetooth MAP."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"установяване и прекратяване на връзката с WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Разрешава на приложението да определя дали WiMAX мрежата е активирана, както и информация за всички такива мрежи, които са свързани."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Промяна на състоянието на WiMAX мрежата"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Разрешава на приложението да свързва таблета към WiMAX мрежа и да прекратява връзката му с нея."</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Разрешава на приложението да свързва телефона към WiMAX мрежа и да прекратява връзката му с нея."</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"оценяване на мрежите"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Разрешава на приложението да класира мрежите и да повлияе върху това, кои да са предпочитаните за таблета."</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Разрешава на приложението да класира мрежите и да повлияе върху това, кои да са предпочитаните за телефона."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"сдвояване с устройства с Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Разрешава на приложението да вижда конфигурацията на Bluetooth на таблета и да изгражда и приема връзки със сдвоени устройства."</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Разрешава на приложението да вижда конфигурацията на Bluetooth на телефона и да изгражда и приема връзки със сдвоени устройства."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"контролиране на комуникацията в близкото поле"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
@@ -762,6 +840,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролирайте дължината и разрешените знаци за паролите за отключване на екрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Наблюдаване на опитите за отключване на екрана"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Наблюдава броя въведени неправилни пароли при отключването на екрана и заключва таблета или изтрива всички данни от него, ако неправилните пароли са твърде много."</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Наблюдава броя въведени неправилни пароли при отключването на екрана и заключва телефона или изтрива всички данни от него, ако неправилните пароли са твърде много."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Промяна на паролата за отключване на екрана"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Промяна на паролата за отключване на екрана."</string>
@@ -769,6 +849,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Контролирайте как и кога екранът се заключва."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Изтриване на всички данни"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Изтриване на данните в таблета без предупреждение чрез възстановяване на фабричните настройки."</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Изтриване на данните в телефона без предупреждение чрез възстановяване на фабричните настройки."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Задаване на глобален прокси сървър за устройството"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Задаване на глобалния прокси сървър, който да се използва, когато правилото е активирано. Само първият администратор на устройството задава действителния глобален прокси сървър."</string>
@@ -917,6 +999,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Максималният брой опити за отключване с лице е надвишен"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Няма SIM карта"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"В таблета няма SIM карта."</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"В телефона няма SIM карта."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Поставете SIM карта."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM картата липсва или е нечетлива. Поставете SIM карта."</string>
@@ -939,10 +1023,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Въведохте неправилно паролата си <xliff:g id="NUMBER_0">%d</xliff:g> пъти. \n\nОпитайте отново след <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Въведохте неправилно ПИН кода си <xliff:g id="NUMBER_0">%d</xliff:g> пъти. \n\nОпитайте отново след <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством данните си за вход в Google.\n\nОпитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством данните си за вход в Google.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Направихте опит да отключите таблета неправилно <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдат възстановени стандартните му фабрични настройки и всички потребителски данни ще бъдат заличени."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Направихте опит да отключите телефона неправилно <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдат възстановени стандартните му фабрични настройки и всички потребителски данни ще бъдат заличени."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Направихте опит да отключите таблета неправилно <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Направихте опит да отключите телефона неправилно <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Опитайте отново след <xliff:g id="NUMBER">%d</xliff:g> секунди."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Забравили сте фигурата?"</string>
@@ -1026,6 +1116,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Разрешава на приложението да чете историята на всички посетени от браузъра URL адреси и всички негови отметки. Забележка: Възможно е браузъри на трети страни или други приложения с възможности за сърфиране в мрежата да не могат да наложат ограниченията на това разрешение."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"запис на вашите отметки и история в мрежата"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Разрешава на приложението да променя историята или отметките на браузъра, съхранени на таблета ви. Това може да му позволи да изтрива или променя данните на браузъра. Забележка: Възможно е браузъри на трети страни или други приложения с възможности за сърфиране в мрежата да не могат да наложат ограниченията на разрешението."</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Разрешава на приложението да променя историята или отметките на браузъра, съхранени на телефона ви. Това може да му позволи да изтрива или променя данните на браузъра. Забележка: Възможно е браузъри на трети страни или други приложения с възможности за сърфиране в мрежата да не могат да наложат ограниченията на разрешението."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"навиване на будилника"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Разрешава на приложението да навие инсталирано приложение будилник. Някои будилници може да не изпълнят тази функция."</string>
@@ -1302,6 +1394,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Въведете задължителния ПИН:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"ПИН:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Таблетът временно ще прекъсне връзката с Wi-Fi, докато е свързан с/ъс <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Телефонът временно ще прекрати връзката с Wi-Fi, докато е свързан с/ъс <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Вмъкване на знак"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Изпращане на SMS съобщения"</string>
@@ -1583,6 +1677,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Само веднъж"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s не поддържа служебен потребителски профил"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Таблет"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Телефон"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Слушалки"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Докинг станц.: Високогов."</string>
@@ -1637,10 +1733,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Въведохте неправилно паролата си <xliff:g id="NUMBER_0">%d</xliff:g> пъти. \n\nОпитайте отново след <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. \n\nОпитайте отново след <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Направихте опит да отключите неправилно таблета <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдат възстановени стандартните му фабрични настройки и всички потребителски данни ще бъдат заличени."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Направихте опит да отключите неправилно телефона <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдат възстановени стандартните му фабрични настройки и всички потребителски данни ще бъдат заличени."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Направихте опит да отключите неправилно таблета <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Направихте опит да отключите неправилно телефона <xliff:g id="NUMBER">%d</xliff:g> пъти. Сега ще бъдат възстановени стандартните му фабрични настройки."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Премахване"</string>
