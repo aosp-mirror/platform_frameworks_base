@@ -437,6 +437,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Updates the min and max virtual scroll bounds */
     void updateMinMaxScroll(boolean boundScrollToNewMinMax, boolean launchedWithAltTab,
             boolean launchedFromHome) {
+        if (mStack == null) return;
+
         // Compute the min and max scroll values
         mLayoutAlgorithm.computeMinMaxScroll(mStack.getTasks(), launchedWithAltTab, launchedFromHome);
 
@@ -561,6 +563,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
+        if (mStack == null) return;
+
         int childCount = getChildCount();
         if (childCount > 0) {
             TaskView backMostTask = (TaskView) getChildAt(0);
@@ -635,6 +639,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (mStack == null) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
+
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
@@ -680,6 +689,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (mStack == null) {
+            super.onLayout(changed, left, top, right, bottom);
+            return;
+        }
+
         // Layout each of the children
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -837,7 +851,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Final callback after Recents is finally hidden. */
     void onRecentsHidden() {
-        reset();
         setStack(null);
     }
 
@@ -1012,6 +1025,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void prepareViewToLeavePool(TaskView tv, Task task, boolean isNewView) {
+        if (mStack == null) return;
+
         // It is possible for a view to be returned to the view pool before it is laid out,
         // which means that we will need to relayout the view when it is first used next.
         boolean requiresRelayout = tv.getWidth() <= 0 && !isNewView;
@@ -1150,6 +1165,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
+        if (mStack == null) return;
+
         // Compute which components need to be removed
         HashSet<ComponentName> removedComponents = monitor.computeComponentsRemoved(
                 mStack.getTaskKeys(), packageName, userId);
