@@ -26,6 +26,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
+import android.graphics.Xfermode;
 import android.util.MathUtils;
 import android.view.HardwareCanvas;
 import android.view.RenderNodeAnimator;
@@ -58,8 +59,10 @@ class Ripple {
     /** Bounds used for computing max radius. */
     private final Rect mBounds;
 
-    /** Full-opacity color for drawing this ripple. */
-    private int mColorOpaque;
+    /** ARGB color for drawing this ripple. */
+    private int mColor;
+
+    private Xfermode mXfermode;
 
     /** Maximum ripple radius. */
     private float mOuterRadius;
@@ -120,9 +123,7 @@ class Ripple {
         mStartingY = startingY;
     }
 
-    public void setup(int maxRadius, int color, float density) {
-        mColorOpaque = color | 0xFF000000;
-
+    public void setup(int maxRadius, float density) {
         if (maxRadius != RippleDrawable.RADIUS_AUTO) {
             mHasMaxRadius = true;
             mOuterRadius = maxRadius;
@@ -216,6 +217,10 @@ class Ripple {
      * Draws the ripple centered at (0,0) using the specified paint.
      */
     public boolean draw(Canvas c, Paint p) {
+        // Store the color and xfermode, we might need them later.
+        mColor = p.getColor();
+        mXfermode = p.getXfermode();
+
         final boolean canUseHardware = c.isHardwareAccelerated();
         if (mCanUseHardware != canUseHardware && mCanUseHardware) {
             // We've switched from hardware to non-hardware mode. Panic.
@@ -261,8 +266,8 @@ class Ripple {
     private boolean drawSoftware(Canvas c, Paint p) {
         boolean hasContent = false;
 
-        p.setColor(mColorOpaque);
-        final int alpha = (int) (255 * mOpacity + 0.5f);
+        final int paintAlpha = p.getAlpha();
+        final int alpha = (int) (paintAlpha * mOpacity + 0.5f);
         final float radius = MathUtils.lerp(0, mOuterRadius, mTweenRadius);
         if (alpha > 0 && radius > 0) {
             final float x = MathUtils.lerp(
@@ -270,8 +275,8 @@ class Ripple {
             final float y = MathUtils.lerp(
                     mClampedStartingY - mBounds.exactCenterY(), mOuterY, mTweenY);
             p.setAlpha(alpha);
-            p.setStyle(Style.FILL);
             c.drawCircle(x, y, radius, p);
+            p.setAlpha(paintAlpha);
             hasContent = true;
         }
 
@@ -374,8 +379,9 @@ class Ripple {
         final float startRadius = MathUtils.lerp(0, mOuterRadius, mTweenRadius);
         final Paint paint = getTempPaint();
         paint.setAntiAlias(true);
-        paint.setColor(mColorOpaque);
-        paint.setAlpha((int) (255 * mOpacity + 0.5f));
+        paint.setColor(mColor);
+        paint.setXfermode(mXfermode);
+        paint.setAlpha((int) (Color.alpha(mColor) * mOpacity + 0.5f));
         paint.setStyle(Style.FILL);
         mPropPaint = CanvasProperty.createPaint(paint);
         mPropRadius = CanvasProperty.createFloat(startRadius);

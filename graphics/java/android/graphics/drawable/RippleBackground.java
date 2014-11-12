@@ -26,6 +26,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Rect;
+import android.graphics.Xfermode;
 import android.util.MathUtils;
 import android.view.HardwareCanvas;
 import android.view.RenderNodeAnimator;
@@ -60,11 +61,10 @@ class RippleBackground {
     /** Bounds used for computing max radius. */
     private final Rect mBounds;
 
-    /** Full-opacity color for drawing this ripple. */
-    private int mColorOpaque;
+    /** ARGB color for drawing this ripple. */
+    private int mColor;
 
-    /** Maximum alpha value for drawing this ripple. */
-    private int mColorAlpha;
+    private Xfermode mXfermode;
 
     /** Maximum ripple radius. */
     private float mOuterRadius;
@@ -106,10 +106,7 @@ class RippleBackground {
         mBounds = bounds;
     }
 
-    public void setup(int maxRadius, int color, float density) {
-        mColorOpaque = color | 0xFF000000;
-        mColorAlpha = Color.alpha(color) / 2;
-
+    public void setup(int maxRadius, float density) {
         if (maxRadius != RippleDrawable.RADIUS_AUTO) {
             mHasMaxRadius = true;
             mOuterRadius = maxRadius;
@@ -122,10 +119,6 @@ class RippleBackground {
         mOuterX = 0;
         mOuterY = 0;
         mDensity = density;
-    }
-
-    public boolean isHardwareAnimating() {
-        return mHardwareAnimating;
     }
 
     public void onHotspotBoundsChanged() {
@@ -151,6 +144,10 @@ class RippleBackground {
      * Draws the ripple centered at (0,0) using the specified paint.
      */
     public boolean draw(Canvas c, Paint p) {
+        // Store the color and xfermode, we might need them later.
+        mColor = p.getColor();
+        mXfermode = p.getXfermode();
+
         final boolean canUseHardware = c.isHardwareAccelerated();
         if (mCanUseHardware != canUseHardware && mCanUseHardware) {
             // We've switched from hardware to non-hardware mode. Panic.
@@ -169,8 +166,7 @@ class RippleBackground {
     }
 
     public boolean shouldDraw() {
-        final int outerAlpha = (int) (mColorAlpha * mOuterOpacity + 0.5f);
-        return mCanUseHardware && mHardwareAnimating || outerAlpha > 0 && mOuterRadius > 0;
+        return (mCanUseHardware && mHardwareAnimating) || (mOuterOpacity > 0 && mOuterRadius > 0);
     }
 
     private boolean drawHardware(HardwareCanvas c) {
@@ -201,12 +197,13 @@ class RippleBackground {
     private boolean drawSoftware(Canvas c, Paint p) {
         boolean hasContent = false;
 
-        p.setColor(mColorOpaque);
-        final int outerAlpha = (int) (mColorAlpha * mOuterOpacity + 0.5f);
-        if (outerAlpha > 0 && mOuterRadius > 0) {
-            p.setAlpha(outerAlpha);
-            p.setStyle(Style.FILL);
-            c.drawCircle(mOuterX, mOuterY, mOuterRadius, p);
+        final int paintAlpha = p.getAlpha();
+        final int alpha = (int) (paintAlpha * mOuterOpacity + 0.5f);
+        final float radius = mOuterRadius;
+        if (alpha > 0 && radius > 0) {
+            p.setAlpha(alpha);
+            c.drawCircle(mOuterX, mOuterY, radius, p);
+            p.setAlpha(paintAlpha);
             hasContent = true;
         }
 
@@ -262,7 +259,7 @@ class RippleBackground {
         // outer(t) = mOuterOpacity + t * WAVE_OUTER_OPACITY_VELOCITY / 1000
         final int inflectionDuration = Math.max(0, (int) (1000 * (1 - mOuterOpacity)
                 / (WAVE_OPACITY_DECAY_VELOCITY + outerOpacityVelocity) + 0.5f));
-        final int inflectionOpacity = (int) (mColorAlpha * (mOuterOpacity
+        final int inflectionOpacity = (int) (Color.alpha(mColor) * (mOuterOpacity
                 + inflectionDuration * outerOpacityVelocity * outerSizeInfluence / 1000) + 0.5f);
 
         if (mCanUseHardware) {
@@ -277,8 +274,9 @@ class RippleBackground {
 
         final Paint outerPaint = getTempPaint();
         outerPaint.setAntiAlias(true);
-        outerPaint.setColor(mColorOpaque);
-        outerPaint.setAlpha((int) (mColorAlpha * mOuterOpacity + 0.5f));
+        outerPaint.setXfermode(mXfermode);
+        outerPaint.setColor(mColor);
+        outerPaint.setAlpha((int) (Color.alpha(mColor) * mOuterOpacity + 0.5f));
         outerPaint.setStyle(Style.FILL);
         mPropOuterPaint = CanvasProperty.createPaint(outerPaint);
         mPropOuterRadius = CanvasProperty.createFloat(mOuterRadius);
