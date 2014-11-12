@@ -29,11 +29,11 @@ import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.cdma.EriInfo;
+import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SignalCluster;
@@ -46,7 +46,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NetworkControllerBaseTest extends AndroidTestCase {
+public class NetworkControllerBaseTest extends SysuiTestCase {
     private static final String TAG = "NetworkControllerBaseTest";
     protected static final int DEFAULT_LEVEL = 2;
     protected static final int DEFAULT_SIGNAL_STRENGTH =
@@ -76,9 +76,6 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        // Mockito stuff.
-        System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
 
         mMockWm = mock(WifiManager.class);
         mMockTm = mock(TelephonyManager.class);
