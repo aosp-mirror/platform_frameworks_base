@@ -18,12 +18,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:fitsSystemWindows="true">
 
     <include
         style="@style/BouncerSecurityContainer"
         layout="@layout/keyguard_simple_host_view"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 </FrameLayout>
 

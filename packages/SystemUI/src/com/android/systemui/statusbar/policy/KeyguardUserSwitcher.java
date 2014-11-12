@@ -145,7 +145,7 @@ public class KeyguardUserSwitcher {
         }
         mUserSwitcher.setClipChildren(false);
         mUserSwitcher.setClipToPadding(false);
-        mAppearAnimationUtils.startAppearAnimation(objects, new Runnable() {
+        mAppearAnimationUtils.startAnimation(objects, new Runnable() {
             @Override
             public void run() {
                 mUserSwitcher.setClipChildren(true);
