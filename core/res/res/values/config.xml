@@ -776,7 +776,7 @@
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->
-    <integer name="config_longPressOnHomeBehavior">1</integer>
+    <integer name="config_longPressOnHomeBehavior">0</integer>
 
     <!-- Control the behavior when the user double-taps the home button.
             0 - Nothing

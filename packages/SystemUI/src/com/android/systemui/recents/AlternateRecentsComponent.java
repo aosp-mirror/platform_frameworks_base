@@ -41,6 +41,7 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.recents.misc.Console;
 import com.android.systemui.recents.misc.SystemServicesProxy;
+import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
 import com.android.systemui.recents.model.TaskGrouping;
@@ -64,6 +65,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "recents.triggeredFromAltTab";
     final public static String EXTRA_TRIGGERED_FROM_HOME_KEY = "recents.triggeredFromHomeKey";
     final public static String EXTRA_REUSE_TASK_STACK_VIEWS = "recents.reuseTaskStackViews";
+    final public static String EXTRA_NUM_VISIBLE_TASKS = "recents.numVisibleTasks";
+    final public static String EXTRA_NUM_VISIBLE_THUMBNAILS = "recents.numVisibleThumbnails";
 
     final public static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
     final public static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
@@ -76,6 +79,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final static String sRecentsActivity = "com.android.systemui.recents.RecentsActivity";
 
     static RecentsComponent.Callbacks sRecentsComponentCallbacks;
+    static RecentsTaskLoadPlan sInstanceLoadPlan;
 
     Context mContext;
     LayoutInflater mInflater;
@@ -134,8 +138,15 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             }
         }
 
-        // When we start, preload the metadata associated with the previous tasks
-        RecentsTaskLoader.getInstance().preload(mContext, RecentsTaskLoader.ALL_TASKS);
+        // When we start, preload the metadata and icons associated with the recent tasks.
+        // We can use a new plan since the caches will be the same.
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
+        loader.preloadTasks(plan, true /* isTopTaskHome */);
+        RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
+        launchOpts.numVisibleTasks = loader.getApplicationIconCacheSize();
+        launchOpts.loadThumbnails = false;
+        loader.loadTasks(mContext, plan, launchOpts);
     }
 
     public void onBootCompleted() {
@@ -183,9 +194,11 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     public void onPreloadRecents() {
-        // When we start, preload the metadata associated with the previous tasks
-        RecentsTaskLoader.getInstance().preload(mContext,
-                Constants.Values.RecentsTaskLoader.PreloadFirstTasksCount);
+        // Preload only the raw task list into a new load plan (which will be consumed by the
+        // RecentsActivity)
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        sInstanceLoadPlan = loader.createLoadPlan(mContext);
+        sInstanceLoadPlan.preloadRawTasks(true);
     }
 
     public void onCancelPreloadingRecents() {
@@ -194,8 +207,10 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     void showRelativeAffiliatedTask(boolean showNextTask) {
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        TaskStack stack = loader.getTaskStack(mSystemServicesProxy, mContext.getResources(),
-                -1, -1, RecentsTaskLoader.ALL_TASKS, false, true, null, null);
+        RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
+        loader.preloadTasks(plan, true /* isTopTaskHome */);
+        TaskStack stack = plan.getTaskStack();
+
         // Return early if there are no tasks
         if (stack.getTaskCount() == 0) return;
 
@@ -411,11 +426,11 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
      * Creates the activity options for an app->recents transition.
      */
     ActivityOptions getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo topTask,
-            boolean isTopTaskHome) {
+            TaskStack stack, TaskStackView stackView) {
         // Update the destination rect
         Task toTask = new Task();
-        TaskViewTransform toTransform = getThumbnailTransitionTransform(topTask.id, isTopTaskHome,
-                toTask);
+        TaskViewTransform toTransform = getThumbnailTransitionTransform(stack, stackView,
+                topTask.id, toTask);
         if (toTransform != null && toTask.key != null) {
             Rect toTaskRect = toTransform.rect;
             int toHeaderWidth = (int) (mHeaderBar.getMeasuredWidth() * toTransform.scale);
@@ -443,16 +458,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     }
 
     /** Returns the transition rect for the given task id. */
-    TaskViewTransform getThumbnailTransitionTransform(int runningTaskId, boolean isTopTaskHome,
-                                                      Task runningTaskOut) {
-        // Get the stack of tasks that we are animating into
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-        TaskStack stack = loader.getTaskStack(mSystemServicesProxy, mContext.getResources(),
-                runningTaskId, -1, RecentsTaskLoader.ALL_TASKS, false, isTopTaskHome, null, null);
-        if (stack.getTaskCount() == 0) {
-            return null;
-        }
-
+    TaskViewTransform getThumbnailTransitionTransform(TaskStack stack, TaskStackView stackView,
+            int runningTaskId, Task runningTaskOut) {
         // Find the running task in the TaskStack
         Task task = null;
         ArrayList<Task> tasks = stack.getTasks();
@@ -474,30 +481,42 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         }
 
         // Get the transform for the running task
-        mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);
-        mDummyStackView.getScroller().setStackScrollToInitialState();
-        mTmpTransform = mDummyStackView.getStackAlgorithm().getStackTransform(task,
-                mDummyStackView.getScroller().getStackScroll(), mTmpTransform, null);
+        stackView.getScroller().setStackScrollToInitialState();
+        mTmpTransform = stackView.getStackAlgorithm().getStackTransform(task,
+                stackView.getScroller().getStackScroll(), mTmpTransform, null);
         return mTmpTransform;
     }
 
     /** Starts the recents activity */
     void startRecentsActivity(ActivityManager.RunningTaskInfo topTask, boolean isTopTaskHome) {
-        // If Recents is not the front-most activity and we should animate into it.  If
-        // the activity at the root of the top task stack in the home stack, then we just do a
-        // simple transition.  Otherwise, we animate to the rects defined by the Recents service,
-        // which can differ depending on the number of items in the list.
-        SystemServicesProxy ssp = mSystemServicesProxy;
-        List<ActivityManager.RecentTaskInfo> recentTasks =
-                ssp.getRecentTasks(3, UserHandle.CURRENT.getIdentifier(), isTopTaskHome);
-        boolean useThumbnailTransition = !isTopTaskHome;
-        boolean hasRecentTasks = !recentTasks.isEmpty();
+        if (sInstanceLoadPlan == null) {
+            // Create a new load plan if onPreloadRecents() was never triggered
+            RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+            sInstanceLoadPlan = loader.createLoadPlan(mContext);
+        }
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
+        TaskStack stack = sInstanceLoadPlan.getTaskStack();
+
+        // Prepare the dummy stack for the transition
+        mDummyStackView.updateMinMaxScrollForStack(stack, mTriggeredFromAltTab, isTopTaskHome);
+        TaskStackViewLayoutAlgorithm.VisibilityReport stackVr =
+                mDummyStackView.computeStackVisibilityReport();
+        boolean hasRecentTasks = stack.getTaskCount() > 0;
+        boolean useThumbnailTransition = !isTopTaskHome && hasRecentTasks;
 
         if (useThumbnailTransition) {
+            // Ensure that we load the running task's icon
+            RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
+            launchOpts.runningTaskId = topTask.id;
+            launchOpts.loadThumbnails = false;
+            loader.loadTasks(mContext, sInstanceLoadPlan, launchOpts);
+
             // Try starting with a thumbnail transition
-            ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, isTopTaskHome);
+            ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, stack,
+                    mDummyStackView);
             if (opts != null) {
-                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_THUMBNAIL);
+                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_THUMBNAIL, stackVr);
             } else {
                 // Fall through below to the non-thumbnail transition
                 useThumbnailTransition = false;
@@ -531,11 +550,11 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
                 ActivityOptions opts = getHomeTransitionActivityOptions(fromSearchHome);
                 startAlternateRecentsActivity(topTask, opts,
-                        fromSearchHome ? EXTRA_FROM_SEARCH_HOME : EXTRA_FROM_HOME);
+                        fromSearchHome ? EXTRA_FROM_SEARCH_HOME : EXTRA_FROM_HOME, stackVr);
             } else {
                 // Otherwise we do the normal fade from an unknown source
                 ActivityOptions opts = getUnknownTransitionActivityOptions();
-                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_HOME);
+                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_HOME, stackVr);
             }
         }
         mLastToggleTime = System.currentTimeMillis();
@@ -543,7 +562,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     /** Starts the recents activity */
     void startAlternateRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-                                       ActivityOptions opts, String extraFlag) {
+            ActivityOptions opts, String extraFlag,
+            TaskStackViewLayoutAlgorithm.VisibilityReport vr) {
         Intent intent = new Intent(sToggleRecentsAction);
         intent.setClassName(sRecentsPackage, sRecentsActivity);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -555,6 +575,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, mTriggeredFromAltTab);
         intent.putExtra(EXTRA_FROM_TASK_ID, (topTask != null) ? topTask.id : -1);
         intent.putExtra(EXTRA_REUSE_TASK_STACK_VIEWS, mCanReuseTaskStackViews);
+        intent.putExtra(EXTRA_NUM_VISIBLE_TASKS, vr.numVisibleTasks);
+        intent.putExtra(EXTRA_NUM_VISIBLE_THUMBNAILS, vr.numVisibleThumbnails);
         if (opts != null) {
             mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.CURRENT);
         } else {
@@ -573,6 +595,15 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         if (sRecentsComponentCallbacks != null) {
             sRecentsComponentCallbacks.onVisibilityChanged(visible);
         }
+    }
+
+    /**
+     * Returns the preloaded load plan and invalidates it.
+     */
+    public static RecentsTaskLoadPlan consumeInstanceLoadPlan() {
+        RecentsTaskLoadPlan plan = sInstanceLoadPlan;
+        sInstanceLoadPlan = null;
+        return plan;
     }
 
     /**** OnAnimationStartedListener Implementation ****/

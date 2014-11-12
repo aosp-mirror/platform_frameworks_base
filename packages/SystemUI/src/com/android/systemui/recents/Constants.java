@@ -64,11 +64,6 @@ public class Constants {
             public static String DebugModeVersion = "A";
         }
 
-        public static class RecentsTaskLoader {
-            // XXX: This should be calculated on the first load
-            public static final int PreloadFirstTasksCount = 6;
-        }
-
         public static class TaskStackView {
             public static final int TaskStackOverscrollRange = 150;
             public static final int FilterStartDelay = 25;
