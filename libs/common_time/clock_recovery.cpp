@@ -22,6 +22,7 @@
 #define __STDC_LIMIT_MACROS
 #define LOG_TAG "common_time"
 #include <utils/Log.h>
+#include <inttypes.h>
 #include <stdint.h>
 
 #include <common_time/local_clock.h>
@@ -280,7 +281,7 @@ bool ClockRecoveryLoop::pushDisciplineEvent(int64_t local_time,
     // system.
     setTargetCorrection_l(tgt_correction);
 
-    LOG_TS("clock_loop %lld %f %f %f %d\n", raw_delta, delta_f, CO, CObias, tgt_correction);
+    LOG_TS("clock_loop %" PRId64 " %f %f %f %d\n", raw_delta, delta_f, CO, CObias, tgt_correction);
 
 #ifdef TIME_SERVICE_DEBUG
     diag_thread_->pushDisciplineEvent(
@@ -335,7 +336,6 @@ void ClockRecoveryLoop::setTargetCorrection_l(int32_t tgt) {
     // 300mSec.
     if (tgt_correction_ != tgt) {
         int64_t now = local_clock_->getLocalTime();
-        status_t res;
 
         tgt_correction_ = tgt;
 

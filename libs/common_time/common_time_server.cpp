@@ -25,6 +25,7 @@
 #include <arpa/inet.h>
 #include <assert.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <linux/if_ether.h>
 #include <net/if.h>
 #include <net/if_arp.h>
@@ -969,13 +970,14 @@ bool CommonTimeServer::handleSyncResponse(
         // if the RTT of the packet is significantly larger than the panic
         // threshold, we should simply discard it.  Its better to do nothing
         // than to take cues from a packet like that.
-        int rttCommon = mCommonClock.localDurationToCommonDuration(rtt);
+        int64_t rttCommon = mCommonClock.localDurationToCommonDuration(rtt);
         if (rttCommon > (static_cast<int64_t>(mPanicThresholdUsec) * 
                          kRTTDiscardPanicThreshMultiplier)) {
-            ALOGV("Dropping sync response with RTT of %lld uSec", rttCommon);
+            ALOGV("Dropping sync response with RTT of %" PRId64 " uSec", rttCommon);
             mClient_ExpiredSyncRespsRXedFromCurMaster++;
             if (shouldPanicNotGettingGoodData())
                 return becomeInitial("RX panic, no good data");
+            return true;
         } else {
             result = mClockRecovery.pushDisciplineEvent(avgLocal, avgCommon, rttCommon);
             mClient_LastGoodSyncRX = clientRxLocalTime;
