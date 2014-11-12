@@ -5901,6 +5901,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 region.op(interactiveRegion, Region.Op.INTERSECT);
             }
 
+            // Take into account the window bounds.
+            final View root = getRootView();
+            if (root != null) {
+                region.op(dx, dy, root.getWidth() + dx, root.getHeight() + dy, Region.Op.INTERSECT);
+            }
+
             // If the view is completely covered, done.
             if (region.isEmpty()) {
                 return false;
