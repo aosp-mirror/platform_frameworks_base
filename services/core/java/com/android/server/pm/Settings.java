@@ -103,7 +103,7 @@ final class Settings {
      * Note that care should be taken to make sure all database upgrades are
      * idempotent.
      */
-    private static final int CURRENT_DATABASE_VERSION = DatabaseVersion.SIGNATURE_END_ENTITY;
+    private static final int CURRENT_DATABASE_VERSION = DatabaseVersion.SIGNATURE_MALFORMED_RECOVER;
 
     /**
      * This class contains constants that can be referred to from upgrade code.
@@ -121,6 +121,14 @@ final class Settings {
          * just the signing certificate.
          */
         public static final int SIGNATURE_END_ENTITY = 2;
+
+        /**
+         * There was a window of time in
+         * {@link android.os.Build.VERSION_CODES#LOLLIPOP} where we persisted
+         * certificates after potentially mutating them. To switch back to the
+         * original untouched certificates, we need to force a collection pass.
+         */
+        public static final int SIGNATURE_MALFORMED_RECOVER = 3;
     }
 
     private static final boolean DEBUG_STOPPED = false;
