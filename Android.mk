@@ -430,7 +430,7 @@ include $(CLEAR_VARS)
 
 aidl_files := \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
-	frameworks/base/telephony/java/android/telephony/SubInfoRecord.aidl \
+	frameworks/base/telephony/java/android/telephony/SubscriptionInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/CellInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/SignalStrength.aidl \
 	frameworks/base/telephony/java/android/telephony/IccOpenLogicalChannelResponse.aidl \
