@@ -31,7 +31,7 @@ import android.os.Parcelable;
 /**
  * A Parcelable class for Subscription Information.
  */
-public class SubInfoRecord implements Parcelable {
+public class SubscriptionInfo implements Parcelable {
 
     /**
      * Subscription Identifier, this is a device unique number
@@ -99,7 +99,7 @@ public class SubInfoRecord implements Parcelable {
     /**
      * @hide
      */
-    public SubInfoRecord(int id, String iccId, int simSlotIndex, CharSequence displayName,
+    public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
             Bitmap icon, int mcc, int mnc) {
         this.mId = id;
@@ -177,12 +177,12 @@ public class SubInfoRecord implements Parcelable {
     }
 
     /**
-     * Creates and returns an icon {@code Bitmap} to represent this {@code SubInfoRecord} in a user
+     * Creates and returns an icon {@code Bitmap} to represent this {@code SubscriptionInfo} in a user
      * interface.
      *
      * @param context A {@code Context} to get the {@code DisplayMetrics}s from.
      *
-     * @return A bitmap icon for this {@code SubInfoRecord}.
+     * @return A bitmap icon for this {@code SubscriptionInfo}.
      */
     public Bitmap createIconBitmap(Context context) {
         int width = mIconBitmap.getWidth();
@@ -259,9 +259,9 @@ public class SubInfoRecord implements Parcelable {
         return this.mMnc;
     }
 
-    public static final Parcelable.Creator<SubInfoRecord> CREATOR = new Parcelable.Creator<SubInfoRecord>() {
+    public static final Parcelable.Creator<SubscriptionInfo> CREATOR = new Parcelable.Creator<SubscriptionInfo>() {
         @Override
-        public SubInfoRecord createFromParcel(Parcel source) {
+        public SubscriptionInfo createFromParcel(Parcel source) {
             int id = source.readInt();
             String iccId = source.readString();
             int simSlotIndex = source.readInt();
@@ -275,13 +275,13 @@ public class SubInfoRecord implements Parcelable {
             int mnc = source.readInt();
             Bitmap iconBitmap = Bitmap.CREATOR.createFromParcel(source);
 
-            return new SubInfoRecord(id, iccId, simSlotIndex, displayName, carrierName, nameSource,
+            return new SubscriptionInfo(id, iccId, simSlotIndex, displayName, carrierName, nameSource,
                     iconTint, number, dataRoaming, iconBitmap, mcc, mnc);
         }
 
         @Override
-        public SubInfoRecord[] newArray(int size) {
-            return new SubInfoRecord[size];
+        public SubscriptionInfo[] newArray(int size) {
+            return new SubscriptionInfo[size];
         }
     };
 
