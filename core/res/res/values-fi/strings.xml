@@ -149,12 +149,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Liikaa <xliff:g id="CONTENT_TYPE">%s</xliff:g>-poistoja."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Tablet-laitteen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Kellon tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Puhelimen tallennustila on täynnä. Vapauta tilaa poistamalla tiedostoja."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Verkkoa saatetaan valvoa"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Valvoja on tuntematon kolmas osapuoli."</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Valvoja on <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Minä"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet-laitteen asetukset"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Puhelimen asetukset"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Äänetön tila"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Ota langaton yhteys käyttöön"</string>
@@ -166,6 +170,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Soittoääni: normaali"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Suljetaan..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Tablet-laitteesi sammutetaan."</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Kello sammutetaan."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Puhelin suljetaan."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Haluatko sammuttaa?"</string>
@@ -174,6 +180,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Viimeisimmät"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Ei viimeaikaisia sovelluksia"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Tablet-laitteen asetukset"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"Puhelimen asetukset"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Näytön lukitus"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Katkaise virta"</string>
@@ -290,9 +298,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Antaa sovelluksen lähettää muille viestisovelluksille pyyntöjä käsitellä saapuvien puheluiden vastaa viestillä -tapahtumia."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"lue tekstiviestejä (teksti tai multimedia)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Antaa sovelluksen lukea tablet-laitteeseen tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden arkaluonteisuudesta."</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Antaa sovelluksen lukea puhelimeen tai SIM-kortille tallennettuja tekstiviestejä. Sovellus voi lukea kaikki tekstiviestit huolimatta niiden arkaluonteisuudesta."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"muokkaa tekstiviestejä (teksti tai multimedia)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Antaa sovelluksen kirjoittaa tablet-laitteelle tai SIM-kortille tallennettuihin tekstiviesteihin. Haitalliset sovellukset voivat poistaa viestejä."</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Antaa sovelluksen kirjoittaa puhelimelle tai SIM-kortille tallennettuihin tekstiviesteihin. Haitalliset sovellukset voivat poistaa viestejä."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"vastaanota tekstiviestejä (WAP)"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Antaa sovelluksen vastaanottaa ja käsitellä WAP-viestejä. Sovellus voi valvoa tai poistaa laitteeseesi lähetettyjä viestejä näyttämättä niitä sinulle."</string>
@@ -386,6 +398,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Antaa sovelluksen pysäyttää ruudun väliaikaisesti siirtyäkseen koko ruudun tilaan."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"painaa näppäimiä ja hallintapainikkeita"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Antaa sovelluksen käyttää omia syötteitään (kuten näppäinpainalluksia) muissa sovelluksissa. Haitalliset sovellukset voivat ottaa tällä tablet-laitteen haltuun."</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Antaa sovelluksen käyttää omia syötteitään (kuten näppäinpainalluksia) muissa sovelluksissa. Haitalliset sovellukset voivat ottaa tällä puhelimen haltuun."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"tallenna kirjoittamiasi merkkejä ja suorittamiasi toimintoja"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Antaa sovelluksen lukea näppäinpainalluksia myös käytettäessä muita sovelluksia (esimerkiksi kirjoitettaessa salasanaa). Ei tavallisten sovellusten käyttöön."</string>
@@ -433,6 +447,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Antaa sovelluksen pyytää, että tarjottu signaali lähetetään kaikille käynnissä oleville prosesseille."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"sovelluksen asettaminen aina käynnissä olevaksi"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa tablet-laitteen toimintaa."</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Antaa sovelluksen lisätä omia osiaan muistiin pysyvästi. Tämä voi rajoittaa muiden sovellusten käytettävissä olevaa muistia ja hidastaa puhelimen toimintaa."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"sovellusten poistaminen"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Antaa sovelluksen poistaa Android-paketteja. Haitalliset sovellukset voivat käyttää tätä tärkeiden sovellusten poistamiseen."</string>
@@ -446,11 +462,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Antaa sovelluksen asentaa uusia tai päivitettyjä Android-paketteja. Haitalliset sovellukset voivat käyttää tätä uusien sovellusten asentamiseen mielivaltaisen voimakkailla käyttöluvilla."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"sovellusvälimuistin kaikkien tietojen poistaminen"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Antaa sovelluksen vapauttaa tablet-laitteen tallennustilaa poistamalla tiedostoja muiden sovellusten välimuistihakemistosta. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Antaa sovelluksen vapauttaa puhelimen tallennustilaa poistamalla tiedostoja muiden sovellusten välimuistihakemistosta. Muut sovellukset voivat käynnistyä hitaammin, koska niiden täytyy noutaa tietonsa uudelleen."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"sovellusresurssien siirtäminen"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Antaa sovelluksen siirtää sovellusresursseja sisäisiltä tietovälineiltä ulkoisille ja päinvastoin."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"lukea arkaluonteisia lokitietoja"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Antaa sovelluksen lukea järjestelmän lokitiedostoja. Näin sovellus saa yleisiä tietoja siitä, mitä teet tablet-laitteella, sekä mahdollisia yksityisiä tai arkaluonteisia tietoja."</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Antaa sovelluksen lukea järjestelmän lokitiedostoja. Näin sovellus saa yleisiä tietoja siitä, mitä teet puhelimella, sekä mahdollisia yksityisiä tai arkaluonteisia tietoja."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"käytä mitä tahansa tietovälineen koodin purkajaa toistoa varten"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Sallii sovelluksen käyttää mitä tahansa asennettua tietovälineen koodin purkajaa toistoa varten."</string>
@@ -462,6 +482,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Antaa sovelluksen lukea ja kirjoittaa diag-ryhmän omistamiin resursseihin, esimerkiksi /dev-hakemistossa oleviin tiedostoihin. Tämä voi vaikuttaa järjestelmän vakauteen ja turvallisuuteen. Tämä lupa tulee myöntää VAIN valmistajan tai operaattorin laitteistotesteille."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"sovelluskomponenttien ottaminen käyttöön tai pois käytöstä"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Antaa sovelluksen muuttaa, onko toisen sovelluksen komponentti käytössä vai ei. Haitalliset sovellukset voivat käyttää tätä tablet-laitteen tärkeiden ominaisuuksien poistamiseen käytöstä. Tämän luvan käyttöönotto edellyttää varovaisuutta, sillä sen avulla sovelluskomponentit on mahdollista saada epäkäytettävään, epäyhtenäiseen tai epävakaaseen tilaan."</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Antaa sovelluksen muuttaa sitä, onko toisen sovelluksen komponentti käytössä vai ei. Haitalliset sovellukset voivat käyttää tätä puhelimen tärkeiden ominaisuuksien poistamiseen käytöstä. Tämän luvan käyttöönotto edellyttää varovaisuutta, sillä sen avulla sovelluskomponentit on mahdollista saada epäkäytettävään, epäyhtenäiseen tai epävakaaseen tilaan."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"myönnä tai kiellä käyttöluvat"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Antaa sovelluksen myöntää tai kieltää tiettyjä käyttööoikeuksia itselleen tai muille sovelluksille. Haittaohjelmat voivat käyttää tämän ominaisuuden avulla toimintoja, joiden käyttöön et ole antanut lupaa."</string>
@@ -475,21 +497,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Antaa sovelluksen muokata Googlen palvelukarttaa. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"suorita laitteen käynnistyessä"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Antaa sovelluksen käynnistyä heti, kun laite on käynnistynyt. Tämä voi pidentää tablet-laitteen käynnistysaikaa ja hidastaa sen yleistä käyttöä sovelluksen ollessa aina käynnissä."</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Antaa sovelluksen käynnistyä heti, kun laite on käynnistynyt. Tämä voi pidentää puhelimen käynnistysaikaa ja hidastaa puhelimen yleistä käyttöä sovelluksen ollessa aina käynnissä."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"lähetä tärkeä lähetys"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Antaa sovelluksen lähettää pysyviä lähetyksiä, jotka säilyvät lähetyksen päätyttyä. Liiallinen käyttö voi tehdä tablet-laitteesta hitaan tai epävakaan kasvattamalla sen muistinkäyttöä liikaa."</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Antaa sovelluksen lähettää pysyviä lähetyksiä, jotka säilyvät lähetyksen päätyttyä. Liiallinen käyttö voi tehdä puhelimesta hitaan tai epävakaan kasvattamalla sen muistinkäyttöä liikaa."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"lue yhteystietoja"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Antaa sovelluksen lukea tablet-laitteeseesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Antaa sovelluksen lukea puhelimeesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat tallentaa kontaktitietoja. Haitalliset sovellukset voivat jakaa kontaktitietoja ilman lupaasi."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"muokkaa yhteystietoja"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Antaa sovelluksen muokata tablet-laitteeseesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Antaa sovelluksen muokata puhelimeesi tallennettuja kontaktitietoja sekä tarkastella, kuinka usein olet soittanut, lähettänyt sähköpostia tai muuten viestinyt tiettyjen kontaktien kanssa. Tämän luvan saaneet sovellukset voivat poistaa kontaktitietoja."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"lue puhelulokia"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Antaa sovelluksen lukea tablet-laitteen puhelulokia sekä soitettujen ja vastaanotettujen puheluiden tietoja. Sovellus voi myös tallentaa puhelulokitietoja. Haitalliset sovellukset voivat jakaa puhelulokitietoja ilman lupaasi."</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Antaa sovelluksen lukea puhelimen puhelulokia sekä soitettujen ja vastaanotettujen puheluiden tietoja. Sovellus voi myös tallentaa puhelulokitietoja. Haitalliset sovellukset voivat jakaa puhelulokitietoja ilman lupaasi."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"kirjoita puhelulokiin"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Antaa sovelluksen muokata tablet-laitteesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Antaa sovelluksen muokata puhelimesi puhelulokia, kuten tietoja vastatuista ja soitetuista puheluista. Haitalliset sovellukset voivat poistaa puhelulokisi tai muokata sitä."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"lue omia yhteystietoja"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Antaa sovelluksen lukea laitteelle tallennettuja henkilökohtaisia tietoja, kuten nimen ja yhteystietoja. Sovellus voi tunnistaa sinut ja lähettää profiilitietojasi muille."</string>
@@ -503,9 +537,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Antaa sovelluksen näyttää kavereidesi päivityksiä sosiaalisista palveluista. Mieti tarkkaan ennen tietojen jakamista: tämän luvan saaneet sovellukset voivat luoda viestejä, jotka vaikuttavat kavereidesi lähettämiltä. Huom: tätä lupaa ei saa ottaa käyttöön kaikissa sosiaalisissa verkkopalveluissa."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"lue kalenteritapahtumia ja luottamuksellisia tietoja"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Antaa sovelluksen lukea tablet-laitteelle tallennettuja kalenteritapahtumia, myös kavereiden tai työkavereiden tapahtumia. Sovellus voi jakaa tai tallentaa kalenteritietojasi niiden arkaluonteisuudesta huolimatta."</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Antaa sovelluksen lukea puhelimeen tallennettuja kalenteritapahtumia, myös kavereiden tai työkavereiden tapahtumia. Sovellus voi jakaa tai tallentaa kalenteritietojasi niiden arkaluonteisuudesta huolimatta."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"lisää tai muokkaa kalenteritapahtumia ja lähetä sähköpostia vieraille ilman omistajien lupaa"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Antaa sovelluksen lisätä, poistaa ja muuttaa tapahtumia, joita voit muokata tablet-laitteellasi. Näihin kuuluvat myös kavereidesi tai työkavereidesi tapahtumat. Sovellus voi lähettää viestejä, jotka vaikuttavat kalenterin omistajien lähettämiltä, tai muokata tapahtumia ilman niiden omistajien lupaa."</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Antaa sovelluksen lisätä, poistaa ja muuttaa tapahtumia, joita voit muokata puhelimellasi. Näihin kuuluvat myös kavereidesi tai työkavereidesi tapahtumat. Sovellus voi lähettää viestejä, jotka vaikuttavat kalenterin omistajien lähettämiltä, tai muokata tapahtumia ilman niiden omistajien lupaa."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"imitoi sijaintilähteitä testaustarkoituksissa"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Luo imitoituja sijaintilähteitä testaustarkoituksessa tai asenna uusi sijaintipalvelu. Sovellus voi ohittaa muiden sijaintilähteiden kuten GPS:n ja sijaintipalveluiden palauttaman sijainnin ja/tai tilan."</string>
@@ -550,12 +588,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"poista lähetyksen merkkivalo käytöstä, kun kameraa käytetään"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Antaa valmiiksi asennetun järjestelmäsovelluksen poistaa käytöstä kameran käytössäolon merkkivalon."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"poista tablet-laite käytöstä lopullisesti"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"poista puhelin käytöstä pysyvästi"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Antaa sovelluksen poistaa koko tablet-laitteen käytöstä lopullisesti. Tämä on hyvin vaarallista."</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Antaa sovelluksen poistaa koko puhelimen käytöstä lopullisesti. Tämä on hyvin vaarallista."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"pakota tablet-laite käynnistymään uudelleen"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"pakota puhelin käynnistymään uudelleen"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Antaa sovelluksen pakottaa tablet-laitteen käynnistymään uudelleen."</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Antaa sovelluksen pakottaa puhelimen käynnistymään uudelleen."</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"käytä USB:n tiedostojärj."</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"käytä SD-kortin tiedostojärjestelmää"</string>
@@ -590,6 +636,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"soita mihin tahansa puhelinnumeroon suoraan"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Antaa sovelluksen soittaa mihin tahansa puhelinnumeroon, myös hätänumeroihin, ilman käyttäjän toimia. Haitalliset sovellukset voivat soittaa turhia ja laittomia puheluita hätänumeroihin."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"käynnistä CDMA-tablet-laitteen asetukset"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"aloita CDMA-puhelimen asetuksien määrittäminen"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Antaa sovelluksen aloittaa CDMA-määrityksen. Haitalliset sovellukset voivat aloittaa tarpeettoman CDMA-määrityksen."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"hallitse sijaintien päivitysilmoituksia"</string>
@@ -605,20 +653,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"lue puhelimen tarkat tilat"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Antaa sovelluksen käyttää puhelimen tarkkoja tiloja. Tämän oikeus antaa sovelluksen määrittää puhelun todellisen tilan, eli onko puhelu aktiivinen vai taustalla, puhelujen epäonnistumiset, tietoliikenneyhteyden tarkan tilan ja tietoliikenneyhteyden muodostuksen epäonnistumiset."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"estä tablet-laitetta menemästä virransäästötilaan"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"estä puhelinta menemästä virransäästötilaan"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Antaa sovelluksen estää tablet-laitetta siirtymästä virransäästötilaan."</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Antaa sovelluksen estää puhelinta siirtymästä virransäästötilaan."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"infrapunalähetys"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Antaa sovelluksen käyttää tablet-laitteen infrapunalähetintä."</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Antaa sovelluksen käyttää puhelimen infrapunalähetintä."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"käynnistä tai sammuta tablet-laite"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"sammutta tai käynnistä puhelin"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Antaa sovelluksen sammuttaa tai käynnistää tablet-laitteen."</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Antaa sovelluksen sammuttaa ja käynnistää puhelimen."</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"nollaa näytön aikakatkaisu"</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"Sallii sovelluksen nollata näytön aikakatkaisu."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"toimi tehdastestaustilassa"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Suorita matalan tason valmistajan testinä, jolloin koko tabletin laitteisto on käytössä. Käytettävissä vain, kun tabletia käytetään valmistajan testitilassa."</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Suorita alemman tason valmistajan testinä ja anna täydet oikeudet puhelimen laitteistolle. Käytettävissä vain, kun puhelin on valmistajan testitilassa."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"aseta taustakuva"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Antaa sovelluksen asettaa laitteen taustakuvan."</string>
@@ -628,14 +688,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Antaa sovelluksen palauttaa laitteen täysin tehdasasetuksiin sekä poistaa kaikki tiedot, määritykset ja asennetut sovellukset."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"aseta aika"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Antaa sovelluksen muuttaa tablet-laitteen kellonaikaa."</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Antaa sovelluksen muuttaa puhelimen kellonaikaa."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"asettaa aikavyöhykkeen"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Antaa sovelluksen muuttaa tablet-laitteen aikavyöhykettä."</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Antaa sovelluksen muuttaa puhelimen aikavyöhykettä."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"toimi AccountManagerService-sovelluksena"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Antaa sovelluksen soittaa puheluja tilien todentajille."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"etsi tilejä laitteelta"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Antaa sovelluksen tarkastella tablet-laitteeseen tallennettuja tilejä. Näihin voivat kuulua myös asentamiesi sovelluksien luomat tilit."</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Antaa sovelluksen tarkastella puhelimeen tallennettuja tilejä. Näihin voivat kuulua myös asentamiesi sovelluksien luomat tilit."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"luo tilejä ja aseta salasanoja"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Antaa sovelluksen käyttää tilienhallinnan tilintodennustehtäviä, kuten uusien tilien luomista sekä niiden salasanojen lukemista ja asettamista."</string>
@@ -661,26 +727,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Antaa sovelluksen yhdistää wifi-tukiasemiin tai katkaista yhteyden sekä tehdä muutoksia määritettyihin wifi-verkkoihin."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"anna ottaa vastaan wifi-ryhmälähetyksiä"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Antaa sovelluksen vastaanottaa kaikille laitteille, ei vain tablet-laitteellesi, wifi-verkon kautta monilähetystilassa lähetettyjä paketteja. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Antaa sovelluksen vastaanottaa kaikille laitteille, ei vain puhelimellesi, wifi-verkon kautta monilähetystilassa lähetettyjä paketteja. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"käytä Bluetooth-asetuksia"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Antaa sovelluksen määrittää paikallisen Bluetooth-tabletin asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Antaa sovelluksen määrittää paikallisen Bluetooth-puhelimen asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"anna sovelluksen muodostaa Bluetooth-laitepari"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Antaa sovelluksen muodostaa laiteparin etälaitteiden kanssa ilman käyttäjän toimia."</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Antaa sovelluksen muodostaa laiteparin etälaitteiden kanssa ilman käyttäjän toimia."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Antaa sovelluksen muodostaa laiteparin etälaitteiden kanssa ilman käyttäjän toimia."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"käytä Bluetooth MAP -tietoja"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Antaa sovelluksen käyttää Bluetooth MAP -tietoja."</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Antaa sovelluksen käyttää Bluetooth MAP -tietoja."</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Antaa sovelluksen käyttää Bluetooth MAP -tietoja."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"muodosta yhteys WiMAXiin ja katkaise yhteys"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Antaa sovelluksen määrittää, onko WiMAX käytössä, sekä saada selville tietoja WiMAX-verkoista, joihin on muodostettu yhteys."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Vaihda WiMAX-verkon tilaa"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Antaa sovelluksen muodostaa tablet-laitteella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Antaa sovelluksen muodostaa puhelimella yhteyden WiMAX-verkkoon ja katkaista yhteyden."</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"pisteytä verkot"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Sallii sovelluksen asettaa verkkoja paremmuusjärjestykseen ja vaikuttaa siihen, mikä verkko tablet-laitteen kannattaa valita."</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Sallii sovelluksen asettaa verkkoja paremmuusjärjestykseen ja vaikuttaa siihen, mikä verkko puhelimen kannattaa valita."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"muodosta laitepari Bluetooth-laitteiden kanssa"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Antaa sovelluksen tarkastella tablet-laitteen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä."</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Antaa sovelluksen tarkastella puhelimen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä muihin laitteisiin."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"hallitse Near Field Communication -tunnistusta"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Antaa sovelluksen kommunikoida NFC (Near Field Communication) -tunnisteiden, -korttien ja -lukijoiden kanssa."</string>
@@ -762,6 +840,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Hallinnoi ruudun lukituksenpoistosalasanoissa sallittuja merkkejä ja salasanan pituutta."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Tarkkaile ruudun lukituksen poistoyrityksiä"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa sekä lukitsee tablet-laitteen tai poistaa sen tiedot, jos salasana syötetään väärin liian monta kertaa."</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa ja lukitsee puhelimen tai poistaa sen kaikki tiedot, jos väärä salasana syötetään liian monta kertaa."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Vaihda ruudunlukituksen poiston salasanaa"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Vaihda ruudunlukituksen poiston salasanaa."</string>
@@ -769,6 +849,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Hallinnoi, milloin ja miten ruutu lukittuu."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Pyyhi kaikki tiedot"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Tyhjennä tablet-laitteen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Tyhjennä puhelimen tiedot varoituksetta palauttamalla tehdasasetukset."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Aseta laitteen yleinen välityspalvelin"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Aseta laitteen yleinen välityspalvelin käyttöön, kun käytäntö on käytössä. Vain ensimmäinen laitteen järjestelmänhallitsija voi asettaa käytettävän yleisen välityspalvelimen."</string>
@@ -917,6 +999,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Face Unlock -yrityksiä tehty suurin sallittu määrä."</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"Ei SIM-korttia"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Tablet-laitteessa ei ole SIM-korttia."</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Puhelimessa ei ole SIM-korttia."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Aseta SIM-kortti."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-korttia ei löydy tai ei voi lukea. Kytke SIM-kortti."</string>
@@ -939,10 +1023,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus Google-sisäänkirjautumisen avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus Google-sisäänkirjautumisen avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%d</xliff:g> epäonnistunutta yritystä, tablet-laitteeseen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%d</xliff:g> epäonnistunutta yritystä, puhelimeen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Laitteeseen palautetaan nyt tehdasasetukset."</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Puhelimeen palautetaan nyt tehdasasetukset."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Yritä uudelleen <xliff:g id="NUMBER">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Unohditko mallin?"</string>
@@ -1026,6 +1116,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Antaa sovelluksen lukea selaimen käyttämien URL-osoitteiden historiaa sekä selaimen kirjanmerkkejä. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"kirjoita verkon kirjanmerkkejä ja historiaa"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Antaa sovelluksen muokata selaimen historiaa ja tablet-laitteeseen tallennettuja kirjanmerkkejä. Sovellus voi poistaa tai muokata selaimen tietoja. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Antaa sovelluksen muokata selaimen historiaa ja puhelimeen tallennettuja kirjanmerkkejä. Sovellus voi poistaa tai muokata selaimen tietoja. Huomaa: kolmannen osapuolen selaimet tai muut sovellukset, jotka pystyvät selaamaan verkkoa, eivät saa käyttää tätä lupaa."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"aseta herätys"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Antaa sovelluksen asettaa hälytyksen sisäiseen herätyskellosovellukseen. Jotkin herätyskellosovellukset eivät välttämättä käytä tätä ominaisuutta."</string>
@@ -1302,6 +1394,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Kirjoita pyydetty PIN-koodi:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-koodi:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tablet-laitteen yhteys wifi-verkkoon katkaistaan väliaikaisesti tabletin ollessa yhdistettynä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Puhelimen yhteys wifi-verkkoon katkaistaan väliaikaisesti puhelimen ollessa yhdistettynä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Lisää merkki"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Tekstiviestien lähettäminen"</string>
@@ -1583,6 +1677,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Vain kerran"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ei tue työprofiilia"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Tablet-laite"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Puhelin"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Kuulokkeet"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Telineen kaiuttimet"</string>
@@ -1637,10 +1733,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%d</xliff:g> epäonnistunutta yritystä, tablet-laitteeseen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%d</xliff:g> epäonnistunutta yritystä, puhelimeen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Laitteeseen palautetaan nyt tehdasasetukset."</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Puhelimeen palautetaan nyt tehdasasetukset."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Poista"</string>

@@ -149,12 +149,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"చాలా ఎక్కువ <xliff:g id="CONTENT_TYPE">%s</xliff:g> తొలగింపులు."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"టాబ్లెట్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌లను తొలగించండి."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"వాచ్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌లను తొలగించండి."</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"ఫోన్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌లను తొలగించండి."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"నెట్‌వర్క్ పర్యవేక్షించబడవచ్చు"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"తెలియని మూడవ పక్షం ద్వారా"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ద్వారా"</string>
     <string name="me" msgid="6545696007631404292">"నేను"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"టాబ్లెట్ ఎంపికలు"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"ఫోన్ ఎంపికలు"</string>
     <string name="silent_mode" msgid="7167703389802618663">"నిశ్శబ్ద మోడ్"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"వైర్‌లెస్‌ను ప్రారంభించండి"</string>
@@ -166,6 +170,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"రింగర్ ఆన్‌లో ఉంది"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"షట్ డౌన్ చేయబడుతోంది…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"మీ టాబ్లెట్ షట్‌డౌన్ చేయబడుతుంది."</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"మీ వాచ్ షట్ డౌన్ చేయబడుతుంది."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"మీ ఫోన్ షట్‌డౌన్ చేయబడుతుంది."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"మీరు షట్ డౌన్ చేయాలనుకుంటున్నారా?"</string>
@@ -174,6 +180,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"ఇటీవలివి"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"ఇటీవలి అనువర్తనాలు ఏవీ లేవు."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"టాబ్లెట్ ఎంపికలు"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"ఫోన్ ఎంపికలు"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"స్క్రీన్ లాక్"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"పవర్ ఆఫ్ చేయి"</string>
@@ -290,9 +298,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"ఇన్‌కమింగ్ కాల్‌ల కోసం సందేశం ద్వారా ప్రతిస్పందించే ఈవెంట్‌లను నిర్వహించడానికి ఇతర సందేశ విధాన అనువర్తనాలకు అభ్యర్థనలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"మీ వచన సందేశాలు (SMS లేదా MMS) చదవడం"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"మీ టాబ్లెట్ లేదా సిమ్ కార్డు‌లో నిల్వ చేయబడిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"మీ ఫోన్ లేదా సిమ్ కార్డు‌లో నిల్వ చేయబడిన SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది కంటెంట్ లేదా గోప్యతతో సంబంధం లేకుండా అన్ని SMS సందేశాలను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"మీ వచన సందేశాలను (SMS లేదా MMS) సవరించడం"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"మీ టాబ్లెట్‌లో లేదా సిమ్ కార్డులో నిల్వ చేసిన SMS సందేశాలను వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ సందేశాలను తొలగించవచ్చు."</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"మీ ఫోన్‌లో లేదా సిమ్ కార్డులో నిల్వ చేసిన SMS సందేశాలను వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ సందేశాలను తొలగించవచ్చు."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"వచన సందేశాలను (WAP) స్వీకరించడం"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"WAP సందేశాలను స్వీకరించడానికి మరియు ప్రాసెస్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీకు పంపబడిన సందేశాలను మీకు చూపకుండానే పర్యవేక్షించగల లేదా తొలగించగల సామర్థ్యాన్ని కలిగి ఉంటుంది."</string>
@@ -386,6 +398,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"పూర్తి-స్క్రీన్ పరివర్తనం కోసం స్క్రీన్‌ను తాత్కాలికంగా స్తంభింపజేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"కీలు మరియు నియంత్రణ బటన్‌లను నొక్కడం"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"ఇతర అప్లికేషన్‌లకు అప్లికేషన్ యొక్క స్వంత ఇన్‌పుట్ ఈవెంట్‌లను (కీని నొక్కడం, మొదలైనవి) బట్వాడా చేయడానికి దాన్ని అనుమతిస్తుంది. టాబ్లెట్‌ను స్వాధీనం చేసుకోవడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"ఇతర అప్లికేషన్‌లకు అప్లికేషన్ యొక్క స్వంత ఇన్‌పుట్ ఈవెంట్‌లను (కీని నొక్కడం, మొదలైనవి) బట్వాడా చేయడానికి దాన్ని అనుమతిస్తుంది. ఫోన్‌ను స్వాధీనం చేసుకోవడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"మీరు టైప్ చేసేదాన్ని మరియు మీరు తీసుకునే చర్యలను రికార్డ్ చేయడం"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"మరో అనువర్తనంతో పరస్పర చర్య చేస్తున్నప్పటికీ (పాస్‌వర్డ్‌ను టైప్ చేయడం వంటివి) మీరు నొక్కే కీను చూడటానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాలకు ఎప్పటికీ అవసరం ఉండదు."</string>
@@ -433,6 +447,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"అన్ని నిరంతర ప్రాసెస్‌లకు సరఫరా సిగ్నల్‌ను పంపాలని అభ్యర్థించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"అనువర్తనాన్ని ఎల్లప్పుడూ అమలు చేయడం"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"అనువర్తనం, దాని భాగాలు మెమరీలో ఉండేలా చేయడానికి దానిని అనుమతిస్తుంది. ఇది ఇతర అనువర్తనాలకు అందుబాటులో ఉన్న మెమరీని ఆక్రమిస్తుంది, టాబ్లెట్ నెమ్మదిగా పని చేస్తుంది."</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"అనువర్తనం, దాని భాగాలు మెమరీలో ఉండేలా చేయడానికి దానిని అనుమతిస్తుంది. ఇది ఇతర అనువర్తనాలకు అందుబాటులో ఉన్న మెమరీని ఆక్రమిస్తుంది, ఫోన్ నెమ్మదిగా పని చేస్తుంది."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"అనువర్తనాలను తొలగించడం"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Android ప్యాకేజీలను తొలగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ముఖ్యమైన అనువర్తనాలను తొలగించడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
@@ -446,11 +462,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"కొత్త లేదా నవీకరించిన Android ప్యాకేజీలను ఇన్‌స్టాల్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఏకపక్ష శక్తివంతమైన అనుమతులతో కొత్త అనువర్తనాలను జోడించడానికి హానికరమైన అనువర్తనాలు దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"మొత్తం అనువర్తన కాష్ డేటాను తొలగించడం"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"ఇతర అనువర్తనాల యొక్క కాష్ డైరెక్టరీల్లో ఉన్న ఫైల్‌లను తొలగించడం ద్వారా టాబ్లెట్ నిల్వను ఖాళీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఇతర అనువర్తనాలు వాటి డేటాను మళ్లీ పొందాల్సి ఉంటుంది కనుక అవి చాలా నెమ్మదిగా ప్రారంభం కావచ్చు."</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"ఇతర అనువర్తనాల యొక్క కాష్ డైరెక్టరీల్లో ఉన్న ఫైల్‌లను తొలగించడం ద్వారా ఫోన్ నిల్వను ఖాళీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీని వలన ఇతర అనువర్తనాలు వాటి డేటాను మళ్లీ పొందాల్సి ఉంటుంది కనుక అవి చాలా నెమ్మదిగా ప్రారంభం కావచ్చు."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"అనువర్తన వనరులను తరలించడం"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"అనువర్తన వనరులను అంతర్గతం నుండి బాహ్య మీడియాకు తరలించడానికి మరియు అటు నుండి ఇటు తరలించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"ముఖ్యమైన లాగ్ డేటాను చదవడం"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"సిస్టమ్ యొక్క విభిన్న లాగ్ ఫైల్‌ల నుండి చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సంభావ్యంగా వ్యక్తిగత లేదా ప్రైవేట్ సమాచారంతో సహా, మీరు టాబ్లెట్‌తో ఏమి చేస్తున్నారనేదానికి సంబంధించిన సాధారణ సమాచారాన్ని కనుగొనడానికి దీన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"సిస్టమ్ యొక్క విభిన్న లాగ్ ఫైల్‌ల నుండి చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది సంభావ్యంగా వ్యక్తిగత లేదా ప్రైవేట్ సమాచారంతో సహా, మీరు ఫోన్‌తో ఏమి చేస్తున్నారనేదానికి సంబంధించిన సాధారణ సమాచారాన్ని కనుగొనడానికి దీన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ప్లేబ్యాక్ కోసం ఏదైనా మీడియా డీకోడర్‌ను ఉపయోగించడం"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ప్లేబ్యాక్ కోసం డీకోడ్ చేయడానికి ఏదైనా ఇన్‌స్టాల్ చేయబడిన మీడియా డీకోడర్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -462,6 +482,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"విశ్లేషణ సమూహం స్వంతంగా కలిగి ఉన్న వనరుని చదవడానికి మరియు అందులో వ్రాయడానికి అనువర్తనాన్ని అనుమతిస్తుంది; ఉదాహరణకు, /devలోని ఫైల్‌లు. దీని కారణంగా సిస్టమ్ స్థిరత్వం మరియు భద్రత సమర్థవంతంగా ప్రభావితమయ్యే అవకాశం ఉంది. ఇది హార్డ్‌వేర్-నిర్దిష్ట విశ్లేషణల కోసం తయారీదారు లేదా ఆపరేటర్ ద్వారా మాత్రమే ఉపయోగించబడాలి."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"అనువర్తన అంశాలను ప్రారంభించడం లేదా నిలిపివేయడం"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"మరో అనువర్తనం యొక్క కీలక భాగాన్ని ప్రారంభించాలా లేదా అనేది మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ముఖ్యమైన టాబ్లెట్ సామర్థ్యాలను నిలిపివేయడానికి దీన్ని ఉపయోగించవచ్చు. అనువర్తనం యొక్క కీలక భాగాలు నిరుపయోగమైన, ఇమడలేని లేదా అస్థిరమైన స్థితిలోకి వెళ్లే అవకాశం ఉన్నందున తప్పనిసరిగా ఈ అనుమతితో పాటుగా కేర్‌ను ఉపయోగించాలి."</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"మరో అనువర్తనం యొక్క కీలక భాగాన్ని ప్రారంభించాలా లేదా అనేది మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు ముఖ్యమైన ఫోన్ సామర్థ్యాలను నిలిపివేయడానికి దీన్ని ఉపయోగించవచ్చు. అనువర్తనం యొక్క కీలక భాగాలు నిరుపయోగమైన, ఇమడలేని లేదా అస్థిరమైన స్థితిలోకి వెళ్లే అవకాశం ఉన్నందున తప్పనిసరిగా ఈ అనుమతితో పాటుగా కేర్‌ను ఉపయోగించాలి."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"అనుమతులను మంజూరు చేయడం లేదా ఉపసంహరించడం"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"దీని కోసం లేదా ఇతర అనువర్తనాల కోసం నిర్దిష్ట అనుమతులను మంజూరు చేయడానికి లేదా ఉపసంహరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీరు ప్రాప్యత చేయడానికి అనుమతి ఇవ్వని లక్షణాలను ప్రాప్యత చేయడానికి దీన్ని ఉపయోగించవచ్చు."</string>
@@ -475,21 +497,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Google సేవల మ్యాప్‌ను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సాధారణ అనువర్తనాల ద్వారా ఉపయోగించడానికి ఉద్దేశించినది కాదు."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"ప్రారంభంలో అమలు చేయడం"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"సిస్టమ్ బూటింగ్‌ను పూర్తి చేసిన వెంటనే దానికదే ప్రారంభించబడటానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది టాబ్లెట్‌ను ప్రారంభించడానికి ఎక్కువ సమయం పట్టేలా చేయవచ్చు మరియు ఎల్లప్పుడూ అమలు చేయడం ద్వారా మొత్తం టాబ్లెట్‌ను నెమ్మదిగా పని చేయడానికి అనువర్తనాన్ని అనుమతించేలా చేయవచ్చు."</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"సిస్టమ్ బూటింగ్‌ను పూర్తి చేసిన వెంటనే దానికదే ప్రారంభించబడటానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది ఫోన్‌ను ప్రారంభించడానికి ఎక్కువ సమయం పట్టేలా చేయవచ్చు మరియు ఎల్లప్పుడూ అమలు చేయడం ద్వారా మొత్తం ఫోన్‌ను నెమ్మదిగా పని చేయడానికి అనువర్తనాన్ని అనుమతించేలా చేయవచ్చు."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"స్టిక్కీ ప్రసారాన్ని పంపడం"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"ప్రసారం ముగిసిన తర్వాత భద్రపరచబడే ప్రసారాలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అత్యధిక వినియోగం వలన టాబ్లెట్ నెమ్మదిగా పని చేయవచ్చు లేదా అధిక పరిమాణంలో మెమరీని ఉపయోగించడం వలన అస్థిరంగా మారవచ్చు."</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"ప్రసారం ముగిసిన తర్వాత భద్రపరచబడే ప్రసారాలను పంపడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అత్యధిక వినియోగం వలన ఫోన్ నెమ్మదిగా పని చేయవచ్చు లేదా అధిక పరిమాణంలో మెమరీని ఉపయోగించడం వలన అస్థిరంగా మారవచ్చు."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"మీ పరిచయాలను చదవడం"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"మీరు నిర్దిష్ట వ్యక్తులకు కాల్ చేసిన, ఇమెయిల్ చేసిన లేదా ఇతర మార్గాల్లో కమ్యూనికేట్ చేసిన తరచుదనంతో సహా మీ టాబ్లెట్‌లో నిల్వ చేయబడిన మీ పరిచయాల గురించి డేటాను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీ పరిచయ డేటాను సేవ్ చేయడానికి అనువర్తనాలను అనుమతిస్తుంది మరియు హానికరమైన అనువర్తనాలు మీకు తెలియకుండానే పరిచయ డేటాను భాగస్వామ్యం చేయవచ్చు."</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"మీరు నిర్దిష్ట వ్యక్తులకు కాల్ చేసిన, ఇమెయిల్ చేసిన లేదా ఇతర మార్గాల్లో కమ్యూనికేట్ చేసిన తరచుదనంతో సహా మీ ఫోన్‌లో నిల్వ చేయబడిన మీ పరిచయాల గురించి డేటాను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీ పరిచయ డేటాను సేవ్ చేయడానికి అనువర్తనాలను అనుమతిస్తుంది మరియు హానికరమైన అనువర్తనాలు మీకు తెలియకుండానే పరిచయ డేటాను భాగస్వామ్యం చేయవచ్చు."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"మీ పరిచయాలను సవరించడం"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"మీరు నిర్దిష్ట పరిచయాలకు కాల్ చేసిన, ఇమెయిల్ చేసిన లేదా ఇతర మార్గాల్లో కమ్యూనికేట్ చేసిన తరచుదనంతో సహా మీ టాబ్లెట్‌లో నిల్వ చేయబడిన మీ పరిచయాల గురించి డేటాను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి పరిచయ డేటాను తొలగించడానికి అనువర్తనాలను అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"మీరు నిర్దిష్ట పరిచయాలకు కాల్ చేసిన, ఇమెయిల్ చేసిన లేదా ఇతర మార్గాల్లో కమ్యూనికేట్ చేసిన తరచుదనంతో సహా మీ ఫోన్‌లో నిల్వ చేయబడిన మీ పరిచయాల గురించి డేటాను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి పరిచయ డేటాను తొలగించడానికి అనువర్తనాలను అనుమతిస్తుంది."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"కాల్ లాగ్‌ను చదవడం"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"ఇన్‌కమింగ్ మరియు అవుట్‌గోయింగ్ కాల్‌ల గురించిన డేటాతో సహా మీ టాబ్లెట్ యొక్క కాల్ లాగ్‌ను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీ కాల్ లాగ్ డేటాను సేవ్ చేయడానికి అనువర్తనాలను అనుమతిస్తుంది మరియు హానికరమైన అనువర్తనాలు మీకు తెలియకుండానే కాల్ లాగ్ డేటాను భాగస్వామ్యం చేయవచ్చు."</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"ఇన్‌కమింగ్ మరియు అవుట్‌గోయింగ్ కాల్‌ల గురించిన డేటాతో సహా మీ ఫోన్ యొక్క కాల్ లాగ్‌ను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి మీ కాల్ లాగ్ డేటాను సేవ్ చేయడానికి అనువర్తనాలను అనుమతిస్తుంది మరియు హానికరమైన అనువర్తనాలు మీకు తెలియకుండానే కాల్ లాగ్ డేటాను భాగస్వామ్యం చేయవచ్చు."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"కాల్ లాగ్‌ను వ్రాయడం"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"ఇన్‌కమింగ్ మరియు అవుట్‌గోయింగ్ కాల్‌ల గురించిన డేటాతో సహా మీ టాబ్లెట్ యొక్క కాల్ లాగ్‌ను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ కాల్ లాగ్‌ను ఎరేజ్ చేయడానికి లేదా సవరించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"ఇన్‌కమింగ్ మరియు అవుట్‌గోయింగ్ కాల్‌ల గురించిన డేటాతో సహా మీ ఫోన్ యొక్క కాల్ లాగ్‌ను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు మీ కాల్ లాగ్‌ను ఎరేజ్ చేయడానికి లేదా సవరించడానికి దీన్ని ఉపయోగించవచ్చు."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"మీ స్వంత సంప్రదింపు కార్డును చదవడం"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"మీ పరికరంలో నిల్వ చేయబడిన వ్యక్తిగత ప్రొఫైల్ సమాచారాన్ని అనగా మీ పేరు మరియు సంప్రదింపు సమాచారం వంటివి చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. అనువర్తనం మిమ్మల్ని గుర్తించగలదని మరియు మీ ప్రొఫైల్ సమాచారాన్ని ఇతరులకు పంపించగలదని దీని అర్థం."</string>
@@ -503,9 +537,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"మీ స్నేహితుల నుండి తాజా సామాజిక విషయాలను ప్రదర్శించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. సమాచారాన్ని భాగస్వామ్యం చేసేటప్పుడు జాగ్రత్తగా ఉండండి -- ఇది మీ స్నేహితుల నుండి వచ్చినట్లుగా కనిపించే రీతిలో సందేశాలను రూపొందించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. గమనిక: ఈ అనుమతి అన్ని సామాజిక నెట్‌వర్క్‌ల్లో అమలు చేయబడకపోవచ్చు."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"క్యాలెండర్ ఈవెంట్‌లతో పాటు గోప్యమైన సమాచారాన్ని చదవడం"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"స్నేహితులు లేదా సహోద్యోగులకు సంబంధించిన ఈవెంట్‌లతో సహా మీ టాబ్లెట్‌లో నిల్వ చేయబడిన అన్ని క్యాలెండర్ ఈవెంట్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది గోప్యత లేదా తీవ్రతతో సంబంధం లేకుండా మీ క్యాలెండర్ డేటాను భాగస్వామ్యం చేయడానికి లేదా సేవ్ చేయడానికి అనువర్తనాన్ని అనుమతించవచ్చు."</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"స్నేహితులు లేదా సహోద్యోగులకు సంబంధించిన ఈవెంట్‌లతో సహా మీ ఫోన్‌లో నిల్వ చేయబడిన అన్ని క్యాలెండర్ ఈవెంట్‌లను చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది గోప్యత లేదా తీవ్రతతో సంబంధం లేకుండా మీ క్యాలెండర్ డేటాను భాగస్వామ్యం చేయడానికి లేదా సేవ్ చేయడానికి అనువర్తనాన్ని అనుమతించవచ్చు."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"యజమానికి తెలియకుండానే క్యాలెండర్ ఈవెంట్‌లను జోడించి లేదా సవరించి, అతిథులకు ఇమెయిల్ పంపడం"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"స్నేహితులు లేదా సహోద్యోగులకు సంబంధించిన ఈవెంట్‌లతో సహా మీరు మీ టాబ్లెట్‌లో సవరించగల ఈవెంట్‌లను జోడించడానికి, తీసివేయడానికి, మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది క్యాలెండర్ యజమానుల నుండి వచ్చినట్లుగా కనిపించే రీతిలో సందేశాలను పంపడానికి లేదా యజమానికి తెలియకుండానే ఈవెంట్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతించవచ్చు."</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"స్నేహితులు లేదా సహోద్యోగులకు సంబంధించిన ఈవెంట్‌లతో సహా మీరు మీ ఫోన్‌లో సవరించగల ఈవెంట్‌లను జోడించడానికి, తీసివేయడానికి, మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది క్యాలెండర్ యజమానుల నుండి వచ్చినట్లుగా కనిపించే రీతిలో సందేశాలను పంపడానికి లేదా యజమానికి తెలియకుండానే ఈవెంట్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతించవచ్చు."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"పరీక్షించడం కోసం స్థాన మూలాలను మాక్ చేయడం"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"పరీక్షించడం కోసం అనుకృత స్థాన మూలాలను సృష్టించండి లేదా కొత్త స్థాన ప్రదాతను ఇన్‌స్టాల్ చేయండి. ఇది GPS లేదా స్థాన ప్రదాతల వంటి ఇతర స్థాన మూలాల ద్వారా అందించబడిన స్థానం మరియు/లేదా స్థితిని భర్తీ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -550,12 +588,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"కెమెరా ఉపయోగంలో ఉన్నప్పుడు ప్రసరణ సూచీ LEDని నిలిపివేయడం"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"కెమెరా వినియోగ సూచీ LEDని నిలిపివేయడానికి ముందే ఇన్‌స్టాల్ చేయబడిన సిస్టమ్ అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"టాబ్లెట్‌ను శాశ్వతంగా నిలిపివేయడం"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"ఫోన్‌ను శాశ్వతంగా నిలిపివేయడం"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"పూర్తి టాబ్లెట్‌ను శాశ్వతంగా నిలిపివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"పూర్తి ఫోన్‌ను శాశ్వతంగా నిలిపివేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది చాలా ప్రమాదకరం."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"బలవంతంగా టాబ్లెట్ రీబూట్ చేయడం"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"బలవంతంగా ఫోన్ రీబూట్ చేయడం"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"రీబూట్ చేయాల్సిన టాబ్లెట్‌ను నిర్బంధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"రీబూట్ చేయాల్సిన ఫోన్‌ను నిర్బంధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB నిల్వ ఫైల్ సిస్టమ్‌ను ప్రాప్యత చేయడం"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD కార్డు ఫైల్ సిస్టమ్‌ను ప్రాప్యత చేయడం"</string>
@@ -590,6 +636,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ఏ ఫోన్ నంబర్‌లకు అయినా నేరుగా కాల్ చేయడం"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"మీ ప్రమేయం లేకుండా అత్యవసర నంబర్‌లతో సహా, ఏదైనా ఫోన్ నంబర్‌కు కాల్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు అత్యవసర సేవలకు అనవసరమైన మరియు చట్ట విరుద్ధమైన కాల్‌లు చేయవచ్చు."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA టాబ్లెట్ సెటప్‌ను నేరుగా ప్రారంభించడం"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA ఫోన్ సెటప్‌ను నేరుగా ప్రారంభించడం"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"CDMA కేటాయింపును ప్రారంభించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. హానికరమైన అనువర్తనాలు CDMA కేటాయింపును అనవసరంగా ప్రారంభించవచ్చు."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"స్థాన నవీకరణ నోటిఫికేషన్‌లను నియంత్రించడం"</string>
@@ -605,20 +653,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"నిర్దుష్ట ఫోన్ స్థితిగతులను చదవడం"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"ఖచ్చితమైన ఫోన్ స్థితిగతులను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఈ అనుమతి నిజ కాల్ స్థితిని గుర్తించడానికి అనువర్తనాన్ని అనుమతిస్తుంది, కాల్ సక్రియంగా ఉందా లేదా నేపథ్యంలో ఉందా, కాల్ వైఫల్యాలు, నిర్దుష్టమైన డేటా కనెక్షన్ స్థితి మరియు డేటా కనెక్షన్ వైఫల్యాలు వంటివి."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"టాబ్లెట్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"ఫోన్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"నిద్రావస్థకి వెళ్లకుండా టాబ్లెట్‌ను నిరోధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"నిద్రావస్థకి వెళ్లకుండా ఫోన్‌ను నిరోధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"ఇన్‌ఫ్రారెడ్ ప్రసరణ"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"టాబ్లెట్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"ఫోన్ యొక్క ఇన్‌ఫ్రారెడ్ ట్రాన్స్‌మిటర్‌ను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"పవర్ టాబ్లెట్‌ను ఆన్ లేదా ఆఫ్ చేయడం"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"పవర్ ఫోన్‌ను ఆన్ లేదా ఆఫ్ చేయడం"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"టాబ్లెట్‌ను ఆన్ లేదా ఆఫ్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"ఫోన్‌ను ఆన్ లేదా ఆఫ్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"డిస్‌ప్లే నిలుపుదల సమయాన్ని రీసెట్ చేయడం"</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"డిస్‌ప్లే నిలుపుదల సమయాన్ని రీసెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"ఫ్యాక్టరీ పరీక్ష మోడ్‌లో అమలు చేయడం"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"టాబ్లెట్ హార్డ్‌వేర్‌కు పూర్తి ప్రాప్యతను అనుమతిస్తూ, తక్కువ-స్థాయి తయారీదారు పరీక్షగా అమలు చేయండి. టాబ్లెట్ తయారీదారు పరీక్ష మోడ్‌లో అమలవుతున్నప్పుడు మాత్రమే అందుబాటులో ఉంటుంది."</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"ఫోన్ హార్డ్‌వేర్‌కు పూర్తి ప్రాప్యతను అనుమతిస్తూ, తక్కువ-స్థాయి తయారీదారు పరీక్షగా అమలు చేయండి. ఫోన్ తయారీదారు పరీక్ష మోడ్‌లో అమలవుతున్నప్పుడు మాత్రమే అందుబాటులో ఉంటుంది."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"వాల్‌పేపర్‌ను సెట్ చేయడం"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"సిస్టమ్ వాల్‌పేపర్‌ను సెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -628,14 +688,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"సిస్టమ్ యొక్క ఫ్యాక్టరీ సెట్టింగ్‌లు, మొత్తం డేటాను ఎరేజ్ చేయడం, కాన్ఫిగరేషన్ మరియు ఇన్‌స్టాల్ చేయబడిన అనువర్తనాల కోసం సిస్టమ్‌ను పూర్తిగా రీసెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"సమయాన్ని సెట్ చేయడం"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"టాబ్లెట్ యొక్క గడియారం సమయాన్ని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"ఫోన్ యొక్క గడియారం సమయాన్ని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"సమయ మండలిని సెట్ చేయడం"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"టాబ్లెట్ యొక్క సమయ మండలిని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"ఫోన్ యొక్క సమయ మండలిని మార్చడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"ఖాతా నిర్వాహికి సేవగా అమలు చేయడం"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"AccountAuthenticatorsకు కాల్‌లు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"పరికరంలో ఖాతాలను కనుగొనడం"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"టాబ్లెట్‌కు తెలిసిన ఖాతాల జాబితాను పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన అనువర్తనాల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"ఫోన్‌కు తెలిసిన ఖాతాల జాబితాను పొందడానికి అనువర్తనాన్ని అనుమతిస్తుంది. దీనిలో మీరు ఇన్‌స్టాల్ చేసిన అనువర్తనాల ద్వారా సృష్టించబడిన ఖాతాలు ఏవైనా ఉండవచ్చు."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"ఖాతాలను సృష్టించడం మరియు పాస్‌వర్డ్‌లను సెట్ చేయడం"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"ఖాతాలను సృష్టించడం మరియు వాటికి పాస్‌వర్డ్‌లను పొందడం మరియు సెట్ చేయడంతో సహా ఖాతా నిర్వాహకులకు ఉండే ఖాతా authenticator సామర్థ్యాలను ఉపయోగించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -661,26 +727,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Wi-Fi ప్రాప్యత స్థానాలకు కనెక్ట్ చేయడానికి మరియు వాటి నుండి డిస్‌కనెక్ట్ చేయడానికి మరియు Wi-Fi నెట్‌వర్క్‌ల కోసం పరికర కాన్ఫిగరేషన్‌కు మార్పులు చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi Multicast స్వీకరణను అనుమతించడం"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"మల్టీక్యాస్ట్ చిరునామాలను ఉపయోగించి మీ టాబ్లెట్‌కు మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపబడిన ప్యాకెట్‌లను స్వీకరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఇది ఎక్కువ పవర్ ఉపయోగిస్తుంది."</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"మల్టీక్యాస్ట్ చిరునామాలను ఉపయోగించి మీ ఫోన్‌కు మాత్రమే కాకుండా Wi-Fi నెట్‌వర్క్‌లోని అన్ని పరికరాలకు పంపబడిన ప్యాకెట్‌లను స్వీకరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. మల్టీక్యాస్ట్ యేతర మోడ్ కంటే ఇది ఎక్కువ పవర్ ఉపయోగిస్తుంది."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"బ్లూటూత్ సెట్టింగ్‌లను ప్రాప్యత చేయడం"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"స్థానిక బ్లూటూత్ టాబ్లెట్‌ను కాన్ఫిగర్ చేయడానికి మరియు రిమోట్ పరికరాలతో దాన్ని కనుగొనడానికి మరియు జత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"స్థానిక బ్లూటూత్ ఫోన్‌ను కాన్ఫిగర్ చేయడానికి మరియు రిమోట్ పరికరాలతో దాన్ని కనుగొనడానికి మరియు జత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"అనువర్తనం ద్వారా బ్లూటూత్ జత చేయడాన్ని అనుమతించడం"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"వినియోగదారు చర్య లేకుండానే రిమోట్ పరికరాలతో జత కావడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"వినియోగదారు చర్య లేకుండానే రిమోట్ పరికరాలతో జత కావడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"వినియోగదారు చర్య లేకుండానే రిమోట్ పరికరాలతో జత కావడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"బ్లూటూత్ MAP డేటాను ప్రాప్యత చేయడం"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Bluetooth MAP డేటాను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Bluetooth MAP డేటాను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Bluetooth MAP డేటాను ప్రాప్యత చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAXకు కనెక్ట్ చేయడం మరియు దాని నుండి డిస్‌కనెక్ట్ చేయడం"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Wi-Fi ప్రారంభించబడిందా, లేదా మరియు కనెక్ట్ చేయబడిన WiMAX నెట్‌వర్క్‌ల గురించి సమాచారాన్ని కనుగొనడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX స్థితిని మార్చండి"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"WiMAX నెట్‌వర్క్‌లకు టాబ్లెట్‌ను కనెక్ట్ చేయడానికి మరియు వాటి నుండి టాబ్లెట్‌ను డిస్‌కనెక్ట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX నెట్‌వర్క్‌లకు ఫోన్‌ను కనెక్ట్ చేయడానికి మరియు వాటి నుండి ఫోన్‌ను డిస్‌కనెక్ట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"స్కోర్ నెట్‌వర్క్‌లు"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"నెట్‌వర్క్‌లను ర్యాంక్ చేయడానికి మరియు టాబ్లెట్ ఏయే నెట్‌వర్క్‌లకు ప్రాధాన్యత ఇవ్వాలనేది ప్రభావితం చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"నెట్‌వర్క్‌లను ర్యాంక్ చేయడానికి మరియు ఫోన్ ఏయే నెట్‌వర్క్‌లకు ప్రాధాన్యత ఇవ్వాలనేది ప్రభావితం చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"బ్లూటూత్ పరికరాలతో జత చేయడం"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"టాబ్లెట్‌లో బ్లూటూత్ యొక్క కాన్ఫిగరేషన్‌ను వీక్షించడానికి మరియు జత చేయబడిన పరికరాలతో కనెక్షన్‌లను ఏర్పాటు చేయడానికి మరియు ఆమోదించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"ఫోన్‌లో బ్లూటూత్ యొక్క కాన్ఫిగరేషన్‌ను వీక్షించడానికి మరియు జత చేయబడిన పరికరాలతో కనెక్షన్‌లను ఏర్పాటు చేయడానికి మరియు ఆమోదించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"సమీప క్షేత్ర కమ్యూనికేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"సమీప ఫీల్డ్ కమ్యూనికేషన్ (NFC) ట్యాగ్‌లు, కార్డులు మరియు రీడర్‌లతో కమ్యూనికేట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
@@ -762,6 +840,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"స్క్రీన్-అన్‌లాక్ పాస్‌వర్డ్‌ల్లో అనుమతించబడే అక్షరాల  సంఖ్యను మరియు అక్షరాలను నియంత్రించండి."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"స్క్రీన్-అన్‌లాక్ ప్రయత్నాలను పర్యవేక్షించండి"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"టైప్ చేసిన చెల్లని పాస్‌వర్డ్‌ల సంఖ్యను పర్యవేక్షిస్తుంది. స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు, అనేక సార్లు చెల్లని పాస్‌వర్డ్‌లను టైప్ చేస్తే టాబ్లెట్ లాక్ చేయబడుతుంది లేదా టాబ్లెట్‌లోని మొత్తం డేటా ఎరేజ్ చేయబడుతుంది."</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"టైప్ చేసిన చెల్లని పాస్‌వర్డ్‌ల సంఖ్యను పర్యవేక్షిస్తుంది. స్క్రీన్‌ను అన్‌లాక్ చేస్తున్నప్పుడు, అనేక సార్లు చెల్లని పాస్‌వర్డ్‌లను టైప్ చేస్తే ఫోన్ లాక్ చేయబడుతుంది లేదా ఫోన్‌లోని మొత్తం డేటా ఎరేజ్ చేయబడుతుంది."</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"స్క్రీన్-అన్‌లాక్ పాస్‌వర్డ్‌ను మార్చండి"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"స్క్రీన్-అన్‌లాక్ పాస్‌వర్డ్‌ను మార్చండి."</string>
@@ -769,6 +849,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"స్క్రీన్‌ను ఎలా మరియు ఎప్పుడు లాక్ చేయాలనే దాన్ని నియంత్రించండి."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"మొత్తం డేటాను ఎరేజ్ చేయండి"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే టాబ్లెట్ డేటాను ఎరేజ్ చేయండి."</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"ఫ్యాక్టరీ డేటా రీసెట్‌ను అమలు చేయడం ద్వారా హెచ్చరించకుండానే ఫోన్ డేటాను ఎరేజ్ చేయండి."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"పరికరం గ్లోబల్ ప్రాక్సీని సెట్ చేయండి"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"విధానాన్ని ప్రారంభించినప్పుడు ఉపయోగించబడటానికి పరికరం గ్లోబల్ ప్రాక్సీని సెట్ చేయండి. మొదటి పరికర నిర్వాహకులు మాత్రమే ప్రభావవంతమైన గ్లోబల్ ప్రాక్సీని సెట్ చేస్తారు."</string>
@@ -917,6 +999,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"ముఖంతో అన్‌లాక్ ప్రయత్నాల గరిష్ట పరిమితి మించిపోయారు"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"సిమ్ కార్డు లేదు"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"టాబ్లెట్‌లో సిమ్ కార్డు లేదు."</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"ఫోన్‌లో సిమ్ కార్డు లేదు."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"సిమ్ కార్డును చొప్పించండి."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"సిమ్ కార్డు లేదు లేదా చదవగలిగేలా లేదు. సిమ్ కార్డును చొప్పించండి."</string>
@@ -939,10 +1023,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> వైఫల్య ప్రయత్నాల తర్వాత, టాబ్లెట్ ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది మరియు మొత్తం వినియోగదారు డేటాను కోల్పోవడం సంభవిస్తుంది."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> వైఫల్య ప్రయత్నాల తర్వాత, ఫోన్ ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది మరియు మొత్తం వినియోగదారు డేటాను కోల్పోవడం సంభవిస్తుంది."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. టాబ్లెట్ ఇప్పుడు ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది."</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. ఫోన్ ఇప్పుడు ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"నమూనాను మర్చిపోయారా?"</string>
@@ -1026,6 +1116,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"బ్రౌజర్ సందర్శించిన అన్ని URLల చరిత్ర గురించి మరియు అన్ని బ్రౌజర్ బుక్‌మార్క్‌ల గురించి చదవడానికి అనువర్తనాన్ని అనుమతిస్తుంది. గమనిక: ఈ అనుమతి మూడవ పక్షం బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర అనువర్తనాల ద్వారా అమలు చేయబడకపోవచ్చు."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"వెబ్ బుక్‌మార్క్‌లు మరియు చరిత్రను వ్రాయడం"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"మీ టాబ్లెట్‌లో నిల్వ చేయబడిన బ్రౌజర్ చరిత్రను లేదా బుక్‌మార్క్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది బ్రౌజర్ డేటాను ఎరేజ్ చేయడానికి లేదా సవరించడానికి అనువర్తనాన్ని అనుమతించవచ్చు. గమనిక: ఈ అనుమతి మూడవ పక్షం బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర అనువర్తనాల ద్వారా అమలు చేయబడకపోవచ్చు."</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"మీ ఫోన్‌లో నిల్వ చేయబడిన బ్రౌజర్ చరిత్రను లేదా బుక్‌మార్క్‌లను సవరించడానికి అనువర్తనాన్ని అనుమతిస్తుంది. ఇది బ్రౌజర్ డేటాను ఎరేజ్ చేయడానికి లేదా సవరించడానికి అనువర్తనాన్ని అనుమతించవచ్చు. గమనిక: ఈ అనుమతి మూడవ పక్షం బ్రౌజర్‌లు లేదా వెబ్ బ్రౌజింగ్ సామర్థ్యాలు గల ఇతర అనువర్తనాల ద్వారా అమలు చేయబడకపోవచ్చు."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"అలారం సెట్ చేయడం"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"ఇన్‌స్టాల్ చేయబడిన అలారం గడియారం అనువర్తనంలో అలారంను సెట్ చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది. కొన్ని అలారం గల గడియారం అనువర్తనాలు ఈ లక్షణాన్ని అమలు చేయకపోవచ్చు."</string>
@@ -1302,6 +1394,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"అవసరమైన పిన్‌ను టైప్ చేయండి:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"పిన్‌:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"టాబ్లెట్ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>కు కనెక్ట్ చేయబడినప్పుడు Wi-Fi నుండి తాత్కాలికంగా డిస్‌కనెక్ట్ చేయబడుతుంది"</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"ఫోన్ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>కి కనెక్ట్ అయినప్పుడు అది Wi-Fi నుండి తాత్కాలికంగా డిస్‌కనెక్ట్ చేయబడుతుంది"</string>
     <string name="select_character" msgid="3365550120617701745">"అక్షరాన్ని చొప్పించండి"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS సందేశాలు పంపుతోంది"</string>
@@ -1583,6 +1677,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"ఒకసారి"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s కార్యాలయ ప్రొఫైల్‌కు మద్దతు ఇవ్వదు"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"టాబ్లెట్"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"ఫోన్"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"హెడ్‌ఫోన్‌లు"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"డాక్ స్పీకర్‌లు"</string>
@@ -1637,10 +1733,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా టైప్ చేసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%d</xliff:g> చెల్లని ప్రయత్నాలు చేసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, టాబ్లెట్ ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది మరియు మొత్తం వినియోగదారు డేటాను కోల్పోవడం సంభవిస్తుంది."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%d</xliff:g> చెల్లని ప్రయత్నాలు చేసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఫోన్ ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది మరియు మొత్తం వినియోగదారు డేటాను కోల్పోవడం సంభవిస్తుంది."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> చెల్లని ప్రయత్నాలు చేసారు. టాబ్లెట్ ఇప్పుడు ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది."</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> చెల్లని ప్రయత్నాలు చేసారు. ఫోన్ ఇప్పుడు ఫ్యాక్టరీ డిఫాల్ట్‌కు రీసెట్ చేయబడుతుంది."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"తీసివేయి"</string>
