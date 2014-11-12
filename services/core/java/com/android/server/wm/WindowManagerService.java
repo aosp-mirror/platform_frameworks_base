@@ -1759,7 +1759,7 @@ public class WindowManagerService extends IWindowManager.Stub
             // wallpaper during the animation so it doesn't flicker out.
             final boolean hasWallpaper = (w.mAttrs.flags&FLAG_SHOW_WALLPAPER) != 0
                     || (w.mAppToken != null
-                            && w.mWinAnimator.keyguardGoingAwayAnimation);
+                            && w.mWinAnimator.mKeyguardGoingAwayAnimation);
             if (hasWallpaper && w.isOnScreen()
                     && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
@@ -2541,8 +2541,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mInputMonitor.updateInputWindowsLw(false /*force*/);
 
-            if (true || localLOGV) Slog.v(TAG, "addWindow: New client " + client.asBinder()
-                    + ": window=" + win + " Callers=" + Debug.getCallers(5));
+            if (true || localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG, "addWindow: New client "
+                    + client.asBinder() + ": window=" + win + " Callers=" + Debug.getCallers(5));
 
             if (win.isVisibleOrAdding() && updateOrientationFromAppTokensLocked(false)) {
                 reportNewConfig = true;
@@ -5411,7 +5411,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void notifyActivityDrawnForKeyguard() {
         if (DEBUG_KEYGUARD) Slog.d(TAG, "notifyActivityDrawnForKeyguard: waiting="
-                + mKeyguardWaitingForActivityDrawn);
+                + mKeyguardWaitingForActivityDrawn + " Callers=" + Debug.getCallers(5));
         synchronized (mWindowMap) {
             if (mKeyguardWaitingForActivityDrawn) {
                 mPolicy.notifyActivityDrawnForKeyguardLw();
@@ -9322,6 +9322,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES, true /*updateInputWindows*/);
             mFocusMayChange = false;
+            notifyActivityDrawnForKeyguard();
         }
 
         return changes;
@@ -9809,7 +9810,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                 atoken.numInterestingWindows = atoken.numDrawnWindows = 0;
                                 atoken.startingDisplayed = false;
                             }
-                            if ((w.isOnScreen() || winAnimator.mAttrType == TYPE_BASE_APPLICATION)
+                            if ((w.isOnScreenIgnoringKeyguard()
+                                    || winAnimator.mAttrType == TYPE_BASE_APPLICATION)
                                     && !w.mExiting && !w.mDestroying) {
                                 if (DEBUG_VISIBILITY || DEBUG_ORIENTATION) {
                                     Slog.v(TAG, "Eval win " + w + ": isDrawn=" + w.isDrawnLw()

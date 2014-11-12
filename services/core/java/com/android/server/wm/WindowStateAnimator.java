@@ -97,6 +97,7 @@ class WindowStateAnimator {
     boolean mWasAnimating;      // Were we animating going into the most recent animation step?
     int mAnimLayer;
     int mLastLayer;
+    long mAnimationStartTime;
 
     SurfaceControl mSurfaceControl;
     SurfaceControl mPendingDestroySurface;
@@ -147,7 +148,7 @@ class WindowStateAnimator {
      * window is first added or shown, cleared when the callback has been made. */
     boolean mEnteringAnimation;
 
-    boolean keyguardGoingAwayAnimation;
+    boolean mKeyguardGoingAwayAnimation;
 
     /** This is set when there is no Surface */
     static final int NO_SURFACE = 0;
@@ -210,7 +211,7 @@ class WindowStateAnimator {
         mIsWallpaper = win.mIsWallpaper;
     }
 
-    public void setAnimation(Animation anim) {
+    public void setAnimation(Animation anim, long startTime) {
         if (localLOGV) Slog.v(TAG, "Setting animation in " + this + ": " + anim);
         mAnimating = false;
         mLocalAnimating = false;
@@ -221,6 +222,11 @@ class WindowStateAnimator {
         mTransformation.clear();
         mTransformation.setAlpha(mLastHidden ? 0 : 1);
         mHasLocalTransformation = true;
+        mAnimationStartTime = startTime;
+    }
+
+    public void setAnimation(Animation anim) {
+        setAnimation(anim, -1);
     }
 
     public void clearAnimation() {
@@ -229,7 +235,7 @@ class WindowStateAnimator {
             mLocalAnimating = false;
             mAnimation.cancel();
             mAnimation = null;
-            keyguardGoingAwayAnimation = false;
+            mKeyguardGoingAwayAnimation = false;
         }
     }
 
@@ -299,7 +305,9 @@ class WindowStateAnimator {
                     final DisplayInfo displayInfo = displayContent.getDisplayInfo();
                     mAnimDw = displayInfo.appWidth;
                     mAnimDh = displayInfo.appHeight;
-                    mAnimation.setStartTime(currentTime);
+                    mAnimation.setStartTime(mAnimationStartTime != -1
+                            ? mAnimationStartTime
+                            : currentTime);
                     mLocalAnimating = true;
                     mAnimating = true;
                 }
@@ -351,7 +359,7 @@ class WindowStateAnimator {
             + (mWin.mAppToken != null ? mWin.mAppToken.reportedVisible : false));
 
         mAnimating = false;
-        keyguardGoingAwayAnimation = false;
+        mKeyguardGoingAwayAnimation = false;
         mLocalAnimating = false;
         if (mAnimation != null) {
             mAnimation.cancel();
@@ -500,9 +508,6 @@ class WindowStateAnimator {
                 Slog.v(TAG, "Draw state now committed in " + mWin);
             }
             mDrawState = COMMIT_DRAW_PENDING;
-            if (startingWindow) {
-                mService.notifyActivityDrawnForKeyguard();
-            }
             return true;
         }
         return false;
@@ -1786,9 +1791,14 @@ class WindowStateAnimator {
      * @return true if an animation has been loaded.
      */
     boolean applyAnimationLocked(int transit, boolean isEntrance) {
-        if (mLocalAnimating && mAnimationIsEntrance == isEntrance) {
+        if ((mLocalAnimating && mAnimationIsEntrance == isEntrance)
+                || mKeyguardGoingAwayAnimation) {
             // If we are trying to apply an animation, but already running
-            // an animation of the same type, then just leave that one alone.
+            // an animation of the same type, or when we are playing the Keyguard dismissing
+            // animation, then just leave that one alone.
+
+            // TODO: if mKeyguardGoingAwayAnimation and this is a exiting starting window, modify
+            // existing animation to fade it out as well.
             return true;
         }
 
