@@ -94,7 +94,7 @@ public class Trampoline extends IBackupManager.Stub {
 
         if (userHandle == UserHandle.USER_OWNER) {
             synchronized (this) {
-                if (makeActive != (mService != null)) {
+                if (makeActive != isBackupServiceActive(userHandle)) {
                     Slog.i(TAG, "Making backup "
                             + (makeActive ? "" : "in") + "active in user " + userHandle);
                     if (makeActive) {
@@ -111,6 +111,21 @@ public class Trampoline extends IBackupManager.Stub {
                 }
             }
         }
+    }
+
+    /**
+     * Querying activity state of backup service. Calling this method before initialize yields
+     * undefined result.
+     * @param userHandle The user in which the activity state of backup service is queried.
+     * @return true if the service is active.
+     */
+    public boolean isBackupServiceActive(final int userHandle) {
+        if (userHandle == UserHandle.USER_OWNER) {
+            synchronized (this) {
+                return mService != null;
+            }
+        }
+        return false;
     }
 
     // IBackupManager binder API

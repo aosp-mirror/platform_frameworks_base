@@ -303,4 +303,11 @@ interface IBackupManager {
      *     {@code false} otherwise.
      */
     void setBackupServiceActive(int whichUser, boolean makeActive);
+
+    /**
+     * Queries the activity status of backup service as set by {@link #setBackupServiceActive}.
+     * @param whichUser User handle of the defined user whose backup active state
+     *     is being queried.
+     */
+    boolean isBackupServiceActive(int whichUser);
 }
