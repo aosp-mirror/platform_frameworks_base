@@ -27,7 +27,7 @@
 
 #include "common_time_server.h"
 
-int main(int argc, char *argv[]) {
+int main() {
     using namespace android;
 
     sp<CommonTimeServer> service = new CommonTimeServer();
