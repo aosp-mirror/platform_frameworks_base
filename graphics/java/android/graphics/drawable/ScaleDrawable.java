@@ -173,9 +173,9 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
                 a, R.styleable.ScaleDrawable_scaleWidth, state.mScaleWidth);
         state.mScaleHeight = getPercent(
                 a, R.styleable.ScaleDrawable_scaleHeight, state.mScaleHeight);
-        state.mGravity = a.getInt(R.styleable.ScaleDrawable_scaleGravity, Gravity.LEFT);
+        state.mGravity = a.getInt(R.styleable.ScaleDrawable_scaleGravity, state.mGravity);
         state.mUseIntrinsicSizeAsMin = a.getBoolean(
-                R.styleable.ScaleDrawable_useIntrinsicSizeAsMinimum, false);
+                R.styleable.ScaleDrawable_useIntrinsicSizeAsMinimum, state.mUseIntrinsicSizeAsMin);
 
         final Drawable dr = a.getDrawable(R.styleable.ScaleDrawable_drawable);
         if (dr != null) {
@@ -347,13 +347,16 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
     }
 
     final static class ScaleState extends ConstantState {
+        /** Constant used to disable scaling for a particular dimension. */
+        private static final float DO_NOT_SCALE = -1.0f;
+
         int[] mThemeAttrs;
         int mChangingConfigurations;
 
         Drawable mDrawable;
 
-        float mScaleWidth = 1.0f;
-        float mScaleHeight = 1.0f;
+        float mScaleWidth = DO_NOT_SCALE;
+        float mScaleHeight = DO_NOT_SCALE;
         int mGravity = Gravity.LEFT;
         boolean mUseIntrinsicSizeAsMin = false;
 
