@@ -244,7 +244,7 @@ public class ZenModePanel extends LinearLayout {
     }
 
     private void setExitCondition(Condition exitCondition) {
-        if (sameConditionId(mExitCondition, exitCondition)) return;
+        if (Objects.equals(mExitCondition, exitCondition)) return;
         mExitCondition = exitCondition;
         refreshExitConditionText();
         updateWidgets();
