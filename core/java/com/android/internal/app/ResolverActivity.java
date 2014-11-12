@@ -840,7 +840,7 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 }
                 if (N > 1) {
                     Comparator<ResolveInfo> rComparator =
-                            new ResolverComparator(ResolverActivity.this);
+                            new ResolverComparator(ResolverActivity.this, mIntent);
                     Collections.sort(currentResolveList, rComparator);
                 }
                 // First put the initial items at the top.
@@ -1093,11 +1093,20 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
     }
 
+    static final boolean isSpecificUriMatch(int match) {
+        match = match&IntentFilter.MATCH_CATEGORY_MASK;
+        return match >= IntentFilter.MATCH_CATEGORY_HOST
+                && match <= IntentFilter.MATCH_CATEGORY_PATH;
+    }
+
     class ResolverComparator implements Comparator<ResolveInfo> {
         private final Collator mCollator;
+        private final boolean mHttp;
 
-        public ResolverComparator(Context context) {
+        public ResolverComparator(Context context, Intent intent) {
             mCollator = Collator.getInstance(context.getResources().getConfiguration().locale);
+            String scheme = intent.getScheme();
+            mHttp = "http".equals(scheme) || "https".equals(scheme);
         }
 
         @Override
@@ -1105,6 +1114,17 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             // We want to put the one targeted to another user at the end of the dialog.
             if (lhs.targetUserId != UserHandle.USER_CURRENT) {
                 return 1;
+            }
+
+            if (mHttp) {
+                // Special case: we want filters that match URI paths/schemes to be
+                // ordered before others.  This is for the case when opening URIs,
+                // to make native apps go above browsers.
+                final boolean lhsSpecific = isSpecificUriMatch(lhs.match);
+                final boolean rhsSpecific = isSpecificUriMatch(rhs.match);
+                if (lhsSpecific != rhsSpecific) {
+                    return lhsSpecific ? -1 : 1;
+                }
             }
 
             if (mStats != null) {
