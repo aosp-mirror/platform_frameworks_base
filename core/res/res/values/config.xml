@@ -467,6 +467,8 @@
     <bool name="config_allowTheaterModeWakeFromKey">false</bool>
     <!-- If this is true, allow wake from theater mode from motion. -->
     <bool name="config_allowTheaterModeWakeFromMotion">false</bool>
+    <!-- If this is true, allow wake from theater mode from motion. -->
+    <bool name="config_allowTheaterModeWakeFromMotionWhenNotDreaming">false</bool>
     <!-- If this is true, allow wake from theater mode from lid switch. -->
     <bool name="config_allowTheaterModeWakeFromLidSwitch">false</bool>
     <!-- If this is true, allow wake from theater mode when docked. -->
