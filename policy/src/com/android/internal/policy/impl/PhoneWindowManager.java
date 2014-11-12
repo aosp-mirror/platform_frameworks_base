@@ -525,6 +525,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mAllowTheaterModeWakeFromKey;
     private boolean mAllowTheaterModeWakeFromPowerKey;
     private boolean mAllowTheaterModeWakeFromMotion;
+    private boolean mAllowTheaterModeWakeFromMotionWhenNotDreaming;
     private boolean mAllowTheaterModeWakeFromCameraLens;
     private boolean mAllowTheaterModeWakeFromLidSwitch;
     private boolean mAllowTheaterModeWakeFromWakeGesture;
@@ -1235,6 +1236,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     com.android.internal.R.bool.config_allowTheaterModeWakeFromPowerKey);
         mAllowTheaterModeWakeFromMotion = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromMotion);
+        mAllowTheaterModeWakeFromMotionWhenNotDreaming = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowTheaterModeWakeFromMotionWhenNotDreaming);
         mAllowTheaterModeWakeFromCameraLens = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromCameraLens);
         mAllowTheaterModeWakeFromLidSwitch = mContext.getResources().getBoolean(
@@ -4780,6 +4783,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (shouldDispatchInputWhenNonInteractive()) {
             return ACTION_PASS_TO_USER;
+        }
+
+        // If we have not passed the action up and we are in theater mode without dreaming,
+        // there will be no dream to intercept the touch and wake into ambient.  The device should
+        // wake up in this case.
+        if (isTheaterModeEnabled() && (policyFlags & FLAG_WAKE) != 0) {
+            wakeUp(whenNanos / 1000000, mAllowTheaterModeWakeFromMotionWhenNotDreaming);
         }
 
         return 0;
