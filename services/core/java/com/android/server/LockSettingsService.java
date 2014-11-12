@@ -43,13 +43,10 @@ import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.security.KeyStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.widget.ILockSettings;
-import com.android.internal.widget.ILockSettingsObserver;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.LockPatternUtilsCache;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,9 +62,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
 
-    private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
-
-
     private static final String TAG = "LockSettingsService";
 
     private final Context mContext;
@@ -76,8 +70,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private LockPatternUtils mLockPatternUtils;
     private boolean mFirstCallToVold;
-
-    private final ArrayList<LockSettingsObserver> mObservers = new ArrayList<>();
 
     public LockSettingsService(Context context) {
         mContext = context;
@@ -233,7 +225,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void setStringUnchecked(String key, int userId, String value) {
         mStorage.writeKeyValue(key, value, userId);
-        notifyObservers(key, userId);
     }
 
     @Override
@@ -258,52 +249,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         checkReadPermission(key, userId);
 
         return mStorage.readKeyValue(key, defaultValue, userId);
-    }
-
-    @Override
-    public void registerObserver(ILockSettingsObserver remote) throws RemoteException {
-        synchronized (mObservers) {
-            for (int i = 0; i < mObservers.size(); i++) {
-                if (mObservers.get(i).remote.asBinder() == remote.asBinder()) {
-                    boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
-                    if (isDebuggable) {
-                        throw new IllegalStateException("Observer was already registered.");
-                    } else {
-                        Log.e(TAG, "Observer was already registered.");
-                        return;
-                    }
-                }
-            }
-            LockSettingsObserver o = new LockSettingsObserver();
-            o.remote = remote;
-            o.remote.asBinder().linkToDeath(o, 0);
-            mObservers.add(o);
-        }
-    }
-
-    @Override
-    public void unregisterObserver(ILockSettingsObserver remote) throws RemoteException {
-        synchronized (mObservers) {
-            for (int i = 0; i < mObservers.size(); i++) {
-                if (mObservers.get(i).remote.asBinder() == remote.asBinder()) {
-                    mObservers.remove(i);
-                    return;
-                }
-            }
-        }
-    }
-
-    public void notifyObservers(String key, int userId) {
-        synchronized (mObservers) {
-            for (int i = 0; i < mObservers.size(); i++) {
-                try {
-                    mObservers.get(i).remote.onLockSettingChanged(key, userId);
-                } catch (RemoteException e) {
-                    // The stack trace is not really helpful here.
-                    Log.e(TAG, "Failed to notify ILockSettingsObserver: " + e);
-                }
-            }
-        }
     }
 
     @Override
@@ -354,7 +299,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         final byte[] hash = LockPatternUtils.patternToHash(
                 LockPatternUtils.stringToPattern(pattern));
         mStorage.writePatternHash(hash, userId);
-        notifyObservers(LockPatternUtilsCache.HAS_LOCK_PATTERN_CACHE_KEY, userId);
     }
 
     @Override
@@ -364,7 +308,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         maybeUpdateKeystore(password, userId);
 
         mStorage.writePasswordHash(mLockPatternUtils.passwordToHash(password, userId), userId);
-        notifyObservers(LockPatternUtilsCache.HAS_LOCK_PASSWORD_CACHE_KEY, userId);
     }
 
     @Override
@@ -452,7 +395,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         checkWritePermission(userId);
 
         mStorage.removeUser(userId);
-        notifyObservers(null /* key */, userId);
 
         final KeyStore ks = KeyStore.getInstance();
         final int userUid = UserHandle.getUid(userId, Process.SYSTEM_UID);
@@ -490,14 +432,5 @@ public class LockSettingsService extends ILockSettings.Stub {
             return IMountService.Stub.asInterface(service);
         }
         return null;
-    }
-
-    private class LockSettingsObserver implements DeathRecipient {
-        ILockSettingsObserver remote;
-
-        @Override
-        public void binderDied() {
-            mObservers.remove(this);
-        }
     }
 }
