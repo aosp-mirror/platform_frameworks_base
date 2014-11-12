@@ -151,12 +151,16 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Хэт олон <xliff:g id="CONTENT_TYPE">%s</xliff:g> устгах."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Таблетийн сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Цагны сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
+    <!-- no translation found for low_memory (516619861191025923) -->
+    <skip />
     <string name="low_memory" product="default" msgid="3475999286680000541">"Утасны сан дүүрсэн. Зай чөлөөлөх бол зарим файлыг устгана уу."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Сүлжээ хянагдаж байж болзошгүй"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Тодорхойгүй гуравдагч талаас"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>-с"</string>
     <string name="me" msgid="6545696007631404292">"Би"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Таблетын сонголтууд"</string>
+    <!-- no translation found for power_dialog (6153888706430556356) -->
+    <skip />
     <string name="power_dialog" product="default" msgid="1319919075463988638">"Утасны сонголт"</string>
     <string name="silent_mode" msgid="7167703389802618663">"Чимээгүй горим"</string>
     <string name="turn_on_radio" msgid="3912793092339962371">"Утасгүй холбоог асаах"</string>
@@ -168,6 +172,8 @@
     <string name="silent_mode_ring" msgid="8592241816194074353">"Хонх ассан"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Унтрааж байна…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"Таны таблет унтрах болно."</string>
+    <!-- no translation found for shutdown_confirm (476672373995075359) -->
+    <skip />
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Таны цаг унтрах болно."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Таны утас унтрах болно."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Та унтраах уу?"</string>
@@ -176,6 +182,8 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"Сүүлийн"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Сүүлийн апп хоосон."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Таблет сонголт"</string>
+    <!-- no translation found for global_actions (7240386462508182976) -->
+    <skip />
     <string name="global_actions" product="default" msgid="2406416831541615258">"Утасны сонголтууд"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Дэлгэцний түгжээ"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Унтраах"</string>
@@ -292,9 +300,13 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Апп нь дуудлага ирэх үед мессежээр хариу өгөх үйл явдлыг зохицуулахын тулд бусад мессежийн апп-д хүсэлт илгээх боломжтой."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"таны текст мессежийг унших(SMS эсвэл MMS)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Апп нь таны утас эсвэл SIM картанд хадгалагдсан SMS мессежийг унших боломжтой. Энэ нь апп-д бүх мессежийг контент эсвэл нууц эсэхээс нь үл хамааран унших боломжийг олгоно."</string>
+    <!-- no translation found for permdesc_readSms (5102425513647038535) -->
+    <skip />
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Апп нь таны утас эсвэл SIM картанд хадгалагдсан SMS мессежийг унших боломжтой. Энэ нь апп-д бүх мессежийг контент эсвэл нууц эсэхээс нь үл хамааран унших боломжийг олгоно."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"Текст мессежийг засах (SMS эсвэл MMS)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Апп нь таны таблет эсвэл SIM картанд хадгалагдсан SMS мессежрүү бичих боломжтой. Хортой апп нь таны мессежүүдийг устгах боломжтой."</string>
+    <!-- no translation found for permdesc_writeSms (955871498983538187) -->
+    <skip />
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Апп нь таны утас эсвэл SIM картанд хадгалагдсан SMS мессежрүү бичих боломжтой. Хортой апп нь таны мессежүүдийг устгах боломжтой."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"текст мессеж(WAP) хүлээн авах"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Апп нь WAP мессежийг хүлээн авах болон биелүүлэх боломжтой. Энэ зөвшөөрөл нь танд илгээсэн мессежийг танд харуулалгүйгээр хянах эсвэл устгах боломжийг агуулна."</string>
@@ -388,6 +400,8 @@
     <string name="permdesc_freezeScreen" msgid="8558923789222670064">"Аппликешн нь бүтэн дэлгэцрүү шилжихэд дэлгэцийг хөдөлгөөнгүй болгох боломжтой."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"товч болон контрол товч дарах"</string>
     <string name="permdesc_injectEvents" product="tablet" msgid="206352565599968632">"Алл нь өөрийн оролтын үйл явдлыг(товч дарагдах г.м) бусад апп-д дамжуулах боломжтой. Хортой апп нь энийг ашиглан таблетыг удирдах боломжтой."</string>
+    <!-- no translation found for permdesc_injectEvents (4681361983270791611) -->
+    <skip />
     <string name="permdesc_injectEvents" product="default" msgid="653128057572326253">"Алл нь өөрийн оролтын үйл явдлыг(товч дарагдах г.м) бусад апп-д дамжуулах боломжтой. Хортой апп нь энийг ашиглан утсыг удирдах боломжтой."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"таны хийж байгаа үйлдэл болон бичиж байгааг бичлэг хийх"</string>
     <string name="permdesc_readInputState" msgid="8387754901688728043">"Апп нь бусад апп-тай харилцан үйлчилж(нууц үг оруулах) таны дарсан товчийг ажиглах боломжтой. Энгийн апп-д хэрэглэгдэхгүй."</string>
@@ -433,6 +447,8 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Апп нь бүх байнгын процессруу хангамжийн дохиог илгээх хүсэлтийг хийх боломжтой."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"апп-г байнга ажиллуулах"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Апп нь өөрийн хэсгийн санах ойд байнга байлгах боломжтой. Энэ нь бусад апп-уудын ашиглах санах ойг хязгаарлан таблетыг удаашруулах болно."</string>
+    <!-- no translation found for permdesc_persistentActivity (5086862529499103587) -->
+    <skip />
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Апп нь өөрийн хэсгийг санах ойд байнга байлгах боломжтой. Энэ нь бусад апп-уудын ашиглах санах ойг хязгаарлан утсыг удаашруулах болно."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"апп устгах"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Апп нь Андройд багцийг устгах боломжтой. Хортой апп нь энийг ашиглан чухал апп-г устгах боломжтой."</string>
@@ -446,11 +462,15 @@
     <string name="permdesc_installPackages" msgid="5628530972548071284">"Апп нь шинэ эсвэл шинэчлэгдсэн Андройд багцийг суулгах боломжтой. Хортой апп нь энийг ашиглан дурын эрхтэй шинэ апп-г суулгах боломжтой."</string>
     <string name="permlab_clearAppCache" msgid="7487279391723526815">"бүх апп-н кеш датаг устгах"</string>
     <string name="permdesc_clearAppCache" product="tablet" msgid="8974640871945434565">"Апп нь бусад аппликешны кеш директороос файл устган таблетын санг чөлөөлөх боломжтой. Энэ  нь бусад аппликешнд нөлөөлж, тэдгээр нь эхлэхдээ шаардлагатай датагаа дахин дуудах тул удааширч болзошгүй."</string>
+    <!-- no translation found for permdesc_clearAppCache (244647416303997022) -->
+    <skip />
     <string name="permdesc_clearAppCache" product="default" msgid="2459441021956436779">"Апп нь бусад аппликешны кеш директороос файл устган утасны санг чөлөөлөх боломжтой. Энэ нь бусад аппликешнд нөлөөлж, тэдгээр нь эхлэхдээ шаардлагатай датагаа дахин дуудах тул удааширч болзошгүй."</string>
     <string name="permlab_movePackage" msgid="3289890271645921411">"апп нөөцийг шилжүүлэх"</string>
     <string name="permdesc_movePackage" msgid="319562217778244524">"Апп нь апп нөөцийг дотроос гадна медиаруу болон эсрэгээр нь зөөх боломжтой."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"нууц лог дата унших"</string>
     <string name="permdesc_readLogs" product="tablet" msgid="82061313293455151">"Апп нь системийн төрөл бүрийн лог файлыг унших боломжтой. Энэ нь та таблет дээрээ юу хийсэн талаарх хувийн болон нууц мэдээллийг олох боломжтой болгоно."</string>
+    <!-- no translation found for permdesc_readLogs (9023899974809538988) -->
+    <skip />
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Апп нь системийн төрөл бүрийн лог файлыг унших боломжтой. Энэ нь та утсан дээрээ юу хийсэн талаарх хувийн болон нууц мэдээллийг олох боломжтой болгоно."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"тоглуулахын тулд дурын медиа шифрлэгчийг ашиглах"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Апп нь тоглуулах үедээ код тайлахдаа суулгагдсан ямарч медиа код тайлагчийг ашиглах боломжтой."</string>
@@ -462,6 +482,8 @@
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Апп нь оношлох грүпийн эзэмшдэг, жишээ нь /dev доторх файлууд, дурын  нөөцийг унших бичих боломжтой.Энэ нь системийн тогвортой байдал болон аюулгүй байдалд бодитоор нөлөөлнө. Энэ нь үйлдвэрлэгч болон операторын хардверт-зориулсан оношлогоонд ашиглагдана."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"апп компонентыг идэвхжүүлэх эсвэл идэвхгүй болгох"</string>
     <string name="permdesc_changeComponentState" product="tablet" msgid="8887435740982237294">"Апп нь өөр апп-н компонент идэвхтэй эсэхийг солих боломжтой. Хортой апп нь энийг ашиглан таблетын чухал чадамжийг идэвхгүй болгож болзошгүй. Зөвшөөрөл нь аппликешн компонентыг тогтворгүй, ашиглаж болохгүй, тохиромжгүй төлөвт оруулах боломжтой тул ашиглахдаа болгоомжтой байх шаардлагатай."</string>
+    <!-- no translation found for permdesc_changeComponentState (9151634188264231389) -->
+    <skip />
     <string name="permdesc_changeComponentState" product="default" msgid="1827232484416505615">"Апп нь өөр апп-н компонент идэвхтэй эсэхийг солих боломжтой. Хортой апп нь энийг ашиглан утасны чухал чадамжийг идэвхгүй болгож болзошгүй. Зөвшөөрөл нь аппликешн компонентыг тогтворгүй, ашиглаж болохгүй, тохиромжгүй төлөвт оруулах боломжтой тул ашиглахдаа болгоомжтой байх шаардлагатай."</string>
     <string name="permlab_grantRevokePermissions" msgid="4627315351093508795">"зөвшөөрөл олгох эсвэл цуцлах"</string>
     <string name="permdesc_grantRevokePermissions" msgid="4088642654085850662">"Аппликешн нь өөртэй болон бусад аппликешнд тусгай зөвшөөрлийг олгох болон цуцлах боломжтой. Хортой аппликешн нь энийг ашиглан таны олгоогүй эрхэнд хандах боломжтой."</string>
@@ -475,21 +497,33 @@
     <string name="permdesc_writeGservices" msgid="1287309437638380229">"Апп нь Google-н газрын зургийн үйлчилгээг өөрчлөх боломжтой. Энгийн апп-д ашиглагдахгүй."</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"Эхлэхэд ажиллуулах"</string>
     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Апп нь систем асаж дуусахад шууд өөрийгөө асаах боломжтой. Ингэснээр таблетыг асахад их хугацаа орох болон байнга ажилладаг апп нь таблетийг бүхэлд нь удаашруулах боломжтой."</string>
+    <!-- no translation found for permdesc_receiveBootCompleted (4525890122209673621) -->
+    <skip />
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Апп нь систем асаж дуусахад шууд өөрийгөө асаах боломжтой. Ингэснээр утсыг асахад их хугацаа орох болон байнга ажилладаг апп нь утсыг бүхэлд нь удаашруулах боломжтой."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"тасардаггүй өргөн дамжууллыг илгээх"</string>
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Апп нь өргөн дамжуулал дууссаны дараа үлдсэн өргөн дамжуулалыг илгээх боломжтой. Ихээр ашиглах нь хэт их санах ой ашиглан таблетыг удаашруулах болон тогтворгүй болгох боломжтой."</string>
+    <!-- no translation found for permdesc_broadcastSticky (6839285697565389467) -->
+    <skip />
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Апп нь өргөн дамжуулал дууссаны дараа үлдсэн өргөн дамжуулалыг илгээх боломжтой. Ихээр ашиглах нь хэт их санах ой ашиглан утсыг удаашруулах болон тогтворгүй болгох боломжтой."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"өөрийн харилцагчдыг унших"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Апп нь таны утсаар ярьсан, имэйл илгээсэн давтамж эсвэл тусгай харилцагдчидтайгаа өөр аргаар холбоо барьсан байдал зэргийг агуулсан таблет дээр хадгалагдсан харилцагчдын талаарх датаг унших боломжтой. Энэ зөвшөөрөл нь апп-д таны харилцагчийн датаг хадгалах боломжийг олгох ба хортой апп нь танд мэдэгдэлгүйгээр харилцагчийн датаг хуваалцах боломжтой."</string>
+    <!-- no translation found for permdesc_readContacts (1839238344654834087) -->
+    <skip />
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Апп нь таны утсаар ярьсан, имэйл илгээсэн давтамж эсвэл тусгай харилцагчидтайгаа өөр аргаар холбоо барьсан байдал зэргийг агуулсан таны утсан дээр хадгалагдсан харилцагчдын талаарх датаг унших боломжтой. Энэ зөвшөөрөл нь апп-д таны харилцагчийн датаг хадгалах боломжийг олгох ба хортой апп нь танд мэдэгдэлгүйгээр харилцагчийн датаг хуваалцах боломжтой."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"таны харилцагчдыг өөрчлөх"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Апп нь таны утсаар ярьсан, имэйл илгээсэн давтамж эсвэл тусгай харилцагчидтайгаа өөр аргаар холбоо барьсан байдал зэргийг агуулсан таны таблет дээр хадгалагдсан харилцагчдын талаарх датаг өөрчлөх боломжтой. Энэ зөвшөөрөл нь апп-д харилцагчийн датаг устгах боломжийг олгоно."</string>
+    <!-- no translation found for permdesc_writeContacts (5438230957000018959) -->
+    <skip />
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Апп нь таны утсаар ярьсан, имэйл илгээсэн давтамж эсвэл харилцагдчидтайгаа өөр аргаар холбоо барьсан байдал зэргийг агуулсан утсан дээр хадгалагдсан харилцагчдын талаарх датаг өөрчлөх боломжтой. Энэ зөвшөөрөл нь апп-д харилцагчийн датаг устгах боломжийг олгоно."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"дуудлагын логийг унших"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Апп нь таны таблетын ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг унших боломжтой. Энэ зөвшөөрөл нь апп-д таны дуудлагын логын датаг хадгалах боломжийг олгох ба хортой апп нь танд мэдэгдэлгүйгээр дуудлагын лог датаг хуваалцах боломжтой."</string>
+    <!-- no translation found for permdesc_readCallLog (5611770887047387926) -->
+    <skip />
     <string name="permdesc_readCallLog" product="default" msgid="5777725796813217244">"Апп нь таны утасны ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг унших боломжтой. Энэ зөвшөөрөл нь апп-д таны дуудлагын логын датаг хадгалах боломжийг олгох ба хортой апп нь танд мэдэгдэлгүйгээр дуудлагын лог датаг хуваалцах боломжтой."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"дуудлагын логруу бичих"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Апп нь таны таблетын ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг унших боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
+    <!-- no translation found for permdesc_writeCallLog (4225034892248398019) -->
+    <skip />
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Апп нь таны утасны ирсэн гарсан дуудлага зэргийг агуулсан дуудлагын логыг өөрчлөх боломжтой. Хортой апп нь энийг ашиглан таны дуудлагын логыг өөрчлөх болон арилгах боломжтой."</string>
     <string name="permlab_readProfile" msgid="4701889852612716678">"та өөрийн харилцагчийн картыг унших"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Апп нь таны нэр болон холбоо барих мэдээлэл зэрэг таны утсан дээр хадгалагдсан хувийн профайл мэдээллийг унших боломжтой. Ингэснээр апп нь танийг таньж чадах ба таны профайл мэдээллийг бусдад илгээх боломжтой."</string>
@@ -503,9 +537,13 @@
     <string name="permdesc_writeSocialStream" product="default" msgid="3086557552204114849">"Апп нь таны найзуудын нийтийн шинэчлэлтийг дүрслэх боломжтой.Мэдээлэл хуваалцахдаа болгоомжтой байна уу - энэ нь апп-д таны найзаас ирсэн мэт харагдах мессеж хийх боломжийг олгоно. Анхаар: энэ зөвшөөрөл нь бүх нийтийн сүлжээнд ашиглаж боломжгүй."</string>
     <string name="permlab_readCalendar" msgid="5972727560257612398">"календарийн хуваарийн нууц мэдээллийг унших"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Апп нь таны таблет дээр хадгалагдсан найзууд болон хамтран ажиллагсдын календарийн бүх хуваарийг унших боломжтой. Энэ нь апп-д таны календарийн датаг нууц эсвэл эмзэг эсэхээс нь үл хамааран хуваалцах эсвэл хадгалах боломжийг олгоно."</string>
+    <!-- no translation found for permdesc_readCalendar (3191352452242394196) -->
+    <skip />
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Allows the app to read all calendar events stored on your phone, including those of friends or co-workers. This may allow the app to share or save your calendar data, regardless of confidentiality or sensitivity. Апп нь таны утсан дээр хадгалагдсан найзууд болон хамтран ажиллагсдын календарийн бүх хуваарийг унших боломжтой. Энэ нь апп-д таны календарийн датаг нууц эсвэл эмзэг эсэхээс нь үл хамааран хуваалцах эсвэл хадгалах боломжийг олгоно."</string>
     <string name="permlab_writeCalendar" msgid="8438874755193825647">"календарын хуваарийг нэмэх эсвэл өөрчлөх болон эзэмшигчид мэдэгдэлгүйгээр зочидруу имэйл илгээх"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Апп нь таблет дээр та болон таны найзууд, хамтран ажиллагсдын өөрчилж чадах үйл явдлуудыг нэмэх, хасах болон солих боломжтой. Энэ нь апп-д, календарь эзэмшигчээс ирсэн мэт харагдах мессежийг илгээх эсвэл эзэмшигчд нь мэдэгдэлгүйгээр үйл явдлуудыг өөрчлөх боломжийг олгоно."</string>
+    <!-- no translation found for permdesc_writeCalendar (1273290605500902507) -->
+    <skip />
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Апп нь утсан дээр та болон таны найзууд, хамтран ажиллагсдын өөрчилж чадах үйл явдлуудыг нэмэх, хасах болон солих боломжтой. Энэ нь апп-д, календарь эзэмшигчээс ирсэн мэт харагдах мессежийг илгээх эсвэл эзэмшигчид нь мэдэгдэлгүйгээр үйл явдлуудыг өөрчлөх боломжийг олгоно."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"тест хийх байршлын эх үүсвэрийг үүсгэх"</string>
     <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"Тестэд ашиглах хуурамч байршлын эх үүсвэрийг үүсгэх болон шинэ байршил өгөгчийг суулгах боломжтой. Ингэснээр апп нь GPS эсвэл байршил өгөгч зэрэг бусад байршлын эх үүсвэрээс ирсэн байршил болон статусыг өөрчлөх боломжтой."</string>
@@ -550,12 +588,20 @@
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"камер ашиглаж байх үед дамжууллыг заагч LED-г идэвхгүй болгох"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Урьдчилан суусан систем аппликешн нь камер ашиглалтыг заасан LED-г идэвхгүй болгох боломжтой."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"таблетыг бүрмөсөн идэвхгүй болгох"</string>
+    <!-- no translation found for permlab_brick (4912674222121249410) -->
+    <skip />
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"утсыг бүрмөсөн идэвхгүй болгох"</string>
     <string name="permdesc_brick" product="tablet" msgid="4334818808001699530">"Апп нь таблетыг бүхэлд нь бүрмөсөн идэвхгүй болгох боломжтой. Энэ маш аюултайэ"</string>
+    <!-- no translation found for permdesc_brick (7070924544316356349) -->
+    <skip />
     <string name="permdesc_brick" product="default" msgid="5788903297627283099">"Апп нь утсыг бүхэлд нь бүрмөсөн идэвхгүй болгох боломжтой. Энэ маш аюултай."</string>
     <string name="permlab_reboot" product="tablet" msgid="3436634972561795002">"таблет хүчээр дахин асаах"</string>
+    <!-- no translation found for permlab_reboot (2112102119558886236) -->
+    <skip />
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"утсыг хүчээр дахин асаах"</string>
     <string name="permdesc_reboot" product="tablet" msgid="8172056180063700741">"Апп нь таблетыг хүчээр дахин асаах боломжтой."</string>
+    <!-- no translation found for permdesc_reboot (7116222694344401650) -->
+    <skip />
     <string name="permdesc_reboot" product="default" msgid="5326008124289989969">"Апп нь утсыг хүчээр дахин асаах боломжтой."</string>
     <string name="permlab_mount_unmount_filesystems" product="nosdcard" msgid="2927361537942591841">"USB сан файл системд хандах"</string>
     <string name="permlab_mount_unmount_filesystems" product="default" msgid="4402305049890953810">"SD карт файл системд хандах"</string>
@@ -590,6 +636,8 @@
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"дурны утасны дугаарт шууд дуудлага хийх"</string>
     <string name="permdesc_callPrivileged" msgid="1689024901509996810">"Апп нь таны оролцоогүйгээр яаралтай тусламжийн дугааруудыг оруулаад ямарч дугаарлуу дуудлага хийх боломжтой. Хортой апп нь шаардлагагүй, хууль бус дуудлагыг яаралтай тусламжийн үйлчилгээрүү хийж болзошгүй."</string>
     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"CDMA таблет тохиргоог шууд эхлүүлэх"</string>
+    <!-- no translation found for permlab_performCdmaProvisioning (3485391974208100809) -->
+    <skip />
     <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"CDMA утасны тохиргоог шууд эхлүүлэх"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="1994193538802314186">"Апп нь CDMA провишныг эхлүүлэх боломжтой. Хортой апп нь шаардлагагүй байхад CDMA провишныг эхлүүлж болзошгүй."</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"байршил шинэчлэх мэдэгдлийг удирдах"</string>
@@ -605,20 +653,32 @@
     <string name="permlab_readPrecisePhoneState" msgid="5476483020282007597">"утасны байдлыг нарийн унших"</string>
     <string name="permdesc_readPrecisePhoneState" msgid="6648009074263855418">"Апп-д утасны тодорхой байдалд хандах боломжийг олгодог. Энэ зөвшөөрөл апп-д дуудлагын бодит статус, дуудлага идэвхтэй эсхүл ар талд тавигдсан эсэх, амжилтгүй дуудлага болон дата холболтын нарийн статус болон дата холболтын алдааг тодорхойлох боломж олгоно."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"таблетыг унтуулахгүй байлгах"</string>
+    <!-- no translation found for permlab_wakeLock (2601193288949154131) -->
+    <skip />
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"утсыг унтуулахгүй байлгах"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"Апп нь таблетыг унтахаас сэргийлэх боломжтой"</string>
+    <!-- no translation found for permdesc_wakeLock (3208534859208996974) -->
+    <skip />
     <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"Апп нь утсыг унтахаас сэргийлэх боломжтой"</string>
     <string name="permlab_transmitIr" msgid="7545858504238530105">"хэт улаанаар дамжуулах"</string>
     <string name="permdesc_transmitIr" product="tablet" msgid="5358308854306529170">"Апп-д таблетын хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
+    <!-- no translation found for permdesc_transmitIr (3926790828514867101) -->
+    <skip />
     <string name="permdesc_transmitIr" product="default" msgid="7957763745020300725">"Апп-д утасны хэт улаан дамжуулагчийг ашиглахыг зөвшөөрнө."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"таблетыг унтраах эсвэл асаах"</string>
+    <!-- no translation found for permlab_devicePower (7579718349658943416) -->
+    <skip />
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"утсыг унтраах эсвэл асаах"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"Апп нь таблетыг асаах, унтраах боломжтой."</string>
+    <!-- no translation found for permdesc_devicePower (1334908641773273512) -->
+    <skip />
     <string name="permdesc_devicePower" product="default" msgid="6037057348463131032">"Апп нь утсыг асаах, унтраах боломжтой."</string>
     <string name="permlab_userActivity" msgid="1677844893921729548">"дэлгэцийн амрах хугацааг тохируулах"</string>
     <string name="permdesc_userActivity" msgid="651746160252248024">"Апп-т дэлгэцийн амрах хугацааг өөрчлөхийг зөвшөөрнө."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"үйлдвэрийн тест горимд ажиллуулах"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Доод төвшиний үйлдвэрийн тестийг ажиллуулан таблетын хардверт бүрэн хандах боломжтой. Таблет нь үйлдвэрийн тестийн горимд ажиллах үед л боломжтой."</string>
+    <!-- no translation found for permdesc_factoryTest (2105643629211155695) -->
+    <skip />
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Доод төвшиний үйлдвэрийн тестийг ажиллуулан утасны хардверт бүрэн хандах боломжтой. Утас үйлдвэрийн тестийн горимд ажиллах үед л боломжтой."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"ханын зургийг тохируулах"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Апп нь системийн ханын зургийг тохируулах боломжтой."</string>
@@ -628,14 +688,20 @@
     <string name="permdesc_masterClear" msgid="3665380492633910226">"Апп нь бүх датаг арилгах болон бүх суулгасан апп-г арилган системийг бүхэлд үйлдвэрийн тохиргоогоор бүрэн тохируулах боломжтой"</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"цагийн тохиргоо"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Апп нь таблетын цагийг солих боломжтой."</string>
+    <!-- no translation found for permdesc_setTime (1826398919861882682) -->
+    <skip />
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Апп нь утасны цагийг солих боломжтой."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"цагийн бүсийн тохиргоо"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Апп нь таблетын цагийн бүсийг солих боломжтой."</string>
+    <!-- no translation found for permdesc_setTimeZone (888864653946175955) -->
+    <skip />
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Апп нь утасны цагийн бүсийг өөрчлөх боломжтой."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"AccountManagerService болж ажиллах"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Апп нь Акаунт гэрчлэгчрүү дуудлага хийх боломжтой."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"төхөөрөмж дээрх акаунтыг олох"</string>
     <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Апп нь таблетэд мэдэгдэж байгаа акаунтын жагсаалтыг авах боломжтой. Энд таны суулгасан аппликешнүүдийн үүсгэсэн бүх акаунтууд хамрагдана."</string>
+    <!-- no translation found for permdesc_getAccounts (4190633395633907543) -->
+    <skip />
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Апп нь утсанд мэдэгдэж байгаа акаунтын жагсаалтыг авах боломжтой. Энд таны суулгасан аппликешнүүдийн үүсгэсэн бүх акаунтууд хамрагдана."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"акаунт үүсгэх болон нууц үг тохируулах"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Апп нь акаунт үүсгэх, тэдгээрийн нууц үгийг тохируулах зэрэг акаунт удирдагчийн акаунт гэрчлэгчийн функцийг ашиглах боломжтой."</string>
@@ -661,26 +727,38 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Апп нь Wi-Fi холболтын цэгтэй холбогдох буюу салах боломжтой ба тохируулсан Wi-Fi сүлжээнд өөрчлөлт хийх боломжтой."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Wi-Fi олон дамжуулалт хүлээн авахыг зөвшөөрөх"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Апп нь олон дамжуулал ашиглан Wi-Fi сүлжээн дэх бүх төхөөрөмжрүү пакет илгээх болон хүлээн авах боломжтой. Энэ нь олон дамжуулал ашиглахгүй горимоос илүү их тэжээл зарцуулна."</string>
+    <!-- no translation found for permdesc_changeWifiMulticastState (9031975661145014160) -->
+    <skip />
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Апп нь олон дамжуулал ашиглан Wi-Fi сүлжээн дэх бүх төхөөрөмжрүү пакет илгээх болон хүлээн авах боломжтой. Энэ нь олон дамжуулал ашиглахгүй горимоос илүү их тэжээл зарцуулна."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"Блютүүт тохиргоонд хандах"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Апп нь дотоод блютүүт таблетын тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой"</string>
+    <!-- no translation found for permdesc_bluetoothAdmin (3373125682645601429) -->
+    <skip />
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Апп нь утасны дотоод блютүүтыг тохируулах боломжтой ба гадаад төхөөрөмжийг олох болон хос үүсгэх боломжтой."</string>
     <string name="permlab_bluetoothPriv" msgid="4009494246009513828">"Аппликешнд bluetooth хослол хийхийг зөвшөөрнө"</string>
     <string name="permdesc_bluetoothPriv" product="tablet" msgid="8045735193417468857">"Апп-д хэрэглэгчтэй харьцахгүйгээр зайны төхөөрөмжүүдтэй хослох боломж олгоно."</string>
+    <string name="permdesc_bluetoothPriv" product="tv" msgid="8045735193417468857">"Апп-д хэрэглэгчтэй харьцахгүйгээр зайны төхөөрөмжүүдтэй хослох боломж олгоно."</string>
     <string name="permdesc_bluetoothPriv" product="default" msgid="8045735193417468857">"Апп-д хэрэглэгчтэй харьцахгүйгээр зайны төхөөрөмжүүдтэй хослох боломж олгоно."</string>
     <string name="permlab_bluetoothMap" msgid="6372198338939197349">"Блютүүт MAP датаны хандалт"</string>
     <string name="permdesc_bluetoothMap" product="tablet" msgid="5784090105926959958">"Апп-д Блютүүт MAP датад хандах боломж олгоно."</string>
+    <string name="permdesc_bluetoothMap" product="tv" msgid="5784090105926959958">"Апп-д Блютүүт MAP датад хандах боломж олгоно."</string>
     <string name="permdesc_bluetoothMap" product="default" msgid="5784090105926959958">"Апп-д Блютүүт MAP датад хандах боломж олгоно."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"WiMAX-д холбогдох болон салах"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Апп нь WiMAX идэвхтэй эсэх болон холбогдсон WiMAX сүлжээний талаар мэдээллийг тодорхойлох боломжтой."</string>
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"WiMAX статусыг өөрчлөх"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Апп нь WiMAX сүлжээнд таблетыг холбох болон салгах боломжтой."</string>
+    <!-- no translation found for permdesc_changeWimaxState (6022307083934827718) -->
+    <skip />
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Апп нь WiMAX сүлжээнд утсыг холбох болон салгах боломжтой."</string>
     <string name="permlab_scoreNetworks" msgid="6445777779383587181">"бүртгэгдсэн сүлжээ"</string>
     <string name="permdesc_scoreNetworks" product="tablet" msgid="1304304745850215556">"Апп-д сүлжээнүүдийг эрэмбэлж, аль сүлжээнд таблетыг холбоход нөлөөлөх боломж олгоно."</string>
+    <!-- no translation found for permdesc_scoreNetworks (5444434643862417649) -->
+    <skip />
     <string name="permdesc_scoreNetworks" product="default" msgid="1831501848178651379">"Апп-д сүлжээнүүдийг эрэмбэлж, аль сүлжээнд утсыг холбоход нөлөөлөх боломж олгоно."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"Блютүүт төхөөрөмжтэй хос үүсгэх"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Апп нь таблет дээрх блютүүт тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой."</string>
+    <!-- no translation found for permdesc_bluetooth (3974124940101104206) -->
+    <skip />
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Апп нь утсан дээрх Блютүүт тохиргоог харах боломжтой ба хос болох төхөөрөмжтэй холболтыг зөвшөөрөх болон хийх боломжтой."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ойролцоо талбарын холбоог удирдах"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Апп нь Ойролцоо Талбарын Холболт(NFC) таг, карт, болон уншигчтай холбогдох боломжтой."</string>
@@ -760,6 +838,8 @@
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Дэлгэц түгжих нууц үгэнд зөвшөөрөгдсөн тэмдэгт болон уртыг удирдах"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Дэлгэц тайлах оролдлогыг хянах"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал таблетыг түгжих болон таблетын бүх датаг арилгана"</string>
+    <!-- no translation found for policydesc_watchLogin (2707817988309890256) -->
+    <skip />
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Дэлгэц түгжигдсэн үед нууц үг буруу оруулалтын тоог хянах, ба хэрэв хэт олон удаа нууц үгийг буруу оруулбал утсыг түгжих болон утасны бүх датаг арилгана"</string>
     <string name="policylab_resetPassword" msgid="2620077191242688955">"Дэлгэц түгжих нууц үгийг солих"</string>
     <string name="policydesc_resetPassword" msgid="605963962301904458">"Дэлгэц түгжих нууц үгийг солих"</string>
@@ -767,6 +847,8 @@
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Дэлгэц хэзээ яаж түгжихийг удирдах"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Бүх датаг арилгах"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Үйлдвэрийн дата утгыг өгсөнөөр таблетын дата шууд арилгагдана."</string>
+    <!-- no translation found for policydesc_wipeData (5816221315214527028) -->
+    <skip />
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Үйлдвэрийн дата утгыг өгсөнөөр утасны дата шууд арилгагдана."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Төхөрөөмжийн глобал проксиг тохируулах"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Бодлого идэвхтэй үед төхөөрөмжийн глобал проксиг ашиглахаар тохируулсан. Зөвхөн эхний төхөөрөмжийн админ л үр дүнтэй глобал проксиг тохируулна."</string>
@@ -915,6 +997,8 @@
     <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Нүүрээр түгжээ тайлах оролдлогын тоо дээд хэмжээнээс хэтэрсэн"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="5099439277819215399">"SIM карт байхгүй"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Таблет SIM картгүй."</string>
+    <!-- no translation found for lockscreen_missing_sim_message (1943633865476989599) -->
+    <skip />
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Утсанд SIM карт байхгүй."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM картыг оруулна уу."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM карт байхгүй эсвэл унших боломжгүй. SIM карт оруулна уу."</string>
@@ -937,10 +1021,16 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Та нууц үгээ <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Та PIN кодоо <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Та тайлах хээг <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%d</xliff:g> удаа дахин буруу оруулбал, та таблетаа тайлахын тулд Google нэвтрэлтээ ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (5316664559603394684) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Та тайлах хээг <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%d</xliff:g> удаа дахин буруу оролдвол, та таблетаа тайлахын тулд Google нэвтрэлтээ ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Та таблетыг тайлах гэж <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу оролдлоо. <xliff:g id="NUMBER_1">%d</xliff:g> удаа дахин буруу оролдвол таблет үйлдвэрийн үндсэн утгаараа тохируулагдах ба хэрэглэгчийн дата бүхэлдээ устана."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_at_wipe (950408382418270260) -->
+    <skip />
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Та утсыг тайлах гэж <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу оролдлоо. <xliff:g id="NUMBER_1">%d</xliff:g> удаа дахин буруу оролдвол утас үйлдвэрийн үндсэн утгаараа тохируулагдах ба хэрэглэгчийн дата бүхэлдээ устана."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Та таблетыг <xliff:g id="NUMBER">%d</xliff:g> удаа тайлах гэж буруу оролдлоо. Таблет одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
+    <!-- no translation found for lockscreen_failed_attempts_now_wiping (3195755534096192191) -->
+    <skip />
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Та утсыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Утас одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"<xliff:g id="NUMBER">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Хээг мартсан уу?"</string>
@@ -1024,6 +1114,8 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Апп нь Хөтчийн зочилж байсан бүх URL-н түүх болон Хөтчийн бүх хавчуургыг унших боломжтой. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадавхтай аппликешнүүдэд ашиглагдахгүй байх боломжтой."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"веб хавчуурга болон түүхийг бичих"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Апп нь таны таблет дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
+    <!-- no translation found for permdesc_writeHistoryBookmarks (7007393823197766548) -->
+    <skip />
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Апп нь таны утсан дээр хадгалагдсан Хөтчийн түүх эсвэл хавчуургыг өөрчлөх боломжтой. Энэ нь апп-д Хөтчийн датаг арилгах эсвэл өөрчлөх боломжийг олгоно. Анхаар: Энэ зөвшөөрөл нь гуравдагч талын хөтөч эсвэл вебээр хөтөчлөх чадвартай аппликешнд ажиллахгүй байх боломжтой."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"сэрүүлэг тохируулах"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Апп нь суулгагдсан сэрүүлэгний апп дээр сэрүүлэг тохируулах боломжтой. Зарим сэрүүлэгний апп нь энэ функцийг дэмжихгүй байж болзошгүй."</string>
@@ -1297,6 +1389,8 @@
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Шаардлагатай PIN-г бичнэ үү:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN:"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Таблет <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-тэй холбогдох үедээ түр зуур Wi-Fi-с салах болно."</string>
+    <!-- no translation found for wifi_p2p_frequency_conflict_message (3087858235069421128) -->
+    <skip />
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Утас <xliff:g id="DEVICE_NAME">%1$s</xliff:g>-тай холбогдох үедээ түр зуур Wi-Fi-с салах болно."</string>
     <string name="select_character" msgid="3365550120617701745">"Тэмдэгт оруулах"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMS мессеж илгээж байна"</string>
@@ -1578,6 +1672,8 @@
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"Нэг удаа"</string>
     <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s ажлын профайлыг дэмждэггүй"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"Таблет"</string>
+    <!-- no translation found for default_audio_route_name (9158088547603019321) -->
+    <skip />
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"Утас"</string>
     <string name="default_audio_route_name_headphones" msgid="8119971843803439110">"Чихэвч"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="6240602982276591864">"Чанга яригчийг суулгах"</string>
@@ -1632,10 +1728,16 @@
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Та PIN кодоо <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу бичив. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Та тайлах хээг <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу зурлаа. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Та таблетыг тайлах гэж <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу оролдлоо. <xliff:g id="NUMBER_1">%d</xliff:g> удаа дахин буруу оролдвол таблет үйлдвэрийн үндсэн утгаараа тохируулагдах ба хэрэглэгчийн дата бүхэлдээ устана."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (5621231220154419413) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Та утсыг тайлах гэж <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу оролдлоо. <xliff:g id="NUMBER_1">%d</xliff:g> удаа дахин буруу оролдвол утас үйлдвэрийн үндсэн утгаараа тохируулагдах ба хэрэглэгчийн дата бүхэлдээ устана."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Та таблетыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Таблет одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
+    <!-- no translation found for kg_failed_attempts_now_wiping (4987878286750741463) -->
+    <skip />
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Та утсыг тайлах гэж <xliff:g id="NUMBER">%d</xliff:g> удаа буруу оролдлоо. Утас одоо үйлдвэрийн үндсэн утгаараа тохируулагдах болно."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Та тайлах хээг <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%d</xliff:g> удаа дахин буруу оруулбал, та таблетаа тайлахын тулд имэйл акаунт шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_login (4224651132862313471) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Та тайлах хээг <xliff:g id="NUMBER_0">%d</xliff:g> удаа буруу зурлаа. <xliff:g id="NUMBER_1">%d</xliff:g> удаа дахин буруу оруулбал, та утсаа тайлахын тулд имэйл акаунтаа ашиглах шаардлагатай болно.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундын дараа дахин оролдоно уу."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Устгах"</string>
