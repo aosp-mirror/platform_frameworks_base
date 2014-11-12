@@ -3632,9 +3632,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         if (mHintTextColor != null) {
             color = mHintTextColor.getColorForState(getDrawableState(), 0);
-            if (color != mCurHintTextColor && mText.length() == 0) {
+            if (color != mCurHintTextColor) {
                 mCurHintTextColor = color;
-                inval = true;
+                if (mText.length() == 0) {
+                    inval = true;
+                }
             }
         }
         if (inval) {
