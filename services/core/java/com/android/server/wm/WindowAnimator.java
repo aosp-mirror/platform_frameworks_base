@@ -349,7 +349,8 @@ public class WindowAnimator {
                     } else {
                         boolean applyExistingExitAnimation = mPostKeyguardExitAnimation != null
                                 && !winAnimator.mKeyguardGoingAwayAnimation
-                                && win.hasDrawnLw();
+                                && win.hasDrawnLw()
+                                && win.mAttachedWindow == null;
 
                         // If the window is already showing and we don't need to apply an existing
                         // Keyguard exit animation, skip.
@@ -364,7 +365,8 @@ public class WindowAnimator {
                         }
                         if (DEBUG_KEYGUARD || WindowManagerService.DEBUG_VISIBILITY) Slog.v(TAG,
                                 "Now policy shown: " + win);
-                        if ((mBulkUpdateParams & SET_FORCE_HIDING_CHANGED) != 0) {
+                        if ((mBulkUpdateParams & SET_FORCE_HIDING_CHANGED) != 0
+                                && win.mAttachedWindow == null) {
                             if (unForceHiding == null) {
                                 unForceHiding = new ArrayList<>();
                             }

@@ -113,6 +113,8 @@ import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
  */
 public class KeyguardViewMediator extends SystemUI {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
+    private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
+
     final static boolean DEBUG = false;
     private final static boolean DBG_WAKE = false;
 
@@ -136,6 +138,7 @@ public class KeyguardViewMediator extends SystemUI {
     private static final int DISMISS = 17;
     private static final int START_KEYGUARD_EXIT_ANIM = 18;
     private static final int ON_ACTIVITY_DRAWN = 19;
+    private static final int KEYGUARD_DONE_PENDING_TIMEOUT = 20;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -294,7 +297,7 @@ public class KeyguardViewMediator extends SystemUI {
             // ActivityManagerService) will not reconstruct the keyguard if it is already showing.
             synchronized (KeyguardViewMediator.this) {
                 mSwitchingUser = true;
-                mKeyguardDonePending = false;
+                resetKeyguardDonePendingLocked();
                 resetStateLocked();
                 adjustStatusBarLocked();
                 // When we switch users we want to bring the new user to the biometric unlock even
@@ -450,6 +453,8 @@ public class KeyguardViewMediator extends SystemUI {
             mKeyguardDonePending = true;
             mHideAnimationRun = true;
             mStatusBarKeyguardViewManager.startPreHideAnimation(null /* finishRunnable */);
+            mHandler.sendEmptyMessageDelayed(KEYGUARD_DONE_PENDING_TIMEOUT,
+                    KEYGUARD_DONE_PENDING_TIMEOUT_MS);
         }
 
         @Override
@@ -584,7 +589,7 @@ public class KeyguardViewMediator extends SystemUI {
             mScreenOn = false;
             if (DEBUG) Log.d(TAG, "onScreenTurnedOff(" + why + ")");
 
-            mKeyguardDonePending = false;
+            resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
 
             // Lock immediately based on setting if secure (user has a pin/pattern/password).
@@ -1108,6 +1113,9 @@ public class KeyguardViewMediator extends SystemUI {
                     StartKeyguardExitAnimParams params = (StartKeyguardExitAnimParams) msg.obj;
                     handleStartKeyguardExitAnimation(params.startTime, params.fadeoutDuration);
                     break;
+                case KEYGUARD_DONE_PENDING_TIMEOUT:
+                    Log.w(TAG, "Timeout while waiting for activity drawn!");
+                    // Fall through.
                 case ON_ACTIVITY_DRAWN:
                     handleOnActivityDrawn();
                     break;
@@ -1122,7 +1130,7 @@ public class KeyguardViewMediator extends SystemUI {
     private void handleKeyguardDone(boolean authenticated, boolean wakeup) {
         if (DEBUG) Log.d(TAG, "handleKeyguardDone");
         synchronized (this) {
-            mKeyguardDonePending = false;
+            resetKeyguardDonePendingLocked();
         }
 
         if (authenticated) {
@@ -1242,7 +1250,7 @@ public class KeyguardViewMediator extends SystemUI {
             mStatusBarKeyguardViewManager.show(options);
             mHiding = false;
             mShowing = true;
-            mKeyguardDonePending = false;
+            resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
@@ -1321,7 +1329,7 @@ public class KeyguardViewMediator extends SystemUI {
 
             mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
             mShowing = false;
-            mKeyguardDonePending = false;
+            resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
             updateActivityLockScreenState();
             adjustStatusBarLocked();
@@ -1415,6 +1423,11 @@ public class KeyguardViewMediator extends SystemUI {
     private boolean isAssistantAvailable() {
         return mSearchManager != null
                 && mSearchManager.getAssistIntent(mContext, false, UserHandle.USER_CURRENT) != null;
+    }
+
+    private void resetKeyguardDonePendingLocked() {
+        mKeyguardDonePending = false;
+        mHandler.removeMessages(KEYGUARD_DONE_PENDING_TIMEOUT);
     }
 
     public void onBootCompleted() {
