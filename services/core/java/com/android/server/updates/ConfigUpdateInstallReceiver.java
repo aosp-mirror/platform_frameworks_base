@@ -47,7 +47,6 @@ public class ConfigUpdateInstallReceiver extends BroadcastReceiver {
 
     private static final String TAG = "ConfigUpdateInstallReceiver";
 
-    private static final String EXTRA_CONTENT_PATH = "CONTENT_PATH";
     private static final String EXTRA_REQUIRED_HASH = "REQUIRED_HASH";
     private static final String EXTRA_SIGNATURE = "SIGNATURE";
     private static final String EXTRA_VERSION_NUMBER = "VERSION";
