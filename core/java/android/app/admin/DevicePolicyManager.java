@@ -3306,6 +3306,7 @@ public class DevicePolicyManager {
      * <p>The settings that can be updated by a profile or device owner with this method are:
      * <ul>
      * <li>{@link Settings.Secure#DEFAULT_INPUT_METHOD}</li>
+     * <li>{@link Settings.Secure#INSTALL_NON_MARKET_APPS}</li>
      * <li>{@link Settings.Secure#SKIP_FIRST_USE_HINTS}</li>
      * </ul>
      * <p>A device owner can additionally update the following settings:
