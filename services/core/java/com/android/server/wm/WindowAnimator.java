@@ -333,10 +333,11 @@ public class WindowAnimator {
                             + " hidden=" + win.mRootToken.hidden
                             + " anim=" + win.mWinAnimator.mAnimation);
                 } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
-                    final boolean hideWhenLocked = !((win.mIsImWindow || imeTarget == win) && showImeOverKeyguard) ||
-                            (appShowWhenLocked != null && (appShowWhenLocked == win.mAppToken ||
-                                    // Show error dialogs over apps that dismiss keyguard.
-                                    (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0)));
+                    final boolean hideWhenLocked =
+                            !(((win.mIsImWindow || imeTarget == win) && showImeOverKeyguard)
+                            || (appShowWhenLocked != null && (appShowWhenLocked == win.mAppToken ||
+                            // Show error dialogs over apps that dismiss keyguard.
+                            (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0)));
                     if (((mForceHiding == KEYGUARD_ANIMATING_IN)
                                 && (!winAnimator.isAnimating() || hideWhenLocked))
                             || ((mForceHiding == KEYGUARD_SHOWN) && hideWhenLocked)) {
