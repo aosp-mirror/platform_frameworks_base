@@ -2867,6 +2867,38 @@ public class PackageManagerService extends IPackageManager.Stub {
         return PackageManager.SIGNATURE_NO_MATCH;
     }
 
+    private boolean isRecoverSignatureUpdateNeeded(PackageParser.Package scannedPkg) {
+        if (isExternal(scannedPkg)) {
+            return mSettings.isExternalDatabaseVersionOlderThan(
+                    DatabaseVersion.SIGNATURE_MALFORMED_RECOVER);
+        } else {
+            return mSettings.isInternalDatabaseVersionOlderThan(
+                    DatabaseVersion.SIGNATURE_MALFORMED_RECOVER);
+        }
+    }
+
+    private int compareSignaturesRecover(PackageSignatures existingSigs,
+            PackageParser.Package scannedPkg) {
+        if (!isRecoverSignatureUpdateNeeded(scannedPkg)) {
+            return PackageManager.SIGNATURE_NO_MATCH;
+        }
+
+        String msg = null;
+        try {
+            if (Signature.areEffectiveMatch(existingSigs.mSignatures, scannedPkg.mSignatures)) {
+                logCriticalInfo(Log.INFO, "Recovered effectively matching certificates for "
+                        + scannedPkg.packageName);
+                return PackageManager.SIGNATURE_MATCH;
+            }
+        } catch (CertificateException e) {
+            msg = e.getMessage();
+        }
+
+        logCriticalInfo(Log.INFO,
+                "Failed to recover certificates for " + scannedPkg.packageName + ": " + msg);
+        return PackageManager.SIGNATURE_NO_MATCH;
+    }
+
     @Override
     public String[] getPackagesForUid(int uid) {
         uid = UserHandle.getAppId(uid);
@@ -4155,7 +4187,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (ps != null
                 && ps.codePath.equals(srcFile)
                 && ps.timeStamp == srcFile.lastModified()
-                && !isCompatSignatureUpdateNeeded(pkg)) {
+                && !isCompatSignatureUpdateNeeded(pkg)
+                && !isRecoverSignatureUpdateNeeded(pkg)) {
             long mSigningKeySetId = ps.keySetData.getProperSigningKeySet();
             if (ps.signatures.mSignatures != null
                     && ps.signatures.mSignatures.length != 0
@@ -4430,6 +4463,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                         == PackageManager.SIGNATURE_MATCH;
             }
             if (!match) {
+                match = compareSignaturesRecover(pkgSetting.signatures, pkg)
+                        == PackageManager.SIGNATURE_MATCH;
+            }
+            if (!match) {
                 throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE, "Package "
                         + pkg.packageName + " signatures do not match the "
                         + "previously installed version; ignoring!");
@@ -4443,6 +4480,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
             if (!match) {
                 match = compareSignaturesCompat(pkgSetting.sharedUser.signatures, pkg)
+                        == PackageManager.SIGNATURE_MATCH;
+            }
+            if (!match) {
+                match = compareSignaturesRecover(pkgSetting.sharedUser.signatures, pkg)
                         == PackageManager.SIGNATURE_MATCH;
             }
             if (!match) {
@@ -5393,6 +5434,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!pkgSetting.keySetData.isUsingUpgradeKeySets() || pkgSetting.sharedUser != null) {
                 try {
                     verifySignaturesLP(pkgSetting, pkg);
+                    // We just determined the app is signed correctly, so bring
+                    // over the latest parsed certs.
+                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
                 } catch (PackageManagerException e) {
                     if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                         throw e;
@@ -5425,7 +5469,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + pkg.packageName + " upgrade keys do not match the "
                             + "previously installed version");
                 } else {
-                    // signatures may have changed as result of upgrade
+                    // We just determined the app is signed correctly, so bring
+                    // over the latest parsed certs.
                     pkgSetting.signatures.mSignatures = pkg.mSignatures;
                 }
             }
