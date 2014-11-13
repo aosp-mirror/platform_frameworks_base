@@ -24,7 +24,6 @@ public:
     }
 
     virtual size_t read(void* buffer, size_t size) {
-        JNIEnv* env = fEnv;
         if (NULL == buffer) {
             if (0 == size) {
                 return 0;

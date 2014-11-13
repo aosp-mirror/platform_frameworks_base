@@ -191,12 +191,6 @@ extern int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
 
-static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
-{
-    if (jniThrowException(env, exc, msg) != 0)
-        assert(false);
-}
-
 /*
  * Code written in the Java Programming Language calls here from main().
  */
@@ -1212,13 +1206,6 @@ static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env
         }
     }
     return 0;
-}
-
-static void register_jam_procs(const RegJAMProc array[], size_t count)
-{
-    for (size_t i = 0; i < count; i++) {
-        array[i]();
-    }
 }
 
 static const RegJNIRec gRegJNI[] = {

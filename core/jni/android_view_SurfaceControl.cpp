@@ -134,7 +134,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
     status_t res;
     if (allLayers) {
         minLayer = 0;
-        maxLayer = -1UL;
+        maxLayer = -1;
     }
 
     res = screenshot->update(displayToken, sourceCrop, width, height,

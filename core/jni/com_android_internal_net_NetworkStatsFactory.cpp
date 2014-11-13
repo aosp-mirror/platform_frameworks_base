@@ -17,6 +17,7 @@
 #define LOG_TAG "NetworkStats"
 
 #include <errno.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -187,7 +188,7 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
         if (endPos - pos == 3) {
             rawTag = 0;
         } else {
-            if (sscanf(pos, "%llx", &rawTag) != 1) {
+            if (sscanf(pos, "%" PRIx64, &rawTag) != 1) {
                 ALOGE("bad tag: %s", pos);
                 fclose(fp);
                 return -1;
@@ -204,7 +205,7 @@ static int readNetworkStatsDetail(JNIEnv* env, jclass clazz, jobject stats,
         while (*pos == ' ') pos++;
 
         // Parse remaining fields.
-        if (sscanf(pos, "%u %u %llu %llu %llu %llu",
+        if (sscanf(pos, "%u %u %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64,
                 &s.uid, &s.set, &s.rxBytes, &s.rxPackets,
                 &s.txBytes, &s.txPackets) == 6) {
             if (limitUid != -1 && limitUid != s.uid) {
