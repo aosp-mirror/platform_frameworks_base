@@ -23,10 +23,7 @@ import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
-import android.util.LayoutDirection;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -63,8 +60,6 @@ public class NotificationPanelView extends PanelView implements
     private static final float HEADER_RUBBERBAND_FACTOR = 2.05f;
     private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
 
-    private static final int DOZE_BACKGROUND_COLOR = 0xff000000;
-    private static final int TAG_KEY_ANIM = R.id.scrim;
     public static final long DOZE_ANIMATION_DURATION = 700;
 
     private KeyguardAffordanceHelper mAfforanceHelper;
@@ -1824,11 +1819,9 @@ public class NotificationPanelView extends PanelView implements
         if (dozing == mDozing) return;
         mDozing = dozing;
         if (mDozing) {
-            setBackgroundColorAlpha(DOZE_BACKGROUND_COLOR, 0xff, false /*animate*/);
             mKeyguardStatusBar.setVisibility(View.INVISIBLE);
             mKeyguardBottomArea.setVisibility(View.INVISIBLE);
         } else {
-            setBackgroundColorAlpha(DOZE_BACKGROUND_COLOR, 0, animate);
             mKeyguardBottomArea.setVisibility(View.VISIBLE);
             mKeyguardStatusBar.setVisibility(View.VISIBLE);
             if (animate) {
@@ -1841,52 +1834,6 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public boolean isDozing() {
         return mDozing;
-    }
-
-    private void setBackgroundColorAlpha(int rgb, int targetAlpha,
-            boolean animate) {
-        int currentAlpha = getBackgroundAlpha(this);
-        if (currentAlpha == targetAlpha) {
-            return;
-        }
-        final int r = Color.red(rgb);
-        final int g = Color.green(rgb);
-        final int b = Color.blue(rgb);
-        Object runningAnim = getTag(TAG_KEY_ANIM);
-        if (runningAnim instanceof ValueAnimator) {
-            ((ValueAnimator) runningAnim).cancel();
-        }
-        if (!animate) {
-            setBackgroundColor(Color.argb(targetAlpha, r, g, b));
-            return;
-        }
-        ValueAnimator anim = ValueAnimator.ofInt(currentAlpha, targetAlpha);
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                int value = (int) animation.getAnimatedValue();
-                setBackgroundColor(Color.argb(value, r, g, b));
-            }
-        });
-        anim.setInterpolator(mDozeAnimationInterpolator);
-        anim.setDuration(DOZE_ANIMATION_DURATION);
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                setTag(TAG_KEY_ANIM, null);
-            }
-        });
-        anim.start();
-        setTag(TAG_KEY_ANIM, anim);
-    }
-
-    private static int getBackgroundAlpha(View view) {
-        if (view.getBackground() instanceof ColorDrawable) {
-            ColorDrawable drawable = (ColorDrawable) view.getBackground();
-            return Color.alpha(drawable.getColor());
-        } else {
-            return 0;
-        }
     }
 
     public void setShadeEmpty(boolean shadeEmpty) {
