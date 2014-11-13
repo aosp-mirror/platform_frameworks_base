@@ -34,6 +34,7 @@ import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.IDevicePolicyManager;
+import android.app.backup.IBackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -3648,6 +3649,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (mDeviceOwner != null && mDeviceOwner.hasDeviceOwner()) {
                 throw new IllegalStateException(
                         "Trying to set device owner but device owner is already set.");
+            }
+
+            // Shutting down backup manager service permanently.
+            long ident = Binder.clearCallingIdentity();
+            try {
+                IBackupManager ibm = IBackupManager.Stub.asInterface(
+                        ServiceManager.getService(Context.BACKUP_SERVICE));
+                ibm.setBackupServiceActive(UserHandle.USER_OWNER, false);
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Failed deactivating backup service.", e);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
 
             if (mDeviceOwner == null) {
