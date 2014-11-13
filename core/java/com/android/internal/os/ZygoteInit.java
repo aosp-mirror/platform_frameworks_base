@@ -45,6 +45,8 @@ import libcore.io.IoUtils;
 
 import java.io.BufferedReader;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -97,9 +99,9 @@ public class ZygoteInit {
     static final int GC_LOOP_COUNT = 10;
 
     /**
-     * The name of a resource file that contains classes to preload.
+     * The path of a file that contains classes to preload.
      */
-    private static final String PRELOADED_CLASSES = "preloaded-classes";
+    private static final String PRELOADED_CLASSES = "/system/etc/preloaded-classes";
 
     /** Controls whether we should preload resources during zygote init. */
     private static final boolean PRELOAD_RESOURCES = true;
@@ -284,90 +286,92 @@ public class ZygoteInit {
     private static void preloadClasses() {
         final VMRuntime runtime = VMRuntime.getRuntime();
 
-        InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream(
-                PRELOADED_CLASSES);
-        if (is == null) {
+        InputStream is;
+        try {
+            is = new FileInputStream(PRELOADED_CLASSES);
+        } catch (FileNotFoundException e) {
             Log.e(TAG, "Couldn't find " + PRELOADED_CLASSES + ".");
-        } else {
-            Log.i(TAG, "Preloading classes...");
-            long startTime = SystemClock.uptimeMillis();
+            return;
+        }
 
-            // Drop root perms while running static initializers.
-            setEffectiveGroup(UNPRIVILEGED_GID);
-            setEffectiveUser(UNPRIVILEGED_UID);
+        Log.i(TAG, "Preloading classes...");
+        long startTime = SystemClock.uptimeMillis();
 
-            // Alter the target heap utilization.  With explicit GCs this
-            // is not likely to have any effect.
-            float defaultUtilization = runtime.getTargetHeapUtilization();
-            runtime.setTargetHeapUtilization(0.8f);
+        // Drop root perms while running static initializers.
+        setEffectiveGroup(UNPRIVILEGED_GID);
+        setEffectiveUser(UNPRIVILEGED_UID);
 
-            // Start with a clean slate.
-            System.gc();
-            runtime.runFinalizationSync();
-            Debug.startAllocCounting();
+        // Alter the target heap utilization.  With explicit GCs this
+        // is not likely to have any effect.
+        float defaultUtilization = runtime.getTargetHeapUtilization();
+        runtime.setTargetHeapUtilization(0.8f);
 
-            try {
-                BufferedReader br
-                    = new BufferedReader(new InputStreamReader(is), 256);
+        // Start with a clean slate.
+        System.gc();
+        runtime.runFinalizationSync();
+        Debug.startAllocCounting();
 
-                int count = 0;
-                String line;
-                while ((line = br.readLine()) != null) {
-                    // Skip comments and blank lines.
-                    line = line.trim();
-                    if (line.startsWith("#") || line.equals("")) {
-                        continue;
-                    }
+        try {
+            BufferedReader br
+                = new BufferedReader(new InputStreamReader(is), 256);
 
-                    try {
-                        if (false) {
-                            Log.v(TAG, "Preloading " + line + "...");
-                        }
-                        Class.forName(line);
-                        if (Debug.getGlobalAllocSize() > PRELOAD_GC_THRESHOLD) {
-                            if (false) {
-                                Log.v(TAG,
-                                    " GC at " + Debug.getGlobalAllocSize());
-                            }
-                            System.gc();
-                            runtime.runFinalizationSync();
-                            Debug.resetGlobalAllocSize();
-                        }
-                        count++;
-                    } catch (ClassNotFoundException e) {
-                        Log.w(TAG, "Class not found for preloading: " + line);
-                    } catch (UnsatisfiedLinkError e) {
-                        Log.w(TAG, "Problem preloading " + line + ": " + e);
-                    } catch (Throwable t) {
-                        Log.e(TAG, "Error preloading " + line + ".", t);
-                        if (t instanceof Error) {
-                            throw (Error) t;
-                        }
-                        if (t instanceof RuntimeException) {
-                            throw (RuntimeException) t;
-                        }
-                        throw new RuntimeException(t);
-                    }
+            int count = 0;
+            String line;
+            while ((line = br.readLine()) != null) {
+                // Skip comments and blank lines.
+                line = line.trim();
+                if (line.startsWith("#") || line.equals("")) {
+                    continue;
                 }
 
-                Log.i(TAG, "...preloaded " + count + " classes in "
-                        + (SystemClock.uptimeMillis()-startTime) + "ms.");
-            } catch (IOException e) {
-                Log.e(TAG, "Error reading " + PRELOADED_CLASSES + ".", e);
-            } finally {
-                IoUtils.closeQuietly(is);
-                // Restore default.
-                runtime.setTargetHeapUtilization(defaultUtilization);
-
-                // Fill in dex caches with classes, fields, and methods brought in by preloading.
-                runtime.preloadDexCaches();
-
-                Debug.stopAllocCounting();
-
-                // Bring back root. We'll need it later.
-                setEffectiveUser(ROOT_UID);
-                setEffectiveGroup(ROOT_GID);
+                try {
+                    if (false) {
+                        Log.v(TAG, "Preloading " + line + "...");
+                    }
+                    Class.forName(line);
+                    if (Debug.getGlobalAllocSize() > PRELOAD_GC_THRESHOLD) {
+                        if (false) {
+                            Log.v(TAG,
+                                " GC at " + Debug.getGlobalAllocSize());
+                        }
+                        System.gc();
+                        runtime.runFinalizationSync();
+                        Debug.resetGlobalAllocSize();
+                    }
+                    count++;
+                } catch (ClassNotFoundException e) {
+                    Log.w(TAG, "Class not found for preloading: " + line);
+                } catch (UnsatisfiedLinkError e) {
+                    Log.w(TAG, "Problem preloading " + line + ": " + e);
+                } catch (Throwable t) {
+                    Log.e(TAG, "Error preloading " + line + ".", t);
+                    if (t instanceof Error) {
+                        throw (Error) t;
+                    }
+                    if (t instanceof RuntimeException) {
+                        throw (RuntimeException) t;
+                    }
+                    throw new RuntimeException(t);
+                }
             }
+
+            Log.i(TAG, "...preloaded " + count + " classes in "
+                    + (SystemClock.uptimeMillis()-startTime) + "ms.");
+        } catch (IOException e) {
+            Log.e(TAG, "Error reading " + PRELOADED_CLASSES + ".", e);
+        } finally {
+            IoUtils.closeQuietly(is);
+            // Restore default.
+            runtime.setTargetHeapUtilization(defaultUtilization);
+
+            // Fill in dex caches with classes, fields, and methods brought in by preloading.
+            runtime.preloadDexCaches();
+
+            Debug.stopAllocCounting();
+
+            // Bring back root. We'll need it later.
+            setEffectiveUser(ROOT_UID);
+            setEffectiveGroup(ROOT_GID);
         }
     }
 
