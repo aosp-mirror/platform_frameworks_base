@@ -1194,17 +1194,37 @@ class FastScroller {
         return MathUtils.constrain((y - offset) / range, 0f, 1f);
     }
 
+    /**
+     * Calculates the thumb position based on the visible items.
+     *
+     * @param firstVisibleItem First visible item, >= 0.
+     * @param visibleItemCount Number of visible items, >= 0.
+     * @param totalItemCount Total number of items, >= 0.
+     * @return
+     */
     private float getPosFromItemCount(
             int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        if (mSectionIndexer == null || mListAdapter == null) {
+        final SectionIndexer sectionIndexer = mSectionIndexer;
+        if (sectionIndexer == null || mListAdapter == null) {
             getSectionsFromIndexer();
         }
 
-        final boolean hasSections = mSectionIndexer != null && mSections != null
+        if (visibleItemCount == 0 || totalItemCount == 0) {
+            // No items are visible.
+            return 0;
+        }
+
+        final boolean hasSections = sectionIndexer != null && mSections != null
                 && mSections.length > 0;
         if (!hasSections || !mMatchDragPosition) {
-            return (float) firstVisibleItem / (totalItemCount - visibleItemCount);
+            if (visibleItemCount == totalItemCount) {
+                // All items are visible.
+                return 0;
+            } else {
+                return (float) firstVisibleItem / (totalItemCount - visibleItemCount);
+            }
         }
+
         // Ignore headers.
         firstVisibleItem -= mHeaderCount;
         if (firstVisibleItem < 0) {
@@ -1222,14 +1242,14 @@ class FastScroller {
         }
 
         // Number of rows in this section.
-        final int section = mSectionIndexer.getSectionForPosition(firstVisibleItem);
-        final int sectionPos = mSectionIndexer.getPositionForSection(section);
+        final int section = sectionIndexer.getSectionForPosition(firstVisibleItem);
+        final int sectionPos = sectionIndexer.getPositionForSection(section);
         final int sectionCount = mSections.length;
         final int positionsInSection;
         if (section < sectionCount - 1) {
             final int nextSectionPos;
             if (section + 1 < sectionCount) {
-                nextSectionPos = mSectionIndexer.getPositionForSection(section + 1);
+                nextSectionPos = sectionIndexer.getPositionForSection(section + 1);
             } else {
                 nextSectionPos = totalItemCount - 1;
             }
