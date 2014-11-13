@@ -17,6 +17,10 @@
 
 // This source file is automatically generated
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
 
