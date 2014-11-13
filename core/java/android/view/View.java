@@ -11842,7 +11842,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     void invalidateInternal(int l, int t, int r, int b, boolean invalidateCache,
             boolean fullInvalidate) {
         if (mGhostView != null) {
-            mGhostView.invalidate(invalidateCache);
+            mGhostView.invalidate(true);
             return;
         }
 
