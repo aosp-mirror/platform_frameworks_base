@@ -19,6 +19,7 @@ package android.media;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
+import android.media.AudioAttributes;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -116,8 +117,8 @@ interface IAudioService {
 
     boolean isBluetoothA2dpOn();
 
-    int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName);
+    int requestAudioFocus(in AudioAttributes aa, int durationHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags);
 
     int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId);
 
