@@ -640,6 +640,7 @@ public class PhoneAccount implements Parcelable {
         if (mIconBitmap == null) {
             out.writeInt(0);
         } else {
+            out.writeInt(1);
             mIconBitmap.writeToParcel(out, flags);
         }
         out.writeInt(mIconTint);
