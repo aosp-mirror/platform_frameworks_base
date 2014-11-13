@@ -29,7 +29,7 @@
 
 namespace android {
 
-static jlong native_measureDirectory(JNIEnv* env, jobject clazz, jstring directory) {
+static jlong native_measureDirectory(JNIEnv* env, jobject /* clazz */, jstring directory) {
     jlong ret = 0L;
 
     const char* path = env->GetStringUTFChars(directory, NULL);
@@ -65,7 +65,7 @@ int register_com_android_defcontainer(JNIEnv *env) {
 
 } // namespace android
 
-int JNI_OnLoad(JavaVM *jvm, void* reserved) {
+int JNI_OnLoad(JavaVM *jvm, void* /* reserved */) {
     JNIEnv *env;
 
     if (jvm->GetEnv((void**)&env, JNI_VERSION_1_6)) {
