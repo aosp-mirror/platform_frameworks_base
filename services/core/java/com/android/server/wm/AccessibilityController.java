@@ -984,18 +984,23 @@ final class AccessibilityController {
 
                 final int visibleWindowCount = visibleWindows.size();
                 for (int i = visibleWindowCount - 1; i >= 0; i--) {
-                    WindowState windowState = visibleWindows.valueAt(i);
-
-                    // Compute the bounds in the screen.
-                    Rect boundsInScreen = mTempRect;
-                    computeWindowBoundsInScreen(windowState, boundsInScreen);
-
+                    final WindowState windowState = visibleWindows.valueAt(i);
                     final int flags = windowState.mAttrs.flags;
 
                     // If the window is not touchable - ignore.
                     if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
                         continue;
                     }
+
+                    // If the window is an accessibility overlay - ignore.
+                    if (windowState.mAttrs.type ==
+                            WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
+                        continue;
+                    }
+
+                    // Compute the bounds in the screen.
+                    final Rect boundsInScreen = mTempRect;
+                    computeWindowBoundsInScreen(windowState, boundsInScreen);
 
                     // If the window is completely covered by other windows - ignore.
                     if (unaccountedSpace.quickReject(boundsInScreen)) {
@@ -1013,14 +1018,8 @@ final class AccessibilityController {
                         }
                     }
 
-                    // Account for the space this window takes if the window
-                    // is not an accessibility overlay which does not change
-                    // the reported windows.
-                    if (windowState.mAttrs.type == WindowManager.LayoutParams
-                            .TYPE_ACCESSIBILITY_OVERLAY) {
-                        unaccountedSpace.op(boundsInScreen, unaccountedSpace,
-                                Region.Op.REVERSE_DIFFERENCE);
-                    }
+                    unaccountedSpace.op(boundsInScreen, unaccountedSpace,
+                            Region.Op.REVERSE_DIFFERENCE);
 
                     // We figured out what is touchable for the entire screen - done.
                     if (unaccountedSpace.isEmpty()) {
