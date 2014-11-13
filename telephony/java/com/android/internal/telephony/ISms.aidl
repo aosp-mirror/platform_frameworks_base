@@ -290,81 +290,102 @@ interface ISms {
 
     /**
      * Enable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier. Note that if two different clients enable the same
-     * message identifier, they must both disable it for the device to stop
-     * receiving those messages.
+     * message identifier and RAN type. The RAN type specify this message ID
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients
+     * enable the same message identifier, they must both disable it for the
+     * device to stop receiving those messages.
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #disableCellBroadcast(int)
+     * @see #disableCellBroadcast(int, int)
      */
-    boolean enableCellBroadcast(int messageIdentifier);
+    boolean enableCellBroadcast(int messageIdentifier, int ranType);
 
     /**
      * Enable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier. Note that if two different clients enable the same
-     * message identifier, they must both disable it for the device to stop
-     * receiving those messages.
+     * message identifier and RAN type. The RAN type specify this message ID
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients
+     * enable the same message identifier, they must both disable it for the
+     * device to stop receiving those messages.
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
      * @param subId for which the broadcast has to be enabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #disableCellBroadcast(int)
+     * @see #disableCellBroadcast(int, int)
      */
-    boolean enableCellBroadcastForSubscriber(in int subId, int messageIdentifier);
+    boolean enableCellBroadcastForSubscriber(int subId, int messageIdentifier, int ranType);
 
     /**
      * Disable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier. Note that if two different clients enable the same
-     * message identifier, they must both disable it for the device to stop
-     * receiving those messages.
+     * message identifier and RAN type. The RAN type specify this message ID
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients
+     * enable the same message identifier, they must both disable it for the
+     * device to stop receiving those messages.
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #enableCellBroadcast(int)
+     * @see #enableCellBroadcast(int, int)
      */
-    boolean disableCellBroadcast(int messageIdentifier);
+    boolean disableCellBroadcast(int messageIdentifier, int ranType);
 
     /**
      * Disable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier. Note that if two different clients enable the same
-     * message identifier, they must both disable it for the device to stop
-     * receiving those messages.
+     * message identifier and RAN type. The RAN type specify this message ID
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients
+     * enable the same message identifier, they must both disable it for the
+     * device to stop receiving those messages.
      *
      * @param messageIdentifier Message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
      * @param subId for which the broadcast has to be disabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #enableCellBroadcast(int)
+     * @see #enableCellBroadcast(int, int)
      */
-    boolean disableCellBroadcastForSubscriber(in int subId, int messageIdentifier);
+    boolean disableCellBroadcastForSubscriber(int subId, int messageIdentifier, int ranType);
 
     /*
      * Enable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier range. Note that if two different clients enable
-     * a message identifier range, they must both disable it for the device
-     * to stop receiving those messages.
+     * message identifier range and RAN type. The RAN type specify this message
+     * ID range belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different
+     * clients enable a message identifier range, they must both disable it for
+     * the device to stop receiving those messages.
      *
      * @param startMessageId first message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
      * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #disableCellBroadcastRange(int, int)
+     * @see #disableCellBroadcastRange(int, int, int)
      */
-    boolean enableCellBroadcastRange(int startMessageId, int endMessageId);
+    boolean enableCellBroadcastRange(int startMessageId, int endMessageId, int ranType);
 
     /*
      * Enable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier range. Note that if two different clients enable
+     * message identifier range and RAN type. The RAN type specify this message ID range
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients enable
      * a message identifier range, they must both disable it for the device
      * to stop receiving those messages.
      *
@@ -373,15 +394,20 @@ interface ISms {
      * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
      * @param subId for which the broadcast has to be enabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
-     * @see #disableCellBroadcastRange(int, int)
+     * @see #disableCellBroadcastRange(int, int, int)
      */
-    boolean enableCellBroadcastRangeForSubscriber(int subId, int startMessageId, int endMessageId);
+    boolean enableCellBroadcastRangeForSubscriber(int subId, int startMessageId, int endMessageId,
+            int ranType);
 
     /**
      * Disable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier range. Note that if two different clients enable
+     * message identifier range and RAN type. The RAN type specify this message ID range
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients enable
      * a message identifier range, they must both disable it for the device
      * to stop receiving those messages.
      *
@@ -389,29 +415,36 @@ interface ISms {
      *   C.R1001-G (3GPP2)
      * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
      *   C.R1001-G (3GPP2)
-     * @return true if successful, false otherwise
-     *
-     * @see #enableCellBroadcastRange(int, int)
-     */
-    boolean disableCellBroadcastRange(int startMessageId, int endMessageId);
-
-    /**
-     * Disable reception of cell broadcast (SMS-CB) messages with the given
-     * message identifier range. Note that if two different clients enable
-     * a message identifier range, they must both disable it for the device
-     * to stop receiving those messages.
-     *
-     * @param startMessageId first message identifier as specified in TS 23.041 (3GPP) or
-     *   C.R1001-G (3GPP2)
-     * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
-     *   C.R1001-G (3GPP2)
-     * @param subId for which the broadcast has to be disabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
      * @return true if successful, false otherwise
      *
      * @see #enableCellBroadcastRange(int, int, int)
      */
+    boolean disableCellBroadcastRange(int startMessageId, int endMessageId, int ranType);
+
+    /**
+     * Disable reception of cell broadcast (SMS-CB) messages with the given
+     * message identifier range and RAN type. The RAN type specify this message ID range
+     * belong to 3GPP (GSM) or 3GPP2(CDMA). Note that if two different clients enable
+     * a message identifier range, they must both disable it for the device
+     * to stop receiving those messages.
+     *
+     * @param startMessageId first message identifier as specified in TS 23.041 (3GPP) or
+     *   C.R1001-G (3GPP2)
+     * @param endMessageId last message identifier as specified in TS 23.041 (3GPP) or
+     *   C.R1001-G (3GPP2)
+     * @param subId for which the broadcast has to be disabled
+     * @param ranType as defined in class SmsManager, the value can be one of these:
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_GSM
+     *    android.telephony.SmsMessage.CELL_BROADCAST_RAN_TYPE_CDMA
+     * @return true if successful, false otherwise
+     *
+     * @see #enableCellBroadcastRange(int, int, int, int)
+     */
     boolean disableCellBroadcastRangeForSubscriber(int subId, int startMessageId,
-            int endMessageId);
+            int endMessageId, int ranType);
 
     /**
      * Returns the premium SMS send permission for the specified package.
