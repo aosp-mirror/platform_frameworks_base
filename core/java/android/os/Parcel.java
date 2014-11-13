@@ -340,6 +340,12 @@ public final class Parcel {
         }
     }
 
+    /** @hide */
+    public static native long getGlobalAllocSize();
+
+    /** @hide */
+    public static native long getGlobalAllocCount();
+
     /**
      * Returns the total amount of data contained in the parcel.
      */
