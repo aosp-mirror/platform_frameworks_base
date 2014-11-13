@@ -1,12 +1,16 @@
 package com.android.systemui.statusbar.policy;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 
+import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.R;
 
 import org.mockito.Mockito;
@@ -126,5 +130,151 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_CDMA);
         setCdmaRoaming(false);
+    }
+
+    public void testOnReceive_updateSimState_noSim() {
+        Intent intent = new Intent();
+        intent.setAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE, IccCardConstants.INTENT_VALUE_ICC_ABSENT);
+
+        mNetworkController.onReceive(mContext, intent);
+
+        assertSimStateEquals(IccCardConstants.State.ABSENT);
+    }
+
+    public void testOnReceive_stringsUpdatedAction_spn() {
+        String expectedMNetworkName = "Test";
+        Intent intent = createStringsUpdatedIntent(true /* showSpn */,
+                expectedMNetworkName /* spn */,
+                false /* showPlmn */,
+                "NotTest" /* plmn */);
+
+        mNetworkController.onReceive(mContext, intent);
+
+        assertNetworkNameEquals(expectedMNetworkName);
+    }
+
+    public void testOnReceive_stringsUpdatedAction_plmn() {
+        String expectedMNetworkName = "Test";
+
+        Intent intent = createStringsUpdatedIntent(false /* showSpn */,
+                "NotTest" /* spn */,
+                true /* showPlmn */,
+                expectedMNetworkName /* plmn */);
+
+        mNetworkController.onReceive(mContext, intent);
+
+        assertNetworkNameEquals(expectedMNetworkName);
+    }
+
+    public void testOnReceive_stringsUpdatedAction_bothFalse() {
+        Intent intent = createStringsUpdatedIntent(false /* showSpn */,
+              "Irrelevant" /* spn */,
+              false /* showPlmn */,
+              "Irrelevant" /* plmn */);
+
+        mNetworkController.onReceive(mContext, intent);
+
+        String defaultNetworkName = mMobileSignalController
+            .getStringIfExists(
+                com.android.internal.R.string.lockscreen_carrier_default);
+        assertNetworkNameEquals(defaultNetworkName);
+    }
+
+    public void testOnReceive_stringsUpdatedAction_bothTrueAndNull() {
+        Intent intent = createStringsUpdatedIntent(true /* showSpn */,
+            null /* spn */,
+            true /* showPlmn */,
+            null /* plmn */);
+
+        mNetworkController.onReceive(mContext, intent);
+
+        String defaultNetworkName = mMobileSignalController.getStringIfExists(
+                com.android.internal.R.string.lockscreen_carrier_default);
+        assertNetworkNameEquals(defaultNetworkName);
+    }
+
+    public void testOnReceive_stringsUpdatedAction_bothTrueAndNonNull() {
+        String spn = "Test1";
+        String plmn = "Test2";
+
+        Intent intent = createStringsUpdatedIntent(true /* showSpn */,
+            spn /* spn */,
+            true /* showPlmn */,
+            plmn /* plmn */);
+
+        mNetworkController.onReceive(mContext, intent);
+
+        assertNetworkNameEquals(plmn
+                + mMobileSignalController.getStringIfExists(
+                        R.string.status_bar_network_name_separator)
+                + spn);
+    }
+
+    private Intent createStringsUpdatedIntent(boolean showSpn, String spn,
+            boolean showPlmn, String plmn) {
+
+        Intent intent = new Intent();
+        intent.setAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
+
+        intent.putExtra(TelephonyIntents.EXTRA_SHOW_SPN, showSpn);
+        intent.putExtra(TelephonyIntents.EXTRA_SPN, spn);
+
+        intent.putExtra(TelephonyIntents.EXTRA_SHOW_PLMN, showPlmn);
+        intent.putExtra(TelephonyIntents.EXTRA_PLMN, plmn);
+
+        return intent;
+    }
+
+    public void testOnUpdateDataActivity_dataIn() {
+        setupDefaultSignal();
+
+        updateDataActivity(TelephonyManager.DATA_ACTIVITY_IN);
+
+        verifyLastQsMobileDataIndicators(true /* visible */,
+                TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+                DEFAULT_QS_ICON /* typeIcon */,
+                true /* dataIn */,
+                false /* dataOut */);
+
+    }
+
+    public void testOnUpdateDataActivity_dataOut() {
+      setupDefaultSignal();
+
+      updateDataActivity(TelephonyManager.DATA_ACTIVITY_OUT);
+
+      verifyLastQsMobileDataIndicators(true /* visible */,
+              TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+              DEFAULT_QS_ICON /* typeIcon */,
+              false /* dataIn */,
+              true /* dataOut */);
+
+    }
+
+    public void testOnUpdateDataActivity_dataInOut() {
+      setupDefaultSignal();
+
+      updateDataActivity(TelephonyManager.DATA_ACTIVITY_INOUT);
+
+      verifyLastQsMobileDataIndicators(true /* visible */,
+              TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+              DEFAULT_QS_ICON /* typeIcon */,
+              true /* dataIn */,
+              true /* dataOut */);
+
+    }
+
+    public void testOnUpdateDataActivity_dataActivityNone() {
+      setupDefaultSignal();
+
+      updateDataActivity(TelephonyManager.DATA_ACTIVITY_NONE);
+
+      verifyLastQsMobileDataIndicators(true /* visible */,
+              TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL] /* icon */,
+              DEFAULT_QS_ICON /* typeIcon */,
+              false /* dataIn */,
+              false /* dataOut */);
+
     }
 }

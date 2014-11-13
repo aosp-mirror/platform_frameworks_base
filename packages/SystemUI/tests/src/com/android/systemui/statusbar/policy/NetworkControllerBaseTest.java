@@ -17,9 +17,12 @@ import android.telephony.TelephonyManager;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl.MobileSignalController;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SignalCluster;
 
 import org.mockito.ArgumentCaptor;
@@ -41,6 +44,7 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
     protected static final int DEFAULT_QS_ICON = TelephonyIcons.QS_ICON_3G;
 
     protected NetworkControllerImpl mNetworkController;
+    protected MobileSignalController mMobileSignalController;
     protected PhoneStateListener mPhoneStateListener;
     protected SignalCluster mSignalCluster;
     protected NetworkSignalChangedCallback mNetworkSignalChangedCallback;
@@ -84,12 +88,25 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         when(subscription.getSubscriptionId()).thenReturn(subId);
         subs.add(subscription);
         mNetworkController.setCurrentSubscriptions(subs);
-        mPhoneStateListener =
-                mNetworkController.mMobileSignalControllers.get(subId).mPhoneStateListener;
+        mMobileSignalController = mNetworkController.mMobileSignalControllers.get(subId);
+        mPhoneStateListener = mMobileSignalController.mPhoneStateListener;
         mSignalCluster = mock(SignalCluster.class);
         mNetworkSignalChangedCallback = mock(NetworkSignalChangedCallback.class);
         mNetworkController.addSignalCluster(mSignalCluster);
         mNetworkController.addNetworkSignalChangedCallback(mNetworkSignalChangedCallback);
+    }
+
+    protected NetworkControllerImpl setUpNoMobileData() {
+      when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
+      NetworkControllerImpl networkControllerNoMobile
+              = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
+                        mConfig, mock(AccessPointControllerImpl.class),
+                        mock(MobileDataControllerImpl.class));
+
+      setupNetworkController();
+
+      return networkControllerNoMobile;
+
     }
 
     @Override
@@ -238,4 +255,12 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
         assertEquals("Visibility in status bar", visible, (boolean) visibleArg.getValue());
     }
+
+   protected void assertSimStateEquals(IccCardConstants.State expected) {
+       assertEquals("Sim state", expected, mMobileSignalController.getSimState());
+   }
+
+   protected void assertNetworkNameEquals(String expected) {
+       assertEquals("Network name", expected, mNetworkController.getMobileNetworkName());
+   }
 }
