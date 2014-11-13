@@ -582,11 +582,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         state = mPowerState.getScreenState();
 
         // Use zero brightness when screen is off.
-        // Use full brightness when screen brightness is boosted.
         if (state == Display.STATE_OFF) {
             brightness = PowerManager.BRIGHTNESS_OFF;
-        } else if (mPowerRequest.boostScreenBrightness) {
-            brightness = PowerManager.BRIGHTNESS_ON;
         }
 
         // Configure auto-brightness.
@@ -599,6 +596,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     && brightness < 0;
             mAutomaticBrightnessController.configure(autoBrightnessEnabled,
                     mPowerRequest.screenAutoBrightnessAdjustment, state != Display.STATE_ON);
+        }
+
+        // Apply brightness boost.
+        // We do this here after configuring auto-brightness so that we don't
+        // disable the light sensor during this temporary state.  That way when
+        // boost ends we will be able to resume normal auto-brightness behavior
+        // without any delay.
+        if (mPowerRequest.boostScreenBrightness
+                && brightness != PowerManager.BRIGHTNESS_OFF) {
+            brightness = PowerManager.BRIGHTNESS_ON;
         }
 
         // Apply auto-brightness.
