@@ -2871,6 +2871,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         final TaskRecord task = r.task;
         task.setLastThumbnail(task.stack.screenshotActivities(r));
         mService.addRecentTaskLocked(task);
+        mService.notifyTaskStackChangedLocked();
         mWindowManager.setAppVisibility(r.appToken, false);
     }
 

@@ -69,7 +69,7 @@ import java.util.Objects;
 final class ActivityRecord {
     static final String TAG = ActivityManagerService.TAG;
     static final boolean DEBUG_SAVED_STATE = ActivityStackSupervisor.DEBUG_SAVED_STATE;
-    final public static String RECENTS_PACKAGE_NAME = "com.android.systemui.recent";
+    final public static String RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
     private static final String TAG_ACTIVITY = "activity";
     private static final String ATTR_ID = "id";
@@ -792,7 +792,7 @@ final class ActivityRecord {
         }
     }
 
-    void updateThumbnail(Bitmap newThumbnail, CharSequence description) {
+    void updateThumbnailLocked(Bitmap newThumbnail, CharSequence description) {
         if (newThumbnail != null) {
             if (ActivityManagerService.DEBUG_THUMBNAILS) Slog.i(ActivityManagerService.TAG,
                     "Setting thumbnail of " + this + " to " + newThumbnail);
