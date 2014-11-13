@@ -280,7 +280,7 @@ public class PathParser {
          * @param path The target Path object.
          */
         public static void nodesToPath(PathDataNode[] node, Path path) {
-            float[] current = new float[4];
+            float[] current = new float[6];
             char previousCommand = 'm';
             for (int i = 0; i < node.length; i++) {
                 addCommand(path, current, previousCommand, node[i].mType, node[i].mParams);
@@ -313,6 +313,8 @@ public class PathParser {
             float currentY = current[1];
             float ctrlPointX = current[2];
             float ctrlPointY = current[3];
+            float currentSegmentStartX = current[4];
+            float currentSegmentStartY = current[5];
             float reflectiveCtrlPointX;
             float reflectiveCtrlPointY;
 
@@ -320,7 +322,15 @@ public class PathParser {
                 case 'z':
                 case 'Z':
                     path.close();
-                    return;
+                    // Path is closed here, but we need to move the pen to the
+                    // closed position. So we cache the segment's starting position,
+                    // and restore it here.
+                    currentX = currentSegmentStartX;
+                    currentY = currentSegmentStartY;
+                    ctrlPointX = currentSegmentStartX;
+                    ctrlPointY = currentSegmentStartY;
+                    path.moveTo(currentX, currentY);
+                    break;
                 case 'm':
                 case 'M':
                 case 'l':
@@ -350,17 +360,22 @@ public class PathParser {
                     incr = 7;
                     break;
             }
+
             for (int k = 0; k < val.length; k += incr) {
                 switch (cmd) {
                     case 'm': // moveto - Start a new sub-path (relative)
                         path.rMoveTo(val[k + 0], val[k + 1]);
                         currentX += val[k + 0];
                         currentY += val[k + 1];
+                        currentSegmentStartX = currentX;
+                        currentSegmentStartY = currentY;
                         break;
                     case 'M': // moveto - Start a new sub-path
                         path.moveTo(val[k + 0], val[k + 1]);
                         currentX = val[k + 0];
                         currentY = val[k + 1];
+                        currentSegmentStartX = currentX;
+                        currentSegmentStartY = currentY;
                         break;
                     case 'l': // lineto - Draw a line from the current point (relative)
                         path.rLineTo(val[k + 0], val[k + 1]);
@@ -371,10 +386,6 @@ public class PathParser {
                         path.lineTo(val[k + 0], val[k + 1]);
                         currentX = val[k + 0];
                         currentY = val[k + 1];
-                        break;
-                    case 'z': // closepath - Close the current subpath
-                    case 'Z': // closepath - Close the current subpath
-                        path.close();
                         break;
                     case 'h': // horizontal lineto - Draws a horizontal line (relative)
                         path.rLineTo(val[k + 0], 0);
@@ -526,6 +537,8 @@ public class PathParser {
             current[1] = currentY;
             current[2] = ctrlPointX;
             current[3] = ctrlPointY;
+            current[4] = currentSegmentStartX;
+            current[5] = currentSegmentStartY;
         }
 
         private static void drawArc(Path p,
