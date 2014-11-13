@@ -356,20 +356,12 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Ρύθμιση"</string>
     <string name="muted_by" msgid="6147073845094180001">"Σίγαση από <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <!-- no translation found for screen_pinning_title (3273740381976175811) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description (1346522416878235405) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (8518446209564202557) -->
-    <skip />
-    <!-- no translation found for screen_pinning_positive (3783985798366751226) -->
-    <skip />
-    <!-- no translation found for screen_pinning_negative (3741602308343880268) -->
-    <skip />
-    <!-- no translation found for quick_settings_reset_confirmation_title (748792586749897883) -->
-    <skip />
-    <!-- no translation found for quick_settings_reset_confirmation_message (2235970126803317374) -->
-    <skip />
-    <!-- no translation found for quick_settings_reset_confirmation_button (2660339101868367515) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="3273740381976175811">"Η οθόνη καρφιτσώθηκε"</string>
+    <string name="screen_pinning_description" msgid="1346522416878235405">"Με αυτόν τον τρόπο παραμένει σε προβολή έως ότου την ξεκαρφιτσώσετε. Αγγίξτε παρατεταμένα \"Επιστροφή\" και \"Επισκόπηση\" ταυτόχρονα για ξεκαρφίτσωμα."</string>
+    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"Με αυτόν τον τρόπο παραμένει σε προβολή έως ότου την ξεκαρφιτσώσετε. Αγγίξτε παρατεταμένα \"Επισκόπηση\" για ξεκαρφίτσωμα."</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"Το κατάλαβα"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"Όχι"</string>
+    <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Απόκρυψη <xliff:g id="TILE_LABEL">%1$s</xliff:g>;"</string>
+    <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Θα εμφανιστεί ξανά την επόμενη φορά που θα το ενεργοποιήσετε στις ρυθμίσεις."</string>
+    <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Απόκρυψη"</string>
 </resources>
