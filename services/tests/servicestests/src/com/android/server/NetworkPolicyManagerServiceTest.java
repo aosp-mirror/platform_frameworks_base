@@ -838,7 +838,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        return new NetworkState(info, prop, null, null, TEST_SSID);
+        return new NetworkState(info, prop, null, null, null, TEST_SSID);
     }
 
     private void expectCurrentTime() throws Exception {
