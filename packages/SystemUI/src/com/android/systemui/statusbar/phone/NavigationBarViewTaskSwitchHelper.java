@@ -17,9 +17,11 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 
 public class NavigationBarViewTaskSwitchHelper extends GestureDetector.SimpleOnGestureListener {
@@ -36,7 +38,8 @@ public class NavigationBarViewTaskSwitchHelper extends GestureDetector.SimpleOnG
 
     public NavigationBarViewTaskSwitchHelper(Context context) {
         ViewConfiguration configuration = ViewConfiguration.get(context);
-        mScrollTouchSlop = 4 * configuration.getScaledTouchSlop();
+        Resources r = context.getResources();
+        mScrollTouchSlop = r.getDimensionPixelSize(R.dimen.navigation_bar_min_swipe_distance);
         mMinFlingVelocity = configuration.getScaledMinimumFlingVelocity();
         mTaskSwitcherDetector = new GestureDetector(context, this);
     }

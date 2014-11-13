@@ -177,7 +177,7 @@ final class ProcessList {
     // 1280x800 or larger screen with around 1GB RAM.  Values are in KB.
     private final int[] mOomMinFreeHigh = new int[] {
             73728, 92160, 110592,
-            129024, 147456, 184320
+            129024, 225000, 325000
     };
     // The actual OOM killer memory levels we are using.
     private final int[] mOomMinFree = new int[mOomAdj.length];
@@ -235,22 +235,16 @@ final class ProcessList {
             Slog.i("XXXXXX", "minfree_adj=" + minfree_adj + " minfree_abs=" + minfree_abs);
         }
 
-        // We've now baked in the increase to the basic oom values above, since
-        // they seem to be useful more generally for devices that are tight on
-        // memory than just for 64 bit.  This should probably have some more
-        // tuning done, so not deleting it quite yet...
-        final boolean is64bit = false; //Build.SUPPORTED_64_BIT_ABIS.length > 0;
+        if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
+            // Increase the high min-free levels for cached processes for 64-bit
+            mOomMinFreeHigh[4] = 225000;
+            mOomMinFreeHigh[5] = 325000;
+        }
 
         for (int i=0; i<mOomAdj.length; i++) {
             int low = mOomMinFreeLow[i];
             int high = mOomMinFreeHigh[i];
             mOomMinFree[i] = (int)(low + ((high-low)*scale));
-            if (is64bit) {
-                // On 64 bit devices, we consume more baseline RAM, because 64 bit is cool!
-                // To avoid being all pagey and stuff, scale up the memory levels to
-                // give us some breathing room.
-                mOomMinFree[i] = (3*mOomMinFree[i])/2;
-            }
         }
 
         if (minfree_abs >= 0) {
