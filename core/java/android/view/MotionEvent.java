@@ -3168,6 +3168,12 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         return ev;
     }
 
+    /** @hide */
+    @Override
+    public final void cancel() {
+        setAction(ACTION_CANCEL);
+    }
+
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(PARCEL_TOKEN_MOTION_EVENT);
         nativeWriteToParcel(mNativePtr, out);
