@@ -2541,7 +2541,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mInputMonitor.updateInputWindowsLw(false /*force*/);
 
-            if (true || localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG, "addWindow: New client "
+            if (localLOGV || DEBUG_ADD_REMOVE) Slog.v(TAG, "addWindow: New client "
                     + client.asBinder() + ": window=" + win + " Callers=" + Debug.getCallers(5));
 
             if (win.isVisibleOrAdding() && updateOrientationFromAppTokensLocked(false)) {
@@ -2706,8 +2706,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.removeWindowLw(win);
         win.removeLocked();
 
-        if (true || DEBUG_ADD_REMOVE) Slog.v(TAG, "removeWindowInnerLocked: " + win +
-                " Callers=" + Debug.getCallers(5));
+        if (DEBUG_ADD_REMOVE) Slog.v(TAG, "removeWindowInnerLocked: " + win);
         mWindowMap.remove(win.mClient.asBinder());
         if (win.mAppOp != AppOpsManager.OP_NONE) {
             mAppOps.finishOp(win.mAppOp, win.getOwningUid(), win.getOwningPackage());
