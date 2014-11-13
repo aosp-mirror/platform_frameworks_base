@@ -84,6 +84,7 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
             ALOGE("fingerprint: invalid msg: %d", msg.type);
             return;
     }
+    (void)arg3;
     //ALOG(LOG_VERBOSE, LOG_TAG, "hal_notify(msg=%d, arg1=%d, arg2=%d)\n", msg.type, arg1, arg2);
 
 	// TODO: fix gross hack to attach JNI to calling thread

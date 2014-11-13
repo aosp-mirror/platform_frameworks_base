@@ -148,11 +148,6 @@ static void setStartDelay(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong s
     animator->setStartDelay(startDelay);
 }
 
-static jlong getStartDelay(JNIEnv* env, jobject clazz, jlong animatorPtr) {
-    BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
-    return static_cast<jlong>(animator->startDelay());
-}
-
 static void setInterpolator(JNIEnv* env, jobject clazz, jlong animatorPtr, jlong interpolatorPtr) {
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
     Interpolator* interpolator = reinterpret_cast<Interpolator*>(interpolatorPtr);

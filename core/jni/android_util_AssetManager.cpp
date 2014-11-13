@@ -17,9 +17,6 @@
 
 #define LOG_TAG "asset"
 
-#define DEBUG_STYLES(x) //x
-#define THROW_ON_BAD_ID 0
-
 #include <android_runtime/android_util_AssetManager.h>
 
 #include "jni.h"
@@ -47,6 +44,9 @@ extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
 
 namespace android {
+
+static const bool kThrowOnBadId = false;
+static const bool kDebugStyles = false;
 
 // ----------------------------------------------------------------------------
 
@@ -803,21 +803,21 @@ static jint android_content_AssetManager_loadResourceValue(JNIEnv* env, jobject 
     ResTable_config config;
     uint32_t typeSpecFlags;
     ssize_t block = res.getResource(ident, &value, false, density, &typeSpecFlags, &config);
-#if THROW_ON_BAD_ID
-    if (block == BAD_INDEX) {
-        jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-        return 0;
-    }
-#endif
-    uint32_t ref = ident;
-    if (resolve) {
-        block = res.resolveReference(&value, block, &ref, &typeSpecFlags, &config);
-#if THROW_ON_BAD_ID
+    if (kThrowOnBadId) {
         if (block == BAD_INDEX) {
             jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
             return 0;
         }
-#endif
+    }
+    uint32_t ref = ident;
+    if (resolve) {
+        block = res.resolveReference(&value, block, &ref, &typeSpecFlags, &config);
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return 0;
+            }
+        }
     }
     if (block >= 0) {
         return copyValue(env, outValue, &res, value, ref, block, typeSpecFlags, &config);
@@ -863,12 +863,12 @@ static jint android_content_AssetManager_loadResourceBagValue(JNIEnv* env, jobje
     uint32_t ref = ident;
     if (resolve) {
         block = res.resolveReference(&value, block, &ref, &typeSpecFlags);
-#if THROW_ON_BAD_ID
-        if (block == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return 0;
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return 0;
+            }
         }
-#endif
     }
     if (block >= 0) {
         return copyValue(env, outValue, &res, value, ref, block, typeSpecFlags);
@@ -978,12 +978,12 @@ static jint android_content_AssetManager_loadThemeAttributeValue(
     uint32_t ref = 0;
     if (resolve) {
         block = res.resolveReference(&value, block, &ref, &typeSpecFlags);
-#if THROW_ON_BAD_ID
-        if (block == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return 0;
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return 0;
+            }
         }
-#endif
     }
     return block >= 0 ? copyValue(env, outValue, &res, value, ref, block, typeSpecFlags) : block;
 }
@@ -994,6 +994,7 @@ static void android_content_AssetManager_dumpTheme(JNIEnv* env, jobject clazz,
 {
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeHandle);
     const ResTable& res(theme->getResTable());
+    (void)res;
 
     // XXX Need to use params.
     theme->dumpToLog();
@@ -1021,8 +1022,10 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
         return JNI_FALSE;
     }
 
-    DEBUG_STYLES(ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x",
-        themeToken, defStyleAttr, defStyleRes));
+    if (kDebugStyles) {
+        ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x",
+                themeToken, defStyleAttr, defStyleRes);
+    }
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
     const ResTable& res = theme->getResTable();
@@ -1089,7 +1092,9 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
     for (jsize ii=0; ii<NI; ii++) {
         const uint32_t curIdent = (uint32_t)src[ii];
 
-        DEBUG_STYLES(ALOGI("RETRIEVING ATTR 0x%08x...", curIdent));
+        if (kDebugStyles) {
+            ALOGI("RETRIEVING ATTR 0x%08x...", curIdent);
+        }
 
         // Try to find a value for this attribute...  we prioritize values
         // coming from, first XML attributes, then XML style, then default
@@ -1104,8 +1109,9 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
             block = -1;
             value.dataType = Res_value::TYPE_ATTRIBUTE;
             value.data = srcValues[ii];
-            DEBUG_STYLES(ALOGI("-> From values: type=0x%x, data=0x%08x",
-                    value.dataType, value.data));
+            if (kDebugStyles) {
+                ALOGI("-> From values: type=0x%x, data=0x%08x", value.dataType, value.data);
+            }
         }
 
         // Skip through the default style values until the end or the next possible match.
@@ -1118,8 +1124,9 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
                 block = defStyleEnt->stringBlock;
                 typeSetFlags = defStyleTypeSetFlags;
                 value = defStyleEnt->map.value;
-                DEBUG_STYLES(ALOGI("-> From def style: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From def style: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
             defStyleEnt++;
         }
@@ -1130,38 +1137,45 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
             ssize_t newBlock = theme->resolveAttributeReference(&value, block,
                     &resid, &typeSetFlags, &config);
             if (newBlock >= 0) block = newBlock;
-            DEBUG_STYLES(ALOGI("-> Resolved attr: type=0x%x, data=0x%08x",
-                    value.dataType, value.data));
+            if (kDebugStyles) {
+                ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType, value.data);
+            }
         } else {
             // If we still don't have a value for this attribute, try to find
             // it in the theme!
             ssize_t newBlock = theme->getAttribute(curIdent, &value, &typeSetFlags);
             if (newBlock >= 0) {
-                DEBUG_STYLES(ALOGI("-> From theme: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
                 newBlock = res.resolveReference(&value, block, &resid,
                         &typeSetFlags, &config);
-#if THROW_ON_BAD_ID
-                if (newBlock == BAD_INDEX) {
-                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                    return JNI_FALSE;
+                if (kThrowOnBadId) {
+                    if (newBlock == BAD_INDEX) {
+                        jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                        return JNI_FALSE;
+                    }
                 }
-#endif
                 if (newBlock >= 0) block = newBlock;
-                DEBUG_STYLES(ALOGI("-> Resolved theme: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
         }
 
         // Deal with the special @null value -- it turns back to TYPE_NULL.
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
-            DEBUG_STYLES(ALOGI("-> Setting to @null!"));
+            if (kDebugStyles) {
+                ALOGI("-> Setting to @null!");
+            }
             value.dataType = Res_value::TYPE_NULL;
             block = -1;
         }
 
-        DEBUG_STYLES(ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
-                curIdent, value.dataType, value.data));
+        if (kDebugStyles) {
+            ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", curIdent, value.dataType,
+                  value.data);
+        }
 
         // Write the final value back to Java.
         dest[STYLE_TYPE] = value.dataType;
@@ -1215,8 +1229,10 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
         return JNI_FALSE;
     }
 
-    DEBUG_STYLES(ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x xml=0x%x",
-        themeToken, defStyleAttr, defStyleRes, xmlParserToken));
+    if (kDebugStyles) {
+    ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x xml=0x%x",
+          themeToken, defStyleAttr, defStyleRes, xmlParserToken);
+    }
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
     const ResTable& res = theme->getResTable();
@@ -1313,7 +1329,9 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
     for (jsize ii=0; ii<NI; ii++) {
         const uint32_t curIdent = (uint32_t)src[ii];
 
-        DEBUG_STYLES(ALOGI("RETRIEVING ATTR 0x%08x...", curIdent));
+        if (kDebugStyles) {
+            ALOGI("RETRIEVING ATTR 0x%08x...", curIdent);
+        }
 
         // Try to find a value for this attribute...  we prioritize values
         // coming from, first XML attributes, then XML style, then default
@@ -1334,8 +1352,9 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
             xmlParser->getAttributeValue(ix, &value);
             ix++;
             curXmlAttr = xmlParser->getAttributeNameResID(ix);
-            DEBUG_STYLES(ALOGI("-> From XML: type=0x%x, data=0x%08x",
-                    value.dataType, value.data));
+            if (kDebugStyles) {
+                ALOGI("-> From XML: type=0x%x, data=0x%08x", value.dataType, value.data);
+            }
         }
 
         // Skip through the style values until the end or the next possible match.
@@ -1348,8 +1367,9 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
                 block = styleEnt->stringBlock;
                 typeSetFlags = styleTypeSetFlags;
                 value = styleEnt->map.value;
-                DEBUG_STYLES(ALOGI("-> From style: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From style: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
             styleEnt++;
         }
@@ -1364,8 +1384,9 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
                 block = defStyleEnt->stringBlock;
                 typeSetFlags = defStyleTypeSetFlags;
                 value = defStyleEnt->map.value;
-                DEBUG_STYLES(ALOGI("-> From def style: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From def style: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
             defStyleEnt++;
         }
@@ -1376,38 +1397,44 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
             ssize_t newBlock = theme->resolveAttributeReference(&value, block,
                     &resid, &typeSetFlags, &config);
             if (newBlock >= 0) block = newBlock;
-            DEBUG_STYLES(ALOGI("-> Resolved attr: type=0x%x, data=0x%08x",
-                    value.dataType, value.data));
+            if (kDebugStyles) {
+                ALOGI("-> Resolved attr: type=0x%x, data=0x%08x", value.dataType, value.data);
+            }
         } else {
             // If we still don't have a value for this attribute, try to find
             // it in the theme!
             ssize_t newBlock = theme->getAttribute(curIdent, &value, &typeSetFlags);
             if (newBlock >= 0) {
-                DEBUG_STYLES(ALOGI("-> From theme: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> From theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
                 newBlock = res.resolveReference(&value, block, &resid,
                         &typeSetFlags, &config);
-#if THROW_ON_BAD_ID
-                if (newBlock == BAD_INDEX) {
-                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                    return JNI_FALSE;
+                if (kThrowOnBadId) {
+                    if (newBlock == BAD_INDEX) {
+                        jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                        return JNI_FALSE;
+                    }
                 }
-#endif
                 if (newBlock >= 0) block = newBlock;
-                DEBUG_STYLES(ALOGI("-> Resolved theme: type=0x%x, data=0x%08x",
-                        value.dataType, value.data));
+                if (kDebugStyles) {
+                    ALOGI("-> Resolved theme: type=0x%x, data=0x%08x", value.dataType, value.data);
+                }
             }
         }
 
         // Deal with the special @null value -- it turns back to TYPE_NULL.
         if (value.dataType == Res_value::TYPE_REFERENCE && value.data == 0) {
-            DEBUG_STYLES(ALOGI("-> Setting to @null!"));
+            if (kDebugStyles) {
+                ALOGI("-> Setting to @null!");
+            }
             value.dataType = Res_value::TYPE_NULL;
             block = kXmlBlock;
         }
 
-        DEBUG_STYLES(ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x",
-                curIdent, value.dataType, value.data));
+        if (kDebugStyles) {
+            ALOGI("Attribute 0x%08x: type=0x%x, data=0x%08x", curIdent, value.dataType, value.data);
+        }
 
         // Write the final value back to Java.
         dest[STYLE_TYPE] = value.dataType;
@@ -1536,12 +1563,12 @@ static jboolean android_content_AssetManager_retrieveAttributes(JNIEnv* env, job
             //printf("Resolving attribute reference\n");
             ssize_t newBlock = res.resolveReference(&value, block, &resid,
                     &typeSetFlags, &config);
-#if THROW_ON_BAD_ID
-            if (newBlock == BAD_INDEX) {
-                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                return JNI_FALSE;
+            if (kThrowOnBadId) {
+                if (newBlock == BAD_INDEX) {
+                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                    return JNI_FALSE;
+                }
             }
-#endif
             if (newBlock >= 0) block = newBlock;
         }
 
@@ -1649,12 +1676,12 @@ static jint android_content_AssetManager_retrieveArray(JNIEnv* env, jobject claz
             //printf("Resolving attribute reference\n");
             ssize_t newBlock = res.resolveReference(&value, block, &resid,
                     &typeSetFlags, &config);
-#if THROW_ON_BAD_ID
-            if (newBlock == BAD_INDEX) {
-                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-                return JNI_FALSE;
+            if (kThrowOnBadId) {
+                if (newBlock == BAD_INDEX) {
+                    jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                    return JNI_FALSE;
+                }
             }
-#endif
             if (newBlock >= 0) block = newBlock;
         }
 
@@ -1761,12 +1788,12 @@ static jintArray android_content_AssetManager_getArrayStringInfo(JNIEnv* env, jo
             stringIndex = value.data;
         }
 
-#if THROW_ON_BAD_ID
-        if (stringBlock == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return array;
+        if (kThrowOnBadId) {
+            if (stringBlock == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return array;
+            }
         }
-#endif
 
         //todo: It might be faster to allocate a C array to contain
         //      the blocknums and indices, put them in there and then
@@ -1809,12 +1836,12 @@ static jobjectArray android_content_AssetManager_getArrayStringResource(JNIEnv* 
 
         // Take care of resolving the found resource to its final value.
         ssize_t block = res.resolveReference(&value, bag->stringBlock, NULL);
-#if THROW_ON_BAD_ID
-        if (block == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return array;
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return array;
+            }
         }
-#endif
         if (value.dataType == Res_value::TYPE_STRING) {
             const ResStringPool* pool = res.getTableStringBlock(block);
             const char* str8 = pool->string8At(value.data, &strLen);
@@ -1872,12 +1899,12 @@ static jintArray android_content_AssetManager_getArrayIntResource(JNIEnv* env, j
 
         // Take care of resolving the found resource to its final value.
         ssize_t block = res.resolveReference(&value, bag->stringBlock, NULL);
-#if THROW_ON_BAD_ID
-        if (block == BAD_INDEX) {
-            jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
-            return array;
+        if (kThrowOnBadId) {
+            if (block == BAD_INDEX) {
+                jniThrowException(env, "java/lang/IllegalStateException", "Bad resource!");
+                return array;
+            }
         }
-#endif
         if (value.dataType >= Res_value::TYPE_FIRST_INT
                 && value.dataType <= Res_value::TYPE_LAST_INT) {
             int intVal = value.data;
@@ -1909,7 +1936,6 @@ static jintArray android_content_AssetManager_getStyleAttributes(JNIEnv* env, jo
         return NULL;
     }
 
-    Res_value value;
     const ResTable::bag_entry* bag = startOfBag;
     for (size_t i=0; ((ssize_t)i)<N; i++, bag++) {
         int resourceId = bag->map.name.ident;

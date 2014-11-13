@@ -292,6 +292,7 @@ int register_android_view_InputChannel(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/InputChannel",
             gInputChannelMethods, NELEM(gInputChannelMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    (void)res;
 
     FIND_CLASS(gInputChannelClassInfo.clazz, "android/view/InputChannel");
 

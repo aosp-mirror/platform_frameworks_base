@@ -39,6 +39,9 @@
 
 namespace android {
 
+template <typename T>
+void UNUSED(T t) {}
+
 static jfieldID field_inboundFileDescriptors;
 static jfieldID field_outboundFileDescriptors;
 static jclass class_Credentials;
@@ -492,7 +495,6 @@ static ssize_t socket_read_all(JNIEnv *env, jobject thisJ, int fd,
         void *buffer, size_t len)
 {
     ssize_t ret;
-    ssize_t bytesread = 0;
     struct msghdr msg;
     struct iovec iv;
     unsigned char *buf = (unsigned char *)buffer;
@@ -722,7 +724,7 @@ static void socket_write (JNIEnv *env, jobject object,
     }
 
     err = socket_write_all(env, object, fd, &b, 1);
-
+    UNUSED(err);
     // A return of -1 above means an exception is pending
 }
 
@@ -758,7 +760,7 @@ static void socket_writeba (JNIEnv *env, jobject object,
 
     err = socket_write_all(env, object, fd,
             byteBuffer + off, len);
-
+    UNUSED(err);
     // A return of -1 above means an exception is pending
 
     env->ReleaseByteArrayElements(buffer, byteBuffer, JNI_ABORT);

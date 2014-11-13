@@ -169,6 +169,7 @@ int register_android_os_MessageQueue(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/os/MessageQueue",
             gMessageQueueMethods, NELEM(gMessageQueueMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    (void)res;
 
     jclass clazz;
     FIND_CLASS(clazz, "android/os/MessageQueue");

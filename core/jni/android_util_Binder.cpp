@@ -85,15 +85,6 @@ static struct binderinternal_offsets_t
 
 // ----------------------------------------------------------------------------
 
-static struct debug_offsets_t
-{
-    // Class state.
-    jclass mClass;
-
-} gDebugOffsets;
-
-// ----------------------------------------------------------------------------
-
 static struct error_offsets_t
 {
     jclass mClass;
@@ -1024,7 +1015,9 @@ static bool push_eventlog_int(char** pos, const char* end, jint val) {
 }
 
 // From frameworks/base/core/java/android/content/EventLogTags.logtags:
-#define ENABLE_BINDER_SAMPLE 0
+
+static const bool kEnableBinderSample = false;
+
 #define LOGTAG_BINDER_OPERATION 52004
 
 static void conditionally_log_binder_call(int64_t start_millis,
@@ -1095,24 +1088,28 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
     ALOGV("Java code calling transact on %p in Java object %p with code %" PRId32 "\n",
             target, obj, code);
 
-#if ENABLE_BINDER_SAMPLE
-    // Only log the binder call duration for things on the Java-level main thread.
-    // But if we don't
-    const bool time_binder_calls = should_time_binder_calls();
 
+    bool time_binder_calls;
     int64_t start_millis;
-    if (time_binder_calls) {
-        start_millis = uptimeMillis();
+    if (kEnableBinderSample) {
+        // Only log the binder call duration for things on the Java-level main thread.
+        // But if we don't
+        time_binder_calls = should_time_binder_calls();
+
+        if (time_binder_calls) {
+            start_millis = uptimeMillis();
+        }
     }
-#endif
+
     //printf("Transact from Java code to %p sending: ", target); data->print();
     status_t err = target->transact(code, *data, reply, flags);
     //if (reply) printf("Transact from Java code to %p received: ", target); reply->print();
-#if ENABLE_BINDER_SAMPLE
-    if (time_binder_calls) {
-        conditionally_log_binder_call(start_millis, target, code);
+
+    if (kEnableBinderSample) {
+        if (time_binder_calls) {
+            conditionally_log_binder_call(start_millis, target, code);
+        }
     }
-#endif
 
     if (err == NO_ERROR) {
         return JNI_TRUE;

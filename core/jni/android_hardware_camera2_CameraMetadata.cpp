@@ -315,7 +315,6 @@ static void CameraMetadata_writeValues(JNIEnv *env, jobject thiz, jint tag, jbyt
                              "Tag (%d) did not have a type", tag);
         return;
     }
-    size_t tagSize = Helpers::getTypeSize(tagType);
 
     status_t res;
 
@@ -617,7 +616,7 @@ static void CameraMetadata_classInit(JNIEnv *env, jobject thiz) {
     if (find_fields(env, fields_to_find, NELEM(fields_to_find)) < 0)
         return;
 
-    jclass clazz = env->FindClass(CAMERA_METADATA_CLASS_NAME);
+    env->FindClass(CAMERA_METADATA_CLASS_NAME);
 }
 
 static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName) {
