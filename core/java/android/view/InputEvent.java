@@ -196,6 +196,13 @@ public abstract class InputEvent implements Parcelable {
     public abstract long getEventTimeNano();
 
     /**
+     * Marks the input event as being canceled.
+     *
+     * @hide
+     */
+    public abstract void cancel();
+
+    /**
      * Gets the unique sequence number of this event.
      * Every input event that is created or received by a process has a
      * unique sequence number.  Moreover, a new sequence number is obtained
