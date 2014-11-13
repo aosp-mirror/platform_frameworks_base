@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -26,6 +27,7 @@ import android.net.Uri;
  * implementation of this interface, and make it available to the WebView via mechanism TBD.
  * @hide
  */
+@SystemApi
 public interface WebViewFactoryProvider {
     /**
      * This Interface provides glue for implementing the backend of WebView static methods which
