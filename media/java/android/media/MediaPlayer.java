@@ -37,6 +37,7 @@ import android.os.Process;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.util.Log;
@@ -968,11 +969,16 @@ public class MediaPlayer implements SubtitleController.Listener
      * @throws IllegalStateException if it is called in an invalid state
      */
     public void setDataSource(Context context, Uri uri, Map<String, String> headers)
-        throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
-        String scheme = uri.getScheme();
-        if(scheme == null || scheme.equals("file")) {
+            throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
+        final String scheme = uri.getScheme();
+        if (ContentResolver.SCHEME_FILE.equals(scheme)) {
             setDataSource(uri.getPath());
             return;
+        } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
+                && Settings.AUTHORITY.equals(uri.getAuthority())) {
+            // Redirect ringtones to go directly to underlying provider
+            uri = RingtoneManager.getActualDefaultRingtoneUri(context,
+                    RingtoneManager.getDefaultType(uri));
         }
 
         AssetFileDescriptor fd = null;
