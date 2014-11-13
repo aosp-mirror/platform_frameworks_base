@@ -2708,7 +2708,9 @@ package android.accounts {
     method public void invalidateAuthToken(java.lang.String, java.lang.String);
     method public static android.content.Intent newChooseAccountIntent(android.accounts.Account, java.util.ArrayList<android.accounts.Account>, java.lang.String[], boolean, java.lang.String, java.lang.String, java.lang.String[], android.os.Bundle);
     method public java.lang.String peekAuthToken(android.accounts.Account, java.lang.String);
-    method public android.accounts.AccountManagerFuture<java.lang.Boolean> removeAccount(android.accounts.Account, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler);
+    method public deprecated android.accounts.AccountManagerFuture<java.lang.Boolean> removeAccount(android.accounts.Account, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler);
+    method public android.accounts.AccountManagerFuture<android.os.Bundle> removeAccount(android.accounts.Account, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
+    method public boolean removeAccountExplicitly(android.accounts.Account);
     method public void removeOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener);
     method public android.accounts.AccountManagerFuture<android.accounts.Account> renameAccount(android.accounts.Account, java.lang.String, android.accounts.AccountManagerCallback<android.accounts.Account>, android.os.Handler);
     method public void setAuthToken(android.accounts.Account, java.lang.String, java.lang.String);
