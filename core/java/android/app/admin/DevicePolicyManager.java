@@ -146,6 +146,17 @@ public class DevicePolicyManager {
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME";
 
     /**
+     * An {@link android.accounts.Account} extra holding the account to migrate during managed
+     * profile provisioning. If the account supplied is present in the primary user, it will be
+     * copied, along with its credentials to the managed profile and removed from the primary user.
+     *
+     * Use with {@link #ACTION_PROVISION_MANAGED_PROFILE}.
+     */
+
+    public static final String EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE
+        = "android.app.extra.PROVISIONING_ACCOUNT_TO_MIGRATE";
+
+    /**
      * A String extra that, holds the email address of the account which a managed profile is
      * created for. Used with {@link #ACTION_PROVISION_MANAGED_PROFILE} and
      * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE}.
