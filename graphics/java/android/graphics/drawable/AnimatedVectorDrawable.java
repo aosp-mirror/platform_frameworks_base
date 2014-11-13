@@ -435,13 +435,16 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
 
     @Override
     public void start() {
+        // If any one of the animator has not ended, do nothing.
+        if (isStarted()) {
+            return;
+        }
+        // Otherwise, kick off every animator.
         final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
         final int size = animators.size();
         for (int i = 0; i < size; i++) {
             final Animator animator = animators.get(i);
-            if (!animator.isStarted()) {
-                animator.start();
-            }
+            animator.start();
         }
         invalidateSelf();
     }
