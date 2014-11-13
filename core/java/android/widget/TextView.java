@@ -5368,9 +5368,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
         final int maxScrollY = mLayout.getHeight() - vspace;
 
+        // Add sufficient space for cursor and tone marks
+        int cursorWidth = 2 + (int)mTextPaint.density; // adequate for Material cursors
+        int fudgedPaddingRight = Math.max(0, compoundPaddingRight - (cursorWidth - 1));
+
         float clipLeft = compoundPaddingLeft + scrollX;
         float clipTop = (scrollY == 0) ? 0 : extendedPaddingTop + scrollY;
-        float clipRight = right - left - compoundPaddingRight + scrollX;
+        float clipRight = right - left - fudgedPaddingRight + scrollX;
         float clipBottom = bottom - top + scrollY -
                 ((scrollY == maxScrollY) ? 0 : extendedPaddingBottom);
 
