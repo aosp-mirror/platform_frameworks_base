@@ -1234,6 +1234,7 @@ public final class PowerManagerService extends SystemService
             // Phase 0: Basic state updates.
             updateIsPoweredLocked(mDirty);
             updateStayOnLocked(mDirty);
+            updateScreenBrightnessBoostLocked(mDirty);
 
             // Phase 1: Update wakefulness.
             // Loop because the wake lock and user activity computations are influenced
@@ -1465,7 +1466,8 @@ public final class PowerManagerService extends SystemService
     private void updateUserActivitySummaryLocked(long now, int dirty) {
         // Update the status of the user activity timeout timer.
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY
-                | DIRTY_WAKEFULNESS | DIRTY_SETTINGS)) != 0) {
+                | DIRTY_WAKEFULNESS | DIRTY_SETTINGS
+                | DIRTY_SCREEN_BRIGHTNESS_BOOST)) != 0) {
             mHandler.removeMessages(MSG_USER_ACTIVITY_TIMEOUT);
 
             long nextTimeout = 0;
@@ -1641,7 +1643,8 @@ public final class PowerManagerService extends SystemService
                 || mProximityPositive
                 || (mWakeLockSummary & WAKE_LOCK_STAY_AWAKE) != 0
                 || (mUserActivitySummary & (USER_ACTIVITY_SCREEN_BRIGHT
-                        | USER_ACTIVITY_SCREEN_DIM)) != 0;
+                        | USER_ACTIVITY_SCREEN_DIM)) != 0
+                || mScreenBrightnessBoostInProgress;
     }
 
     /**
@@ -1828,9 +1831,6 @@ public final class PowerManagerService extends SystemService
                 | DIRTY_SETTINGS | DIRTY_SCREEN_BRIGHTNESS_BOOST)) != 0) {
             mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked();
 
-            // Handle screen brightness boost timeout.
-            updateScreenBrightnessBoostLocked();
-
             // Determine appropriate screen brightness and auto-brightness adjustments.
             int screenBrightness = mScreenBrightnessSettingDefault;
             float screenAutoBrightnessAdjustment = 0.0f;
@@ -1879,7 +1879,7 @@ public final class PowerManagerService extends SystemService
             }
 
             mDisplayReady = mDisplayManagerInternal.requestPowerState(mDisplayPowerRequest,
-                    mRequestWaitForNegativeProximity) && !mScreenBrightnessBoostInProgress;
+                    mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
 
             if (DEBUG_SPEW) {
@@ -1896,20 +1896,25 @@ public final class PowerManagerService extends SystemService
         return mDisplayReady && !oldDisplayReady;
     }
 
-    private void updateScreenBrightnessBoostLocked() {
-        if (mScreenBrightnessBoostInProgress) {
-            mHandler.removeMessages(MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT);
-            if (mLastScreenBrightnessBoostTime > mLastSleepTime) {
-                final long boostTimeout = mLastScreenBrightnessBoostTime +
-                        SCREEN_BRIGHTNESS_BOOST_TIMEOUT;
-                if (boostTimeout > SystemClock.uptimeMillis()) {
-                    Message msg = mHandler.obtainMessage(MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT);
-                    msg.setAsynchronous(true);
-                    mHandler.sendMessageAtTime(msg, boostTimeout);
-                    return;
+    private void updateScreenBrightnessBoostLocked(int dirty) {
+        if ((dirty & DIRTY_SCREEN_BRIGHTNESS_BOOST) != 0) {
+            if (mScreenBrightnessBoostInProgress) {
+                final long now = SystemClock.uptimeMillis();
+                mHandler.removeMessages(MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT);
+                if (mLastScreenBrightnessBoostTime > mLastSleepTime) {
+                    final long boostTimeout = mLastScreenBrightnessBoostTime +
+                            SCREEN_BRIGHTNESS_BOOST_TIMEOUT;
+                    if (boostTimeout > now) {
+                        Message msg = mHandler.obtainMessage(MSG_SCREEN_BRIGHTNESS_BOOST_TIMEOUT);
+                        msg.setAsynchronous(true);
+                        mHandler.sendMessageAtTime(msg, boostTimeout);
+                        return;
+                    }
                 }
+                mScreenBrightnessBoostInProgress = false;
+                userActivityNoUpdateLocked(now,
+                        PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
             }
-            mScreenBrightnessBoostInProgress = false;
         }
     }
 
@@ -1940,7 +1945,8 @@ public final class PowerManagerService extends SystemService
 
         if ((mWakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
                 || (mUserActivitySummary & USER_ACTIVITY_SCREEN_BRIGHT) != 0
-                || !mBootCompleted) {
+                || !mBootCompleted
+                || mScreenBrightnessBoostInProgress) {
             return DisplayPowerRequest.POLICY_BRIGHT;
         }
 
@@ -2037,15 +2043,13 @@ public final class PowerManagerService extends SystemService
         final boolean needWakeLockSuspendBlocker = ((mWakeLockSummary & WAKE_LOCK_CPU) != 0);
         final boolean needDisplaySuspendBlocker = needDisplaySuspendBlockerLocked();
         final boolean autoSuspend = !needDisplaySuspendBlocker;
+        final boolean interactive = mDisplayPowerRequest.isBrightOrDim();
 
         // Disable auto-suspend if needed.
-        if (!autoSuspend) {
-            if (mDecoupleHalAutoSuspendModeFromDisplayConfig) {
-                setHalAutoSuspendModeLocked(false);
-            }
-            if (mDecoupleHalInteractiveModeFromDisplayConfig) {
-                setHalInteractiveModeLocked(true);
-            }
+        // FIXME We should consider just leaving auto-suspend enabled forever since
+        // we already hold the necessary wakelocks.
+        if (!autoSuspend && mDecoupleHalAutoSuspendModeFromDisplayConfig) {
+            setHalAutoSuspendModeLocked(false);
         }
 
         // First acquire suspend blockers if needed.
@@ -2056,6 +2060,22 @@ public final class PowerManagerService extends SystemService
         if (needDisplaySuspendBlocker && !mHoldingDisplaySuspendBlocker) {
             mDisplaySuspendBlocker.acquire();
             mHoldingDisplaySuspendBlocker = true;
+        }
+
+        // Inform the power HAL about interactive mode.
+        // Although we could set interactive strictly based on the wakefulness
+        // as reported by isInteractive(), it is actually more desirable to track
+        // the display policy state instead so that the interactive state observed
+        // by the HAL more accurately tracks transitions between AWAKE and DOZING.
+        // Refer to getDesiredScreenPolicyLocked() for details.
+        if (mDecoupleHalInteractiveModeFromDisplayConfig) {
+            // When becoming non-interactive, we want to defer sending this signal
+            // until the display is actually ready so that all transitions have
+            // completed.  This is probably a good sign that things have gotten
+            // too tangled over here...
+            if (interactive || mDisplayReady) {
+                setHalInteractiveModeLocked(interactive);
+            }
         }
 
         // Then release suspend blockers if needed.
@@ -2069,13 +2089,8 @@ public final class PowerManagerService extends SystemService
         }
 
         // Enable auto-suspend if needed.
-        if (autoSuspend) {
-            if (mDecoupleHalInteractiveModeFromDisplayConfig) {
-                setHalInteractiveModeLocked(false);
-            }
-            if (mDecoupleHalAutoSuspendModeFromDisplayConfig) {
-                setHalAutoSuspendModeLocked(true);
-            }
+        if (autoSuspend && mDecoupleHalAutoSuspendModeFromDisplayConfig) {
+            setHalAutoSuspendModeLocked(true);
         }
     }
 
@@ -2096,6 +2111,9 @@ public final class PowerManagerService extends SystemService
                     || !mSuspendWhenScreenOffDueToProximityConfig) {
                 return true;
             }
+        }
+        if (mScreenBrightnessBoostInProgress) {
+            return true;
         }
         // Let the system suspend if the screen is off or dozing.
         return false;
