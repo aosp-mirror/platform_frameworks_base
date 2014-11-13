@@ -949,6 +949,9 @@ include the action bar on devices running Android 2.1 or higher."
               Recommending TV Content</a>
           </li>
           <li>
+            <a href="<?cs var:toroot ?>training/tv/discovery/searchable.html">
+              Making TV Apps Searchable</a>
+          <li>
             <a href="<?cs var:toroot ?>training/tv/discovery/in-app-search.html">
               Searching within TV Apps</a>
           </li>
