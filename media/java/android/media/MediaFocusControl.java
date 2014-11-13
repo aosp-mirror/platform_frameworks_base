@@ -538,14 +538,52 @@ public class MediaFocusControl implements OnFinished {
     /**
      * Helper function:
      * Returns true if the system is in a state where the focus can be reevaluated, false otherwise.
+     * The implementation guarantees that a state where focus cannot be immediately reassigned
+     * implies that an "exclusive" focus owner is at the top of the focus stack.
+     * Modifications to the implementation that break this assumption will cause focus requests to
+     * misbehave when honoring the AudioManager.AUDIOFOCUS_FLAG_DELAY_OK flag.
      */
     private boolean canReassignAudioFocus() {
         // focus requests are rejected during a phone call or when the phone is ringing
         // this is equivalent to IN_VOICE_COMM_FOCUS_ID having the focus
-        if (!mFocusStack.isEmpty() && mFocusStack.peek().hasSameClient(IN_VOICE_COMM_FOCUS_ID)) {
+        if (!mFocusStack.isEmpty() && isExclusiveFocusOwner(mFocusStack.peek())) {
             return false;
         }
         return true;
+    }
+
+    private boolean isExclusiveFocusOwner(FocusRequester fr) {
+        return fr.hasSameClient(IN_VOICE_COMM_FOCUS_ID);
+    }
+
+    /**
+     * Helper function
+     * Pre-conditions: focus stack is not empty, there is one or more exclusive focus owner
+     *                 at the top of the focus stack
+     * Push the focus requester onto the audio focus stack at the first position immediately
+     * following the exclusive focus owners.
+     * @return {@link AudioManager#AUDIOFOCUS_REQUEST_GRANTED} or
+     *     {@link AudioManager#AUDIOFOCUS_REQUEST_DELAYED}
+     */
+    private int pushBelowExclusiveFocusOwners(FocusRequester nfr) {
+        int lastExclusiveFocusOwnerIndex = mFocusStack.size();
+        for (int index = mFocusStack.size()-1; index >= 0; index--) {
+            if (isExclusiveFocusOwner(mFocusStack.elementAt(index))) {
+                lastExclusiveFocusOwnerIndex = index;
+            }
+        }
+        if (lastExclusiveFocusOwnerIndex == mFocusStack.size()) {
+            // this should not happen, but handle it and log an error
+            Log.e(TAG, "No exclusive focus owner found in propagateFocusLossFromGain_syncAf()",
+                    new Exception());
+            // no exclusive owner, push at top of stack, focus is granted, propagate change
+            propagateFocusLossFromGain_syncAf(nfr.getGainRequest());
+            mFocusStack.push(nfr);
+            return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+        } else {
+            mFocusStack.insertElementAt(nfr, lastExclusiveFocusOwnerIndex);
+            return AudioManager.AUDIOFOCUS_REQUEST_DELAYED;
+        }
     }
 
     /**
@@ -581,10 +619,11 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
-    /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int)  */
-    protected int requestAudioFocus(int mainStreamType, int focusChangeHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName) {
-        Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId);
+    /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int, int) */
+    protected int requestAudioFocus(AudioAttributes aa, int focusChangeHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags) {
+        Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId + " req=" + focusChangeHint +
+                "flags=0x" + Integer.toHexString(flags));
         // we need a valid binder callback for clients
         if (!cb.pingBinder()) {
             Log.e(TAG, " AudioFocus DOA client for requestAudioFocus(), aborting.");
@@ -597,8 +636,16 @@ public class MediaFocusControl implements OnFinished {
         }
 
         synchronized(mAudioFocusLock) {
+            boolean focusGrantDelayed = false;
             if (!canReassignAudioFocus()) {
-                return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+                if ((flags & AudioManager.AUDIOFOCUS_FLAG_DELAY_OK) == 0) {
+                    return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+                } else {
+                    // request has AUDIOFOCUS_FLAG_DELAY_OK: focus can't be
+                    // granted right now, so the requester will be inserted in the focus stack
+                    // to receive focus later
+                    focusGrantDelayed = true;
+                }
             }
 
             // handle the potential premature death of the new holder of the focus
@@ -616,7 +663,8 @@ public class MediaFocusControl implements OnFinished {
             if (!mFocusStack.empty() && mFocusStack.peek().hasSameClient(clientId)) {
                 // if focus is already owned by this client and the reason for acquiring the focus
                 // hasn't changed, don't do anything
-                if (mFocusStack.peek().getGainRequest() == focusChangeHint) {
+                final FocusRequester fr = mFocusStack.peek();
+                if (fr.getGainRequest() == focusChangeHint && fr.getGrantFlags() == flags) {
                     // unlink death handler so it can be gc'ed.
                     // linkToDeath() creates a JNI global reference preventing collection.
                     cb.unlinkToDeath(afdh, 0);
@@ -624,21 +672,31 @@ public class MediaFocusControl implements OnFinished {
                 }
                 // the reason for the audio focus request has changed: remove the current top of
                 // stack and respond as if we had a new focus owner
-                FocusRequester fr = mFocusStack.pop();
-                fr.release();
+                if (!focusGrantDelayed) {
+                    mFocusStack.pop();
+                    // the entry that was "popped" is the same that was "peeked" above
+                    fr.release();
+                }
             }
 
             // focus requester might already be somewhere below in the stack, remove it
             removeFocusStackEntry(clientId, false /* signal */);
 
-            // propagate the focus change through the stack
-            if (!mFocusStack.empty()) {
-                propagateFocusLossFromGain_syncAf(focusChangeHint);
-            }
+            final FocusRequester nfr = new FocusRequester(aa, focusChangeHint, flags, fd, cb,
+                    clientId, afdh, callingPackageName, Binder.getCallingUid());
+            if (focusGrantDelayed) {
+                // focusGrantDelayed being true implies we can't reassign focus right now
+                // which implies the focus stack is not empty.
+                return pushBelowExclusiveFocusOwners(nfr);
+            } else {
+                // propagate the focus change through the stack
+                if (!mFocusStack.empty()) {
+                    propagateFocusLossFromGain_syncAf(focusChangeHint);
+                }
 
-            // push focus requester at the top of the audio focus stack
-            mFocusStack.push(new FocusRequester(mainStreamType, focusChangeHint, fd, cb,
-                    clientId, afdh, callingPackageName, Binder.getCallingUid()));
+                // push focus requester at the top of the audio focus stack
+                mFocusStack.push(nfr);
+            }
 
         }//synchronized(mAudioFocusLock)
 
