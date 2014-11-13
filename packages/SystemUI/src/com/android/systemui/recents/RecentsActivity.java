@@ -213,10 +213,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         RecentsTaskLoadPlan plan = AlternateRecentsComponent.consumeInstanceLoadPlan();
         if (plan == null) {
             plan = loader.createLoadPlan(this);
-            loader.preloadTasks(plan, mConfig.launchedFromHome);
         }
 
         // Start loading tasks according to the load plan
+        if (plan.getTaskStack() == null) {
+            loader.preloadTasks(plan, mConfig.launchedFromHome);
+        }
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.runningTaskId = mConfig.launchedToTaskId;
         loadOpts.numVisibleTasks = numVisibleTasks;

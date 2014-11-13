@@ -138,14 +138,15 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             }
         }
 
-        // When we start, preload the metadata and icons associated with the recent tasks.
+        // When we start, preload the data associated with the previous recent tasks.
         // We can use a new plan since the caches will be the same.
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
         loader.preloadTasks(plan, true /* isTopTaskHome */);
         RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
         launchOpts.numVisibleTasks = loader.getApplicationIconCacheSize();
-        launchOpts.loadThumbnails = false;
+        launchOpts.numVisibleTaskThumbnails = loader.getThumbnailCacheSize();
+        launchOpts.onlyLoadForCache = true;
         loader.loadTasks(mContext, plan, launchOpts);
     }
 
@@ -510,6 +511,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
             launchOpts.runningTaskId = topTask.id;
             launchOpts.loadThumbnails = false;
+            launchOpts.onlyLoadForCache = true;
             loader.loadTasks(mContext, sInstanceLoadPlan, launchOpts);
 
             // Try starting with a thumbnail transition
