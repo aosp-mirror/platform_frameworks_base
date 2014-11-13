@@ -29,6 +29,8 @@ public final class ScriptIntrinsicResize extends ScriptIntrinsic {
     /**
      * Supported elements types are {@link Element#U8}, {@link
      * Element#U8_2}, {@link Element#U8_3}, {@link Element#U8_4}
+     * {@link Element#F32}, {@link Element#F32_2}, {@link
+     * Element#F32_3}, {@link Element#F32_4}
      *
      * @param rs The RenderScript context
      *
@@ -52,7 +54,11 @@ public final class ScriptIntrinsicResize extends ScriptIntrinsic {
         if (!e.isCompatible(Element.U8(mRS)) &&
             !e.isCompatible(Element.U8_2(mRS)) &&
             !e.isCompatible(Element.U8_3(mRS)) &&
-            !e.isCompatible(Element.U8_4(mRS))) {
+            !e.isCompatible(Element.U8_4(mRS)) &&
+            !e.isCompatible(Element.F32(mRS)) &&
+            !e.isCompatible(Element.F32_2(mRS)) &&
+            !e.isCompatible(Element.F32_3(mRS)) &&
+            !e.isCompatible(Element.F32_4(mRS))) {
             throw new RSIllegalArgumentException("Unsuported element type.");
         }
 
