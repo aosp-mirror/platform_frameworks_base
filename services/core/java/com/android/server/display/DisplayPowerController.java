@@ -654,11 +654,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         // Animate the screen brightness when the screen is on or dozing.
         // Skip the animation when the screen is off or suspended.
-        if (state == Display.STATE_ON || state == Display.STATE_DOZE) {
-            animateScreenBrightness(brightness,
-                    slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
-        } else {
-            animateScreenBrightness(brightness, 0);
+        if (!mPendingScreenOff) {
+            if (state == Display.STATE_ON || state == Display.STATE_DOZE) {
+                animateScreenBrightness(brightness,
+                        slowChange ? BRIGHTNESS_RAMP_RATE_SLOW : BRIGHTNESS_RAMP_RATE_FAST);
+            } else {
+                animateScreenBrightness(brightness, 0);
+            }
         }
 
         // Determine whether the display is ready for use in the newly requested state.
