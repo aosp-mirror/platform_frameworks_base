@@ -4662,6 +4662,11 @@
         <attr name="weekDayTextAppearance" format="reference" />
         <!-- The text appearance for the calendar dates. -->
         <attr name="dateTextAppearance" format="reference" />
+        <!-- The number of weeks to be shown. -->
+        <attr name="calendarViewMode">
+            <enum name="holo" value="0" />
+            <enum name="material" value="1" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="NumberPicker">

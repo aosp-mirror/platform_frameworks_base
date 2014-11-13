@@ -185,8 +185,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         mDayPickerView = new DayPickerView(mContext);
         mDayPickerView.setFirstDayOfWeek(mFirstDayOfWeek);
-        mDayPickerView.setRange(mMinDate, mMaxDate);
-        mDayPickerView.setDay(mCurrentDate);
+        mDayPickerView.setMinDate(mMinDate.getTimeInMillis());
+        mDayPickerView.setMaxDate(mMaxDate.getTimeInMillis());
+        mDayPickerView.setDate(mCurrentDate.getTimeInMillis());
         mDayPickerView.setOnDaySelectedListener(mOnDaySelectedListener);
 
         mYearPickerView = new YearPickerView(mContext);
@@ -336,7 +337,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         switch (viewIndex) {
             case MONTH_AND_DAY_VIEW:
-                mDayPickerView.setDay(getSelectedDay());
+                mDayPickerView.setDate(getSelectedDay().getTimeInMillis());
                 if (mCurrentView != viewIndex) {
                     mMonthAndDayLayout.setSelected(true);
                     mHeaderYearTextView.setSelected(false);
@@ -414,7 +415,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             updateDisplay(false);
         }
         mMinDate.setTimeInMillis(minDate);
-        mDayPickerView.setRange(mMinDate, mMaxDate);
+        mDayPickerView.setMinDate(minDate);
         mYearPickerView.setRange(mMinDate, mMaxDate);
     }
 
@@ -436,7 +437,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             updateDisplay(false);
         }
         mMaxDate.setTimeInMillis(maxDate);
-        mDayPickerView.setRange(mMinDate, mMaxDate);
+        mDayPickerView.setMaxDate(maxDate);
         mYearPickerView.setRange(mMinDate, mMaxDate);
     }
 
@@ -616,7 +617,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             listener.onDateChanged();
         }
 
-        mDayPickerView.setDay(getSelectedDay());
+        mDayPickerView.setDate(getSelectedDay().getTimeInMillis());
     }
 
     @Override
