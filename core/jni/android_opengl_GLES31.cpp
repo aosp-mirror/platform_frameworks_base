@@ -16,6 +16,10 @@
 
 // This source file is automatically generated
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 #include <stdint.h>
 #include <GLES3/gl31.h>
 #include <jni.h>
@@ -351,7 +355,7 @@ static void android_glDrawArraysIndirect(JNIEnv *_env, jobject, int mode, jlong 
     // In OpenGL ES, 'indirect' is a byte offset into a buffer, not a raw pointer.
     // GL checks for too-large values. Here we only need to check for successful signed 64-bit
     // to unsigned 32-bit conversion.
-    if (sizeof(void*) != sizeof(jlong) && indirect > UINTPTR_MAX) {
+    if (sizeof(void*) != sizeof(jlong) && indirect > static_cast<jlong>(UINT32_MAX)) {
         jniThrowException(_env, "java/lang/IllegalArgumentException", "indirect offset too large");
         return;
     }
@@ -363,7 +367,7 @@ static void android_glDrawElementsIndirect(JNIEnv *_env, jobject, jint mode, jin
     // In OpenGL ES, 'indirect' is a byte offset into a buffer, not a raw pointer.
     // GL checks for too-large values. Here we only need to check for successful signed 64-bit
     // to unsigned 32-bit conversion.
-    if (sizeof(void*) != sizeof(jlong) && indirect > UINTPTR_MAX) {
+    if (sizeof(void*) != sizeof(jlong) && indirect > static_cast<jlong>(UINT32_MAX)) {
         jniThrowException(_env, "java/lang/IllegalArgumentException", "indirect offset too large");
         return;
     }
