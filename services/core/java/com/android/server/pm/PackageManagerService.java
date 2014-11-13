@@ -8982,6 +8982,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         && isVerificationEnabled(userIdentifier, installFlags)) {
                     final Intent verification = new Intent(
                             Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
+                    verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
                     verification.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
                             PACKAGE_MIME_TYPE);
                     verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
