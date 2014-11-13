@@ -121,9 +121,10 @@ public class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when the SIM state changes.
+     * @param slotId
      * @param simState
      */
-    public void onSimStateChanged(IccCardConstants.State simState) { }
+    public void onSimStateChanged(int subId, int slotId, IccCardConstants.State simState) { }
 
     /**
      * Called when a user is removed.

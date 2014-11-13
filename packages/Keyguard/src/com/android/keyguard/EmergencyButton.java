@@ -36,22 +36,18 @@ import com.android.internal.widget.LockPatternUtils;
  * allows the user to return to the call.
  */
 public class EmergencyButton extends Button {
-
-    private static final int EMERGENCY_CALL_TIMEOUT = 10000; // screen timeout after starting e.d.
     private static final String ACTION_EMERGENCY_DIAL = "com.android.phone.EmergencyDialer.DIAL";
 
     KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
         @Override
-        public void onSimStateChanged(State simState) {
-            int phoneState = KeyguardUpdateMonitor.getInstance(mContext).getPhoneState();
-            updateEmergencyCallButton(simState, phoneState);
+        public void onSimStateChanged(int subId, int slotId, State simState) {
+            updateEmergencyCallButton();
         }
 
         @Override
         public void onPhoneStateChanged(int phoneState) {
-            State simState = KeyguardUpdateMonitor.getInstance(mContext).getSimState();
-            updateEmergencyCallButton(simState, phoneState);
+            updateEmergencyCallButton();
         }
     };
     private LockPatternUtils mLockPatternUtils;
@@ -87,9 +83,7 @@ public class EmergencyButton extends Button {
                 takeEmergencyCallAction();
             }
         });
-        int phoneState = KeyguardUpdateMonitor.getInstance(mContext).getPhoneState();
-        State simState = KeyguardUpdateMonitor.getInstance(mContext).getSimState();
-        updateEmergencyCallButton(simState, phoneState);
+        updateEmergencyCallButton();
     }
 
     /**
@@ -112,12 +106,12 @@ public class EmergencyButton extends Button {
         }
     }
 
-    private void updateEmergencyCallButton(State simState, int phoneState) {
+    private void updateEmergencyCallButton() {
         boolean enabled = false;
         if (mLockPatternUtils.isInCall()) {
             enabled = true; // always show "return to call" if phone is off-hook
         } else if (mLockPatternUtils.isEmergencyCallCapable()) {
-            boolean simLocked = KeyguardUpdateMonitor.getInstance(mContext).isSimLocked();
+            final boolean simLocked = KeyguardUpdateMonitor.getInstance(mContext).isSimPinVoiceSecure();
             if (simLocked) {
                 // Some countries can't handle emergency calls while SIM is locked.
                 enabled = mLockPatternUtils.isEmergencyCallEnabledWhileSimLocked();
