@@ -1997,6 +1997,7 @@
   <java-symbol type="string" name="zen_mode_next_alarm_summary" />
   <java-symbol type="string" name="zen_mode_next_alarm_line_one" />
   <java-symbol type="integer" name="config_next_alarm_condition_lookahead_threshold_hrs" />
+  <java-symbol type="string" name="muted_by" />
 
   <java-symbol type="string" name="item_is_selected" />
   <java-symbol type="string" name="day_of_week_label_typeface" />
