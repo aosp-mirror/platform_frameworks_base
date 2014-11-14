@@ -1298,7 +1298,12 @@ public class UserManagerService extends IUserManager.Stub {
                 if (userHandle == 0 || user == null || mRemovingUserIds.get(userHandle)) {
                     return false;
                 }
+
+                // We remember deleted user IDs to prevent them from being
+                // reused during the current boot; they can still be reused
+                // after a reboot.
                 mRemovingUserIds.put(userHandle, true);
+
                 try {
                     mAppOpsService.removeUser(userHandle);
                 } catch (RemoteException e) {
@@ -1386,18 +1391,6 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Remove this user from the list
         mUsers.remove(userHandle);
-
-        // Have user ID linger for several seconds to let external storage VFS
-        // cache entries expire. This must be greater than the 'entry_valid'
-        // timeout used by the FUSE daemon.
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                synchronized (mPackagesLock) {
-                    mRemovingUserIds.delete(userHandle);
-                }
-            }
-        }, MINUTE_IN_MILLIS);
 
         mRestrictionsPinStates.remove(userHandle);
         // Remove user file
