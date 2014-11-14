@@ -260,7 +260,6 @@ class OptimizingLineBreaker : public LineBreaker {
             float w = 0, pw = 0;
             bool breakFound = false;
             int breakIndex = 0, firstTabIndex = INT_MAX;
-            float breakWidth, breakPrintedWidth;
             for (int i = start; i < limit; i++) {
                 const Primitive& p = mPrimitives[i];
 
@@ -286,8 +285,6 @@ class OptimizingLineBreaker : public LineBreaker {
                 if (i > start && (p.type == kPrimitiveType_Penalty || p.type == kPrimitiveType_Wordbreak)) {
                     breakFound = true;
                     breakIndex = i;
-                    breakWidth = w;
-                    breakPrintedWidth = pw;
                 }
             }
 
@@ -536,7 +533,6 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jstring javaLocaleName,
                                jobject recycle, jintArray recycleBreaks,
                                jfloatArray recycleWidths, jbooleanArray recycleFlags,
                                jint recycleLength) {
-    jintArray ret;
     std::vector<int> breaks;
 
     ScopedCharArrayRO textScopedArr(env, inputText);
