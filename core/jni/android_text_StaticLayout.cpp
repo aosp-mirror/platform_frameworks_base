@@ -355,7 +355,7 @@ class GreedyLineBreaker : public LineBreaker {
                             breaks->push_back(mPrimitives[goodBreakIndex].location);
                             widths->push_back(goodBreakWidth);
                             flags->push_back(firstTabIndex < goodBreakIndex);
-                            firstTabIndex = SIZE_MAX;
+                            firstTabIndex = INT_MAX;
                         } else {
                             // must split a word because there is no other option
                             i = breakIndex; // no +1 because of i++
@@ -364,7 +364,7 @@ class GreedyLineBreaker : public LineBreaker {
                             breaks->push_back(mPrimitives[breakIndex].location);
                             widths->push_back(breakWidth);
                             flags->push_back(firstTabIndex < breakIndex);
-                            firstTabIndex = SIZE_MAX;
+                            firstTabIndex = INT_MAX;
                         }
                         printedWidth = width = 0;
                         goodBreakFound = breakFound = false;
@@ -388,7 +388,7 @@ class GreedyLineBreaker : public LineBreaker {
                         breaks->push_back(p.location);
                         widths->push_back(printedWidth);
                         flags->push_back(firstTabIndex < i);
-                        firstTabIndex = SIZE_MAX;
+                        firstTabIndex = INT_MAX;
                         printedWidth = width = 0;
                         goodBreakFound = breakFound = false;
                         goodBreakWidth = breakWidth = 0;
