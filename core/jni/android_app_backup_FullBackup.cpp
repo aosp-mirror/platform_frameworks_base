@@ -73,8 +73,6 @@ static struct {
 static jint backupToTar(JNIEnv* env, jobject clazz, jstring packageNameObj,
         jstring domainObj, jstring linkdomain,
         jstring rootpathObj, jstring pathObj, jobject dataOutputObj) {
-    int ret;
-
     // Extract the various strings, allowing for null object pointers
     const char* packagenamechars = (packageNameObj) ? env->GetStringUTFChars(packageNameObj, NULL) : NULL;
     const char* rootchars = (rootpathObj) ? env->GetStringUTFChars(rootpathObj, NULL) : NULL;

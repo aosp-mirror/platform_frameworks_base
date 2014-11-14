@@ -86,13 +86,6 @@ static jmethodID findStaticMethod(JNIEnv* env, jclass c, const char method[],
     return m;
 }
 
-static jfieldID getFieldID(JNIEnv* env, jclass c, const char name[],
-                           const char type[]) {
-    jfieldID f = env->GetFieldID(c, name, type);
-    LOG_FATAL_IF(!f, "Unable to find field %s", name);
-    return f;
-}
-
 namespace android {
 
 int register_android_nio_utils(JNIEnv* env) {

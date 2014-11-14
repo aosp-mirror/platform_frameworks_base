@@ -654,8 +654,6 @@ static void android_os_Parcel_writeInterfaceToken(JNIEnv* env, jclass clazz, jlo
 
 static void android_os_Parcel_enforceInterface(JNIEnv* env, jclass clazz, jlong nativePtr, jstring name)
 {
-    jboolean ret = JNI_FALSE;
-
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
     if (parcel != NULL) {
         const jchar* str = env->GetStringCritical(name, 0);

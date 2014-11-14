@@ -265,14 +265,6 @@ static jclass make_globalref(JNIEnv* env, const char classname[])
     return (jclass)env->NewGlobalRef(c);
 }
 
-static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
-                                const char fieldname[], const char type[])
-{
-    jfieldID id = env->GetFieldID(clazz, fieldname, type);
-    SkASSERT(id);
-    return id;
-}
-
 int register_android_emoji_EmojiFactory(JNIEnv* env) {
   gEmojiFactory_class = make_globalref(env, "android/emoji/EmojiFactory");
   gEmojiFactory_constructorMethodID = env->GetMethodID(

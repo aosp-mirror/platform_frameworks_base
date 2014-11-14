@@ -12,11 +12,6 @@
 
 using namespace android::uirenderer;
 
-static struct {
-    jclass clazz;
-    jfieldID shader;
-} gShaderClassInfo;
-
 static void ThrowIAE_IfNull(JNIEnv* env, void* ptr) {
     if (NULL == ptr) {
         doThrowIAE(env);

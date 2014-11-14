@@ -325,7 +325,6 @@ static void nativeFinalizeStatement(JNIEnv* env, jclass clazz, jlong connectionP
 
 static jint nativeGetParameterCount(JNIEnv* env, jclass clazz, jlong connectionPtr,
         jlong statementPtr) {
-    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     return sqlite3_bind_parameter_count(statement);
@@ -333,7 +332,6 @@ static jint nativeGetParameterCount(JNIEnv* env, jclass clazz, jlong connectionP
 
 static jboolean nativeIsReadOnly(JNIEnv* env, jclass clazz, jlong connectionPtr,
         jlong statementPtr) {
-    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     return sqlite3_stmt_readonly(statement) != 0;
@@ -341,7 +339,6 @@ static jboolean nativeIsReadOnly(JNIEnv* env, jclass clazz, jlong connectionPtr,
 
 static jint nativeGetColumnCount(JNIEnv* env, jclass clazz, jlong connectionPtr,
         jlong statementPtr) {
-    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     return sqlite3_column_count(statement);
@@ -349,7 +346,6 @@ static jint nativeGetColumnCount(JNIEnv* env, jclass clazz, jlong connectionPtr,
 
 static jstring nativeGetColumnName(JNIEnv* env, jclass clazz, jlong connectionPtr,
         jlong statementPtr, jint index) {
-    SQLiteConnection* connection = reinterpret_cast<SQLiteConnection*>(connectionPtr);
     sqlite3_stmt* statement = reinterpret_cast<sqlite3_stmt*>(statementPtr);
 
     const jchar* name = static_cast<const jchar*>(sqlite3_column_name16(statement, index));

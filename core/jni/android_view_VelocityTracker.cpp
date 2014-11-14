@@ -254,6 +254,7 @@ int register_android_view_VelocityTracker(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/VelocityTracker",
             gVelocityTrackerMethods, NELEM(gVelocityTrackerMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    (void)res;
 
     jclass clazz;
     FIND_CLASS(clazz, "android/view/VelocityTracker$Estimator");

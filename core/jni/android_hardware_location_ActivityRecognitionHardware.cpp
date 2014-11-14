@@ -123,7 +123,7 @@ static void activity_callback(
     detach_thread();
 }
 
-activity_recognition_callback_procs_t sCallbacks {
+activity_recognition_callback_procs_t sCallbacks = {
     activity_callback,
 };
 

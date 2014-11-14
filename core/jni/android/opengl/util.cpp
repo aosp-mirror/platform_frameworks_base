@@ -759,8 +759,6 @@ getPointer(JNIEnv *_env, jobject buffer, jint *remaining)
     jint limit;
     jint elementSizeShift;
     jlong pointer;
-    jint offset;
-    void *data;
 
     position = _env->GetIntField(buffer, positionID);
     limit = _env->GetIntField(buffer, limitID);
@@ -900,10 +898,8 @@ static void etc1_encodeImage(JNIEnv *env, jclass clazz,
         } else if (outB.remaining() < encodedImageSize) {
             doThrowIAE(env, "out's remaining data < encoded image size");
         } else {
-            int result = etc1_encode_image((etc1_byte*) inB.getData(),
-                    width, height, pixelSize,
-                    stride,
-                    (etc1_byte*) outB.getData());
+            etc1_encode_image((etc1_byte*) inB.getData(), width, height, pixelSize, stride,
+                              (etc1_byte*) outB.getData());
         }
     }
 }
@@ -933,10 +929,8 @@ static void etc1_decodeImage(JNIEnv *env, jclass clazz,
         } else if (outB.remaining() < imageSize) {
             doThrowIAE(env, "out's remaining data < image size");
         } else {
-            int result = etc1_decode_image((etc1_byte*) inB.getData(),
-                    (etc1_byte*) outB.getData(),
-                    width, height, pixelSize,
-                    stride);
+            etc1_decode_image((etc1_byte*) inB.getData(), (etc1_byte*) outB.getData(),
+                              width, height, pixelSize, stride);
         }
     }
 }

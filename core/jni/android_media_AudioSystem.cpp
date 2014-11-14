@@ -1064,7 +1064,7 @@ exit:
     return jStatus;
 }
 
-static int
+static jint
 android_media_AudioSystem_releaseAudioPatch(JNIEnv *env, jobject clazz,
                                                jobject jPatch)
 {
@@ -1086,7 +1086,7 @@ android_media_AudioSystem_releaseAudioPatch(JNIEnv *env, jobject clazz,
     status_t status = AudioSystem::releaseAudioPatch(handle);
     ALOGV("AudioSystem::releaseAudioPatch() returned %d", status);
     jint jStatus = nativeToJavaStatus(status);
-    return status;
+    return jStatus;
 }
 
 static jint

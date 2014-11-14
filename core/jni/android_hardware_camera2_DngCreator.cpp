@@ -427,7 +427,6 @@ InputStripSource::InputStripSource(JNIEnv* env, Input& input, uint32_t ifd, uint
 InputStripSource::~InputStripSource() {}
 
 status_t InputStripSource::writeToStream(Output& stream, uint32_t count) {
-    status_t err = OK;
     uint32_t fullSize = mWidth * mHeight * mBytesPerSample * mSamplesPerPixel;
     jlong offset = mOffset;
 
@@ -853,7 +852,6 @@ static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPt
 
     const uint32_t samplesPerPixel = 1;
     const uint32_t bitsPerSample = BITS_PER_SAMPLE;
-    const uint32_t bitsPerByte = BITS_PER_SAMPLE / BYTES_PER_SAMPLE;
     uint32_t imageWidth = 0;
     uint32_t imageHeight = 0;
 
@@ -1637,7 +1635,7 @@ static void DngCreator_nativeSetThumbnail(JNIEnv* env, jobject thiz, jobject buf
 
     size_t fullSize = width * height * BYTES_PER_RGB_PIXEL;
     jlong capacity = env->GetDirectBufferCapacity(buffer);
-    if (capacity != fullSize) {
+    if (static_cast<uint64_t>(capacity) != static_cast<uint64_t>(fullSize)) {
         jniThrowExceptionFmt(env, "java/lang/AssertionError",
                 "Invalid size %d for thumbnail, expected size was %d",
                 capacity, fullSize);

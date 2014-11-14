@@ -224,13 +224,12 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
     int len, nameLen;
     bool skip, done = false;
 
-    unsigned size = 0, resident = 0, pss = 0, swappable_pss = 0;
+    unsigned pss = 0, swappable_pss = 0;
     float sharing_proportion = 0.0;
     unsigned shared_clean = 0, shared_dirty = 0;
     unsigned private_clean = 0, private_dirty = 0;
     unsigned swapped_out = 0;
     bool is_swappable = false;
-    unsigned referenced = 0;
     unsigned temp;
 
     uint64_t start;
@@ -352,9 +351,9 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             }
 
             if (line[0] == 'S' && sscanf(line, "Size: %d kB", &temp) == 1) {
-                size = temp;
+                /* size = temp; */
             } else if (line[0] == 'R' && sscanf(line, "Rss: %d kB", &temp) == 1) {
-                resident = temp;
+                /* resident = temp; */
             } else if (line[0] == 'P' && sscanf(line, "Pss: %d kB", &temp) == 1) {
                 pss = temp;
             } else if (line[0] == 'S' && sscanf(line, "Shared_Clean: %d kB", &temp) == 1) {
@@ -366,7 +365,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             } else if (line[0] == 'P' && sscanf(line, "Private_Dirty: %d kB", &temp) == 1) {
                 private_dirty = temp;
             } else if (line[0] == 'R' && sscanf(line, "Referenced: %d kB", &temp) == 1) {
-                referenced = temp;
+                /* referenced = temp; */
             } else if (line[0] == 'S' && sscanf(line, "Swap: %d kB", &temp) == 1) {
                 swapped_out = temp;
             } else if (sscanf(line, "%" SCNx64 "-%" SCNx64 " %*s %*x %*x:%*x %*d", &start, &end) == 2) {
@@ -490,7 +489,6 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jl
     char line[1024];
     jlong pss = 0;
     jlong uss = 0;
-    unsigned temp;
 
     char tmp[128];
     FILE *fp;

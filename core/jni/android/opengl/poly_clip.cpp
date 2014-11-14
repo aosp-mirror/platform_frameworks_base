@@ -58,7 +58,6 @@ namespace android {
 
 void poly_clip_to_halfspace(Poly* p, Poly* q, int index, float sign, float k)
 {
-    unsigned long m;
     float *up, *vp, *wp;
     Poly_vert *v;
     int i;

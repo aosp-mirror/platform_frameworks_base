@@ -273,6 +273,7 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/view/DisplayEventReceiver",
             gMethods, NELEM(gMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    (void)res;
 
     FIND_CLASS(gDisplayEventReceiverClassInfo.clazz, "android/view/DisplayEventReceiver");
 

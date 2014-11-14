@@ -43,12 +43,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define POLICY_DEBUG 0
 #define GUARD_THREAD_PRIORITY 0
 
-#define DEBUG_PROC(x) //x
-
 using namespace android;
+
+static const bool kDebugPolicy = false;
+static const bool kDebugProc = false;
 
 #if GUARD_THREAD_PRIORITY
 Mutex gKeyCreateMutex;
@@ -175,7 +175,6 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
 {
     ALOGV("%s pid=%d grp=%" PRId32, __func__, pid, grp);
     DIR *d;
-    FILE *fp;
     char proc_path[255];
     struct dirent *de;
 
@@ -191,26 +190,27 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
     }
     SchedPolicy sp = (SchedPolicy) grp;
 
-#if POLICY_DEBUG
-    char cmdline[32];
-    int fd;
+    if (kDebugPolicy) {
+        char cmdline[32];
+        int fd;
 
-    strcpy(cmdline, "unknown");
+        strcpy(cmdline, "unknown");
 
-    sprintf(proc_path, "/proc/%d/cmdline", pid);
-    fd = open(proc_path, O_RDONLY);
-    if (fd >= 0) {
-        int rc = read(fd, cmdline, sizeof(cmdline)-1);
-        cmdline[rc] = 0;
-        close(fd);
+        sprintf(proc_path, "/proc/%d/cmdline", pid);
+        fd = open(proc_path, O_RDONLY);
+        if (fd >= 0) {
+            int rc = read(fd, cmdline, sizeof(cmdline)-1);
+            cmdline[rc] = 0;
+            close(fd);
+        }
+
+        if (sp == SP_BACKGROUND) {
+            ALOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
+        } else {
+            ALOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
+        }
     }
 
-    if (sp == SP_BACKGROUND) {
-        ALOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
-    } else {
-        ALOGD("setProcessGroup: ^^^ pid %d (%s)", pid, cmdline);
-    }
-#endif
     sprintf(proc_path, "/proc/%d/task", pid);
     if (!(d = opendir(proc_path))) {
         // If the process exited on us, don't generate an exception
@@ -729,7 +729,9 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
         const char term = (char)(mode&PROC_TERM_MASK);
         const jsize start = i;
         if (i >= endIndex) {
-            DEBUG_PROC(ALOGW("Ran off end of data @%d", i));
+            if (kDebugProc) {
+                ALOGW("Ran off end of data @%d", i);
+            }
             res = JNI_FALSE;
             break;
         }
@@ -829,7 +831,9 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     int fd = open(file8, O_RDONLY);
 
     if (fd < 0) {
-        DEBUG_PROC(ALOGW("Unable to open process file: %s\n", file8));
+        if (kDebugProc) {
+            ALOGW("Unable to open process file: %s\n", file8);
+        }
         env->ReleaseStringUTFChars(file, file8);
         return JNI_FALSE;
     }
@@ -840,7 +844,9 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     close(fd);
 
     if (len < 0) {
-        DEBUG_PROC(ALOGW("Unable to open process file: %s fd=%d\n", file8, fd));
+        if (kDebugProc) {
+            ALOGW("Unable to open process file: %s fd=%d\n", file8, fd);
+        }
         return JNI_FALSE;
     }
     buffer[len] = 0;

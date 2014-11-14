@@ -85,7 +85,6 @@ writeEntityData_native(JNIEnv* env, jobject clazz, jlong w, jbyteArray data, jin
 static void
 setKeyPrefix_native(JNIEnv* env, jobject clazz, jlong w, jstring keyPrefixObj)
 {
-    int err;
     BackupDataWriter* writer = (BackupDataWriter*)w;
 
     const char* keyPrefixUTF = env->GetStringUTFChars(keyPrefixObj, NULL);

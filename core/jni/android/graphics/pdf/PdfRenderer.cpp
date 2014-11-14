@@ -20,7 +20,11 @@
 #include "SkBitmap.h"
 #include "SkMatrix.h"
 #include "fpdfview.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #include "fsdk_rendercontext.h"
+#pragma GCC diagnostic pop
 
 #include <android_runtime/AndroidRuntime.h>
 #include <vector>
@@ -237,7 +241,6 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
         jlong bitmapPtr, jint destLeft, jint destTop, jint destRight, jint destBottom,
         jlong matrixPtr, jint renderMode) {
 
-    FPDF_DOCUMENT document = reinterpret_cast<FPDF_DOCUMENT>(documentPtr);
     FPDF_PAGE page = reinterpret_cast<FPDF_PAGE>(pagePtr);
     SkBitmap* skBitmap = reinterpret_cast<SkBitmap*>(bitmapPtr);
     SkMatrix* skMatrix = reinterpret_cast<SkMatrix*>(matrixPtr);

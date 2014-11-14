@@ -117,7 +117,7 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
         return true;
     }
 
-    if (st->st_size != fileSize) {
+    if (static_cast<uint64_t>(st->st_size) != static_cast<uint64_t>(fileSize)) {
         return true;
     }
 
@@ -430,7 +430,6 @@ static int findSupportedAbi(JNIEnv *env, jlong apkHandle, jobjectArray supported
     }
 
     ZipEntryRO entry = NULL;
-    char fileName[PATH_MAX];
     int status = NO_NATIVE_LIBRARIES;
     while ((entry = it->next()) != NULL) {
         // We're currently in the lib/ directory of the APK, so it does have some native
