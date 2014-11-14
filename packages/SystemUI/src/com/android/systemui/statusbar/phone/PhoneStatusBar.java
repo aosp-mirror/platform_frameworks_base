@@ -4065,6 +4065,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             pm.wakeUp(time);
             if (fromTouch) {
                 mScreenOnComingFromTouch = true;
+                mNotificationPanel.setTouchDisabled(false);
             }
         }
     }
