@@ -72,7 +72,7 @@ static jboolean com_android_pacprocessor_PacNative_createV8ParserNativeLocked(JN
     return JNI_TRUE;
 }
 
-static jboolean com_android_pacprocessor_PacNative_destroyV8ParserNativeLocked(JNIEnv* /* env *,
+static jboolean com_android_pacprocessor_PacNative_destroyV8ParserNativeLocked(JNIEnv* /* env */,
         jobject) {
     if (proxyResolver != NULL) {
         delete logger;
