@@ -5118,4 +5118,7 @@
 
     <!-- Zen mode condition - line one: until next alarm. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_next_alarm_line_one">Until next alarm</string>
+
+    <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
+    <string name="muted_by">Muted by <xliff:g id="third_party">%1$s</xliff:g></string>
 </resources>
