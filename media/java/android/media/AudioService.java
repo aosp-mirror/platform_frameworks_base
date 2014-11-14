@@ -5011,10 +5011,10 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     // Audio Focus
     //==========================================================================================
-    public int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName) {
-        return mMediaFocusControl.requestAudioFocus(mainStreamType, durationHint, cb, fd,
-                clientId, callingPackageName);
+    public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags) {
+        return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
+                clientId, callingPackageName, flags);
     }
 
     public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId) {

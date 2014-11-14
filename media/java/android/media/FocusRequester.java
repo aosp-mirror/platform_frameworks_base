@@ -45,19 +45,24 @@ class FocusRequester {
      */
     private final int mFocusGainRequest;
     /**
+     * the flags associated with the gain request that qualify the type of grant (e.g. accepting
+     * delay vs grant must be immediate)
+     */
+    private final int mGrantFlags;
+    /**
      * the audio focus loss received my mFocusDispatcher, is AudioManager.AUDIOFOCUS_NONE if
      *  it never lost focus.
      */
     private int mFocusLossReceived;
     /**
-     * the stream type associated with the focus request
+     * the audio attributes associated with the focus request
      */
-    private final int mStreamType;
+    private final AudioAttributes mAttributes;
 
-    FocusRequester(int streamType, int focusRequest,
+    FocusRequester(AudioAttributes aa, int focusRequest, int grantFlags,
             IAudioFocusDispatcher afl, IBinder source, String id, AudioFocusDeathHandler hdlr,
             String pn, int uid) {
-        mStreamType = streamType;
+        mAttributes = aa;
         mFocusDispatcher = afl;
         mSourceRef = source;
         mClientId = id;
@@ -65,6 +70,7 @@ class FocusRequester {
         mPackageName = pn;
         mCallingUid = uid;
         mFocusGainRequest = focusRequest;
+        mGrantFlags = grantFlags;
         mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
     }
 
@@ -98,8 +104,12 @@ class FocusRequester {
         return mFocusGainRequest;
     }
 
-    int getStreamType() {
-        return mStreamType;
+    int getGrantFlags() {
+        return mGrantFlags;
+    }
+
+    AudioAttributes getAudioAttributes() {
+        return mAttributes;
     }
 
 
@@ -139,9 +149,10 @@ class FocusRequester {
                 + " -- pack: " + mPackageName
                 + " -- client: " + mClientId
                 + " -- gain: " + focusGainToString()
+                + " -- grant: " + mGrantFlags
                 + " -- loss: " + focusLossToString()
                 + " -- uid: " + mCallingUid
-                + " -- stream: " + mStreamType);
+                + " -- attr: " + mAttributes);
     }
 
 
