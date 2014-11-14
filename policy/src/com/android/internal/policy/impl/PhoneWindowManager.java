@@ -998,6 +998,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case MULTI_PRESS_POWER_BRIGHTNESS_BOOST:
+                Slog.i(TAG, "Starting brightness boost.");
+                if (!interactive) {
+                    wakeUpFromPowerKey(eventTime);
+                }
                 mPowerManager.boostScreenBrightness(eventTime);
                 break;
         }
