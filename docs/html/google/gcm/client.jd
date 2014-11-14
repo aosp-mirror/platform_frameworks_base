@@ -452,6 +452,21 @@ private void storeRegistrationId(Context context, String regId) {
     editor.commit();
 }</pre>
 
+<h4 id="reg-errors">Handle registration errors</h4>
+
+<p>As stated above, an Android app must register with GCM servers and get a registration ID
+(regID) before it can receive messages. A given regID is not guaranteed to last indefinitely,
+so the first thing your app should always do is check to make sure it has a valid regID
+(as shown in the code snippets above).</p>
+
+<p>In addition to confirming that it has a valid regID, your app should be prepared to handle
+the registration error {@code TOO_MANY_REGISTRATIONS}. This error indicates that the device
+has too many apps registered with GCM. The error only occurs in cases where there are
+extreme numbers of apps, so it should not affect the average user. The remedy is to prompt
+the user to delete some of the other GCM-enabled apps from the device to make
+room for the new one.</p>
+
+
 <h3 id="sample-send">Send a message</h3>
 <p>When the user clicks the app's <strong>Send</strong> button, the app sends an
 upstream message using the
