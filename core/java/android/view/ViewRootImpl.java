@@ -3596,12 +3596,19 @@ public final class ViewRootImpl implements ViewParent,
             if (mView == null || !mAdded) {
                 Slog.w(TAG, "Dropping event due to root view being removed: " + q.mEvent);
                 return true;
-            } else if (!mAttachInfo.mHasWindowFocus &&
-                  !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER) &&
-                  !isTerminalInputEvent(q.mEvent)) {
-                // If this is a focused event and the window doesn't currently have input focus,
-                // then drop this event.  This could be an event that came back from the previous
-                // stage but the window has lost focus in the meantime.
+            } else if ((!mAttachInfo.mHasWindowFocus || mStopped)
+                    && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
+                // This is a focus event and the window doesn't currently have input focus or
+                // has stopped. This could be an event that came back from the previous stage
+                // but the window has lost focus or stopped in the meantime.
+                if (isTerminalInputEvent(q.mEvent)) {
+                    // Don't drop terminal input events, however mark them as canceled.
+                    q.mEvent.cancel();
+                    Slog.w(TAG, "Cancelling event due to no window focus: " + q.mEvent);
+                    return false;
+                }
+
+                // Drop non-terminal input events.
                 Slog.w(TAG, "Dropping event due to no window focus: " + q.mEvent);
                 return true;
             }
