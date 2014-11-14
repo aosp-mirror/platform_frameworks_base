@@ -497,6 +497,7 @@ public class RotateDrawable extends Drawable implements Drawable.Callback {
 
         state.mFromDegrees = a.getFloat(R.styleable.RotateDrawable_fromDegrees, state.mFromDegrees);
         state.mToDegrees = a.getFloat(R.styleable.RotateDrawable_toDegrees, state.mToDegrees);
+        state.mCurrentDegrees = state.mFromDegrees;
 
         final Drawable dr = a.getDrawable(R.styleable.RotateDrawable_drawable);
         if (dr != null) {
