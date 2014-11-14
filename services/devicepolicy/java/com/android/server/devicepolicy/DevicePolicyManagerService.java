@@ -900,23 +900,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (DBG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
         DevicePolicyData policy = getUserData(userHandle);
         IPackageManager pm = AppGlobals.getPackageManager();
-        for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
-            ActiveAdmin aa = policy.mAdminList.get(i);
-            try {
-                if (pm.getPackageInfo(aa.info.getPackageName(), 0, userHandle) == null
-                        || pm.getReceiverInfo(aa.info.getComponent(), 0, userHandle) == null) {
-                    removed = true;
-                    policy.mAdminList.remove(i);
-                    policy.mAdminMap.remove(aa.info.getComponent());
+        synchronized (this) {
+            for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
+                ActiveAdmin aa = policy.mAdminList.get(i);
+                try {
+                    if (pm.getPackageInfo(aa.info.getPackageName(), 0, userHandle) == null
+                            || pm.getReceiverInfo(aa.info.getComponent(), 0, userHandle) == null) {
+                        removed = true;
+                        policy.mAdminList.remove(i);
+                        policy.mAdminMap.remove(aa.info.getComponent());
+                    }
+                } catch (RemoteException re) {
+                    // Shouldn't happen
                 }
-            } catch (RemoteException re) {
-                // Shouldn't happen
             }
-        }
-        if (removed) {
-            validatePasswordOwnerLocked(policy);
-            syncDeviceCapabilitiesLocked(policy);
-            saveSettingsLocked(policy.mUserHandle);
+            if (removed) {
+                validatePasswordOwnerLocked(policy);
+                syncDeviceCapabilitiesLocked(policy);
+                saveSettingsLocked(policy.mUserHandle);
+            }
         }
     }
 
