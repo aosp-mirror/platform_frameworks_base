@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
+
 import java.util.Map;
 
 /**
@@ -65,21 +67,11 @@ public class WebStorage {
         private long mUsage = 0;
 
         /** @hide */
+        @SystemApi
         protected Origin(String origin, long quota, long usage) {
             mOrigin = origin;
             mQuota = quota;
             mUsage = usage;
-        }
-
-        /** @hide */
-        protected Origin(String origin, long quota) {
-            mOrigin = origin;
-            mQuota = quota;
-        }
-
-        /** @hide */
-        protected Origin(String origin) {
-            mOrigin = origin;
         }
 
         /**
@@ -210,5 +202,6 @@ public class WebStorage {
      * way to call createHandler() and createUIHandler(), so it would not work).
      * @hide
      */
+    @SystemApi
     public WebStorage() {}
 }
