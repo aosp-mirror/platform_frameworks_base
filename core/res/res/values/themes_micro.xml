@@ -28,6 +28,8 @@
              to work properly. -->
         <item name="windowIsTranslucent">true</item>
         <item name="windowSwipeToDismiss">true</item>
+        <!-- Required to force windowInsets dispatch through application UI. -->
+        <item name="windowOverscan">true</item>
     </style>
 
     <style name="Theme.Micro.Light" parent="Theme.Holo.Light.NoActionBar">
@@ -44,6 +46,8 @@
              to work properly. -->
         <item name="windowIsTranslucent">true</item>
         <item name="windowSwipeToDismiss">true</item>
+        <!-- Required to force windowInsets dispatch through application UI. -->
+        <item name="windowOverscan">true</item>
     </style>
 
     <style name="Theme.Micro.Dialog" parent="Theme.Holo.Light.Dialog">
@@ -52,6 +56,8 @@
         <item name="windowFullscreen">true</item>
         <item name="textAppearance">@style/TextAppearance.Micro</item>
         <item name="textAppearanceInverse">@style/TextAppearance.Micro</item>
+        <!-- Required to force windowInsets dispatch through application UI. -->
+        <item name="windowOverscan">true</item>
     </style>
 
     <style name="Theme.Micro.Dialog.Alert">
