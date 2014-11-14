@@ -136,7 +136,7 @@ public final class HdmiPortInfo implements Parcelable {
                     boolean cec = (source.readInt() == 1);
                     boolean arc = (source.readInt() == 1);
                     boolean mhl = (source.readInt() == 1);
-                    return new HdmiPortInfo(id, type, address, cec, arc, mhl);
+                    return new HdmiPortInfo(id, type, address, cec, mhl, arc);
                 }
 
                 @Override
@@ -171,5 +171,16 @@ public final class HdmiPortInfo implements Parcelable {
         s.append("arc: ").append(mArcSupported).append(", ");
         s.append("mhl: ").append(mMhlSupported);
         return s.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof HdmiPortInfo)) {
+            return false;
+        }
+        final HdmiPortInfo other = (HdmiPortInfo) o;
+        return mId == other.mId && mType == other.mType && mAddress == other.mAddress
+                && mCecSupported == other.mCecSupported && mArcSupported == other.mArcSupported
+                && mMhlSupported == other.mMhlSupported;
     }
 }
