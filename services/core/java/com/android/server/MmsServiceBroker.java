@@ -16,8 +16,6 @@
 
 package com.android.server;
 
-import com.android.internal.telephony.IMms;
-
 import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -37,6 +35,8 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
+
+import com.android.internal.telephony.IMms;
 
 /**
  * This class is a proxy for MmsService APIs. We need this because MmsService runs
@@ -118,7 +118,7 @@ public class MmsServiceBroker extends SystemService {
     }
 
     public void systemRunning() {
-        tryConnecting();
+        Slog.i(TAG, "Delay connecting to MmsService until an API is called");
     }
 
     private void tryConnecting() {
@@ -206,7 +206,7 @@ public class MmsServiceBroker extends SystemService {
      * Throws a security exception unless the caller has carrier privilege.
      */
     private void enforceCarrierPrivilege() {
-        String[] packages = getPackageManager().getPackagesForUid(Binder.getCallingUid());
+        final String[] packages = getPackageManager().getPackagesForUid(Binder.getCallingUid());
         for (String pkg : packages) {
             if (getTelephonyManager().checkCarrierPrivilegesForPackage(pkg) ==
                     TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
@@ -216,12 +216,21 @@ public class MmsServiceBroker extends SystemService {
         throw new SecurityException("No carrier privilege");
     }
 
+    private String getCallingPackageName() {
+        final String[] packages = getPackageManager().getPackagesForUid(Binder.getCallingUid());
+        if (packages != null && packages.length > 0) {
+            return packages[0];
+        }
+        return "unknown";
+    }
+
     // Service API calls implementation, proxied to the real MmsService in "com.android.mms.service"
     private final class BinderService extends IMms.Stub {
         @Override
         public void sendMessage(int subId, String callingPkg, Uri contentUri,
                 String locationUrl, Bundle configOverrides, PendingIntent sentIntent)
                         throws RemoteException {
+            Slog.d(TAG, "sendMessage() by " + callingPkg);
             mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Send MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
@@ -235,6 +244,7 @@ public class MmsServiceBroker extends SystemService {
         public void downloadMessage(int subId, String callingPkg, String locationUrl,
                 Uri contentUri, Bundle configOverrides,
                 PendingIntent downloadedIntent) throws RemoteException {
+            Slog.d(TAG, "downloadMessage() by " + callingPkg);
             mContext.enforceCallingPermission(Manifest.permission.RECEIVE_MMS,
                     "Download MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_RECEIVE_MMS, Binder.getCallingUid(),
@@ -260,6 +270,7 @@ public class MmsServiceBroker extends SystemService {
 
         @Override
         public Bundle getCarrierConfigValues(int subId) throws RemoteException {
+            Slog.d(TAG, "getCarrierConfigValues() by " + getCallingPackageName());
             return getServiceGuarded().getCarrierConfigValues(subId);
         }
 
