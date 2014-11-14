@@ -61,7 +61,6 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.ProcessStats;
-import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
@@ -1823,99 +1822,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 } while (true);
             }
             }
-        }
-    };
-
-    /**
-     * Monitor for package changes and update our internal state.
-     */
-    private final PackageMonitor mPackageMonitor = new PackageMonitor() {
-        @Override
-        public void onPackageRemoved(String packageName, int uid) {
-            // Remove all tasks with activities in the specified package from the list of recent tasks
-            final int eventUserId = getChangingUserId();
-            synchronized (ActivityManagerService.this) {
-                for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
-                    TaskRecord tr = mRecentTasks.get(i);
-                    if (tr.userId != eventUserId) continue;
-
-                    ComponentName cn = tr.intent.getComponent();
-                    if (cn != null && cn.getPackageName().equals(packageName)) {
-                        // If the package name matches, remove the task
-                        removeTaskByIdLocked(tr.taskId, true);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public boolean onPackageChanged(String packageName, int uid, String[] components) {
-            onPackageModified(packageName);
-            return true;
-        }
-
-        @Override
-        public void onPackageModified(String packageName) {
-            final int eventUserId = getChangingUserId();
-            final IPackageManager pm = AppGlobals.getPackageManager();
-            final ArrayList<Pair<Intent, Integer>> recentTaskIntents =
-                    new ArrayList<Pair<Intent, Integer>>();
-            final HashSet<ComponentName> componentsKnownToExist = new HashSet<ComponentName>();
-            final ArrayList<Integer> tasksToRemove = new ArrayList<Integer>();
-            // Copy the list of recent tasks so that we don't hold onto the lock on
-            // ActivityManagerService for long periods while checking if components exist.
-            synchronized (ActivityManagerService.this) {
-                for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
-                    TaskRecord tr = mRecentTasks.get(i);
-                    if (tr.userId != eventUserId) continue;
-
-                    recentTaskIntents.add(new Pair<Intent, Integer>(tr.intent, tr.taskId));
-                }
-            }
-            // Check the recent tasks and filter out all tasks with components that no longer exist.
-            for (int i = recentTaskIntents.size() - 1; i >= 0; i--) {
-                Pair<Intent, Integer> p = recentTaskIntents.get(i);
-                ComponentName cn = p.first.getComponent();
-                if (cn != null && cn.getPackageName().equals(packageName)) {
-                    if (componentsKnownToExist.contains(cn)) {
-                        // If we know that the component still exists in the package, then skip
-                        continue;
-                    }
-                    try {
-                        ActivityInfo info = pm.getActivityInfo(cn, 0, eventUserId);
-                        if (info != null) {
-                            componentsKnownToExist.add(cn);
-                        } else {
-                            tasksToRemove.add(p.second);
-                        }
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to query activity info for component: " + cn, e);
-                    }
-                }
-            }
-            // Prune all the tasks with removed components from the list of recent tasks
-            synchronized (ActivityManagerService.this) {
-                for (int i = tasksToRemove.size() - 1; i >= 0; i--) {
-                    removeTaskByIdLocked(tasksToRemove.get(i), false);
-                }
-            }
-        }
-
-        @Override
-        public boolean onHandleForceStop(Intent intent, String[] packages, int uid, boolean doit) {
-            // Force stop the specified packages
-            int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0);
-            if (packages != null) {
-                for (String pkg : packages) {
-                    synchronized (ActivityManagerService.this) {
-                        if (forceStopPackageLocked(pkg, -1, false, false, false, false, false,
-                                userId, "finished booting")) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
         }
     };
 
@@ -6166,8 +6072,26 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        // Register receivers to handle package update events
-        mPackageMonitor.register(mContext, Looper.getMainLooper(), UserHandle.ALL, false);
+        IntentFilter pkgFilter = new IntentFilter();
+        pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
+        pkgFilter.addDataScheme("package");
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String[] pkgs = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
+                if (pkgs != null) {
+                    for (String pkg : pkgs) {
+                        synchronized (ActivityManagerService.this) {
+                            if (forceStopPackageLocked(pkg, -1, false, false, false, false, false,
+                                    0, "finished booting")) {
+                                setResultCode(Activity.RESULT_OK);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }, pkgFilter);
 
         // Let system services know.
         mSystemServiceManager.startBootPhase(SystemService.PHASE_BOOT_COMPLETED);
@@ -8397,6 +8321,47 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pr.kill("remove task", true);
             } else {
                 pr.waitingToKill = "remove task";
+            }
+        }
+    }
+
+    private void removeTasksByPackageNameLocked(String packageName, int userId) {
+        // Remove all tasks with activities in the specified package from the list of recent tasks
+        for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
+            TaskRecord tr = mRecentTasks.get(i);
+            if (tr.userId != userId) continue;
+
+            ComponentName cn = tr.intent.getComponent();
+            if (cn != null && cn.getPackageName().equals(packageName)) {
+                // If the package name matches, remove the task.
+                removeTaskByIdLocked(tr.taskId, true);
+            }
+        }
+    }
+
+    private void removeTasksByRemovedPackageComponentsLocked(String packageName, int userId) {
+        final IPackageManager pm = AppGlobals.getPackageManager();
+        final HashSet<ComponentName> componentsKnownToExist = new HashSet<ComponentName>();
+
+        for (int i = mRecentTasks.size() - 1; i >= 0; i--) {
+            TaskRecord tr = mRecentTasks.get(i);
+            if (tr.userId != userId) continue;
+
+            ComponentName cn = tr.intent.getComponent();
+            if (cn != null && cn.getPackageName().equals(packageName)) {
+                // Skip if component still exists in the package.
+                if (componentsKnownToExist.contains(cn)) continue;
+
+                try {
+                    ActivityInfo info = pm.getActivityInfo(cn, 0, userId);
+                    if (info != null) {
+                        componentsKnownToExist.add(cn);
+                    } else {
+                        removeTaskByIdLocked(tr.taskId, false);
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Activity info query failed. component=" + cn, e);
+                }
             }
         }
     }
@@ -15660,126 +15625,133 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        // Handle special intents: if this broadcast is from the package
-        // manager about a package being removed, we need to remove all of
-        // its activities from the history stack.
-        final boolean uidRemoved = Intent.ACTION_UID_REMOVED.equals(
-                intent.getAction());
-        if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
-                || Intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())
-                || Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())
-                || Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(intent.getAction())
-                || uidRemoved) {
-            if (checkComponentPermission(
-                    android.Manifest.permission.BROADCAST_PACKAGE_REMOVED,
-                    callingPid, callingUid, -1, true)
-                    == PackageManager.PERMISSION_GRANTED) {
-                if (uidRemoved) {
-                    final Bundle intentExtras = intent.getExtras();
-                    final int uid = intentExtras != null
-                            ? intentExtras.getInt(Intent.EXTRA_UID) : -1;
-                    if (uid >= 0) {
-                        BatteryStatsImpl bs = mBatteryStatsService.getActiveStatistics();
-                        synchronized (bs) {
-                            bs.removeUidStatsLocked(uid);
-                        }
-                        mAppOpsService.uidRemoved(uid);
+        final String action = intent.getAction();
+        if (action != null) {
+            switch (action) {
+                case Intent.ACTION_UID_REMOVED:
+                case Intent.ACTION_PACKAGE_REMOVED:
+                case Intent.ACTION_PACKAGE_CHANGED:
+                case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
+                case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
+                    // Handle special intents: if this broadcast is from the package
+                    // manager about a package being removed, we need to remove all of
+                    // its activities from the history stack.
+                    if (checkComponentPermission(
+                            android.Manifest.permission.BROADCAST_PACKAGE_REMOVED,
+                            callingPid, callingUid, -1, true)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        String msg = "Permission Denial: " + intent.getAction()
+                                + " broadcast from " + callerPackage + " (pid=" + callingPid
+                                + ", uid=" + callingUid + ")"
+                                + " requires "
+                                + android.Manifest.permission.BROADCAST_PACKAGE_REMOVED;
+                        Slog.w(TAG, msg);
+                        throw new SecurityException(msg);
                     }
-                } else {
-                    // If resources are unavailable just force stop all
-                    // those packages and flush the attribute cache as well.
-                    if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())) {
-                        String list[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
-                        if (list != null && (list.length > 0)) {
-                            for (String pkg : list) {
-                                forceStopPackageLocked(pkg, -1, false, true, true, false, false, userId,
-                                        "storage unmount");
+                    switch (action) {
+                        case Intent.ACTION_UID_REMOVED:
+                            final Bundle intentExtras = intent.getExtras();
+                            final int uid = intentExtras != null
+                                    ? intentExtras.getInt(Intent.EXTRA_UID) : -1;
+                            if (uid >= 0) {
+                                BatteryStatsImpl bs = mBatteryStatsService.getActiveStatistics();
+                                synchronized (bs) {
+                                    bs.removeUidStatsLocked(uid);
+                                }
+                                mAppOpsService.uidRemoved(uid);
                             }
+                            break;
+                        case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
+                            // If resources are unavailable just force stop all those packages
+                            // and flush the attribute cache as well.
+                            String list[] =
+                                    intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                            if (list != null && list.length > 0) {
+                                for (int i = 0; i < list.length; i++) {
+                                    forceStopPackageLocked(list[i], -1, false, true, true,
+                                            false, false, userId, "storage unmount");
+                                }
+                                cleanupRecentTasksLocked(UserHandle.USER_ALL);
+                                sendPackageBroadcastLocked(
+                                        IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list,
+                                        userId);
+                            }
+                            break;
+                        case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
                             cleanupRecentTasksLocked(UserHandle.USER_ALL);
-                            sendPackageBroadcastLocked(
-                                    IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list, userId);
-                        }
-                    } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(
-                            intent.getAction())) {
-                        cleanupRecentTasksLocked(UserHandle.USER_ALL);
-                    } else {
-                        Uri data = intent.getData();
-                        String ssp;
-                        if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
-                            boolean removed = Intent.ACTION_PACKAGE_REMOVED.equals(
-                                    intent.getAction());
-                            boolean fullUninstall = removed &&
-                                    !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
-                            if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
-                                forceStopPackageLocked(ssp, UserHandle.getAppId(
-                                        intent.getIntExtra(Intent.EXTRA_UID, -1)), false, true, true,
-                                        false, fullUninstall, userId,
-                                        removed ? "pkg removed" : "pkg changed");
-                            }
-                            if (removed) {
-                                sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
-                                        new String[] {ssp}, userId);
-                                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                                    mAppOpsService.packageRemoved(
-                                            intent.getIntExtra(Intent.EXTRA_UID, -1), ssp);
+                            break;
+                        case Intent.ACTION_PACKAGE_REMOVED:
+                        case Intent.ACTION_PACKAGE_CHANGED:
+                            Uri data = intent.getData();
+                            String ssp;
+                            if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
+                                boolean removed = Intent.ACTION_PACKAGE_REMOVED.equals(action);
+                                boolean fullUninstall = removed &&
+                                        !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                                if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
+                                    forceStopPackageLocked(ssp, UserHandle.getAppId(
+                                            intent.getIntExtra(Intent.EXTRA_UID, -1)),
+                                            false, true, true, false, fullUninstall, userId,
+                                            removed ? "pkg removed" : "pkg changed");
+                                }
+                                if (removed) {
+                                    sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
+                                            new String[] {ssp}, userId);
+                                    if (fullUninstall) {
+                                        mAppOpsService.packageRemoved(
+                                                intent.getIntExtra(Intent.EXTRA_UID, -1), ssp);
 
-                                    // Remove all permissions granted from/to this package
-                                    removeUriPermissionsForPackageLocked(ssp, userId, true);
+                                        // Remove all permissions granted from/to this package
+                                        removeUriPermissionsForPackageLocked(ssp, userId, true);
+
+                                        removeTasksByPackageNameLocked(ssp, userId);
+                                    }
+                                } else {
+                                    removeTasksByRemovedPackageComponentsLocked(ssp, userId);
                                 }
                             }
+                            break;
+                    }
+                    break;
+                case Intent.ACTION_PACKAGE_ADDED:
+                    // Special case for adding a package: by default turn on compatibility mode.
+                    Uri data = intent.getData();
+                    String ssp;
+                    if (data != null && (ssp = data.getSchemeSpecificPart()) != null) {
+                        final boolean replacing =
+                                intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                        mCompatModePackages.handlePackageAddedLocked(ssp, replacing);
+
+                        if (replacing) {
+                            removeTasksByRemovedPackageComponentsLocked(ssp, userId);
                         }
                     }
-                }
-            } else {
-                String msg = "Permission Denial: " + intent.getAction()
-                        + " broadcast from " + callerPackage + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ")"
-                        + " requires "
-                        + android.Manifest.permission.BROADCAST_PACKAGE_REMOVED;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
+                    break;
+                case Intent.ACTION_TIMEZONE_CHANGED:
+                    // If this is the time zone changed action, queue up a message that will reset
+                    // the timezone of all currently running processes. This message will get
+                    // queued up before the broadcast happens.
+                    mHandler.sendEmptyMessage(UPDATE_TIME_ZONE);
+                    break;
+                case Intent.ACTION_TIME_CHANGED:
+                    // If the user set the time, let all running processes know.
+                    final int is24Hour =
+                            intent.getBooleanExtra(Intent.EXTRA_TIME_PREF_24_HOUR_FORMAT, false) ? 1
+                                    : 0;
+                    mHandler.sendMessage(mHandler.obtainMessage(UPDATE_TIME, is24Hour, 0));
+                    BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+                    synchronized (stats) {
+                        stats.noteCurrentTimeChangedLocked();
+                    }
+                    break;
+                case Intent.ACTION_CLEAR_DNS_CACHE:
+                    mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
+                    break;
+                case Proxy.PROXY_CHANGE_ACTION:
+                    ProxyInfo proxy = intent.getParcelableExtra(Proxy.EXTRA_PROXY_INFO);
+                    mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG, proxy));
+                    break;
             }
-
-        // Special case for adding a package: by default turn on compatibility
-        // mode.
-        } else if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
-            Uri data = intent.getData();
-            String ssp;
-            if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
-                mCompatModePackages.handlePackageAddedLocked(ssp,
-                        intent.getBooleanExtra(Intent.EXTRA_REPLACING, false));
-            }
-        }
-
-        /*
-         * If this is the time zone changed action, queue up a message that will reset the timezone
-         * of all currently running processes. This message will get queued up before the broadcast
-         * happens.
-         */
-        if (Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
-            mHandler.sendEmptyMessage(UPDATE_TIME_ZONE);
-        }
-
-        /*
-         * If the user set the time, let all running processes know.
-         */
-        if (Intent.ACTION_TIME_CHANGED.equals(intent.getAction())) {
-            final int is24Hour = intent.getBooleanExtra(
-                    Intent.EXTRA_TIME_PREF_24_HOUR_FORMAT, false) ? 1 : 0;
-            mHandler.sendMessage(mHandler.obtainMessage(UPDATE_TIME, is24Hour, 0));
-            BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-            synchronized (stats) {
-                stats.noteCurrentTimeChangedLocked();
-            }
-        }
-
-        if (Intent.ACTION_CLEAR_DNS_CACHE.equals(intent.getAction())) {
-            mHandler.sendEmptyMessage(CLEAR_DNS_CACHE_MSG);
-        }
-
-        if (Proxy.PROXY_CHANGE_ACTION.equals(intent.getAction())) {
-            ProxyInfo proxy = intent.getParcelableExtra(Proxy.EXTRA_PROXY_INFO);
-            mHandler.sendMessage(mHandler.obtainMessage(UPDATE_HTTP_PROXY_MSG, proxy));
         }
 
         // Add to the sticky list if requested.
