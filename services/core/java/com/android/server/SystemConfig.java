@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.ActivityManager;
 import android.content.pm.FeatureInfo;
 import android.os.*;
 import android.os.Process;
@@ -177,6 +178,8 @@ public class SystemConfig {
             return;
         }
 
+        final boolean lowRam = ActivityManager.isLowRamDeviceStatic();
+
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(permReader);
@@ -276,10 +279,17 @@ public class SystemConfig {
 
                 } else if ("feature".equals(name)) {
                     String fname = parser.getAttributeValue(null, "name");
+                    boolean allowed;
+                    if (!lowRam) {
+                        allowed = true;
+                    } else {
+                        String notLowRam = parser.getAttributeValue(null, "notLowRam");
+                        allowed = !"true".equals(notLowRam);
+                    }
                     if (fname == null) {
                         Slog.w(TAG, "<feature> without name at "
                                 + parser.getPositionDescription());
-                    } else {
+                    } else if (allowed) {
                         //Log.i(TAG, "Got feature " + fname);
                         FeatureInfo fi = new FeatureInfo();
                         fi.name = fname;
