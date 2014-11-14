@@ -53,6 +53,9 @@ public class Surface implements Parcelable {
 
     private static native void nativeAllocateBuffers(long nativeObject);
 
+    private static native int nativeGetWidth(long nativeObject);
+    private static native int nativeGetHeight(long nativeObject);
+
     public static final Parcelable.Creator<Surface> CREATOR =
             new Parcelable.Creator<Surface>() {
         @Override
@@ -327,7 +330,9 @@ public class Surface implements Parcelable {
             if (mHwuiContext == null) {
                 mHwuiContext = new HwuiContext();
             }
-            return mHwuiContext.lockCanvas();
+            return mHwuiContext.lockCanvas(
+                    nativeGetWidth(mNativeObject),
+                    nativeGetHeight(mNativeObject));
         }
     }
 
@@ -576,11 +581,11 @@ public class Surface implements Parcelable {
             mHwuiRenderer = nHwuiCreate(mRenderNode.mNativeRenderNode, mNativeObject);
         }
 
-        Canvas lockCanvas() {
+        Canvas lockCanvas(int width, int height) {
             if (mCanvas != null) {
                 throw new IllegalStateException("Surface was already locked!");
             }
-            mCanvas = mRenderNode.start(0, 0);
+            mCanvas = mRenderNode.start(width, height);
             return mCanvas;
         }
 
