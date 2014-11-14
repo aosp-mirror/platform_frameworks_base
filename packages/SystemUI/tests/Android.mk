@@ -19,7 +19,7 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common
 
 LOCAL_PACKAGE_NAME := SystemUITests
 LOCAL_INSTRUMENTATION_FOR := SystemUI
