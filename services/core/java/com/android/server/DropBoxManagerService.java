@@ -408,9 +408,14 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
                         if (!newline) out.append("\n");
                     } else {
                         String text = dbe.getText(70);
-                        boolean truncated = (text.length() == 70);
-                        out.append("    ").append(text.trim().replace('\n', '/'));
-                        if (truncated) out.append(" ...");
+                        out.append("    ");
+                        if (text == null) {
+                            out.append("[null]");
+                        } else {
+                            boolean truncated = (text.length() == 70);
+                            out.append(text.trim().replace('\n', '/'));
+                            if (truncated) out.append(" ...");
+                        }
                         out.append("\n");
                     }
                 } catch (IOException e) {
