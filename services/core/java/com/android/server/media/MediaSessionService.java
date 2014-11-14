@@ -805,7 +805,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                         + flags + ", suggestedStream=" + suggestedStream);
 
             }
-            if (session == null) {
+            boolean preferSuggestedStream = false;
+            if (isValidLocalStreamType(suggestedStream)
+                    && AudioSystem.isStreamActive(suggestedStream, 0)) {
+                preferSuggestedStream = true;
+            }
+            if (session == null || preferSuggestedStream) {
                 if ((flags & AudioManager.FLAG_ACTIVE_MEDIA_ONLY) != 0
                         && !AudioSystem.isStreamActive(AudioManager.STREAM_MUSIC, 0)) {
                     if (DEBUG) {
@@ -957,6 +962,12 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private boolean isVoiceKey(int keyCode) {
             return keyCode == KeyEvent.KEYCODE_HEADSETHOOK;
+        }
+
+        // we only handle public stream types, which are 0-5
+        private boolean isValidLocalStreamType(int streamType) {
+            return streamType >= AudioManager.STREAM_VOICE_CALL
+                    && streamType <= AudioManager.STREAM_NOTIFICATION;
         }
 
         private KeyEventWakeLockReceiver mKeyEventReceiver = new KeyEventWakeLockReceiver(mHandler);
