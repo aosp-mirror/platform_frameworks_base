@@ -267,7 +267,7 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"網路共用"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"無線基地台"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
-    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"閃光燈"</string>
+    <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"手電筒"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"行動數據"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"數據用量"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"剩餘資料"</string>
@@ -354,22 +354,13 @@
     <string name="hidden_notifications_text" msgid="2326409389088668981">"解鎖前顯示"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"不用了，謝謝"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"設定"</string>
-    <string name="muted_by" msgid="6147073845094180001">"由 <xliff:g id="THIRD_PARTY">%1$s</xliff:g> 設為靜音"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <!-- no translation found for screen_pinning_title (3273740381976175811) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description (1346522416878235405) -->
-    <skip />
-    <!-- no translation found for screen_pinning_description_accessible (8518446209564202557) -->
-    <skip />
-    <!-- no translation found for screen_pinning_positive (3783985798366751226) -->
-    <skip />
-    <!-- no translation found for screen_pinning_negative (3741602308343880268) -->
-    <skip />
-    <!-- no translation found for quick_settings_reset_confirmation_title (748792586749897883) -->
-    <skip />
-    <!-- no translation found for quick_settings_reset_confirmation_message (2235970126803317374) -->
-    <skip />
-    <!-- no translation found for quick_settings_reset_confirmation_button (2660339101868367515) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="3273740381976175811">"螢幕已固定"</string>
+    <string name="screen_pinning_description" msgid="1346522416878235405">"這會讓螢幕畫面持續顯示，直到取消固定為止。同時輕觸並按住返回按鈕和總覽按鈕即可取消固定。"</string>
+    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"這會讓螢幕畫面持續顯示，直到取消固定為止。輕觸並按住總覽按鈕即可取消固定。"</string>
+    <string name="screen_pinning_positive" msgid="3783985798366751226">"知道了"</string>
+    <string name="screen_pinning_negative" msgid="3741602308343880268">"不用了，謝謝"</string>
+    <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"隱藏<xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
+    <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"當您下次在設定中將其開啟時，這項設定就會重新顯示。"</string>
+    <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"隱藏"</string>
 </resources>
