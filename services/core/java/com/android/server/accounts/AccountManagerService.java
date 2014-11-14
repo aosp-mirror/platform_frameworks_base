@@ -486,7 +486,7 @@ public class AccountManagerService
         for (Account sa : sharedAccounts) {
             if (ArrayUtils.contains(accounts, sa)) continue;
             // Account doesn't exist. Copy it now.
-            copyAccountToUser(sa, UserHandle.USER_OWNER, userId);
+            copyAccountToUser(null /*no response*/, sa, UserHandle.USER_OWNER, userId);
         }
     }
 
@@ -672,16 +672,31 @@ public class AccountManagerService
         }
     }
 
-    private boolean copyAccountToUser(final Account account, int userFrom, int userTo) {
+    @Override
+    public void copyAccountToUser(final IAccountManagerResponse response, final Account account,
+            int userFrom, int userTo) {
+        enforceCrossUserPermission(UserHandle.USER_ALL, "Calling copyAccountToUser requires "
+                    + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
         final UserAccounts fromAccounts = getUserAccounts(userFrom);
         final UserAccounts toAccounts = getUserAccounts(userTo);
         if (fromAccounts == null || toAccounts == null) {
-            return false;
+            if (response != null) {
+                Bundle result = new Bundle();
+                result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false);
+                try {
+                    response.onResult(result);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to report error back to the client." + e);
+                }
+            }
+            return;
         }
 
+        Slog.d(TAG, "Copying account " + account.name
+                + " from user " + userFrom + " to user " + userTo);
         long identityToken = clearCallingIdentity();
         try {
-            new Session(fromAccounts, null, account.type, false,
+            new Session(fromAccounts, response, account.type, false,
                     false /* stripAuthTokenFromResult */) {
                 @Override
                 protected String toDebugString(long now) {
@@ -696,12 +711,10 @@ public class AccountManagerService
 
                 @Override
                 public void onResult(Bundle result) {
-                    if (result != null) {
-                        if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
-                            // Create a Session for the target user and pass in the bundle
-                            completeCloningAccount(result, account, toAccounts);
-                        }
-                        return;
+                    if (result != null
+                            && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
+                        // Create a Session for the target user and pass in the bundle
+                        completeCloningAccount(response, result, account, toAccounts);
                     } else {
                         super.onResult(result);
                     }
@@ -710,14 +723,13 @@ public class AccountManagerService
         } finally {
             restoreCallingIdentity(identityToken);
         }
-        return true;
     }
 
-    void completeCloningAccount(final Bundle result, final Account account,
-            final UserAccounts targetUser) {
+    private void completeCloningAccount(IAccountManagerResponse response,
+            final Bundle accountCredentials, final Account account, final UserAccounts targetUser) {
         long id = clearCallingIdentity();
         try {
-            new Session(targetUser, null, account.type, false,
+            new Session(targetUser, response, account.type, false,
                     false /* stripAuthTokenFromResult */) {
                 @Override
                 protected String toDebugString(long now) {
@@ -730,10 +742,10 @@ public class AccountManagerService
                     // Confirm that the owner's account still exists before this step.
                     UserAccounts owner = getUserAccounts(UserHandle.USER_OWNER);
                     synchronized (owner.cacheLock) {
-                        Account[] ownerAccounts = getAccounts(UserHandle.USER_OWNER);
-                        for (Account acc : ownerAccounts) {
+                        for (Account acc : getAccounts(UserHandle.USER_OWNER)) {
                             if (acc.equals(account)) {
-                                mAuthenticator.addAccountFromCredentials(this, account, result);
+                                mAuthenticator.addAccountFromCredentials(
+                                        this, account, accountCredentials);
                                 break;
                             }
                         }
@@ -742,17 +754,10 @@ public class AccountManagerService
 
                 @Override
                 public void onResult(Bundle result) {
-                    if (result != null) {
-                        if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
-                            // TODO: Anything?
-                        } else {
-                            // TODO: Show error notification
-                            // TODO: Should we remove the shadow account to avoid retries?
-                        }
-                        return;
-                    } else {
-                        super.onResult(result);
-                    }
+                    // TODO: Anything to do if if succedded?
+                    // TODO: If it failed: Show error notification? Should we remove the shadow
+                    // account to avoid retries?
+                    super.onResult(result);
                 }
 
                 @Override
@@ -2740,7 +2745,7 @@ public class AccountManagerService
                     break;
 
                 case MESSAGE_COPY_SHARED_ACCOUNT:
-                    copyAccountToUser((Account) msg.obj, msg.arg1, msg.arg2);
+                    copyAccountToUser(/*no response*/ null, (Account) msg.obj, msg.arg1, msg.arg2);
                     break;
 
                 default:
