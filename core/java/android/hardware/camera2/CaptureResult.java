@@ -970,7 +970,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Whether auto-focus (AF) is currently enabled, and what
      * mode it is set to.</p>
      * <p>Only effective if {@link CaptureRequest#CONTROL_MODE android.control.mode} = AUTO and the lens is not fixed focus
-     * (i.e. <code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>).</p>
+     * (i.e. <code>{@link CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE android.lens.info.minimumFocusDistance} &gt; 0</code>). Also note that
+     * when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is OFF, the behavior of AF is device
+     * dependent. It is recommended to lock AF by using {@link CaptureRequest#CONTROL_AF_TRIGGER android.control.afTrigger} before
+     * setting {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} to OFF, or set AF mode to OFF when AE is OFF.</p>
      * <p>If the lens is controlled by the camera device auto-focus algorithm,
      * the camera device will report the current AF status in {@link CaptureResult#CONTROL_AF_STATE android.control.afState}
      * in result metadata.</p>
@@ -987,8 +990,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CameraCharacteristics#CONTROL_AF_AVAILABLE_MODES android.control.afAvailableModes}</p>
      * <p>This key is available on all devices.</p>
      *
+     * @see CaptureRequest#CONTROL_AE_MODE
      * @see CameraCharacteristics#CONTROL_AF_AVAILABLE_MODES
      * @see CaptureResult#CONTROL_AF_STATE
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#LENS_INFO_MINIMUM_FOCUS_DISTANCE
      * @see #CONTROL_AF_MODE_OFF
@@ -1519,7 +1524,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>When set to the ON mode, the camera device's auto-white balance
      * routine is enabled, overriding the application's selected
      * {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains} and
-     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}.</p>
+     * {@link CaptureRequest#COLOR_CORRECTION_MODE android.colorCorrection.mode}. Note that when {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode}
+     * is OFF, the behavior of AWB is device dependent. It is recommened to
+     * also set AWB mode to OFF or lock AWB by using {@link CaptureRequest#CONTROL_AWB_LOCK android.control.awbLock} before
+     * setting AE mode to OFF.</p>
      * <p>When set to the OFF mode, the camera device's auto-white balance
      * routine is disabled. The application manually controls the white
      * balance by {@link CaptureRequest#COLOR_CORRECTION_TRANSFORM android.colorCorrection.transform}, {@link CaptureRequest#COLOR_CORRECTION_GAINS android.colorCorrection.gains}
@@ -1550,7 +1558,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @see CaptureRequest#COLOR_CORRECTION_MODE
      * @see CaptureRequest#COLOR_CORRECTION_TRANSFORM
+     * @see CaptureRequest#CONTROL_AE_MODE
      * @see CameraCharacteristics#CONTROL_AWB_AVAILABLE_MODES
+     * @see CaptureRequest#CONTROL_AWB_LOCK
      * @see CaptureRequest#CONTROL_MODE
      * @see #CONTROL_AWB_MODE_OFF
      * @see #CONTROL_AWB_MODE_AUTO
