@@ -22094,6 +22094,7 @@ package android.os {
     method public android.os.Bundle getData();
     method public android.os.Handler getTarget();
     method public long getWhen();
+    method public boolean isAsynchronous();
     method public static android.os.Message obtain();
     method public static android.os.Message obtain(android.os.Message);
     method public static android.os.Message obtain(android.os.Handler);
@@ -22105,6 +22106,7 @@ package android.os {
     method public android.os.Bundle peekData();
     method public void recycle();
     method public void sendToTarget();
+    method public void setAsynchronous(boolean);
     method public void setData(android.os.Bundle);
     method public void setTarget(android.os.Handler);
     method public void writeToParcel(android.os.Parcel, int);
