@@ -4278,7 +4278,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (pkg.mVersionCode < ps.versionCode) {
                     // The system package has been updated and the code path does not match
                     // Ignore entry. Skip it.
-                    logCriticalInfo(Log.INFO, "Package " + ps.name + " at " + scanFile
+                    Slog.i(TAG, "Package " + ps.name + " at " + scanFile
                             + " ignored: updated version " + ps.versionCode
                             + " better than this " + pkg.mVersionCode);
                     if (!updatedPkg.codePath.equals(scanFile)) {
