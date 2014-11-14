@@ -326,6 +326,8 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         Slog.v(TAG, "--------------------------------------------");
         mCallback.onDeviceDiscoveryDone(result);
         finish();
+        // Process any commands buffered while device discovery action was in progress.
+        tv().processAllDelayedMessages();
     }
 
     private void checkAndProceedStage() {
