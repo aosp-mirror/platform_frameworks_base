@@ -4523,6 +4523,96 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Action to perform when the home key is long-pressed.
+         * (Default can be configured via config_longPressOnHomeBehaviorHwkeys)
+         * 0 - Nothing
+         * 1 - Menu
+         * 2 - App-switch
+         * 3 - Search
+         * 4 - Voice search
+         * 5 - Launch Camera
+         * 6 - Action Sleep
+         * 7 - Toggle split screen
+         */
+        public static final String KEY_HOME_LONG_PRESS_ACTION = "key_home_long_press_action";
+
+        /** @hide */
+        public static final Validator KEY_HOME_LONG_PRESS_ACTION_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 9);
+
+        /**
+         * Action to perform when the home key is double-tapped.
+         * (Default can be configured via config_doubleTapOnHomeBehaviorHwkeys)
+         * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+         */
+        public static final String KEY_HOME_DOUBLE_TAP_ACTION = "key_home_double_tap_action";
+
+        /** @hide */
+        public static final Validator KEY_HOME_DOUBLE_TAP_ACTION_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 9);
+
+        /**
+         * Action to perform when the menu key is pressed. (Default is 1)
+         * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+         */
+        public static final String KEY_MENU_ACTION = "key_menu_action";
+
+        /** @hide */
+        public static final Validator KEY_MENU_ACTION_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 9);
+
+        /**
+         * Action to perform when the menu key is long-pressed.
+         * (Default is 0 on devices with a search key, 3 on devices without)
+         * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+         */
+        public static final String KEY_MENU_LONG_PRESS_ACTION = "key_menu_long_press_action";
+
+        /** @hide */
+        public static final Validator KEY_MENU_LONG_PRESS_ACTION_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 9);
+
+        /**
+         * Action to perform when the assistant (search) key is pressed. (Default is 3)
+         * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+         */
+        public static final String KEY_ASSIST_ACTION = "key_assist_action";
+
+        /** @hide */
+        public static final Validator KEY_ASSIST_ACTION_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 9);
+
+        /**
+         * Action to perform when the assistant (search) key is long-pressed. (Default is 4)
+         * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+         */
+        public static final String KEY_ASSIST_LONG_PRESS_ACTION = "key_assist_long_press_action";
+
+        /** @hide */
+        public static final Validator KEY_ASSIST_LONG_PRESS_ACTION_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 9);
+
+        /**
+         * Action to perform when the app switch key is pressed. (Default is 2)
+         * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+         */
+        public static final String KEY_APP_SWITCH_ACTION = "key_app_switch_action";
+
+        /** @hide */
+        public static final Validator KEY_APP_SWITCH_ACTION_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 9);
+
+        /**
+         * Action to perform when the app switch key is long-pressed. (Default is 0)
+         * (See KEY_HOME_LONG_PRESS_ACTION for valid values)
+         */
+        public static final String KEY_APP_SWITCH_LONG_PRESS_ACTION = "key_app_switch_long_press_action";
+
+        /** @hide */
+        public static final Validator KEY_APP_SWITCH_LONG_PRESS_ACTION_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 9);
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4718,6 +4808,14 @@ public final class Settings {
             PRIVATE_SETTINGS.add(BUTTON_BRIGHTNESS);
             PRIVATE_SETTINGS.add(PROXIMITY_ON_WAKE);
             PRIVATE_SETTINGS.add(NAVIGATION_BAR_SHOW);
+            PRIVATE_SETTINGS.add(KEY_HOME_LONG_PRESS_ACTION);
+            PRIVATE_SETTINGS.add(KEY_HOME_DOUBLE_TAP_ACTION);
+            PRIVATE_SETTINGS.add(KEY_MENU_ACTION);
+            PRIVATE_SETTINGS.add(KEY_MENU_LONG_PRESS_ACTION);
+            PRIVATE_SETTINGS.add(KEY_ASSIST_ACTION);
+            PRIVATE_SETTINGS.add(KEY_ASSIST_LONG_PRESS_ACTION);
+            PRIVATE_SETTINGS.add(KEY_APP_SWITCH_ACTION);
+            PRIVATE_SETTINGS.add(KEY_APP_SWITCH_LONG_PRESS_ACTION);
         }
 
         /**
@@ -4816,6 +4914,14 @@ public final class Settings {
             VALIDATORS.put(PROXIMITY_ON_WAKE, PROXIMITY_ON_WAKE_VALIDATOR);
             VALIDATORS.put(BUTTON_BACKLIGHT_ONLY_WHEN_PRESSED, BUTTON_BACKLIGHT_ONLY_WHEN_PRESSED_VALIDATOR);
             VALIDATORS.put(NAVIGATION_BAR_SHOW, NAVIGATION_BAR_SHOW_VALIDATOR);
+            VALIDATORS.put(KEY_HOME_LONG_PRESS_ACTION, KEY_HOME_LONG_PRESS_ACTION_VALIDATOR);
+            VALIDATORS.put(KEY_HOME_DOUBLE_TAP_ACTION, KEY_HOME_DOUBLE_TAP_ACTION_VALIDATOR);
+            VALIDATORS.put(KEY_MENU_ACTION, KEY_MENU_ACTION_VALIDATOR);
+            VALIDATORS.put(KEY_MENU_LONG_PRESS_ACTION, KEY_MENU_LONG_PRESS_ACTION_VALIDATOR);
+            VALIDATORS.put(KEY_ASSIST_ACTION, KEY_ASSIST_ACTION_VALIDATOR);
+            VALIDATORS.put(KEY_ASSIST_LONG_PRESS_ACTION, KEY_ASSIST_LONG_PRESS_ACTION_VALIDATOR);
+            VALIDATORS.put(KEY_APP_SWITCH_ACTION, KEY_APP_SWITCH_ACTION_VALIDATOR);
+            VALIDATORS.put(KEY_APP_SWITCH_LONG_PRESS_ACTION, KEY_APP_SWITCH_LONG_PRESS_ACTION_VALIDATOR);
         }
 
         /**

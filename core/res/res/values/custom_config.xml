@@ -83,4 +83,123 @@
     <!-- Whether device supports gestures on fingerprint sensor -->
     <bool name="config_supportsGesturesOnFingerprintSensor">false</bool>
 
+    <!-- Hardware keys present on the device, stored as a bit field.
+         This integer should equal the sum of the corresponding value for each
+         of the following keys present:
+             1 - Home
+             2 - Back
+             4 - Menu
+             8 - Assistant (search)
+            16 - App switch
+            32 - Camera
+            64 - Volume rocker
+         For example, a device with Home, Back and Menu keys would set this
+         config to 7. -->
+    <integer name="config_deviceHardwareKeys">64</integer>
+
+    <!-- Control the behavior when the user long presses the home button.
+            0 - Nothing
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - Launch camera
+            6 - Sleep
+            7 - Toggle split screen
+            8 - Take screenshot
+         This needs to match the enums in
+         frameworks/base/core/java/com/android/internal/util/custom/hwkeys/DeviceKeysConstants.java.
+    -->
+    <integer name="config_longPressOnHomeBehaviorHwkeys">3</integer>
+
+    <!-- Control the behavior when the user double-taps the home button.
+            0 - Nothing
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - Launch camera
+            6 - Sleep
+            7 - Toggle split screen
+            8 - Take screenshot
+         This needs to match the enums in
+         frameworks/base/core/java/com/android/internal/util/custom/hwkeys/DeviceKeysConstants.java.
+    -->
+    <integer name="config_doubleTapOnHomeBehaviorHwkeys">0</integer>
+
+    <!-- Control the behavior when the user long presses the menu button.
+            0 - Nothing
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - Launch camera
+            6 - Sleep
+            7 - Toggle split screen
+            8 - Take screenshot
+         This needs to match the enums in
+         frameworks/base/core/java/com/android/internal/util/custom/hwkeys/DeviceKeysConstants.java.
+    -->
+    <integer name="config_longPressOnMenuBehaviorHwkeys">2</integer>
+
+    <!-- Control the behavior when the user long presses the app switch button.
+            0 - Nothing
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - Launch camera
+            6 - Sleep
+            7 - Toggle split screen
+            8 - Take screenshot
+         This needs to match the enums in
+         frameworks/base/core/java/com/android/internal/util/custom/hwkeys/DeviceKeysConstants.java.
+    -->
+    <integer name="config_pressOnAppSwitchBehaviorHwkeys">2</integer>
+
+    <!-- Control the behavior when the user long presses the app switch button.
+            0 - Nothing
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - Launch camera
+            6 - Sleep
+            7 - Toggle split screen
+            8 - Take screenshot
+         This needs to match the enums in
+         frameworks/base/core/java/com/android/internal/util/custom/hwkeys/DeviceKeysConstants.java.
+    -->
+    <integer name="config_longPressOnAppSwitchBehaviorHwkeys">8</integer>
+
+    <!-- Control the behavior when the user presses the assist button.
+            0 - Nothing
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - Launch camera
+            6 - Sleep
+            7 - Toggle split screen
+            8 - Take screenshot
+         This needs to match the enums in
+         frameworks/base/core/java/com/android/internal/util/custom/hwkeys/DeviceKeysConstants.java.
+    -->
+    <integer name="config_pressOnAssistBehaviorHwkeys">3</integer>
+
+    <!-- Control the behavior when the user long presses the assist button.
+            0 - Nothing
+            1 - Menu key
+            2 - Recent apps view in SystemUI
+            3 - Launch assist intent
+            4 - Voice Search
+            5 - Launch camera
+            6 - Sleep
+            7 - Toggle split screen
+            8 - Take screenshot
+         This needs to match the enums in
+         frameworks/base/core/java/com/android/internal/util/custom/hwkeys/DeviceKeysConstants.java.
+    -->
+    <integer name="config_longPressOnAssistBehaviorHwkeys">4</integer>
+
 </resources>

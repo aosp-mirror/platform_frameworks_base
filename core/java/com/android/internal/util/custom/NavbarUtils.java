@@ -21,6 +21,8 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.os.UserHandle;
 
+import static com.android.internal.util.custom.hwkeys.DeviceKeysConstants.*;
+
 public class NavbarUtils {
     public static boolean hasNavbarByDefault(Context context) {
         boolean needsNav = context.getResources().getBoolean(com.android.internal.R.bool.config_showNavigationBar);
