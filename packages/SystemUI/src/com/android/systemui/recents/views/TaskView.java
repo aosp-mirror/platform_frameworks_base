@@ -57,6 +57,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     AccelerateInterpolator mDimInterpolator = new AccelerateInterpolator(1f);
     PorterDuffColorFilter mDimColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_ATOP);
     Paint mDimLayerPaint = new Paint();
+    float mActionButtonTranslationZ;
 
     Task mTask;
     boolean mTaskDataLoaded;
@@ -145,6 +146,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 outline.setOval(0, 0, mActionButtonView.getWidth(), mActionButtonView.getHeight());
             }
         });
+        mActionButtonTranslationZ = mActionButtonView.getTranslationZ();
     }
 
     @Override
@@ -201,6 +203,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         setDim(0);
         setLayerType(View.LAYER_TYPE_NONE, null);
         TaskViewTransform.reset(this);
+        if (mActionButtonView != null) {
+            mActionButtonView.setScaleX(1f);
+            mActionButtonView.setScaleY(1f);
+            mActionButtonView.setAlpha(1f);
+            mActionButtonView.setTranslationZ(mActionButtonTranslationZ);
+        }
     }
 
     /**
