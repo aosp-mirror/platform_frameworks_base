@@ -1,0 +1,29 @@
+XML Files
+X Collect declared IDs
+X Build StringPool
+X Flatten
+
+Resource Table Operations
+X Build Resource Table (with StringPool) from XML.
+X Modify Resource Table.
+X - Copy and transform resources.
+X   - Pre-17/21 attr correction.
+X Perform analysis of types.
+X Flatten.
+X Assign resource IDs.
+X Assign public resource IDs.
+X Merge resource tables
+- Assign private attributes to different typespace.
+- Align resource tables
+
+Splits
+- Collect all resources (ids from layouts).
+- Generate resource table from base resources.
+- Generate resource table from individual resources of the required type.
+- Align resource tables (same type/name = same ID).
+
+Fat Apk
+X Collect all resources (ids from layouts).
+X Generate resource tables for all configurations.
+- Align individual resource tables.
+- Merge resource tables.

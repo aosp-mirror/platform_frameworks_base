@@ -1333,7 +1333,11 @@ struct ResTable_entry
         FLAG_COMPLEX = 0x0001,
         // If set, this resource has been declared public, so libraries
         // are allowed to reference it.
-        FLAG_PUBLIC = 0x0002
+        FLAG_PUBLIC = 0x0002,
+        // If set, this is a weak resource and may be overriden by strong
+        // resources of the same name/type. This is only useful during
+        // linking with other resource tables.
+        FLAG_WEAK = 0x0004
     };
     uint16_t flags;
     

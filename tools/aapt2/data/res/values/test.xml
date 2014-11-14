@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="hooha"><font bgcolor="#ffffff">Hey guys!</font> <xliff:g>My</xliff:g> name is <b>Adam</b>. How <b><i>are</i></b> you?</string>
+    <public name="hooha" type="string" id="0x7f020001"/>
+    <string name="wow">@android:string/ok</string>
+    <public name="image" type="drawable" id="0x7f060000" />
+    <attr name="layout_width" format="boolean" />
+    <attr name="flags">
+        <flag name="complex" value="1" />
+        <flag name="pub" value="2" />
+        <flag name="weak" value="4" />
+    </attr>
+</resources>
