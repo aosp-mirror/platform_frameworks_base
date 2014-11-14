@@ -49,6 +49,7 @@ public class RecentsTaskLoadPlan {
         public int runningTaskId = -1;
         public boolean loadIcons = true;
         public boolean loadThumbnails = true;
+        public boolean onlyLoadForCache = false;
         public int numVisibleTasks = 0;
         public int numVisibleTaskThumbnails = 0;
     }
