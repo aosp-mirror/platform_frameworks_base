@@ -1183,7 +1183,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int SERVICE_TIMEOUT_MSG = 12;
     static final int UPDATE_TIME_ZONE = 13;
     static final int SHOW_UID_ERROR_MSG = 14;
-    static final int IM_FEELING_LUCKY_MSG = 15;
+    static final int SHOW_FINGERPRINT_ERROR_MSG = 15;
     static final int PROC_START_TIMEOUT_MSG = 20;
     static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 21;
     static final int KILL_APPLICATION_MSG = 22;
@@ -1212,13 +1212,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int FINISH_BOOTING_MSG = 45;
     static final int START_USER_SWITCH_MSG = 46;
     static final int SEND_LOCALE_TO_MOUNT_DAEMON_MSG = 47;
+    static final int DISMISS_DIALOG_MSG = 48;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
     static final int FIRST_COMPAT_MODE_MSG = 300;
     static final int FIRST_SUPERVISOR_STACK_MSG = 100;
 
-    AlertDialog mUidAlert;
     CompatModeDialog mCompatModeDialog;
     long mLastMemUsageReportTime = 0;
 
@@ -1447,27 +1447,27 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             } break;
             case SHOW_UID_ERROR_MSG: {
-                String title = "System UIDs Inconsistent";
-                String text = "UIDs on the system are inconsistent, you need to wipe your"
-                        + " data partition or your device will be unstable.";
-                Log.e(TAG, title + ": " + text);
                 if (mShowDialogs) {
-                    // XXX This is a temporary dialog, no need to localize.
                     AlertDialog d = new BaseErrorDialog(mContext);
                     d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
                     d.setCancelable(false);
-                    d.setTitle(title);
-                    d.setMessage(text);
-                    d.setButton(DialogInterface.BUTTON_POSITIVE, "I'm Feeling Lucky",
-                            mHandler.obtainMessage(IM_FEELING_LUCKY_MSG));
-                    mUidAlert = d;
+                    d.setTitle(mContext.getText(R.string.android_system_label));
+                    d.setMessage(mContext.getText(R.string.system_error_wipe_data));
+                    d.setButton(DialogInterface.BUTTON_POSITIVE, mContext.getText(R.string.ok),
+                            mHandler.obtainMessage(DISMISS_DIALOG_MSG, d));
                     d.show();
                 }
             } break;
-            case IM_FEELING_LUCKY_MSG: {
-                if (mUidAlert != null) {
-                    mUidAlert.dismiss();
-                    mUidAlert = null;
+            case SHOW_FINGERPRINT_ERROR_MSG: {
+                if (mShowDialogs) {
+                    AlertDialog d = new BaseErrorDialog(mContext);
+                    d.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+                    d.setCancelable(false);
+                    d.setTitle(mContext.getText(R.string.android_system_label));
+                    d.setMessage(mContext.getText(R.string.system_error_manufacturer));
+                    d.setButton(DialogInterface.BUTTON_POSITIVE, mContext.getText(R.string.ok),
+                            mHandler.obtainMessage(DISMISS_DIALOG_MSG, d));
+                    d.show();
                 }
             } break;
             case PROC_START_TIMEOUT_MSG: {
@@ -1727,6 +1727,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 break;
             }
+            case DISMISS_DIALOG_MSG: {
+                final Dialog d = (Dialog) msg.obj;
+                d.dismiss();
+                break;
+            }
             }
         }
     };
@@ -1776,7 +1781,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                int i=0, num=0;
+                int i = 0;
+                int num = 0;
                 long[] tmp = new long[1];
                 do {
                     ProcessRecord proc;
@@ -11249,11 +11255,16 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             try {
                 if (AppGlobals.getPackageManager().hasSystemUidErrors()) {
-                    Message msg = Message.obtain();
-                    msg.what = SHOW_UID_ERROR_MSG;
-                    mHandler.sendMessage(msg);
+                    Slog.e(TAG, "UIDs on the system are inconsistent, you need to wipe your"
+                            + " data partition or your device will be unstable.");
+                    mHandler.obtainMessage(SHOW_UID_ERROR_MSG).sendToTarget();
                 }
             } catch (RemoteException e) {
+            }
+
+            if (!Build.isFingerprintConsistent()) {
+                Slog.e(TAG, "Build fingerprint is not consistent, warning user");
+                mHandler.obtainMessage(SHOW_FINGERPRINT_ERROR_MSG).sendToTarget();
             }
 
             long ident = Binder.clearCallingIdentity();
@@ -13961,7 +13972,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         ArrayList<MemItem> procMems = new ArrayList<MemItem>();
         final SparseArray<MemItem> procMemsMap = new SparseArray<MemItem>();
-        long nativePss=0, dalvikPss=0, otherPss=0;
+        long nativePss = 0;
+        long dalvikPss = 0;
+        long otherPss = 0;
         long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
 
         long oomPss[] = new long[DUMP_MEM_OOM_LABEL.length];
