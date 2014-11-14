@@ -6437,7 +6437,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mResolveActivity.applicationInfo = pkg.applicationInfo;
             mResolveActivity.name = mCustomResolverComponentName.getClassName();
             mResolveActivity.packageName = pkg.applicationInfo.packageName;
-            mResolveActivity.processName = null;
+            mResolveActivity.processName = pkg.applicationInfo.packageName;
             mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS |
                     ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
