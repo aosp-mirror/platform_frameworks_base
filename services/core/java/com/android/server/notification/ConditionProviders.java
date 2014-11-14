@@ -260,9 +260,11 @@ public class ConditionProviders extends ManagedServices {
             for (int i = 0; i < N; i++) {
                 final Condition c = conditions[i];
                 final ConditionRecord r = getRecordLocked(c.id, info.component);
+                final Condition oldCondition = r.condition;
+                final boolean conditionUpdate = oldCondition != null && !oldCondition.equals(c);
                 r.info = info;
                 r.condition = c;
-                // if manual, exit zen if false (or failed)
+                // if manual, exit zen if false (or failed), update if true (and changed)
                 if (r.isManual) {
                     if (c.state == Condition.STATE_FALSE || c.state == Condition.STATE_ERROR) {
                         final boolean failed = c.state == Condition.STATE_ERROR;
@@ -275,6 +277,10 @@ public class ConditionProviders extends ManagedServices {
                                 "manualConditionExit");
                         unsubscribeLocked(r);
                         r.isManual = false;
+                    } else if (c.state == Condition.STATE_TRUE && conditionUpdate) {
+                        if (DEBUG) Slog.d(TAG, "Current condition updated, still true. old="
+                                + oldCondition + " new=" + c);
+                        setZenModeCondition(c, "conditionUpdate");
                     }
                 }
                 // if automatic, exit zen if false (or failed), enter zen if true
@@ -559,7 +565,7 @@ public class ConditionProviders extends ManagedServices {
             // enter downtime, or update mode if reconfigured during an active downtime
             if (inDowntime && (mode == Global.ZEN_MODE_OFF || downtimeCurrent)  && config != null) {
                 final Condition condition = mDowntime.createCondition(config.toDowntimeInfo(),
-                        Condition.STATE_TRUE);
+                        config.sleepNone, Condition.STATE_TRUE);
                 mZenModeHelper.setZenMode(downtimeMode, "downtimeEnter");
                 setZenModeCondition(condition, "downtime");
             }

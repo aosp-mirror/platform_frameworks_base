@@ -122,7 +122,8 @@ public class DowntimeConditionProvider extends ConditionProviderService {
         if (DEBUG) Slog.d(TAG, "onRequestConditions relevance=" + relevance);
         if ((relevance & Condition.FLAG_RELEVANT_NOW) != 0) {
             if (isInDowntime() && mConfig != null) {
-                notifyCondition(createCondition(mConfig.toDowntimeInfo(), Condition.STATE_TRUE));
+                notifyCondition(createCondition(mConfig.toDowntimeInfo(), mConfig.sleepNone,
+                        Condition.STATE_TRUE));
             }
         }
     }
@@ -135,7 +136,7 @@ public class DowntimeConditionProvider extends ConditionProviderService {
             final int state = mConfig.toDowntimeInfo().equals(downtime) && isInDowntime()
                     ? Condition.STATE_TRUE : Condition.STATE_FALSE;
             if (DEBUG) Slog.d(TAG, "notify condition state: " + Condition.stateToString(state));
-            notifyCondition(createCondition(downtime, state));
+            notifyCondition(createCondition(downtime, mConfig.sleepNone, state));
         }
     }
 
@@ -157,14 +158,22 @@ public class DowntimeConditionProvider extends ConditionProviderService {
         return mDowntimeMode != Global.ZEN_MODE_OFF;
     }
 
-    public Condition createCondition(DowntimeInfo downtime, int state) {
+    public Condition createCondition(DowntimeInfo downtime, boolean orAlarm, int state) {
         if (downtime == null) return null;
         final Uri id = ZenModeConfig.toDowntimeConditionId(downtime);
         final String skeleton = DateFormat.is24HourFormat(mContext) ? "Hm" : "hma";
         final Locale locale = Locale.getDefault();
         final String pattern = DateFormat.getBestDateTimePattern(locale, skeleton);
-        final long time = getTime(System.currentTimeMillis(), downtime.endHour, downtime.endMinute);
-        final String formatted = new SimpleDateFormat(pattern, locale).format(new Date(time));
+        final long now = System.currentTimeMillis();
+        long endTime = getTime(now, downtime.endHour, downtime.endMinute);
+        if (orAlarm) {
+            final AlarmClockInfo nextAlarm = mTracker.getNextAlarm();
+            final long nextAlarmTime = nextAlarm != null ? nextAlarm.getTriggerTime() : 0;
+            if (nextAlarmTime > now && nextAlarmTime < endTime) {
+                endTime = nextAlarmTime;
+            }
+        }
+        final String formatted = new SimpleDateFormat(pattern, locale).format(new Date(endTime));
         final String summary = mContext.getString(R.string.downtime_condition_summary, formatted);
         final String line1 = mContext.getString(R.string.downtime_condition_line_one);
         return new Condition(id, summary, line1, formatted, 0, state, Condition.FLAG_RELEVANT_NOW);
@@ -302,6 +311,11 @@ public class DowntimeConditionProvider extends ConditionProviderService {
 
     private void onEvaluateNextAlarm(AlarmClockInfo nextAlarm, long wakeupTime, boolean booted) {
         if (!booted) return;  // we don't know yet
+        // update condition description if we're in downtime (mode = none)
+        if (isInDowntime() && mConfig != null && mConfig.sleepNone) {
+            notifyCondition(createCondition(mConfig.toDowntimeInfo(), true /*orAlarm*/,
+                    Condition.STATE_TRUE));
+        }
         if (nextAlarm == null) return;  // not fireable
         if (DEBUG) Slog.d(TAG, "onEvaluateNextAlarm " + mTracker.formatAlarmDebug(nextAlarm));
         if (System.currentTimeMillis() > wakeupTime) {
@@ -336,6 +350,10 @@ public class DowntimeConditionProvider extends ConditionProviderService {
             } else if (Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                 if (DEBUG) Slog.d(TAG, "timezone changed to " + TimeZone.getDefault());
                 mCalendar.setTimeZone(TimeZone.getDefault());
+                mFiredAlarms.clear();
+            } else if (Intent.ACTION_TIME_CHANGED.equals(action)) {
+                if (DEBUG) Slog.d(TAG, "time changed to " + now);
+                mFiredAlarms.clear();
             } else {
                 if (DEBUG) Slog.d(TAG, action + " fired at " + now);
             }
