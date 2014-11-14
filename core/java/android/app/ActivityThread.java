@@ -5223,8 +5223,6 @@ public final class ActivityThread {
             sMainThreadHandler = thread.getHandler();
         }
 
-        AsyncTask.init();
-
         if (false) {
             Looper.myLooper().setMessageLogging(new
                     LogPrinter(Log.DEBUG, "ActivityThread"));
