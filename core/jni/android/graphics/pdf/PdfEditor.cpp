@@ -16,11 +16,16 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #include "fpdfview.h"
 #include "fpdfedit.h"
 #include "fpdfsave.h"
 #include "fsdk_rendercontext.h"
 #include "fpdf_transformpage.h"
+#pragma GCC diagnostic pop
+
 #include "SkMatrix.h"
 
 #include <android_runtime/AndroidRuntime.h>
