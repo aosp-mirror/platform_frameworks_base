@@ -79,7 +79,7 @@ static void throwIllegalArgumentException(JNIEnv* env, char* message) {
     throwException(env, className, message);
 }
 
-static void readBitmapPixels(JNIEnv* env, jclass clazz, jobject jbitmap, jint fd) {
+static void readBitmapPixels(JNIEnv* env, jclass /* clazz */, jobject jbitmap, jint fd) {
     // Read the info.
     AndroidBitmapInfo readInfo;
     bool read = readAllBytes(fd, (void*) &readInfo, sizeof(AndroidBitmapInfo));
@@ -127,7 +127,7 @@ static void readBitmapPixels(JNIEnv* env, jclass clazz, jobject jbitmap, jint fd
     }
 }
 
-static void writeBitmapPixels(JNIEnv* env, jclass clazz, jobject jbitmap, jint fd) {
+static void writeBitmapPixels(JNIEnv* env, jclass /* clazz */, jobject jbitmap, jint fd) {
     // Get the info.
     AndroidBitmapInfo info;
     int result = AndroidBitmap_getInfo(env, jbitmap, &info);
