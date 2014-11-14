@@ -141,14 +141,6 @@ highlights</a>.</p>
 the Android SDK</a>. Then use the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>
 to download the Android 5.0 SDK Platform and System Images.</p>
 
-<p style="
-    padding: 10px;
-    background: #eee;
-    width: 445px;
-    border: 1px solid #ccc;
-    margin-top: 20px;
-">To test your apps on a real device, flash a Nexus 5 or Nexus 7 with the <br>
-<a href="/preview/index.html#Start"><b>ANDROID PREVIEW SYSTEM IMAGE</b></a>.</p>
 
 <h3 id="ApiLevel">Update your target API level</h3>
 
