@@ -319,7 +319,7 @@ static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz,
     // update the Surface only if the underlying IGraphicBufferProducer
     // has changed.
     if (self != NULL
-            && (self->getIGraphicBufferProducer()->asBinder() == binder)) {
+            && (IInterface::asBinder(self->getIGraphicBufferProducer()) == binder)) {
         // same IGraphicBufferProducer, return ourselves
         return jlong(self.get());
     }
@@ -349,7 +349,7 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
         return;
     }
     sp<Surface> self(reinterpret_cast<Surface *>(nativeObject));
-    parcel->writeStrongBinder( self != 0 ? self->getIGraphicBufferProducer()->asBinder() : NULL);
+    parcel->writeStrongBinder( self != 0 ? IInterface::asBinder(self->getIGraphicBufferProducer()) : NULL);
 }
 
 // ----------------------------------------------------------------------------

@@ -99,14 +99,14 @@ status_t CommonClockService::registerListener(
         Mutex::Autolock lock(mCallbackLock);
         // check whether this is a duplicate
         for (size_t i = 0; i < mListeners.size(); i++) {
-            if (mListeners[i]->asBinder() == listener->asBinder())
+            if (IInterface::asBinder(mListeners[i]) == IInterface::asBinder(listener))
                 return ALREADY_EXISTS;
         }
     }
 
     mListeners.add(listener);
     mTimeServer.reevaluateAutoDisableState(0 != mListeners.size());
-    return listener->asBinder()->linkToDeath(this);
+    return IInterface::asBinder(listener)->linkToDeath(this);
 }
 
 status_t CommonClockService::unregisterListener(
@@ -117,8 +117,8 @@ status_t CommonClockService::unregisterListener(
     {   // scoping for autolock pattern
         Mutex::Autolock lock(mCallbackLock);
         for (size_t i = 0; i < mListeners.size(); i++) {
-            if (mListeners[i]->asBinder() == listener->asBinder()) {
-                mListeners[i]->asBinder()->unlinkToDeath(this);
+            if (IInterface::asBinder(mListeners[i]) == IInterface::asBinder(listener)) {
+                IInterface::asBinder(mListeners[i])->unlinkToDeath(this);
                 mListeners.removeAt(i);
                 ret_val = OK;
                 break;
@@ -136,7 +136,7 @@ void CommonClockService::binderDied(const wp<IBinder>& who) {
     {   // scoping for autolock pattern
         Mutex::Autolock lock(mCallbackLock);
         for (size_t i = 0; i < mListeners.size(); i++) {
-            if (mListeners[i]->asBinder() == who) {
+            if (IInterface::asBinder(mListeners[i]) == who) {
                 mListeners.removeAt(i);
                 break;
             }

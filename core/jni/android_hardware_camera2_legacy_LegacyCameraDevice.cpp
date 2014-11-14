@@ -604,7 +604,7 @@ static jlong LegacyCameraDevice_nativeGetSurfaceId(JNIEnv* env, jobject thiz, jo
         ALOGE("%s: Could not retrieve IGraphicBufferProducer from surface.", __FUNCTION__);
         return 0;
     }
-    sp<IBinder> b = gbp->asBinder();
+    sp<IBinder> b = IInterface::asBinder(gbp);
     if (b == NULL) {
         ALOGE("%s: Could not retrieve IBinder from surface.", __FUNCTION__);
         return 0;
