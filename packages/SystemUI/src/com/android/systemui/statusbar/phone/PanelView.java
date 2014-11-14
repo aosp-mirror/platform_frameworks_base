@@ -98,6 +98,7 @@ public abstract class PanelView extends FrameLayout {
     private boolean mCollapseAfterPeek;
     private boolean mExpanding;
     private boolean mGestureWaitForTouchSlop;
+    private boolean mDozingOnDown;
     private Runnable mPeekRunnable = new Runnable() {
         @Override
         public void run() {
@@ -244,6 +245,7 @@ public abstract class PanelView extends FrameLayout {
                 mUpdateFlingOnLayout = false;
                 mPeekTouching = mPanelClosedOnDown;
                 mTouchAboveFalsingThreshold = false;
+                mDozingOnDown = isDozing();
                 if (mVelocityTracker == null) {
                     initVelocityTracker();
                 }
@@ -418,6 +420,7 @@ public abstract class PanelView extends FrameLayout {
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
                 mTouchAboveFalsingThreshold = false;
+                mDozingOnDown = isDozing();
                 initVelocityTracker();
                 trackMovement(event);
                 break;
@@ -937,7 +940,7 @@ public abstract class PanelView extends FrameLayout {
     private boolean onMiddleClicked() {
         switch (mStatusBar.getBarState()) {
             case StatusBarState.KEYGUARD:
-                if (!isDozing()) {
+                if (!mDozingOnDown) {
                     startUnlockHintAnimation();
                 }
                 return true;
