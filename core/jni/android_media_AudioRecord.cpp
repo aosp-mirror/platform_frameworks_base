@@ -431,7 +431,7 @@ static jint android_media_AudioRecord_readInShortArray(JNIEnv *env,  jobject thi
     // read the new audio data from the native AudioRecord object
     const size_t recorderBuffSize = lpRecorder->frameCount()*lpRecorder->frameSize();
     const size_t sizeInBytes = sizeInShorts * sizeof(short);
-    ssize_t readSize = lpRecorder->read(recordBuff + offsetInShorts * sizeof(short),
+    ssize_t readSize = lpRecorder->read(recordBuff + offsetInShorts,
                                         sizeInBytes > recorderBuffSize ?
                                             recorderBuffSize : sizeInBytes);
 
