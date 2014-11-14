@@ -418,28 +418,36 @@ public class RecentsTaskLoader {
         return mMaxIconCacheSize;
     }
 
+    /** Returns the size of the thumbnail cache. */
+    public int getThumbnailCacheSize() {
+        return mMaxThumbnailCacheSize;
+    }
+
+    /** Creates a new plan for loading the recent tasks. */
     public RecentsTaskLoadPlan createLoadPlan(Context context) {
         RecentsConfiguration config = RecentsConfiguration.getInstance();
         RecentsTaskLoadPlan plan = new RecentsTaskLoadPlan(context, config, mSystemServicesProxy);
         return plan;
     }
 
+    /** Preloads recents tasks using the specified plan to store the output. */
     public void preloadTasks(RecentsTaskLoadPlan plan, boolean isTopTaskHome) {
         plan.preloadPlan(this, isTopTaskHome);
     }
 
+    /** Begins loading the heavy task data according to the specified options. */
     public void loadTasks(Context context, RecentsTaskLoadPlan plan,
             RecentsTaskLoadPlan.Options opts) {
         if (opts == null) {
             throw new RuntimeException("Requires load options");
         }
         plan.executePlan(opts, this);
-        if (opts.numVisibleTasks > 0) {
+        if (!opts.onlyLoadForCache) {
             mNumVisibleTasksLoaded = opts.numVisibleTasks;
-        }
 
-        // Start the loader
-        mLoader.start(context);
+            // Start the loader
+            mLoader.start(context);
+        }
     }
 
     /** Acquires the task resource data directly from the pool. */
