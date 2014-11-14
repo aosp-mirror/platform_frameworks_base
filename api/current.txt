@@ -20,6 +20,7 @@ package android {
     field public static final java.lang.String BATTERY_STATS = "android.permission.BATTERY_STATS";
     field public static final java.lang.String BIND_ACCESSIBILITY_SERVICE = "android.permission.BIND_ACCESSIBILITY_SERVICE";
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
+    field public static final java.lang.String BIND_CARRIER_MESSAGING_SERVICE = "android.permission.BIND_CARRIER_MESSAGING_SERVICE";
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
     field public static final java.lang.String BIND_DREAM_SERVICE = "android.permission.BIND_DREAM_SERVICE";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
@@ -26889,6 +26890,83 @@ package android.security {
     ctor public KeyStoreParameter.Builder(android.content.Context);
     method public android.security.KeyStoreParameter build();
     method public android.security.KeyStoreParameter.Builder setEncryptionRequired(boolean);
+  }
+
+}
+
+package android.service.carriermessaging {
+
+  public abstract class CarrierMessagingService extends android.app.Service {
+    ctor public CarrierMessagingService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public int onDownloadMms(android.net.Uri, java.lang.String);
+    method public boolean onFilterSms(android.service.carriermessaging.MessagePdu, java.lang.String, int);
+    method public android.service.carriermessaging.CarrierMessagingService.SendSmsResponse onSendDataSms(byte[], java.lang.String, java.lang.String, int);
+    method public android.service.carriermessaging.CarrierMessagingService.SendMmsResult onSendMms(android.net.Uri, java.lang.String);
+    method public java.util.List<android.service.carriermessaging.CarrierMessagingService.SendSmsResponse> onSendMultipartTextSms(java.util.List<java.lang.String>, java.lang.String, java.lang.String);
+    method public android.service.carriermessaging.CarrierMessagingService.SendSmsResponse onSendTextSms(java.lang.String, java.lang.String, java.lang.String);
+    field public static final int DOWNLOAD_STATUS_ERROR = 2; // 0x2
+    field public static final int DOWNLOAD_STATUS_OK = 0; // 0x0
+    field public static final int DOWNLOAD_STATUS_RETRY_ON_CARRIER_NETWORK = 1; // 0x1
+    field public static final int SEND_STATUS_ERROR = 2; // 0x2
+    field public static final int SEND_STATUS_OK = 0; // 0x0
+    field public static final int SEND_STATUS_RETRY_ON_CARRIER_NETWORK = 1; // 0x1
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.carriermessaging.CarrierMessagingService";
+  }
+
+  public static final class CarrierMessagingService.SendMmsResult {
+    ctor public CarrierMessagingService.SendMmsResult(int, byte[]);
+    method public int getResult();
+    method public byte[] getSendConfPdu();
+  }
+
+  public static final class CarrierMessagingService.SendSmsResponse implements android.os.Parcelable {
+    ctor public CarrierMessagingService.SendSmsResponse(int, byte[], int);
+    method public int describeContents();
+    method public byte[] getAckPdu();
+    method public int getErrorCode();
+    method public int getMessageRef();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.carriermessaging.CarrierMessagingService.SendSmsResponse> CREATOR;
+  }
+
+  public abstract interface ICarrierMessagingCallback implements android.os.IInterface {
+    method public abstract void onDownloadMmsComplete(int) throws android.os.RemoteException;
+    method public abstract void onFilterComplete(boolean) throws android.os.RemoteException;
+    method public abstract void onSendMmsComplete(int, byte[]) throws android.os.RemoteException;
+    method public abstract void onSendMultipartSmsComplete(int, java.util.List<android.service.carriermessaging.CarrierMessagingService.SendSmsResponse>) throws android.os.RemoteException;
+    method public abstract void onSendSmsComplete(int, android.service.carriermessaging.CarrierMessagingService.SendSmsResponse) throws android.os.RemoteException;
+  }
+
+  public static abstract class ICarrierMessagingCallback.Stub extends android.os.Binder implements android.service.carriermessaging.ICarrierMessagingCallback {
+    ctor public ICarrierMessagingCallback.Stub();
+    method public android.os.IBinder asBinder();
+    method public static android.service.carriermessaging.ICarrierMessagingCallback asInterface(android.os.IBinder);
+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
+  }
+
+  public abstract interface ICarrierMessagingService implements android.os.IInterface {
+    method public abstract void downloadMms(android.net.Uri, java.lang.String, android.service.carriermessaging.ICarrierMessagingCallback) throws android.os.RemoteException;
+    method public abstract void filterSms(android.service.carriermessaging.MessagePdu, java.lang.String, int, android.service.carriermessaging.ICarrierMessagingCallback) throws android.os.RemoteException;
+    method public abstract void sendDataSms(byte[], java.lang.String, java.lang.String, int, android.service.carriermessaging.ICarrierMessagingCallback) throws android.os.RemoteException;
+    method public abstract void sendMms(android.net.Uri, java.lang.String, android.service.carriermessaging.ICarrierMessagingCallback) throws android.os.RemoteException;
+    method public abstract void sendMultipartTextSms(java.util.List<java.lang.String>, java.lang.String, java.lang.String, android.service.carriermessaging.ICarrierMessagingCallback) throws android.os.RemoteException;
+    method public abstract void sendTextSms(java.lang.String, java.lang.String, java.lang.String, android.service.carriermessaging.ICarrierMessagingCallback) throws android.os.RemoteException;
+  }
+
+  public static abstract class ICarrierMessagingService.Stub extends android.os.Binder implements android.service.carriermessaging.ICarrierMessagingService {
+    ctor public ICarrierMessagingService.Stub();
+    method public android.os.IBinder asBinder();
+    method public static android.service.carriermessaging.ICarrierMessagingService asInterface(android.os.IBinder);
+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
+  }
+
+  public final class MessagePdu implements android.os.Parcelable {
+    ctor public MessagePdu(java.util.List<byte[]>);
+    method public int describeContents();
+    method public java.util.List<byte[]> getPdus();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.carriermessaging.MessagePdu> CREATOR;
   }
 
 }
