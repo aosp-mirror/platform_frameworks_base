@@ -744,7 +744,7 @@ public class VolumePanel extends Handler implements DemoMode {
         } else {
             sc.seekbarView.setVisibility(View.GONE);
             sc.suppressorView.setVisibility(View.VISIBLE);
-            sc.suppressorView.setText(mContext.getString(com.android.systemui.R.string.muted_by,
+            sc.suppressorView.setText(mContext.getString(R.string.muted_by,
                     getSuppressorCaption(suppressor)));
             sc.icon.setImageResource(sc.iconSuppressedRes);
         }
