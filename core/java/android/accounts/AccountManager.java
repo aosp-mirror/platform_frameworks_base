@@ -1443,6 +1443,40 @@ public class AccountManager {
     }
 
     /**
+     * Copies an account from the primary user to another user.
+     * @param account the account to copy
+     * @param user the target user
+     * @param callback Callback to invoke when the request completes,
+     *     null for no callback
+     * @param handler {@link Handler} identifying the callback thread,
+     *     null for the main thread
+     * @return An {@link AccountManagerFuture} which resolves to a Boolean indicated wether it
+     * succeeded.
+     * @hide
+     */
+    public AccountManagerFuture<Boolean> copyAccountToUser(
+            final Account account, final UserHandle user,
+            AccountManagerCallback<Boolean> callback, Handler handler) {
+        if (account == null) throw new IllegalArgumentException("account is null");
+        if (user == null) throw new IllegalArgumentException("user is null");
+
+        return new Future2Task<Boolean>(handler, callback) {
+            @Override
+            public void doWork() throws RemoteException {
+                mService.copyAccountToUser(
+                        mResponse, account, UserHandle.USER_OWNER, user.getIdentifier());
+            }
+            @Override
+            public Boolean bundleToResult(Bundle bundle) throws AuthenticatorException {
+                if (!bundle.containsKey(KEY_BOOLEAN_RESULT)) {
+                    throw new AuthenticatorException("no result in response");
+                }
+                return bundle.getBoolean(KEY_BOOLEAN_RESULT);
+            }
+        }.start();
+    }
+
+    /**
      * @hide
      * Removes the shared account.
      * @param account the account to remove
