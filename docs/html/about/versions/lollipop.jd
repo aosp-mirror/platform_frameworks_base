@@ -57,16 +57,6 @@ about Android 5.0 for consumers at
 
 
 
-<p style="
-    padding: 10px;
-    background: #eee;
-    width: 250px;
-    border: 1px solid #ccc;
-    margin-top: 20px;
-">To test your apps on a real device, flash a Nexus 5 or Nexus 7 with the <br>
-<a href="/preview/index.html#Start"><b>ANDROID PREVIEW SYSTEM IMAGE</b></a>.</p>
-
-
 <h2 id="Material">Material design</h2>
 
 <p>Android 5.0 brings <a href="http://www.google.com/design/spec">Material design</a> to Android and gives you an expanded UI toolkit for integrating the new design patterns easily in your apps.  </p>
