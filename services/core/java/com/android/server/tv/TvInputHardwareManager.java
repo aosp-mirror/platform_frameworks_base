@@ -299,6 +299,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         return -1;
     }
 
+    private static boolean intArrayContains(int[] array, int value) {
+        for (int element : array) {
+            if (element == value) return true;
+        }
+        return false;
+    }
+
     public void addHdmiTvInput(int id, TvInputInfo info) {
         if (info.getType() != TvInputInfo.TYPE_HDMI) {
             throw new IllegalArgumentException("info (" + info + ") has non-HDMI type.");
@@ -755,20 +762,64 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             AudioPortConfig sinkConfig = mAudioSink.activeConfig();
             AudioPatch[] audioPatchArray = new AudioPatch[] { mAudioPatch };
             boolean shouldRecreateAudioPatch = sourceUpdated || sinkUpdated;
+
+            int sinkSamplingRate = mDesiredSamplingRate;
+            int sinkChannelMask = mDesiredChannelMask;
+            int sinkFormat = mDesiredFormat;
+            // If sinkConfig != null and values are set to default, fill in the sinkConfig values.
+            if (sinkConfig != null) {
+                if (sinkSamplingRate == 0) {
+                    sinkSamplingRate = sinkConfig.samplingRate();
+                }
+                if (sinkChannelMask == AudioFormat.CHANNEL_OUT_DEFAULT) {
+                    sinkChannelMask = sinkConfig.channelMask();
+                }
+                if (sinkFormat == AudioFormat.ENCODING_DEFAULT) {
+                    sinkChannelMask = sinkConfig.format();
+                }
+            }
+
             if (sinkConfig == null
-                    || (mDesiredSamplingRate != 0
-                            && sinkConfig.samplingRate() != mDesiredSamplingRate)
-                    || (mDesiredChannelMask != AudioFormat.CHANNEL_OUT_DEFAULT
-                            && sinkConfig.channelMask() != mDesiredChannelMask)
-                    || (mDesiredFormat != AudioFormat.ENCODING_DEFAULT
-                            && sinkConfig.format() != mDesiredFormat)) {
-                sinkConfig = mAudioSink.buildConfig(mDesiredSamplingRate, mDesiredChannelMask,
-                        mDesiredFormat, null);
+                    || sinkConfig.samplingRate() != sinkSamplingRate
+                    || sinkConfig.channelMask() != sinkChannelMask
+                    || sinkConfig.format() != sinkFormat) {
+                // Check for compatibility and reset to default if necessary.
+                if (!intArrayContains(mAudioSink.samplingRates(), sinkSamplingRate)
+                        && mAudioSink.samplingRates().length > 0) {
+                    sinkSamplingRate = mAudioSink.samplingRates()[0];
+                }
+                if (!intArrayContains(mAudioSink.channelMasks(), sinkChannelMask)) {
+                    sinkChannelMask = AudioFormat.CHANNEL_OUT_DEFAULT;
+                }
+                if (!intArrayContains(mAudioSink.formats(), sinkFormat)) {
+                    sinkFormat = AudioFormat.ENCODING_DEFAULT;
+                }
+                sinkConfig = mAudioSink.buildConfig(sinkSamplingRate, sinkChannelMask,
+                        sinkFormat, null);
                 shouldRecreateAudioPatch = true;
             }
             if (sourceConfig == null || sourceGainConfig != null) {
-                sourceConfig = mAudioSource.buildConfig(sinkConfig.samplingRate(),
-                        sinkConfig.channelMask(), sinkConfig.format(), sourceGainConfig);
+                int sourceSamplingRate = 0;
+                if (intArrayContains(mAudioSource.samplingRates(), sinkConfig.samplingRate())) {
+                    sourceSamplingRate = sinkConfig.samplingRate();
+                } else if (mAudioSource.samplingRates().length > 0) {
+                    // Use any sampling rate and hope audio patch can handle resampling...
+                    sourceSamplingRate = mAudioSource.samplingRates()[0];
+                }
+                int sourceChannelMask = AudioFormat.CHANNEL_IN_DEFAULT;
+                for (int inChannelMask : mAudioSource.channelMasks()) {
+                    if (AudioFormat.channelCountFromOutChannelMask(sinkConfig.channelMask())
+                            == AudioFormat.channelCountFromInChannelMask(inChannelMask)) {
+                        sourceChannelMask = inChannelMask;
+                        break;
+                    }
+                }
+                int sourceFormat = AudioFormat.ENCODING_DEFAULT;
+                if (intArrayContains(mAudioSource.formats(), sinkConfig.format())) {
+                    sourceFormat = sinkConfig.format();
+                }
+                sourceConfig = mAudioSource.buildConfig(sourceSamplingRate, sourceChannelMask,
+                        sourceFormat, sourceGainConfig);
                 shouldRecreateAudioPatch = true;
             }
             if (shouldRecreateAudioPatch) {
@@ -778,6 +829,9 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                         new AudioPortConfig[] { sourceConfig },
                         new AudioPortConfig[] { sinkConfig });
                 mAudioPatch = audioPatchArray[0];
+                if (sourceGainConfig != null) {
+                    mAudioManager.setAudioPortGain(mAudioSource, sourceGainConfig);
+                }
             }
         }
 
