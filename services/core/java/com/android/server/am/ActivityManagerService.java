@@ -8460,6 +8460,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
             if (task == null) {
+                Slog.d(TAG, "Could not find task for id: "+ taskId);
                 return;
             }
             if (mStackSupervisor.isLockTaskModeViolation(task)) {
