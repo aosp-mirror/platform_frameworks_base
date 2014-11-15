@@ -128,7 +128,7 @@ static jobject android_media_MediaHTTPConnection_native_getIMemory(
         JNIEnv *env, jobject thiz) {
     sp<JMediaHTTPConnection> conn = getObject(env, thiz);
 
-    return javaObjectForIBinder(env, conn->getIMemory()->asBinder());
+    return javaObjectForIBinder(env, IInterface::asBinder(conn->getIMemory()));
 }
 
 static jint android_media_MediaHTTPConnection_native_readAt(
