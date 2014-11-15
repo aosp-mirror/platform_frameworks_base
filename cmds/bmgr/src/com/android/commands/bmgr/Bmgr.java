@@ -354,7 +354,7 @@ public final class Bmgr {
             return;
         }
 
-        if (arg.indexOf('.') >= 0) {
+        if (arg.indexOf('.') >= 0 || arg.equals("android")) {
             // it's a package name
             doRestorePackage(arg);
         } else {
