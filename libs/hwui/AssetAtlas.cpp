@@ -33,6 +33,8 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int64_t* map, int count) {
         return;
     }
 
+    ATRACE_NAME("AssetAtlas::init");
+
     mImage = new Image(buffer);
 
     if (mImage->getTexture()) {
