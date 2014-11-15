@@ -5958,16 +5958,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (app.isolated) {
                 mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
             }
-            app.kill(reason, true);
-            handleAppDiedLocked(app, true, allowRestart);
-            removeLruProcessLocked(app);
-
+            boolean willRestart = false;
             if (app.persistent && !app.isolated) {
                 if (!callerWillRestart) {
-                    addAppLocked(app.info, false, null /* ABI override */);
+                    willRestart = true;
                 } else {
                     needRestart = true;
                 }
+            }
+            app.kill(reason, true);
+            handleAppDiedLocked(app, willRestart, allowRestart);
+            if (willRestart) {
+                removeLruProcessLocked(app);
+                addAppLocked(app.info, false, null /* ABI override */);
             }
         } else {
             mRemovedProcesses.add(app);
