@@ -117,8 +117,9 @@ public final class BluetoothLeAdvertiser {
                         AdvertiseCallback.ADVERTISE_FAILED_FEATURE_UNSUPPORTED);
                 return;
             }
-            if (totalBytes(advertiseData) > MAX_ADVERTISING_DATA_BYTES ||
-                    totalBytes(scanResponse) > MAX_ADVERTISING_DATA_BYTES) {
+            boolean isConnectable = settings.isConnectable();
+            if (totalBytes(advertiseData, isConnectable) > MAX_ADVERTISING_DATA_BYTES ||
+                    totalBytes(scanResponse, isConnectable) > MAX_ADVERTISING_DATA_BYTES) {
                 postStartFailure(callback, AdvertiseCallback.ADVERTISE_FAILED_DATA_TOO_LARGE);
                 return;
             }
@@ -171,9 +172,10 @@ public final class BluetoothLeAdvertiser {
     }
 
     // Compute the size of the advertise data.
-    private int totalBytes(AdvertiseData data) {
+    private int totalBytes(AdvertiseData data, boolean isConnectable) {
         if (data == null) return 0;
-        int size = FLAGS_FIELD_BYTES; // flags field is always set.
+        // Flags field is omitted if the advertising is not connectable.
+        int size = isConnectable ? FLAGS_FIELD_BYTES : 0;
         if (data.getServiceUuids() != null) {
             int num16BitUuids = 0;
             int num32BitUuids = 0;
