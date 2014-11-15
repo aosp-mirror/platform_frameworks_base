@@ -445,14 +445,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         mAm.mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_USAGE_STATS, null);
         Parcel current = Parcel.obtain();
+        synchronized (mAm) {
+            long now = SystemClock.uptimeMillis();
+            mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
+            mProcessStats.mTimePeriodEndUptime = now;
+            mProcessStats.writeToParcel(current, now, 0);
+        }
         mWriteLock.lock();
         try {
-            synchronized (mAm) {
-                long now = SystemClock.uptimeMillis();
-                mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
-                mProcessStats.mTimePeriodEndUptime = now;
-                mProcessStats.writeToParcel(current, now, 0);
-            }
             if (historic != null) {
                 ArrayList<String> files = getCommittedFiles(0, false, true);
                 if (files != null) {
@@ -476,18 +476,18 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     public ParcelFileDescriptor getStatsOverTime(long minTime) {
         mAm.mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_USAGE_STATS, null);
+        Parcel current = Parcel.obtain();
+        long curTime;
+        synchronized (mAm) {
+            long now = SystemClock.uptimeMillis();
+            mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
+            mProcessStats.mTimePeriodEndUptime = now;
+            mProcessStats.writeToParcel(current, now, 0);
+            curTime = mProcessStats.mTimePeriodEndRealtime
+                    - mProcessStats.mTimePeriodStartRealtime;
+        }
         mWriteLock.lock();
         try {
-            Parcel current = Parcel.obtain();
-            long curTime;
-            synchronized (mAm) {
-                long now = SystemClock.uptimeMillis();
-                mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
-                mProcessStats.mTimePeriodEndUptime = now;
-                mProcessStats.writeToParcel(current, now, 0);
-                curTime = mProcessStats.mTimePeriodEndRealtime
-                        - mProcessStats.mTimePeriodStartRealtime;
-            }
             if (curTime < minTime) {
                 // Need to add in older stats to reach desired time.
                 ArrayList<String> files = getCommittedFiles(0, false, true);
