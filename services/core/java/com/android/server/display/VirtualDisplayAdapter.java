@@ -23,6 +23,7 @@ import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemProperties;
 import android.os.IBinder.DeathRecipient;
 import android.os.Message;
 import android.os.RemoteException;
@@ -278,6 +279,15 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 }
                 if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
+
+                    if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
+                        // For demonstration purposes, allow rotation of the external display.
+                        // In the future we might allow the user to configure this directly.
+                        if ("portrait".equals(SystemProperties.get(
+                                "persist.demo.remoterotation"))) {
+                            mInfo.rotation = Surface.ROTATION_270;
+                        }
+                    }
                 }
                 mInfo.type = Display.TYPE_VIRTUAL;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;

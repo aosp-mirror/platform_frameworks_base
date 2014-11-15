@@ -342,6 +342,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mUndockedHdmiRotation;
     int mDemoHdmiRotation;
     boolean mDemoHdmiRotationLock;
+    int mDemoRotation;
+    boolean mDemoRotationLock;
 
     boolean mWakeGestureEnabledSetting;
     MyWakeGestureListener mWakeGestureListener;
@@ -1450,6 +1452,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mDemoHdmiRotation = mLandscapeRotation;
         }
         mDemoHdmiRotationLock = SystemProperties.getBoolean("persist.demo.hdmirotationlock", false);
+
+        // For demo purposes, allow the rotation of the remote display to be controlled.
+        // By default, remote display locks rotation to landscape.
+        if ("portrait".equals(SystemProperties.get("persist.demo.remoterotation"))) {
+            mDemoRotation = mPortraitRotation;
+        } else {
+            mDemoRotation = mLandscapeRotation;
+        }
+        mDemoRotationLock = SystemProperties.getBoolean(
+                "persist.demo.rotationlock", false);
 
         // Only force the default orientation if the screen is xlarge, at least 960dp x 720dp, per
         // http://developer.android.com/guide/practices/screens_support.html#range
@@ -5319,6 +5331,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // full multi-display support).
                 // Note that the dock orientation overrides the HDMI orientation.
                 preferredRotation = mUndockedHdmiRotation;
+            } else if (mDemoRotationLock) {
+                // Ignore sensor when demo rotation lock is enabled.
+                // Note that the dock orientation and HDMI rotation lock override this.
+                preferredRotation = mDemoRotation;
             } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
                 // Application just wants to remain locked in the last rotation.
                 preferredRotation = lastRotation;
