@@ -186,6 +186,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mUIDozeTrigger.stopDozing();
             mUIDozeTrigger.resetTrigger();
         }
+        mStackScroller.reset();
     }
 
     /** Requests that the views be synchronized with the model */
@@ -658,9 +659,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // If this is the first layout, then scroll to the front of the stack and synchronize the
         // stack views immediately to load all the views
         if (mAwaitingFirstLayout) {
-            mStackScroller.setStackScrollToInitialState();
-            requestSynchronizeStackViewsWithModel();
-            synchronizeStackViewsWithModel();
+            if (mStackScroller.setStackScrollToInitialState()) {
+                requestSynchronizeStackViewsWithModel();
+                synchronizeStackViewsWithModel();
+            }
         }
 
         // Measure each of the TaskViews
@@ -914,7 +916,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             TaskView frontTv = getChildViewForTask(newFrontMostTask);
             if (frontTv != null) {
                 frontTv.onTaskBound(newFrontMostTask);
-                frontTv.fadeInActionButton(false);
+                frontTv.fadeInActionButton(0, mConfig.taskViewEnterFromAppDuration);
             }
         }
 

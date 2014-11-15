@@ -74,11 +74,15 @@ public class RecentsConfiguration {
     public float taskStackWidthPaddingPct;
     public float taskStackOverscrollPct;
 
+    /** Transitions */
+    public int transitionEnterFromAppDelay;
+    public int transitionEnterFromHomeDelay;
+
     /** Task view animation and styles */
-    public int taskViewEnterFromHomeDelay;
+    public int taskViewEnterFromAppDuration;
     public int taskViewEnterFromHomeDuration;
     public int taskViewEnterFromHomeStaggerDelay;
-    public int taskViewEnterFromHomeStaggerDuration;
+    public int taskViewExitToAppDuration;
     public int taskViewExitToHomeDuration;
     public int taskViewRemoveAnimDuration;
     public int taskViewRemoveAnimTranslationXPx;
@@ -98,15 +102,7 @@ public class RecentsConfiguration {
 
     /** Task bar size & animations */
     public int taskBarHeight;
-    public int taskBarEnterAnimDuration;
-    public int taskBarEnterAnimDelay;
-    public int taskBarExitAnimDuration;
     public int taskBarDismissDozeDelaySeconds;
-
-    /** Lock to app */
-    public int taskViewLockToAppButtonHeight;
-    public int taskViewLockToAppShortAnimDuration;
-    public int taskViewLockToAppLongAnimDuration;
 
     /** Nav bar scrim */
     public int navBarScrimEnterDuration;
@@ -213,15 +209,23 @@ public class RecentsConfiguration {
         taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
         taskStackTopPaddingPx = res.getDimensionPixelSize(R.dimen.recents_stack_top_padding);
 
+        // Transition
+        transitionEnterFromAppDelay =
+                res.getInteger(R.integer.recents_enter_from_app_transition_duration);
+        transitionEnterFromHomeDelay =
+                res.getInteger(R.integer.recents_enter_from_home_transition_duration);
+
         // Task view animation and styles
-        taskViewEnterFromHomeDelay =
-                res.getInteger(R.integer.recents_animate_task_enter_from_home_delay);
+        taskViewEnterFromAppDuration =
+                res.getInteger(R.integer.recents_task_enter_from_app_duration);
         taskViewEnterFromHomeDuration =
-                res.getInteger(R.integer.recents_animate_task_enter_from_home_duration);
+                res.getInteger(R.integer.recents_task_enter_from_home_duration);
         taskViewEnterFromHomeStaggerDelay =
-                res.getInteger(R.integer.recents_animate_task_enter_from_home_stagger_delay);
+                res.getInteger(R.integer.recents_task_enter_from_home_stagger_delay);
+        taskViewExitToAppDuration =
+                res.getInteger(R.integer.recents_task_exit_to_app_duration);
         taskViewExitToHomeDuration =
-                res.getInteger(R.integer.recents_animate_task_exit_to_home_duration);
+                res.getInteger(R.integer.recents_task_exit_to_home_duration);
         taskViewRemoveAnimDuration =
                 res.getInteger(R.integer.recents_animate_task_view_remove_duration);
         taskViewRemoveAnimTranslationXPx =
@@ -252,22 +256,8 @@ public class RecentsConfiguration {
 
         // Task bar size & animations
         taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
-        taskBarEnterAnimDuration =
-                res.getInteger(R.integer.recents_animate_task_bar_enter_duration);
-        taskBarEnterAnimDelay =
-                res.getInteger(R.integer.recents_animate_task_bar_enter_delay);
-        taskBarExitAnimDuration =
-                res.getInteger(R.integer.recents_animate_task_bar_exit_duration);
         taskBarDismissDozeDelaySeconds =
                 res.getInteger(R.integer.recents_task_bar_dismiss_delay_seconds);
-
-        // Lock to app
-        taskViewLockToAppButtonHeight =
-                res.getDimensionPixelSize(R.dimen.recents_task_view_lock_to_app_button_height);
-        taskViewLockToAppShortAnimDuration =
-                res.getInteger(R.integer.recents_animate_lock_to_app_button_short_duration);
-        taskViewLockToAppLongAnimDuration =
-                res.getInteger(R.integer.recents_animate_lock_to_app_button_long_duration);
 
         // Nav bar scrim
         navBarScrimEnterDuration =
