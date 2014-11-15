@@ -3528,8 +3528,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * By default, children are clipped to the padding of the ViewGroup. This
-     * allows view groups to override this behavior
+     * Sets whether this ViewGroup will clip its children to its padding, if
+     * padding is present.
+     * <p>
+     * By default, children are clipped to the padding of their parent
+     * Viewgroup. This clipping behavior is only enabled if padding is non-zero.
      *
      * @param clipToPadding true to clip children to the padding of the
      *        group, false otherwise
@@ -3543,7 +3546,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Check if this ViewGroup is configured to clip child views to its padding.
+     * Returns whether this ViewGroup will clip its children to its padding, if
+     * padding is present.
+     * <p>
+     * By default, children are clipped to the padding of their parent
+     * Viewgroup. This clipping behavior is only enabled if padding is non-zero.
      *
      * @return true if this ViewGroup clips children to its padding, false otherwise
      *
