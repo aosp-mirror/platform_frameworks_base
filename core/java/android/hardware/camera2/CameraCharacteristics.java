@@ -1155,6 +1155,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR MANUAL_SENSOR}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING MANUAL_POST_PROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_RAW RAW}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS READ_SENSOR_SETTINGS}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1163,6 +1164,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_SENSOR
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_RAW
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS
      */
     @PublicKey
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
