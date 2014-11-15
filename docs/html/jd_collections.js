@@ -7,6 +7,14 @@ var RESOURCE_COLLECTIONS = {
       "sdk/installing/studio.html"
     ]
   },
+  "index/primary/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/resources.html",
+      "intl/zh-cn/distribute/tools/launch-checklist.html",
+      "intl/zh-cn/distribute/tools/localization-checklist.html"
+    ]
+  },
   "distribute/edu/videos/stories": {
     "title": "",
     "resources": [
@@ -72,6 +80,16 @@ var RESOURCE_COLLECTIONS = {
       "https://developers.google.com/edu/guidelines"
     ]
   },
+  "distribute/essentials/zhcn": {
+    "resources": [
+      "intl/zh-cn/distribute/essentials/quality/core.html",
+      "intl/zh-cn/distribute/essentials/quality/tablets.html",
+      "distribute/essentials/quality/tv.html",
+      "distribute/essentials/quality/wear.html",
+      "https://developers.google.com/edu/guidelines",
+      "distribute/essentials/optimizing-your-app.html"
+    ]
+  },
   "distribute/users": {
     "title": "",
     "resources": [
@@ -114,6 +132,13 @@ var RESOURCE_COLLECTIONS = {
       "distribute/tools/localization-checklist.html"
     ]
   },
+  "distribute/tools/checklists/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/tools/launch-checklist.html",
+      "intl/zh-cn/distribute/tools/localization-checklist.html"
+    ]
+  },
   "distribute/tools/promote": {
     "resources": [
       "distribute/tools/promote/device-art.html",
@@ -121,11 +146,26 @@ var RESOURCE_COLLECTIONS = {
       "distribute/tools/promote/linking.html"
     ]
   },
+  "distribute/tools/promote/zhcn": {
+    "resources": [
+      "intl/zh-cn/distribute/tools/promote/device-art.html",
+      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "intl/zh-cn/distribute/tools/promote/linking.html"
+    ]
+  },
   "distribute/tools/support": {
     "title": "Google Play",
     "resources": [
       "https://support.google.com/googleplay/android-developer",
       "https://support.google.com/googleplay/android-developer/answer/4430948",
+      "support.html"
+    ]
+  },
+  "distribute/tools/support/zhcn": {
+    "title": "Google Play",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/answer/4430948?hl=zh-Hans",
       "support.html"
     ]
   },
@@ -140,6 +180,14 @@ var RESOURCE_COLLECTIONS = {
     "title": "Google Play",
     "resources": [
       "distribute/tools/promote/brand.html",
+      "distribute/tools/open-distribution.html",
+      "about/dashboards/index.html"
+    ]
+  },
+  "distribute/tools/more/zhcn": {
+    "title": "Google Play",
+    "resources": [
+      "intl/zh-cn/distribute/tools/promote/brand.html",
       "distribute/tools/open-distribution.html",
       "about/dashboards/index.html"
     ]
@@ -367,11 +415,22 @@ var RESOURCE_COLLECTIONS = {
     "title": "",
     "resources": [
       "distribute/tools/launch-checklist.html",
-      "http://play.google.com/about/developer-content-policy.html",
-      "https://support.google.com/googleplay/android-developer/answer/188189",
-      "https://support.google.com/googleplay/android-developer/answer/1078870",
+      "http://play.google.com/about/developer-content-policy.html?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/answer/188189?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/answer/1078870?hl=zh-Hans",
       "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
-      "https://support.google.com/googleplay/android-developer/answer/113477"
+      "https://support.google.com/googleplay/android-developer/answer/113477?hl=zh-Hans"
+    ]
+  },
+  "distribute/essentials/core/play/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/tools/launch-checklist.html",
+      "http://play.google.com/about/developer-content-policy.html",
+      "https://support.google.com/googleplay/android-developer/answer/188189?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/answer/1078870?hl=zh-Hans",
+      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html",
+      "https://support.google.com/googleplay/android-developer/answer/113477?hl=zh-Hans"
     ]
   },
   "distribute/essentials/tabletguidelines/optimize": {
@@ -446,6 +505,15 @@ var RESOURCE_COLLECTIONS = {
       "https://play.google.com/apps/publish/",
       "distribute/tools/promote/badges.html",
       "distribute/tools/promote/device-art.html"
+    ]
+  },
+  "distribute/essentials/tabletguidelines/showcase/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/tools/launch-checklist.html",
+      "https://play.google.com/apps/publish/?hl=zh-Hans",
+      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "intl/zh-cn/distribute/tools/promote/device-art.html"
     ]
   },
   "distribute/essentials/tabletguidelines/googleplay": {
@@ -583,6 +651,12 @@ var RESOURCE_COLLECTIONS = {
       "https://support.google.com/googleplay/android-developer/answer/138294"
     ]
   },
+  "distribute/toolsreference/localizationchecklist/identifylocales/zhcn": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/138294?hl=zh-Hans"
+    ]
+  },
   "distribute/tools/loc/designforloc": {
     "title": "",
     "resources": [
@@ -600,6 +674,14 @@ var RESOURCE_COLLECTIONS = {
       "http://en.wikipedia.org/wiki/XLIFF"
     ]
   },
+  "distribute/toolsreference/localizationchecklist/managestrings/zhcn": {
+    "title": "",
+    "resources": [
+      "guide/topics/resources/string-resource.html",
+      "intl/zh-cn/design/style/writing.html",
+      "http://en.wikipedia.org/wiki/XLIFF"
+    ]
+  },
   "distribute/toolsreference/localizationchecklist/translatestrings": {
     "title": "",
     "resources": [
@@ -613,10 +695,23 @@ var RESOURCE_COLLECTIONS = {
       "distribute/tools/promote/device-art.html"
     ]
   },
+  "distribute/toolsreference/localizationchecklist/preplaunch/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "intl/zh-cn/distribute/tools/promote/device-art.html"
+    ]
+  },
   "distribute/toolsreference/localizationchecklist/supportlaunch": {
     "title": "",
     "resources": [
       "distribute/tools/launch-checklist.html",
+    ]
+  },
+  "distribute/toolsreference/localizationchecklist/supportlaunch/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/tools/launch-checklist.html",
     ]
   },
   "distribute/toolsreference/launchchecklist/understanding": {
@@ -736,6 +831,119 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/optimizing-your-app.html"
     ]
   },
+
+
+
+  "distribute/toolsreference/launchchecklist/understanding/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/tools/publishing/publishing_overview.html",
+      "intl/zh-cn/tools/publishing/preparing.html"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/policies/zhcn": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/4430948?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/topic/2364761?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer?hl=zh-Hans"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/quality/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/essentials/quality/core.html",
+      "intl/zh-cn/distribute/essentials/quality/tablets.html",
+      "https://developers.google.com/edu/guidelines?hl=zh-Hans"
+    ]
+  },
+
+  "distribute/toolsreference/launchchecklist/rating/zhcn": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/188189?hl=zh-Hans",
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/country/zhcn": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/138294?hl=zh-Hans"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/size/zhcn": {
+    "title": "",
+    "resources": [
+      "google/play/expansion-files.html",
+      "intl/zh-cn/tools/help/proguard.html"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/price/zhcn": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/table/3541286?hl=zh-Hans",
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/purchasemethod/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/google/play/billing/index.html",
+      "google/play/billing/billing_subscriptions.html"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/setprice/zhcn": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/1169947?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/answer/138412?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/answer/112622?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/answer/138000?hl=zh-Hans"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/localization/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/tools/localization-checklist.html",
+      "guide/topics/resources/localization.html"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/graphics/zhcn": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/1078870?hl=zh-Hans",
+      "http://android-developers.blogspot.com/2011/10/android-market-featured-image.html"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/productdetails/zhcn": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/113475?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/answer/1078870?hl=zh-Hans"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/badges/zhcn": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/tools/promote/badges.html",
+      "intl/zh-cn/distribute/tools/promote/linking.html"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/finalchecks/zhcn": {
+    "title": "",
+    "resources": [
+      "http://play.google.com/about/developer-content-policy.html",
+      "https://support.google.com/googleplay/android-developer/answer/113476?hl=zh-Hans",
+      "support.html"
+    ]
+  },
+  "distribute/toolsreference/launchchecklist/afterlaunch/zhcn": {
+    "title": "",
+    "resources": [
+      "https://support.google.com/googleplay/android-developer/answer/113477?hl=zh-Hans",
+      "https://support.google.com/googleplay/android-developer/answer/1153479?hl=zh-Hans",
+      "https://support.google.com/payments/answer/2741495?hl=zh-Hans",
+      "distribute/essentials/optimizing-your-app.html"
+    ]
+  },
   "distribute/monetize/premium": {
     "title": "",
     "resources": [
@@ -815,6 +1023,93 @@ var RESOURCE_COLLECTIONS = {
       "http://storage.googleapis.com/androiddevelopers/shareables/stories/Noodlecake_SuperStickmanGolf2_gpgs.pdf",
       "http://storage.googleapis.com/androiddevelopers/shareables/stories/TinyRebel_DoctorWhoLegacy_gpgs.pdf",
       "http://storage.googleapis.com/androiddevelopers/shareables/stories/Senri_LeosFortune_gpgs.pdf"
+    ]
+  },
+  "overview/zhcn/1": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/essentials/quality/core.html",
+      "intl/zh-cn/distribute/essentials/quality/tablets.html",
+      "intl/zh-cn/distribute/tools/launch-checklist.html",
+      "intl/zh-cn/tools/publishing/publishing_overview.html",
+      "intl/zh-cn/distribute/tools/localization-checklist.html"
+    ]
+  },
+    "overview/zhcn/2": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/google/play/billing/index.html",
+      "intl/zh-cn/google/play/billing/api.html",
+      "intl/zh-cn/google/play/billing/billing_admin.html",
+      "intl/zh-cn/google/play/billing/billing_testing.html",
+      "intl/zh-cn/google/play/billing/billing_best_practices.html"
+    ]
+  },
+  "overview/zhcn/3": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/distribute/tools/promote/badges.html",
+
+      "intl/zh-cn/distribute/tools/promote/device-art.html",
+      "intl/zh-cn/distribute/tools/promote/linking.html",
+      "intl/zh-cn/distribute/tools/promote/brand.html",
+      "intl/zh-cn/tools/help/proguard.html"
+    ]
+  },
+  "overview/zhcn/4": {
+    "title": "",
+    "resources": [
+      "intl/zh-cn/design/style/writing.html",
+      "intl/zh-cn/training/basics/fragments/fragment-ui.html",
+      "intl/zh-cn/training/multiscreen/index.html",
+      "intl/zh-cn/training/monitoring-device-state/index.html"
+    ]
+  },
+  "overview/carousel/zhcn": {
+    "title": "",
+    "resources": [
+      "http://www.youtube.com/watch?v=vGV7FHGzpFU",
+      "http://www.youtube.com/watch?v=aqc3ZOTzpdk",
+      "http://www.youtube.com/watch?v=jaNrJ8uyLSc"
+    ]
+  },
+  "overview/1": {
+    "title": "",
+    "resources": [
+      "distribute/essentials/quality/core.html",
+      "distribute/essentials/quality/tablets.html",
+      "distribute/tools/launch-checklist.html",
+      "tools/publishing/publishing_overview.html",
+      "distribute/tools/localization-checklist.html"
+    ]
+  },
+    "overview/2": {
+    "title": "",
+    "resources": [
+      "google/play/billing/index.html",
+      "google/play/billing/api.html",
+      "google/play/billing/billing_admin.html",
+      "google/play/billing/billing_testing.html",
+      "google/play/billing/billing_best_practices.html"
+    ]
+  },
+  "overview/3": {
+    "title": "",
+    "resources": [
+      "distribute/tools/promote/badges.html",
+      "distribute/tools/promote/device-art.html",
+      "distribute/tools/promote/linking.html",
+      "distribute/tools/promote/brand.html",
+      "tools/help/proguard.html"
+    ]
+  },
+  "overview/4": {
+    "title": "",
+    "resources": [
+      "design/style/writing.html",
+      "training/basics/fragments/fragment-ui.html",
+      "training/multiscreen/index.html",
+      "training/monitoring-device-state/index.html"
     ]
   }
 }

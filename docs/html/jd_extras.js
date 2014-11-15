@@ -121,6 +121,18 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"google"
   },
   {
+    "title": "支持向Google Play用户发布应用的地区",
+    "lang": "zh-cn",
+    "titleFriendly":"",
+    "summary": "支持向Google Play用户发布应用的国家/地区。",
+    "url":"https://support.google.com/googleplay/android-developer/answer/138294?hl=zh-Hans",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
     "title":"Google Play Content Policies",
     "titleFriendly":"",
     "summary":"Details on policies relating to your developer account and app distribution is governed.",
@@ -156,10 +168,32 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type":"google"
   },
   {
+    "title":"Google Play应用政策中心",
+    "titleFriendly":"",
+    "summary":"一个方便你了解Google Play政策和指南的中心资源。",
+    "url":"https://support.google.com/googleplay/android-developer/answer/4430948?hl=zh-Hans",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"http://storage.googleapis.com/support-kms-prod/SNP_712EA2784949DDF085C46E3BE7B1DC618A09_4389397_en_v0",
+    "type":"google"
+  },
+  {
     "title":"Developer Help Center",
     "titleFriendly":"",
     "summary":"Complete details on getting started, publishing, troubleshooting, and more.",
     "url":"https://support.google.com/googleplay/android-developer",
+    "group":"",
+    "keywords": [],
+    "tags": [],
+    "image":"images/play_dev.jpg",
+    "type":"google"
+  },
+  {
+    "title":"开发者帮助中心",
+    "titleFriendly":"",
+    "summary":"完整资料帮助开发者新手入手，发布，故障排除，等等",
+    "url":"https://support.google.com/googleplay/android-developer?hl=zh-Hans",
     "group":"",
     "keywords": [],
     "tags": [],
@@ -215,6 +249,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type": "blog",
     "titleFriendly": ""
   },
+
   {
     "lang": "en",
     "group": "",
@@ -268,6 +303,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
   {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/188189?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "针对Google Play为你的应用内容分级",
+    "summary": "如何为你的应用内容分级。",
+    "keywords": [],
+    "type": "support",
+    "titleFriendly": ""
+  },
+  {
     "lang": "en",
     "group": "",
     "tags": [],
@@ -289,6 +337,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image": "images/play_dev.jpg",
     "title": "Supporting your users",
     "summary": "Options for supporting users.",
+    "keywords": [],
+    "type": "support",
+    "titleFriendly": ""
+  },
+{
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/113477?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "为用户提供支持",
+    "summary": "为用户提供支持的各种选择。",
     "keywords": [],
     "type": "support",
     "titleFriendly": ""
@@ -419,6 +480,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image": null,
     "title": "Google Play Developer Console",
     "summary": "The tools console for publishing your app.",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://play.google.com/apps/publish/?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": null,
+    "title": "Google Play 开发者控制台",
+    "summary": "发布应用的开发者控制台",
     "keywords": [],
     "type": "guide",
     "titleFriendly": ""
@@ -619,6 +693,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
   {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/topic/2364761?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "政策和最佳做法",
+    "summary": "内容政策和流程",
+    "keywords": [],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
     "lang": "en",
     "group": "",
     "tags": [],
@@ -686,11 +773,37 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "lang": "en",
     "group": "",
     "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/1169947?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "以多种货币销售应用",
+    "summary": "如何在Google Play为应用定价",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "en",
+    "group": "",
+    "tags": [],
     "url": "https://support.google.com/googleplay/android-developer/answer/138412",
     "timestamp": 1194884220000,
     "image": "images/play_dev.jpg",
     "title": "Prices and supported currencies",
     "summary": "Help Center document listing supported currencies for pricing your apps.",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+    {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/138412?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "各国家/地区获许定价范围和货币",
+    "summary": "各国家/地区获许定价范围和货币列表",
     "keywords": [],
     "type": "guide",
     "titleFriendly": ""
@@ -709,6 +822,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
   {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/112622?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "交易费用",
+    "summary": "销售的应用和应用内产品的交易费。",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
     "lang": "en",
     "group": "",
     "tags": [],
@@ -717,6 +843,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image": "images/play_dev.jpg",
     "title": "Specifying tax rates",
     "summary": "Help Center document describing how to set tax rates for different countries.",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/138000?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "税率",
+    "summary": "如何设置不同国家/地区的税率",
     "keywords": [],
     "type": "guide",
     "titleFriendly": ""
@@ -748,6 +887,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
   {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/113475?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "类别",
+    "summary": "应用的类别列表。",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
     "lang": "en",
     "group": "",
     "tags": [],
@@ -761,6 +913,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
   {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/113476?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "更新应用",
+    "summary": "更新Google Play应用的要求。",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
     "lang": "en",
     "group": "",
     "tags": [],
@@ -769,6 +934,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image": null,
     "title": "In-app Billing",
     "summary": "Help Center document describing how to correctly set up In-app Billing.",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/1153479?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": null,
+    "title": "应用内结算",
+    "summary": "如何正确设置应用内商品和订阅结算。",
     "keywords": [],
     "type": "guide",
     "titleFriendly": ""
@@ -1004,7 +1182,7 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "type": "guide",
     "titleFriendly": ""
   },
-    {
+  {
     "lang": "en",
     "group": "",
     "tags": [],
@@ -1018,6 +1196,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "titleFriendly": ""
   },
   {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/googleplay/android-developer/answer/1078870?hl=zh-Hans",
+    "timestamp": 1194884220000,
+    "image": "images/play_dev.jpg",
+    "title": "为你的应用的图片资源",
+    "summary": "如何在你的应用的商品详情页面上添加图片资源。",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
     "lang": "en",
     "group": "",
     "tags": [],
@@ -1026,6 +1217,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image": null,
     "title": "Issuing Refunds",
     "summary": "Help Center document describing how to issue refunds.",
+    "keywords": [],
+    "type": "guide",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://support.google.com/payments/answer/2741495?hl=zh-Hans",
+    "timestamp": null,
+    "image": null,
+    "title": "退回訂單款項",
+    "summary": "如何退还已收取的订单款项。",
     "keywords": [],
     "type": "guide",
     "titleFriendly": ""
@@ -1052,6 +1256,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "image": "images/play_dev.jpg",
     "title": "Supported locations for distributing your apps in Google Play",
     "summary": "Countries and regions where you can distribute your app in Google Play.",
+    "keywords": [],
+    "type": "distribute",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": ["localization", "pricing", "developer support"],
+    "url": "https://support.google.com/googleplay/android-developer/table/3541286?hl=zh-Hans",
+    "timestamp": null,
+    "image": "images/play_dev.jpg",
+    "title": "支持向Google Play用户发布应用的地区",
+    "summary": "支持向Google Play用户发布应用的国家/地区。",
     "keywords": [],
     "type": "distribute",
     "titleFriendly": ""
@@ -1218,6 +1435,19 @@ DISTRIBUTE_RESOURCES = DISTRIBUTE_RESOURCES.concat([
     "group": "",
     "tags": [],
     "url": "https://developers.google.com/edu/guidelines",
+    "timestamp": null,
+    "image": "http://developer.android.com/distribute/images/edu-guidelines.jpg",
+    "title": "Education Guidelines",
+    "summary": "These guidelines and requirements help you develop great apps for students, which offer compelling content and an intuitive user experience on Android tablets.",
+    "keywords": [],
+    "type": "",
+    "titleFriendly": ""
+  },
+  {
+    "lang": "zh-cn",
+    "group": "",
+    "tags": [],
+    "url": "https://developers.google.com/edu/guidelines?hl=zh-Hans",
     "timestamp": null,
     "image": "http://developer.android.com/distribute/images/edu-guidelines.jpg",
     "title": "Education Guidelines",

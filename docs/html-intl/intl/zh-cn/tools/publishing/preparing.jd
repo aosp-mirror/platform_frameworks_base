@@ -1,0 +1,186 @@
+page.title=准备发布
+page.type=工具
+
+@jd:body
+
+      <div id="qv-wrapper">
+    <div id="qv">
+      <h2>概述</h2>
+      <ul>
+        <li>了解发布应用需要哪些资源。</li>
+        <li>了解如何配置和构建应用以进行发布。</li>
+        <li>了解发布应用的最佳做法。</li>
+      </ul>
+      <h2>本文内容</h2>
+      <ol>
+        <li><a href="#publishing-intro">简介</a></li>
+        <li><a href="#publishing-gather">收集材料和资源</a></li>
+        <li><a href="#publishing-configure">配置应用</a></li>
+        <li><a href="#publishing-build">构建应用</a></li>
+        <li><a href="#publishing-resources">准备外部服务器和资源</a></li>
+        <li><a href="#publishing-test">测试应用以进行发布</a></li>
+      </ol>
+      <h2>另请参见</h2>
+      <ol>
+        <li><a href="{@docRoot}tools/publishing/publishing_overview.html">发布概述</a></li>
+        <li><a href="{@docRoot}tools/publishing/app-signing.html">为应用签名</a></li>
+        <li><a href="{@docRoot}distribute/tools/launch-checklist.html">Google Play 发布检查清单</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>在将您的 Android 应用分发给用户之前，您需要先完成准备工作。对于所有 Android 应用，准备流程都是一项必须完成的<a href="{@docRoot}tools/workflow/index.html">开发任务</a>，也是发布流程中的第一步（参见图 1）。</p>
+
+  <p>当准备应用以进行发布时，您需要配置、构建并测试应用的发布版本。配置任务相当简单，涉及完成代码清理和代码修改这两项基本任务，从而达到优化应用的目的。构建流程与调试构建流程相似，可以使用 JDK 和 Android SDK 工具完成。测试任务就是做最终检查，以确保您的应用能在实际环境下正常运行。准备好要发布的应用后，您将获得一个已签名的 <code>.apk</code> 文件。您可以直接将该文件分发给用户，也可以通过 Google Play 等应用市场进行分发。</p>
+
+  <p>本文总结了您在准备应用以进行发布时需执行的几大任务。这些任务适用于所有 Android 应用，无论这些应用采用什么方式发布或分发给用户。如果您要通过 Google Play 发布应用，则还应查看 <a href="{@docRoot}distribute/tools/launch-checklist.html">Google Play 发布检查清单</a>，以确保您要发布的应用满足 Google Play 的所有要求。</p>
+
+  <p class="note"><strong>注意</strong>：在您执行本文所述任务之前，最好确保您的应用符合针对功能、性能和稳定性的所有发布标准。</p>
+
+  <img src="{@docRoot}images/publishing/publishing_overview_prep.png" alt="显示发布流程在整个开发流程中的位置" height="190" id="figure1" />
+  <p class="img-caption">
+    <strong>图 1.</strong>  准备发布是一项必须完成的<a href="{@docRoot}tools/workflow/index.html">开发任务</a>，也是发布流程中的第一步。
+  </p>
+
+  <h2 id="publishing-intro">简介</h2>
+
+  <p>为了向用户发布应用，您需要先创建发布版应用包，以供用户在其 Android 设备上安装和运行。发布版应用包与调试 <code>.apk</code> 文件中包含的组件相同（经过编译的源代码、资源、清单文件等），使用的构建工具也相同。不过，与调试 <code>.apk</code> 文件不同的是，发布版 <code>.apk</code> 文件已使用您自己的证书签名且使用 Zipalign 工具进行了优化。</p>
+
+  <div class="figure" style="width:331px">
+    <img src="{@docRoot}images/publishing/publishing_preparing.png" alt="显示准备应用以进行发布所需执行的五项任务" height="450" />
+    <p class="img-caption">
+      <strong>图 2.</strong>  要准备应用以进行发布，您需执行五大任务。
+    </p>
+  </div>
+
+  <p>通常情况下，如果您使用 Eclipse 和 ADT 插件或 Ant 构建脚本（包含在 Android SDK 中）构建应用，可以无缝地完成签名和优化任务。例如，您可以使用 Eclipse“导出向导”一次性完成对应用的编译、签名和优化操作。如果通过命令行进行构建，您还可以配置 Ant 构建脚本来执行相同的操作。</p>
+
+  <p>要准备应用以进行发布，您通常需要执行五大任务（参见图 2）。每项大任务可能包含一项或多项小任务，视您的应用发布方式而定。例如，如果您要通过 Google Play 发布应用，则可能需要在配置应用的发布版本时向清单中添加特殊的过滤规则。同样，为了满足 Google Play 发布指南的要求，您可能需要在收集发布材料时准备几张屏幕截图并撰写相关宣传文字。</p>
+
+  <p>一般来说，在对应用进行了全面调试和测试后，您需要执行图 2 中列出的任务。Android SDK 中提供的几种工具可帮您测试和调试您的 Android 应用。有关详情，请参阅开发者指南中的<a href="{@docRoot}tools/debugging/index.html">调试</a>和<a href="{@docRoot}tools/testing/index.html">测试</a>这两部分。</p>
+
+  <h2 id="publishing-gather">收集材料和资源</h2>
+
+  <p>要开始准备应用以进行发布，您需要收集几项支持性的信息，其中至少应包含用于为应用签名的加密密钥以及应用图标。此外，您可能还需要提供最终用户许可协议。</p>
+
+  <h4 id="publishing-keys">加密密钥</h4>
+
+  <p>Android 系统要求安装的每个应用都必须使用应用开发者拥有的证书（即开发者用于存放私钥的证书）进行数字签名。Android 系统利用该证书来识别应用作者并在应用之间建立信任关系。您用于签名的的证书无需由证书机构签名；Android 系统允许您使用自签名证书为您的应用签名。如需了解有关证书的要求，请参阅<a href="{@docRoot}tools/publishing/app-signing.html#cert">获取合适的私钥</a>。</p>
+
+  <p class="caution"><strong>重要提示</strong>：您的应用必须使用在 2033 年 10 月 22 日之后才会失效的加密密钥签名。</p>
+
+  <p>如果您应用访问的服务或使用的第三方库需要基于您的私钥的附加密钥，则您还必须获得其他发布密钥。例如，如果您的应用使用 <a href="http://code.google.com/android/add-ons/google-apis/reference/com/google/android/maps/MapView.html">MapView</a> 类（属于 <a href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google 地图外部库</a>），您需要让您的应用注册 Google 地图服务并获取 Maps API 密钥。如需了解如何获取 Maps API 密钥，请参阅<a href="http://code.google.com/android/add-ons/google-apis/mapkey.html">获取 Maps API 密钥</a>。</p>
+
+  <h4>应用图标</h4>
+
+  <p>请确保您有应用图标而且图标遵守建议的<a href="{@docRoot}guide/practices/ui_guidelines/icon_design_launcher.html">图标指南</a>。应用的图标会显示在设备的主屏幕上和“启动器”窗口中，有助于用户识别您的应用。它还会显示在“管理应用”、“我的下载”等其他位置。此外，Google Play 等发布服务也会向用户显示您的应用图标。</p>
+
+  <p class="note"><strong>注意</strong>：如果您要在 Google Play 上发布应用，则需要创建高分辨率版本的图标。有关详情，请参阅<a href="https://www.google.com/support/androidmarket/developer/bin/answer.py?answer=1078870">应用的图形资源</a>。</p>
+
+  <h4>最终用户许可协议</h4>
+
+  <p>请考虑为您的应用准备最终用户许可协议 (EULA)。最终用户许可协议可帮助保护您的员工、公司和知识产权，因此我们建议您为自己的应用提供一份。</p>
+
+  <h4>其他材料</h4>
+
+  <p>您可能还需要准备宣传和营销材料，用来宣传您的应用。例如，如果您要在 Google Play 上发布应用，则需要准备几段宣传文字并创建几张应用截图。有关详情，请参阅<a href="https://www.google.com/support/androidmarket/developer/bin/answer.py?answer=1078870">应用的图形资源</a></p>
+
+  <h2 id="publishing-configure">配置应用以进行发布</h2>
+
+  <p>收集完所有支持材料后，您可以开始配置应用以进行发布。这部分总结了一些建议您在发布应用前对源代码、资源文件和应用清单进行的配置更改。虽然是否实施这里列出的大部分配置更改都由您决定，但这些都是良好的编码习惯。因此我们建议您实施这些更改。在某些情况下，您可能已在开发过程中实施了这些配置更改。</p>
+
+  <h4>选择合适的应用包名称</h4>
+
+  <p>请确保您选择的应用包名称适合在应用的整个生命周期中使用。将应用分发给用户后，您就无法再更改应用包名称。您可以在应用的清单文件中设置应用包名称。有关详情，请参阅介绍 <a href="{@docRoot}guide/topics/manifest/manifest-element.html#package">package</a> 属性的文档。</p>
+
+  <h4>停用日志记录和调试功能</h4>
+
+  <p>在构建应用的发布版本之前，请确保停用日志记录功能和调试选项。要停用日志记录功能，您可以移除源文件中对 <code><a href="{@docRoot}reference/android/util/Log.html">Log</a></code> 方法的调用。要停用调试功能，您可以从清单文件的 <code>&lt;application&gt;</code> 代码中移除 <code>android:debuggable</code> 属性或将 <code>android:debuggable</code> 属性设置为 <code>false</code>。此外，请移除您在项目中创建的所有日志文件或静态测试文件。</p>
+
+  <p>此外，您还应移除之前添加到代码中的所有 <code><a href="{@docRoot}reference/android/os/Debug.html">Debug</a></code> 跟踪调用，例如 <code><a href="{@docRoot}reference/android/os/Debug.html#startMethodTracing()">startMethodTracing()</a></code> 和 <code><a href="{@docRoot}reference/android/os/Debug.html#stopMethodTracing()">stopMethodTracing()</a></code> 方法调用。</p>
+
+  <p class="caution"><strong>重要提示</strong>：调试功能允许用户使用 Chrome DevTools 注入脚本和提取内容，因此如果您使用 <code><a href="{@docRoot}reference/android/webkit/WebView.html">WebView</a></code> 展示付费内容或使用 JavaScript 界面，请确保停用应用的调试功能。要停用调试功能，请使用 <code><a href="{@docRoot}reference/android/webkit/WebView.html#setWebContentsDebuggingEnabled(boolean)">WebView.setWebContentsDebuggingEnabled()</a></code> 方法。</p>
+
+  <h4>清理项目目录</h4>
+
+  <p>请清理您的项目，确保其符合 <a href="{@docRoot}tools/projects/index.html#ApplicationProjects">Android 项目</a>中所述的目录结构要求。项目中留有散乱或孤立的文件会妨碍对应用的编译，导致应用发生异常。您至少应执行下列清理任务：</p>
+
+  <ul>
+    <li>查看 <code>jni/</code>、<code>lib/</code> 和 <code>src/</code> 目录的内容。<code>jni/</code> 目录应只包含与 <a href="{@docRoot}tools/sdk/ndk/index.html">Android NDK</a> 相关联的源文件，例如 <code>.c</code>、<code>.cpp</code>、<code>.h</code> 和 <code>.mk</code> 文件。<code>lib/</code> 目录应只包含第三方库文件或专用库文件，包括预构建的共享库和静态库（例如 <code>.so</code> 文件）。<code>src/</code> 目录应只包含应用的源文件（<code>.java</code> 和 <code>.aidl</code> 文件）。<code>src/</code> 不应包含任何 <code>.jar</code> 文件。</li>
+    <li>检查项目中是否包含应用不需要的专用或专有数据文件，如果有请将其移除。例如，在项目的 <code>res/</code> 目录中查找是否包含旧的图形文件、布局文件和值文件，如果您不再使用这些文件，请将其删除。</li>
+    <li>检查 <code>lib/</code> 目录中是否包含测试库；如果您的应用不再使用这些库，请将其移除。</li>
+    <li>查看 <code>assets/</code> 目录和 <code>res/raw/</code> 目录的内容，查找其中是否包含需在应用发布前更新或移除的原始资源文件和静态文件。</li>
+  </ul>
+
+  <h4>查看并更新清单设置</h4>
+
+  <p>确认下列清单项是否已正确设置：</p>
+
+  <ul>
+    <li><a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">
+    &lt;uses-permission&gt;</a> 元素
+      <p>您应该只指定应用必需的相关权限。</p>
+    </li>
+    <li><code>android:icon</code> 和 <code>android:label</code> 属性
+      <p>您必须为这些属性（位于 <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a> 元素中）指定值。</p>
+    </li>
+    <li><code>android:versionCode</code> 和 <code>android:versionName</code> 属性。
+      <p>我们建议您为这些属性（位于 <a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a> 元素中）指定值。有关详情，请参阅<a href="{@docRoot}tools/publishing/versioning.html">应用的版本管理</a>。</p>
+    </li>
+  </ul>
+
+  <p>如果您要在 Google Play 上发布应用，还可以设置另外几个清单元素。例如，<code>android:minSdkVersion</code> 和 <code>android:targetSdkVersion</code> 属性（位于 <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a> 元素中）。如需详细了解这些设置以及其他 Google Play 设置，请参阅 <a href="{@docRoot}google/play/filters.html">Google Play 上的过滤器</a>。</p>
+
+  <h4>解决兼容性问题</h4>
+
+  <p>Android 提供了多种工具和技术，可让您的应用与多种设备兼容。为了让您的应用尽可能地适合更多用户，建议您执行以下操作：</p>
+
+  <ul>
+    <li><strong>添加跨屏配置支持</strong>
+      <p>确保您采取了<a href="{@docRoot}guide/practices/screens_support.html#screen-independence">支持跨屏的最佳做法</a>。通过支持跨屏配置，您创建的应用可在 Android 支持的任何屏幕尺寸的设备上正常运行且拥有精美外观。</p>
+    </li>
+    <li><strong>针对 Android 平板电脑优化应用</strong>
+      <p>如果您的应用是专为运行 Android 3.0 以上版本的设备打造的，请遵照<a href="{@docRoot}guide/practices/optimizing-for-3.0.html">针对 Android 3.0 优化应用</a>中所述的指南和最佳做法，这样您的应用就能与运行 Android 3.0 的设备兼容。</p>
+    </li>
+    <li><strong>考虑使用支持库</strong>
+      <p>如果您的应用是专为运行 Android 3.x 的设备打造的，请向您的应用项目中添加<a href="{@docRoot}tools/support-library/index.html">支持库</a>，这样您的应用就能与较低版本的 Android 系统兼容。您可以将“支持库”提供的静态支持库添加到您的 Android 应用中，以便使用低版本的平台上未提供的 API 或使用不属于框架 API 的实用程序 API。</p>
+    </li>
+  </ul>
+
+  <h4>更新服务器和服务的网址</h4>
+
+  <p>如果您的应用需要访问远程服务器或服务，请确保您使用的是该服务器或服务的生产网址或路径，而非测试网址或路径。</p>
+
+  <h4>实施许可服务（如果您要在 Google Play 上发布应用）</h4>
+
+  <p>如果您要通过 Google Play 发布付费应用，请考虑支持 Google Play 许可服务。借助这项许可服务，您可以根据当前用户的购买情况控制其对您应用的访问权限。使用 Google Play 许可服务并不是强制的，即使您通过 Google Play 发布应用也可以不使用这项服务。</p>
+
+  <p>如需详细了解 Google Play 许可服务以及如何在应用中使用该服务，请参阅<a href="{@docRoot}google/play/licensing/index.html">应用许可</a>。</p>
+
+  <h2 id="publishing-build">构建应用以进行发布</h2>
+
+  <p>配置好应用后，您可以将其构建为一个经过签名和优化的发布版 <code>.apk</code> 文件。JDK 中包含用于为 <code>.apk</code> 文件签名的工具（Keytool 和 Jarsigner）；Android SDK 中包含用于编译和优化 <code>.apk</code> 文件的工具。如果您使用的是带 ADT 插件的 Eclipse 或是从命令行使用 Ant 构建脚本，则整个构建流程可以自动完成。</p>
+
+  <h3>使用 Eclipse 进行构建</h3>
+
+  <p>您可以使用 Eclipse“导出向导”构建使用私钥签名并经过优化的发布版 <code>.apk</code> 文件。如需了解如何运行“导出向导”，请参阅<a href="{@docRoot}tools/publishing/app-signing.html#ExportWizard">使用 Eclipse ADT 进行编译和签名</a>。“导出向导”会对您要发布的应用进行编译、使用私钥为应用签名并使用 Zipalign 工具对应用进行优化。如果您已通过 Eclipse 运行或调试过应用且未在应用中发现错误，“导出向导”就应该能成功运行（有关详情，请参阅<a href="{@docRoot}tools/building/building-eclipse.html">使用带 ADT 的 Eclipse 构建和运行应用</a>）。</p>
+
+  <p>“导出向导”假设您有适合为应用签名的<a href="#billing-keys">证书和私钥</a>。如果您没有合适的证书和私钥，“导出向导”将帮您生成一个（如需详细了解签名流程和签名指南，请参阅<a href="{@docRoot}tools/publishing/app-signing.html">为应用签名</a>）。</p>
+
+  <h3>使用 Ant 进行构建</h3>
+
+  <p>您可以使用 Ant 构建脚本（包含在 Android SDK 中）来构建使用私钥签名并经过优化的发布版 <code>.apk</code> 文件。如需了解具体做法，请参阅<a href="{@docRoot}tools/building/building-cmdline.html#ReleaseMode">在发布模式下进行构建</a>。这种构建方式假设您有适合为应用签名的<a href="#billing-keys">证书和密钥</a>。如果您没有合适的证书和私钥，“导出向导”将帮您生成一个（如需详细了解签名流程和签名指南，请参阅<a href="{@docRoot}tools/publishing/app-signing.html">为应用签名</a>）。</p>
+
+  <h2 id="publishing-resources">准备外部服务器和资源</h2>
+
+  <p>如果您的应用依赖于远程服务器，请确保该服务器是安全的且已经过配置，随时可投入实际使用。如果您要在应用中实施<a href="{@docRoot}google/play/billing/index.html">应用内结算</a>，而且要在远程服务器上执行签名验证步骤，则必须这样做。</p>
+
+  <p>此外，如果您的应用从远程服务器或实时服务中抓取内容（例如内容 Feed），请确保您提供的内容是最新的且随时可投入实际使用。</p>
+
+  <h2 id="publishing-test">测试应用以进行发布</h2>
+
+  <p>测试应用的发布版本有助于确保您的应用能在实际设备上和实际网络条件下正常运行。理想情况下，您至少应在一部手持设备上和一台平板电脑上测试您的应用，以确认界面元素的尺寸是否合适，以及应用的性能和能耗是否可接受。</p>
+
+  <p>在测试之前，请先参阅<a href="{@docRoot}tools/testing/what_to_test.html">测试内容</a>。这篇文章总结了您在测试 Android 应用时应注意的常见情况。当您完成测试并确定应用的发布版本能正常运行后，就可以向用户发布您的应用了。有关详情，请参阅<a href="{@docRoot}tools/publishing/publishing_overview.html#publishing-release">向用户发布应用</a>。如果您要在 Google Play 上发布应用，请参阅 <a href="{@docRoot}distribute/tools/launch-checklist.html">Google Play 发布检查清单</a>。</p>
+
+
