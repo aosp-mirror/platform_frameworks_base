@@ -50,7 +50,6 @@ LOCAL_MULTILIB := both
 LOCAL_MODULE_STEM_32 := hwuitest
 LOCAL_MODULE_STEM_64 := hwuitest64
 
-include external/stlport/libstlport.mk
 include $(BUILD_EXECUTABLE)
 
 include $(call all-makefiles-under,$(LOCAL_PATH))
