@@ -390,7 +390,8 @@ public class MediaFocusControl implements OnFinished {
     // AudioFocus
     //==========================================================================================
 
-    /* constant to identify focus stack entry that is used to hold the focus while the phone
+    /**
+     * Constant to identify a focus stack entry that is used to hold the focus while the phone
      * is ringing or during a call. Used by com.android.internal.telephony.CallManager when
      * entering and exiting calls.
      */
@@ -539,40 +540,40 @@ public class MediaFocusControl implements OnFinished {
      * Helper function:
      * Returns true if the system is in a state where the focus can be reevaluated, false otherwise.
      * The implementation guarantees that a state where focus cannot be immediately reassigned
-     * implies that an "exclusive" focus owner is at the top of the focus stack.
+     * implies that an "locked" focus owner is at the top of the focus stack.
      * Modifications to the implementation that break this assumption will cause focus requests to
      * misbehave when honoring the AudioManager.AUDIOFOCUS_FLAG_DELAY_OK flag.
      */
     private boolean canReassignAudioFocus() {
         // focus requests are rejected during a phone call or when the phone is ringing
         // this is equivalent to IN_VOICE_COMM_FOCUS_ID having the focus
-        if (!mFocusStack.isEmpty() && isExclusiveFocusOwner(mFocusStack.peek())) {
+        if (!mFocusStack.isEmpty() && isLockedFocusOwner(mFocusStack.peek())) {
             return false;
         }
         return true;
     }
 
-    private boolean isExclusiveFocusOwner(FocusRequester fr) {
-        return fr.hasSameClient(IN_VOICE_COMM_FOCUS_ID);
+    private boolean isLockedFocusOwner(FocusRequester fr) {
+        return (fr.hasSameClient(IN_VOICE_COMM_FOCUS_ID) || fr.isLockedFocusOwner());
     }
 
     /**
      * Helper function
-     * Pre-conditions: focus stack is not empty, there is one or more exclusive focus owner
+     * Pre-conditions: focus stack is not empty, there is one or more locked focus owner
      *                 at the top of the focus stack
      * Push the focus requester onto the audio focus stack at the first position immediately
-     * following the exclusive focus owners.
+     * following the locked focus owners.
      * @return {@link AudioManager#AUDIOFOCUS_REQUEST_GRANTED} or
      *     {@link AudioManager#AUDIOFOCUS_REQUEST_DELAYED}
      */
-    private int pushBelowExclusiveFocusOwners(FocusRequester nfr) {
-        int lastExclusiveFocusOwnerIndex = mFocusStack.size();
+    private int pushBelowLockedFocusOwners(FocusRequester nfr) {
+        int lastLockedFocusOwnerIndex = mFocusStack.size();
         for (int index = mFocusStack.size()-1; index >= 0; index--) {
-            if (isExclusiveFocusOwner(mFocusStack.elementAt(index))) {
-                lastExclusiveFocusOwnerIndex = index;
+            if (isLockedFocusOwner(mFocusStack.elementAt(index))) {
+                lastLockedFocusOwnerIndex = index;
             }
         }
-        if (lastExclusiveFocusOwnerIndex == mFocusStack.size()) {
+        if (lastLockedFocusOwnerIndex == mFocusStack.size()) {
             // this should not happen, but handle it and log an error
             Log.e(TAG, "No exclusive focus owner found in propagateFocusLossFromGain_syncAf()",
                     new Exception());
@@ -581,7 +582,7 @@ public class MediaFocusControl implements OnFinished {
             mFocusStack.push(nfr);
             return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
         } else {
-            mFocusStack.insertElementAt(nfr, lastExclusiveFocusOwnerIndex);
+            mFocusStack.insertElementAt(nfr, lastLockedFocusOwnerIndex);
             return AudioManager.AUDIOFOCUS_REQUEST_DELAYED;
         }
     }
@@ -687,7 +688,7 @@ public class MediaFocusControl implements OnFinished {
             if (focusGrantDelayed) {
                 // focusGrantDelayed being true implies we can't reassign focus right now
                 // which implies the focus stack is not empty.
-                return pushBelowExclusiveFocusOwners(nfr);
+                return pushBelowLockedFocusOwners(nfr);
             } else {
                 // propagate the focus change through the stack
                 if (!mFocusStack.empty()) {
@@ -703,8 +704,11 @@ public class MediaFocusControl implements OnFinished {
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
 
-    /** @see AudioManager#abandonAudioFocus(AudioManager.OnAudioFocusChangeListener)  */
-    protected int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId) {
+    /**
+     * @see AudioManager#abandonAudioFocus(AudioManager.OnAudioFocusChangeListener, AudioAttributes)
+     * */
+    protected int abandonAudioFocus(IAudioFocusDispatcher fl, String clientId, AudioAttributes aa) {
+        // AudioAttributes are currently ignored, to be used for zones
         Log.i(TAG, " AudioFocus  abandonAudioFocus() from " + clientId);
         try {
             // this will take care of notifying the new focus owner if needed
