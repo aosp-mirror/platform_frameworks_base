@@ -221,6 +221,24 @@ public class WindowAnimator {
         }
     }
 
+    private boolean shouldForceHide(WindowState win) {
+        final WindowState imeTarget = mService.mInputMethodTarget;
+        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleNow() &&
+                (imeTarget.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0;
+
+        final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
+        final AppWindowToken appShowWhenLocked = winShowWhenLocked == null ?
+                null : winShowWhenLocked.mAppToken;
+        final boolean hideWhenLocked =
+                !(((win.mIsImWindow || imeTarget == win) && showImeOverKeyguard)
+                        || (appShowWhenLocked != null && (appShowWhenLocked == win.mAppToken ||
+                        // Show error dialogs over apps that dismiss keyguard.
+                        (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0)));
+        return ((mForceHiding == KEYGUARD_ANIMATING_IN)
+                && (!win.mWinAnimator.isAnimating() || hideWhenLocked))
+                || ((mForceHiding == KEYGUARD_SHOWN) && hideWhenLocked);
+    }
+
     private void updateWindowsLocked(final int displayId) {
         ++mAnimTransactionSequence;
 
@@ -256,14 +274,6 @@ public class WindowAnimator {
 
         mForceHiding = KEYGUARD_NOT_SHOWN;
 
-        final WindowState imeTarget = mService.mInputMethodTarget;
-        final boolean showImeOverKeyguard = imeTarget != null && imeTarget.isVisibleNow() &&
-                (imeTarget.getAttrs().flags & FLAG_SHOW_WHEN_LOCKED) != 0;
-
-        final WindowState winShowWhenLocked = (WindowState) mPolicy.getWinShowWhenLockedLw();
-        final AppWindowToken appShowWhenLocked = winShowWhenLocked == null ?
-                null : winShowWhenLocked.mAppToken;
-
         boolean wallpaperInUnForceHiding = false;
         boolean startingInUnForceHiding = false;
         ArrayList<WindowStateAnimator> unForceHiding = null;
@@ -272,7 +282,8 @@ public class WindowAnimator {
             WindowState win = windows.get(i);
             WindowStateAnimator winAnimator = win.mWinAnimator;
             final int flags = win.mAttrs.flags;
-
+            boolean canBeForceHidden = mPolicy.canBeForceHidden(win, win.mAttrs);
+            boolean shouldBeForceHidden = shouldForceHide(win);
             if (winAnimator.mSurfaceControl != null) {
                 final boolean wasAnimating = winAnimator.mWasAnimating;
                 final boolean nowAnimating = winAnimator.stepAnimationLocked(mCurrentTime);
@@ -332,15 +343,8 @@ public class WindowAnimator {
                             + " vis=" + win.mViewVisibility
                             + " hidden=" + win.mRootToken.hidden
                             + " anim=" + win.mWinAnimator.mAnimation);
-                } else if (mPolicy.canBeForceHidden(win, win.mAttrs)) {
-                    final boolean hideWhenLocked =
-                            !(((win.mIsImWindow || imeTarget == win) && showImeOverKeyguard)
-                            || (appShowWhenLocked != null && (appShowWhenLocked == win.mAppToken ||
-                            // Show error dialogs over apps that dismiss keyguard.
-                            (win.mAttrs.privateFlags & PRIVATE_FLAG_SYSTEM_ERROR) != 0)));
-                    if (((mForceHiding == KEYGUARD_ANIMATING_IN)
-                                && (!winAnimator.isAnimating() || hideWhenLocked))
-                            || ((mForceHiding == KEYGUARD_SHOWN) && hideWhenLocked)) {
+                } else if (canBeForceHidden) {
+                    if (shouldBeForceHidden) {
                         if (!win.hideLw(false, false)) {
                             // Was already hidden
                             continue;
@@ -408,6 +412,16 @@ public class WindowAnimator {
                                     getPendingLayoutChanges(Display.DEFAULT_DISPLAY));
                         }
                     }
+                }
+            }
+
+            // If the window doesn't have a surface, the only thing we care about is the correct
+            // policy visibility.
+            else if (canBeForceHidden) {
+                if (shouldBeForceHidden) {
+                    win.hideLw(false, false);
+                } else {
+                    win.showLw(false, false);
                 }
             }
 
