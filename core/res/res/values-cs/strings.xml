@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
@@ -836,6 +835,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Umožňuje této aplikaci přijímat informace o aktuálních přenosech pomocí technologie Android Beam"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"odstranění certifikátů DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Povoluje aplikaci odstranit certifikáty DRM. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní služby zasílání zpráv prostřednictvím operátora. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Řídit délku hesel pro odemčení obrazovky a povolené znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>
@@ -1905,4 +1906,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sbalit"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Do dalšího budíku v <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Do příštího budíku"</string>
+    <string name="muted_by" msgid="6147073845094180001">"Ignorováno stranou <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>
