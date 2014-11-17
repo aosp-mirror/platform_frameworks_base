@@ -22,6 +22,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.Process;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -52,6 +53,10 @@ public class KeyguardService extends Service {
     }
 
     void checkPermission() {
+        // Avoid deadlock by avoiding calling back into the system process.
+        if (Binder.getCallingUid() == Process.SYSTEM_UID) return;
+
+        // Otherwise,explicitly check for caller permission ...
         if (getBaseContext().checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
             Log.w(TAG, "Caller needs permission '" + PERMISSION + "' to call " + Debug.getCaller());
             throw new SecurityException("Access denied to process: " + Binder.getCallingPid()
