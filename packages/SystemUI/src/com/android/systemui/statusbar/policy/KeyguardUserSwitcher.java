@@ -58,7 +58,9 @@ public class KeyguardUserSwitcher {
     public KeyguardUserSwitcher(Context context, ViewStub userSwitcher,
             KeyguardStatusBarView statusBarView, NotificationPanelView panelView,
             UserSwitcherController userSwitcherController) {
-        if (context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON) {
+        boolean keyguardUserSwitcherEnabled =
+                context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON;
+        if (userSwitcherController != null && keyguardUserSwitcherEnabled) {
             mUserSwitcherContainer = (Container) userSwitcher.inflate();
             mUserSwitcher = (ViewGroup)
                     mUserSwitcherContainer.findViewById(R.id.keyguard_user_switcher_inner);
