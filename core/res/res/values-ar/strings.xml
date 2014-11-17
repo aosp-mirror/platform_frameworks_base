@@ -833,6 +833,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"‏السماح لهذا التطبيق بتلقي معلومات حول عمليات نقل شعاع Android الحالية"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"‏إزالة شهادات DRM"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"‏للسماح لأحد التطبيقات بإزالة شهادات DRM. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"الالتزام بخدمة المراسلة التابعة لمشغل شبكة الجوّال"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"يسمح لحامله بالالتزام بواجهة المستوى العالي لخدمة المراسلة التابعة لمشغل شبكة الجوَّال. ومن المفترض عدم الحاجة إليه مع التطبيقات العادية."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تعيين قواعد كلمة المرور"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"يمكنك التحكم في الطول والأحرف المسموح بها في كلمات مرور إلغاء تأمين الشاشة."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"مراقبة محاولات إلغاء قفل الشاشة"</string>
@@ -1899,4 +1901,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"تصغير"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"حتى التنبيه التالي في <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"حتى التنبيه التالي"</string>
+    <string name="muted_by" msgid="6147073845094180001">"تم كتم الصوت بواسطة <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

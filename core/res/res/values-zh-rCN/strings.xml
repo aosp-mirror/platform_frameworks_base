@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g>小时<xliff:g id="MINUTES">%2$d</xliff:g>分钟"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g>小时<xliff:g id="MINUTES">%2$d</xliff:g>分钟"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g>分钟"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> 分钟"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g>分钟<xliff:g id="SECONDS">%2$d</xliff:g>秒"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g>分钟<xliff:g id="SECONDS">%2$d</xliff:g>秒"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
@@ -834,6 +833,10 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"允许此应用接收Android Beam当前传输内容的相关信息"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"移除DRM证书"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"允许应用移除DRM证书。普通应用绝不需要此权限。"</string>
+    <!-- no translation found for permlab_bindCarrierMessagingService (1490229371796969158) -->
+    <skip />
+    <!-- no translation found for permdesc_bindCarrierMessagingService (2762882888502113944) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制屏幕解锁密码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
@@ -1900,4 +1903,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收起"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"到下次闹钟时间（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"到下次闹钟时间"</string>
+    <string name="muted_by" msgid="6147073845094180001">"已被<xliff:g id="THIRD_PARTY">%1$s</xliff:g>设为静音"</string>
 </resources>

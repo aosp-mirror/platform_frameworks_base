@@ -833,6 +833,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ծրագրին թույլ է տալիս ստանալ Android Beam-ով ընթացիկ փոխանցումների մասին տեղեկատվություն:"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"հեռացնել DRM վկայագրեր"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ծրագրին թույլ է տալիս հեռացնել DRM վկայագրեր: Սովորական ծրագրերի համար երբեք պետք չի գալիս:"</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"կապվել օպերատորի հաղորդագրությունների ծառայության հետ"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Թույլ է տալիս տիրոջը կապվել օպերատորի հաղորդագրությունների ծառայության վերին մակարդակի միջերեսի հետ: Սա երբեք չի պահանջվում սովորական հավելվածների համար:"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Վերահսկել էկրանի ապակողպման գաղտնաբառերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
@@ -1899,4 +1901,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Թաքցնել"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Մինչև հաջորդ զարթուցիչը՝ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Մինչև հաջորդ զարթուցիչը"</string>
+    <string name="muted_by" msgid="6147073845094180001">"Համրեցվել է <xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ի կողմից"</string>
 </resources>
