@@ -1156,6 +1156,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING MANUAL_POST_PROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_RAW RAW}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS READ_SENSOR_SETTINGS}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE BURST_CAPTURE}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1165,6 +1166,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MANUAL_POST_PROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_RAW
      * @see #REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE
      */
     @PublicKey
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
@@ -2285,12 +2287,16 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Camera devices will come in three flavors: LEGACY, LIMITED and FULL.</p>
      * <p>A FULL device will support below capabilities:</p>
      * <ul>
-     * <li>30fps at maximum resolution (== sensor resolution) is preferred, more than 20fps is required.</li>
+     * <li>30fps operation at maximum resolution (== sensor resolution) is preferred, more than
+     *   20fps is required, for at least uncompressed YUV
+     *   output. ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains BURST_CAPTURE)</li>
      * <li>Per frame control ({@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} <code>==</code> PER_FRAME_CONTROL)</li>
      * <li>Manual sensor control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_SENSOR)</li>
-     * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains MANUAL_POST_PROCESSING)</li>
+     * <li>Manual post-processing control ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities} contains
+     *   MANUAL_POST_PROCESSING)</li>
      * <li>Arbitrary cropping region ({@link CameraCharacteristics#SCALER_CROPPING_TYPE android.scaler.croppingType} <code>==</code> FREEFORM)</li>
-     * <li>At least 3 processed (but not stalling) format output streams ({@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC android.request.maxNumOutputProc} <code>&gt;=</code> 3)</li>
+     * <li>At least 3 processed (but not stalling) format output streams
+     *   ({@link CameraCharacteristics#REQUEST_MAX_NUM_OUTPUT_PROC android.request.maxNumOutputProc} <code>&gt;=</code> 3)</li>
      * <li>The required stream configuration defined in android.scaler.availableStreamConfigurations</li>
      * <li>The required exposure time range defined in {@link CameraCharacteristics#SENSOR_INFO_EXPOSURE_TIME_RANGE android.sensor.info.exposureTimeRange}</li>
      * <li>The required maxFrameDuration defined in {@link CameraCharacteristics#SENSOR_INFO_MAX_FRAME_DURATION android.sensor.info.maxFrameDuration}</li>
