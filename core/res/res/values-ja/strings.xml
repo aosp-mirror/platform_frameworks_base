@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g>時間<xliff:g id="MINUTES">%2$d</xliff:g>分"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g>時間<xliff:g id="MINUTES">%2$d</xliff:g>分"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g>分"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g>分"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g>分<xliff:g id="SECONDS">%2$d</xliff:g>秒"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g>分<xliff:g id="SECONDS">%2$d</xliff:g>秒"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>秒"</string>
@@ -834,6 +833,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"現在のAndroidビーム転送に関する情報を受信することをこのアプリに許可します。"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM証明書の削除"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM証明書の削除をアプリに許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"携帯通信会社のSMSサービスへのバインド"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"携帯通信会社のSMSサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"画面ロック解除パスワードの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>
@@ -1900,4 +1901,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"折りたたむ"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"次のアラーム（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）まで"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"次のアラームまで"</string>
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>によりミュートになっています"</string>
 </resources>

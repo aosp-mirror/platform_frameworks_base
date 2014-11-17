@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ಗಂಟೆ <xliff:g id="MINUTES">%2$d</xliff:g> ನಿಮಿಷಗಳು"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ಗಂಟೆ <xliff:g id="MINUTES">%2$d</xliff:g> ನಿಮಿಷ"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> ನಿಮಿಷಗಳು"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> ನಿಮಿಷ"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> ನಿಮಿ <xliff:g id="SECONDS">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳು"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> ನಿಮಿ <xliff:g id="SECONDS">%2$d</xliff:g> ಸೆ"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ಸೆಕೆಂಡುಗಳು"</string>
@@ -834,6 +833,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ಪ್ರಸ್ತುತ Android Beam ವರ್ಗಾವಣೆಗಳ ಕುರಿತ ಮಾಹಿತಿಯನ್ನು ಸ್ವೀಕರಿಸಲು ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸಿ"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM ಪ್ರಮಾಣಪತ್ರಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗೆ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ವಾಹಕ ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಸೇವೆಗೆ ಪ್ರತಿಬಂಧಿಸಿ"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ವಾಹಕ ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಸೇವೆಯ ಮೇಲ್ಮಟ್ಟದ ಇಂಟರ್ಫೇಸ್‌ಗೆ ಪ್ರತಿಬಂಧಿಸಲು ಹೊಂದಿರುವವರಿಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಾಮಾನ್ಯ ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಗಾಗಿ ಎಂದಿಗೂ ಅಗತ್ಯವಿರುವುದಿಲ್ಲ."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"ಪಾಸ್‌ವರ್ಡ್ ನಿಮಯಗಳನ್ನು ಹೊಂದಿಸಿ"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"ಪರದೆ-ಅನ್‍‍ಲಾಕ್ ಪಾಸ್‍‍ವರ್ಡ್‌ಗಳಲ್ಲಿ ಅನುಮತಿಸಿರುವ ಅಳತೆ ಮತ್ತು ಅಕ್ಷರಗಳನ್ನು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"ಪರದೆಯ-ಅನ್‌ಲಾಕ್ ಪ್ರಯತ್ನಗಳನ್ನು ಮಾನಿಟರ್ ಮಾಡಿ"</string>
@@ -1900,4 +1901,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ಸಂಕುಚಿಸು"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"ಮುಂದಿನ ಅಲಾರಮ್ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"ಮುಂದಿನ ಅಲಾರಮ್‌ವರೆಗೆ"</string>
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಅವರಿಂದ ಮ್ಯೂಟ್‌ ಮಾಡಲಾಗಿದೆ"</string>
 </resources>
