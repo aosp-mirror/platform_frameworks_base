@@ -18,12 +18,14 @@ package android.nfc;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.ContentProvider;
 import android.content.Intent;
 import android.net.Uri;
 import android.nfc.NfcAdapter.ReaderCallback;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -350,19 +352,24 @@ public final class NfcActivityManager extends IAppCallback.Stub
         if (urisCallback != null) {
             uris = urisCallback.createBeamUris(mDefaultEvent);
             if (uris != null) {
+                ArrayList<Uri> validUris = new ArrayList<Uri>();
                 for (Uri uri : uris) {
                     if (uri == null) {
                         Log.e(TAG, "Uri not allowed to be null.");
-                        return null;
+                        continue;
                     }
                     String scheme = uri.getScheme();
                     if (scheme == null || (!scheme.equalsIgnoreCase("file") &&
                             !scheme.equalsIgnoreCase("content"))) {
                         Log.e(TAG, "Uri needs to have " +
                                 "either scheme file or scheme content");
-                        return null;
+                        continue;
                     }
+                    uri = ContentProvider.maybeAddUserId(uri, UserHandle.myUserId());
+                    validUris.add(uri);
                 }
+
+                uris = validUris.toArray(new Uri[validUris.size()]);
             }
         }
         if (uris != null && uris.length > 0) {
@@ -372,7 +379,7 @@ public final class NfcActivityManager extends IAppCallback.Stub
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
         }
-        return new BeamShareData(message, uris, flags);
+        return new BeamShareData(message, uris, UserHandle.CURRENT, flags);
     }
 
     /** Callback from NFC service, usually on binder thread */
