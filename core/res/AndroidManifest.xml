@@ -2406,6 +2406,15 @@
         android:description="@string/permdesc_controlWifiDisplay"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to control VPN.
+         <p>Not for use by third-party applications.</p>
+         @hide -->
+    <permission android:name="android.permission.CONTROL_VPN"
+        android:label="@string/permlab_controlVpn"
+        android:description="@string/permdesc_controlVpn"
+        android:protectionLevel="signature|system" />
+    <uses-permission android:name="android.permission.CONTROL_VPN" />
+
     <!-- @SystemApi Allows an application to capture audio output.
          <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"
