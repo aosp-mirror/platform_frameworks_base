@@ -128,7 +128,7 @@ inline void computeBufferSize(int* totalVertexCount, int* totalIndexCount,
 }
 
 inline bool needsExtraForEdge(float firstAlpha, float secondAlpha) {
-    return abs(firstAlpha - secondAlpha) > ALPHA_THRESHOLD;
+    return fabsf(firstAlpha - secondAlpha) > ALPHA_THRESHOLD;
 }
 
 /**
