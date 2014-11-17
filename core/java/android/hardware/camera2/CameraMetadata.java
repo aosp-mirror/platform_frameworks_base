@@ -482,6 +482,26 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS = 5;
 
+    /**
+     * <p>The camera device supports capturing maximum-resolution
+     * images at &gt;= 20 frames per second, in at least the
+     * uncompressed YUV format, when post-processing settings
+     * are set to FAST.</p>
+     * <p>More specifically, this means that a size matching the
+     * camera device's active array size is listed as a
+     * supported size for the YUV_420_888 format in
+     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}, and the
+     * minimum frame duration for that format and size is &lt;=
+     * 1/20 s.</p>
+     * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is
+     * guaranted to have a value between 0 and 4, inclusive.</p>
+     *
+     * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
+     * @see CameraCharacteristics#SYNC_MAX_LATENCY
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_BURST_CAPTURE = 6;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
@@ -1259,8 +1279,7 @@ public abstract class CameraMetadata<TKey> {
      * image while recording video) use case.</p>
      * <p>The camera device should take the highest-quality image
      * possible (given the other settings) without disrupting the
-     * frame rate of video recording.<br />
-     * </p>
+     * frame rate of video recording.  </p>
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;
