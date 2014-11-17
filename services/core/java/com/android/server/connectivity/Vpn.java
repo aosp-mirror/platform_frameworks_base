@@ -23,6 +23,7 @@ import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
+import android.Manifest;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -739,31 +740,7 @@ public class Vpn {
     };
 
     private void enforceControlPermission() {
-        // System user is allowed to control VPN.
-        if (Binder.getCallingUid() == Process.SYSTEM_UID) {
-            return;
-        }
-        int appId = UserHandle.getAppId(Binder.getCallingUid());
-        final long token = Binder.clearCallingIdentity();
-        try {
-            // System VPN dialogs are also allowed to control VPN.
-            PackageManager pm = mContext.getPackageManager();
-            ApplicationInfo app = pm.getApplicationInfo(VpnConfig.DIALOGS_PACKAGE, 0);
-            if (((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) && (appId == app.uid)) {
-                return;
-            }
-            // SystemUI dialogs are also allowed to control VPN.
-            ApplicationInfo sysUiApp = pm.getApplicationInfo("com.android.systemui", 0);
-            if (((sysUiApp.flags & ApplicationInfo.FLAG_SYSTEM) != 0) && (appId == sysUiApp.uid)) {
-                return;
-            }
-        } catch (Exception e) {
-            // ignore
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-
-        throw new SecurityException("Unauthorized Caller");
+        mContext.enforceCallingPermission(Manifest.permission.CONTROL_VPN, "Unauthorized Caller");
     }
 
     private class Connection implements ServiceConnection {
