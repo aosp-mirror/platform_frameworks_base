@@ -38,6 +38,18 @@ public class RecentsConfiguration {
     static RecentsConfiguration sInstance;
     static int sPrevConfigurationHashCode;
 
+    /** Levels of svelte in increasing severity/austerity. */
+    // No svelting.
+    public static final int SVELTE_NONE = 0;
+    // Limit thumbnail cache to number of visible thumbnails when Recents was loaded, disable
+    // caching thumbnails as you scroll.
+    public static final int SVELTE_LIMIT_CACHE = 1;
+    // Disable the thumbnail cache, load thumbnails asynchronously when the activity loads and
+    // evict all thumbnails when hidden.
+    public static final int SVELTE_DISABLE_CACHE = 2;
+    // Disable all thumbnail loading.
+    public static final int SVELTE_DISABLE_LOADING = 3;
+
     /** Animations */
     public float animationPxMovementPerSecond;
 
@@ -128,6 +140,7 @@ public class RecentsConfiguration {
     public boolean lockToAppEnabled;
     public boolean developerOptionsEnabled;
     public boolean debugModeEnabled;
+    public int svelteLevel;
 
     /** Private constructor */
     private RecentsConfiguration(Context context) {
@@ -277,6 +290,7 @@ public class RecentsConfiguration {
         useHardwareLayers = res.getBoolean(R.bool.config_recents_use_hardware_layers);
         altTabKeyDelay = res.getInteger(R.integer.recents_alt_tab_key_delay);
         fakeShadows = res.getBoolean(R.bool.config_recents_fake_shadows);
+        svelteLevel = res.getInteger(R.integer.recents_svelte_level);
     }
 
     /** Updates the system insets */

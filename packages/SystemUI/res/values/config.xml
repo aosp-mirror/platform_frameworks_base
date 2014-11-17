@@ -182,6 +182,8 @@
     <bool name="recents_has_transposed_search_bar">true</bool>
     <!-- Transposes the nav bar in landscape (only used for purposes of layout). -->
     <bool name="recents_has_transposed_nav_bar">true</bool>
+    <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
+    <integer name="recents_svelte_level">0</integer>
 
     <!-- Whether to enable KeyguardService or not -->
     <bool name="config_enableKeyguardService">true</bool>
