@@ -476,7 +476,7 @@
             android:exported="true"
             android:label="@string/dessert_case"
             android:permission="android.permission.BIND_DREAM_SERVICE"
-            android:enabled="false"
+            android:enabled="true"
             android:process=":sweetsweetdesserts"
             >
             <intent-filter>
