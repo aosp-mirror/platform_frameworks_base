@@ -405,6 +405,9 @@
     <!-- The width of user avatar when on Keyguard -->
     <dimen name="multi_user_avatar_keyguard_size">22dp</dimen>
 
+    <!-- The width of user avatar when expanded -->
+    <dimen name="multi_user_avatar_expanded_size">24dp</dimen>
+
     <!-- The font size of the time when collapsed in QS -->
     <dimen name="qs_time_collapsed_size">14sp</dimen>
 
