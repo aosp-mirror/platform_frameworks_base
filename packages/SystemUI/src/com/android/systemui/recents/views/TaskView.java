@@ -469,7 +469,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         startDeleteTaskAnimation(new Runnable() {
             @Override
             public void run() {
-                mCb.onTaskViewDismissed(tv);
+                if (mCb != null) {
+                    mCb.onTaskViewDismissed(tv);
+                }
             }
         });
     }
@@ -486,7 +488,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     void setClipViewInStack(boolean clip) {
         if (clip != mClipViewInStack) {
             mClipViewInStack = clip;
-            mCb.onTaskViewClipStateChanged(this);
+            if (mCb != null) {
+                mCb.onTaskViewClipStateChanged(this);
+            }
         }
     }
 
@@ -570,7 +574,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         // Update the thumbnail alpha with the focus
         mThumbnailView.onFocusChanged(true);
         // Call the callback
-        mCb.onTaskViewFocusChanged(this, true);
+        if (mCb != null) {
+            mCb.onTaskViewFocusChanged(this, true);
+        }
         // Workaround, we don't always want it focusable in touch mode, but we want the first task
         // to be focused after the enter-recents animation, which can be triggered from either touch
         // or keyboard
@@ -593,7 +599,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         // Update the thumbnail alpha with the focus
         mThumbnailView.onFocusChanged(false);
         // Call the callback
-        mCb.onTaskViewFocusChanged(this, false);
+        if (mCb != null) {
+            mCb.onTaskViewFocusChanged(this, false);
+        }
         invalidate();
     }
 
@@ -694,7 +702,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 @Override
                 public void run() {
                     if (Constants.DebugFlags.App.EnableTaskFiltering && v == mHeaderView.mApplicationIcon) {
-                        mCb.onTaskViewAppIconClicked(tv);
+                        if (mCb != null) {
+                            mCb.onTaskViewAppIconClicked(tv);
+                        }
                     } else if (v == mHeaderView.mDismissButton) {
                         dismissTask();
                     }
@@ -705,7 +715,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 // Reset the translation of the action button before we animate it out
                 mActionButtonView.setTranslationZ(0f);
             }
-            mCb.onTaskViewClicked(tv, tv.getTask(), (v == mActionButtonView));
+            if (mCb != null) {
+                mCb.onTaskViewClicked(tv, tv.getTask(), (v == mActionButtonView));
+            }
         }
     }
 
@@ -714,8 +726,10 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     @Override
     public boolean onLongClick(View v) {
         if (v == mHeaderView.mApplicationIcon) {
-            mCb.onTaskViewAppInfoClicked(this);
-            return true;
+            if (mCb != null) {
+                mCb.onTaskViewAppInfoClicked(this);
+                return true;
+            }
         }
         return false;
     }
