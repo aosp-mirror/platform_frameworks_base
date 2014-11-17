@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> 小時 <xliff:g id="MINUTES">%2$d</xliff:g> 分鐘"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> 小時 <xliff:g id="MINUTES">%2$d</xliff:g> 分鐘"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> 分鐘"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> 分鐘"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> 分鐘 <xliff:g id="SECONDS">%2$d</xliff:g> 秒"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> 分鐘 <xliff:g id="SECONDS">%2$d</xliff:g> 秒"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> 秒"</string>
@@ -836,6 +835,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"允許應用程式接收 Android Beam 目前傳輸的資訊"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"移除 DRM 憑證"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"允許應用程式移除 DRM 憑證 (一般應用程式並不需要)。"</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"繫結至行動通訊業者簡訊服務"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允許應用程式繫結至行動通訊業者簡訊服務的頂層介面 (一般應用程式並不需要)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制螢幕解鎖密碼所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>
@@ -1883,7 +1884,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"節約耗電量功能會降低裝置的效能，並限制震動和大多數背景資料，藉此延長電池續航力。此外，電子郵件、聊天工具和其他需要使用同步功能的應用程式若未開啟，將不會自動更新。\n\n當您為裝置充電時，節約耗電量功能會自動關閉。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"直到 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 停機時間結束"</string>
-    <string name="downtime_condition_line_one" msgid="8762708714645352010">"到停機時間結束時"</string>
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"直到停機時間結束"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"1 分鐘 (結束時間：<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
     <item quantity="other" msgid="2787867221129368935">"%1$d 分鐘 (結束時間：<xliff:g id="FORMATTEDTIME">%2$s</xliff:g>)"</item>
@@ -1903,6 +1904,7 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"結束時間：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"無限期"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"收合"</string>
-    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"到下次鬧鐘鈴響時：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"到下次鬧鐘鈴響時"</string>
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"直到下次鬧鐘鈴響：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"直到下次鬧鐘鈴響"</string>
+    <string name="muted_by" msgid="6147073845094180001">"由 <xliff:g id="THIRD_PARTY">%1$s</xliff:g> 設為靜音"</string>
 </resources>

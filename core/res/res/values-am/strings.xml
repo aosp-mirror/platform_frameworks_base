@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ሰዓ <xliff:g id="MINUTES">%2$d</xliff:g> ደቂቃ"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ሰዓ <xliff:g id="MINUTES">%2$d</xliff:g> ደቂቃ"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> ደቂቃዎች"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> ደቂቃዎች"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> ደቂቃ <xliff:g id="SECONDS">%2$d</xliff:g> ሴ"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> ደቂቃ <xliff:g id="SECONDS">%2$d</xliff:g> ሴ"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ሴ"</string>
@@ -836,6 +835,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"ይም መተግበሪያ ስለአሁን የAndroid Beam ሽግግሮች መረጃ እንዲቀበል ይፈቅዳል"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"የDRM እውቅና ማረጋገጫዎችን ያስወግዳል"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"አንድ መተግበሪያ የDRM እውቅና ማረጋገጫዎችን እንዲያስወግድ ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"ወደሞባይል አገልግሎት ሰጪ የመልዕክት አገልግሎት አያይዝ"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"ያዢው በሞባይል አገልግሎት ሰጪ የመልዕክት አላላክ አገልግሎት ላይ ከፍተኛውን ደረጃ በይነ ገጽ እንዲይዝ ይፈቅድለታል። ለመደበኛ መተግበሪያ በጭራሽ አያስፈልግም።"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"የይለፍ ቃል ደንቦች አዘጋጅ"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"በማያ-መክፈት የተፈቀዱ የይለፍ ቃል ርዝመት እና ቁምፊዎች ተቆጣጠር።"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"የማሳያ-ክፈት ሙከራዎችን አሳይ"</string>
@@ -1905,4 +1906,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ሰብስብ"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"በ<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ላይ እስከሚቀጥለው ማንቂያ ድረስ"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"እስከሚቀጥለው ማንቂያ ድረስ"</string>
+    <string name="muted_by" msgid="6147073845094180001">"ድምጽ በ<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ተዘግቷል"</string>
 </resources>

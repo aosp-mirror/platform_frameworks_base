@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g>시간 <xliff:g id="MINUTES">%2$d</xliff:g>분"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g>시간 <xliff:g id="MINUTES">%2$d</xliff:g>분"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g>분"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g>분"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g>분 <xliff:g id="SECONDS">%2$d</xliff:g>초"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g>분 <xliff:g id="SECONDS">%2$d</xliff:g>초"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g>초"</string>
@@ -836,6 +835,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"이 애플리케이션이 현재 Android Beam 전송 관련 정보를 수신하도록 허용합니다."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM 인증서 삭제"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"애플리케이션이 DRM 인증서를 삭제하도록 허용합니다. 일반 앱에서는 필요하지 않습니다."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"이동통신사 메시지 서비스에 고정"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"화면 잠금해제 비밀번호에 허용되는 길이 및 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
@@ -1907,4 +1908,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"접기"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"다음 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 알람까지"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"다음 알람까지"</string>
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>에서 알림음 음소거"</string>
 </resources>

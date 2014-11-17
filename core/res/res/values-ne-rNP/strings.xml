@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> घण्टा <xliff:g id="MINUTES">%2$d</xliff:g> मि"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> घण्टा <xliff:g id="MINUTES">%2$d</xliff:g> मिनेट"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> मिनेट"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> मिनेट"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> मिनेट <xliff:g id="SECONDS">%2$d</xliff:g> से"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> मिनेट <xliff:g id="SECONDS">%2$d</xliff:g> से"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकेन्ड"</string>
@@ -836,6 +835,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"यस आवेदनले वर्तमान Android Beam स्थानान्तरण बारेमा जानकारी प्राप्त गर्न अनुमति दिन्छ"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM प्रमाणपत्रहरू हटाउनुहोस्"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रहरू हटाउन अनुप्रयोगलाई अनुमति दिन्छ। सामान्य अनुप्रयोगहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"वाहक मेसेजिङ सेवामा आबद्ध हुनुहोस्"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"धारकलाई वाहक मेसेजिङ सेवाको उच्च-स्तरको इन्टरफेसमा आबद्ध हुन अनुमति दिनुहोस्। सामान्य एपहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियमहरू मिलाउनुहोस्"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्क्रिन-अनलक पासवर्डहरूमा अनुमति दिइएको लम्बाइ र अक्षरहरू नियन्त्रण गर्नुहोस्।"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"मोनिटर स्क्रिन-अनलक प्रयत्नहरू"</string>
@@ -1913,4 +1914,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त पार्नुहोस्"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> मा अर्को अलार्म सम्म"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"अर्को अलार्म सम्म"</string>
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारा मौन गरिएको"</string>
 </resources>

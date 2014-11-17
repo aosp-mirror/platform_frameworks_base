@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ता <xliff:g id="MINUTES">%2$d</xliff:g> मि"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ता <xliff:g id="MINUTES">%2$d</xliff:g> मि"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> मिनिटे"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> मिनिट"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> मि <xliff:g id="SECONDS">%2$d</xliff:g> से"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> मि <xliff:g id="SECONDS">%2$d</xliff:g> से"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंद"</string>
@@ -836,6 +835,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"वर्तमान Android बीम स्थानांतरणांविषयी माहिती प्राप्त करण्यासाठी या अनुप्रयोगास अनुमती देते"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM प्रमाणपत्रे काढा"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रे काढण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अॅप्स साठी कधीही आवश्यकता नसते."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"एका वाहक संदेशन सेवेवर प्रतिबद्ध करा"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"वाहक संदेशन सेवेचा शीर्ष-स्तर इंटरफेस प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्‍य अ‍ॅप्‍सकरिता कधीही आवश्‍यक नसते."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"संकेतशब्द नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्क्रीन-अनलॉक संकेतशब्दांमध्ये अनुमती दिलेली लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"स्क्रीन-अनलॉक प्रयत्नांचे परीक्षण करा"</string>
@@ -1905,4 +1906,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"संक्षिप्त करा"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता पुढील अलार्मपर्यंत"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"पुढील अलार्मपर्यंत"</string>
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारे नि:शब्द केले"</string>
 </resources>
