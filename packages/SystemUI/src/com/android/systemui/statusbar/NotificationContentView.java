@@ -42,13 +42,13 @@ import com.android.systemui.R;
 public class NotificationContentView extends FrameLayout {
 
     private static final long ANIMATION_DURATION_LENGTH = 170;
-    private static final Paint INVERT_PAINT = createInvertPaint();
-    private static final ColorFilter NO_COLOR_FILTER = new ColorFilter();
 
     private final Rect mClipBounds = new Rect();
 
     private View mContractedChild;
     private View mExpandedChild;
+
+    private NotificationViewWrapper mContractedWrapper;
 
     private int mSmallHeight;
     private int mClipTopAmount;
@@ -122,6 +122,7 @@ public class NotificationContentView extends FrameLayout {
         sanitizeContractedLayoutParams(child);
         addView(child);
         mContractedChild = child;
+        mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
     }
 
@@ -249,38 +250,10 @@ public class NotificationContentView extends FrameLayout {
         return mExpandedChild != null;
     }
 
-    public void setDark(boolean dark, boolean fade) {
+    public void setDark(boolean dark, boolean fade, long delay) {
         if (mDark == dark || mContractedChild == null) return;
         mDark = dark;
-        setImageViewDark(dark, fade, com.android.internal.R.id.right_icon);
-        setImageViewDark(dark, fade, com.android.internal.R.id.icon);
-    }
-
-    private void setImageViewDark(boolean dark, boolean fade, int imageViewId) {
-        // TODO: implement fade
-        final ImageView v = (ImageView) mContractedChild.findViewById(imageViewId);
-        if (v == null) return;
-        final Drawable d = v.getBackground();
-        if (dark) {
-            v.setLayerType(LAYER_TYPE_HARDWARE, INVERT_PAINT);
-            if (d != null) {
-                v.setTag(R.id.doze_saved_filter_tag, d.getColorFilter() != null ? d.getColorFilter()
-                        : NO_COLOR_FILTER);
-                d.setColorFilter(getResources().getColor(R.color.doze_small_icon_background_color),
-                        PorterDuff.Mode.SRC_ATOP);
-                v.setImageAlpha(getResources().getInteger(R.integer.doze_small_icon_alpha));
-            }
-        } else {
-            v.setLayerType(LAYER_TYPE_NONE, null);
-            if (d != null)  {
-                final ColorFilter filter = (ColorFilter) v.getTag(R.id.doze_saved_filter_tag);
-                if (filter != null) {
-                    d.setColorFilter(filter == NO_COLOR_FILTER ? null : filter);
-                    v.setTag(R.id.doze_saved_filter_tag, null);
-                }
-                v.setImageAlpha(0xff);
-            }
-        }
+        mContractedWrapper.setDark(dark, fade, delay);
     }
 
     @Override
@@ -289,17 +262,5 @@ public class NotificationContentView extends FrameLayout {
         // This is not really true, but good enough when fading from the contracted to the expanded
         // layout, and saves us some layers.
         return false;
-    }
-
-    private static Paint createInvertPaint() {
-        final Paint p = new Paint();
-        final float[] invert = {
-            -1f,  0f,  0f, 1f, 1f,
-             0f, -1f,  0f, 1f, 1f,
-             0f,  0f, -1f, 1f, 1f,
-             0f,  0f,  0f, 1f, 0f
-        };
-        p.setColorFilter(new ColorMatrixColorFilter(new ColorMatrix(invert)));
-        return p;
     }
 }
