@@ -19,6 +19,7 @@ package android.net;
 import static android.system.OsConstants.AF_INET;
 import static android.system.OsConstants.AF_INET6;
 
+import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -161,6 +162,32 @@ public class VpnService extends Service {
             // ignore
         }
         return VpnConfig.getIntentForConfirmation();
+    }
+
+    /**
+     * Version of {@link #prepare(Context)} which does not require user consent.
+     *
+     * <p>Requires {@link android.Manifest.permission#CONTROL_VPN} and should generally not be
+     * used. Only acceptable in situations where user consent has been obtained through other means.
+     *
+     * <p>Once this is run, future preparations may be done with the standard prepare method as this
+     * will authorize the package to prepare the VPN without consent in the future.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static void prepareAndAuthorize(Context context) {
+        IConnectivityManager cm = getService();
+        String packageName = context.getPackageName();
+        try {
+            // Only prepare if we're not already prepared.
+            if (!cm.prepareVpn(packageName, null)) {
+                cm.prepareVpn(null, packageName);
+            }
+            cm.setVpnPackageAuthorization(true);
+        } catch (RemoteException e) {
+            // ignore
+        }
     }
 
     /**
