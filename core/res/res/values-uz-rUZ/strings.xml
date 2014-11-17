@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> soat <xliff:g id="MINUTES">%2$d</xliff:g> daq"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> soat <xliff:g id="MINUTES">%2$d</xliff:g> daq"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> daqiqa"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> daqiqa"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> daq <xliff:g id="SECONDS">%2$d</xliff:g> son"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> daq <xliff:g id="SECONDS">%2$d</xliff:g> son"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> soniya"</string>
@@ -834,6 +833,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ushbu ilovaga joriy Android Beam uzatishlari haqida ma\'lumotlarni olish ruxsati berilsin."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM sertifikatlarini o‘chirib tashlash"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ilovaga DRM sertifikatlarini o‘chirib tashlash uchun ruxsat beradi. Oddiy ilovalar uchun talab qilinmaydi."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"aloqa operatorining xabar almashinuv xizmatiga bog‘lanish"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Egasiga aloqa operatorining xabar almashinuv xizmatining yuqori darajali interfeysiga bog‘lanish uchun ruxsat beradi. Oddiy ilovalar uchun hech qachon kerak bo‘lmaydi."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Parol qoidalarini o‘rnatish"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran qulfini ochish parollariga ruxsat berilgan belgilar va ularning uzunligini boshqarish."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekranni qulfdan chiqarish urinishlarini nazorat qilish"</string>
@@ -1900,4 +1901,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Yig‘ish"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Keyingi uyg‘otkich vaqtigacha (<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Keyingi uyg‘otkich vaqtigacha"</string>
+    <string name="muted_by" msgid="6147073845094180001">"“<xliff:g id="THIRD_PARTY">%1$s</xliff:g>” tomonidan ovozsiz qilingan"</string>
 </resources>

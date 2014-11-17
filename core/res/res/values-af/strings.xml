@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> u. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> u. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minute"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min."</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s."</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s."</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sekondes"</string>
@@ -834,6 +833,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Laat hierdie program toe om inligting oor huidige Android Straal-oordragte te ontvang."</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"verwyder DRM-sertifikate"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Laat \'n program toe om DRM-sertifikate te verwyder. Behoort nooit vir gewone programme nodig te wees nie."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"bind aan \'n diensverskaffer-boodskapdiens"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Dit laat die houer toe om aan die top-koppelvlak van \'n diensverskaffer-boodskapdiens te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Beheer lengte en watter karakters wat in die skermontsluit-wagwoorde gebruik word."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor pogings om skerm te ontsluit"</string>
@@ -1900,4 +1901,5 @@
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Vou in"</string>
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Tot die volgende wekker om <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Tot die volgende wekker"</string>
+    <string name="muted_by" msgid="6147073845094180001">"Gedemp deur <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
 </resources>

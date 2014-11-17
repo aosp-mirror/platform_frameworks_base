@@ -34,8 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"පැය <xliff:g id="HOURS">%1$d</xliff:g> මිනි <xliff:g id="MINUTES">%2$d</xliff:g>"</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"පැය <xliff:g id="HOURS">%1$d</xliff:g> මිනි <xliff:g id="MINUTES">%2$d</xliff:g>"</string>
     <string name="durationMinutes" msgid="3134226679883579347">"මිනි <xliff:g id="MINUTES">%1$d</xliff:g>"</string>
-    <!-- no translation found for durationMinute (7155301744174623818) -->
-    <skip />
+    <string name="durationMinute" msgid="7155301744174623818">"මිනිත්තු <xliff:g id="MINUTES">%1$d</xliff:g>"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"මිනි <xliff:g id="MINUTES">%1$d</xliff:g> තත් <xliff:g id="SECONDS">%2$d</xliff:g>"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"මිනි <xliff:g id="MINUTES">%1$d</xliff:g> තත් <xliff:g id="SECONDS">%2$d</xliff:g>"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"තත් <xliff:g id="SECONDS">%1$d</xliff:g>"</string>
@@ -796,14 +795,10 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"හැඹිලි ගොනු පද්ධති කියවීමට සහ ලිවීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_use_sip" msgid="2052499390128979920">"SIP ඇමතුම් සිදුකිරීමට/ලබාගැනීමට"</string>
     <string name="permdesc_use_sip" msgid="2297804849860225257">"SIP ඇමතුම් සිදුකිරීමට සහ ලබාගැනීමට යෙදුමට ඉඩ දෙන්න."</string>
-    <!-- no translation found for permlab_register_sim_subscription (3166535485877549177) -->
-    <skip />
-    <!-- no translation found for permdesc_register_sim_subscription (2138909035926222911) -->
-    <skip />
-    <!-- no translation found for permlab_register_call_provider (108102120289029841) -->
-    <skip />
-    <!-- no translation found for permdesc_register_call_provider (7034310263521081388) -->
-    <skip />
+    <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"අලුත් විදුලි සංදේශ SIM සම්බන්ධතාවක් ලියාපදිංචි කරන්න"</string>
+    <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"අලුත් විදුලි සංදේශ SIM සම්බන්ධතාවක් ලියාපදිංචි කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"අලුත් විදුලි සංදේශ සම්බන්ධතාවක් ලියාපදිංචි කරන්න"</string>
+    <string name="permdesc_register_call_provider" msgid="7034310263521081388">"අලුත් විදුලි සංදේශන සම්බන්ධතා ලියාපදිංචි කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"විදුලි සංදේශන සම්බන්ධතා කළමණාකරණය කරන්න"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"විදුලි සංදේශන සම්බන්ධතා කළමණාකරණය කිරීමට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"ලැබෙන ඇමතුම් තිරය සමග අන්තර් ක්‍රියාකාරී වන්න"</string>
@@ -838,6 +833,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"දැනට තිබෙන Android බීම් හුවමාරු පිළිබඳ තොරතුරු ලබාගැනීමට මෙම යෙදුමට ඉඩ දෙන්න"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM සහතික ඉවත් කරන්න"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"යෙදුමකට DRM  සහතික ඉවත් කිරීමට ඉඩ දේ. සාමාන්‍ය යෙදුම් වලට කිසිදා අවශ්‍ය නොවේ."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"වාහක පණිවිඩ යැවීමේ සේවාවට බදින්න"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"වාහක සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"තිරය අගුළු ඇරීමේ මුරපදයට අනුමත අකුරු සහ දිග පාලනය කරන්න."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
@@ -1884,8 +1881,7 @@
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ගැලවීමට පෙර මුරපදය විමසන්න"</string>
     <string name="battery_saver_description" msgid="2510530476513605742">"බැටරියේ ජීව කාලය දියුණු කිරීමට උදව් කිරීමට, ඔබගේ උපාංගයේ ක්‍රියාකාරිත්වය සහ සීමා කළ කම්පනයන් සහ බොහොමයක් පසුබිම් දත්ත බැටරි සුරැකීමෙන් අඩු කරයි. සමමුහුර්ත කිරීම බලාපොරොත්තු වෙන ඊ-තැපෑල, පණිවිඩ යැවීම සහ වෙනත් යෙදුම් යාවත්කාලීන වන්නේ ඔබ ඒවා විවෘත කළ විට පමණි.\n\nඔබගේ උපාංගය ආරෝපණය වන විට බැටරි සුරැකීම ස්වයංක්‍රීයව අක්‍රිය වේ."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"ඔබගේ බිඳවැටුම් වේලාව <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> දී අවසන්වන තුරු"</string>
-    <!-- no translation found for downtime_condition_line_one (8762708714645352010) -->
-    <skip />
+    <string name="downtime_condition_line_one" msgid="8762708714645352010">"ඔබගේ බිදවැටුම් කාලය අවසන් වන තෙක්"</string>
   <plurals name="zen_mode_duration_minutes_summary">
     <item quantity="one" msgid="3177683545388923234">"මිනිත්තු එකක් සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
     <item quantity="other" msgid="2787867221129368935">"මිනිත්තු %1$d සඳහා (<xliff:g id="FORMATTEDTIME">%2$s</xliff:g> තෙක්)"</item>
@@ -1905,8 +1901,7 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> තෙක්"</string>
     <string name="zen_mode_forever" msgid="4316804956488785559">"අනියත ආකාරයට"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"හකුළන්න"</string>
-    <!-- no translation found for zen_mode_next_alarm_summary (5915140424683747372) -->
-    <skip />
-    <!-- no translation found for zen_mode_next_alarm_line_one (5537042951553420916) -->
-    <skip />
+    <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> හි ඊළඟ සීනුව තෙක්"</string>
+    <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"ඊළඟ සීනුව තෙක්"</string>
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> විසින් නිශ්ශබ්ද කරන ලදි"</string>
 </resources>
