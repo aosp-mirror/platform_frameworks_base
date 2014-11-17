@@ -2537,6 +2537,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadSetting(stmt, Settings.Global.DEFAULT_INSTALL_LOCATION,
                     PackageHelper.APP_INSTALL_AUTO);
 
+            // volume adjust sound
+            loadIntegerSetting(stmt, Settings.System.VOLUME_KEY_ADJUST_SOUND,
+                    R.integer.volume_key_adjust_sound);
+
             // Set default cdma emergency tone
             loadSetting(stmt, Settings.Global.EMERGENCY_TONE, 0);
 

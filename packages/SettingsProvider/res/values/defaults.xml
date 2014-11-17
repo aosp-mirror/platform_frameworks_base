@@ -205,5 +205,8 @@
 
     <!-- Default for Settings.Global.GUEST_USER_ENABLED -->
     <bool name="def_guest_user_enabled">true</bool>
+    
+    <!-- Volume adjust sound -->
+    <integer name="volume_key_adjust_sound">1</integer>
 
 </resources>
