@@ -357,6 +357,22 @@ static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
     parcel->writeStrongBinder( self != 0 ? self->getIGraphicBufferProducer()->asBinder() : NULL);
 }
 
+static jint nativeGetWidth(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    ANativeWindow* anw = static_cast<ANativeWindow*>(surface);
+    int value = 0;
+    anw->query(anw, NATIVE_WINDOW_WIDTH, &value);
+    return value;
+}
+
+static jint nativeGetHeight(JNIEnv* env, jclass clazz, jlong nativeObject) {
+    Surface* surface = reinterpret_cast<Surface*>(nativeObject);
+    ANativeWindow* anw = static_cast<ANativeWindow*>(surface);
+    int value = 0;
+    anw->query(anw, NATIVE_WINDOW_HEIGHT, &value);
+    return value;
+}
+
 namespace uirenderer {
 
 using namespace android::uirenderer::renderthread;
@@ -426,6 +442,8 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeReadFromParcel },
     {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
             (void*)nativeWriteToParcel },
+    {"nativeGetWidth", "(J)I", (void*)nativeGetWidth },
+    {"nativeGetHeight", "(J)I", (void*)nativeGetHeight },
 
     // HWUI context
     {"nHwuiCreate", "(JJ)J", (void*) hwui::create },
