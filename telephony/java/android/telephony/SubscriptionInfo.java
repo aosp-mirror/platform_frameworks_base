@@ -34,6 +34,11 @@ import android.os.Parcelable;
 public class SubscriptionInfo implements Parcelable {
 
     /**
+     * Size of text to render on the icon.
+     */
+    private static final int TEXT_SIZE = 22;
+
+    /**
      * Subscription Identifier, this is a device unique number
      * and not an index into an array
      */
@@ -201,10 +206,11 @@ public class SubscriptionInfo implements Parcelable {
         paint.setColorFilter(null);
 
         // Write the sim slot index.
+        paint.setAntiAlias(true);
         paint.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
         paint.setColor(Color.WHITE);
-        paint.setTextSize(12);
-        final String index = Integer.toString(mSimSlotIndex);
+        paint.setTextSize(TEXT_SIZE);
+        final String index = Integer.toString(mSimSlotIndex + 1);
         final Rect textBound = new Rect();
         paint.getTextBounds(index, 0, 1, textBound);
         final float xOffset = (width / 2.f) - textBound.centerX();
