@@ -2105,4 +2105,9 @@
 
   <!-- From SignalStrength -->
   <java-symbol type="integer" name="config_LTE_RSRP_threshold_type" />
+
+  <java-symbol type="string" name="android_system_label" />
+  <java-symbol type="string" name="system_error_wipe_data" />
+  <java-symbol type="string" name="system_error_manufacturer" />
+
 </resources>
