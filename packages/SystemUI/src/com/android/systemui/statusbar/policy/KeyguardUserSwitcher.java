@@ -227,6 +227,10 @@ public class KeyguardUserSwitcher {
         }
     };
 
+    public boolean isEnabled() {
+        return mUserSwitcherContainer != null;
+    }
+
     public static class Adapter extends UserSwitcherController.BaseUserAdapter implements
             View.OnClickListener {
 

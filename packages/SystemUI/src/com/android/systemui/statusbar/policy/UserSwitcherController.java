@@ -78,6 +78,9 @@ public class UserSwitcherController {
     private boolean mSimpleUserSwitcher;
     private boolean mAddUsersWhenLocked;
 
+    private boolean mKeyguardUserSwitcherAvailable;
+    private boolean mQsExpanded;
+
     public UserSwitcherController(Context context, KeyguardMonitor keyguardMonitor) {
         mContext = context;
         mGuestResumeSessionReceiver.register(context);
@@ -116,16 +119,18 @@ public class UserSwitcherController {
      */
     @SuppressWarnings("unchecked")
     private void refreshUsers(int forcePictureLoadForId) {
-
-        SparseArray<Bitmap> bitmaps = new SparseArray<>(mUsers.size());
-        final int N = mUsers.size();
-        for (int i = 0; i < N; i++) {
-            UserRecord r = mUsers.get(i);
-            if (r == null || r.info == null
-                    || r.info.id == forcePictureLoadForId || r.picture == null) {
-                continue;
+        SparseArray<Bitmap> bitmaps = null;
+        if (allowCachingOfBitmaps()) {
+            bitmaps = new SparseArray<>(mUsers.size());
+            final int N = mUsers.size();
+            for (int i = 0; i < N; i++) {
+                UserRecord r = mUsers.get(i);
+                if (r == null || r.info == null
+                        || r.info.id == forcePictureLoadForId || r.picture == null) {
+                    continue;
+                }
+                bitmaps.put(r.info.id, r.picture);
             }
-            bitmaps.put(r.info.id, r.picture);
         }
 
         final boolean addUsersWhenLocked = mAddUsersWhenLocked;
@@ -151,13 +156,15 @@ public class UserSwitcherController {
                                 true /* isGuest */, isCurrent, false /* isAddUser */,
                                 false /* isRestricted */);
                     } else if (info.supportsSwitchTo()) {
-                        Bitmap picture = bitmaps.get(info.id);
-                        if (picture == null) {
-                            picture = mUserManager.getUserIcon(info.id);
-                        }
-                        if (picture != null) {
-                            picture = BitmapHelper.createCircularClip(
-                                    picture, avatarSize, avatarSize);
+                        Bitmap picture = bitmaps != null ? bitmaps.get(info.id) : null;
+                        if (picture == null && allowCachingOfBitmaps()) {
+                            Bitmap loadedPicture = mUserManager.getUserIcon(info.id);
+
+                            if (loadedPicture != null) {
+                                picture = BitmapHelper.createCircularClip(
+                                        loadedPicture, avatarSize, avatarSize);
+                                loadedPicture.recycle();
+                            }
                         }
                         int index = isCurrent ? 0 : records.size();
                         records.add(index, new UserRecord(info, picture, false /* isGuest */,
@@ -550,6 +557,32 @@ public class UserSwitcherController {
                 exitGuest(mGuestId);
             }
         }
+    }
+
+    /**
+     * Notify if the keyguard user switcher is available.
+     */
+    public void setKeyguardUserSwitcherAvailable(boolean available) {
+        boolean oldShouldCacheBitmaps = allowCachingOfBitmaps();
+        mKeyguardUserSwitcherAvailable = available;
+        if (allowCachingOfBitmaps() != oldShouldCacheBitmaps) {
+            refreshUsers(UserHandle.USER_NULL);
+        }
+    }
+
+    /**
+     * Notify if the quick settings are expanded.
+     */
+    public void setQsExpanded(boolean qsExpanded) {
+        boolean oldShouldCacheBitmaps = allowCachingOfBitmaps();
+        mQsExpanded = qsExpanded;
+        if (allowCachingOfBitmaps() != oldShouldCacheBitmaps) {
+            refreshUsers(UserHandle.USER_NULL);
+        }
+    }
+
+    private boolean allowCachingOfBitmaps() {
+        return mQsExpanded || mKeyguardUserSwitcherAvailable;
     }
 
     private final class AddUserDialog extends SystemUIDialog implements
