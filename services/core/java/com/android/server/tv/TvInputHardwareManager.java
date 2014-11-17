@@ -673,28 +673,35 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 if (mReleased) {
                     throw new IllegalStateException("Device already released.");
                 }
-                if (surface != null && config == null) {
-                    return false;
-                }
-                if (surface == null && mActiveConfig == null) {
-                    return false;
-                }
 
                 int result = TvInputHal.ERROR_UNKNOWN;
                 if (surface == null) {
-                    result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
-                    mActiveConfig = null;
+                    // The value of config is ignored when surface == null.
+                    if (mActiveConfig != null) {
+                        result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
+                        mActiveConfig = null;
+                    } else {
+                        // We already have no active stream.
+                        return true;
+                    }
                 } else {
-                    if (!config.equals(mActiveConfig)) {
+                    // It's impossible to set a non-null surface with a null config.
+                    if (config == null) {
+                        return false;
+                    }
+                    // Remove stream only if we have an existing active configuration.
+                    if (mActiveConfig != null && !config.equals(mActiveConfig)) {
                         result = mHal.removeStream(mInfo.getDeviceId(), mActiveConfig);
                         if (result != TvInputHal.SUCCESS) {
                             mActiveConfig = null;
-                            return false;
                         }
                     }
-                    result = mHal.addOrUpdateStream(mInfo.getDeviceId(), surface, config);
+                    // Proceed only if all previous operations succeeded.
                     if (result == TvInputHal.SUCCESS) {
-                        mActiveConfig = config;
+                        result = mHal.addOrUpdateStream(mInfo.getDeviceId(), surface, config);
+                        if (result == TvInputHal.SUCCESS) {
+                            mActiveConfig = config;
+                        }
                     }
                 }
                 updateAudioConfigLocked();
