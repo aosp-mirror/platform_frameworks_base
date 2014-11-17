@@ -354,8 +354,8 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ترتیب دیں"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>۔ <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"اسکرین پن کردہ ہے"</string>
-    <string name="screen_pinning_description" msgid="1346522416878235405">"یہ اس کو اس وقت تک منظر میں رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے واپس اور عام جائزہ کو ایک ساتھ ٹچ کریں اور پکڑ کر رکھیں۔"</string>
-    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"یہ اس کو اس وقت تک منظر میں رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے عام جائزہ کو ٹچ کریں اور پکڑ کر رکھیں۔"</string>
+    <string name="screen_pinning_description" msgid="1346522416878235405">"یہ اس کو اس وقت تک منظر میں رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے واپس اور عمومی جائزہ کو ایک ساتھ ٹچ کریں اور پکڑ کر رکھیں۔"</string>
+    <string name="screen_pinning_description_accessible" msgid="8518446209564202557">"یہ اس کو اس وقت تک منظر میں رکھتا ہے جب تک آپ اس سے پن نہیں ہٹا دیتے۔ پن ہٹانے کیلئے عمومی جائزہ کو ٹچ کریں اور پکڑ کر رکھیں۔"</string>
     <string name="screen_pinning_positive" msgid="3783985798366751226">"سمجھ آ گئی"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"نہیں شکریہ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> کو چھپائیں؟"</string>
