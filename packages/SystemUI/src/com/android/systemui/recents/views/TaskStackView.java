@@ -554,7 +554,8 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Resets the focused task. */
     void resetFocusedTask() {
-        if (mFocusedTaskIndex > -1) {
+        if ((mStack != null) && (0 <= mFocusedTaskIndex) &&
+                (mFocusedTaskIndex < mStack.getTaskCount())) {
             Task t = mStack.getTasks().get(mFocusedTaskIndex);
             TaskView tv = getChildViewForTask(t);
             tv.unsetFocusedTask();
