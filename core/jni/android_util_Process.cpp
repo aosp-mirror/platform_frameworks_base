@@ -719,7 +719,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
         jint mode = formatData[fi];
         if ((mode&PROC_PARENS) != 0) {
             i++;
-        } else if ((mode&PROC_QUOTES != 0)) {
+        } else if ((mode&PROC_QUOTES) != 0) {
             if (buffer[i] == '"') {
                 i++;
             } else {
