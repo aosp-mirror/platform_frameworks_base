@@ -400,9 +400,6 @@ LOCAL_DX_FLAGS := --core-library --multi-dex
 
 LOCAL_RMTYPEDEFS := true
 
-# List of classes and interfaces which should be loaded by the Zygote.
-LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
-
 include $(BUILD_JAVA_LIBRARY)
 framework_module := $(LOCAL_INSTALLED_MODULE)
 
