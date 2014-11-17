@@ -98,6 +98,7 @@
                     android:contentDescription="@string/accessibility_menu"
                     android:src="@drawable/ic_sysbar_menu"
                     android:visibility="invisible"
+                    android:scaleType="centerInside"
                     android:layout_gravity="end"
                     systemui:keyCode="82" />
 
@@ -210,6 +211,7 @@
                     android:layout_height="40dp"
                     android:contentDescription="@string/accessibility_menu"
                     android:src="@drawable/ic_sysbar_menu_land"
+                    android:scaleType="centerInside"
                     android:layout_gravity="top"
                     android:visibility="invisible"
                     systemui:keyCode="82" />
