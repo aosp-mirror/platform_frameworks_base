@@ -74,6 +74,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -853,8 +854,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardBottomArea.setAccessibilityController(mAccessibilityController);
         mNextAlarmController = new NextAlarmController(mContext);
         mKeyguardMonitor = new KeyguardMonitor();
-        mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor);
-
+        if (UserSwitcherController.isUserSwitcherAvailable(UserManager.get(mContext))) {
+            mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor);
+        }
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
                 (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
                 mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
@@ -1510,7 +1512,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // If the user switcher is simple then disable QS during setup because
         // the user intends to use the lock screen user switcher, QS in not needed.
         mNotificationPanel.setQsExpansionEnabled(isDeviceProvisioned()
-                && (!mUserSwitcherController.isSimpleUserSwitcher() || mUserSetup));
+                && (mUserSetup || mUserSwitcherController == null
+                        || !mUserSwitcherController.isSimpleUserSwitcher()));
         mShadeUpdates.check();
     }
 
