@@ -20,6 +20,7 @@
 # ==========================================================
 LOCAL_PATH:= $(call my-dir)
 testFiles := \
+    AttributeFinder_test.cpp \
     ByteBucketArray_test.cpp \
     Config_test.cpp \
     ConfigLocale_test.cpp \
