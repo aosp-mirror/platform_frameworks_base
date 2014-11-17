@@ -417,6 +417,11 @@ interface ITelephony {
     boolean needsOtaServiceProvisioning();
 
     /**
+     * Sets the voicemail number for a particular subscriber.
+     */
+    boolean setVoiceMailNumber(int subId, String alphaTag, String number);
+
+    /**
       * Returns the unread count of voicemails
       */
     int getVoiceMessageCount();
