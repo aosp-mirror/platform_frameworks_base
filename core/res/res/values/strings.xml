@@ -212,6 +212,12 @@
     <!-- Displayed to tell the user that all service is blocked by access control. -->
     <string name="RestrictedOnAll">All voice/data/SMS services are blocked.</string>
 
+    <!-- Displayed to tell the user that peer changed TTY mode -->
+    <string name="peerTtyModeFull">Peer requested TTY Mode FULL</string>
+    <string name="peerTtyModeHco">Peer requested TTY Mode HCO</string>
+    <string name="peerTtyModeVco">Peer requested TTY Mode VCO</string>
+    <string name="peerTtyModeOff">Peer requested TTY Mode OFF</string>
+
     <!-- Mappings between TS 27.007 +CFCC/+CLCK "service classes" and human-readable strings--> <skip />
     <!-- Example: Service was enabled for: Voice, Data -->
     <string name="serviceClassVoice">Voice</string>
