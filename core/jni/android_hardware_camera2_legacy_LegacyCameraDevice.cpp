@@ -312,8 +312,8 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
         case HAL_PIXEL_FORMAT_BLOB: {
             int8_t* img = NULL;
             struct camera3_jpeg_blob footer = {
-                jpeg_blob_id: CAMERA3_JPEG_BLOB_ID,
-                jpeg_size: (uint32_t)bufferLength
+                .jpeg_blob_id = CAMERA3_JPEG_BLOB_ID,
+                .jpeg_size = (uint32_t)bufferLength
             };
 
             size_t totalJpegSize = bufferLength + sizeof(footer);
