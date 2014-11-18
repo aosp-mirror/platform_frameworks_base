@@ -61,6 +61,8 @@ class TimePickerSpinnerDelegate extends TimePicker.AbstractTimePickerDelegate im
     // Also NOT a real index, just used for keyboard mode.
     private static final int ENABLE_PICKER_INDEX = 3;
 
+    // LayoutLib relies on these constants. Change TimePickerSpinnerDelegate_Delegate if
+    // modifying these.
     private static final int AM = 0;
     private static final int PM = 1;
 
