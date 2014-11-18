@@ -16,6 +16,7 @@
 
 package android.service.carriermessaging;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.app.Service;
@@ -93,7 +94,7 @@ public abstract class CarrierMessagingService extends Service {
      * @return True to keep an inbound SMS message and delivered to SMS apps. False to
      * drop the message.
      */
-    public boolean onFilterSms(MessagePdu pdu, String format, int destPort) {
+    public boolean onFilterSms(@NonNull MessagePdu pdu, @NonNull String format, int destPort) {
         // optional
         return true;
     }
@@ -105,9 +106,11 @@ public abstract class CarrierMessagingService extends Service {
      * @param format the format of the response PDU, typically "3gpp" or "3gpp2"
      * @param destAddress phone number of the recipient of the message
      *
-     * @return a {@link SendSmsResponse}.
+     * @return a possibly {code null} {@link SendSmsResponse}. Upon returning {@code null}, the SMS
+     *         is sent using the carrier network.
      */
-    public SendSmsResponse onSendTextSms(String text, String format, String destAddress) {
+    public @Nullable SendSmsResponse onSendTextSms(
+            @NonNull String text, @NonNull String format, @NonNull String destAddress) {
         // optional
         return null;
     }
@@ -120,10 +123,11 @@ public abstract class CarrierMessagingService extends Service {
      * @param destAddress phone number of the recipient of the message
      * @param destPort the destination port
      *
-     * @return a {@link SendSmsResponse}
+     * @return a possibly {code null} {@link SendSmsResponse}. Upon returning {@code null}, the SMS
+     *         is sent using the carrier network.
      */
-    public SendSmsResponse onSendDataSms(byte[] data, String format, String destAddress,
-            int destPort) {
+    public @Nullable SendSmsResponse onSendDataSms(@NonNull byte[] data, @NonNull String format,
+            @NonNull String destAddress, int destPort) {
         // optional
         return null;
     }
@@ -135,10 +139,11 @@ public abstract class CarrierMessagingService extends Service {
      * @param format format the format of the response PDU, typically "3gpp" or "3gpp2"
      * @param destAddress phone number of the recipient of the message
      *
-     * @return a {@link List} of {@link SendSmsResponse}, one for each message part.
+     * @return a possibly {code null} {@link List} of {@link SendSmsResponse}, one for each message
+     *         part. Upon returning {@code null}, the SMS is sent using the carrier network.
      */
-    public List<SendSmsResponse> onSendMultipartTextSms(List<String> parts, String format,
-            String destAddress) {
+    public @Nullable List<SendSmsResponse> onSendMultipartTextSms(@NonNull List<String> parts,
+            @NonNull String format, @NonNull String destAddress) {
         // optional
         return null;
     }
@@ -150,9 +155,10 @@ public abstract class CarrierMessagingService extends Service {
      * @param locationUrl the optional URL to send this MMS PDU. If this is not specified,
      *                    the PDU should be sent to the default MMSC URL.
      *
-     * @return a {@link SendMmsResult}.
+     * @return a possibly {@code null} {@link SendMmsResult}. Upon returning {@code null}, the
+     *         MMS is sent using the carrier network.
      */
-    public SendMmsResult onSendMms(Uri pduUri, @Nullable String locationUrl) {
+    public @Nullable SendMmsResult onSendMms(@NonNull Uri pduUri, @Nullable String locationUrl) {
         // optional
         return null;
     }
@@ -165,13 +171,13 @@ public abstract class CarrierMessagingService extends Service {
      *
      * @return a {@link SendMmsResult}.
      */
-    public int onDownloadMms(Uri contentUri, String locationUrl) {
+    public int onDownloadMms(@NonNull Uri contentUri, @NonNull String locationUrl) {
         // optional
         return DOWNLOAD_STATUS_RETRY_ON_CARRIER_NETWORK;
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
+    public @Nullable IBinder onBind(@NonNull Intent intent) {
         if (!SERVICE_INTERFACE.equals(intent.getAction())) {
             return null;
         }
@@ -185,12 +191,24 @@ public abstract class CarrierMessagingService extends Service {
         private int mResult;
         private byte[] mSendConfPdu;
 
-        public SendMmsResult(int result, byte[] sendConfPdu) {
+        /**
+         * Constructs a SendMmsResult with the MMS send result, and the SenConf PDU.
+         *
+         * @param result the result which is one of {@link #SEND_STATUS_OK},
+         *               {@link #SEND_STATUS_RETRY_ON_CARRIER_NETWORK}, and
+         *               {@link #SEND_STATUS_ERROR}
+         * @param sendConfPdu a possibly {code null} SendConf PDU, which confirms that the message
+         *        was sent. sendConfPdu is ignored if the {@code result} is not
+         *        {@link #SEND_STATUS_OK}
+         */
+        public SendMmsResult(int result, @Nullable byte[] sendConfPdu) {
             mResult = result;
             mSendConfPdu = sendConfPdu;
         }
 
         /**
+         * Returns the result of sending the MMS.
+         *
          * @return the result which is one of {@link #SEND_STATUS_OK},
          *         {@link #SEND_STATUS_RETRY_ON_CARRIER_NETWORK}, and {@link #SEND_STATUS_ERROR}
          */
@@ -199,9 +217,11 @@ public abstract class CarrierMessagingService extends Service {
         }
 
         /**
-         * @return the SendConf PDU, which confirms that the message was sent.
+         * Returns the SendConf PDU, which confirms that the message was sent.
+         *
+         * @return the SendConf PDU
          */
-        public byte[] getSendConfPdu() {
+        public @Nullable byte[] getSendConfPdu() {
             return mSendConfPdu;
         }
     }
@@ -219,12 +239,15 @@ public abstract class CarrierMessagingService extends Service {
         private int mErrorCode;
 
         /**
+         * Constructs a SendSmsResponse for the message reference, the ack PDU, and error code for
+         * the just-sent SMS.
+         *
          * @param messageRef message reference of the just-sent SMS
          * @param ackPdu ackPdu for the just-sent SMS
          * @param errorCode error code. See 3GPP 27.005, 3.2.5 for GSM/UMTS,
          *     3GPP2 N.S0005 (IS-41C) Table 171 for CDMA, -1 if unknown or not applicable.
          */
-        public SendSmsResponse(int messageRef, byte[] ackPdu, int errorCode) {
+        public SendSmsResponse(int messageRef, @NonNull byte[] ackPdu, int errorCode) {
             mMessageRef = messageRef;
             mAckPdu = ackPdu;
             mErrorCode = errorCode;
@@ -244,7 +267,7 @@ public abstract class CarrierMessagingService extends Service {
          *
          * @return the ackPdu
          */
-        public byte[] getAckPdu() {
+        public @NonNull byte[] getAckPdu() {
             return mAckPdu;
         }
 
