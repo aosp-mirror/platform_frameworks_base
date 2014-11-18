@@ -938,6 +938,25 @@ include the action bar on devices running Android 2.1 or higher."
   </li>
   <!-- End: Building for TV -->
 
+  <!-- Start: Building for Auto -->
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/auto/index.html">
+      <span class="small">Building Apps for</span><br/>
+              Auto
+      </a>
+    </div>
+    <ul>
+      <li>
+        <a href="<?cs var:toroot ?>training/auto/start/index.html"
+             description="How to start building or extending apps that work
+             with Auto devices.">
+             Getting Started with Auto</a>
+      </li>
+    </ul>
+  </li>
+  <!-- End: Building for Auto -->
+
 
   <li class="nav-section">
     <div class="nav-section-header">
