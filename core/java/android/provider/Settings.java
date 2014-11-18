@@ -984,8 +984,8 @@ public final class Settings {
      * InputDeviceIdentifier. This field is used by some activities to jump straight into the
      * settings for the given device.
      * <p>
-     * Example: The {@link #INPUT_METHOD_SETTINGS} intent opens the keyboard layout dialog for the
-     * given device.
+     * Example: The {@link #ACTION_INPUT_METHOD_SETTINGS} intent opens the keyboard layout
+     * dialog for the given device.
      * @hide
      */
     public static final String EXTRA_INPUT_DEVICE_IDENTIFIER = "input_device_identifier";
@@ -4816,7 +4816,7 @@ public final class Settings {
          * The timeout in milliseconds before the device fully goes to sleep after
          * a period of inactivity.  This value sets an upper bound on how long the device
          * will stay awake or dreaming without user activity.  It should generally
-         * be longer than {@link #SCREEN_OFF_TIMEOUT} as otherwise the device
+         * be longer than {@link Settings.System#SCREEN_OFF_TIMEOUT} as otherwise the device
          * will sleep before it ever has a chance to dream.
          * <p>
          * Use -1 to disable this timeout.
