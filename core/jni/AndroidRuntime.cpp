@@ -356,6 +356,15 @@ static int hasDir(const char* dir)
     return 0;
 }
 
+static bool hasFile(const char* file) {
+    struct stat s;
+    int res = stat(file, &s);
+    if (res == 0) {
+        return S_ISREG(s.st_mode);
+    }
+    return false;
+}
+
 /*
  * Read the persistent locale.
  */
@@ -772,6 +781,13 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         addOption("--image-classes-zip=/system/framework/framework.jar");
         addOption("-Ximage-compiler-option");
         addOption("--image-classes=preloaded-classes");
+
+        // If there is a compiled-classes file, push it.
+        if (hasFile("/system/etc/compiled-classes")) {
+            addOption("-Ximage-compiler-option");
+            addOption("--compiled-classes=/system/etc/compiled-classes");
+        }
+
         property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
         parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
 
