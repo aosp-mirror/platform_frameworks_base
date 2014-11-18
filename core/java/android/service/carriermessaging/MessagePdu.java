@@ -16,6 +16,7 @@
 
 package android.service.carriermessaging;
 
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,9 +32,14 @@ public final class MessagePdu implements Parcelable {
     private final List<byte[]> mPduList;
 
     /**
+     * Constructs a MessagePdu with the list of message PDUs.
+     *
      * @param pduList the list of message PDUs
      */
-    public MessagePdu(List<byte[]> pduList) {
+    public MessagePdu(@NonNull List<byte[]> pduList) {
+        if (pduList == null || pduList.contains(null)) {
+            throw new IllegalArgumentException("pduList must not be null or contain nulls");
+        }
         mPduList = pduList;
     }
 
@@ -42,7 +48,7 @@ public final class MessagePdu implements Parcelable {
      *
      * @return the list of PDUs
      */
-    public List<byte[]> getPdus() {
+    public @NonNull List<byte[]> getPdus() {
         return mPduList;
     }
 
@@ -51,9 +57,6 @@ public final class MessagePdu implements Parcelable {
         return 0;
     }
 
-    /**
-     * Writes the PDU into a {@link Parcel}.
-     */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (mPduList == null) {
