@@ -71,6 +71,8 @@ void CanvasContext::destroy() {
 }
 
 void CanvasContext::setSurface(ANativeWindow* window) {
+    ATRACE_CALL();
+
     mNativeWindow = window;
 
     if (mEglSurface != EGL_NO_SURFACE) {

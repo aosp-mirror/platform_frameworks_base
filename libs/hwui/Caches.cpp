@@ -67,6 +67,8 @@ Caches::Caches(): Singleton<Caches>(),
 bool Caches::init() {
     if (mInitialized) return false;
 
+    ATRACE_NAME("Caches::init");
+
     glGenBuffers(1, &meshBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, meshBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(gMeshVertices), gMeshVertices, GL_STATIC_DRAW);
