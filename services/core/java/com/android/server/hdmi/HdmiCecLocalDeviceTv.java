@@ -765,7 +765,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     boolean isSystemAudioActivated() {
-        if (getAvrDeviceInfo() == null) {
+        if (!hasSystemAudioDevice()) {
             return false;
         }
         synchronized (mLock) {
