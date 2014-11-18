@@ -5040,13 +5040,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public boolean isUninstallBlocked(ComponentName who, String packageName) {
+        // This function should return true if and only if the package is blocked by
+        // setUninstallBlocked(). It should still return false for other cases of blocks, such as
+        // when the package is a system app, or when it is an active device admin.
         final int userId = UserHandle.getCallingUserId();
 
         synchronized (this) {
-            if (who == null) {
-                throw new NullPointerException("ComponentName is null");
+            if (who != null) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             }
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             long id = Binder.clearCallingIdentity();
             try {
