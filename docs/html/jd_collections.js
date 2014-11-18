@@ -794,6 +794,14 @@ var RESOURCE_COLLECTIONS = {
       "shareables/distribute/play_dev_guide_secrets_en.pdf"
     ]
   },
+  "design/auto/auto_ui_guidelines": {
+    "title": "",
+    "resources": [
+      "shareables/auto/AndroidAuto-media-apps.pdf",
+      "shareables/auto/AndroidAuto-messaging-apps.pdf",
+      "shareables/auto/AndroidAuto-custom-colors.pdf"
+    ]
+  },
   "distribute/stories/games": {
     "title": "",
     "resources": [
