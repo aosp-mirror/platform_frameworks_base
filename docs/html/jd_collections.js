@@ -68,8 +68,8 @@ var RESOURCE_COLLECTIONS = {
       "distribute/essentials/quality/tablets.html",
       "distribute/essentials/quality/tv.html",
       "distribute/essentials/quality/wear.html",
-      "https://developers.google.com/edu/guidelines",
-      "distribute/essentials/optimizing-your-app.html"
+      "distribute/essentials/quality/auto.html",
+      "https://developers.google.com/edu/guidelines"
     ]
   },
   "distribute/users": {
@@ -346,6 +346,13 @@ var RESOURCE_COLLECTIONS = {
       "training/wearables/notifications/index.html",
       "training/wearables/apps/index.html",
       "training/wearables/notifications/voice-input.html"
+    ]
+  },
+    "distribute/essentials/autoqualityguidelines/visualdesign": {
+    "title": "",
+    "resources": [
+      "training/auto/messaging/index.html",
+      "training/auto/start/index.html"
     ]
   },
   "distribute/essentials/core/performance": {
