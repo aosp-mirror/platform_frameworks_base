@@ -178,7 +178,7 @@ public class VolumeUI extends SystemUI {
 
         @Override
         public void dismiss() throws RemoteException {
-            mPanel.postDismiss(0);
+            dismissNow();
         }
 
         @Override
@@ -189,6 +189,11 @@ public class VolumeUI extends SystemUI {
         @Override
         public void dispatchDemoCommand(String command, Bundle args) {
             mPanel.dispatchDemoCommand(command, args);
+        }
+
+        @Override
+        public void dismissNow() {
+            mPanel.postDismiss(0);
         }
     }
 
