@@ -1,5 +1,7 @@
 package com.android.systemui.statusbar.policy;
 
+import static org.mockito.Mockito.mock;
+
 import android.net.ConnectivityManager;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -15,7 +17,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Turn off mobile network support.
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm);
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
+                mock(AccessPointController.class), mock(MobileDataController.class));
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, 0, 0);
