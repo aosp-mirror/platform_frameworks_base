@@ -2659,6 +2659,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     @Override
     public void setInteracting(int barWindow, boolean interacting) {
+        final boolean changing = ((mInteractingWindows & barWindow) != 0) != interacting;
         mInteractingWindows = interacting
                 ? (mInteractingWindows | barWindow)
                 : (mInteractingWindows & ~barWindow);
@@ -2666,6 +2667,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             suspendAutohide();
         } else {
             resumeSuspendedAutohide();
+        }
+        // manually dismiss the volume panel when interacting with the nav bar
+        if (changing && interacting && barWindow == StatusBarManager.WINDOW_NAVIGATION_BAR) {
+            if (mVolumeComponent != null) {
+                mVolumeComponent.dismissNow();
+            }
         }
         checkBarModes();
     }
