@@ -959,6 +959,11 @@ include the action bar on devices running Android 2.1 or higher."
              description="How to extend audio apps to play content on Auto devices.">
              Playing Audio for Auto</a>
       </li>
+      <li>
+        <a href="<?cs var:toroot ?>training/auto/messaging/index.html"
+             description="How to extend text messaging apps to work with Auto devices.">
+             Messaging for Auto</a>
+      </li>
     </ul>
   </li>
   <!-- End: Building for Auto -->
