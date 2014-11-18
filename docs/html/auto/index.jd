@@ -223,34 +223,25 @@ page.type=about
           </div>
           <div class="landing-body">
           <div class="cols">
-
             <div class="col-4">
-              <img src="/auto/images/logos/apps/kik.png"
-                   width="120" height="120" class="img-logo" style="margin-top:20px"/>
-            </div>
-            <div class="col-4">
-              <img src="/auto/images/logos/apps/textplus.png"
-                   width="120" height="24" class="img-logo" style="margin-top:70px" />
-            </div>
-            <div class="col-4">
-              <img src="/auto/images/logos/apps/iheartradio.png"
+              <img src="{@docRoot}auto/images/logos/apps/iheartradio.png"
                    width="160" height="160" class="img-logo" />
             </div>
-            <div class="col-4">
-              <img src="/auto/images/logos/apps/spotify.png"
-                   width="160" height="160" class="img-logo" />
-            </div>
-          </div>
-          <div class="cols">
-
             <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/joyride.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
+              <img src="{@docRoot}auto/images/logos/apps/kik.png"
+                   width="120" height="120" class="img-logo" style="margin-top:30px" />
+            </div>
+            <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/mlb.png"
                    width="160" height="160" class="img-logo" />
             </div>
+          </div>
+
+          <div class="cols">
             <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/pandora.png"
                    width="160" height="160" class="img-logo" />
@@ -259,10 +250,20 @@ page.type=about
               <img src="{@docRoot}auto/images/logos/apps/pocketcasts.png"
                    width="160" height="160" class="img-logo" />
             </div>
-          </div>
-          <div class="cols">
             <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/songza.png"
+                   width="160" height="160" class="img-logo" />
+            </div>
+            <div class="col-4">
+              <img src="/auto/images/logos/apps/soundcloud.png"
+                   width="100" height="100" class="img-logo"
+                   style="margin-top:30px" />
+            </div>
+          </div>
+
+          <div class="cols">
+            <div class="col-4">
+              <img src="/auto/images/logos/apps/spotify.png"
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
@@ -270,14 +271,26 @@ page.type=about
                    width="160" height="160" class="img-logo" />
             </div>
             <div class="col-4">
+              <img src="/auto/images/logos/apps/TextMe.png"
+                   width="100" height="100" class="img-logo" style="margin-top:30px" />
+            </div>
+            <div class="col-4">
+              <img src="/auto/images/logos/apps/textplus.png"
+                   width="120" height="24" class="img-logo" style="margin-top:70px" />
+            </div>
+          </div>
+
+          <div class="cols">
+            <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/tunein.png"
-                   width="160" height="160" class="img-logo" />
+                   width="160" height="160" class="img-logo" style="margin-left:160px" />
             </div>
             <div class="col-4">
               <img src="{@docRoot}auto/images/logos/apps/umano.png"
-                   width="160" height="160" class="img-logo" />
+                   width="160" height="160" class="img-logo" style="margin-left:370px" />
             </div>
           </div>
+
           <div class="cols" style="margin-top:40px">
               <div class="col-4">
                 <img src="/auto/images/logos/apps/whatsapp.png"
@@ -292,6 +305,7 @@ page.type=about
                 user-friendly and highly safety-minded."</em></p>
               </div>
           </div>
+
           <div class="cols" style="margin-top:60px">
 
               <div class="col-4">
