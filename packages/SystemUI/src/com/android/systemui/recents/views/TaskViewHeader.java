@@ -235,7 +235,7 @@ public class TaskViewHeader extends FrameLayout {
                     .alpha(0f)
                     .setStartDelay(0)
                     .setInterpolator(mConfig.fastOutSlowInInterpolator)
-                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .setDuration(mConfig.taskViewExitToAppDuration)
                     .withLayer()
                     .start();
         }
@@ -249,7 +249,7 @@ public class TaskViewHeader extends FrameLayout {
                 .alpha(1f)
                 .setStartDelay(0)
                 .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                .setDuration(mConfig.taskBarEnterAnimDuration)
+                .setDuration(mConfig.taskViewEnterFromAppDuration)
                 .withLayer()
                 .start();
     }
