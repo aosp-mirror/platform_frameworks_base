@@ -19,9 +19,9 @@ page.image=/distribute/images/gp-auto-quality.png
       Core App Quality</a></li>
     <li><a href="{@docRoot}distribute/essentials/optimizing-your-app.html">
       Optimize Your App</a></li>
-    <li><a href="{@docRoot}/shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
       for Media Applications</a></li>
-    <li><a href="{@docRoot}/shareables/auto/AndroidAuto-messaging-apps.pdf">Android Auto UX Guidelines
+    <li><a href="{@docRoot}shareables/auto/AndroidAuto-messaging-apps.pdf">Android Auto UX Guidelines
       for Messaging Applications</a></li>
   </ol>
 </div>
@@ -310,7 +310,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
     <p style="margin-bottom:.5em;">
      App has no more than four primary actions plus one optional action overflow toggle (or five if
      no action overflow is used). For more information, see details on the media control card in the
-     <a href="{@docRoot}/shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
+     <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
       for Media Applications</a>.
     </p>
   </td>
@@ -324,7 +324,7 @@ data-sortorder="-timestamp" data-cardsizes="9x3" data-maxresults="6">
     <p style="margin-bottom:.5em;">
      App has no more than four optional secondary actions plus one action overflow toggle. For more
      information, see details on the media control card in the
-     <a href="{@docRoot}/shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
+     <a href="{@docRoot}shareables/auto/AndroidAuto-media-apps.pdf">Android Auto UX Guidelines
       for Media Applications</a>.
     </p>
   </td>
