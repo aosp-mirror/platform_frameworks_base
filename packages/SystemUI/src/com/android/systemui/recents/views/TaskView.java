@@ -24,7 +24,6 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewOutlineProvider;
-import android.view.ViewPropertyAnimator;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.FrameLayout;
 import com.android.systemui.R;
@@ -271,24 +270,25 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                 if (Constants.DebugFlags.App.EnableThumbnailAlphaOnFrontmost) {
                     // Animate the thumbnail alpha before the dim animation (to prevent updating the
                     // hardware layer)
-                    mThumbnailView.startEnterRecentsAnimation(mConfig.taskBarEnterAnimDelay,
+                    mThumbnailView.startEnterRecentsAnimation(mConfig.transitionEnterFromAppDelay,
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    animateDimToProgress(0, mConfig.taskBarEnterAnimDuration,
+                                    animateDimToProgress(0, mConfig.taskViewEnterFromAppDuration,
                                             ctx.postAnimationTrigger.decrementOnAnimationEnd());
                                 }
                             });
                 } else {
                     // Immediately start the dim animation
-                    animateDimToProgress(mConfig.taskBarEnterAnimDelay,
-                            mConfig.taskBarEnterAnimDuration,
+                    animateDimToProgress(mConfig.transitionEnterFromAppDelay,
+                            mConfig.taskViewEnterFromAppDuration,
                             ctx.postAnimationTrigger.decrementOnAnimationEnd());
                 }
                 ctx.postAnimationTrigger.increment();
 
                 // Animate the action button in
-                fadeInActionButton(true);
+                fadeInActionButton(mConfig.transitionEnterFromAppDelay,
+                        mConfig.taskViewEnterFromAppDuration);
             } else {
                 // Animate the task up if it was occluding the launch target
                 if (ctx.currentTaskOccludesLaunchTarget) {
@@ -296,7 +296,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     setAlpha(0f);
                     animate().alpha(1f)
                             .translationY(transform.translationY)
-                            .setStartDelay(mConfig.taskBarEnterAnimDelay)
+                            .setStartDelay(mConfig.transitionEnterFromAppDelay)
                             .setUpdateListener(null)
                             .setInterpolator(mConfig.fastOutSlowInInterpolator)
                             .setDuration(mConfig.taskViewEnterFromHomeDuration)
@@ -311,12 +311,12 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     ctx.postAnimationTrigger.increment();
                 }
             }
-            startDelay = mConfig.taskBarEnterAnimDelay;
+            startDelay = mConfig.transitionEnterFromAppDelay;
 
         } else if (mConfig.launchedFromHome) {
             // Animate the tasks up
             int frontIndex = (ctx.currentStackViewCount - ctx.currentStackViewIndex - 1);
-            int delay = mConfig.taskViewEnterFromHomeDelay +
+            int delay = mConfig.transitionEnterFromHomeDelay +
                     frontIndex * mConfig.taskViewEnterFromHomeStaggerDelay;
 
             setScaleX(transform.scale);
@@ -353,19 +353,17 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         }, (startDelay / 2));
     }
 
-    public void fadeInActionButton(boolean withDelay) {
+    public void fadeInActionButton(int delay, int duration) {
         // Hide the action button
         mActionButtonView.setAlpha(0f);
 
         // Animate the action button in
-        ViewPropertyAnimator animator = mActionButtonView.animate().alpha(1f)
-                .setDuration(mConfig.taskBarEnterAnimDuration)
+        mActionButtonView.animate().alpha(1f)
+                .setStartDelay(delay)
+                .setDuration(duration)
                 .setInterpolator(PhoneStatusBar.ALPHA_IN)
-                .withLayer();
-        if (withDelay) {
-            animator.setStartDelay(mConfig.taskBarEnterAnimDelay);
-        }
-        animator.start();
+                .withLayer()
+                .start();
     }
 
     /** Animates this task view as it leaves recents by pressing home. */
@@ -391,7 +389,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             // Animate the dim
             if (mDimAlpha > 0) {
                 ObjectAnimator anim = ObjectAnimator.ofInt(this, "dim", 0);
-                anim.setDuration(mConfig.taskBarExitAnimDuration);
+                anim.setDuration(mConfig.taskViewExitToAppDuration);
                 anim.setInterpolator(mConfig.fastOutLinearInInterpolator);
                 anim.start();
             }
@@ -406,7 +404,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             mActionButtonView.animate()
                     .alpha(0f)
                     .setStartDelay(0)
-                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .setDuration(mConfig.taskViewExitToAppDuration)
                     .setInterpolator(mConfig.fastOutLinearInInterpolator)
                     .withLayer()
                     .start();
@@ -421,7 +419,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     .setStartDelay(0)
                     .setUpdateListener(null)
                     .setInterpolator(mConfig.fastOutLinearInInterpolator)
-                    .setDuration(mConfig.taskBarExitAnimDuration)
+                    .setDuration(mConfig.taskViewExitToAppDuration)
                     .start();
             }
         }
