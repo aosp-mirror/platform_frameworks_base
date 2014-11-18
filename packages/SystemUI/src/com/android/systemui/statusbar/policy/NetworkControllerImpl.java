@@ -179,13 +179,16 @@ public class NetworkControllerImpl extends BroadcastReceiver
     public NetworkControllerImpl(Context context) {
         this(context, (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE),
                 (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE),
-                (WifiManager) context.getSystemService(Context.WIFI_SERVICE));
+                (WifiManager) context.getSystemService(Context.WIFI_SERVICE),
+                new AccessPointController(context), new MobileDataController(context));
         registerListeners();
     }
 
     @VisibleForTesting
     NetworkControllerImpl(Context context, ConnectivityManager connectivityManager,
-            TelephonyManager telephonyManager, WifiManager wifiManager) {
+            TelephonyManager telephonyManager, WifiManager wifiManager,
+            AccessPointController accessPointController,
+            MobileDataController mobileDataController) {
         mContext = context;
         final Resources res = context.getResources();
 
@@ -224,8 +227,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         updateAirplaneMode();
 
         mLastLocale = mContext.getResources().getConfiguration().locale;
-        mAccessPoints = new AccessPointController(mContext);
-        mMobileDataController = new MobileDataController(mContext);
+        mAccessPoints = accessPointController;
+        mMobileDataController = mobileDataController;
         mMobileDataController.setCallback(new MobileDataController.Callback() {
             @Override
             public void onMobileDataEnabled(boolean enabled) {
