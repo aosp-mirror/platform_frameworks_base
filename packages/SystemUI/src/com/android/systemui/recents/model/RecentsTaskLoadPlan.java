@@ -155,7 +155,8 @@ public class RecentsTaskLoadPlan {
     /**
      * Called to apply the actual loading based on the specified conditions.
      */
-    synchronized void executePlan(Options opts, RecentsTaskLoader loader) {
+    synchronized void executePlan(Options opts, RecentsTaskLoader loader,
+            TaskResourceLoadQueue loadQueue) {
         if (DEBUG) Log.d(TAG, "executePlan, # tasks: " + opts.numVisibleTasks +
                 ", # thumbnails: " + opts.numVisibleTaskThumbnails +
                 ", running task id: " + opts.runningTaskId);
@@ -195,8 +196,12 @@ public class RecentsTaskLoadPlan {
             if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
                 if (task.thumbnail == null) {
                     if (DEBUG) Log.d(TAG, "\tLoading thumbnail: " + taskKey);
-                    task.thumbnail = loader.getAndUpdateThumbnail(taskKey, mSystemServicesProxy,
-                            true);
+                    if (mConfig.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
+                        task.thumbnail = loader.getAndUpdateThumbnail(taskKey, mSystemServicesProxy,
+                                true);
+                    } else if (mConfig.svelteLevel == RecentsConfiguration.SVELTE_DISABLE_CACHE) {
+                        loadQueue.addTask(task);
+                    }
                 }
             }
 
