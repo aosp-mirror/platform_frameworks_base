@@ -94,6 +94,9 @@ class TaskResourceLoadQueue {
 
 /* Task resource loader */
 class TaskResourceLoader implements Runnable {
+    static String TAG = "TaskResourceLoader";
+    static boolean DEBUG = false;
+
     Context mContext;
     HandlerThread mLoadThread;
     Handler mLoadThreadHandler;
@@ -165,6 +168,7 @@ class TaskResourceLoader implements Runnable {
                     }
                 }
             } else {
+                RecentsConfiguration config = RecentsConfiguration.getInstance();
                 SystemServicesProxy ssp = mSystemServicesProxy;
                 // If we've stopped the loader, then fall thorugh to the above logic to wait on
                 // the load thread
@@ -185,6 +189,7 @@ class TaskResourceLoader implements Runnable {
                             ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent(),
                                     t.key.userId);
                             if (info != null) {
+                                if (DEBUG) Log.d(TAG, "Loading icon: " + t.key);
                                 cachedIcon = ssp.getActivityIcon(info, t.key.userId);
                             }
                         }
@@ -199,11 +204,19 @@ class TaskResourceLoader implements Runnable {
                     }
                     // Load the thumbnail if it is stale or we haven't cached one yet
                     if (cachedThumbnail == null) {
-                        cachedThumbnail = ssp.getTaskThumbnail(t.key.id);
+                        if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING) {
+                            if (DEBUG) Log.d(TAG, "Loading thumbnail: " + t.key);
+                            cachedThumbnail = ssp.getTaskThumbnail(t.key.id);
+                        }
                         if (cachedThumbnail == null) {
                             cachedThumbnail = mDefaultThumbnail;
                         }
-                        mThumbnailCache.put(t.key, cachedThumbnail);
+                        // When svelte, we trim the memory to just the visible thumbnails when
+                        // leaving, so don't thrash the cache as the user scrolls (just load them
+                        // from scratch each time)
+                        if (config.svelteLevel < RecentsConfiguration.SVELTE_LIMIT_CACHE) {
+                            mThumbnailCache.put(t.key, cachedThumbnail);
+                        }
                     }
                     if (!mCancelled) {
                         // Notify that the task data has changed
@@ -267,6 +280,7 @@ public class RecentsTaskLoader {
     int mMaxThumbnailCacheSize;
     int mMaxIconCacheSize;
     int mNumVisibleTasksLoaded;
+    int mNumVisibleThumbnailsLoaded;
 
     BitmapDrawable mDefaultApplicationIcon;
     Bitmap mDefaultThumbnail;
@@ -392,7 +406,8 @@ public class RecentsTaskLoader {
             return thumbnail;
         }
 
-        if (loadIfNotCached) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
+        if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING && loadIfNotCached) {
             // Load the thumbnail from the system
             thumbnail = ssp.getTaskThumbnail(taskKey.id);
             if (thumbnail != null) {
@@ -441,9 +456,10 @@ public class RecentsTaskLoader {
         if (opts == null) {
             throw new RuntimeException("Requires load options");
         }
-        plan.executePlan(opts, this);
+        plan.executePlan(opts, this, mLoadQueue);
         if (!opts.onlyLoadForCache) {
             mNumVisibleTasksLoaded = opts.numVisibleTasks;
+            mNumVisibleThumbnailsLoaded = opts.numVisibleTaskThumbnails;
 
             // Start the loader
             mLoader.start(context);
@@ -503,12 +519,19 @@ public class RecentsTaskLoader {
      * out of memory.
      */
     public void onTrimMemory(int level) {
+        RecentsConfiguration config = RecentsConfiguration.getInstance();
         switch (level) {
             case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
                 // Stop the loader immediately when the UI is no longer visible
                 stopLoader();
-                mThumbnailCache.trimToSize(Math.max(mNumVisibleTasksLoaded,
-                        mMaxThumbnailCacheSize / 2));
+                if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
+                    mThumbnailCache.trimToSize(Math.max(mNumVisibleTasksLoaded,
+                            mMaxThumbnailCacheSize / 2));
+                } else if (config.svelteLevel == RecentsConfiguration.SVELTE_LIMIT_CACHE) {
+                    mThumbnailCache.trimToSize(mNumVisibleThumbnailsLoaded);
+                } else if (config.svelteLevel >= RecentsConfiguration.SVELTE_DISABLE_CACHE) {
+                    mThumbnailCache.evictAll();
+                }
                 mApplicationIconCache.trimToSize(Math.max(mNumVisibleTasksLoaded,
                         mMaxIconCacheSize / 2));
                 break;
