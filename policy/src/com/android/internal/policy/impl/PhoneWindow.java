@@ -101,6 +101,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -2153,6 +2154,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     private final class DecorView extends FrameLayout implements RootViewSurfaceTaker {
+
         /* package */int mDefaultOpacity = PixelFormat.OPAQUE;
 
         /** The feature ID of the panel, or -1 if this is the application's DecorView */
@@ -2182,19 +2184,45 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // View added at runtime to draw under the navigation bar area
         private View mNavigationGuard;
 
-        private View mStatusColorView;
-        private View mNavigationColorView;
+        private final ColorViewState mStatusColorViewState = new ColorViewState(
+                SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
+                Gravity.TOP,
+                STATUS_BAR_BACKGROUND_TRANSITION_NAME,
+                com.android.internal.R.id.statusBarBackground,
+                FLAG_FULLSCREEN);
+        private final ColorViewState mNavigationColorViewState = new ColorViewState(
+                SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
+                Gravity.BOTTOM,
+                NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME,
+                com.android.internal.R.id.navigationBarBackground,
+                0 /* hideWindowFlag */);
+
+        private final Interpolator mShowInterpolator;
+        private final Interpolator mHideInterpolator;
+        private final int mBarEnterExitDuration;
+
         private final BackgroundFallback mBackgroundFallback = new BackgroundFallback();
 
         private int mLastTopInset = 0;
         private int mLastBottomInset = 0;
         private int mLastRightInset = 0;
+        private boolean mLastHasTopStableInset = false;
+        private boolean mLastHasBottomStableInset = false;
+        private int mLastWindowFlags = 0;
 
         private int mRootScrollY = 0;
 
         public DecorView(Context context, int featureId) {
             super(context);
             mFeatureId = featureId;
+
+            mShowInterpolator = AnimationUtils.loadInterpolator(context,
+                    android.R.interpolator.linear_out_slow_in);
+            mHideInterpolator = AnimationUtils.loadInterpolator(context,
+                    android.R.interpolator.fast_out_linear_in);
+
+            mBarEnterExitDuration = context.getResources().getInteger(
+                    R.integer.dock_enter_exit_duration);
         }
 
         public void setBackgroundFallback(int resId) {
@@ -2787,13 +2815,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         @Override
         public void onWindowSystemUiVisibilityChanged(int visible) {
-            updateColorViews(null /* insets */);
+            updateColorViews(null /* insets */, true /* animate */);
         }
 
         @Override
         public WindowInsets onApplyWindowInsets(WindowInsets insets) {
             mFrameOffsets.set(insets.getSystemWindowInsets());
-            insets = updateColorViews(insets);
+            insets = updateColorViews(insets, true /* animate */);
             insets = updateStatusGuard(insets);
             updateNavigationGuard(insets);
             if (getForeground() != null) {
@@ -2807,11 +2835,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return false;
         }
 
-        private WindowInsets updateColorViews(WindowInsets insets) {
+        private WindowInsets updateColorViews(WindowInsets insets, boolean animate) {
             WindowManager.LayoutParams attrs = getAttributes();
             int sysUiVisibility = attrs.systemUiVisibility | getWindowSystemUiVisibility();
 
             if (!mIsFloating && ActivityManager.isHighEndGfx()) {
+                boolean disallowAnimate = !isLaidOut();
+                disallowAnimate |= ((mLastWindowFlags ^ attrs.flags)
+                        & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
+                mLastWindowFlags = attrs.flags;
+
                 if (insets != null) {
                     mLastTopInset = Math.min(insets.getStableInsetTop(),
                             insets.getSystemWindowInsetTop());
@@ -2819,19 +2852,23 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                             insets.getSystemWindowInsetBottom());
                     mLastRightInset = Math.min(insets.getStableInsetRight(),
                             insets.getSystemWindowInsetRight());
+
+                    // Don't animate if the presence of stable insets has changed, because that
+                    // indicates that the window was either just added and received them for the
+                    // first time, or the window size or position has changed.
+                    boolean hasTopStableInset = insets.getStableInsetTop() != 0;
+                    disallowAnimate |= hasTopStableInset && !mLastHasTopStableInset;
+                    mLastHasTopStableInset = hasTopStableInset;
+
+                    boolean hasBottomStableInset = insets.getStableInsetBottom() != 0;
+                    disallowAnimate |= hasBottomStableInset && !mLastHasBottomStableInset;
+                    mLastHasBottomStableInset = hasBottomStableInset;
                 }
-                mStatusColorView = updateColorViewInt(mStatusColorView, sysUiVisibility,
-                        SYSTEM_UI_FLAG_FULLSCREEN, FLAG_TRANSLUCENT_STATUS,
-                        mStatusBarColor, mLastTopInset, Gravity.TOP,
-                        STATUS_BAR_BACKGROUND_TRANSITION_NAME,
-                        com.android.internal.R.id.statusBarBackground,
-                        (getAttributes().flags & FLAG_FULLSCREEN) != 0);
-                mNavigationColorView = updateColorViewInt(mNavigationColorView, sysUiVisibility,
-                        SYSTEM_UI_FLAG_HIDE_NAVIGATION, FLAG_TRANSLUCENT_NAVIGATION,
-                        mNavigationBarColor, mLastBottomInset, Gravity.BOTTOM,
-                        NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME,
-                        com.android.internal.R.id.navigationBarBackground,
-                        false /* hiddenByWindowFlag */);
+
+                updateColorViewInt(mStatusColorViewState, sysUiVisibility, mStatusBarColor,
+                        mLastTopInset, animate && !disallowAnimate);
+                updateColorViewInt(mNavigationColorViewState, sysUiVisibility, mNavigationBarColor,
+                        mLastBottomInset, animate && !disallowAnimate);
             }
 
             // When we expand the window with FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, we still need
@@ -2875,28 +2912,35 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return insets;
         }
 
-        private View updateColorViewInt(View view, int sysUiVis, int systemUiHideFlag,
-                int translucentFlag, int color, int height, int verticalGravity,
-                String transitionName, int id, boolean hiddenByWindowFlag) {
-            boolean show = height > 0 && (sysUiVis & systemUiHideFlag) == 0
-                    && !hiddenByWindowFlag
-                    && (getAttributes().flags & translucentFlag) == 0
+        private void updateColorViewInt(final ColorViewState state, int sysUiVis, int color,
+                int height, boolean animate) {
+            boolean show = height > 0 && (sysUiVis & state.systemUiHideFlag) == 0
+                    && (getAttributes().flags & state.hideWindowFlag) == 0
+                    && (getAttributes().flags & state.translucentFlag) == 0
                     && (color & Color.BLACK) != 0
                     && (getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
 
+            boolean visibilityChanged = false;
+            View view = state.view;
+
             if (view == null) {
                 if (show) {
-                    view = new View(mContext);
+                    state.view = view = new View(mContext);
                     view.setBackgroundColor(color);
-                    view.setTransitionName(transitionName);
-                    view.setId(id);
+                    view.setTransitionName(state.transitionName);
+                    view.setId(state.id);
+                    visibilityChanged = true;
+                    view.setVisibility(INVISIBLE);
+                    state.targetVisibility = VISIBLE;
+
                     addView(view, new LayoutParams(LayoutParams.MATCH_PARENT, height,
-                            Gravity.START | verticalGravity));
+                            Gravity.START | state.verticalGravity));
                     updateColorViewTranslations();
                 }
             } else {
                 int vis = show ? VISIBLE : INVISIBLE;
-                view.setVisibility(vis);
+                visibilityChanged = state.targetVisibility != vis;
+                state.targetVisibility = vis;
                 if (show) {
                     LayoutParams lp = (LayoutParams) view.getLayoutParams();
                     if (lp.height != height) {
@@ -2906,18 +2950,43 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     view.setBackgroundColor(color);
                 }
             }
-            return view;
+            if (visibilityChanged) {
+                view.animate().cancel();
+                if (animate) {
+                    if (show) {
+                        if (view.getVisibility() != VISIBLE) {
+                            view.setVisibility(VISIBLE);
+                            view.setAlpha(0.0f);
+                        }
+                        view.animate().alpha(1.0f).setInterpolator(mShowInterpolator).
+                                setDuration(mBarEnterExitDuration);
+                    } else {
+                        view.animate().alpha(0.0f).setInterpolator(mHideInterpolator)
+                                .setDuration(mBarEnterExitDuration)
+                                .withEndAction(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        state.view.setAlpha(1.0f);
+                                        state.view.setVisibility(INVISIBLE);
+                                    }
+                                });
+                    }
+                } else {
+                    view.setAlpha(1.0f);
+                    view.setVisibility(show ? VISIBLE : INVISIBLE);
+                }
+            }
         }
 
         private void updateColorViewTranslations() {
             // Put the color views back in place when they get moved off the screen
             // due to the the ViewRootImpl panning.
             int rootScrollY = mRootScrollY;
-            if (mStatusColorView != null) {
-                mStatusColorView.setTranslationY(rootScrollY > 0 ? rootScrollY : 0);
+            if (mStatusColorViewState.view != null) {
+                mStatusColorViewState.view.setTranslationY(rootScrollY > 0 ? rootScrollY : 0);
             }
-            if (mNavigationColorView != null) {
-                mNavigationColorView.setTranslationY(rootScrollY < 0 ? rootScrollY : 0);
+            if (mNavigationColorViewState.view != null) {
+                mNavigationColorViewState.view.setTranslationY(rootScrollY < 0 ? rootScrollY : 0);
             }
         }
 
@@ -2948,7 +3017,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                                 mStatusGuard = new View(mContext);
                                 mStatusGuard.setBackgroundColor(mContext.getResources()
                                         .getColor(R.color.input_method_navigation_guard));
-                                addView(mStatusGuard, indexOfChild(mStatusColorView),
+                                addView(mStatusGuard, indexOfChild(mStatusColorViewState.view),
                                         new LayoutParams(LayoutParams.MATCH_PARENT,
                                                 mlp.topMargin, Gravity.START | Gravity.TOP));
                             } else {
@@ -3008,9 +3077,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mNavigationGuard = new View(mContext);
                     mNavigationGuard.setBackgroundColor(mContext.getResources()
                             .getColor(R.color.input_method_navigation_guard));
-                    addView(mNavigationGuard, indexOfChild(mNavigationColorView), new LayoutParams(
-                            LayoutParams.MATCH_PARENT, insets.getSystemWindowInsetBottom(),
-                            Gravity.START | Gravity.BOTTOM));
+                    addView(mNavigationGuard, indexOfChild(mNavigationColorViewState.view),
+                            new LayoutParams(LayoutParams.MATCH_PARENT,
+                                    insets.getSystemWindowInsetBottom(),
+                                    Gravity.START | Gravity.BOTTOM));
                 } else {
                     LayoutParams lp = (LayoutParams) mNavigationGuard.getLayoutParams();
                     lp.height = insets.getSystemWindowInsetBottom();
@@ -3912,7 +3982,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     protected void dispatchWindowAttributesChanged(WindowManager.LayoutParams attrs) {
         super.dispatchWindowAttributesChanged(attrs);
         if (mDecor != null) {
-            mDecor.updateColorViews(null /* insets */);
+            mDecor.updateColorViews(null /* insets */, true /* animate */);
         }
     }
 
@@ -4639,6 +4709,29 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
+    private static class ColorViewState {
+        View view = null;
+        int targetVisibility = View.INVISIBLE;
+
+        final int id;
+        final int systemUiHideFlag;
+        final int translucentFlag;
+        final int verticalGravity;
+        final String transitionName;
+        final int hideWindowFlag;
+
+        ColorViewState(int systemUiHideFlag,
+                int translucentFlag, int verticalGravity,
+                String transitionName, int id, int hideWindowFlag) {
+            this.id = id;
+            this.systemUiHideFlag = systemUiHideFlag;
+            this.translucentFlag = translucentFlag;
+            this.verticalGravity = verticalGravity;
+            this.transitionName = transitionName;
+            this.hideWindowFlag = hideWindowFlag;
+        }
+    }
+
     void sendCloseSystemWindows() {
         PhoneWindowManager.sendCloseSystemWindows(getContext(), null);
     }
@@ -4657,7 +4750,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mStatusBarColor = color;
         mForcedStatusBarColor = true;
         if (mDecor != null) {
-            mDecor.updateColorViews(null);
+            mDecor.updateColorViews(null, false /* animate */);
         }
     }
 
@@ -4671,7 +4764,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mNavigationBarColor = color;
         mForcedNavigationBarColor = true;
         if (mDecor != null) {
-            mDecor.updateColorViews(null);
+            mDecor.updateColorViews(null, false /* animate */);
         }
     }
 }
