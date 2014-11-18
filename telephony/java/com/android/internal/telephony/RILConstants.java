@@ -57,7 +57,17 @@ public interface RILConstants {
                                                  retries needed */
     int MISSING_RESOURCE = 16;                /* no logical channel available */
     int NO_SUCH_ELEMENT = 17;                 /* application not found on SIM */
+    int DIAL_MODIFIED_TO_USSD = 18;           /* DIAL request modified to USSD */
+    int DIAL_MODIFIED_TO_SS = 19;             /* DIAL request modified to SS */
+    int DIAL_MODIFIED_TO_DIAL = 20;           /* DIAL request modified to DIAL with different data*/
+    int USSD_MODIFIED_TO_DIAL = 21;           /* USSD request modified to DIAL */
+    int USSD_MODIFIED_TO_SS = 22;             /* USSD request modified to SS */
+    int USSD_MODIFIED_TO_USSD = 23;           /* USSD request modified to different USSD request */
+    int SS_MODIFIED_TO_DIAL = 24;             /* SS request modified to DIAL */
+    int SS_MODIFIED_TO_USSD = 25;             /* SS request modified to USSD */
     int SUBSCRIPTION_NOT_SUPPORTED = 26;      /* Subscription not supported */
+    int SS_MODIFIED_TO_SS = 27;               /* SS request modified to different SS request */
+
 
     /* NETWORK_MODE_* See ril.h RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE */
     int NETWORK_MODE_WCDMA_PREF     = 0; /* GSM/WCDMA (WCDMA preferred) */
@@ -339,4 +349,6 @@ cat include/telephony/ril.h | \
     int RIL_UNSOL_HARDWARE_CONFIG_CHANGED = 1040;
     int RIL_UNSOL_DC_RT_INFO_CHANGED = 1041;
     int RIL_UNSOL_RADIO_CAPABILITY = 1042;
+    int RIL_UNSOL_ON_SS = 1043;
+    int RIL_UNSOL_STK_CC_ALPHA_NOTIFY = 1044;
 }
