@@ -6601,6 +6601,15 @@ public final class Settings {
         public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
 
         /**
+         * Whether user can enable/disable LTE as a preferred network. A carrier might control
+         * this via gservices, OMA-DM, carrier app, etc.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String LTE_SERVICE_FORCED = "lte_service_forced";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
