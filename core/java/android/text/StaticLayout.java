@@ -383,7 +383,6 @@ public class StaticLayout extends Layout {
                                 okBottom = fitBottom;
                         }
                     } else {
-                        final boolean moreChars;
                         int endPos;
                         int above, below, top, bottom;
                         float currentTextWidth;
@@ -395,7 +394,6 @@ public class StaticLayout extends Layout {
                             top = okTop;
                             bottom = okBottom;
                             currentTextWidth = okWidth;
-                            moreChars = (j + 1 < spanEnd);
                         } else if (fit != here) {
                             endPos = fit;
                             above = fitAscent;
@@ -403,7 +401,6 @@ public class StaticLayout extends Layout {
                             top = fitTop;
                             bottom = fitBottom;
                             currentTextWidth = fitWidth;
-                            moreChars = (j + 1 < spanEnd);
                         } else {
                             // must make progress, so take next character
                             endPos = here + 1;
@@ -417,7 +414,6 @@ public class StaticLayout extends Layout {
                             top = fmTop;
                             bottom = fmBottom;
                             currentTextWidth = widths[here - paraStart];
-                            moreChars = (endPos < spanEnd);
                         }
 
                         v = out(source, here, endPos,
@@ -425,7 +421,7 @@ public class StaticLayout extends Layout {
                                 v, spacingmult, spacingadd, chooseHt,chooseHtv, fm, hasTabOrEmoji,
                                 needMultiply, chdirs, dir, easy, bufEnd, includepad, trackpad,
                                 chs, widths, paraStart, ellipsize, ellipsizedWidth,
-                                currentTextWidth, paint, moreChars);
+                                currentTextWidth, paint, true);
 
                         here = endPos;
                         j = here - 1; // restart j-span loop from here, compensating for the j++
