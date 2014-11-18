@@ -3669,6 +3669,45 @@ public abstract class BatteryStats implements Parcelable {
         pw.print(suffix);
     }
 
+    private static boolean dumpTimeEstimate(PrintWriter pw, String label, long[] steps,
+            int count, long modesOfInterest, long modeValues) {
+        if (count <= 0) {
+            return false;
+        }
+        long total = 0;
+        int numOfInterest = 0;
+        for (int i=0; i<count; i++) {
+            long initMode = (steps[i] & STEP_LEVEL_INITIAL_MODE_MASK)
+                    >> STEP_LEVEL_INITIAL_MODE_SHIFT;
+            long modMode = (steps[i] & STEP_LEVEL_MODIFIED_MODE_MASK)
+                    >> STEP_LEVEL_MODIFIED_MODE_SHIFT;
+            // If the modes of interest didn't change during this step period...
+            if ((modMode&modesOfInterest) == 0) {
+                // And the mode values during this period match those we are measuring...
+                if ((initMode&modesOfInterest) == modeValues) {
+                    // Then this can be used to estimate the total time!
+                    numOfInterest++;
+                    total += steps[i] & STEP_LEVEL_TIME_MASK;
+                }
+            }
+        }
+        if (numOfInterest <= 0) {
+            return false;
+        }
+
+        // The estimated time is the average time we spend in each level, multipled
+        // by 100 -- the total number of battery levels
+        long estimatedTime = (total / numOfInterest) * 100;
+
+        pw.print(label);
+        StringBuilder sb = new StringBuilder(64);
+        formatTimeMs(sb, estimatedTime);
+        pw.print(sb);
+        pw.println();
+
+        return true;
+    }
+
     private static boolean dumpDurationSteps(PrintWriter pw, String header, long[] steps,
             int count, boolean checkin) {
         if (count <= 0) {
@@ -3923,6 +3962,38 @@ public abstract class BatteryStats implements Parcelable {
                     TimeUtils.formatDuration(timeRemaining / 1000, pw);
                     pw.println();
                 }
+                dumpTimeEstimate(pw, "  Estimated screen off time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_OFF-1));
+                dumpTimeEstimate(pw, "  Estimated screen off power save time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_OFF-1)|STEP_LEVEL_MODE_POWER_SAVE);
+                dumpTimeEstimate(pw, "  Estimated screen on time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_ON-1));
+                dumpTimeEstimate(pw, "  Estimated screen on power save time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_ON-1)|STEP_LEVEL_MODE_POWER_SAVE);
+                dumpTimeEstimate(pw, "  Estimated screen doze time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_DOZE-1));
+                dumpTimeEstimate(pw, "  Estimated screen doze power save time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_DOZE-1)|STEP_LEVEL_MODE_POWER_SAVE);
+                dumpTimeEstimate(pw, "  Estimated screen doze suspend time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_DOZE_SUSPEND-1));
+                dumpTimeEstimate(pw, "  Estimated screen doze suspend power save time: ",
+                        getDischargeStepDurationsArray(), getNumDischargeStepDurations(),
+                        STEP_LEVEL_MODE_SCREEN_STATE|STEP_LEVEL_MODE_POWER_SAVE,
+                        (Display.STATE_DOZE_SUSPEND-1)|STEP_LEVEL_MODE_POWER_SAVE);
                 pw.println();
             }
             if (dumpDurationSteps(pw, "Charge step durations:", getChargeStepDurationsArray(),
