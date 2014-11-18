@@ -1827,8 +1827,8 @@ public class AudioService extends IAudioService.Stub {
                 if (!isStreamAffectedByRingerMode(streamType) ||
                     ringerMode == AudioManager.RINGER_MODE_NORMAL) {
                     // ring and notifications volume should never be 0 when not silenced
-                    // on voice capable devices
-                    if (isPlatformVoice() &&
+                    // on voice capable devices or devices that support vibration
+                    if ((isPlatformVoice() || mHasVibrator) &&
                             mStreamVolumeAlias[streamType] == AudioSystem.STREAM_RING) {
                         synchronized (VolumeStreamState.class) {
                             Set set = mStreamStates[streamType].mIndex.entrySet();
