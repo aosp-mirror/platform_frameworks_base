@@ -82,6 +82,8 @@ EglManager::EglManager(RenderThread& thread)
 void EglManager::initialize() {
     if (hasEglContext()) return;
 
+    ATRACE_NAME("Creating EGLContext");
+
     mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     LOG_ALWAYS_FATAL_IF(mEglDisplay == EGL_NO_DISPLAY,
             "Failed to get EGL_DEFAULT_DISPLAY! err=%s", egl_error_str());
