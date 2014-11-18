@@ -431,8 +431,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         // Update if we are getting a configuration change
         if (savedInstanceState != null) {
             // Update RecentsConfiguration
-            mConfig = RecentsConfiguration.reinitialize(this,
-                    RecentsTaskLoader.getInstance().getSystemServicesProxy());
             mConfig.updateOnConfigurationChange();
             // Trigger the enter animation
             onEnterAnimationTriggered();

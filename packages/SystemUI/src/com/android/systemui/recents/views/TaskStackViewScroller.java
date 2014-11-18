@@ -48,6 +48,11 @@ public class TaskStackViewScroller {
         setStackScroll(getStackScroll());
     }
 
+    /** Resets the task scroller. */
+    void reset() {
+        mStackScrollP = 0f;
+    }
+
     /** Sets the callbacks */
     void setCallbacks(TaskStackViewScrollerCallbacks cb) {
         mCb = cb;
@@ -71,9 +76,14 @@ public class TaskStackViewScroller {
         mStackScrollP = s;
     }
 
-    /** Sets the current stack scroll to the initial state when you first enter recents */
-    public void setStackScrollToInitialState() {
+    /**
+     * Sets the current stack scroll to the initial state when you first enter recents.
+     * @return whether the stack progress changed.
+     */
+    public boolean setStackScrollToInitialState() {
+        float prevStackScrollP = mStackScrollP;
         setStackScroll(getBoundedStackScroll(mLayoutAlgorithm.mInitialScrollP));
+        return Float.compare(prevStackScrollP, mStackScrollP) != 0;
     }
 
     /** Bounds the current scroll if necessary */
