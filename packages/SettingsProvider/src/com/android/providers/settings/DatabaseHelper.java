@@ -2269,6 +2269,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.System.POINTER_SPEED,
                     R.integer.def_pointer_speed);
+
+            loadBooleanSetting(stmt, Settings.System.STATUS_BAR_SHOW_BATTERY_PERCENT,
+                    R.bool.def_status_bar_show_battery_percent);
         } finally {
             if (stmt != null) stmt.close();
         }

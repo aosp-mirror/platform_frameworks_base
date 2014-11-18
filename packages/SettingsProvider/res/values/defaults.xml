@@ -209,4 +209,7 @@
     <!-- Volume adjust sound -->
     <integer name="volume_key_adjust_sound">1</integer>
 
+    <!-- Status bar show battery percent -->
+    <bool name="def_status_bar_show_battery_percent">false</bool>
+
 </resources>

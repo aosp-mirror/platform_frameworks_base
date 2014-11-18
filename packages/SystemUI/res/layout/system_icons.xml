@@ -38,4 +38,13 @@
         android:layout_width="9.5dp"
         android:layout_marginBottom="@dimen/battery_margin_bottom"
         android:layout_marginStart="7dp"/>
+
+    <com.android.systemui.BatteryLevelTextView android:id="@+id/battery_level_text"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="center_vertical"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/battery_level_text_size"
+        android:layout_marginStart="7dp"/>
 </LinearLayout>
