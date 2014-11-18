@@ -319,6 +319,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // handler thread.  We'll need to resolve this someday by teaching the input dispatcher
     // to hold wakelocks during dispatch and eliminating the critical path.
     volatile boolean mPowerKeyHandled;
+    volatile boolean mBeganFromNonInteractive;
     volatile int mPowerKeyPressCounter;
     volatile boolean mEndCallKeyHandled;
 
@@ -882,15 +883,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout());
                 }
             } else {
-                // When non-interactive, we ordinarily wake up immediately and
-                // consume the key.  However on some devices we need to support multi-press
-                // without waking so we will delay handling for later in that case
-                // (at the cost of increased latency).
+                wakeUpFromPowerKey(event.getDownTime());
                 final int maxCount = getMaxMultiPressPowerCount();
+
                 if (maxCount <= 1) {
-                    // No other actions.  We can wake immediately.
-                    wakeUpFromPowerKey(event.getDownTime());
                     mPowerKeyHandled = true;
+                } else {
+                    mBeganFromNonInteractive = true;
                 }
             }
         }
@@ -927,6 +926,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void finishPowerKeyPress() {
+        mBeganFromNonInteractive = false;
         mPowerKeyPressCounter = 0;
         if (mPowerKeyWakeLock.isHeld()) {
             mPowerKeyWakeLock.release();
@@ -951,9 +951,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             powerMultiPressAction(eventTime, interactive, mDoublePressOnPowerBehavior);
         } else if (count == 3) {
             powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
-        } else if (!interactive) {
-            wakeUpFromPowerKey(eventTime);
-        } else {
+        } else if (interactive && !mBeganFromNonInteractive) {
             switch (mShortPressOnPowerBehavior) {
                 case SHORT_PRESS_POWER_NOTHING:
                     break;
