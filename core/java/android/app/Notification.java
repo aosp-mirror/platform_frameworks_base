@@ -4986,7 +4986,9 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Set a hint that this notification's background should not be clipped if possible.
+         * Set a hint that this notification's background should not be clipped if possible,
+         * and should instead be resized to fully display on the screen, retaining the aspect
+         * ratio of the image. This can be useful for images like barcodes or qr codes.
          * @param hintAvoidBackgroundClipping {@code true} to avoid clipping if possible.
          * @return this object for method chaining
          */
@@ -4997,7 +4999,9 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Get a hint that this notification's background should not be clipped if possible.
+         * Get a hint that this notification's background should not be clipped if possible,
+         * and should instead be resized to fully display on the screen, retaining the aspect
+         * ratio of the image. This can be useful for images like barcodes or qr codes.
          * @return {@code true} if it's ok if the background is clipped on the screen, false
          * otherwise. The default value is {@code false} if this was never set.
          */
