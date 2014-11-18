@@ -320,7 +320,7 @@
     <dimen name="heads_up_window_height">250dp</dimen>
 
     <!-- The minimum amount the user needs to swipe to go to the camera / phone. -->
-    <dimen name="keyguard_min_swipe_amount">90dp</dimen>
+    <dimen name="keyguard_min_swipe_amount">110dp</dimen>
 
     <!-- The minimum background radius when swiping to a side for the camera / phone affordances. -->
     <dimen name="keyguard_affordance_min_background_radius">30dp</dimen>
