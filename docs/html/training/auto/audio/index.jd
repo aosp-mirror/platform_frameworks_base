@@ -301,31 +301,30 @@ look like this:</p>
 public BrowserRoot onGetRoot(String clientPackageName, int clientUid,
     Bundle rootHints) {
 
-    // Check the calling client to make sure it's one you approve.
-    // For example, to limit access to just Auto, the Auto emulator,
-    // and this app:
-
-    if (!clientPackageName.equals("com.google.android.projection.gearhead") &amp;&amp;
-            !clientPackageName.equals("com.example.android.media") &amp;&amp;
-            !clientPackageName.equals(getApplication().getPackageName()) {
-
+    // To ensure you are not allowing any arbitrary app to browse your app's
+    // contents, you need to check the origin:
+    if (!PackageValidator.isCallerAllowed(this, clientPackageName, clientUid)) {
         // If the request comes from an untrusted package, return null.
         // No further calls will be made to other media browsing methods.
+        LogHelper.w(TAG, "OnGetRoot: IGNORING request from untrusted package "
+                + clientPackageName);
         return null;
-        }
-
-        // Return a BrowserRoot. If you wish, you could have multiple BrowserRoot
-        // objects and return different ones depending on the calling client.
-        // In this example, there's just a single BrowserRoot.
-        return new BrowserRoot(MEDIA_BROWSER_ROOT, null);
     }
+    if (ANDROID_AUTO_PACKAGE_NAME.equals(clientPackageName)) {
+        // Optional: if your app needs to adapt ads, music library or anything
+        // else that needs to run differently when connected to the car, this
+        // is where you should handle it.
+    }
+    return new BrowserRoot(MEDIA_ID_ROOT, null);
+}
 </pre>
 
 <p>
   The Auto device client builds the top-level menu by calling {@link
-  android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()} with the root node
-  object and getting it's children. The client builds submenus by calling the same method with
-  other child nodes. The following example code shows a simple implementation of {@link
+  android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()}
+  with the root node object and getting it's children. The client builds
+  submenus by calling the same method with other child nodes. The following
+  example code shows a simple implementation of {@link
   android.service.media.MediaBrowserService#onLoadChildren onLoadChildren()} method:
 </p>
 
