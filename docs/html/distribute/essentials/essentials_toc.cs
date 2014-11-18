@@ -22,6 +22,12 @@
           </a>
     </div>
   </li>
+    <li class="nav-section">
+    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/quality/auto.html">
+            <span class="en">Auto App Quality</span>
+          </a>
+    </div>
+  </li>
   <li class="nav-section">
     <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/optimizing-your-app.html">
           <span class="en">Optimize Your App</span>
