@@ -383,8 +383,8 @@ public class UserManager {
      *
      * <p/>Key for application restrictions.
      * <p/>Type: Boolean
-     * @see android.app.admin.DevicePolicyManager#addApplicationRestriction()
-     * @see android.app.admin.DevicePolicyManager#getApplicationRestriction()
+     * @see android.app.admin.DevicePolicyManager#setApplicationRestrictions()
+     * @see android.app.admin.DevicePolicyManager#getApplicationRestrictions()
      */
     public static final String KEY_RESTRICTIONS_PENDING = "restrictions_pending";
 
