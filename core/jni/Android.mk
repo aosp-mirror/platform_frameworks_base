@@ -261,7 +261,9 @@ LOCAL_C_INCLUDES += bionic/libc/private
 
 LOCAL_MODULE:= libandroid_runtime
 
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+# -Wno-unknown-pragmas: necessary for Clang as the GL bindings need to turn
+#                       off a GCC warning that Clang doesn't know.
+LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code -Wno-unknown-pragmas
 
 include $(BUILD_SHARED_LIBRARY)
 
