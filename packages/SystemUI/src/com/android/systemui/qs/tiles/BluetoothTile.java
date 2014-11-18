@@ -77,6 +77,10 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
 
     @Override
     protected void handleSecondaryClick() {
+        if (!mState.value) {
+            mState.value = true;
+            mController.setBluetoothEnabled(true);
+        }
         showDetail(true);
     }
 
