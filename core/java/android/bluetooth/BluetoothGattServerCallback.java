@@ -145,4 +145,16 @@ public abstract class BluetoothGattServerCallback {
      */
     public void onNotificationSent(BluetoothDevice device, int status) {
     }
+
+    /**
+     * Callback indicating the MTU for a given device connection has changed.
+     *
+     * <p>This callback will be invoked if a remote client has requested to change
+     * the MTU for a given connection.
+     *
+     * @param device The remote device that requested the MTU change
+     * @param mtu The new MTU size
+     */
+    public void onMtuChanged(BluetoothDevice device, int mtu) {
+    }
 }

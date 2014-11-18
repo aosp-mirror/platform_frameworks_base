@@ -6383,6 +6383,7 @@ package android.bluetooth {
     method public void onDescriptorReadRequest(android.bluetooth.BluetoothDevice, int, int, android.bluetooth.BluetoothGattDescriptor);
     method public void onDescriptorWriteRequest(android.bluetooth.BluetoothDevice, int, android.bluetooth.BluetoothGattDescriptor, boolean, boolean, int, byte[]);
     method public void onExecuteWrite(android.bluetooth.BluetoothDevice, int, boolean);
+    method public void onMtuChanged(android.bluetooth.BluetoothDevice, int);
     method public void onNotificationSent(android.bluetooth.BluetoothDevice, int);
     method public void onServiceAdded(int, android.bluetooth.BluetoothGattService);
   }
