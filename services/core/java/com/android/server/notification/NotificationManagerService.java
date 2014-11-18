@@ -1931,12 +1931,7 @@ public class NotificationManagerService extends SystemService {
             if (hasValidSound) {
                 boolean looping =
                         (notification.flags & Notification.FLAG_INSISTENT) != 0;
-                AudioAttributes audioAttributes;
-                if (notification.audioAttributes != null) {
-                    audioAttributes = notification.audioAttributes;
-                } else {
-                    audioAttributes = Notification.AUDIO_ATTRIBUTES_DEFAULT;
-                }
+                AudioAttributes audioAttributes = audioAttributesForNotification(notification);
                 mSoundNotification = record;
                 // do not play notifications if stream volume is 0 (typically because
                 // ringer mode is silent) or if there is a user of exclusive audio focus
@@ -2030,7 +2025,9 @@ public class NotificationManagerService extends SystemService {
     }
 
     private static AudioAttributes audioAttributesForNotification(Notification n) {
-        if (n.audioAttributes != null) {
+        if (n.audioAttributes != null
+                && !Notification.AUDIO_ATTRIBUTES_DEFAULT.equals(n.audioAttributes)) {
+            // the audio attributes are set and different from the default, use them
             return n.audioAttributes;
         } else if (n.audioStreamType >= 0 && n.audioStreamType < AudioSystem.getNumStreamTypes()) {
             // the stream type is valid, use it
