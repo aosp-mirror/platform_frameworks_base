@@ -63,6 +63,7 @@ public abstract class Visibility extends Transition {
 
     private static final String[] sTransitionProperties = {
             PROPNAME_VISIBILITY,
+            PROPNAME_PARENT,
     };
 
     private static class VisibilityInfo {
