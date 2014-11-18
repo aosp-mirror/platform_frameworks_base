@@ -149,7 +149,7 @@ public class DateTimeView extends TextView {
                     format = getTimeFormat();
                     break;
                 case SHOW_MONTH_DAY_YEAR:
-                    format = getDateFormat();
+                    format = DateFormat.getDateInstance(DateFormat.SHORT);
                     break;
                 default:
                     throw new RuntimeException("unknown display value: " + display);
@@ -189,21 +189,6 @@ public class DateTimeView extends TextView {
         return android.text.format.DateFormat.getTimeFormat(getContext());
     }
 
-    private DateFormat getDateFormat() {
-        String format = Settings.System.getString(getContext().getContentResolver(),
-                Settings.System.DATE_FORMAT);
-        if (format == null || "".equals(format)) {
-            return DateFormat.getDateInstance(DateFormat.SHORT);
-        } else {
-            try {
-                return new SimpleDateFormat(format);
-            } catch (IllegalArgumentException e) {
-                // If we tried to use a bad format string, fall back to a default.
-                return DateFormat.getDateInstance(DateFormat.SHORT);
-            }
-        }
-    }
-
     private void registerReceivers() {
         Context context = getContext();
 
@@ -213,15 +198,11 @@ public class DateTimeView extends TextView {
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         context.registerReceiver(mBroadcastReceiver, filter);
-
-        Uri uri = Settings.System.getUriFor(Settings.System.DATE_FORMAT);
-        context.getContentResolver().registerContentObserver(uri, true, mContentObserver);
     }
 
     private void unregisterReceivers() {
         Context context = getContext();
         context.unregisterReceiver(mBroadcastReceiver);
-        context.getContentResolver().unregisterContentObserver(mContentObserver);
     }
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -237,14 +218,6 @@ public class DateTimeView extends TextView {
                 }
             }
             // ACTION_TIME_CHANGED can also signal a change of 12/24 hr. format.
-            mLastFormat = null;
-            update();
-        }
-    };
-
-    private ContentObserver mContentObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
             mLastFormat = null;
             update();
         }
