@@ -16,7 +16,6 @@
 
 package com.android.systemui.recents.views;
 
-import android.animation.ObjectAnimator;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.view.View;
@@ -34,8 +33,6 @@ public class AnimateableViewBounds extends ViewOutlineProvider {
     int mCornerRadius;
     float mAlpha = 1f;
     final float mMinAlpha = 0.25f;
-
-    ObjectAnimator mClipBottomAnimator;
 
     public AnimateableViewBounds(TaskView source, int cornerRadius) {
         mConfig = RecentsConfiguration.getInstance();

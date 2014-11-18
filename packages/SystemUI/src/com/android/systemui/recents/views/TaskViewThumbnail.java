@@ -237,12 +237,12 @@ public class TaskViewThumbnail extends View {
     /** Animates this task thumbnail as it enters Recents. */
     void startEnterRecentsAnimation(int delay, Runnable postAnimRunnable) {
         startFadeAnimation(mConfig.taskViewThumbnailAlpha, delay,
-                mConfig.taskBarEnterAnimDuration, postAnimRunnable);
+                mConfig.taskViewEnterFromAppDuration, postAnimRunnable);
     }
 
     /** Animates this task thumbnail as it exits Recents. */
     void startLaunchTaskAnimation(Runnable postAnimRunnable) {
-        startFadeAnimation(1f, 0, mConfig.taskBarExitAnimDuration, postAnimRunnable);
+        startFadeAnimation(1f, 0, mConfig.taskViewExitToAppDuration, postAnimRunnable);
     }
 
     /** Starts a new thumbnail alpha animation. */
