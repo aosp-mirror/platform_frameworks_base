@@ -20,11 +20,18 @@
 
 #include "Caches.h"
 #include "DeferredDisplayList.h"
-#include "RenderState.h"
 #include "Layer.h"
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "RenderNode.h"
+#include "RenderState.h"
+#include "utils/TraceUtils.h"
+
+#define ATRACE_LAYER_WORK(label) \
+    ATRACE_FORMAT("%s HW Layer DisplayList %s %ux%u", \
+            label, \
+            (renderNode.get() != NULL) ? renderNode->getName() : "", \
+            getWidth(), getHeight())
 
 namespace android {
 namespace uirenderer {
@@ -223,6 +230,8 @@ void Layer::allocateTexture() {
 }
 
 void Layer::defer(const OpenGLRenderer& rootRenderer) {
+    ATRACE_LAYER_WORK("Optimize");
+
     updateLightPosFromRenderer(rootRenderer);
     const float width = layer.getWidth();
     const float height = layer.getHeight();
@@ -260,6 +269,9 @@ void Layer::cancelDefer() {
 void Layer::flush() {
     // renderer is checked as layer may be destroyed/put in layer cache with flush scheduled
     if (deferredList && renderer) {
+        ATRACE_LAYER_WORK("Issue");
+        renderer->startMark((renderNode.get() != NULL) ? renderNode->getName() : "Layer");
+
         renderer->setViewport(layer.getWidth(), layer.getHeight());
         renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
                 !isBlend());
@@ -270,10 +282,14 @@ void Layer::flush() {
 
         dirtyRect.setEmpty();
         renderNode = NULL;
+
+        renderer->endMark();
     }
 }
 
 void Layer::render(const OpenGLRenderer& rootRenderer) {
+    ATRACE_LAYER_WORK("Direct-Issue");
+
     updateLightPosFromRenderer(rootRenderer);
     renderer->setViewport(layer.getWidth(), layer.getHeight());
     renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,

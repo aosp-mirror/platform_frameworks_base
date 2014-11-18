@@ -56,6 +56,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -14397,143 +14398,158 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void buildDrawingCache(boolean autoScale) {
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0 || (autoScale ?
                 mDrawingCache == null : mUnscaledDrawingCache == null)) {
-            mCachingFailed = false;
+            if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW,
+                        "buildDrawingCache/SW Layer for " + getClass().getSimpleName());
+            }
+            try {
+                buildDrawingCacheImpl(autoScale);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
+        }
+    }
 
-            int width = mRight - mLeft;
-            int height = mBottom - mTop;
+    /**
+     * private, internal implementation of buildDrawingCache, used to enable tracing
+     */
+    private void buildDrawingCacheImpl(boolean autoScale) {
+        mCachingFailed = false;
 
-            final AttachInfo attachInfo = mAttachInfo;
-            final boolean scalingRequired = attachInfo != null && attachInfo.mScalingRequired;
+        int width = mRight - mLeft;
+        int height = mBottom - mTop;
 
-            if (autoScale && scalingRequired) {
-                width = (int) ((width * attachInfo.mApplicationScale) + 0.5f);
-                height = (int) ((height * attachInfo.mApplicationScale) + 0.5f);
+        final AttachInfo attachInfo = mAttachInfo;
+        final boolean scalingRequired = attachInfo != null && attachInfo.mScalingRequired;
+
+        if (autoScale && scalingRequired) {
+            width = (int) ((width * attachInfo.mApplicationScale) + 0.5f);
+            height = (int) ((height * attachInfo.mApplicationScale) + 0.5f);
+        }
+
+        final int drawingCacheBackgroundColor = mDrawingCacheBackgroundColor;
+        final boolean opaque = drawingCacheBackgroundColor != 0 || isOpaque();
+        final boolean use32BitCache = attachInfo != null && attachInfo.mUse32BitDrawingCache;
+
+        final long projectedBitmapSize = width * height * (opaque && !use32BitCache ? 2 : 4);
+        final long drawingCacheSize =
+                ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize();
+        if (width <= 0 || height <= 0 || projectedBitmapSize > drawingCacheSize) {
+            if (width > 0 && height > 0) {
+                Log.w(VIEW_LOG_TAG, "View too large to fit into drawing cache, needs "
+                        + projectedBitmapSize + " bytes, only "
+                        + drawingCacheSize + " available");
+            }
+            destroyDrawingCache();
+            mCachingFailed = true;
+            return;
+        }
+
+        boolean clear = true;
+        Bitmap bitmap = autoScale ? mDrawingCache : mUnscaledDrawingCache;
+
+        if (bitmap == null || bitmap.getWidth() != width || bitmap.getHeight() != height) {
+            Bitmap.Config quality;
+            if (!opaque) {
+                // Never pick ARGB_4444 because it looks awful
+                // Keep the DRAWING_CACHE_QUALITY_LOW flag just in case
+                switch (mViewFlags & DRAWING_CACHE_QUALITY_MASK) {
+                    case DRAWING_CACHE_QUALITY_AUTO:
+                    case DRAWING_CACHE_QUALITY_LOW:
+                    case DRAWING_CACHE_QUALITY_HIGH:
+                    default:
+                        quality = Bitmap.Config.ARGB_8888;
+                        break;
+                }
+            } else {
+                // Optimization for translucent windows
+                // If the window is translucent, use a 32 bits bitmap to benefit from memcpy()
+                quality = use32BitCache ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
             }
 
-            final int drawingCacheBackgroundColor = mDrawingCacheBackgroundColor;
-            final boolean opaque = drawingCacheBackgroundColor != 0 || isOpaque();
-            final boolean use32BitCache = attachInfo != null && attachInfo.mUse32BitDrawingCache;
+            // Try to cleanup memory
+            if (bitmap != null) bitmap.recycle();
 
-            final long projectedBitmapSize = width * height * (opaque && !use32BitCache ? 2 : 4);
-            final long drawingCacheSize =
-                    ViewConfiguration.get(mContext).getScaledMaximumDrawingCacheSize();
-            if (width <= 0 || height <= 0 || projectedBitmapSize > drawingCacheSize) {
-                if (width > 0 && height > 0) {
-                    Log.w(VIEW_LOG_TAG, "View too large to fit into drawing cache, needs "
-                            + projectedBitmapSize + " bytes, only "
-                            + drawingCacheSize + " available");
+            try {
+                bitmap = Bitmap.createBitmap(mResources.getDisplayMetrics(),
+                        width, height, quality);
+                bitmap.setDensity(getResources().getDisplayMetrics().densityDpi);
+                if (autoScale) {
+                    mDrawingCache = bitmap;
+                } else {
+                    mUnscaledDrawingCache = bitmap;
                 }
-                destroyDrawingCache();
+                if (opaque && use32BitCache) bitmap.setHasAlpha(false);
+            } catch (OutOfMemoryError e) {
+                // If there is not enough memory to create the bitmap cache, just
+                // ignore the issue as bitmap caches are not required to draw the
+                // view hierarchy
+                if (autoScale) {
+                    mDrawingCache = null;
+                } else {
+                    mUnscaledDrawingCache = null;
+                }
                 mCachingFailed = true;
                 return;
             }
 
-            boolean clear = true;
-            Bitmap bitmap = autoScale ? mDrawingCache : mUnscaledDrawingCache;
+            clear = drawingCacheBackgroundColor != 0;
+        }
 
-            if (bitmap == null || bitmap.getWidth() != width || bitmap.getHeight() != height) {
-                Bitmap.Config quality;
-                if (!opaque) {
-                    // Never pick ARGB_4444 because it looks awful
-                    // Keep the DRAWING_CACHE_QUALITY_LOW flag just in case
-                    switch (mViewFlags & DRAWING_CACHE_QUALITY_MASK) {
-                        case DRAWING_CACHE_QUALITY_AUTO:
-                        case DRAWING_CACHE_QUALITY_LOW:
-                        case DRAWING_CACHE_QUALITY_HIGH:
-                        default:
-                            quality = Bitmap.Config.ARGB_8888;
-                            break;
-                    }
-                } else {
-                    // Optimization for translucent windows
-                    // If the window is translucent, use a 32 bits bitmap to benefit from memcpy()
-                    quality = use32BitCache ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565;
-                }
-
-                // Try to cleanup memory
-                if (bitmap != null) bitmap.recycle();
-
-                try {
-                    bitmap = Bitmap.createBitmap(mResources.getDisplayMetrics(),
-                            width, height, quality);
-                    bitmap.setDensity(getResources().getDisplayMetrics().densityDpi);
-                    if (autoScale) {
-                        mDrawingCache = bitmap;
-                    } else {
-                        mUnscaledDrawingCache = bitmap;
-                    }
-                    if (opaque && use32BitCache) bitmap.setHasAlpha(false);
-                } catch (OutOfMemoryError e) {
-                    // If there is not enough memory to create the bitmap cache, just
-                    // ignore the issue as bitmap caches are not required to draw the
-                    // view hierarchy
-                    if (autoScale) {
-                        mDrawingCache = null;
-                    } else {
-                        mUnscaledDrawingCache = null;
-                    }
-                    mCachingFailed = true;
-                    return;
-                }
-
-                clear = drawingCacheBackgroundColor != 0;
+        Canvas canvas;
+        if (attachInfo != null) {
+            canvas = attachInfo.mCanvas;
+            if (canvas == null) {
+                canvas = new Canvas();
             }
+            canvas.setBitmap(bitmap);
+            // Temporarily clobber the cached Canvas in case one of our children
+            // is also using a drawing cache. Without this, the children would
+            // steal the canvas by attaching their own bitmap to it and bad, bad
+            // thing would happen (invisible views, corrupted drawings, etc.)
+            attachInfo.mCanvas = null;
+        } else {
+            // This case should hopefully never or seldom happen
+            canvas = new Canvas(bitmap);
+        }
 
-            Canvas canvas;
-            if (attachInfo != null) {
-                canvas = attachInfo.mCanvas;
-                if (canvas == null) {
-                    canvas = new Canvas();
-                }
-                canvas.setBitmap(bitmap);
-                // Temporarily clobber the cached Canvas in case one of our children
-                // is also using a drawing cache. Without this, the children would
-                // steal the canvas by attaching their own bitmap to it and bad, bad
-                // thing would happen (invisible views, corrupted drawings, etc.)
-                attachInfo.mCanvas = null;
-            } else {
-                // This case should hopefully never or seldom happen
-                canvas = new Canvas(bitmap);
+        if (clear) {
+            bitmap.eraseColor(drawingCacheBackgroundColor);
+        }
+
+        computeScroll();
+        final int restoreCount = canvas.save();
+
+        if (autoScale && scalingRequired) {
+            final float scale = attachInfo.mApplicationScale;
+            canvas.scale(scale, scale);
+        }
+
+        canvas.translate(-mScrollX, -mScrollY);
+
+        mPrivateFlags |= PFLAG_DRAWN;
+        if (mAttachInfo == null || !mAttachInfo.mHardwareAccelerated ||
+                mLayerType != LAYER_TYPE_NONE) {
+            mPrivateFlags |= PFLAG_DRAWING_CACHE_VALID;
+        }
+
+        // Fast path for layouts with no backgrounds
+        if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
+            mPrivateFlags &= ~PFLAG_DIRTY_MASK;
+            dispatchDraw(canvas);
+            if (mOverlay != null && !mOverlay.isEmpty()) {
+                mOverlay.getOverlayView().draw(canvas);
             }
+        } else {
+            draw(canvas);
+        }
 
-            if (clear) {
-                bitmap.eraseColor(drawingCacheBackgroundColor);
-            }
+        canvas.restoreToCount(restoreCount);
+        canvas.setBitmap(null);
 
-            computeScroll();
-            final int restoreCount = canvas.save();
-
-            if (autoScale && scalingRequired) {
-                final float scale = attachInfo.mApplicationScale;
-                canvas.scale(scale, scale);
-            }
-
-            canvas.translate(-mScrollX, -mScrollY);
-
-            mPrivateFlags |= PFLAG_DRAWN;
-            if (mAttachInfo == null || !mAttachInfo.mHardwareAccelerated ||
-                    mLayerType != LAYER_TYPE_NONE) {
-                mPrivateFlags |= PFLAG_DRAWING_CACHE_VALID;
-            }
-
-            // Fast path for layouts with no backgrounds
-            if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
-                mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-                dispatchDraw(canvas);
-                if (mOverlay != null && !mOverlay.isEmpty()) {
-                    mOverlay.getOverlayView().draw(canvas);
-                }
-            } else {
-                draw(canvas);
-            }
-
-            canvas.restoreToCount(restoreCount);
-            canvas.setBitmap(null);
-
-            if (attachInfo != null) {
-                // Restore the cached Canvas for our siblings
-                attachInfo.mCanvas = canvas;
-            }
+        if (attachInfo != null) {
+            // Restore the cached Canvas for our siblings
+            attachInfo.mCanvas = canvas;
         }
     }
 
@@ -15472,10 +15488,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && mAttachInfo.mHardwareRenderer != null) {
             mBackgroundRenderNode = getDrawableRenderNode(background, mBackgroundRenderNode);
 
-            final RenderNode displayList = mBackgroundRenderNode;
-            if (displayList != null && displayList.isValid()) {
-                setBackgroundDisplayListProperties(displayList);
-                ((HardwareCanvas) canvas).drawRenderNode(displayList);
+            final RenderNode renderNode = mBackgroundRenderNode;
+            if (renderNode != null && renderNode.isValid()) {
+                setBackgroundRenderNodeProperties(renderNode);
+                ((HardwareCanvas) canvas).drawRenderNode(renderNode);
                 return;
             }
         }
@@ -15491,14 +15507,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    /**
-     * Set up background drawable display list properties.
-     *
-     * @param displayList Valid display list for the background drawable
-     */
-    private void setBackgroundDisplayListProperties(RenderNode displayList) {
-        displayList.setTranslationX(mScrollX);
-        displayList.setTranslationY(mScrollY);
+    private void setBackgroundRenderNodeProperties(RenderNode renderNode) {
+        renderNode.setTranslationX(mScrollX);
+        renderNode.setTranslationY(mScrollY);
     }
 
     /**

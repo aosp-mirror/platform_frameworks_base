@@ -363,7 +363,7 @@ void Font::measure(const SkPaint* paint, const char* text, uint32_t start, uint3
 }
 
 void Font::precache(const SkPaint* paint, const char* text, int numGlyphs) {
-    ATRACE_NAME("precacheText");
+    ATRACE_NAME("Precache Glyphs");
 
     if (numGlyphs == 0 || text == NULL) {
         return;
