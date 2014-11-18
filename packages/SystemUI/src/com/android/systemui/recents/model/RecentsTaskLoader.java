@@ -170,65 +170,65 @@ class TaskResourceLoader implements Runnable {
             } else {
                 RecentsConfiguration config = RecentsConfiguration.getInstance();
                 SystemServicesProxy ssp = mSystemServicesProxy;
-                // If we've stopped the loader, then fall thorugh to the above logic to wait on
+                // If we've stopped the loader, then fall through to the above logic to wait on
                 // the load thread
-                if (ssp == null) continue;
+                if (ssp != null) {
+                    // Load the next item from the queue
+                    final Task t = mLoadQueue.nextTask();
+                    if (t != null) {
+                        Drawable cachedIcon = mApplicationIconCache.get(t.key);
+                        Bitmap cachedThumbnail = mThumbnailCache.get(t.key);
 
-                // Load the next item from the queue
-                final Task t = mLoadQueue.nextTask();
-                if (t != null) {
-                    Drawable cachedIcon = mApplicationIconCache.get(t.key);
-                    Bitmap cachedThumbnail = mThumbnailCache.get(t.key);
-
-                    // Load the application icon if it is stale or we haven't cached one yet
-                    if (cachedIcon == null) {
-                        cachedIcon = getTaskDescriptionIcon(t.key, t.icon, t.iconFilename, ssp,
-                                mContext.getResources());
-
+                        // Load the application icon if it is stale or we haven't cached one yet
                         if (cachedIcon == null) {
-                            ActivityInfo info = ssp.getActivityInfo(t.key.baseIntent.getComponent(),
-                                    t.key.userId);
-                            if (info != null) {
-                                if (DEBUG) Log.d(TAG, "Loading icon: " + t.key);
-                                cachedIcon = ssp.getActivityIcon(info, t.key.userId);
+                            cachedIcon = getTaskDescriptionIcon(t.key, t.icon, t.iconFilename, ssp,
+                                    mContext.getResources());
+
+                            if (cachedIcon == null) {
+                                ActivityInfo info = ssp.getActivityInfo(
+                                        t.key.baseIntent.getComponent(), t.key.userId);
+                                if (info != null) {
+                                    if (DEBUG) Log.d(TAG, "Loading icon: " + t.key);
+                                    cachedIcon = ssp.getActivityIcon(info, t.key.userId);
+                                }
                             }
-                        }
 
-                        if (cachedIcon == null) {
-                            cachedIcon = mDefaultApplicationIcon;
-                        }
+                            if (cachedIcon == null) {
+                                cachedIcon = mDefaultApplicationIcon;
+                            }
 
-                        // At this point, even if we can't load the icon, we will set the default
-                        // icon.
-                        mApplicationIconCache.put(t.key, cachedIcon);
-                    }
-                    // Load the thumbnail if it is stale or we haven't cached one yet
-                    if (cachedThumbnail == null) {
-                        if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING) {
-                            if (DEBUG) Log.d(TAG, "Loading thumbnail: " + t.key);
-                            cachedThumbnail = ssp.getTaskThumbnail(t.key.id);
+                            // At this point, even if we can't load the icon, we will set the
+                            // default icon.
+                            mApplicationIconCache.put(t.key, cachedIcon);
                         }
+                        // Load the thumbnail if it is stale or we haven't cached one yet
                         if (cachedThumbnail == null) {
-                            cachedThumbnail = mDefaultThumbnail;
-                        }
-                        // When svelte, we trim the memory to just the visible thumbnails when
-                        // leaving, so don't thrash the cache as the user scrolls (just load them
-                        // from scratch each time)
-                        if (config.svelteLevel < RecentsConfiguration.SVELTE_LIMIT_CACHE) {
-                            mThumbnailCache.put(t.key, cachedThumbnail);
-                        }
-                    }
-                    if (!mCancelled) {
-                        // Notify that the task data has changed
-                        final Drawable newIcon = cachedIcon;
-                        final Bitmap newThumbnail = cachedThumbnail == mDefaultThumbnail
-                                ? null : cachedThumbnail;
-                        mMainThreadHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                t.notifyTaskDataLoaded(newThumbnail, newIcon);
+                            if (config.svelteLevel < RecentsConfiguration.SVELTE_DISABLE_LOADING) {
+                                if (DEBUG) Log.d(TAG, "Loading thumbnail: " + t.key);
+                                cachedThumbnail = ssp.getTaskThumbnail(t.key.id);
                             }
-                        });
+                            if (cachedThumbnail == null) {
+                                cachedThumbnail = mDefaultThumbnail;
+                            }
+                            // When svelte, we trim the memory to just the visible thumbnails when
+                            // leaving, so don't thrash the cache as the user scrolls (just load
+                            // them from scratch each time)
+                            if (config.svelteLevel < RecentsConfiguration.SVELTE_LIMIT_CACHE) {
+                                mThumbnailCache.put(t.key, cachedThumbnail);
+                            }
+                        }
+                        if (!mCancelled) {
+                            // Notify that the task data has changed
+                            final Drawable newIcon = cachedIcon;
+                            final Bitmap newThumbnail = cachedThumbnail == mDefaultThumbnail
+                                    ? null : cachedThumbnail;
+                            mMainThreadHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    t.notifyTaskDataLoaded(newThumbnail, newIcon);
+                                }
+                            });
+                        }
                     }
                 }
 
