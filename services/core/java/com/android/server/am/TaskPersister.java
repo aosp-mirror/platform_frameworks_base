@@ -63,6 +63,12 @@ public class TaskPersister {
     private static final String IMAGES_DIRNAME = "recent_images";
     static final String IMAGE_EXTENSION = ".png";
 
+    // Directory where restored historical task XML/PNG files are placed.  This directory
+    // contains subdirs named after TASKS_DIRNAME and IMAGES_DIRNAME mirroring the
+    // ancestral device's dataset.  This needs to match the RECENTS_TASK_RESTORE_DIR
+    // value in RecentsBackupHelper.
+    private static final String RESTORED_TASKS = "restored_" + TASKS_DIRNAME;
+
     private static final String TAG_TASK = "task";
 
     static File sImagesDir;
