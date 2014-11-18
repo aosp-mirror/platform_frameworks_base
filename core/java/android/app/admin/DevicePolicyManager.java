@@ -182,8 +182,8 @@ public class DevicePolicyManager {
      * <p>Use in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
      * provisioning via an NFC bump.
      */
-    public static final String EXTRA_PROVISIONING_DONT_DISABLE_SYSTEM_APPS =
-            "android.app.extra.PROVISIONING_DONT_DISABLE_SYSTEM_APPS";
+    public static final String EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED =
+            "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED";
 
     /**
      * A String extra holding the time zone {@link android.app.AlarmManager} that the device
