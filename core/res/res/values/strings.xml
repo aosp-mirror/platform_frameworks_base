@@ -94,7 +94,7 @@
     <string name="emptyPhoneNumber">(No phone number)</string>
 
     <!-- How to display the lack of a name -->
-    <string name="unknownName">(Unknown)</string>
+    <string name="unknownName">Unknown</string>
 
     <!-- What the UI should display for "voice mail" unless overridden by the SIM-->
     <string name="defaultVoiceMailAlphaTag">Voicemail</string>
