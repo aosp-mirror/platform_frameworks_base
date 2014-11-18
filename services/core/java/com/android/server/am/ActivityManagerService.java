@@ -796,7 +796,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         public int hashCode() {
-            return toString().hashCode();
+            int hashCode = 1;
+            hashCode = 31 * hashCode + sourceUserId;
+            hashCode = 31 * hashCode + uri.hashCode();
+            hashCode = 31 * hashCode + (prefix ? 1231 : 1237);
+            return hashCode;
         }
 
         @Override
