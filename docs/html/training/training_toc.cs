@@ -938,6 +938,7 @@ include the action bar on devices running Android 2.1 or higher."
   </li>
   <!-- End: Building for TV -->
 
+
   <!-- Start: Building for Auto -->
   <li class="nav-section">
     <div class="nav-section-header">
@@ -952,6 +953,11 @@ include the action bar on devices running Android 2.1 or higher."
              description="How to start building or extending apps that work
              with Auto devices.">
              Getting Started with Auto</a>
+      </li>
+      <li>
+        <a href="<?cs var:toroot ?>training/auto/audio/index.html"
+             description="How to extend audio apps to play content on Auto devices.">
+             Playing Audio for Auto</a>
       </li>
     </ul>
   </li>
