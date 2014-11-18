@@ -1973,6 +1973,41 @@ public class TelephonyManager {
     }
 
     /**
+     * Sets the voice mail number.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param alphaTag The alpha tag to display.
+     * @param number The voicemail number.
+     */
+    public boolean setVoiceMailNumber(String alphaTag, String number) {
+        return setVoiceMailNumber(getDefaultSubscription(), alphaTag, number);
+    }
+
+    /**
+     * Sets the voicemail number for the given subscriber.
+     * <p>
+     * Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     * Or the calling app has carrier privileges. @see #hasCarrierPrivileges
+     *
+     * @param subId The subscriber id.
+     * @param alphaTag The alpha tag to display.
+     * @param number The voicemail number.
+     */
+    /** {@hide} */
+    public boolean setVoiceMailNumber(int subId, String alphaTag, String number) {
+        try {
+            return getITelephony().setVoiceMailNumber(subId, alphaTag, number);
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return false;
+    }
+
+    /**
      * Returns the voice mail count. Return 0 if unavailable.
      * <p>
      * Requires Permission:
