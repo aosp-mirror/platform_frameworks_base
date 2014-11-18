@@ -62,7 +62,8 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         mSignalCluster = mock(SignalCluster.class);
         mNetworkSignalChangedCallback = mock(NetworkSignalChangedCallback.class);
 
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm);
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
+                mock(AccessPointController.class), mock(MobileDataController.class));
         setupNetworkController();
     }
 
