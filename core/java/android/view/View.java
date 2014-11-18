@@ -2400,12 +2400,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_NESTED_SCROLLING_ENABLED = 0x80;
 
-    /**
-     * Flag indicating that outline was invalidated and should be rebuilt the next time
-     * the DisplayList is updated.
-     */
-    static final int PFLAG3_OUTLINE_INVALID = 0x100;
-
     /* End of masks for mPrivateFlags3 */
 
     static final int DRAG_MASK = PFLAG2_DRAG_CAN_ACCEPT | PFLAG2_DRAG_HOVERED;
@@ -11277,7 +11271,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #setOutlineProvider(ViewOutlineProvider)
      */
     public void invalidateOutline() {
-        mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
+        rebuildOutline();
 
         notifySubtreeAccessibilityStateChangedIfNeeded();
         invalidateViewProperty(false, false);
@@ -14873,10 +14867,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     void setDisplayListProperties(RenderNode renderNode) {
         if (renderNode != null) {
-            if ((mPrivateFlags3 & PFLAG3_OUTLINE_INVALID) != 0) {
-                rebuildOutline();
-                mPrivateFlags3 &= ~PFLAG3_OUTLINE_INVALID;
-            }
             renderNode.setHasOverlappingRendering(hasOverlappingRendering());
             if (mParent instanceof ViewGroup) {
                 renderNode.setClipToBounds(
@@ -15478,7 +15468,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackgroundSizeChanged) {
             background.setBounds(0, 0,  mRight - mLeft, mBottom - mTop);
             mBackgroundSizeChanged = false;
-            mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
+            rebuildOutline();
         }
 
         // Attempt to use a display list if requested.
@@ -15861,7 +15851,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mOverlay.getOverlayView().setRight(newWidth);
             mOverlay.getOverlayView().setBottom(newHeight);
         }
-        mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
+        rebuildOutline();
     }
 
     /**
@@ -15897,8 +15887,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             invalidate(dirty.left + scrollX, dirty.top + scrollY,
                     dirty.right + scrollX, dirty.bottom + scrollY);
-
-            mPrivateFlags3 |= PFLAG3_OUTLINE_INVALID;
+            rebuildOutline();
         }
     }
 
