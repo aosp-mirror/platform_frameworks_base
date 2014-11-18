@@ -14768,27 +14768,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * this view, to which future drawing operations will be clipped.
      */
     public void setClipBounds(Rect clipBounds) {
+        if (clipBounds == mClipBounds
+                || (clipBounds != null && clipBounds.equals(mClipBounds))) {
+            return;
+        }
         if (clipBounds != null) {
-            if (clipBounds.equals(mClipBounds)) {
-                return;
-            }
             if (mClipBounds == null) {
-                invalidate();
                 mClipBounds = new Rect(clipBounds);
             } else {
-                invalidate(Math.min(mClipBounds.left, clipBounds.left),
-                        Math.min(mClipBounds.top, clipBounds.top),
-                        Math.max(mClipBounds.right, clipBounds.right),
-                        Math.max(mClipBounds.bottom, clipBounds.bottom));
                 mClipBounds.set(clipBounds);
             }
         } else {
-            if (mClipBounds != null) {
-                invalidate();
-                mClipBounds = null;
-            }
+            mClipBounds = null;
         }
         mRenderNode.setClipBounds(mClipBounds);
+        invalidateViewProperty(false, false);
     }
 
     /**
