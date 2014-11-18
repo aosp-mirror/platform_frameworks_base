@@ -1473,22 +1473,30 @@ public class DevicePolicyManager {
 
     /**
      * Flag for {@link #wipeData(int)}: also erase the device's external
-     * storage.
+     * storage (such as SD cards).
      */
     public static final int WIPE_EXTERNAL_STORAGE = 0x0001;
 
     /**
+     * Flag for {@link #wipeData(int)}: also erase the factory reset protection
+     * data.
+     *
+     * This flag may only be set by device owner admins; if it is set by other
+     * admins a {@link SecurityException} will be thrown.
+     */
+    public static final int WIPE_RESET_PROTECTION_DATA = 0x0002;
+
+    /**
      * Ask the user data be wiped.  This will cause the device to reboot,
-     * erasing all user data while next booting up.  External storage such
-     * as SD cards will be also erased if the flag {@link #WIPE_EXTERNAL_STORAGE}
-     * is set.
+     * erasing all user data while next booting up.
      *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_WIPE_DATA} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
-     * @param flags Bit mask of additional options: currently 0 and
-     *              {@link #WIPE_EXTERNAL_STORAGE} are supported.
+     * @param flags Bit mask of additional options: currently supported flags
+     * are {@link #WIPE_EXTERNAL_STORAGE} and
+     * {@link #WIPE_RESET_PROTECTION_DATA}.
      */
     public void wipeData(int flags) {
         if (mService != null) {
