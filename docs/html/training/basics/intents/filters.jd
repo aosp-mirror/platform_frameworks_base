@@ -1,10 +1,8 @@
 page.title=Allowing Other Apps to Start Your Activity
-parent.title=Interacting with Other Apps
-parent.link=index.html
+page.tags=intents
+helpoutsWidget=true
 
 trainingnavtop=true
-previous.title=Getting a Result from an Activity
-previous.link=result.html
 
 @jd:body
 
