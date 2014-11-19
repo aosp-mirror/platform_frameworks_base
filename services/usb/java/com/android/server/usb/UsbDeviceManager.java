@@ -209,8 +209,13 @@ public class UsbDeviceManager {
         mUseUsbNotification = !massStorageSupported;
 
         // make sure the ADB_ENABLED setting value matches the current state
-        Settings.Global.putInt(mContentResolver, Settings.Global.ADB_ENABLED, mAdbEnabled ? 1 : 0);
-
+        try {
+            Settings.Global.putInt(mContentResolver,
+                    Settings.Global.ADB_ENABLED, mAdbEnabled ? 1 : 0);
+        } catch (SecurityException e) {
+            // If UserManager.DISALLOW_DEBUGGING_FEATURES is on, that this setting can't be changed.
+            Slog.d(TAG, "ADB_ENABLED is restricted.");
+        }
         mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
     }
 
