@@ -28,6 +28,8 @@
 #include <gui/DisplayEventReceiver.h>
 #include "android_os_MessageQueue.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 // Number of events to read at a time from the DisplayEventReceiver pipe.
@@ -260,30 +262,19 @@ static JNINativeMethod gMethods[] = {
             (void*)nativeScheduleVsync }
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
 int register_android_view_DisplayEventReceiver(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "android/view/DisplayEventReceiver",
-            gMethods, NELEM(gMethods));
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
-    (void)res;
+    int res = RegisterMethodsOrDie(env, "android/view/DisplayEventReceiver", gMethods,
+                                   NELEM(gMethods));
 
-    FIND_CLASS(gDisplayEventReceiverClassInfo.clazz, "android/view/DisplayEventReceiver");
+    jclass clazz = FindClassOrDie(env, "android/view/DisplayEventReceiver");
+    gDisplayEventReceiverClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
-    GET_METHOD_ID(gDisplayEventReceiverClassInfo.dispatchVsync,
-            gDisplayEventReceiverClassInfo.clazz,
-            "dispatchVsync", "(JII)V");
-    GET_METHOD_ID(gDisplayEventReceiverClassInfo.dispatchHotplug,
-            gDisplayEventReceiverClassInfo.clazz,
-            "dispatchHotplug", "(JIZ)V");
-    return 0;
+    gDisplayEventReceiverClassInfo.dispatchVsync = GetMethodIDOrDie(env,
+            gDisplayEventReceiverClassInfo.clazz, "dispatchVsync", "(JII)V");
+    gDisplayEventReceiverClassInfo.dispatchHotplug = GetMethodIDOrDie(env,
+            gDisplayEventReceiverClassInfo.clazz, "dispatchHotplug", "(JIZ)V");
+
+    return res;
 }
 
 } // namespace android

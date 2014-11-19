@@ -46,6 +46,8 @@
 
 #include <android_runtime/AndroidRuntime.h>
 
+#include "core_jni_helpers.h"
+
 //#undef ALOGV
 //#define ALOGV(...) fprintf(stderr, __VA_ARGS__)
 
@@ -741,20 +743,14 @@ const char* const kParcelPathName = "android/os/Parcel";
 
 int register_android_os_Parcel(JNIEnv* env)
 {
-    jclass clazz;
+    jclass clazz = FindClassOrDie(env, kParcelPathName);
 
-    clazz = env->FindClass(kParcelPathName);
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.Parcel");
+    gParcelOffsets.clazz = MakeGlobalRefOrDie(env, clazz);
+    gParcelOffsets.mNativePtr = GetFieldIDOrDie(env, clazz, "mNativePtr", "J");
+    gParcelOffsets.obtain = GetStaticMethodIDOrDie(env, clazz, "obtain", "()Landroid/os/Parcel;");
+    gParcelOffsets.recycle = GetMethodIDOrDie(env, clazz, "recycle", "()V");
 
-    gParcelOffsets.clazz = (jclass) env->NewGlobalRef(clazz);
-    gParcelOffsets.mNativePtr = env->GetFieldID(clazz, "mNativePtr", "J");
-    gParcelOffsets.obtain = env->GetStaticMethodID(clazz, "obtain",
-                                                   "()Landroid/os/Parcel;");
-    gParcelOffsets.recycle = env->GetMethodID(clazz, "recycle", "()V");
-
-    return AndroidRuntime::registerNativeMethods(
-        env, kParcelPathName,
-        gParcelMethods, NELEM(gParcelMethods));
+    return RegisterMethodsOrDie(env, kParcelPathName, gParcelMethods, NELEM(gParcelMethods));
 }
 
 };

@@ -34,6 +34,8 @@
 
 #include <private/android_filesystem_config.h> // for AID_SYSTEM
 
+#include "core_jni_helpers.h"
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -2115,64 +2117,38 @@ static JNINativeMethod gAssetManagerMethods[] = {
 
 int register_android_content_AssetManager(JNIEnv* env)
 {
-    jclass typedValue = env->FindClass("android/util/TypedValue");
-    LOG_FATAL_IF(typedValue == NULL, "Unable to find class android/util/TypedValue");
-    gTypedValueOffsets.mType
-        = env->GetFieldID(typedValue, "type", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mType == NULL, "Unable to find TypedValue.type");
-    gTypedValueOffsets.mData
-        = env->GetFieldID(typedValue, "data", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mData == NULL, "Unable to find TypedValue.data");
-    gTypedValueOffsets.mString
-        = env->GetFieldID(typedValue, "string", "Ljava/lang/CharSequence;");
-    LOG_FATAL_IF(gTypedValueOffsets.mString == NULL, "Unable to find TypedValue.string");
-    gTypedValueOffsets.mAssetCookie
-        = env->GetFieldID(typedValue, "assetCookie", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mAssetCookie == NULL, "Unable to find TypedValue.assetCookie");
-    gTypedValueOffsets.mResourceId
-        = env->GetFieldID(typedValue, "resourceId", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mResourceId == NULL, "Unable to find TypedValue.resourceId");
-    gTypedValueOffsets.mChangingConfigurations
-        = env->GetFieldID(typedValue, "changingConfigurations", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mChangingConfigurations == NULL, "Unable to find TypedValue.changingConfigurations");
-    gTypedValueOffsets.mDensity = env->GetFieldID(typedValue, "density", "I");
-    LOG_FATAL_IF(gTypedValueOffsets.mDensity == NULL, "Unable to find TypedValue.density");
+    jclass typedValue = FindClassOrDie(env, "android/util/TypedValue");
+    gTypedValueOffsets.mType = GetFieldIDOrDie(env, typedValue, "type", "I");
+    gTypedValueOffsets.mData = GetFieldIDOrDie(env, typedValue, "data", "I");
+    gTypedValueOffsets.mString = GetFieldIDOrDie(env, typedValue, "string",
+                                                 "Ljava/lang/CharSequence;");
+    gTypedValueOffsets.mAssetCookie = GetFieldIDOrDie(env, typedValue, "assetCookie", "I");
+    gTypedValueOffsets.mResourceId = GetFieldIDOrDie(env, typedValue, "resourceId", "I");
+    gTypedValueOffsets.mChangingConfigurations = GetFieldIDOrDie(env, typedValue,
+                                                                 "changingConfigurations", "I");
+    gTypedValueOffsets.mDensity = GetFieldIDOrDie(env, typedValue, "density", "I");
 
-    jclass assetFd = env->FindClass("android/content/res/AssetFileDescriptor");
-    LOG_FATAL_IF(assetFd == NULL, "Unable to find class android/content/res/AssetFileDescriptor");
-    gAssetFileDescriptorOffsets.mFd
-        = env->GetFieldID(assetFd, "mFd", "Landroid/os/ParcelFileDescriptor;");
-    LOG_FATAL_IF(gAssetFileDescriptorOffsets.mFd == NULL, "Unable to find AssetFileDescriptor.mFd");
-    gAssetFileDescriptorOffsets.mStartOffset
-        = env->GetFieldID(assetFd, "mStartOffset", "J");
-    LOG_FATAL_IF(gAssetFileDescriptorOffsets.mStartOffset == NULL, "Unable to find AssetFileDescriptor.mStartOffset");
-    gAssetFileDescriptorOffsets.mLength
-        = env->GetFieldID(assetFd, "mLength", "J");
-    LOG_FATAL_IF(gAssetFileDescriptorOffsets.mLength == NULL, "Unable to find AssetFileDescriptor.mLength");
+    jclass assetFd = FindClassOrDie(env, "android/content/res/AssetFileDescriptor");
+    gAssetFileDescriptorOffsets.mFd = GetFieldIDOrDie(env, assetFd, "mFd",
+                                                      "Landroid/os/ParcelFileDescriptor;");
+    gAssetFileDescriptorOffsets.mStartOffset = GetFieldIDOrDie(env, assetFd, "mStartOffset", "J");
+    gAssetFileDescriptorOffsets.mLength = GetFieldIDOrDie(env, assetFd, "mLength", "J");
 
-    jclass assetManager = env->FindClass("android/content/res/AssetManager");
-    LOG_FATAL_IF(assetManager == NULL, "Unable to find class android/content/res/AssetManager");
-    gAssetManagerOffsets.mObject
-        = env->GetFieldID(assetManager, "mObject", "J");
-    LOG_FATAL_IF(gAssetManagerOffsets.mObject == NULL, "Unable to find AssetManager.mObject");
+    jclass assetManager = FindClassOrDie(env, "android/content/res/AssetManager");
+    gAssetManagerOffsets.mObject = GetFieldIDOrDie(env, assetManager, "mObject", "J");
 
-    jclass stringClass = env->FindClass("java/lang/String");
-    LOG_FATAL_IF(stringClass == NULL, "Unable to find class java/lang/String");
-    g_stringClass = (jclass)env->NewGlobalRef(stringClass);
-    LOG_FATAL_IF(g_stringClass == NULL, "Unable to create global reference for class java/lang/String");
+    jclass stringClass = FindClassOrDie(env, "java/lang/String");
+    g_stringClass = MakeGlobalRefOrDie(env, stringClass);
 
-    jclass sparseArrayClass = env->FindClass("android/util/SparseArray");
-    LOG_FATAL_IF(sparseArrayClass == NULL, "Unable to find class android/util/SparseArray");
-    gSparseArrayOffsets.classObject = (jclass) env->NewGlobalRef(sparseArrayClass);
-    gSparseArrayOffsets.constructor =
-            env->GetMethodID(gSparseArrayOffsets.classObject, "<init>", "()V");
-    LOG_FATAL_IF(gSparseArrayOffsets.constructor == NULL, "Unable to find SparseArray.<init>()");
-    gSparseArrayOffsets.put =
-            env->GetMethodID(gSparseArrayOffsets.classObject, "put", "(ILjava/lang/Object;)V");
-    LOG_FATAL_IF(gSparseArrayOffsets.put == NULL, "Unable to find SparseArray.put(int, V)");
+    jclass sparseArrayClass = FindClassOrDie(env, "android/util/SparseArray");
+    gSparseArrayOffsets.classObject = MakeGlobalRefOrDie(env, sparseArrayClass);
+    gSparseArrayOffsets.constructor = GetMethodIDOrDie(env, gSparseArrayOffsets.classObject,
+                                                       "<init>", "()V");
+    gSparseArrayOffsets.put = GetMethodIDOrDie(env, gSparseArrayOffsets.classObject, "put",
+                                               "(ILjava/lang/Object;)V");
 
-    return AndroidRuntime::registerNativeMethods(env,
-            "android/content/res/AssetManager", gAssetManagerMethods, NELEM(gAssetManagerMethods));
+    return RegisterMethodsOrDie(env, "android/content/res/AssetManager", gAssetManagerMethods,
+                                NELEM(gAssetManagerMethods));
 }
 
 }; // namespace android

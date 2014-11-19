@@ -24,22 +24,7 @@
 #include <hardware/fingerprint.h>
 #include <utils/Log.h>
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_STATIC_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
-        var = env->GetStaticMethodID(clazz, methodName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find static method" methodName);
-
-#define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
-        var = env->GetMethodID(clazz, methodName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method" methodName);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
+#include "core_jni_helpers.h"
 
 namespace android {
 
@@ -104,10 +89,12 @@ static void hal_notify_callback(fingerprint_msg_t msg) {
 
 static void nativeInit(JNIEnv *env, jobject clazz, jobject callbackObj) {
     ALOG(LOG_VERBOSE, LOG_TAG, "nativeInit()\n");
-    FIND_CLASS(gFingerprintServiceClassInfo.clazz, FINGERPRINT_SERVICE);
-    GET_METHOD_ID(gFingerprintServiceClassInfo.notify, gFingerprintServiceClassInfo.clazz,
+    gFingerprintServiceClassInfo.clazz = FindClassOrDie(env, FINGERPRINT_SERVICE);
+    gFingerprintServiceClassInfo.clazz = MakeGlobalRefOrDie(env,
+                                                            gFingerprintServiceClassInfo.clazz);
+    gFingerprintServiceClassInfo.notify = GetMethodIDOrDie(env, gFingerprintServiceClassInfo.clazz,
            "notify", "(III)V");
-    gFingerprintServiceClassInfo.callbackObject = env->NewGlobalRef(callbackObj);
+    gFingerprintServiceClassInfo.callbackObject = MakeGlobalRefOrDie(env, callbackObj);
 }
 
 static jint nativeEnroll(JNIEnv* env, jobject clazz, jint timeout) {
@@ -193,11 +180,11 @@ static const JNINativeMethod g_methods[] = {
 };
 
 int register_android_server_fingerprint_FingerprintService(JNIEnv* env) {
-    FIND_CLASS(gFingerprintServiceClassInfo.clazz, FINGERPRINT_SERVICE);
-    GET_METHOD_ID(gFingerprintServiceClassInfo.notify, gFingerprintServiceClassInfo.clazz, "notify",
-            "(III)V");
-    int result = AndroidRuntime::registerNativeMethods(
-        env, FINGERPRINT_SERVICE, g_methods, NELEM(g_methods));
+    jclass clazz = FindClassOrDie(env, FINGERPRINT_SERVICE);
+    gFingerprintServiceClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
+    gFingerprintServiceClassInfo.notify = GetMethodIDOrDie(env, gFingerprintServiceClassInfo.clazz,
+                                                           "notify", "(III)V");
+    int result = RegisterMethodsOrDie(env, FINGERPRINT_SERVICE, g_methods, NELEM(g_methods));
     ALOG(LOG_VERBOSE, LOG_TAG, "FingerprintManager JNI ready.\n");
     return result;
 }

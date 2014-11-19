@@ -37,6 +37,8 @@
 
 #include <ScopedLocalRef.h>
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 static struct {
@@ -408,30 +410,20 @@ static JNINativeMethod gMethods[] = {
             (void*)nativeConsumeBatchedInputEvents },
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
 int register_android_view_InputEventReceiver(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "android/view/InputEventReceiver",
+    int res = RegisterMethodsOrDie(env, "android/view/InputEventReceiver",
             gMethods, NELEM(gMethods));
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
-    (void)res;
 
-    FIND_CLASS(gInputEventReceiverClassInfo.clazz, "android/view/InputEventReceiver");
+    jclass clazz = FindClassOrDie(env, "android/view/InputEventReceiver");
+    gInputEventReceiverClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
-    GET_METHOD_ID(gInputEventReceiverClassInfo.dispatchInputEvent,
+    gInputEventReceiverClassInfo.dispatchInputEvent = GetMethodIDOrDie(env,
             gInputEventReceiverClassInfo.clazz,
             "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
-    GET_METHOD_ID(gInputEventReceiverClassInfo.dispatchBatchedInputEventPending,
-            gInputEventReceiverClassInfo.clazz,
-            "dispatchBatchedInputEventPending", "()V");
-    return 0;
+    gInputEventReceiverClassInfo.dispatchBatchedInputEventPending = GetMethodIDOrDie(env,
+            gInputEventReceiverClassInfo.clazz, "dispatchBatchedInputEventPending", "()V");
+
+    return res;
 }
 
 } // namespace android

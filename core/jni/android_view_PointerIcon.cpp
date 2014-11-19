@@ -25,6 +25,8 @@
 #include <utils/Log.h>
 #include <android/graphics/GraphicsJNI.h>
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 static struct {
@@ -106,42 +108,26 @@ status_t android_view_PointerIcon_loadSystemIcon(JNIEnv* env, jobject contextObj
 
 // --- JNI Registration ---
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_STATIC_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetStaticMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
 int register_android_view_PointerIcon(JNIEnv* env) {
-    FIND_CLASS(gPointerIconClassInfo.clazz, "android/view/PointerIcon");
+    jclass clazz = FindClassOrDie(env, "android/view/PointerIcon");
+    gPointerIconClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
-    GET_FIELD_ID(gPointerIconClassInfo.mBitmap, gPointerIconClassInfo.clazz,
+    gPointerIconClassInfo.mBitmap = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
             "mBitmap", "Landroid/graphics/Bitmap;");
 
-    GET_FIELD_ID(gPointerIconClassInfo.mStyle, gPointerIconClassInfo.clazz,
+    gPointerIconClassInfo.mStyle = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
             "mStyle", "I");
 
-    GET_FIELD_ID(gPointerIconClassInfo.mHotSpotX, gPointerIconClassInfo.clazz,
+    gPointerIconClassInfo.mHotSpotX = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
             "mHotSpotX", "F");
 
-    GET_FIELD_ID(gPointerIconClassInfo.mHotSpotY, gPointerIconClassInfo.clazz,
+    gPointerIconClassInfo.mHotSpotY = GetFieldIDOrDie(env, gPointerIconClassInfo.clazz,
             "mHotSpotY", "F");
 
-    GET_STATIC_METHOD_ID(gPointerIconClassInfo.getSystemIcon, gPointerIconClassInfo.clazz,
+    gPointerIconClassInfo.getSystemIcon = GetStaticMethodIDOrDie(env, gPointerIconClassInfo.clazz,
             "getSystemIcon", "(Landroid/content/Context;I)Landroid/view/PointerIcon;");
 
-    GET_METHOD_ID(gPointerIconClassInfo.load, gPointerIconClassInfo.clazz,
+    gPointerIconClassInfo.load = GetMethodIDOrDie(env, gPointerIconClassInfo.clazz,
             "load", "(Landroid/content/Context;)Landroid/view/PointerIcon;");
 
     return 0;

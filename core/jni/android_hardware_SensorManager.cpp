@@ -28,6 +28,8 @@
 #include "android_os_MessageQueue.h"
 #include <android_runtime/AndroidRuntime.h>
 
+#include "core_jni_helpers.h"
+
 static struct {
     jclass clazz;
     jmethodID dispatchSensorEvent;
@@ -294,32 +296,22 @@ static JNINativeMethod gBaseEventQueueMethods[] = {
 
 using namespace android;
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
 int register_android_hardware_SensorManager(JNIEnv *env)
 {
-    jniRegisterNativeMethods(env, "android/hardware/SystemSensorManager",
+    RegisterMethodsOrDie(env, "android/hardware/SystemSensorManager",
             gSystemSensorManagerMethods, NELEM(gSystemSensorManagerMethods));
 
-    jniRegisterNativeMethods(env, "android/hardware/SystemSensorManager$BaseEventQueue",
+    RegisterMethodsOrDie(env, "android/hardware/SystemSensorManager$BaseEventQueue",
             gBaseEventQueueMethods, NELEM(gBaseEventQueueMethods));
 
-    FIND_CLASS(gBaseEventQueueClassInfo.clazz, "android/hardware/SystemSensorManager$BaseEventQueue");
+    gBaseEventQueueClassInfo.clazz = FindClassOrDie(env,
+            "android/hardware/SystemSensorManager$BaseEventQueue");
 
-    GET_METHOD_ID(gBaseEventQueueClassInfo.dispatchSensorEvent,
-            gBaseEventQueueClassInfo.clazz,
-            "dispatchSensorEvent", "(I[FIJ)V");
+    gBaseEventQueueClassInfo.dispatchSensorEvent = GetMethodIDOrDie(env,
+            gBaseEventQueueClassInfo.clazz, "dispatchSensorEvent", "(I[FIJ)V");
 
-    GET_METHOD_ID(gBaseEventQueueClassInfo.dispatchFlushCompleteEvent,
-                  gBaseEventQueueClassInfo.clazz,
-                  "dispatchFlushCompleteEvent", "(I)V");
+    gBaseEventQueueClassInfo.dispatchFlushCompleteEvent = GetMethodIDOrDie(env,
+            gBaseEventQueueClassInfo.clazz, "dispatchFlushCompleteEvent", "(I)V");
 
     return 0;
 }
