@@ -208,7 +208,6 @@ static void report_exception(JNIEnv* env, jthrowable excep, const char* msg)
         sleep(60);
         ALOGE("Forcefully exiting");
         exit(1);
-        *((int *) 1) = 1;
     }
 
 bail:
