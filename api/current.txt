@@ -16930,8 +16930,8 @@ package android.net {
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
     field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
-    field public static final java.lang.String EXTRA_NETWORK_REQUEST_NETWORK = "networkRequestNetwork";
-    field public static final java.lang.String EXTRA_NETWORK_REQUEST_NETWORK_REQUEST = "networkRequestNetworkRequest";
+    field public static final java.lang.String EXTRA_NETWORK = "android.net.extra.NETWORK";
+    field public static final java.lang.String EXTRA_NETWORK_REQUEST = "android.net.extra.NETWORK_REQUEST";
     field public static final java.lang.String EXTRA_NETWORK_TYPE = "networkType";
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";

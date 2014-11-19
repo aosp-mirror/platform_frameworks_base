@@ -2381,15 +2381,14 @@ public class ConnectivityManager {
      * successfully finding a network for the applications request.  Retrieve it with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      */
-    public static final String EXTRA_NETWORK_REQUEST_NETWORK = "networkRequestNetwork";
+    public static final String EXTRA_NETWORK = "android.net.extra.NETWORK";
 
     /**
      * The lookup key for a {@link NetworkRequest} object included with the intent after
      * successfully finding a network for the applications request.  Retrieve it with
      * {@link android.content.Intent#getParcelableExtra(String)}.
      */
-    public static final String EXTRA_NETWORK_REQUEST_NETWORK_REQUEST =
-            "networkRequestNetworkRequest";
+    public static final String EXTRA_NETWORK_REQUEST = "android.net.extra.NETWORK_REQUEST";
 
 
     /**
@@ -2405,8 +2404,8 @@ public class ConnectivityManager {
      * &lt;receiver&gt; tag in an AndroidManifest.xml file
      * <p>
      * The operation Intent is delivered with two extras, a {@link Network} typed
-     * extra called {@link #EXTRA_NETWORK_REQUEST_NETWORK} and a {@link NetworkRequest}
-     * typed extra called {@link #EXTRA_NETWORK_REQUEST_NETWORK_REQUEST} containing
+     * extra called {@link #EXTRA_NETWORK} and a {@link NetworkRequest}
+     * typed extra called {@link #EXTRA_NETWORK_REQUEST} containing
      * the original requests parameters.  It is important to create a new,
      * {@link NetworkCallback} based request before completing the processing of the
      * Intent to reserve the network or it will be released shortly after the Intent
