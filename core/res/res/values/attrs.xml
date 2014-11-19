@@ -5660,6 +5660,10 @@
             <enum name="right" value="0x05" />
             <!-- Slide to and from the bottom edge of the Scene. -->
             <enum name="bottom" value="0x50" />
+            <!-- Slide to and from the x-axis position at the start of the Scene root. -->
+            <enum name="start" value="0x00800003"/>
+            <!-- Slide to and from the x-axis position at the end of the Scene root. -->
+            <enum name="end" value="0x00800005"/>
         </attr>
     </declare-styleable>
 
