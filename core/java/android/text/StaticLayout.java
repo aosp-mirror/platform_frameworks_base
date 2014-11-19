@@ -355,14 +355,12 @@ public class StaticLayout extends Layout {
                 while (breakIndex < breakCount && paraStart + breaks[breakIndex] <= spanEnd) {
                     int endPos = paraStart + breaks[breakIndex];
 
-                    boolean moreChars = (endPos < paraEnd); // XXX is this the right way to calculate this?
-
                     v = out(source, here, endPos,
                             fmAscent, fmDescent, fmTop, fmBottom,
                             v, spacingmult, spacingadd, chooseHt,chooseHtv, fm, flags[breakIndex],
                             needMultiply, chdirs, dir, easy, bufEnd, includepad, trackpad,
                             chs, widths, paraStart, ellipsize, ellipsizedWidth,
-                            lineWidths[breakIndex], paint, moreChars);
+                            lineWidths[breakIndex], paint, true);
 
                     if (endPos < spanEnd) {
                         // preserve metrics for current span
