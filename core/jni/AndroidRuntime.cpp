@@ -779,6 +779,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         addOption("-Ximage-compiler-option");
         addOption("--image-classes=/system/etc/preloaded-classes");
 
+        // If there is a compiled-classes file, push it.
+        if (hasFile("/system/etc/compiled-classes")) {
+            addOption("-Ximage-compiler-option");
+            addOption("--compiled-classes=/system/etc/compiled-classes");
+        }
+
         property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
         parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
 
