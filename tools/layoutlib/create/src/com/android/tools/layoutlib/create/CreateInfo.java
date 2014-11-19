@@ -167,6 +167,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.RenderNode#nSetElevation",
         "android.view.RenderNode#nGetElevation",
         "android.view.ViewGroup#drawChild",
+        "android.widget.TimePickerSpinnerDelegate#getAmOrPmKeyCode",
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
         "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
