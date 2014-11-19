@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Inaruhusu programu kusanidi na kuunganika kwenye maonyesho ya Wifi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"dhibiti maonyesho ya Wifi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Inaruhusu programu kudhibiti vipengele vya kiwango cha chini vya maonyesho ya Wifi."</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"dhibiti Virtual Private Networks"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"Huruhusu programu kudhibiti vipengele vya viwango vya chini vya Virtual Private Networks."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"nasa sauti"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Inaruhusu programu kunasa na kuelekeza sauti kwingine."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Kutambua neno tekelezi"</string>
@@ -1700,7 +1702,7 @@
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", salama"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Simu ya dharura"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Umesahau Ruwaza"</string>
-    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Mchoro Usio sahihi"</string>
+    <string name="kg_wrong_pattern" msgid="1850806070801358830">"Mchoro huo si sahihi"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Nenosiri Lisilo sahihi"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"Nambari ya PIN si sahihi"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Jaribu tena baada ya sekunde <xliff:g id="NUMBER">%1$d</xliff:g>."</string>
@@ -1902,4 +1904,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Hadi kengele inayofuata saa <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Hadi kengele inayofuata"</string>
     <string name="muted_by" msgid="6147073845094180001">"Sauti imezimwa na <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"Kuna hitilafu ya ndani ya kifaa chako, na huenda kisiwe thabiti mpaka urejeshe mipangilio ya kiwandani."</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"Kuna hitilafu ya ndani ya kifaa chako. Wasiliana na mtengenezaji wa kifaa chako kwa maelezo."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>
