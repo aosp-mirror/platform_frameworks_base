@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Дозвољава апликацији да конфигурише Wi-Fi екране и повезује се са њима."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"контрола Wi-Fi екрана"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Дозвољава апликацији да контролише функције Wi-Fi екрана ниског нивоа."</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"контролиши виртуелне приватне мреже"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"Дозвољава апликацији да контролише функције ниског нивоа виртуелних приватних мрежа."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"снимање аудио садржаја"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Дозвољава апликацији да снима и преусмерава аудио садржај."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Откривање актуелних речи"</string>
@@ -989,10 +991,10 @@
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Број за хитне случајеве"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Нема услуге."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Екран је закључан."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Притисните „Мени“ да бисте откључали телефон или упутите хитни позив."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Притисните „Мени“ да бисте откључали телефон или упутите хитан позив."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Притисните „Мени“ за откључавање."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Унесите шаблон за откључавање"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Хитни позив"</string>
+    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Хитан позив"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Назад на позив"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Тачно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Покушајте поново"</string>
@@ -1645,7 +1647,7 @@
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Нема више 4G података"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Нема више подат. за мобил. уређ."</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Нема више Wi-Fi података"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Нема података до краја циклуса"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Потрошили сте податке за овај месец"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Прекорачен пренос 2G-3G података"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Прекорачење преноса 4G података"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Ограничење мобилних података је прекорачено"</string>
@@ -1703,7 +1705,7 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Постављени елемент бр. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>×<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безбедно"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Хитни позив"</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Хитан позив"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Заборављени шаблон"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Погрешан шаблон"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Погрешна лозинка"</string>
@@ -1907,4 +1909,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"До следећег аларма у <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"До следећег аларма"</string>
     <string name="muted_by" msgid="6147073845094180001">"Звук је искључио/ла <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"Дошло је до интерног проблема у вези са уређајем и можда ће бити нестабилан док не обавите ресетовање на фабричка подешавања."</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"Дошло је до интерног проблема у вези са уређајем. Потражите детаље од произвођача."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>
