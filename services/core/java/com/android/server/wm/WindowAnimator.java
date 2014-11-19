@@ -41,6 +41,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.Choreographer;
 
 import com.android.server.wm.WindowManagerService.LayoutFields;
 
@@ -63,7 +64,7 @@ public class WindowAnimator {
 
     boolean mAnimating;
 
-    final Runnable mAnimationRunnable;
+    final Choreographer.FrameCallback mAnimationFrameCallback;
 
     /** Time of current animation step. Reset on each iteration */
     long mCurrentTime;
@@ -118,12 +119,11 @@ public class WindowAnimator {
         mContext = service.mContext;
         mPolicy = service.mPolicy;
 
-        mAnimationRunnable = new Runnable() {
-            @Override
-            public void run() {
+        mAnimationFrameCallback = new Choreographer.FrameCallback() {
+            public void doFrame(long frameTimeNs) {
                 synchronized (mService.mWindowMap) {
                     mService.mAnimationScheduled = false;
-                    animateLocked();
+                    animateLocked(frameTimeNs);
                 }
             }
         };
@@ -623,12 +623,12 @@ public class WindowAnimator {
 
 
     /** Locked on mService.mWindowMap. */
-    private void animateLocked() {
+    private void animateLocked(long frameTimeNs) {
         if (!mInitialized) {
             return;
         }
 
-        mCurrentTime = SystemClock.uptimeMillis();
+        mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
         mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
         boolean wasAnimating = mAnimating;
         mAnimating = false;
