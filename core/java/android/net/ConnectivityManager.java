@@ -509,6 +509,8 @@ public class ConnectivityManager {
                 return "MOBILE_EMERGENCY";
             case TYPE_PROXY:
                 return "PROXY";
+            case TYPE_VPN:
+                return "VPN";
             default:
                 return Integer.toString(type);
         }
