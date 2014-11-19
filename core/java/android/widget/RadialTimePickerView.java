@@ -452,7 +452,10 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
     }
 
     public void initialize(int hour, int minute, boolean is24HourMode) {
-        mIs24HourMode = is24HourMode;
+        if (mIs24HourMode != is24HourMode) {
+            mIs24HourMode = is24HourMode;
+            initData();
+        }
 
         setCurrentHourInternal(hour, false, false);
         setCurrentMinuteInternal(minute, false);
