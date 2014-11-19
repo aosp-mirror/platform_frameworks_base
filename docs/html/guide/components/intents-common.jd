@@ -2282,6 +2282,14 @@ public void dialPhoneNumber(String phoneNumber) {
     <li>"search for cat videos on myvideoapp"</li>
   </ul>
 </div>
+<!-- Video box -->
+<a class="notice-developers-video"
+   href="https://www.youtube.com/watch?v=PS1FbB5qWEI">
+<div>
+    <h3>Video</h3>
+    <p>Voice search in your app</p>
+</div>
+</a>
 
 <p>To support search within the context of your app, declare an intent filter in your app with
 the <code>SEARCH_ACTION</code> action, as shown in the example intent filter below.</p>
