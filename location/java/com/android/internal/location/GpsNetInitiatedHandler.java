@@ -49,7 +49,7 @@ public class GpsNetInitiatedHandler {
 
     private static final String TAG = "GpsNetInitiatedHandler";
 
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG = false;
 
     // NI verify activity for bringing up UI (not used yet)
     public static final String ACTION_NI_VERIFY = "android.intent.action.NETWORK_INITIATED_VERIFY";
