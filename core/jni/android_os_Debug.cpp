@@ -272,6 +272,7 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                         subHeap = HEAP_DALVIK_LINEARALLOC;
                     } else if ((strstr(name, "/dev/ashmem/dalvik-alloc space") == name) ||
                                (strstr(name, "/dev/ashmem/dalvik-main space") == name) ||
+                               (strstr(name, "/dev/ashmem/dalvik-zygote space") == name) ||
                                (strstr(name, "/dev/ashmem/dalvik-non moving space") == name)) {
                         // This is the regular Dalvik heap.
                         whichHeap = HEAP_DALVIK;
