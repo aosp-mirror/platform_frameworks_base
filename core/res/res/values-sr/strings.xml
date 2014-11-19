@@ -896,10 +896,10 @@
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Број за хитне случајеве"</string>
     <string name="lockscreen_carrier_default" msgid="8963839242565653192">"Нема услуге."</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Екран је закључан."</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Притисните „Мени“ да бисте откључали телефон или упутите хитни позив."</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Притисните „Мени“ да бисте откључали телефон или упутите хитан позив."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Притисните „Мени“ за откључавање."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Унесите шаблон за откључавање"</string>
-    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Хитни позив"</string>
+    <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Хитан позив"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Назад на позив"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Тачно!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Покушајте поново"</string>
@@ -1541,7 +1541,7 @@
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Нема више 4G података"</string>
     <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Нема више подат. за мобил. уређ."</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Нема више Wi-Fi података"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Нема података до краја циклуса"</string>
+    <string name="data_usage_limit_body" msgid="291731708279614081">"Потрошили сте податке за овај месец"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Прекорачен пренос 2G-3G података"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Прекорачење преноса 4G података"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="4941346653729943789">"Ограничење мобилних података је прекорачено"</string>
@@ -1597,7 +1597,7 @@
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Постављени елемент бр. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>×<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безбедно"</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Хитни позив"</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Хитан позив"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Заборављени шаблон"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Погрешан шаблон"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Погрешна лозинка"</string>
