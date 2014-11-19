@@ -25,6 +25,8 @@
 #include "android_view_InputDevice.h"
 #include "android_view_KeyCharacterMap.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 static struct {
@@ -77,24 +79,15 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
 }
 
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className);
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
 int register_android_view_InputDevice(JNIEnv* env)
 {
-    FIND_CLASS(gInputDeviceClassInfo.clazz, "android/view/InputDevice");
-    gInputDeviceClassInfo.clazz = jclass(env->NewGlobalRef(gInputDeviceClassInfo.clazz));
+    gInputDeviceClassInfo.clazz = FindClassOrDie(env, "android/view/InputDevice");
+    gInputDeviceClassInfo.clazz = MakeGlobalRefOrDie(env, gInputDeviceClassInfo.clazz);
 
-    GET_METHOD_ID(gInputDeviceClassInfo.ctor, gInputDeviceClassInfo.clazz,
-            "<init>",
+    gInputDeviceClassInfo.ctor = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "<init>",
             "(IIILjava/lang/String;IILjava/lang/String;ZIILandroid/view/KeyCharacterMap;ZZ)V");
 
-    GET_METHOD_ID(gInputDeviceClassInfo.addMotionRange, gInputDeviceClassInfo.clazz,
+    gInputDeviceClassInfo.addMotionRange = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz,
             "addMotionRange", "(IIFFFFF)V");
 
     return 0;

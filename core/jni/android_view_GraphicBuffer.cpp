@@ -38,6 +38,8 @@
 
 #include <private/gui/ComposerService.h>
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -277,18 +279,6 @@ sp<GraphicBuffer> graphicBufferForJavaObject(JNIEnv* env, jobject obj) {
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(!var, "Unable to find method " methodName);
-
 const char* const kClassPathName = "android/view/GraphicBuffer";
 
 static JNINativeMethod gMethods[] = {
@@ -307,22 +297,21 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_android_view_GraphicBuffer(JNIEnv* env) {
-    jclass clazz;
-    FIND_CLASS(clazz, "android/view/GraphicBuffer");
-    GET_FIELD_ID(gGraphicBufferClassInfo.mNativeObject, clazz, "mNativeObject", "J");
+    jclass clazz = FindClassOrDie(env, "android/view/GraphicBuffer");
+    gGraphicBufferClassInfo.mNativeObject = GetFieldIDOrDie(env, clazz, "mNativeObject", "J");
 
-    FIND_CLASS(clazz, "android/graphics/Rect");
-    GET_METHOD_ID(gRectClassInfo.set, clazz, "set", "(IIII)V");
-    GET_FIELD_ID(gRectClassInfo.left, clazz, "left", "I");
-    GET_FIELD_ID(gRectClassInfo.top, clazz, "top", "I");
-    GET_FIELD_ID(gRectClassInfo.right, clazz, "right", "I");
-    GET_FIELD_ID(gRectClassInfo.bottom, clazz, "bottom", "I");
+    clazz = FindClassOrDie(env, "android/graphics/Rect");
+    gRectClassInfo.set = GetMethodIDOrDie(env, clazz, "set", "(IIII)V");
+    gRectClassInfo.left = GetFieldIDOrDie(env, clazz, "left", "I");
+    gRectClassInfo.top = GetFieldIDOrDie(env, clazz, "top", "I");
+    gRectClassInfo.right = GetFieldIDOrDie(env, clazz, "right", "I");
+    gRectClassInfo.bottom = GetFieldIDOrDie(env, clazz, "bottom", "I");
 
-    FIND_CLASS(clazz, "android/graphics/Canvas");
-    GET_FIELD_ID(gCanvasClassInfo.mSurfaceFormat, clazz, "mSurfaceFormat", "I");
-    GET_METHOD_ID(gCanvasClassInfo.setNativeBitmap, clazz, "setNativeBitmap", "(J)V");
+    clazz = FindClassOrDie(env, "android/graphics/Canvas");
+    gCanvasClassInfo.mSurfaceFormat = GetFieldIDOrDie(env, clazz, "mSurfaceFormat", "I");
+    gCanvasClassInfo.setNativeBitmap = GetMethodIDOrDie(env, clazz, "setNativeBitmap", "(J)V");
 
-    return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
 };

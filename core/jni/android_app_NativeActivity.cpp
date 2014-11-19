@@ -40,6 +40,8 @@
 
 #include "nativebridge/native_bridge.h"
 
+#include "core_jni_helpers.h"
+
 #define LOG_TRACE(...)
 //#define LOG_TRACE(...) ALOG(LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 
@@ -632,39 +634,20 @@ static const JNINativeMethod g_methods[] = {
 
 static const char* const kNativeActivityPathName = "android/app/NativeActivity";
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class %s", className);
-
-#define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
-        var = env->GetMethodID(clazz, methodName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method" methodName);
-        
 int register_android_app_NativeActivity(JNIEnv* env)
 {
     //ALOGD("register_android_app_NativeActivity");
-    jclass clazz;
-    FIND_CLASS(clazz, kNativeActivityPathName);
+    jclass clazz = FindClassOrDie(env, kNativeActivityPathName);
 
-    GET_METHOD_ID(gNativeActivityClassInfo.finish,
-            clazz,
-            "finish", "()V");
-    GET_METHOD_ID(gNativeActivityClassInfo.setWindowFlags,
-            clazz,
-            "setWindowFlags", "(II)V");
-    GET_METHOD_ID(gNativeActivityClassInfo.setWindowFormat,
-            clazz,
-            "setWindowFormat", "(I)V");
-    GET_METHOD_ID(gNativeActivityClassInfo.showIme,
-            clazz,
-            "showIme", "(I)V");
-    GET_METHOD_ID(gNativeActivityClassInfo.hideIme,
-            clazz,
-            "hideIme", "(I)V");
+    gNativeActivityClassInfo.finish = GetMethodIDOrDie(env, clazz, "finish", "()V");
+    gNativeActivityClassInfo.setWindowFlags = GetMethodIDOrDie(env, clazz, "setWindowFlags",
+                                                               "(II)V");
+    gNativeActivityClassInfo.setWindowFormat = GetMethodIDOrDie(env, clazz, "setWindowFormat",
+                                                                "(I)V");
+    gNativeActivityClassInfo.showIme = GetMethodIDOrDie(env, clazz, "showIme", "(I)V");
+    gNativeActivityClassInfo.hideIme = GetMethodIDOrDie(env, clazz, "hideIme", "(I)V");
 
-    return AndroidRuntime::registerNativeMethods(
-        env, kNativeActivityPathName,
-        g_methods, NELEM(g_methods));
+    return RegisterMethodsOrDie(env, kNativeActivityPathName, g_methods, NELEM(g_methods));
 }
 
 } // namespace android

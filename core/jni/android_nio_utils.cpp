@@ -16,6 +16,8 @@
 
 #include "android_nio_utils.h"
 
+#include "core_jni_helpers.h"
+
 struct NioJNIData {
     jclass nioAccessClass;
 
@@ -73,32 +75,19 @@ android::AutoBufferPointer::~AutoBufferPointer() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static jclass findClass(JNIEnv* env, const char name[]) {
-    jclass c = env->FindClass(name);
-    LOG_FATAL_IF(!c, "Unable to find class %s", name);
-    return c;
-}
-
-static jmethodID findStaticMethod(JNIEnv* env, jclass c, const char method[],
-                                  const char params[]) {
-    jmethodID m = env->GetStaticMethodID(c, method, params);
-    LOG_FATAL_IF(!m, "Unable to find method %s", method);
-    return m;
-}
-
 namespace android {
 
 int register_android_nio_utils(JNIEnv* env) {
-    jclass localClass = findClass(env, "java/nio/NIOAccess");
-    gNioJNI.getBasePointerID = findStaticMethod(env, localClass,
-                                    "getBasePointer", "(Ljava/nio/Buffer;)J");
-    gNioJNI.getBaseArrayID = findStaticMethod(env, localClass,
-                    "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
-    gNioJNI.getBaseArrayOffsetID = findStaticMethod(env, localClass,
-                                "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
+    jclass localClass = FindClassOrDie(env, "java/nio/NIOAccess");
+    gNioJNI.getBasePointerID = GetStaticMethodIDOrDie(env, localClass, "getBasePointer",
+                                                      "(Ljava/nio/Buffer;)J");
+    gNioJNI.getBaseArrayID = GetStaticMethodIDOrDie(env, localClass, "getBaseArray",
+                                                    "(Ljava/nio/Buffer;)Ljava/lang/Object;");
+    gNioJNI.getBaseArrayOffsetID = GetStaticMethodIDOrDie(env, localClass, "getBaseArrayOffset",
+                                                          "(Ljava/nio/Buffer;)I");
 
     // now record a permanent version of the class ID
-    gNioJNI.nioAccessClass = (jclass) env->NewGlobalRef(localClass);
+    gNioJNI.nioAccessClass = MakeGlobalRefOrDie(env, localClass);
 
     return 0;
 }

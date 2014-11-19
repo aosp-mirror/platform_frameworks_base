@@ -37,6 +37,8 @@
 
 #include <ScopedLocalRef.h>
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 static struct {
@@ -299,27 +301,16 @@ static JNINativeMethod gMethods[] = {
             (void*)nativeSendMotionEvent },
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
 int register_android_view_InputEventSender(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "android/view/InputEventSender",
-            gMethods, NELEM(gMethods));
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
-    (void)res;
+    int res = RegisterMethodsOrDie(env, "android/view/InputEventSender", gMethods, NELEM(gMethods));
 
-    FIND_CLASS(gInputEventSenderClassInfo.clazz, "android/view/InputEventSender");
+    jclass clazz = FindClassOrDie(env, "android/view/InputEventSender");
+    gInputEventSenderClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
-    GET_METHOD_ID(gInputEventSenderClassInfo.dispatchInputEventFinished,
-            gInputEventSenderClassInfo.clazz,
-            "dispatchInputEventFinished", "(IZ)V");
-    return 0;
+    gInputEventSenderClassInfo.dispatchInputEventFinished = GetMethodIDOrDie(
+            env, gInputEventSenderClassInfo.clazz, "dispatchInputEventFinished", "(IZ)V");
+
+    return res;
 }
 
 } // namespace android

@@ -47,6 +47,8 @@
 
 #include "MinikinUtils.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 using namespace uirenderer;
@@ -980,32 +982,19 @@ static JNINativeMethod gActivityThreadMethods[] = {
                                                (void*) android_app_ActivityThread_dumpGraphics }
 };
 
-
+int register_android_view_GLES20Canvas(JNIEnv* env) {
 #ifdef USE_OPENGL_RENDERER
-    #define FIND_CLASS(var, className) \
-            var = env->FindClass(className); \
-            LOG_FATAL_IF(! var, "Unable to find class " className);
-
-    #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-            var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-            LOG_FATAL_IF(! var, "Unable to find method " methodName);
-#else
-    #define FIND_CLASS(var, className)
-    #define GET_METHOD_ID(var, clazz, methodName, methodDescriptor)
+    jclass clazz = FindClassOrDie(env, "android/graphics/Rect");
+    gRectClassInfo.set = GetMethodIDOrDie(env, clazz, "set", "(IIII)V");
 #endif
 
-int register_android_view_GLES20Canvas(JNIEnv* env) {
-    jclass clazz;
-    FIND_CLASS(clazz, "android/graphics/Rect");
-    GET_METHOD_ID(gRectClassInfo.set, clazz, "set", "(IIII)V");
-
-    return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
 const char* const kActivityThreadPathName = "android/app/ActivityThread";
 
 int register_android_app_ActivityThread(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, kActivityThreadPathName,
+    return RegisterMethodsOrDie(env, kActivityThreadPathName,
             gActivityThreadMethods, NELEM(gActivityThreadMethods));
 }
 
