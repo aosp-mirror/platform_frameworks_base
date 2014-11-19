@@ -104,10 +104,16 @@ sdk.platform.apiLevel=21
   </li>
 </ol>
 
-<h2>API 区别</h2>
+<h2>API Differences</h2>
 <ol>
-<li><a href="{@docRoot}sdk/api_diff/21/changes.html">API 级别 20 对比 21 »</a> </li>
-<li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">L Developer Preview 对比级别 21 »</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/21/changes.html">API level 20 to 21 &raquo;</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">L Developer Preview to 21 &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+<li><a href="{@docRoot}about/versions/android-5.0-changes.html">Android 5.0 Behavior Changes</a> </li>
+<li><a href="{@docRoot}about/versions/lollipop.html">Android Lollipop Highlights</a> </li>
 </ol>
 
 </div>
