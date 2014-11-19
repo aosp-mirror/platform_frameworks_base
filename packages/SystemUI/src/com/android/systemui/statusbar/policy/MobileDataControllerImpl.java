@@ -38,12 +38,10 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 
-import com.android.systemui.statusbar.policy.NetworkController.DataUsageInfo;
-
 import java.util.Date;
 import java.util.Locale;
 
-public class MobileDataController {
+public class MobileDataControllerImpl implements NetworkController.MobileDataController {
     private static final String TAG = "MobileDataController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -61,14 +59,19 @@ public class MobileDataController {
 
     private INetworkStatsSession mSession;
     private Callback mCallback;
+    private NetworkControllerImpl mNetworkController;
 
-    public MobileDataController(Context context) {
+    public MobileDataControllerImpl(Context context) {
         mContext = context;
         mTelephonyManager = TelephonyManager.from(context);
         mConnectivityManager = ConnectivityManager.from(context);
         mStatsService = INetworkStatsService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         mPolicyManager = NetworkPolicyManager.from(mContext);
+    }
+
+    public void setNetworkController(NetworkControllerImpl networkController) {
+        mNetworkController = networkController;
     }
 
     private INetworkStatsSession getSession() {
@@ -154,6 +157,9 @@ public class MobileDataController {
                 usage.warningLevel = policy.warningBytes > 0 ? policy.warningBytes : 0;
             } else {
                 usage.warningLevel = DEFAULT_WARNING_LEVEL;
+            }
+            if (usage != null) {
+                usage.carrier = mNetworkController.getMobileNetworkName();
             }
             return usage;
         } catch (RemoteException e) {

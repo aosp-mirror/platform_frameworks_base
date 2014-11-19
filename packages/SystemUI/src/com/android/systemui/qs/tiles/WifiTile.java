@@ -31,7 +31,8 @@ import com.android.systemui.qs.QSTile;
 import com.android.systemui.qs.QSTileView;
 import com.android.systemui.qs.SignalTileView;
 import com.android.systemui.statusbar.policy.NetworkController;
-import com.android.systemui.statusbar.policy.NetworkController.AccessPoint;
+import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
+import com.android.systemui.statusbar.policy.NetworkController.AccessPointController.AccessPoint;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
 /** Quick settings tile: Wifi **/
@@ -39,12 +40,14 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
 
     private final NetworkController mController;
+    private final AccessPointController mWifiController;
     private final WifiDetailAdapter mDetailAdapter;
     private final QSTile.SignalState mStateBeforeClick = newTileState();
 
     public WifiTile(Host host) {
         super(host);
         mController = host.getNetworkController();
+        mWifiController = mController.getAccessPointController();
         mDetailAdapter = new WifiDetailAdapter();
     }
 
@@ -62,10 +65,10 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     public void setListening(boolean listening) {
         if (listening) {
             mController.addNetworkSignalChangedCallback(mCallback);
-            mController.addAccessPointCallback(mDetailAdapter);
+            mWifiController.addAccessPointCallback(mDetailAdapter);
         } else {
             mController.removeNetworkSignalChangedCallback(mCallback);
-            mController.removeAccessPointCallback(mDetailAdapter);
+            mWifiController.removeAccessPointCallback(mDetailAdapter);
         }
     }
 
@@ -87,7 +90,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
 
     @Override
     protected void handleSecondaryClick() {
-        if (!mController.canConfigWifi()) {
+        if (!mWifiController.canConfigWifi()) {
             mHost.startSettingsActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
             return;
         }
@@ -231,7 +234,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
     };
 
     private final class WifiDetailAdapter implements DetailAdapter,
-            NetworkController.AccessPointCallback, QSDetailItems.Callback {
+            NetworkController.AccessPointController.AccessPointCallback, QSDetailItems.Callback {
 
         private QSDetailItems mItems;
         private AccessPoint[] mAccessPoints;
@@ -261,7 +264,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
         public View createDetailView(Context context, View convertView, ViewGroup parent) {
             if (DEBUG) Log.d(TAG, "createDetailView convertView=" + (convertView != null));
             mAccessPoints = null;
-            mController.scanForAccessPoints();
+            mWifiController.scanForAccessPoints();
             fireScanStateChanged(true);
             mItems = QSDetailItems.convertOrInflate(context, convertView, parent);
             mItems.setTagSuffix("Wifi");
@@ -287,7 +290,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
             if (item == null || item.tag == null) return;
             final AccessPoint ap = (AccessPoint) item.tag;
             if (!ap.isConnected) {
-                if (mController.connect(ap)) {
+                if (mWifiController.connect(ap)) {
                     mHost.collapsePanels();
                 }
             }

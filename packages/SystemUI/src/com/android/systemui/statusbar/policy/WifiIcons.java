@@ -45,5 +45,8 @@ class WifiIcons {
               R.drawable.ic_qs_wifi_full_4 }
         };
 
+    static final int QS_WIFI_NO_NETWORK = R.drawable.ic_qs_wifi_no_network;
+    static final int WIFI_NO_NETWORK = R.drawable.stat_sys_wifi_signal_null;
+
     static final int WIFI_LEVEL_COUNT = WIFI_SIGNAL_STRENGTH[0].length;
 }

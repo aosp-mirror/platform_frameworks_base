@@ -36,15 +36,13 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.policy.NetworkController.AccessPoint;
-import com.android.systemui.statusbar.policy.NetworkController.AccessPointCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class AccessPointController {
+public class AccessPointControllerImpl implements NetworkController.AccessPointController {
     private static final String TAG = "AccessPointController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -69,7 +67,7 @@ public class AccessPointController {
     private boolean mScanning;
     private int mCurrentUser;
 
-    public AccessPointController(Context context) {
+    public AccessPointControllerImpl(Context context) {
         mContext = context;
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
@@ -81,25 +79,28 @@ public class AccessPointController {
                 new UserHandle(mCurrentUser));
     }
 
-    void onUserSwitched(int newUserId) {
+    public void onUserSwitched(int newUserId) {
         mCurrentUser = newUserId;
     }
 
-    public void addCallback(AccessPointCallback callback) {
+    @Override
+    public void addAccessPointCallback(AccessPointCallback callback) {
         if (callback == null || mCallbacks.contains(callback)) return;
         if (DEBUG) Log.d(TAG, "addCallback " + callback);
         mCallbacks.add(callback);
         mReceiver.setListening(!mCallbacks.isEmpty());
     }
 
-    public void removeCallback(AccessPointCallback callback) {
+    @Override
+    public void removeAccessPointCallback(AccessPointCallback callback) {
         if (callback == null) return;
         if (DEBUG) Log.d(TAG, "removeCallback " + callback);
         mCallbacks.remove(callback);
         mReceiver.setListening(!mCallbacks.isEmpty());
     }
 
-    public void scan() {
+    @Override
+    public void scanForAccessPoints() {
         if (mScanning) return;
         if (DEBUG) Log.d(TAG, "scan!");
         mScanning = mWifiManager.startScan();

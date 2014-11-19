@@ -18,7 +18,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
-                mock(AccessPointController.class), mock(MobileDataController.class));
+                mConfig, mock(AccessPointControllerImpl.class),
+                mock(MobileDataControllerImpl.class));
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, 0, 0);
