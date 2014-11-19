@@ -484,7 +484,8 @@ static void convertAudioGainConfigToNative(JNIEnv *env,
 
 static jint convertAudioPortConfigToNative(JNIEnv *env,
                                                struct audio_port_config *nAudioPortConfig,
-                                               const jobject jAudioPortConfig)
+                                               const jobject jAudioPortConfig,
+                                               bool useConfigMask)
 {
     jobject jAudioPort = env->GetObjectField(jAudioPortConfig, gAudioPortConfigFields.mPort);
     jobject jHandle = env->GetObjectField(jAudioPort, gAudioPortFields.mHandle);
@@ -503,8 +504,13 @@ static jint convertAudioPortConfigToNative(JNIEnv *env,
     ALOGV("convertAudioPortConfigToNative handle %d role %d type %d",
           nAudioPortConfig->id, nAudioPortConfig->role, nAudioPortConfig->type);
 
+    unsigned int configMask = 0;
+
     nAudioPortConfig->sample_rate = env->GetIntField(jAudioPortConfig,
                                                      gAudioPortConfigFields.mSamplingRate);
+    if (nAudioPortConfig->sample_rate != 0) {
+        configMask |= AUDIO_PORT_CONFIG_SAMPLE_RATE;
+    }
 
     bool useInMask = useInChannelMask(nAudioPortConfig->type, nAudioPortConfig->role);
     audio_channel_mask_t nMask;
@@ -518,22 +524,34 @@ static jint convertAudioPortConfigToNative(JNIEnv *env,
         ALOGV("convertAudioPortConfigToNative OUT mask java %x native %x", jMask, nMask);
     }
     nAudioPortConfig->channel_mask = nMask;
+    if (nAudioPortConfig->channel_mask != AUDIO_CHANNEL_NONE) {
+        configMask |= AUDIO_PORT_CONFIG_CHANNEL_MASK;
+    }
 
     jint jFormat = env->GetIntField(jAudioPortConfig, gAudioPortConfigFields.mFormat);
     audio_format_t nFormat = audioFormatToNative(jFormat);
     ALOGV("convertAudioPortConfigToNative format %d native %d", jFormat, nFormat);
     nAudioPortConfig->format = nFormat;
+    if (nAudioPortConfig->format != AUDIO_FORMAT_DEFAULT &&
+            nAudioPortConfig->format != AUDIO_FORMAT_INVALID) {
+        configMask |= AUDIO_PORT_CONFIG_FORMAT;
+    }
+
     jobject jGain = env->GetObjectField(jAudioPortConfig, gAudioPortConfigFields.mGain);
     if (jGain != NULL) {
         convertAudioGainConfigToNative(env, &nAudioPortConfig->gain, jGain, useInMask);
         env->DeleteLocalRef(jGain);
+        configMask |= AUDIO_PORT_CONFIG_GAIN;
     } else {
         ALOGV("convertAudioPortConfigToNative no gain");
         nAudioPortConfig->gain.index = -1;
     }
-    nAudioPortConfig->config_mask = env->GetIntField(jAudioPortConfig,
-                                                     gAudioPortConfigFields.mConfigMask);
-
+    if (useConfigMask) {
+        nAudioPortConfig->config_mask = env->GetIntField(jAudioPortConfig,
+                                                         gAudioPortConfigFields.mConfigMask);
+    } else {
+        nAudioPortConfig->config_mask = configMask;
+    }
     env->DeleteLocalRef(jAudioPort);
     env->DeleteLocalRef(jHandle);
     return (jint)AUDIO_JAVA_SUCCESS;
@@ -998,7 +1016,7 @@ android_media_AudioSystem_createAudioPatch(JNIEnv *env, jobject clazz,
             jStatus = (jint)AUDIO_JAVA_BAD_VALUE;
             goto exit;
         }
-        jStatus = convertAudioPortConfigToNative(env, &nPatch.sources[i], jSource);
+        jStatus = convertAudioPortConfigToNative(env, &nPatch.sources[i], jSource, false);
         env->DeleteLocalRef(jSource);
         jSource = NULL;
         if (jStatus != AUDIO_JAVA_SUCCESS) {
@@ -1013,7 +1031,7 @@ android_media_AudioSystem_createAudioPatch(JNIEnv *env, jobject clazz,
             jStatus = (jint)AUDIO_JAVA_BAD_VALUE;
             goto exit;
         }
-        jStatus = convertAudioPortConfigToNative(env, &nPatch.sinks[i], jSink);
+        jStatus = convertAudioPortConfigToNative(env, &nPatch.sinks[i], jSink, false);
         env->DeleteLocalRef(jSink);
         jSink = NULL;
         if (jStatus != AUDIO_JAVA_SUCCESS) {
@@ -1268,7 +1286,7 @@ android_media_AudioSystem_setAudioPortConfig(JNIEnv *env, jobject clazz,
         return AUDIO_JAVA_BAD_VALUE;
     }
     struct audio_port_config nAudioPortConfig;
-    jint jStatus = convertAudioPortConfigToNative(env, &nAudioPortConfig, jAudioPortConfig);
+    jint jStatus = convertAudioPortConfigToNative(env, &nAudioPortConfig, jAudioPortConfig, true);
     if (jStatus != AUDIO_JAVA_SUCCESS) {
         return jStatus;
     }
