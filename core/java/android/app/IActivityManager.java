@@ -219,9 +219,11 @@ public interface IActivityManager extends IInterface {
 
     public int checkPermission(String permission, int pid, int uid)
             throws RemoteException;
-
-    public int checkUriPermission(Uri uri, int pid, int uid, int mode, int userId)
+    public int checkPermissionWithToken(String permission, int pid, int uid, IBinder callerToken)
             throws RemoteException;
+
+    public int checkUriPermission(Uri uri, int pid, int uid, int mode, int userId,
+            IBinder callerToken) throws RemoteException;
     public void grantUriPermission(IApplicationThread caller, String targetPkg, Uri uri,
             int mode, int userId) throws RemoteException;
     public void revokeUriPermission(IApplicationThread caller, Uri uri, int mode, int userId)
@@ -785,4 +787,5 @@ public interface IActivityManager extends IInterface {
     int GET_TASK_DESCRIPTION_ICON_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+238;
     int LAUNCH_ASSIST_INTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+239;
     int START_IN_PLACE_ANIMATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+240;
+    int CHECK_PERMISSION_WITH_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+241;
 }

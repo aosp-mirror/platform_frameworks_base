@@ -834,10 +834,12 @@ public final class ActivityManagerService extends ActivityManagerNative
      * indirect content-provider access.
      */
     private class Identity {
-        public int pid;
-        public int uid;
+        public final IBinder token;
+        public final int pid;
+        public final int uid;
 
-        Identity(int _pid, int _uid) {
+        Identity(IBinder _token, int _pid, int _uid) {
+            token = _token;
             pid = _pid;
             uid = _uid;
         }
@@ -2271,15 +2273,19 @@ public final class ActivityManagerService extends ActivityManagerNative
      * process when the bindApplication() IPC is sent to the process. They're
      * lazily setup to make sure the services are running when they're asked for.
      */
-    private HashMap<String, IBinder> getCommonServicesLocked() {
+    private HashMap<String, IBinder> getCommonServicesLocked(boolean isolated) {
         if (mAppBindArgs == null) {
-            mAppBindArgs = new HashMap<String, IBinder>();
+            mAppBindArgs = new HashMap<>();
 
-            // Setup the application init args
-            mAppBindArgs.put("package", ServiceManager.getService("package"));
-            mAppBindArgs.put("window", ServiceManager.getService("window"));
-            mAppBindArgs.put(Context.ALARM_SERVICE,
-                    ServiceManager.getService(Context.ALARM_SERVICE));
+            // Isolated processes won't get this optimization, so that we don't
+            // violate the rules about which services they have access to.
+            if (!isolated) {
+                // Setup the application init args
+                mAppBindArgs.put("package", ServiceManager.getService("package"));
+                mAppBindArgs.put("window", ServiceManager.getService("window"));
+                mAppBindArgs.put(Context.ALARM_SERVICE,
+                        ServiceManager.getService(Context.ALARM_SERVICE));
+            }
         }
         return mAppBindArgs;
     }
@@ -5902,7 +5908,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     profilerInfo, app.instrumentationArguments, app.instrumentationWatcher,
                     app.instrumentationUiAutomationConnection, testMode, enableOpenGlTrace,
                     isRestrictedBackupMode || !normalMode, app.persistent,
-                    new Configuration(mConfiguration), app.compat, getCommonServicesLocked(),
+                    new Configuration(mConfiguration), app.compat,
+                    getCommonServicesLocked(app.isolated),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, null);
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
@@ -6722,21 +6729,9 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     int checkComponentPermission(String permission, int pid, int uid,
             int owningUid, boolean exported) {
-        // We might be performing an operation on behalf of an indirect binder
-        // invocation, e.g. via {@link #openContentUri}.  Check and adjust the
-        // client identity accordingly before proceeding.
-        Identity tlsIdentity = sCallerIdentity.get();
-        if (tlsIdentity != null) {
-            Slog.d(TAG, "checkComponentPermission() adjusting {pid,uid} to {"
-                    + tlsIdentity.pid + "," + tlsIdentity.uid + "}");
-            uid = tlsIdentity.uid;
-            pid = tlsIdentity.pid;
-        }
-
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
-
         return ActivityManager.checkComponentPermission(permission, uid,
                 owningUid, exported);
     }
@@ -6755,6 +6750,26 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (permission == null) {
             return PackageManager.PERMISSION_DENIED;
         }
+        return checkComponentPermission(permission, pid, UserHandle.getAppId(uid), -1, true);
+    }
+
+    @Override
+    public int checkPermissionWithToken(String permission, int pid, int uid, IBinder callerToken) {
+        if (permission == null) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+
+        // We might be performing an operation on behalf of an indirect binder
+        // invocation, e.g. via {@link #openContentUri}.  Check and adjust the
+        // client identity accordingly before proceeding.
+        Identity tlsIdentity = sCallerIdentity.get();
+        if (tlsIdentity != null && tlsIdentity.token == callerToken) {
+            Slog.d(TAG, "checkComponentPermission() adjusting {pid,uid} to {"
+                    + tlsIdentity.pid + "," + tlsIdentity.uid + "}");
+            uid = tlsIdentity.uid;
+            pid = tlsIdentity.pid;
+        }
+
         return checkComponentPermission(permission, pid, UserHandle.getAppId(uid), -1, true);
     }
 
@@ -6963,13 +6978,13 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid,
-            final int modeFlags, int userId) {
+            final int modeFlags, int userId, IBinder callerToken) {
         enforceNotIsolatedCaller("checkUriPermission");
 
         // Another redirected-binder-call permissions check as in
-        // {@link checkComponentPermission}.
+        // {@link checkPermissionWithToken}.
         Identity tlsIdentity = sCallerIdentity.get();
-        if (tlsIdentity != null) {
+        if (tlsIdentity != null && tlsIdentity.token == callerToken) {
             uid = tlsIdentity.uid;
             pid = tlsIdentity.pid;
         }
@@ -9876,10 +9891,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             // we do the check against the caller's permissions even though it looks
             // to the content provider like the Activity Manager itself is making
             // the request.
+            Binder token = new Binder();
             sCallerIdentity.set(new Identity(
-                    Binder.getCallingPid(), Binder.getCallingUid()));
+                    token, Binder.getCallingPid(), Binder.getCallingUid()));
             try {
-                pfd = cph.provider.openFile(null, uri, "r", null);
+                pfd = cph.provider.openFile(null, uri, "r", null, token);
             } catch (FileNotFoundException e) {
                 // do nothing; pfd will be returned null
             } finally {
