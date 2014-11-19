@@ -549,7 +549,7 @@ public class AudioService extends IAudioService.Stub {
                 com.android.internal.R.bool.config_voice_capable)) {
             mPlatformType = PLATFORM_VOICE;
         } else if (context.getPackageManager().hasSystemFeature(
-                                                            PackageManager.FEATURE_TELEVISION)) {
+                                                            PackageManager.FEATURE_LEANBACK)) {
             mPlatformType = PLATFORM_TELEVISION;
         } else {
             mPlatformType = PLATFORM_DEFAULT;
@@ -5318,7 +5318,7 @@ public class AudioService extends IAudioService.Stub {
     private boolean mHdmiSystemAudioSupported = false;
     // Set only when device is tv.
     private HdmiTvClient mHdmiTvClient;
-    // true if the device has system feature PackageManager.FEATURE_TELEVISION.
+    // true if the device has system feature PackageManager.FEATURE_LEANBACK.
     // cached HdmiControlManager interface
     private HdmiControlManager mHdmiManager;
     // Set only when device is a set-top box.
