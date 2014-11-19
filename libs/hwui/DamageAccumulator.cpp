@@ -222,7 +222,7 @@ void DamageAccumulator::finish(SkRect* totalDirty) {
     LOG_ALWAYS_FATAL_IF(mHead->prev != mHead, "Cannot finish, mismatched push/pop calls! %p vs. %p", mHead->prev, mHead);
     // Root node never has a transform, so this is the fully mapped dirty rect
     *totalDirty = mHead->pendingDirty;
-    totalDirty->roundOut();
+    totalDirty->roundOut(totalDirty);
     mHead->pendingDirty.setEmpty();
 }
 

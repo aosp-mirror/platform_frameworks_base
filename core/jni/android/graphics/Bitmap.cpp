@@ -224,37 +224,34 @@ static void ToColor_SI8_Alpha(SkColor dst[], const void* src, int width,
                               SkColorTable* ctable) {
     SkASSERT(width > 0);
     const uint8_t* s = (const uint8_t*)src;
-    const SkPMColor* colors = ctable->lockColors();
+    const SkPMColor* colors = ctable->readColors();
     do {
         *dst++ = SkUnPreMultiply::PMColorToColor(colors[*s++]);
     } while (--width != 0);
-    ctable->unlockColors();
 }
 
 static void ToColor_SI8_Raw(SkColor dst[], const void* src, int width,
                               SkColorTable* ctable) {
     SkASSERT(width > 0);
     const uint8_t* s = (const uint8_t*)src;
-    const SkPMColor* colors = ctable->lockColors();
+    const SkPMColor* colors = ctable->readColors();
     do {
         SkPMColor c = colors[*s++];
         *dst++ = SkColorSetARGB(SkGetPackedA32(c), SkGetPackedR32(c),
                                 SkGetPackedG32(c), SkGetPackedB32(c));
     } while (--width != 0);
-    ctable->unlockColors();
 }
 
 static void ToColor_SI8_Opaque(SkColor dst[], const void* src, int width,
                                SkColorTable* ctable) {
     SkASSERT(width > 0);
     const uint8_t* s = (const uint8_t*)src;
-    const SkPMColor* colors = ctable->lockColors();
+    const SkPMColor* colors = ctable->readColors();
     do {
         SkPMColor c = colors[*s++];
         *dst++ = SkColorSetRGB(SkGetPackedR32(c), SkGetPackedG32(c),
                                SkGetPackedB32(c));
     } while (--width != 0);
-    ctable->unlockColors();
 }
 
 // can return NULL
@@ -639,8 +636,7 @@ static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,
             int count = ctable->count();
             p->writeInt32(count);
             memcpy(p->writeInplace(count * sizeof(SkPMColor)),
-                   ctable->lockColors(), count * sizeof(SkPMColor));
-            ctable->unlockColors();
+                   ctable->readColors(), count * sizeof(SkPMColor));
         } else {
             p->writeInt32(0);   // indicate no ctable
         }
@@ -827,10 +823,8 @@ static jboolean Bitmap_sameAs(JNIEnv* env, jobject, jlong bm0Handle,
             return JNI_FALSE;
         }
 
-        SkAutoLockColors alc0(ct0);
-        SkAutoLockColors alc1(ct1);
         const size_t size = ct0->count() * sizeof(SkPMColor);
-        if (memcmp(alc0.colors(), alc1.colors(), size) != 0) {
+        if (memcmp(ct0->readColors(), ct1->readColors(), size) != 0) {
             return JNI_FALSE;
         }
     }

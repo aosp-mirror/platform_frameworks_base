@@ -223,7 +223,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     }
 
     if (dirty.intersect(0, 0, getWidth(), getHeight())) {
-        dirty.roundOut();
+        dirty.roundOut(&dirty);
         mLayer->updateDeferred(this, dirty.fLeft, dirty.fTop, dirty.fRight, dirty.fBottom);
     }
     // This is not inside the above if because we may have called
