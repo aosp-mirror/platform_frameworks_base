@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"वायफाय प्रदर्शने कॉन्फिगर करण्यासाठी आणि त्यावर कनेक्ट करण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"वायफाय प्रदर्शने नियंत्रित करा"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"वायफाय प्रदर्शनांची निम्न-स्तर वैशिष्ट्ये नियंत्रित करण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"व्हर्च्युअल प्रायव्हेट नेटवर्क नियंत्रित करा"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"अ‍ॅपला व्हर्च्युअल प्रायव्हेट नेटवर्कच्या निम्न-दर्जाच्या वैशिष्‍ट्यांना नियंत्रित करण्‍याची अनुमती देते."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ऑडिओ आउटपुट कॅप्‍चर करा"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"अ‍ॅपला ऑडिओ आउटपुट कॅप्‍चर करण्‍याची आणि पुनर्निर्देशित करण्‍याची अनुमती देते."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hotword शोध"</string>
@@ -833,7 +835,7 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"वर्तमान Android बीम स्थानांतरणांविषयी माहिती प्राप्त करण्यासाठी या अनुप्रयोगास अनुमती देते"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM प्रमाणपत्रे काढा"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"DRM प्रमाणपत्रे काढण्यासाठी अनुप्रयोगास अनुमती देते. सामान्य अॅप्स साठी कधीही आवश्यकता नसते."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"एका वाहक संदेशन सेवेवर प्रतिबद्ध करा"</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"एका वाहक संदेशन सेवेसाठी प्रतिबद्ध"</string>
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"वाहक संदेशन सेवेचा शीर्ष-स्तर इंटरफेस प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्‍य अ‍ॅप्‍सकरिता कधीही आवश्‍यक नसते."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"संकेतशब्द नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्क्रीन-अनलॉक संकेतशब्दांमध्ये अनुमती दिलेली लांबी आणि वर्ण नियंत्रित करा."</string>
@@ -1902,4 +1904,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> वाजता पुढील अलार्मपर्यंत"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"पुढील अलार्मपर्यंत"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारे नि:शब्द केले"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे आणि आपला फॅक्‍टरी डेटा रीसेट होईपर्यंत ती अस्‍थिर असू शकते."</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे. तपशीलांसाठी आपल्‍या निर्मात्याशी संपर्क साधा."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>
