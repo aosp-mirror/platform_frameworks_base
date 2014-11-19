@@ -2066,10 +2066,10 @@ public class TextToSpeech {
         private boolean mEstablished;
 
         private final ITextToSpeechCallback.Stub mCallback = new ITextToSpeechCallback.Stub() {
-            public void onStop(String utteranceId) throws RemoteException {
+            public void onStop(String utteranceId, boolean isStarted) throws RemoteException {
                 UtteranceProgressListener listener = mUtteranceProgressListener;
                 if (listener != null) {
-                    listener.onDone(utteranceId);
+                    listener.onStop(utteranceId, isStarted);
                 }
             };
 

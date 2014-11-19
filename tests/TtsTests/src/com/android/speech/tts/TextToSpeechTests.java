@@ -43,10 +43,17 @@ public class TextToSpeechTests extends InstrumentationTestCase {
         IDelegate passThrough = LittleMock.mock(IDelegate.class);
         MockableTextToSpeechService.setMocker(passThrough);
 
+        // For the default voice selection
+        LittleMock.doReturn(TextToSpeech.LANG_COUNTRY_AVAILABLE).when(passThrough)
+            .onIsLanguageAvailable(
+                    LittleMock.anyString(), LittleMock.anyString(), LittleMock.anyString());
+        LittleMock.doReturn(TextToSpeech.LANG_COUNTRY_AVAILABLE).when(passThrough)
+            .onLoadLanguage(
+                    LittleMock.anyString(), LittleMock.anyString(), LittleMock.anyString());
+
         blockingInitAndVerify(MOCK_ENGINE, TextToSpeech.SUCCESS);
         assertEquals(MOCK_ENGINE, mTts.getCurrentEngine());
     }
-
 
     @Override
     public void tearDown() {
@@ -77,7 +84,7 @@ public class TextToSpeechTests extends InstrumentationTestCase {
         assertEquals(TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE, mTts.setLanguage(new Locale("eng", "USA", "variant")));
         LittleMock.verify(delegate, LittleMock.anyTimes()).onIsLanguageAvailable(
             "eng", "USA", "variant");
-        LittleMock.verify(delegate, LittleMock.times(1)).onLoadLanguage(
+        LittleMock.verify(delegate, LittleMock.anyTimes()).onLoadLanguage(
             "eng", "USA", "variant");
     }
 
@@ -147,25 +154,33 @@ public class TextToSpeechTests extends InstrumentationTestCase {
     public void testDefaultLanguage_setsVoiceName() throws Exception {
         IDelegate delegate = LittleMock.mock(IDelegate.class);
         MockableTextToSpeechService.setMocker(delegate);
+        Locale defaultLocale = Locale.getDefault();
 
         // ---------------------------------------------------------
         // Test that default language also sets the default voice
         // name
-        LittleMock.doReturn(TextToSpeech.LANG_COUNTRY_AVAILABLE).when(delegate).onIsLanguageAvailable(
-            LittleMock.anyString(), LittleMock.anyString(), LittleMock.anyString());
-        LittleMock.doReturn(TextToSpeech.LANG_COUNTRY_AVAILABLE).when(delegate).onLoadLanguage(
-            LittleMock.anyString(), LittleMock.anyString(), LittleMock.anyString());
+        LittleMock.doReturn(TextToSpeech.LANG_COUNTRY_AVAILABLE).
+            when(delegate).onIsLanguageAvailable(
+                defaultLocale.getISO3Language(),
+                defaultLocale.getISO3Country().toUpperCase(),
+                defaultLocale.getVariant());
+        LittleMock.doReturn(TextToSpeech.LANG_COUNTRY_AVAILABLE).
+            when(delegate).onLoadLanguage(
+                defaultLocale.getISO3Language(),
+                defaultLocale.getISO3Country(),
+                defaultLocale.getVariant());
+
         blockingCallSpeak("foo bar", delegate);
         ArgumentCaptor<SynthesisRequest> req = LittleMock.createCaptor();
         LittleMock.verify(delegate, LittleMock.times(1)).onSynthesizeText(req.capture(),
                 LittleMock.<SynthesisCallback>anyObject());
 
-        Locale defaultLocale = Locale.getDefault();
         assertEquals(defaultLocale.getISO3Language(), req.getValue().getLanguage());
         assertEquals(defaultLocale.getISO3Country(), req.getValue().getCountry());
         assertEquals("", req.getValue().getVariant());
         assertEquals(defaultLocale.toLanguageTag(), req.getValue().getVoiceName());
     }
+
 
     private void blockingCallSpeak(String speech, IDelegate mock) throws
             InterruptedException {

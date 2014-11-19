@@ -19,8 +19,10 @@ package com.android.speech.tts;
 import android.speech.tts.SynthesisCallback;
 import android.speech.tts.SynthesisRequest;
 import android.speech.tts.TextToSpeechService;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 public class MockableTextToSpeechService extends TextToSpeechService {
 
