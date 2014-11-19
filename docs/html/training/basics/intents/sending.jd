@@ -1,10 +1,8 @@
 page.title=Sending the User to Another App
-parent.title=Interacting with Other Apps
-parent.link=index.html
+page.tags=intents
+helpoutsWidget=true
 
 trainingnavtop=true
-next.title=Getting a Result from an Activity
-next.link=result.html
 
 @jd:body
 
