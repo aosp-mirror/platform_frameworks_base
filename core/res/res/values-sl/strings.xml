@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Omogoča aplikaciji konfiguriranje zaslonov Wi-Fi in povezovanje z njimi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"nadzor zaslonov Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Omogoča aplikaciji nadzor osnovnih funkcij zaslonov Wi-Fi."</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"upravljanje navideznih zasebnih omrežij"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"Aplikaciji omogoča upravljanje funkcij nizke ravni navideznih zasebnih omrežij."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"zajem avdioizhoda"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Omogoči aplikaciji, da zajame in preusmeri avdioizhod."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Zaznavanje sprožilnih besed"</string>
@@ -1902,4 +1904,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Do naslednjega alarma ob <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Do naslednjega alarma"</string>
     <string name="muted_by" msgid="6147073845094180001">"Izklop zvoka: <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"Vaša naprava ima notranjo napako in bo morda nestabilna, dokler je ne ponastavite na tovarniške nastavitve."</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"Vaša naprava ima notranjo napako. Če želite več informacij, se obrnite na proizvajalca."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>

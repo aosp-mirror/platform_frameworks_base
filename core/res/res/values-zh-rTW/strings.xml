@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允許應用程式設定及連接 Wi-Fi 顯示裝置。"</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 Wi-Fi 顯示裝置"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 Wi-Fi 顯示裝置的低階功能。"</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"控制虛擬私人網路"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"允許應用程式控制虛擬私人網路的低階功能。"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"擷取音訊輸出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允許應用程式擷取及重新導向音訊輸出。"</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"啟動字詞偵測"</string>
@@ -833,8 +835,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"允許應用程式接收 Android Beam 目前傳輸的資訊"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"移除 DRM 憑證"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"允許應用程式移除 DRM 憑證 (一般應用程式並不需要)。"</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"繫結至行動通訊業者簡訊服務"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允許應用程式繫結至行動通訊業者簡訊服務的頂層介面 (一般應用程式並不需要)。"</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"與行動通訊業者簡訊服務繫結"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允許應用程式與行動通訊業者簡訊服務的頂層介面繫結 (一般應用程式並不需要)。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制螢幕解鎖密碼所允許的長度和字元。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"監視螢幕解鎖嘗試次數"</string>
@@ -1902,4 +1904,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"直到下次鬧鐘鈴響：<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"直到下次鬧鐘鈴響"</string>
     <string name="muted_by" msgid="6147073845094180001">"由 <xliff:g id="THIRD_PARTY">%1$s</xliff:g> 設為靜音"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"您的裝置內部發生問題，必須讓裝置恢復原廠設定才能解除不穩定的狀態。"</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"您的裝置內部發生問題，詳情請洽詢裝置製造商。"</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>

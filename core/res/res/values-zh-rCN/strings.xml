@@ -564,6 +564,10 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允许应用配置并连接到WLAN显示设备。"</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制WLAN显示设备"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允许应用控制WLAN显示设备的基础功能。"</string>
+    <!-- no translation found for permlab_controlVpn (2618442789397588200) -->
+    <skip />
+    <!-- no translation found for permdesc_controlVpn (762852603315861214) -->
+    <skip />
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"捕获音频输出"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"允许该应用捕获和重定向音频输出。"</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"启动指令检测"</string>
@@ -833,10 +837,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"允许此应用接收Android Beam当前传输内容的相关信息"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"移除DRM证书"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"允许应用移除DRM证书。普通应用绝不需要此权限。"</string>
-    <!-- no translation found for permlab_bindCarrierMessagingService (1490229371796969158) -->
-    <skip />
-    <!-- no translation found for permdesc_bindCarrierMessagingService (2762882888502113944) -->
-    <skip />
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"绑定到运营商消息传递服务"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"允许应用绑定到运营商消息传递服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"控制屏幕解锁密码所允许的长度和字符。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
@@ -1904,4 +1906,20 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"到下次闹钟时间（<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>）"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"到下次闹钟时间"</string>
     <string name="muted_by" msgid="6147073845094180001">"已被<xliff:g id="THIRD_PARTY">%1$s</xliff:g>设为静音"</string>
+    <!-- no translation found for system_error_wipe_data (6608165524785354962) -->
+    <skip />
+    <!-- no translation found for system_error_manufacturer (8086872414744210668) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>

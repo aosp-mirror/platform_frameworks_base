@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Ivumela uhlelo lokusebenza ukulungisa nokuxhuma ekubukisweni kwe-Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"lawula ukubukwa kwe-Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Uvumela uhlelo lokusebenza ukulawula izici zeleveli ephansi zokuboniswa kwe-Wi-Fi."</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"lawula Amanethiwekhi Wemfihlo Abonakalayo"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"Ivumela uhlelo lokusebenza ukulawula izici zeleveli ephansi Zamanethiwekhi Wemfihlo Abonakalayo."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"shutha okukhipha umsindo"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Kuvumela uhlelo lokusebenza ukuba lushuthe futhi luqondise kabusha okukhipha umsindo."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Ukutholwa kwe-Hotword"</string>
@@ -1902,4 +1904,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Kuze kube yi-alamu elandelayo ngo-<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Kuze kube yi-alamu elandelayo"</string>
     <string name="muted_by" msgid="6147073845094180001">"Ithuliswe ngu-<xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"Kukhona inkinga yangaphakathi ngedivayisi yakho, futhi ingase ibe engazinzile kuze kube yilapho usetha kabusha yonke idatha."</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"Kukhona inkinga yangaphakathi ngedivayisi yakho. Xhumana nomkhiqizi wakho ukuze uthole imininingwane."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>
