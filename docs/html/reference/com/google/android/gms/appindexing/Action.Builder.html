@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -103,14 +104,14 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>Contents | Android Developers</title>
+<title>Action.Builder | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,8 +489,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
-        <li class="current">Contents</li>
+        
+        <li class="current">Action.Builder</li>
       </ul>
     </div>
   </div>
@@ -765,17 +788,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
    
   
   
-   
   
   
-  
-
-
-
-
-
-
-
 
 
 <div class="sum-details-links">
@@ -787,14 +801,11 @@ Summary:
 
 
 
-  <a href="#inhconstants">Inherited Constants</a>
+
+
+
+  <a href="#pubctors">Ctors</a>
   
-
-
-  &#124; <a href="#lfields">Fields</a>
-  
-
-
 
 
 
@@ -821,31 +832,30 @@ Summary:
 
 <div id="jd-header">
     public
-     
-     
+    static 
+    final 
     
     class
-<h1 itemprop="name">Contents</h1>
+<h1 itemprop="name">Action.Builder</h1>
 
 
 
-  
-    extends Object<br/>
   
   
   
 
   
+    extends <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a><br/>
   
-      implements 
-      
-        SafeParcelable
-      
+  
+  
+
+  
   
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -858,7 +868,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+        <td colspan="3" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
     
 
@@ -866,7 +876,17 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.Contents</td>
+        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">com.google.android.gms.appindexing.Thing.Builder</a></td>
+    </tr>
+    
+
+    <tr>
+        
+            <td class="jd-inheritance-space">&nbsp;</td>
+        
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.appindexing.Action.Builder</td>
     </tr>
     
 
@@ -879,12 +899,11 @@ Summary:
 
 
 <div class="jd-descr">
-<p>
-  <p class="caution"><strong>
-      This class is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/drive/DriveContents.html">DriveContents</a></code> instead.
 
-  </p>
+
+<h2>Class Overview</h2>
+<p itemprop="articleBody">Create a builder for an <code><a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></code>.
+</p>
 
 
 
@@ -927,130 +946,36 @@ Summary:
 
 
 
-<!-- =========== ENUM CONSTANT SUMMARY =========== -->
-<table id="inhconstants" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Constants</div></th></tr>
 
 
 
 
-<tr class="api apilevel-" >
-<td colspan="12">
 
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-android.os.Parcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-android.os.Parcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-android.os.Parcelable
-<div id="inherited-constants-android.os.Parcelable">
-  <div id="inherited-constants-android.os.Parcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-android.os.Parcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
 
-    
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+	 
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
-        <td class="jd-descrcol" width="100%">
-
-
-
-
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
         </td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">int</td>
-        <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
-        <td class="jd-descrcol" width="100%">
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#Action.Builder(java.lang.String)">Action.Builder</a></span>(String actionType)</nobr>
+        
+  </td></tr>
 
-
-
-
-        </td>
-    </tr>
-    
-    
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-com.google.android.gms.common.internal.safeparcel.SafeParcelable
-<div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable">
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%">
-
-
-
-
-        </td>
-    </tr>
 
 
 </table>
-  </div>
-</div>
-</td></tr>
-
-
-</table>
-
-
-
-
-<!-- =========== FIELD SUMMARY =========== -->
-<table id="lfields" class="jd-sumtable"><tr><th colspan="12">Fields</th></tr>
-
-
-    
-      <tr class="alt-color api apilevel-" >
-          <td class="jd-typecol"><nobr>
-          public
-          static
-          final
-          Creator&lt;<a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a>&gt;</nobr></td>
-          <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/Contents.html#CREATOR">CREATOR</a></td>
-          <td class="jd-descrcol" width="100%">
-
-
-
-
-          </td>
-      </tr>
-      
-    
-
-</table>
-
-
-
-
-
 
 
 
@@ -1070,54 +995,15 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             
             
             
-            int</nobr>
+            <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Contents.html#describeContents()">describeContents</a></span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Contents.html#getDriveId()">getDriveId</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#build()">build</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Gets the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> for the file that owns these contents.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            InputStream</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Contents.html#getInputStream()">getInputStream</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">
-          Gets an InputStream that allows you to read this file's contents.
-
-
+          Build the <code><a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></code> object.
+          
+    
 
         </div>
   
@@ -1132,15 +1018,15 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             
             
             
-            int</nobr>
+            <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Contents.html#getMode()">getMode</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#put(java.lang.String, com.google.android.gms.appindexing.Thing)">put</a></span>(String key, <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> value)</nobr>
         
         <div class="jd-descrdiv">
-          Gets the mode the contents were opened in.
-
-
+          Specify optional properties of the content.
+          
+    
 
         </div>
   
@@ -1155,15 +1041,15 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             
             
             
-            OutputStream</nobr>
+            <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Contents.html#getOutputStream()">getOutputStream</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#put(java.lang.String, java.lang.String)">put</a></span>(String key, String value)</nobr>
         
         <div class="jd-descrdiv">
-          Gets an OutputStream that allows you to write new contents.
-
-
+          Specify optional properties of the content.
+          
+    
 
         </div>
   
@@ -1178,15 +1064,15 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             
             
             
-            ParcelFileDescriptor</nobr>
+            <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Contents.html#getParcelFileDescriptor()">getParcelFileDescriptor</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setName(java.lang.String)">setName</a></span>(String name)</nobr>
         
         <div class="jd-descrdiv">
-          Gets a FileDescriptor that points to the Drive file's contents.
-
-
+          Specify the name of the content.
+          
+    
 
         </div>
   
@@ -1201,11 +1087,41 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             
             
             
-            void</nobr>
+            <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/Contents.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel dest, int flags)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setObject(com.google.android.gms.appindexing.Thing)">setObject</a></span>(<a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> thing)</nobr>
         
+        <div class="jd-descrdiv">
+          Specify the object of the action.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html#setUrl(android.net.Uri)">setUrl</a></span>(Uri webUrl)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify the native app URL of the content.
+          
+    
+
+        </div>
+  
   </td></tr>
 
 
@@ -1222,6 +1138,216 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 <table id="inhmethods" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.appindexing.Thing.Builder" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.appindexing.Thing.Builder-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">com.google.android.gms.appindexing.Thing.Builder</a>
+
+<div id="inherited-methods-com.google.android.gms.appindexing.Thing.Builder">
+  <div id="inherited-methods-com.google.android.gms.appindexing.Thing.Builder-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.appindexing.Thing.Builder-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#build()">build</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Build the <code><a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a></code> object.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#put(java.lang.String, com.google.android.gms.appindexing.Thing)">put</a></span>(String key, <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify optional properties of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#put(java.lang.String, java.lang.String)">put</a></span>(String key, String value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify optional properties of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setDescription(java.lang.String)">setDescription</a></span>(String description)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify the optional description of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setId(java.lang.String)">setId</a></span>(String id)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify the optional web URL of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setName(java.lang.String)">setName</a></span>(String name)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify the name of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setType(java.lang.String)">setType</a></span>(String type)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify optional schema.org type of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setUrl(android.net.Uri)">setUrl</a></span>(Uri url)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify the native app URL of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
 
 
 <tr class="api apilevel-" >
@@ -1425,66 +1551,6 @@ From class
 </td></tr>
 
 
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-android.os.Parcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-android.os.Parcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From interface
-
-  android.os.Parcelable
-
-<div id="inherited-methods-android.os.Parcelable">
-  <div id="inherited-methods-android.os.Parcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-android.os.Parcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            int</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">describeContents</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
-        
-  </td></tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-
 </table>
 
 
@@ -1511,45 +1577,46 @@ From interface
 <!-- Fields -->
 
 
-<!-- ========= FIELD DETAIL ======== -->
-<h2>Fields</h2>
+<!-- Public ctors -->
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
 
 
 
-
-<A NAME="CREATOR"></A>
+<A NAME="Action.Builder(java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-        static 
-        final 
-        Creator&lt;<a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a>&gt;
+         
+         
+         
+         
+        
       </span>
-        CREATOR
+      <span class="sympad">Action.Builder</span>
+      <span class="normal">(String actionType)</span>
     </h4>
       <div class="api-level">
-        
+        <div></div>
         
   
 
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-    
     </div>
 </div>
 
 
-
-
-<!-- Public ctors -->
 
 
 
@@ -1565,7 +1632,7 @@ From interface
 
 
 
-<A NAME="describeContents()"></A>
+<A NAME="build()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1575,9 +1642,9 @@ From interface
          
          
          
-        int
+        <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a>
       </span>
-      <span class="sympad">describeContents</span>
+      <span class="sympad">build</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
@@ -1588,50 +1655,17 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
-
-    </div>
-</div>
-
-
-<A NAME="getDriveId()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        <a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a>
-      </span>
-      <span class="sympad">getDriveId</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
       
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the <code><a href="/reference/com/google/android/gms/drive/DriveId.html">DriveId</a></code> for the file that owns these contents. Will be null if these are new
- contents.
+  <div class="jd-tagdata jd-tagdescr"><p>Build the <code><a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></code> object.
 </p></div>
 
     </div>
 </div>
 
 
-<A NAME="getInputStream()"></A>
+<A NAME="put(java.lang.String, com.google.android.gms.appindexing.Thing)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1641,10 +1675,10 @@ From interface
          
          
          
-        InputStream
+        <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a>
       </span>
-      <span class="sympad">getInputStream</span>
-      <span class="normal">()</span>
+      <span class="sympad">put</span>
+      <span class="normal">(String key, <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> value)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1654,21 +1688,153 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify optional properties of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>key</td>
+          <td>The schema.org property. Must not be null.</td>
+        </tr>
+        <tr>
+          <th>value</td>
+          <td>The value of the schema.org property represented as a <code><a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a></code>.
+              If null, the value will be ignored.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
 
 
+<A NAME="put(java.lang.String, java.lang.String)"></A>
 
-  <div class="jd-tagdata jd-tagdescr"><p>Gets an InputStream that allows you to read this file's contents. This method may only be
- used with files opened with <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_READ_ONLY">MODE_READ_ONLY</a></code>; to read/write from a file
- opened with <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_READ_WRITE">MODE_READ_WRITE</a></code>, use the file descriptor returned by
- <code><a href="/reference/com/google/android/gms/drive/Contents.html#getParcelFileDescriptor()">getParcelFileDescriptor()</a></code>. This method may only be called once per <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code>
- instance.
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a>
+      </span>
+      <span class="sympad">put</span>
+      <span class="normal">(String key, String value)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify optional properties of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>key</td>
+          <td>The schema.org property. Must not be null.</td>
+        </tr>
+        <tr>
+          <th>value</td>
+          <td>The value of the schema.org property.
+              If null, the value will be ignored.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setName(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a>
+      </span>
+      <span class="sympad">setName</span>
+      <span class="normal">(String name)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the name of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>name</td>
+          <td>Name of the content.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setObject(com.google.android.gms.appindexing.Thing)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a>
+      </span>
+      <span class="sympad">setObject</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> thing)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the object of the action.
 </p></div>
 
     </div>
 </div>
 
 
-<A NAME="getMode()"></A>
+<A NAME="setUrl(android.net.Uri)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1678,10 +1844,10 @@ From interface
          
          
          
-        int
+        <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a>
       </span>
-      <span class="sympad">getMode</span>
-      <span class="normal">()</span>
+      <span class="sympad">setUrl</span>
+      <span class="normal">(Uri webUrl)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1691,116 +1857,21 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Gets the mode the contents were opened in.
-</p></div>
-
-    </div>
-</div>
-
-
-<A NAME="getOutputStream()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        OutputStream
-      </span>
-      <span class="sympad">getOutputStream</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
       
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Gets an OutputStream that allows you to write new contents. This method may only be used
- with files opened with <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_WRITE_ONLY">MODE_WRITE_ONLY</a></code>; to read/write from a file opened
- with <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_READ_WRITE">MODE_READ_WRITE</a></code>, use the file descriptor returned by
- <code><a href="/reference/com/google/android/gms/drive/Contents.html#getParcelFileDescriptor()">getParcelFileDescriptor()</a></code>. This method may only be called once per <code><a href="/reference/com/google/android/gms/drive/Contents.html">Contents</a></code>
- instance.
-</p></div>
-
-    </div>
-</div>
-
-
-<A NAME="getParcelFileDescriptor()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        ParcelFileDescriptor
-      </span>
-      <span class="sympad">getParcelFileDescriptor</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Gets a FileDescriptor that points to the Drive file's contents. If this file was opened with
- <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_READ_ONLY">MODE_READ_ONLY</a></code> or <code><a href="/reference/com/google/android/gms/drive/DriveFile.html#MODE_READ_WRITE">MODE_READ_WRITE</a></code>, the file referenced by
- the FileDescriptor will contain the most recent version of the file. Otherwise, the file will
- be empty.
-</p></div>
-
-    </div>
-</div>
-
-
-<A NAME="writeToParcel(android.os.Parcel, int)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">writeToParcel</span>
-      <span class="normal">(Parcel dest, int flags)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the native app URL of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>webUrl</td>
+          <td>Set the deep-link in the
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>
