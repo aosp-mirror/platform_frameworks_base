@@ -104,6 +104,7 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -1094,12 +1095,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+    protected void dump(FileDescriptor fd, PrintWriter rawWriter, String[] args) {
         mContext.enforceCallingOrSelfPermission(DUMP, TAG);
 
+        long duration = DateUtils.DAY_IN_MILLIS;
         final HashSet<String> argSet = new HashSet<String>();
         for (String arg : args) {
             argSet.add(arg);
+
+            if (arg.startsWith("--duration=")) {
+                try {
+                    duration = Long.parseLong(arg.substring(11));
+                } catch (NumberFormatException ignored) {
+                }
+            }
         }
 
         // usage: dumpsys netstats --full --uid --tag --poll --checkin
@@ -1109,7 +1118,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final boolean includeUid = argSet.contains("--uid") || argSet.contains("detail");
         final boolean includeTag = argSet.contains("--tag") || argSet.contains("detail");
 
-        final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
+        final IndentingPrintWriter pw = new IndentingPrintWriter(rawWriter, "  ");
 
         synchronized (mStatsLock) {
             if (poll) {
@@ -1119,13 +1128,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
 
             if (checkin) {
-                // list current stats files to verify rotation
-                pw.println("Current files:");
-                pw.increaseIndent();
-                for (String file : mBaseDir.list()) {
-                    pw.println(file);
+                final long end = System.currentTimeMillis();
+                final long start = end - duration;
+
+                pw.print("v1,");
+                pw.print(start / SECOND_IN_MILLIS); pw.print(',');
+                pw.print(end / SECOND_IN_MILLIS); pw.println();
+
+                pw.println("xt");
+                mXtRecorder.dumpCheckin(rawWriter, start, end);
+
+                if (includeUid) {
+                    pw.println("uid");
+                    mUidRecorder.dumpCheckin(rawWriter, start, end);
                 }
-                pw.decreaseIndent();
+                if (includeTag) {
+                    pw.println("tag");
+                    mUidTagRecorder.dumpCheckin(rawWriter, start, end);
+                }
                 return;
             }
 
