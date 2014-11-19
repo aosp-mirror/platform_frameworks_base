@@ -23,6 +23,8 @@
 
 #include <androidfw/BackupHelpers.h>
 
+#include "core_jni_helpers.h"
+
 #include <string.h>
 
 namespace android
@@ -116,15 +118,11 @@ static const JNINativeMethod g_methods[] = {
 
 int register_android_app_backup_FullBackup(JNIEnv* env)
 {
-    jclass clazz = env->FindClass("android/app/backup/BackupDataOutput");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.app.backup.BackupDataOutput");
+    jclass clazz = FindClassOrDie(env, "android/app/backup/BackupDataOutput");
 
-    sBackupDataOutput.mBackupWriter = env->GetFieldID(clazz, "mBackupWriter", "J");
-    LOG_FATAL_IF(sBackupDataOutput.mBackupwriter == NULL,
-            "Unable to find mBackupWriter field in android.app.backup.BackupDataOutput");
+    sBackupDataOutput.mBackupWriter = GetFieldIDOrDie(env, clazz, "mBackupWriter", "J");
 
-    return AndroidRuntime::registerNativeMethods(env, "android/app/backup/FullBackup",
-            g_methods, NELEM(g_methods));
+    return RegisterMethodsOrDie(env, "android/app/backup/FullBackup", g_methods, NELEM(g_methods));
 }
 
 }

@@ -26,6 +26,8 @@
 #include <arpa/inet.h>
 #include <cutils/properties.h>
 
+#include "core_jni_helpers.h"
+
 extern "C" {
 int ifc_enable(const char *ifname);
 int ifc_disable(const char *ifname);
@@ -269,27 +271,26 @@ static JNINativeMethod gNetworkUtilMethods[] = {
 
 int register_android_net_NetworkUtils(JNIEnv* env)
 {
-    jclass dhcpResultsClass = env->FindClass("android/net/DhcpResults");
-    LOG_FATAL_IF(dhcpResultsClass == NULL, "Unable to find class android/net/DhcpResults");
-    dhcpResultsFieldIds.clear =
-            env->GetMethodID(dhcpResultsClass, "clear", "()V");
-    dhcpResultsFieldIds.setIpAddress =
-            env->GetMethodID(dhcpResultsClass, "setIpAddress", "(Ljava/lang/String;I)Z");
-    dhcpResultsFieldIds.setGateway =
-            env->GetMethodID(dhcpResultsClass, "setGateway", "(Ljava/lang/String;)Z");
-    dhcpResultsFieldIds.addDns =
-            env->GetMethodID(dhcpResultsClass, "addDns", "(Ljava/lang/String;)Z");
-    dhcpResultsFieldIds.setDomains =
-            env->GetMethodID(dhcpResultsClass, "setDomains", "(Ljava/lang/String;)V");
-    dhcpResultsFieldIds.setServerAddress =
-            env->GetMethodID(dhcpResultsClass, "setServerAddress", "(Ljava/lang/String;)Z");
-    dhcpResultsFieldIds.setLeaseDuration =
-            env->GetMethodID(dhcpResultsClass, "setLeaseDuration", "(I)V");
-    dhcpResultsFieldIds.setVendorInfo =
-            env->GetMethodID(dhcpResultsClass, "setVendorInfo", "(Ljava/lang/String;)V");
+    jclass dhcpResultsClass = FindClassOrDie(env, "android/net/DhcpResults");
 
-    return AndroidRuntime::registerNativeMethods(env,
-            NETUTILS_PKG_NAME, gNetworkUtilMethods, NELEM(gNetworkUtilMethods));
+    dhcpResultsFieldIds.clear = GetMethodIDOrDie(env, dhcpResultsClass, "clear", "()V");
+    dhcpResultsFieldIds.setIpAddress =GetMethodIDOrDie(env, dhcpResultsClass, "setIpAddress",
+            "(Ljava/lang/String;I)Z");
+    dhcpResultsFieldIds.setGateway = GetMethodIDOrDie(env, dhcpResultsClass, "setGateway",
+            "(Ljava/lang/String;)Z");
+    dhcpResultsFieldIds.addDns = GetMethodIDOrDie(env, dhcpResultsClass, "addDns",
+            "(Ljava/lang/String;)Z");
+    dhcpResultsFieldIds.setDomains = GetMethodIDOrDie(env, dhcpResultsClass, "setDomains",
+            "(Ljava/lang/String;)V");
+    dhcpResultsFieldIds.setServerAddress = GetMethodIDOrDie(env, dhcpResultsClass,
+            "setServerAddress", "(Ljava/lang/String;)Z");
+    dhcpResultsFieldIds.setLeaseDuration = GetMethodIDOrDie(env, dhcpResultsClass,
+            "setLeaseDuration", "(I)V");
+    dhcpResultsFieldIds.setVendorInfo = GetMethodIDOrDie(env, dhcpResultsClass, "setVendorInfo",
+            "(Ljava/lang/String;)V");
+
+    return RegisterMethodsOrDie(env, NETUTILS_PKG_NAME, gNetworkUtilMethods,
+                                NELEM(gNetworkUtilMethods));
 }
 
 }; // namespace android

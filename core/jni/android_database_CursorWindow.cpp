@@ -36,6 +36,8 @@
 #include "android_util_Binder.h"
 #include "android_database_SQLiteCommon.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 static struct {
@@ -522,29 +524,16 @@ static JNINativeMethod sMethods[] =
             (void*)nativePutNull },
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
-int register_android_database_CursorWindow(JNIEnv * env)
+int register_android_database_CursorWindow(JNIEnv* env)
 {
-    jclass clazz;
-    FIND_CLASS(clazz, "android/database/CharArrayBuffer");
+    jclass clazz = FindClassOrDie(env, "android/database/CharArrayBuffer");
 
-    GET_FIELD_ID(gCharArrayBufferClassInfo.data, clazz,
-            "data", "[C");
-    GET_FIELD_ID(gCharArrayBufferClassInfo.sizeCopied, clazz,
-            "sizeCopied", "I");
+    gCharArrayBufferClassInfo.data = GetFieldIDOrDie(env, clazz, "data", "[C");
+    gCharArrayBufferClassInfo.sizeCopied = GetFieldIDOrDie(env, clazz, "sizeCopied", "I");
 
-    gEmptyString = jstring(env->NewGlobalRef(env->NewStringUTF("")));
-    LOG_FATAL_IF(!gEmptyString, "Unable to create empty string");
+    gEmptyString = MakeGlobalRefOrDie(env, env->NewStringUTF(""));
 
-    return AndroidRuntime::registerNativeMethods(env, "android/database/CursorWindow",
-            sMethods, NELEM(sMethods));
+    return RegisterMethodsOrDie(env, "android/database/CursorWindow", sMethods, NELEM(sMethods));
 }
 
 } // namespace android

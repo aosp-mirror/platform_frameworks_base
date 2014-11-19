@@ -23,6 +23,8 @@
 #include <android_runtime/android_content_res_Configuration.h>
 #include "android_runtime/AndroidRuntime.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 static struct {
@@ -70,49 +72,27 @@ void android_Configuration_getFromJava(
             gConfigurationClassInfo.smallestScreenWidthDp);
 }
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
 int register_android_content_res_Configuration(JNIEnv* env)
 {
-    jclass clazz;
-    FIND_CLASS(clazz, "android/content/res/Configuration");
+    jclass clazz = FindClassOrDie(env, "android/content/res/Configuration");
 
-    GET_FIELD_ID(gConfigurationClassInfo.mcc, clazz,
-            "mcc", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.mnc, clazz,
-            "mnc", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.locale, clazz,
-            "locale", "Ljava/util/Locale;");
-    GET_FIELD_ID(gConfigurationClassInfo.screenLayout, clazz,
-            "screenLayout", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.touchscreen, clazz,
-            "touchscreen", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.keyboard, clazz,
-            "keyboard", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.keyboardHidden, clazz,
-            "keyboardHidden", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.hardKeyboardHidden, clazz,
-            "hardKeyboardHidden", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.navigation, clazz,
-            "navigation", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.navigationHidden, clazz,
-            "navigationHidden", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.orientation, clazz,
-            "orientation", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.uiMode, clazz,
-            "uiMode", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.screenWidthDp, clazz,
-            "screenWidthDp", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.screenHeightDp, clazz,
-            "screenHeightDp", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.smallestScreenWidthDp, clazz,
-            "smallestScreenWidthDp", "I");
+    gConfigurationClassInfo.mcc = GetFieldIDOrDie(env, clazz, "mcc", "I");
+    gConfigurationClassInfo.mnc = GetFieldIDOrDie(env, clazz, "mnc", "I");
+    gConfigurationClassInfo.locale = GetFieldIDOrDie(env, clazz, "locale", "Ljava/util/Locale;");
+    gConfigurationClassInfo.screenLayout = GetFieldIDOrDie(env, clazz, "screenLayout", "I");
+    gConfigurationClassInfo.touchscreen = GetFieldIDOrDie(env, clazz, "touchscreen", "I");
+    gConfigurationClassInfo.keyboard = GetFieldIDOrDie(env, clazz, "keyboard", "I");
+    gConfigurationClassInfo.keyboardHidden = GetFieldIDOrDie(env, clazz, "keyboardHidden", "I");
+    gConfigurationClassInfo.hardKeyboardHidden = GetFieldIDOrDie(env, clazz, "hardKeyboardHidden",
+                                                                 "I");
+    gConfigurationClassInfo.navigation = GetFieldIDOrDie(env, clazz, "navigation", "I");
+    gConfigurationClassInfo.navigationHidden = GetFieldIDOrDie(env, clazz, "navigationHidden", "I");
+    gConfigurationClassInfo.orientation = GetFieldIDOrDie(env, clazz, "orientation", "I");
+    gConfigurationClassInfo.uiMode = GetFieldIDOrDie(env, clazz, "uiMode", "I");
+    gConfigurationClassInfo.screenWidthDp = GetFieldIDOrDie(env, clazz, "screenWidthDp", "I");
+    gConfigurationClassInfo.screenHeightDp = GetFieldIDOrDie(env, clazz, "screenHeightDp", "I");
+    gConfigurationClassInfo.smallestScreenWidthDp = GetFieldIDOrDie(env, clazz,
+                                                                    "smallestScreenWidthDp", "I");
 
     return 0;
 }
