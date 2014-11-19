@@ -25,6 +25,7 @@
           <li><a href="<?cs var:toroot ?>design/wear/structure.html">App Structure</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/patterns.html">UI Patterns</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/style.html">Style</a></li>
+          <li><a href="<?cs var:toroot ?>design/wear/watchfaces.html">Watch Faces</a></li>
         </ul>
       </li>
       <li class="nav-section">
