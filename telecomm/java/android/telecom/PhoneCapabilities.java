@@ -101,6 +101,16 @@ public final class PhoneCapabilities {
      */
     public static final int DISCONNECT_FROM_CONFERENCE = 0x00002000;
 
+    /**
+     * Whether the call is a generic conference, where we do not know the precise state of
+     * participants in the conference (eg. on CDMA).
+     *
+     * TODO: Move to CallProperties.
+     *
+     * @hide
+     */
+    public static final int GENERIC_CONFERENCE = 0x00004000;
+
     public static final int ALL = HOLD | SUPPORT_HOLD | MERGE_CONFERENCE | SWAP_CONFERENCE
             | RESPOND_VIA_TEXT | MUTE | MANAGE_CONFERENCE | SEPARATE_FROM_CONFERENCE
             | DISCONNECT_FROM_CONFERENCE;
@@ -163,6 +173,10 @@ public final class PhoneCapabilities {
         if (can(capabilities, VoWIFI)) {
             builder.append(" VoWIFI");
         }
+        if (can(capabilities, GENERIC_CONFERENCE)) {
+            builder.append(" GENERIC_CONFERENCE");
+        }
+
         builder.append("]");
         return builder.toString();
     }
