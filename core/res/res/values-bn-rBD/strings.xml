@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Wifi প্রদর্শনগুলি অনুযায়ী কনফিগার করে নিতে এবং সংযোগ স্থাপন করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi প্রদর্শনগুলিকে নিয়ন্ত্রণ করুন"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wifi প্রদর্শনের নিম্ন মানের বৈশিষ্ট্যগুলিকে নিয়ন্ত্রণ করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷"</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"ভার্চুয়াল প্রাইভেট নেটওয়ার্ক নিয়ন্ত্রণ করুন"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"অ্যাপ্লিকেশানটিকে ভার্চুয়াল প্রাইভেট নেটওয়ার্কের নিম্নস্তরের বৈশিষ্ট্য নিয়ন্ত্রণ করতে দেয়৷"</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"অডিও আউটপুট গ্রহণ করে"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"অ্যাপ্লিকেশানটিকে অডিও আউটপুট গ্রহণ এবং পুনর্নির্দেশ করতে দেয়৷"</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"হটওয়ার্ড সনাক্তকরণ"</string>
@@ -1907,4 +1909,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> এ পরবর্তী অ্যালার্ম পর্যন্ত"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"পরবর্তী অ্যালার্ম পর্যন্ত"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> দ্বারা নিঃশব্দ করা হয়েছে"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে৷ বিস্তারিত জানার জন্য প্রস্তুতকারকের সাথে যোগাযোগ করুন৷"</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>

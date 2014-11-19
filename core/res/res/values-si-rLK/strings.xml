@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"වින්‍යාස කිරීමට සහ Wifi සංදර්ශක වෙත සම්බන්ධ වීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi සංදර්ශක පාලනය"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wifi සංදර්ශකයේ පහළ මට්ටමේ විශේෂාංග පාලනයට යෙදුමට අවසර දෙන්න."</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"අතථ්‍ය පුද්ගලික ජාල පාලනය කරන්න"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"යෙදුමට අතථ්‍ය පුද්ගලික ජාලවල පහළ-මට්ටම් විශේෂාංග පාලනය කිරීමට ඉඩ දෙයි."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ශබ්ද ප්‍රතිදානය ග්‍රහණය"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"යෙදුමට ශබ්ද ප්‍රතිදානය ග්‍රහණය කර හරවා යැවීමට ඉඩ දේ."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Hotword හදුනා ගැනීම"</string>
@@ -1909,4 +1911,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> හි ඊළඟ සීනුව තෙක්"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"ඊළඟ සීනුව තෙක්"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> විසින් නිශ්ශබ්ද කරන ලදි"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"ඔබේ උපාංගය සමගින් ගැටලුවක් ඇති අතර, ඔබේ කර්මාන්තශාලා දත්ත යළි සකසන තෙක් එය අස්ථායි විය හැකිය."</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"ඔබේ උපාංගය සමගින් අභ්‍යන්තර ගැටලුවක් ඇත. විස්තර සඳහා ඔබේ නිෂ්පාදක අමතන්න."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>

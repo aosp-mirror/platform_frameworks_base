@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Cho phép ứng dụng định cấu hình và kết nối với màn hình Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kiểm soát màn hình Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Cho phép ứng dụng kiểm soát các tính năng cấp thấp của màn hình Wi-Fi."</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"kiểm soát Mạng riêng ảo"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"Cho phép ứng dụng kiểm soát các tính năng cấp thấp của Mạng riêng ảo."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"thu thập dữ liệu đầu ra âm thanh"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Cho phép ứng dụng thu thập và chuyển hướng dữ liệu đầu ra âm thanh."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Phát hiện từ nóng"</string>
@@ -1909,4 +1911,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Cho đến lần báo thức tiếp theo vào <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Cho đến lần báo thức tiếp theo"</string>
     <string name="muted_by" msgid="6147073845094180001">"Do <xliff:g id="THIRD_PARTY">%1$s</xliff:g> tắt tiếng"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"Đã xảy ra sự cố nội bộ với thiết bị của bạn và thiết bị có thể sẽ không ổn định cho tới khi bạn thiết lập lại dữ liệu ban đầu."</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"Đã xảy ra sự cố nội bộ với thiết bị. Hãy liên hệ với nhà sản xuất của bạn để biết chi tiết."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>

@@ -564,6 +564,8 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Lubab rakendusel seadistada WiFi-ekraane ja nendega ühendus luua."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WiFi-ekraanide juhtimine"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Lubab rakendusel juhtida WiFi-ekraanide madala taseme funktsioone."</string>
+    <string name="permlab_controlVpn" msgid="2618442789397588200">"virtuaalsete privaatvõrkudega juhtimine"</string>
+    <string name="permdesc_controlVpn" msgid="762852603315861214">"Lubab rakendusel juhtida virtuaalsete privaatvõrkude alamtaseme funktsioone."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"heliväljundi jäädvustamine"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Lubab rakendusel jäädvustada ja ümber suunata heliväljundit."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Otsetee sõna tuvastamine"</string>
@@ -1907,4 +1909,18 @@
     <string name="zen_mode_next_alarm_summary" msgid="5915140424683747372">"Kuni järgmise alarmini <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_next_alarm_line_one" msgid="5537042951553420916">"Kuni järgmise alarmini"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vaigistas"</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"Seadmes ilmnes sisemine probleem ja seade võib olla ebastabiilne seni, kuni lähtestate seadme tehase andmetele."</string>
+    <string name="system_error_manufacturer" msgid="8086872414744210668">"Seadmes ilmnes sisemine probleem. Üksikasjaliku teabe saamiseks võtke ühendust tootjaga."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
+    <skip />
 </resources>
