@@ -793,7 +793,7 @@ public class VolumePanel extends Handler implements DemoMode {
             sc.icon.setAlpha(mDisabledAlpha);
             sc.icon.setClickable(false);
         } else if (fixedVolume ||
-                (sc.streamType != mAudioManager.getMasterStreamType() && muted) ||
+                (sc.streamType != mAudioManager.getMasterStreamType() && !isRinger && muted) ||
                 (sSafetyWarning != null)) {
             sc.seekbarView.setEnabled(false);
         } else {
