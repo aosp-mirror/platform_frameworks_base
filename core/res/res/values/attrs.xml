@@ -7220,6 +7220,8 @@
         <attr name="goIcon" format="reference" />
         <!-- Search icon -->
         <attr name="searchIcon" format="reference" />
+        <!-- Search icon displayed as a text field hint -->
+        <attr name="searchHintIcon" format="reference" />
         <!-- Voice button icon -->
         <attr name="voiceIcon" format="reference" />
         <!-- Commit icon shown in the query suggestion row -->
