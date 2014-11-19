@@ -17,7 +17,6 @@
 package android.net;
 
 import android.app.PendingIntent;
-import android.net.LinkQualityInfo;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -132,12 +131,6 @@ interface IConnectivityManager
     String getMobileProvisioningUrl();
 
     String getMobileRedirectedProvisioningUrl();
-
-    LinkQualityInfo getLinkQualityInfo(int networkType);
-
-    LinkQualityInfo getActiveLinkQualityInfo();
-
-    LinkQualityInfo[] getAllLinkQualityInfo();
 
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String action);
 

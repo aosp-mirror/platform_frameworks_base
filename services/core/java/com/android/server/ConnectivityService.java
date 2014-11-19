@@ -65,7 +65,6 @@ import android.net.INetworkStatsService;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
-import android.net.LinkQualityInfo;
 import android.net.MobileDataStateTracker;
 import android.net.Network;
 import android.net.NetworkAgent;
@@ -256,7 +255,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private Context mContext;
     private int mNetworkPreference;
-    private int mActiveDefaultNetwork = TYPE_NONE;
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
 
@@ -1760,16 +1758,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.println();
         pw.decreaseIndent();
 
-        pw.print("mActiveDefaultNetwork: " + mActiveDefaultNetwork);
-        if (mActiveDefaultNetwork != TYPE_NONE) {
-            NetworkInfo activeNetworkInfo = getActiveNetworkInfo();
-            if (activeNetworkInfo != null) {
-                pw.print(" " + activeNetworkInfo.getState() +
-                         "/" + activeNetworkInfo.getDetailedState());
-            }
-        }
-        pw.println();
-
         pw.println("mLegacyTypeTracker:");
         pw.increaseIndent();
         mLegacyTypeTracker.dump(pw);
@@ -2136,7 +2124,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             if (nai.networkRequests.get(mDefaultRequest.requestId) != null) {
                 removeDataActivityTracking(nai);
-                mActiveDefaultNetwork = ConnectivityManager.TYPE_NONE;
                 notifyLockdownVpn(nai);
                 requestNetworkTransitionWakelock(nai.name());
             }
@@ -2758,42 +2745,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         Slog.e(TAG, s);
     }
 
-    int convertFeatureToNetworkType(int networkType, String feature) {
-        int usedNetworkType = networkType;
-
-        if(networkType == ConnectivityManager.TYPE_MOBILE) {
-            if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_SUPL;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN) ||
-                    TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_DUN;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_FOTA)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_FOTA;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_IMS)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_IMS;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_CBS)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_CBS;
-            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_EMERGENCY)) {
-                usedNetworkType = ConnectivityManager.TYPE_MOBILE_EMERGENCY;
-            } else {
-                Slog.e(TAG, "Can't match any mobile netTracker!");
-            }
-        } else if (networkType == ConnectivityManager.TYPE_WIFI) {
-            if (TextUtils.equals(feature, "p2p")) {
-                usedNetworkType = ConnectivityManager.TYPE_WIFI_P2P;
-            } else {
-                Slog.e(TAG, "Can't match any wifi netTracker!");
-            }
-        } else {
-            Slog.e(TAG, "Unexpected network type");
-        }
-        return usedNetworkType;
-    }
-
     private static <T> T checkNotNull(T value, String message) {
         if (value == null) {
             throw new NullPointerException(message);
@@ -3278,43 +3229,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
     };
-
-    @Override
-    public LinkQualityInfo getLinkQualityInfo(int networkType) {
-        enforceAccessPermission();
-        if (isNetworkTypeValid(networkType) && mNetTrackers[networkType] != null) {
-            return mNetTrackers[networkType].getLinkQualityInfo();
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public LinkQualityInfo getActiveLinkQualityInfo() {
-        enforceAccessPermission();
-        if (isNetworkTypeValid(mActiveDefaultNetwork) &&
-                mNetTrackers[mActiveDefaultNetwork] != null) {
-            return mNetTrackers[mActiveDefaultNetwork].getLinkQualityInfo();
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public LinkQualityInfo[] getAllLinkQualityInfo() {
-        enforceAccessPermission();
-        final ArrayList<LinkQualityInfo> result = Lists.newArrayList();
-        for (NetworkStateTracker tracker : mNetTrackers) {
-            if (tracker != null) {
-                LinkQualityInfo li = tracker.getLinkQualityInfo();
-                if (li != null) {
-                    result.add(li);
-                }
-            }
-        }
-
-        return result.toArray(new LinkQualityInfo[result.size()]);
-    }
 
     /* Infrastructure for network sampling */
 
@@ -3919,7 +3833,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void makeDefault(NetworkAgentInfo newNetwork) {
         if (DBG) log("Switching to new default network: " + newNetwork);
-        mActiveDefaultNetwork = newNetwork.networkInfo.getType();
         setupDataActivityTracking(newNetwork);
         try {
             mNetd.setDefaultNetId(newNetwork.network.netId);
@@ -4024,7 +3937,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (mDefaultRequest.requestId == nri.request.requestId) {
                         isNewDefault = true;
                         // TODO: Remove following line.  It's redundant with makeDefault call.
-                        mActiveDefaultNetwork = newNetwork.networkInfo.getType();
                         if (newNetwork.linkProperties != null) {
                             updateTcpBufferSizes(newNetwork);
                             setDefaultDnsSystemProperties(
