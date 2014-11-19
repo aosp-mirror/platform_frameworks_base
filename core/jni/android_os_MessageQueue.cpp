@@ -23,6 +23,8 @@
 #include <utils/Log.h>
 #include "android_os_MessageQueue.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 static struct {
@@ -157,27 +159,15 @@ static JNINativeMethod gMessageQueueMethods[] = {
     { "nativeIsIdling", "(J)Z", (void*)android_os_MessageQueue_nativeIsIdling }
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
 int register_android_os_MessageQueue(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "android/os/MessageQueue",
-            gMessageQueueMethods, NELEM(gMessageQueueMethods));
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
-    (void)res;
+    int res = RegisterMethodsOrDie(env, "android/os/MessageQueue", gMessageQueueMethods,
+                                   NELEM(gMessageQueueMethods));
 
-    jclass clazz;
-    FIND_CLASS(clazz, "android/os/MessageQueue");
+    jclass clazz = FindClassOrDie(env, "android/os/MessageQueue");
 
-    GET_FIELD_ID(gMessageQueueClassInfo.mPtr, clazz,
-            "mPtr", "J");
-    
-    return 0;
+    gMessageQueueClassInfo.mPtr = GetFieldIDOrDie(env, clazz, "mPtr", "J");
+
+    return res;
 }
 
 } // namespace android

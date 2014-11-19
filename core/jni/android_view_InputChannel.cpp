@@ -26,6 +26,8 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -275,34 +277,19 @@ static JNINativeMethod gInputChannelMethods[] = {
             (void*)android_view_InputChannel_nativeDup },
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_METHOD_ID(var, clazz, methodName, methodDescriptor) \
-        var = env->GetMethodID(clazz, methodName, methodDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method " methodName);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
 int register_android_view_InputChannel(JNIEnv* env) {
-    int res = jniRegisterNativeMethods(env, "android/view/InputChannel",
-            gInputChannelMethods, NELEM(gInputChannelMethods));
-    LOG_FATAL_IF(res < 0, "Unable to register native methods.");
-    (void)res;
+    int res = RegisterMethodsOrDie(env, "android/view/InputChannel", gInputChannelMethods,
+                                   NELEM(gInputChannelMethods));
 
-    FIND_CLASS(gInputChannelClassInfo.clazz, "android/view/InputChannel");
+    jclass clazz = FindClassOrDie(env, "android/view/InputChannel");
+    gInputChannelClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
-    GET_FIELD_ID(gInputChannelClassInfo.mPtr, gInputChannelClassInfo.clazz,
-            "mPtr", "J");
-    
-    GET_METHOD_ID(gInputChannelClassInfo.ctor, gInputChannelClassInfo.clazz,
-            "<init>", "()V");
+    gInputChannelClassInfo.mPtr = GetFieldIDOrDie(env, gInputChannelClassInfo.clazz, "mPtr", "J");
 
-    return 0;
+    gInputChannelClassInfo.ctor = GetMethodIDOrDie(env, gInputChannelClassInfo.clazz, "<init>",
+                                                   "()V");
+
+    return res;
 }
 
 } // namespace android

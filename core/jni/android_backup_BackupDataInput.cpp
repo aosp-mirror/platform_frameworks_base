@@ -22,6 +22,8 @@
 
 #include <androidfw/BackupHelpers.h>
 
+#include "core_jni_helpers.h"
+
 namespace android
 {
 
@@ -135,17 +137,12 @@ int register_android_backup_BackupDataInput(JNIEnv* env)
 {
     //ALOGD("register_android_backup_BackupDataInput");
 
-    jclass clazz = env->FindClass("android/app/backup/BackupDataInput$EntityHeader");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.app.backup.BackupDataInput.EntityHeader");
-    s_keyField = env->GetFieldID(clazz, "key", "Ljava/lang/String;");
-    LOG_FATAL_IF(s_keyField == NULL,
-            "Unable to find key field in android.app.backup.BackupDataInput.EntityHeader");
-    s_dataSizeField = env->GetFieldID(clazz, "dataSize", "I");
-    LOG_FATAL_IF(s_dataSizeField == NULL,
-            "Unable to find dataSize field in android.app.backup.BackupDataInput.EntityHeader");
+    jclass clazz = FindClassOrDie(env, "android/app/backup/BackupDataInput$EntityHeader");
+    s_keyField = GetFieldIDOrDie(env, clazz, "key", "Ljava/lang/String;");
+    s_dataSizeField = GetFieldIDOrDie(env, clazz, "dataSize", "I");
 
-    return AndroidRuntime::registerNativeMethods(env, "android/app/backup/BackupDataInput",
-            g_methods, NELEM(g_methods));
+    return RegisterMethodsOrDie(env, "android/app/backup/BackupDataInput", g_methods,
+                                NELEM(g_methods));
 }
 
 }

@@ -25,6 +25,8 @@
 #include <ScopedUtfChars.h>
 #include "android_view_KeyEvent.h"
 
+#include "core_jni_helpers.h"
+
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -124,56 +126,32 @@ static const JNINativeMethod g_methods[] = {
         (void*)android_view_KeyEvent_nativeKeyCodeFromString},
 };
 
-#define FIND_CLASS(var, className) \
-        var = env->FindClass(className); \
-        LOG_FATAL_IF(! var, "Unable to find class " className); \
-        var = jclass(env->NewGlobalRef(var));
-
-#define GET_STATIC_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
-        var = env->GetStaticMethodID(clazz, methodName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find static method" methodName);
-
-#define GET_METHOD_ID(var, clazz, methodName, fieldDescriptor) \
-        var = env->GetMethodID(clazz, methodName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find method" methodName);
-
-#define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
-        var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
-        LOG_FATAL_IF(! var, "Unable to find field " fieldName);
-
 int register_android_view_KeyEvent(JNIEnv* env) {
-    FIND_CLASS(gKeyEventClassInfo.clazz, "android/view/KeyEvent");
+    jclass clazz = FindClassOrDie(env, "android/view/KeyEvent");
+    gKeyEventClassInfo.clazz = MakeGlobalRefOrDie(env, clazz);
 
-    GET_STATIC_METHOD_ID(gKeyEventClassInfo.obtain, gKeyEventClassInfo.clazz,
+    gKeyEventClassInfo.obtain = GetStaticMethodIDOrDie(env, gKeyEventClassInfo.clazz,
             "obtain", "(JJIIIIIIIILjava/lang/String;)Landroid/view/KeyEvent;");
-    GET_METHOD_ID(gKeyEventClassInfo.recycle, gKeyEventClassInfo.clazz,
+    gKeyEventClassInfo.recycle = GetMethodIDOrDie(env, gKeyEventClassInfo.clazz,
             "recycle", "()V");
 
-    GET_FIELD_ID(gKeyEventClassInfo.mDeviceId, gKeyEventClassInfo.clazz,
-            "mDeviceId", "I");
-    GET_FIELD_ID(gKeyEventClassInfo.mSource, gKeyEventClassInfo.clazz,
-            "mSource", "I");
-    GET_FIELD_ID(gKeyEventClassInfo.mMetaState, gKeyEventClassInfo.clazz,
-            "mMetaState", "I");
-    GET_FIELD_ID(gKeyEventClassInfo.mAction, gKeyEventClassInfo.clazz,
-            "mAction", "I");
-    GET_FIELD_ID(gKeyEventClassInfo.mKeyCode, gKeyEventClassInfo.clazz,
-            "mKeyCode", "I");
-    GET_FIELD_ID(gKeyEventClassInfo.mScanCode, gKeyEventClassInfo.clazz,
-            "mScanCode", "I");
-    GET_FIELD_ID(gKeyEventClassInfo.mRepeatCount, gKeyEventClassInfo.clazz,
-            "mRepeatCount", "I");
-    GET_FIELD_ID(gKeyEventClassInfo.mFlags, gKeyEventClassInfo.clazz,
-            "mFlags", "I");
-    GET_FIELD_ID(gKeyEventClassInfo.mDownTime, gKeyEventClassInfo.clazz,
-            "mDownTime", "J");
-    GET_FIELD_ID(gKeyEventClassInfo.mEventTime, gKeyEventClassInfo.clazz,
-            "mEventTime", "J");
-    GET_FIELD_ID(gKeyEventClassInfo.mCharacters, gKeyEventClassInfo.clazz,
-            "mCharacters", "Ljava/lang/String;");
+    gKeyEventClassInfo.mDeviceId = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mDeviceId", "I");
+    gKeyEventClassInfo.mSource = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mSource", "I");
+    gKeyEventClassInfo.mMetaState = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mMetaState",
+                                                    "I");
+    gKeyEventClassInfo.mAction = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mAction", "I");
+    gKeyEventClassInfo.mKeyCode = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mKeyCode", "I");
+    gKeyEventClassInfo.mScanCode = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mScanCode", "I");
+    gKeyEventClassInfo.mRepeatCount = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mRepeatCount",
+                                                      "I");
+    gKeyEventClassInfo.mFlags = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mFlags", "I");
+    gKeyEventClassInfo.mDownTime = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mDownTime", "J");
+    gKeyEventClassInfo.mEventTime = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mEventTime",
+                                                    "J");
+    gKeyEventClassInfo.mCharacters = GetFieldIDOrDie(env, gKeyEventClassInfo.clazz, "mCharacters",
+                                                     "Ljava/lang/String;");
 
-    return AndroidRuntime::registerNativeMethods(
-        env, "android/view/KeyEvent", g_methods, NELEM(g_methods));
+    return RegisterMethodsOrDie(env, "android/view/KeyEvent", g_methods, NELEM(g_methods));
 }
 
 } // namespace android
