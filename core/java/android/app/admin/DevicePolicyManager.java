@@ -3421,12 +3421,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by profile or device owners to check whether a user has been blocked from
-     * uninstalling a package.
+     * Check whether the current user has been blocked by device policy from uninstalling a package.
+     * Requires the caller to be the profile owner if checking a specific admin's policy.
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin The name of the admin component whose blocking policy will be checked, or null
+     *        to check if any admin has blocked the uninstallation.
      * @param packageName package to check.
-     * @return true if the user shouldn't be able to uninstall the package.
+     * @return true if uninstallation is blocked.
      */
     public boolean isUninstallBlocked(ComponentName admin, String packageName) {
         if (mService != null) {
