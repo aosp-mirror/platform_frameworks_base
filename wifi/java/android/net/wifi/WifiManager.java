@@ -1968,7 +1968,7 @@ public class WifiManager {
     /**
      * Start Wi-fi Protected Setup
      *
-     * @param config WPS configuration
+     * @param config WPS configuration (does not support {@link WpsInfo#LABEL})
      * @param listener for callbacks on success or failure. Can be null.
      * @throws IllegalStateException if the WifiManager instance needs to be
      * initialized again
