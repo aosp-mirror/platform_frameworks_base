@@ -16,8 +16,12 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SimpleMonthView.OnDayClickListener;
@@ -33,15 +37,14 @@ class SimpleMonthAdapter extends BaseAdapter {
 
     private final Context mContext;
 
-    private Calendar mSelectedDay;
-    private ColorStateList mCalendarTextColors;
+    private Calendar mSelectedDay = Calendar.getInstance();
+    private ColorStateList mCalendarTextColors = ColorStateList.valueOf(Color.BLACK);
     private OnDaySelectedListener mOnDaySelectedListener;
 
     private int mFirstDayOfWeek;
 
     public SimpleMonthAdapter(Context context) {
         mContext = context;
-        mSelectedDay = Calendar.getInstance();
     }
 
     public void setRange(Calendar min, Calendar max) {
@@ -55,6 +58,10 @@ class SimpleMonthAdapter extends BaseAdapter {
         mFirstDayOfWeek = firstDayOfWeek;
 
         notifyDataSetInvalidated();
+    }
+
+    public int getFirstDayOfWeek() {
+        return mFirstDayOfWeek;
     }
 
     /**
@@ -79,6 +86,24 @@ class SimpleMonthAdapter extends BaseAdapter {
 
     void setCalendarTextColor(ColorStateList colors) {
         mCalendarTextColors = colors;
+    }
+
+    /**
+     * Sets the text color, size, style, hint color, and highlight color from
+     * the specified TextAppearance resource. This is mostly copied from
+     * {@link TextView#setTextAppearance(Context, int)}.
+     */
+    void setCalendarTextAppearance(int resId) {
+        final TypedArray a = mContext.obtainStyledAttributes(resId, R.styleable.TextAppearance);
+
+        final ColorStateList textColor = a.getColorStateList(R.styleable.TextAppearance_textColor);
+        if (textColor != null) {
+            mCalendarTextColors = textColor;
+        }
+
+        // TODO: Support font size, etc.
+
+        a.recycle();
     }
 
     @Override
