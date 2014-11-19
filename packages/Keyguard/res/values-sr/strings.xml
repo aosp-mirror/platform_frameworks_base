@@ -99,7 +99,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Превуците улево за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_right" msgid="8034433242579600980">"Превуците удесно за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="user_switched" msgid="3768006783166984410">"Актуелни корисник <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="kg_emergency_call_label" msgid="684946192523830531">"Хитни позив"</string>
+    <string name="kg_emergency_call_label" msgid="684946192523830531">"Хитан позив"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Заборављени шаблон"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Погрешан шаблон"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Погрешна лозинка"</string>
