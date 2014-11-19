@@ -25,7 +25,7 @@ import android.content.Context;
 
 public class FullBackupJob extends JobService {
     private static final String TAG = "FullBackupJob";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static ComponentName sIdleService =
             new ComponentName("android", FullBackupJob.class.getName());
