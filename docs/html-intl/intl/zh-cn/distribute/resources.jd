@@ -1,0 +1,56 @@
+page.title=你的语言的资源
+page.viewport_width=970
+section.landing=true
+header.hide=1
+nonavpage=true
+page.metaDescription=我们翻译了以下一些网站资源，希望能帮助你开始设计、开发和发布你的Android应用程序到全球。
+
+@jd:body
+
+    <div class="jd-descr" itemprop="articleBody">
+    <div class="resource-widget resource-carousel-layout col-16" 
+    style="height:420px;margin-top:0px;padding-top:0"
+    data-query="collection:overview/carousel/zhcn"
+    data-sortOdrder="-timestamp"
+    data-maxResults="4"></div>
+
+<div class="dynamic-grid">
+
+<h2>你的语言的资源</h2>
+<p style="margin-bottom:2em;">我们翻译了以下一些网站资源，希望能帮助你开始设计、开发和发布你的Android应用程序到全球。</p>
+
+<h3 style="font-size:18px;font-weight:bold">检查清单</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:overview/zhcn/1"
+    data-sortOrder=""
+    data-cardSizes="6x6,6x6,6x2x3"
+    data-maxResults="5"></div>
+
+<h3 style="font-size:18px;font-weight:bold">Google Play 应用内结算</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:overview/zhcn/2"
+    data-sortOrder=""
+    data-cardSizes="6x6,6x6,6x2x3"
+    data-maxResults="5"></div>
+
+<h3 style="font-size:18px;font-weight:bold">工具</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:overview/zhcn/3"
+    data-sortOrder=""
+    data-cardSizes="6x2x3,6x6,6x6"
+    data-maxResults="5"></div>
+
+<h3 style="font-size:18px;font-weight:bold">培训</h3>
+
+  <div class="resource-widget resource-flow-layout col-16"
+    data-query="collection:overview/zhcn/4"
+    data-sortOrder=""
+    data-cardSizes="6x6,12x2x3"
+    data-maxResults="5"></div>
+
+
+</div>
+
