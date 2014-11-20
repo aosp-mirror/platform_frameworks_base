@@ -2244,8 +2244,6 @@ public abstract class Context {
      * @see android.media.MediaRouter
      * @see #TELEPHONY_SERVICE
      * @see android.telephony.TelephonyManager
-     * @see #TELEPHONY_SUBSCRIPTION_SERVICE
-     * @see android.telephony.SubscriptionManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -2587,16 +2585,6 @@ public abstract class Context {
      * @see android.telephony.TelephonyManager
      */
     public static final String TELEPHONY_SERVICE = "phone";
-
-    /**
-     * Use with {@link #getSystemService} to retrieve a
-     * {@link android.telephony.SubscriptionManager} for handling management the
-     * telephony subscriptions of the device.
-     *
-     * @see #getSystemService
-     * @see android.telephony.SubscriptionManager
-     */
-    public static final String TELEPHONY_SUBSCRIPTION_SERVICE = "telephony_subscription_service";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
