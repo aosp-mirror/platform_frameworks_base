@@ -3317,17 +3317,18 @@ final class ActivityStack {
                 mHandler.sendEmptyMessageDelayed(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG, 500);
             } else {
                 Slog.e(TAG, "releaseBackgroundResources: activity " + r + " no longer running");
-                backgroundResourcesReleased(r.appToken);
+                backgroundResourcesReleased();
             }
         }
     }
 
-    final void backgroundResourcesReleased(IBinder token) {
+    final void backgroundResourcesReleased() {
         mHandler.removeMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG);
         final ActivityRecord r = getVisibleBehindActivity();
         if (r != null) {
             mStackSupervisor.mStoppingActivities.add(r);
             setVisibleBehindActivity(null);
+            mStackSupervisor.scheduleIdleTimeoutLocked(null);
         }
         mStackSupervisor.resumeTopActivitiesLocked();
     }
