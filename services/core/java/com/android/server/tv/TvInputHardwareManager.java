@@ -674,7 +674,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     throw new IllegalStateException("Device already released.");
                 }
 
-                int result = TvInputHal.ERROR_UNKNOWN;
+                int result = TvInputHal.SUCCESS;
                 if (surface == null) {
                     // The value of config is ignored when surface == null.
                     if (mActiveConfig != null) {
