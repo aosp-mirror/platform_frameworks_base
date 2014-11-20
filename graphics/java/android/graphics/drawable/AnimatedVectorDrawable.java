@@ -462,19 +462,22 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable {
     /**
      * Reverses ongoing animations or starts pending animations in reverse.
      * <p>
-     * NOTE: Only works of all animations are ValueAnimators.
+     * NOTE: Only works if all animations support reverse. Otherwise, this will
+     * do nothing.
      * @hide
      */
     public void reverse() {
+        // Only reverse when all the animators can be reverse. Otherwise, partially
+        // reverse is confusing.
+        if (!canReverse()) {
+            Log.w(LOGTAG, "AnimatedVectorDrawable can't reverse()");
+            return;
+        }
         final ArrayList<Animator> animators = mAnimatedVectorState.mAnimators;
         final int size = animators.size();
         for (int i = 0; i < size; i++) {
             final Animator animator = animators.get(i);
-            if (animator.canReverse()) {
-                animator.reverse();
-            } else {
-                Log.w(LOGTAG, "AnimatedVectorDrawable can't reverse()");
-            }
+            animator.reverse();
         }
     }
 

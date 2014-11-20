@@ -199,6 +199,8 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             return false;
         }
 
+        boolean hasReversibleFlag = state.transitionHasReversibleFlag(fromId, toId);
+
         // This may fail if we're already on the transition, but that's okay!
         selectDrawable(transitionIndex);
 
@@ -206,10 +208,14 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         final Drawable d = getCurrent();
         if (d instanceof AnimationDrawable) {
             final boolean reversed = state.isTransitionReversed(fromId, toId);
-            transition = new AnimationDrawableTransition((AnimationDrawable) d, reversed);
+
+            transition = new AnimationDrawableTransition((AnimationDrawable) d,
+                    reversed, hasReversibleFlag);
         } else if (d instanceof AnimatedVectorDrawable) {
             final boolean reversed = state.isTransitionReversed(fromId, toId);
-            transition = new AnimatedVectorDrawableTransition((AnimatedVectorDrawable) d, reversed);
+
+            transition = new AnimatedVectorDrawableTransition((AnimatedVectorDrawable) d,
+                    reversed, hasReversibleFlag);
         } else if (d instanceof Animatable) {
             transition = new AnimatableTransition((Animatable) d);
         } else {
@@ -260,7 +266,12 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     private static class AnimationDrawableTransition  extends Transition {
         private final ObjectAnimator mAnim;
 
-        public AnimationDrawableTransition(AnimationDrawable ad, boolean reversed) {
+        // Even AnimationDrawable is always reversible technically, but
+        // we should obey the XML's android:reversible flag.
+        private final boolean mHasReversibleFlag;
+
+        public AnimationDrawableTransition(AnimationDrawable ad,
+                boolean reversed, boolean hasReversibleFlag) {
             final int frameCount = ad.getNumberOfFrames();
             final int fromFrame = reversed ? frameCount - 1 : 0;
             final int toFrame = reversed ? 0 : frameCount - 1;
@@ -269,13 +280,13 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             anim.setAutoCancel(true);
             anim.setDuration(interp.getTotalDuration());
             anim.setInterpolator(interp);
-
+            mHasReversibleFlag = hasReversibleFlag;
             mAnim = anim;
         }
 
         @Override
         public boolean canReverse() {
-            return true;
+            return mHasReversibleFlag;
         }
 
         @Override
@@ -296,16 +307,28 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
     private static class AnimatedVectorDrawableTransition  extends Transition {
         private final AnimatedVectorDrawable mAvd;
+
+        // mReversed is indicating the current transition's direction.
         private final boolean mReversed;
 
-        public AnimatedVectorDrawableTransition(AnimatedVectorDrawable avd, boolean reversed) {
+        // mHasReversibleFlag is indicating whether the whole transition has
+        // reversible flag set to true.
+        // If mHasReversibleFlag is false, then mReversed is always false.
+        private final boolean mHasReversibleFlag;
+
+        public AnimatedVectorDrawableTransition(AnimatedVectorDrawable avd,
+                boolean reversed, boolean hasReversibleFlag) {
             mAvd = avd;
             mReversed = reversed;
+            mHasReversibleFlag = hasReversibleFlag;
         }
 
         @Override
         public boolean canReverse() {
-            return mAvd.canReverse();
+            // When the transition's XML says it is not reversible, then we obey
+            // it, even if the AVD itself is reversible.
+            // This will help the single direction transition.
+            return mAvd.canReverse() && mHasReversibleFlag;
         }
 
         @Override
@@ -322,7 +345,8 @@ public class AnimatedStateListDrawable extends StateListDrawable {
             if (canReverse()) {
                 mAvd.reverse();
             } else {
-                Log.w(LOGTAG, "Reverse() is called on a drawable can't reverse");
+                Log.w(LOGTAG, "Can't reverse, either the reversible is set to false,"
+                        + " or the AnimatedVectorDrawable can't reverse");
             }
         }
 
@@ -520,8 +544,12 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     }
 
     static class AnimatedStateListState extends StateListState {
-        private static final int REVERSE_SHIFT = 32;
-        private static final int REVERSE_MASK = 0x1;
+        // REVERSED_BIT is indicating the current transition's direction.
+        private static final long REVERSED_BIT = 0x100000000l;
+
+        // REVERSIBLE_FLAG_BIT is indicating whether the whole transition has
+        // reversible flag set to true.
+        private static final long REVERSIBLE_FLAG_BIT = 0x200000000l;
 
         int[] mAnimThemeAttrs;
 
@@ -545,11 +573,15 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         int addTransition(int fromId, int toId, @NonNull Drawable anim, boolean reversible) {
             final int pos = super.addChild(anim);
             final long keyFromTo = generateTransitionKey(fromId, toId);
-            mTransitions.append(keyFromTo, pos);
+            long reversibleBit = 0;
+            if (reversible) {
+                reversibleBit = REVERSIBLE_FLAG_BIT;
+            }
+            mTransitions.append(keyFromTo, pos | reversibleBit);
 
             if (reversible) {
                 final long keyToFrom = generateTransitionKey(toId, fromId);
-                mTransitions.append(keyToFrom, pos | (1L << REVERSE_SHIFT));
+                mTransitions.append(keyToFrom, pos | REVERSED_BIT | reversibleBit);
             }
 
             return addChild(anim);
@@ -581,7 +613,12 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
         boolean isTransitionReversed(int fromId, int toId) {
             final long keyFromTo = generateTransitionKey(fromId, toId);
-            return (mTransitions.get(keyFromTo, -1) >> REVERSE_SHIFT & REVERSE_MASK) == 1;
+            return (mTransitions.get(keyFromTo, -1) & REVERSED_BIT) != 0;
+        }
+
+        boolean transitionHasReversibleFlag(int fromId, int toId) {
+            final long keyFromTo = generateTransitionKey(fromId, toId);
+            return (mTransitions.get(keyFromTo, -1) & REVERSIBLE_FLAG_BIT) != 0;
         }
 
         @Override
