@@ -17,6 +17,8 @@
 #define LOG_TAG "Trace"
 // #define LOG_NDEBUG 0
 
+#include <inttypes.h>
+
 #include <JNIHelp.h>
 #include <ScopedUtfChars.h>
 #include <ScopedStringChars.h>
@@ -48,7 +50,7 @@ static void android_os_Trace_nativeTraceCounter(JNIEnv* env, jclass clazz,
         jlong tag, jstring nameStr, jint value) {
     ScopedUtfChars name(env, nameStr);
 
-    ALOGV("%s: %lld %s %d", __FUNCTION__, tag, name.c_str(), value);
+    ALOGV("%s: %" PRId64 " %s %d", __FUNCTION__, tag, name.c_str(), value);
     atrace_int(tag, name.c_str(), value);
 }
 
@@ -58,14 +60,14 @@ static void android_os_Trace_nativeTraceBegin(JNIEnv* env, jclass clazz,
     String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
     sanitizeString(utf8Chars);
 
-    ALOGV("%s: %lld %s", __FUNCTION__, tag, utf8Chars.string());
+    ALOGV("%s: %" PRId64 " %s", __FUNCTION__, tag, utf8Chars.string());
     atrace_begin(tag, utf8Chars.string());
 }
 
 static void android_os_Trace_nativeTraceEnd(JNIEnv* env, jclass clazz,
         jlong tag) {
 
-    ALOGV("%s: %lld", __FUNCTION__, tag);
+    ALOGV("%s: %" PRId64, __FUNCTION__, tag);
     atrace_end(tag);
 }
 
@@ -75,7 +77,7 @@ static void android_os_Trace_nativeAsyncTraceBegin(JNIEnv* env, jclass clazz,
     String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
     sanitizeString(utf8Chars);
 
-    ALOGV("%s: %lld %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
+    ALOGV("%s: %" PRId64 " %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
     atrace_async_begin(tag, utf8Chars.string(), cookie);
 }
 
@@ -85,7 +87,7 @@ static void android_os_Trace_nativeAsyncTraceEnd(JNIEnv* env, jclass clazz,
     String8 utf8Chars(reinterpret_cast<const char16_t*>(jchars.get()), jchars.size());
     sanitizeString(utf8Chars);
 
-    ALOGV("%s: %lld %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
+    ALOGV("%s: %" PRId64 " %s %d", __FUNCTION__, tag, utf8Chars.string(), cookie);
     atrace_async_end(tag, utf8Chars.string(), cookie);
 }
 

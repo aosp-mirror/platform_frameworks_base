@@ -111,8 +111,8 @@ struct Helpers {
         size_t typeSize = getTypeSize(type);
 
         if (dataBytes % typeSize != 0) {
-            ALOGE("%s: Expected dataBytes (%ud) to be divisible by typeSize "
-                  "(%ud)", __FUNCTION__, dataBytes, typeSize);
+            ALOGE("%s: Expected dataBytes (%zu) to be divisible by typeSize "
+                  "(%zu)", __FUNCTION__, dataBytes, typeSize);
             return BAD_VALUE;
         }
 
@@ -219,7 +219,7 @@ static jboolean CameraMetadata_isEmpty(JNIEnv *env, jobject thiz) {
 
     jboolean empty = metadata->isEmpty();
 
-    ALOGV("%s: Empty returned %d, entry count was %d",
+    ALOGV("%s: Empty returned %d, entry count was %zu",
           __FUNCTION__, empty, metadata->entryCount());
 
     return empty;
@@ -675,7 +675,7 @@ static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyN
                              "Could not find section name for key '%s')", key);
         return 0;
     } else {
-        ALOGV("%s: Found matched section '%s' (%d)",
+        ALOGV("%s: Found matched section '%s' (%zu)",
               __FUNCTION__, section, sectionIndex);
     }
 

@@ -82,7 +82,7 @@ static jbyteArray DdmHandleNativeHeap_getLeakInfo(JNIEnv* env, jobject) {
     get_malloc_leak_info(&allocBytes, &header.allocSize, &header.allocInfoSize,
                          &header.totalMemory, &header.backtraceSize);
 
-    ALOGD("*** mapSize: %d allocSize: %d allocInfoSize: %d totalMemory: %d",
+    ALOGD("*** mapSize: %zu allocSize: %zu allocInfoSize: %zu totalMemory: %zu",
           header.mapSize, header.allocSize, header.allocInfoSize, header.totalMemory);
 
 #if defined(__LP64__)
