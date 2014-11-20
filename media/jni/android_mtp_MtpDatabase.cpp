@@ -818,7 +818,7 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     info.mAssociationType = MTP_ASSOCIATION_TYPE_UNDEFINED;
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
-    MtpString temp(str);
+    MtpString temp(reinterpret_cast<char16_t*>(str));
     info.mName = strdup((const char *)temp);
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
 
@@ -887,7 +887,8 @@ MtpResponseCode MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,
     }
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
-    outFilePath.setTo(str, strlen16(str));
+    outFilePath.setTo(reinterpret_cast<char16_t*>(str),
+                      strlen16(reinterpret_cast<char16_t*>(str)));
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
 
     jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);

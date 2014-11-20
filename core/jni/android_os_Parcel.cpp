@@ -277,7 +277,9 @@ static void android_os_Parcel_writeString(JNIEnv* env, jclass clazz, jlong nativ
         if (val) {
             const jchar* str = env->GetStringCritical(val, 0);
             if (str) {
-                err = parcel->writeString16(str, env->GetStringLength(val));
+                err = parcel->writeString16(
+                    reinterpret_cast<const char16_t*>(str),
+                    env->GetStringLength(val));
                 env->ReleaseStringCritical(val, str);
             }
         } else {
@@ -411,7 +413,7 @@ static jstring android_os_Parcel_readString(JNIEnv* env, jclass clazz, jlong nat
         size_t len;
         const char16_t* str = parcel->readString16Inplace(&len);
         if (str) {
-            return env->NewString(str, len);
+            return env->NewString(reinterpret_cast<const jchar*>(str), len);
         }
         return NULL;
     }
@@ -453,7 +455,8 @@ static jobject android_os_Parcel_openFileDescriptor(JNIEnv* env, jclass clazz,
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return NULL;
     }
-    String8 name8(str, env->GetStringLength(name));
+    String8 name8(reinterpret_cast<const char16_t*>(str),
+                  env->GetStringLength(name));
     env->ReleaseStringCritical(name, str);
     int flags=0;
     switch (mode&0x30000000) {
@@ -648,7 +651,9 @@ static void android_os_Parcel_writeInterfaceToken(JNIEnv* env, jclass clazz, jlo
         // the caller expects to be invoking
         const jchar* str = env->GetStringCritical(name, 0);
         if (str != NULL) {
-            parcel->writeInterfaceToken(String16(str, env->GetStringLength(name)));
+            parcel->writeInterfaceToken(String16(
+                  reinterpret_cast<const char16_t*>(str),
+                  env->GetStringLength(name)));
             env->ReleaseStringCritical(name, str);
         }
     }
@@ -663,7 +668,8 @@ static void android_os_Parcel_enforceInterface(JNIEnv* env, jclass clazz, jlong 
             IPCThreadState* threadState = IPCThreadState::self();
             const int32_t oldPolicy = threadState->getStrictModePolicy();
             const bool isValid = parcel->enforceInterface(
-                String16(str, env->GetStringLength(name)),
+                String16(reinterpret_cast<const char16_t*>(str),
+                         env->GetStringLength(name)),
                 threadState);
             env->ReleaseStringCritical(name, str);
             if (isValid) {
