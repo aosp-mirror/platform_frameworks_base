@@ -2653,4 +2653,8 @@
 
   <public type="attr" name="extractNativeLibs" />
   <public type="attr" name="usesCleartextTraffic" />
+
+  <!--IntentFilter auto verification -->
+  <public type="attr" name="autoVerify" />
+
 </resources>

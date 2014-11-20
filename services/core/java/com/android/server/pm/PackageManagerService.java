@@ -44,6 +44,10 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_USER_RESTRICTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_FORWARD_LOCK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
 import static android.content.pm.PackageParser.isApkFile;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
@@ -59,6 +63,8 @@ import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSets;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 
+import android.Manifest;
+import android.content.pm.IntentFilterVerificationInfo;
 import android.util.ArrayMap;
 
 import com.android.internal.R;
@@ -504,6 +510,231 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     boolean mResolverReplaced = false;
 
+    private final ComponentName mIntentFilterVerifierComponent;
+    private int mIntentFilterVerificationToken = 0;
+
+    final SparseArray<IntentFilterVerificationState> mIntentFilterVerificationStates
+            = new SparseArray<IntentFilterVerificationState>();
+
+    private interface IntentFilterVerifier<T extends IntentFilter> {
+        boolean addOneIntentFilterVerification(int verifierId, int userId, int verificationId,
+                                               T filter, String packageName);
+        void startVerifications(int userId);
+        void receiveVerificationResponse(int verificationId);
+    }
+
+    private class IntentVerifierProxy implements IntentFilterVerifier<ActivityIntentInfo> {
+        private Context mContext;
+        private ComponentName mIntentFilterVerifierComponent;
+        private ArrayList<Integer> mCurrentIntentFilterVerifications = new ArrayList<Integer>();
+
+        public IntentVerifierProxy(Context context, ComponentName verifierComponent) {
+            mContext = context;
+            mIntentFilterVerifierComponent = verifierComponent;
+        }
+
+        private String getDefaultScheme() {
+            // TODO: replace SCHEME_HTTP with SCHEME_HTTPS
+            return IntentFilter.SCHEME_HTTP;
+        }
+
+        @Override
+        public void startVerifications(int userId) {
+            // Launch verifications requests
+            int count = mCurrentIntentFilterVerifications.size();
+            for (int n=0; n<count; n++) {
+                int verificationId = mCurrentIntentFilterVerifications.get(n);
+                final IntentFilterVerificationState ivs =
+                        mIntentFilterVerificationStates.get(verificationId);
+
+                String packageName = ivs.getPackageName();
+                boolean modified = false;
+
+                ArrayList<PackageParser.ActivityIntentInfo> filters = ivs.getFilters();
+                final int filterCount = filters.size();
+                for (int m=0; m<filterCount; m++) {
+                    PackageParser.ActivityIntentInfo filter = filters.get(m);
+                    synchronized (mPackages) {
+                        modified = mSettings.createIntentFilterVerificationIfNeededLPw(
+                                packageName, filter.getHosts());
+                    }
+                }
+                synchronized (mPackages) {
+                    if (modified) {
+                        scheduleWriteSettingsLocked();
+                    }
+                }
+                sendVerificationRequest(userId, verificationId, ivs);
+            }
+            mCurrentIntentFilterVerifications.clear();
+        }
+
+        private void sendVerificationRequest(int userId, int verificationId,
+                                             IntentFilterVerificationState ivs) {
+
+            Intent verificationIntent = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
+            verificationIntent.putExtra(
+                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_ID,
+                    verificationId);
+            verificationIntent.putExtra(
+                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_URI_SCHEME,
+                    getDefaultScheme());
+            verificationIntent.putExtra(
+                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_HOSTS,
+                    ivs.getHostsString());
+            verificationIntent.putExtra(
+                    PackageManager.EXTRA_INTENT_FILTER_VERIFICATION_PACKAGE_NAME,
+                    ivs.getPackageName());
+            verificationIntent.setComponent(mIntentFilterVerifierComponent);
+            verificationIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+
+            UserHandle user = new UserHandle(userId);
+            mContext.sendBroadcastAsUser(verificationIntent, user);
+            Slog.d(TAG, "Sending IntenFilter verification broadcast");
+        }
+
+        public void receiveVerificationResponse(int verificationId) {
+            IntentFilterVerificationState ivs = mIntentFilterVerificationStates.get(verificationId);
+
+            final boolean verified = ivs.isVerified();
+
+            ArrayList<PackageParser.ActivityIntentInfo> filters = ivs.getFilters();
+            final int count = filters.size();
+            for (int n=0; n<count; n++) {
+                PackageParser.ActivityIntentInfo filter = filters.get(n);
+                filter.setVerified(verified);
+
+                Slog.d(TAG, "IntentFilter " + filter.toString() + " verified with result:"
+                        + verified + " and hosts:" + ivs.getHostsString());
+            }
+
+            mIntentFilterVerificationStates.remove(verificationId);
+
+            final String packageName = ivs.getPackageName();
+            IntentFilterVerificationInfo ivi = null;
+
+            synchronized (mPackages) {
+                ivi = mSettings.getIntentFilterVerificationLPr(packageName);
+            }
+            if (ivi == null) {
+                Slog.w(TAG, "IntentFilterVerificationInfo not found for verificationId:"
+                        + verificationId + " packageName:" + packageName);
+                return;
+            }
+            Slog.d(TAG, "Updating IntentFilterVerificationInfo for verificationId: "
+                    + verificationId);
+
+            synchronized (mPackages) {
+                if (verified) {
+                    ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS);
+                } else {
+                    ivi.setStatus(INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK);
+                }
+                scheduleWriteSettingsLocked();
+
+                final int userId = ivs.getUserId();
+                if (userId != UserHandle.USER_ALL) {
+                    final int userStatus =
+                            mSettings.getIntentFilterVerificationStatusLPr(packageName, userId);
+
+                    int updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+                    boolean needUpdate = false;
+
+                    // We cannot override the STATUS_ALWAYS / STATUS_NEVER states if they have
+                    // already been set by the User thru the Disambiguation dialog
+                    switch (userStatus) {
+                        case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
+                            if (verified) {
+                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+                            } else {
+                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+                            }
+                            needUpdate = true;
+                            break;
+
+                        case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
+                            if (verified) {
+                                updatedStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+                                needUpdate = true;
+                            }
+                            break;
+
+                        default:
+                            // Nothing to do
+                    }
+
+                    if (needUpdate) {
+                        mSettings.updateIntentFilterVerificationStatusLPw(
+                                packageName, updatedStatus, userId);
+                        scheduleWritePackageRestrictionsLocked(userId);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean addOneIntentFilterVerification(int verifierId, int userId, int verificationId,
+                    ActivityIntentInfo filter, String packageName) {
+            if (!(filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
+                    filter.hasDataScheme(IntentFilter.SCHEME_HTTPS))) {
+                Slog.d(TAG, "IntentFilter does not contain HTTP nor HTTPS data scheme");
+                return false;
+            }
+            IntentFilterVerificationState ivs = mIntentFilterVerificationStates.get(verificationId);
+            if (ivs == null) {
+                ivs = createDomainVerificationState(verifierId, userId, verificationId,
+                        packageName);
+            }
+            ArrayList<String> hosts = filter.getHostsList();
+            if (!hasValidHosts(hosts)) {
+                return false;
+            }
+            ivs.addFilter(filter);
+            return true;
+        }
+
+        private IntentFilterVerificationState createDomainVerificationState(int verifierId,
+                int userId, int verificationId, String packageName) {
+            IntentFilterVerificationState ivs = new IntentFilterVerificationState(
+                    verifierId, userId, packageName);
+            ivs.setPendingState();
+            synchronized (mPackages) {
+                mIntentFilterVerificationStates.append(verificationId, ivs);
+                mCurrentIntentFilterVerifications.add(verificationId);
+            }
+            return ivs;
+        }
+
+        private boolean hasValidHosts(ArrayList<String> hosts) {
+            if (hosts.size() == 0) {
+                Slog.d(TAG, "IntentFilter does not contain any data hosts");
+                return false;
+            }
+            String hostEndBase = null;
+            for (String host : hosts) {
+                String[] hostParts = host.split("\\.");
+                // Should be at minimum a host like "example.com"
+                if (hostParts.length < 2) {
+                    Slog.d(TAG, "IntentFilter does not contain a valid data host name: " + host);
+                    return false;
+                }
+                // Verify that we have the same ending domain
+                int length = hostParts.length;
+                String hostEnd = hostParts[length - 1] + hostParts[length - 2];
+                if (hostEndBase == null) {
+                    hostEndBase = hostEnd;
+                }
+                if (!hostEnd.equalsIgnoreCase(hostEndBase)) {
+                    Slog.d(TAG, "IntentFilter does not contain the same data domains");
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    private IntentFilterVerifier mIntentFilterVerifier;
+
     // Set of pending broadcasts for aggregating enable/disable of components.
     static class PendingPackageBroadcasts {
         // for each user id, a map of <package name -> components within that package>
@@ -590,6 +821,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int WRITE_PACKAGE_RESTRICTIONS = 14;
     static final int PACKAGE_VERIFIED = 15;
     static final int CHECK_PENDING_VERIFICATION = 16;
+    static final int START_INTENT_FILTER_VERIFICATIONS = 17;
+    static final int INTENT_FILTER_VERIFIED = 18;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1240,6 +1473,54 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                     break;
                 }
+                case START_INTENT_FILTER_VERIFICATIONS: {
+                    int userId = msg.arg1;
+                    int verifierUid = msg.arg2;
+                    PackageParser.Package pkg = (PackageParser.Package)msg.obj;
+
+                    verifyIntentFiltersIfNeeded(userId, verifierUid, pkg);
+                    break;
+                }
+                case INTENT_FILTER_VERIFIED: {
+                    final int verificationId = msg.arg1;
+
+                    final IntentFilterVerificationState state = mIntentFilterVerificationStates.get(
+                            verificationId);
+                    if (state == null) {
+                        Slog.w(TAG, "Invalid IntentFilter verification token "
+                                + verificationId + " received");
+                        break;
+                    }
+
+                    final int userId = state.getUserId();
+
+                    Slog.d(TAG, "Processing IntentFilter verification with token:"
+                            + verificationId + " and userId:" + userId);
+
+                    final IntentFilterVerificationResponse response =
+                            (IntentFilterVerificationResponse) msg.obj;
+
+                    state.setVerifierResponse(response.callerUid, response.code);
+
+                    Slog.d(TAG, "IntentFilter verification with token:" + verificationId
+                            + " and userId:" + userId
+                            + " is settings verifier response with response code:"
+                            + response.code);
+
+                    if (response.code == PackageManager.INTENT_FILTER_VERIFICATION_FAILURE) {
+                        Slog.d(TAG, "Domains failing verification: "
+                                + response.getFailedDomainsString());
+                    }
+
+                    if (state.isVerificationComplete()) {
+                        mIntentFilterVerifier.receiveVerificationResponse(verificationId);
+                    } else {
+                        Slog.d(TAG, "IntentFilter verification with token:" + verificationId
+                                + " was not said to be complete");
+                    }
+
+                    break;
+                }
             }
         }
     }
@@ -1851,10 +2132,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                     SystemClock.uptimeMillis());
 
             mRequiredVerifierPackage = getRequiredVerifierLPr();
+
+            mInstallerService = new PackageInstallerService(context, this, mAppInstallDir);
+
+            mIntentFilterVerifierComponent = getIntentFilterVerifierComponentNameLPr();
+            mIntentFilterVerifier = new IntentVerifierProxy(mContext,
+                    mIntentFilterVerifierComponent);
+
         } // synchronized (mPackages)
         } // synchronized (mInstallLock)
-
-        mInstallerService = new PackageInstallerService(context, this, mAppInstallDir);
 
         // Now after opening every single application zip, make sure they
         // are all flushed.  Not really needed, but keeps things nice and
@@ -1907,6 +2193,46 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return requiredVerifier;
+    }
+
+    private ComponentName getIntentFilterVerifierComponentNameLPr() {
+        final Intent verification = new Intent(Intent.ACTION_INTENT_FILTER_NEEDS_VERIFICATION);
+        final List<ResolveInfo> receivers = queryIntentReceivers(verification, PACKAGE_MIME_TYPE,
+                PackageManager.GET_DISABLED_COMPONENTS, 0 /* userId */);
+
+        ComponentName verifierComponentName = null;
+
+        int priority = -1000;
+        final int N = receivers.size();
+        for (int i = 0; i < N; i++) {
+            final ResolveInfo info = receivers.get(i);
+
+            if (info.activityInfo == null) {
+                continue;
+            }
+
+            final String packageName = info.activityInfo.packageName;
+
+            final PackageSetting ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                continue;
+            }
+
+            if (checkPermission(android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT,
+                    packageName, UserHandle.USER_OWNER) != PackageManager.PERMISSION_GRANTED) {
+                continue;
+            }
+
+            // Select the IntentFilterVerifier with the highest priority
+            if (priority < info.priority) {
+                priority = info.priority;
+                verifierComponentName = new ComponentName(packageName, info.activityInfo.name);
+                Slog.d(TAG, "Selecting IntentFilterVerifier: " + verifierComponentName +
+                        " with priority: " + info.priority);
+            }
+        }
+
+        return verifierComponentName;
     }
 
     @Override
@@ -3532,14 +3858,20 @@ public class PackageManagerService extends IPackageManager.Stub {
                 resolveInfo = queryCrossProfileIntents(
                         matchingFilters, intent, resolvedType, flags, userId);
 
-                // Check for results in the current profile.
+                // Check for results in the current profile. Adding GET_RESOLVED_FILTER flags
+                // as we need it later
                 List<ResolveInfo> result = mActivities.queryIntent(
                         intent, resolvedType, flags, userId);
                 if (resolveInfo != null) {
                     result.add(resolveInfo);
                     Collections.sort(result, mResolvePrioritySorter);
                 }
-                return filterIfNotPrimaryUser(result, userId);
+                result = filterIfNotPrimaryUser(result, userId);
+                if (result.size() > 1) {
+                    return filterCandidatesWithDomainPreferedActivitiesLPw(result);
+                }
+
+                return result;
             }
             final PackageParser.Package pkg = mPackages.get(pkgName);
             if (pkg != null) {
@@ -3570,6 +3902,49 @@ public class PackageManagerService extends IPackageManager.Stub {
         return resolveInfos;
     }
 
+    private List<ResolveInfo> filterCandidatesWithDomainPreferedActivitiesLPw(
+            List<ResolveInfo> candidates) {
+        if (DEBUG_PREFERRED) {
+            Slog.v("TAG", "Filtering results with prefered activities. Candidates count: " +
+                    candidates.size());
+        }
+        final int userId = UserHandle.getCallingUserId();
+        ArrayList<ResolveInfo> result = new ArrayList<ResolveInfo>(candidates);
+        synchronized (mPackages) {
+            final int count = result.size();
+            for (int n = count-1; n >= 0; n--) {
+                ResolveInfo info = result.get(n);
+                if (!info.filterNeedsVerification) {
+                    continue;
+                }
+                String packageName = info.activityInfo.packageName;
+                PackageSetting ps = mSettings.mPackages.get(packageName);
+                if (ps != null) {
+                    // Try to get the status from User settings first
+                    int status = ps.getDomainVerificationStatusForUser(userId);
+                    // if none available, get the master status
+                    if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+                        if (ps.getIntentFilterVerificationInfo() != null) {
+                            status = ps.getIntentFilterVerificationInfo().getStatus();
+                        }
+                    }
+                    if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
+                        result.clear();
+                        result.add(info);
+                        // We break the for loop as we are good to go
+                        break;
+                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
+                        result.remove(n);
+                    }
+                }
+            }
+        }
+        if (DEBUG_PREFERRED) {
+            Slog.v("TAG", "Filtered results with prefered activities. New candidates count: " +
+                    result.size());
+        }
+        return result;
+    }
 
     private ResolveInfo querySkipCurrentProfileIntents(
             List<CrossProfileIntentFilter> matchingFilters, Intent intent, String resolvedType,
@@ -7444,6 +7819,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             if ((mFlags&PackageManager.GET_RESOLVED_FILTER) != 0) {
                 res.filter = info;
             }
+            if (info != null) {
+                res.filterNeedsVerification = info.needsVerification();
+            }
             res.priority = info.getPriority();
             res.preferredOrder = activity.owner.mPreferredOrder;
             //System.out.println("Result: " + res.activityInfo.className +
@@ -7666,8 +8044,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
             res.priority = info.getPriority();
             res.preferredOrder = service.owner.mPreferredOrder;
-            //System.out.println("Result: " + res.activityInfo.className +
-            //                   " = " + res.priority);
             res.match = match;
             res.isDefault = info.hasDefault;
             res.labelRes = info.labelRes;
@@ -8542,6 +8918,45 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                 android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE, 1) == 1;
+    }
+
+    @Override
+    public void verifyIntentFilter(int id, int verificationCode, List<String> outFailedDomains)
+            throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT,
+                "Only intentfilter verification agents can verify applications");
+
+        final Message msg = mHandler.obtainMessage(INTENT_FILTER_VERIFIED);
+        final IntentFilterVerificationResponse response = new IntentFilterVerificationResponse(
+                Binder.getCallingUid(), verificationCode, outFailedDomains);
+        msg.arg1 = id;
+        msg.obj = response;
+        mHandler.sendMessage(msg);
+    }
+
+    @Override
+    public int getIntentVerificationStatus(String packageName, int userId) {
+        synchronized (mPackages) {
+            return mSettings.getIntentFilterVerificationStatusLPr(packageName, userId);
+        }
+    }
+
+    @Override
+    public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
+        boolean result = false;
+        synchronized (mPackages) {
+            result = mSettings.updateIntentFilterVerificationStatusLPw(packageName, status, userId);
+        }
+        scheduleWritePackageRestrictionsLocked(userId);
+        return result;
+    }
+
+    @Override
+    public List<IntentFilterVerificationInfo> getIntentFilterVerifications(String packageName) {
+        synchronized (mPackages) {
+            return mSettings.getIntentFilterVerificationsLPr(packageName);
+        }
     }
 
     /**
@@ -10708,6 +11123,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             return;
         }
 
+        startIntentFilterVerifications(args.user.getIdentifier(), pkg);
+
         if (replace) {
             replacePackageLI(pkg, parseFlags, scanFlags | SCAN_REPLACING, args.user,
                     installerPackageName, res);
@@ -10720,6 +11137,86 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (ps != null) {
                 res.newUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
             }
+        }
+    }
+
+    private void startIntentFilterVerifications(int userId, PackageParser.Package pkg) {
+        if (mIntentFilterVerifierComponent == null) {
+            Slog.d(TAG, "No IntentFilter verification will not be done as "
+                    + "there is no IntentFilterVerifier available!");
+            return;
+        }
+
+        final int verifierUid = getPackageUid(
+                mIntentFilterVerifierComponent.getPackageName(),
+                (userId == UserHandle.USER_ALL) ? UserHandle.USER_OWNER : userId);
+
+        mHandler.removeMessages(START_INTENT_FILTER_VERIFICATIONS);
+        final Message msg = mHandler.obtainMessage(START_INTENT_FILTER_VERIFICATIONS);
+        msg.obj = pkg;
+        msg.arg1 = userId;
+        msg.arg2 = verifierUid;
+
+        mHandler.sendMessage(msg);
+    }
+
+    private void verifyIntentFiltersIfNeeded(int userId, int verifierUid,
+                                             PackageParser.Package pkg) {
+        int size = pkg.activities.size();
+        if (size == 0) {
+            Slog.d(TAG, "No activity, so no need to verify any IntentFilter!");
+            return;
+        }
+
+        Slog.d(TAG, "Checking for userId:" + userId + " if any IntentFilter from the " + size
+                + " Activities needs verification ...");
+
+        final int verificationId = mIntentFilterVerificationToken++;
+        int count = 0;
+        synchronized (mPackages) {
+            for (PackageParser.Activity a : pkg.activities) {
+                for (ActivityIntentInfo filter : a.intents) {
+                    boolean needFilterVerification = filter.needsVerification() &&
+                            !filter.isVerified();
+                    if (needFilterVerification && needNetworkVerificationLPr(filter)) {
+                        Slog.d(TAG, "Verification needed for IntentFilter:" + filter.toString());
+                        mIntentFilterVerifier.addOneIntentFilterVerification(
+                                verifierUid, userId, verificationId, filter, pkg.packageName);
+                        count++;
+                    } else {
+                        Slog.d(TAG, "No verification needed for IntentFilter:" + filter.toString());
+                    }
+                }
+            }
+        }
+
+        if (count > 0) {
+            mIntentFilterVerifier.startVerifications(userId);
+            Slog.d(TAG, "Started " + count + " IntentFilter verification"
+                    + (count > 1 ? "s" : "") +  " for userId:" + userId + "!");
+        } else {
+            Slog.d(TAG, "No need to start any IntentFilter verification!");
+        }
+    }
+
+    private boolean needNetworkVerificationLPr(ActivityIntentInfo filter) {
+        final ComponentName cn  = filter.activity.getComponentName();
+        final String packageName = cn.getPackageName();
+
+        IntentFilterVerificationInfo ivi = mSettings.getIntentFilterVerificationLPr(
+                packageName);
+        if (ivi == null) {
+            return true;
+        }
+        int status = ivi.getStatus();
+        switch (status) {
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
+            case INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
+                return true;
+
+            default:
+                // Nothing to do
+                return false;
         }
     }
 
@@ -11066,6 +11563,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                     clearPackagePreferredActivitiesLPw(deletedPs.name, UserHandle.USER_ALL);
+                    clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL);
                 }
                 // make sure to preserve per-user disabled state if this removal was just
                 // a downgrade of a system app to the factory package
@@ -11294,8 +11792,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                         true,  //notLaunched
                         false, //hidden
                         null, null, null,
-                        false // blockUninstall
-                        );
+                        false, // blockUninstall
+                        INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
                 if (!isSystemApp(ps)) {
                     if (ps.isAnyInstalled(sUserManager.getUserIds())) {
                         // Other user still have this package installed, so all
@@ -11918,6 +12416,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         return changed;
     }
 
+    /** This method takes a specific user id as well as UserHandle.USER_ALL. */
+    void clearIntentFilterVerificationsLPw(String packageName, int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            mSettings.removeIntentFilterVerificationLPw(packageName, sUserManager.getUserIds());
+            for (int oneUserId : sUserManager.getUserIds()) {
+                scheduleWritePackageRestrictionsLocked(oneUserId);
+            }
+        } else {
+            mSettings.removeIntentFilterVerificationLPw(packageName, userId);
+            scheduleWritePackageRestrictionsLocked(userId);
+        }
+    }
+
     @Override
     public void resetPreferredActivities(int userId) {
         /* TODO: Actually use userId. Why is it being passed in? */
@@ -12428,6 +12939,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         public static final int DUMP_KEYSETS = 1 << 11;
         public static final int DUMP_VERSION = 1 << 12;
         public static final int DUMP_INSTALLS = 1 << 13;
+        public static final int DUMP_INTENT_FILTER_VERIFIERS = 1 << 14;
+        public static final int DUMP_DOMAIN_PREFERRED = 1 << 15;
 
         public static final int OPTION_SHOW_FILTERS = 1 << 0;
 
@@ -12533,6 +13046,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 pw.println("    write: write current settings now");
                 pw.println("    <package.name>: info about given package");
                 pw.println("    installs: details about install sessions");
+                pw.println("    d[omain-preferred-apps]: print domains preferred apps");
+                pw.println("    i[ntent-filter-verifiers]|ifv: print intent filter verifier info");
                 return;
             } else if ("--checkin".equals(opt)) {
                 checkin = true;
@@ -12569,6 +13084,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     fullPreferred = true;
                     opti++;
                 }
+            } else if ("d".equals(cmd) || "domain-preferred-apps".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_DOMAIN_PREFERRED);
             } else if ("p".equals(cmd) || "packages".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_PACKAGES);
             } else if ("s".equals(cmd) || "shared-users".equals(cmd)) {
@@ -12579,6 +13096,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 dumpState.setDump(DumpState.DUMP_MESSAGES);
             } else if ("v".equals(cmd) || "verifiers".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_VERIFIERS);
+            } else if ("i".equals(cmd) || "ifv".equals(cmd)
+                    || "intent-filter-verifiers".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_INTENT_FILTER_VERIFIERS);
             } else if ("version".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_VERSION);
             } else if ("k".equals(cmd) || "keysets".equals(cmd)) {
@@ -12631,6 +13151,29 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } else if (mRequiredVerifierPackage != null) {
                     pw.print("vrfy,"); pw.print(mRequiredVerifierPackage);
                     pw.print(","); pw.println(getPackageUid(mRequiredVerifierPackage, 0));
+                }
+            }
+
+            if (dumpState.isDumping(DumpState.DUMP_INTENT_FILTER_VERIFIERS) &&
+                    packageName == null) {
+                if (mIntentFilterVerifierComponent != null) {
+                    String verifierPackageName = mIntentFilterVerifierComponent.getPackageName();
+                    if (!checkin) {
+                        if (dumpState.onTitlePrinted())
+                            pw.println();
+                        pw.println("Intent Filter Verifier:");
+                        pw.print("  Using: ");
+                        pw.print(verifierPackageName);
+                        pw.print(" (uid=");
+                        pw.print(getPackageUid(verifierPackageName, 0));
+                        pw.println(")");
+                    } else if (verifierPackageName != null) {
+                        pw.print("ifv,"); pw.print(verifierPackageName);
+                        pw.print(","); pw.println(getPackageUid(verifierPackageName, 0));
+                    }
+                } else {
+                    pw.println();
+                    pw.println("No Intent Filter Verifier available!");
                 }
             }
 
@@ -12750,6 +13293,65 @@ public class PackageManagerService extends IPackageManager.Stub {
                     pw.println("Failed writing: " + e);
                 } catch (IOException e) {
                     pw.println("Failed writing: " + e);
+                }
+            }
+
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_DOMAIN_PREFERRED)) {
+                pw.println();
+                int count = mSettings.mPackages.size();
+                if (count == 0) {
+                    pw.println("No domain preferred apps!");
+                    pw.println();
+                } else {
+                    final String prefix = "  ";
+                    Collection<PackageSetting> allPackageSettings = mSettings.mPackages.values();
+                    if (allPackageSettings.size() == 0) {
+                        pw.println("No domain preferred apps!");
+                        pw.println();
+                    } else {
+                        pw.println("Domain preferred apps status:");
+                        pw.println();
+                        count = 0;
+                        for (PackageSetting ps : allPackageSettings) {
+                            IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
+                            if (ivi == null || ivi.getPackageName() == null) continue;
+                            pw.println(prefix + "Package Name: " + ivi.getPackageName());
+                            pw.println(prefix + "Domains: " + ivi.getDomainsString());
+                            pw.println(prefix + "Status: " + ivi.getStatusString());
+                            pw.println();
+                            count++;
+                        }
+                        if (count == 0) {
+                            pw.println(prefix + "No domain preferred app status!");
+                            pw.println();
+                        }
+                        for (int userId : sUserManager.getUserIds()) {
+                            pw.println("Domain preferred apps for User " + userId + ":");
+                            pw.println();
+                            count = 0;
+                            for (PackageSetting ps : allPackageSettings) {
+                                IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
+                                if (ivi == null || ivi.getPackageName() == null) {
+                                    continue;
+                                }
+                                final int status = ps.getDomainVerificationStatusForUser(userId);
+                                if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+                                    continue;
+                                }
+                                pw.println(prefix + "Package Name: " + ivi.getPackageName());
+                                pw.println(prefix + "Domains: " + ivi.getDomainsString());
+                                String statusStr = IntentFilterVerificationInfo.
+                                        getStatusStringFromValue(status);
+                                pw.println(prefix + "Status: " + statusStr);
+                                pw.println();
+                                count++;
+                            }
+                            if (count == 0) {
+                                pw.println(prefix + "No domain preferred apps!");
+                                pw.println();
+                            }
+                        }
+                    }
                 }
             }
 

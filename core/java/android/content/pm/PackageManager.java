@@ -969,6 +969,60 @@ public abstract class PackageManager {
     public static final int VERIFICATION_REJECT = -1;
 
     /**
+     * Used as the {@code verificationCode} argument for
+     * {@link PackageManager#verifyIntentFilter} to indicate that the calling
+     * IntentFilter Verifier confirms that the IntentFilter is verified.
+     *
+     * @hide
+     */
+    public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1;
+
+    /**
+     * Used as the {@code verificationCode} argument for
+     * {@link PackageManager#verifyIntentFilter} to indicate that the calling
+     * IntentFilter Verifier confirms that the IntentFilter is NOT verified.
+     *
+     * @hide
+     */
+    public static final int INTENT_FILTER_VERIFICATION_FAILURE = -1;
+
+    /**
+     * Internal status code to indicate that an IntentFilter verification result is not specified.
+     *
+     * @hide
+     */
+    public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED = 0;
+
+    /**
+     * Used as the {@code status} argument for {@link PackageManager#updateIntentVerificationStatus}
+     * to indicate that the User will always be prompted the Intent Disambiguation Dialog if there
+     * are two or more Intent resolved for the IntentFilter's domain(s).
+     *
+     * @hide
+     */
+    public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK = 1;
+
+    /**
+     * Used as the {@code status} argument for {@link PackageManager#updateIntentVerificationStatus}
+     * to indicate that the User will never be prompted the Intent Disambiguation Dialog if there
+     * are two or more resolution of the Intent. The default App for the domain(s) specified in the
+     * IntentFilter will also ALWAYS be used.
+     *
+     * @hide
+     */
+    public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS = 2;
+
+    /**
+     * Used as the {@code status} argument for {@link PackageManager#updateIntentVerificationStatus}
+     * to indicate that the User may be prompted the Intent Disambiguation Dialog if there
+     * are two or more Intent resolved. The default App for the domain(s) specified in the
+     * IntentFilter will also NEVER be presented to the User.
+     *
+     * @hide
+     */
+    public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER = 3;
+
+    /**
      * Can be used as the {@code millisecondsToDelay} argument for
      * {@link PackageManager#extendVerificationTimeout}. This is the
      * maximum time {@code PackageManager} waits for the verification
@@ -1680,8 +1734,52 @@ public abstract class PackageManager {
             = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
 
     /**
-     * The action used to request that the user approve a grant permissions
-     * request from the application.
+     * Extra field name for the ID of a intent filter pending verification. Passed to
+     * an intent filter verifier and is used to call back to
+     * {@link PackageManager#verifyIntentFilter(int, int)}
+     *
+     * @hide
+     */
+    public static final String EXTRA_INTENT_FILTER_VERIFICATION_ID
+            = "android.content.pm.extra.INTENT_FILTER_VERIFICATION_ID";
+
+    /**
+     * Extra field name for the scheme used for an intent filter pending verification. Passed to
+     * an intent filter verifier and is used to construct the URI to verify against.
+     *
+     * Usually this is "https"
+     *
+     * @hide
+     */
+    public static final String EXTRA_INTENT_FILTER_VERIFICATION_URI_SCHEME
+            = "android.content.pm.extra.INTENT_FILTER_VERIFICATION_URI_SCHEME";
+
+    /**
+     * Extra field name for the host names to be used for an intent filter pending verification.
+     * Passed to an intent filter verifier and is used to construct the URI to verify the
+     * intent filter.
+     *
+     * This is a space delimited list of hosts.
+     *
+     * @hide
+     */
+    public static final String EXTRA_INTENT_FILTER_VERIFICATION_HOSTS
+            = "android.content.pm.extra.INTENT_FILTER_VERIFICATION_HOSTS";
+
+    /**
+     * Extra field name for the package name to be used for an intent filter pending verification.
+     * Passed to an intent filter verifier and is used to check the verification responses coming
+     * from the hosts. Each host response will need to include the package name of APK containing
+     * the intent filter.
+     *
+     * @hide
+     */
+    public static final String EXTRA_INTENT_FILTER_VERIFICATION_PACKAGE_NAME
+            = "android.content.pm.extra.INTENT_FILTER_VERIFICATION_PACKAGE_NAME";
+
+    /**
+     * The action used to request that the user approve a permission request
+     * from the application.
      *
      * @hide
      */
@@ -3459,6 +3557,85 @@ public abstract class PackageManager {
      */
     public abstract void extendVerificationTimeout(int id,
             int verificationCodeAtTimeout, long millisecondsToDelay);
+
+    /**
+     * Allows a package listening to the
+     * {@link Intent#ACTION_INTENT_FILTER_NEEDS_VERIFICATION intent filter verification
+     * broadcast} to respond to the package manager. The response must include
+     * the {@code verificationCode} which is one of
+     * {@link PackageManager#INTENT_FILTER_VERIFICATION_SUCCESS} or
+     * {@link PackageManager#INTENT_FILTER_VERIFICATION_FAILURE}.
+     *
+     * @param verificationId pending package identifier as passed via the
+     *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra.
+     * @param verificationCode either {@link PackageManager#INTENT_FILTER_VERIFICATION_SUCCESS}
+     *            or {@link PackageManager#INTENT_FILTER_VERIFICATION_FAILURE}.
+     * @param outFailedDomains a list of failed domains if the verificationCode is
+     *            {@link PackageManager#INTENT_FILTER_VERIFICATION_FAILURE}, otherwise null;
+     * @throws SecurityException if the caller does not have the
+     *            INTENT_FILTER_VERIFICATION_AGENT permission.
+     *
+     * @hide
+     */
+    public abstract void verifyIntentFilter(int verificationId, int verificationCode,
+            List<String> outFailedDomains);
+
+    /**
+     * Get the status of a Domain Verification Result for an IntentFilter. This is
+     * related to the {@link android.content.IntentFilter#setAutoVerify(boolean)} and
+     * {@link android.content.IntentFilter#getAutoVerify()}
+     *
+     * This is used by the ResolverActivity to change the status depending on what the User select
+     * in the Disambiguation Dialog and also used by the Settings App for changing the default App
+     * for a domain.
+     *
+     * @param packageName The package name of the Activity associated with the IntentFilter.
+     * @param userId The user id.
+     *
+     * @return The status to set to. This can be
+     *              {@link #INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK} or
+     *              {@link #INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS} or
+     *              {@link #INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER} or
+     *              {@link #INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED}
+     *
+     * @hide
+     */
+    public abstract int getIntentVerificationStatus(String packageName, int userId);
+
+    /**
+     * Allow to change the status of a Intent Verification status for all IntentFilter of an App.
+     * This is related to the {@link android.content.IntentFilter#setAutoVerify(boolean)} and
+     * {@link android.content.IntentFilter#getAutoVerify()}
+     *
+     * This is used by the ResolverActivity to change the status depending on what the User select
+     * in the Disambiguation Dialog and also used by the Settings App for changing the default App
+     * for a domain.
+     *
+     * @param packageName The package name of the Activity associated with the IntentFilter.
+     * @param status The status to set to. This can be
+     *              {@link #INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK} or
+     *              {@link #INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS} or
+     *              {@link #INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER}
+     * @param userId The user id.
+     *
+     * @return true if the status has been set. False otherwise.
+     *
+     * @hide
+     */
+    public abstract boolean updateIntentVerificationStatus(String packageName, int status,
+            int userId);
+
+    /**
+     * Get the list of IntentFilterVerificationInfo for a specific package and User.
+     *
+     * @param packageName the package name. When this parameter is set to a non null value,
+     *                    the results will be filtered by the package name provided.
+     *                    Otherwise, there will be no filtering and it will return a list
+     *                    corresponding for all packages for the provided userId.
+     * @return a list of IntentFilterVerificationInfo for a specific package and User.
+     */
+    public abstract List<IntentFilterVerificationInfo> getIntentFilterVerifications(
+            String packageName);
 
     /**
      * Change the installer associated with a given package.  There are limitations

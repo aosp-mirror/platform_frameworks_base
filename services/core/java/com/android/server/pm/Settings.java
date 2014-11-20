@@ -22,11 +22,13 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.PACKAGE_INFO_GID;
 
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Binder;
@@ -41,6 +43,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AtomicFile;
+import android.text.TextUtils;
 import android.util.LogPrinter;
 
 import android.util.SparseBooleanArray;
@@ -88,6 +91,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -160,6 +164,7 @@ final class Settings {
             "persistent-preferred-activities";
     static final String TAG_CROSS_PROFILE_INTENT_FILTERS =
             "crossProfile-intent-filters";
+    public static final String TAG_DOMAIN_VERIFICATION = "domain-verification";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_USER = "user";
@@ -174,6 +179,7 @@ final class Settings {
     private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_INSTALLED = "inst";
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
+    private static final String ATTR_DOMAIN_VERIFICATON_STATE = "domainVerificationStatus";
 
     private final Object mLock;
 
@@ -590,8 +596,8 @@ final class Settings {
                                     true, // notLaunched
                                     false, // hidden
                                     null, null, null,
-                                    false // blockUninstall
-                                    );
+                                    false, // blockUninstall
+                                    INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
                             writePackageRestrictionsLPr(user.id);
                         }
                     }
@@ -865,7 +871,7 @@ final class Settings {
             if (mOtherUserIds.get(uid) != null) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
                         "Adding duplicate shared id: " + uid
-                        + " name=" + name);
+                                + " name=" + name);
                 return false;
             }
             mOtherUserIds.put(uid, obj);
@@ -929,6 +935,96 @@ final class Settings {
             mCrossProfileIntentResolvers.put(userId, cpir);
         }
         return cpir;
+    }
+
+    /**
+     * The following functions suppose that you have a lock for managing access to the
+     * mIntentFiltersVerifications map.
+     */
+
+    /* package protected */
+    IntentFilterVerificationInfo getIntentFilterVerificationLPr(String packageName) {
+        PackageSetting ps = mPackages.get(packageName);
+        if (ps == null) {
+            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            return null;
+        }
+        return ps.getIntentFilterVerificationInfo();
+    }
+
+    /* package protected */
+    boolean createIntentFilterVerificationIfNeededLPw(String packageName, String[] domains) {
+        PackageSetting ps = mPackages.get(packageName);
+        if (ps == null) {
+            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            return false;
+        }
+        if (ps.getIntentFilterVerificationInfo() == null) {
+            IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(packageName, domains);
+            ps.setIntentFilterVerificationInfo(ivi);
+            return false;
+        }
+        return true;
+    }
+
+    int getIntentFilterVerificationStatusLPr(String packageName, int userId) {
+        PackageSetting ps = mPackages.get(packageName);
+        if (ps == null) {
+            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            return INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+        }
+        int status = ps.getDomainVerificationStatusForUser(userId);
+        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+            if (ps.getIntentFilterVerificationInfo() != null) {
+                status = ps.getIntentFilterVerificationInfo().getStatus();
+            }
+        }
+        return status;
+    }
+
+    boolean updateIntentFilterVerificationStatusLPw(String packageName, int status, int userId) {
+        PackageSetting ps = mPackages.get(packageName);
+        if (ps == null) {
+            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            return false;
+        }
+        ps.setDomainVerificationStatusForUser(status, userId);
+        return true;
+    }
+
+    /**
+     * Used for dump. Should be read only.
+     */
+    List<IntentFilterVerificationInfo> getIntentFilterVerificationsLPr(
+            String packageName) {
+        if (packageName == null) {
+            return Collections.<IntentFilterVerificationInfo>emptyList();
+        }
+        ArrayList<IntentFilterVerificationInfo> result = new ArrayList<>();
+        for (PackageSetting ps : mPackages.values()) {
+            IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
+            if (ivi == null || TextUtils.isEmpty(ivi.getPackageName()) ||
+                    !ivi.getPackageName().equalsIgnoreCase(packageName)) {
+                continue;
+            }
+            result.add(ivi);
+        }
+        return result;
+    }
+
+    void removeIntentFilterVerificationLPw(String packageName, int userId) {
+        PackageSetting ps = mPackages.get(packageName);
+        if (ps == null) {
+            Slog.w(PackageManagerService.TAG, "No package known for name: " + packageName);
+            return;
+        }
+        ps.clearDomainVerificationStatusForUser(userId);
+    }
+
+    void removeIntentFilterVerificationLPw(String packageName, int[] userIds) {
+        for (int userId : userIds) {
+            removeIntentFilterVerificationLPw(packageName, userId);
+        }
     }
 
     private File getUserPackagesStateFile(int userId) {
@@ -1083,6 +1179,25 @@ final class Settings {
         }
     }
 
+    private void readDomainVerificationLPw(XmlPullParser parser, PackageSettingBase packageSetting)
+            throws XmlPullParserException, IOException {
+        IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
+        packageSetting.setIntentFilterVerificationInfo(ivi);
+        Log.d(TAG, "Read domain verification for package:" + ivi.getPackageName());
+    }
+
+    void writeDomainVerificationsLPr(XmlSerializer serializer, String packageName,
+                                     IntentFilterVerificationInfo verificationInfo)
+            throws IllegalArgumentException, IllegalStateException, IOException {
+        if (verificationInfo != null && verificationInfo.getPackageName() != null) {
+            serializer.startTag(null, TAG_DOMAIN_VERIFICATION);
+            verificationInfo.writeToXml(serializer);
+            Log.d(TAG, "Wrote domain verification for package: "
+                    + verificationInfo.getPackageName());
+            serializer.endTag(null, TAG_DOMAIN_VERIFICATION);
+        }
+    }
+
     void readPackageRestrictionsLPr(int userId) {
         if (DEBUG_MU) {
             Log.i(TAG, "Reading package restrictions for user=" + userId);
@@ -1127,8 +1242,8 @@ final class Settings {
                                 false,  // notLaunched
                                 false,  // hidden
                                 null, null, null,
-                                false // blockUninstall
-                                );
+                                false, // blockUninstall
+                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
                     }
                     return;
                 }
@@ -1197,6 +1312,12 @@ final class Settings {
                     final boolean blockUninstall = blockUninstallStr == null
                             ? false : Boolean.parseBoolean(blockUninstallStr);
 
+                    final String verifStateStr =
+                            parser.getAttributeValue(null, ATTR_DOMAIN_VERIFICATON_STATE);
+                    final int verifState = (verifStateStr == null) ?
+                            PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED :
+                            Integer.parseInt(verifStateStr);
+
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
 
@@ -1217,7 +1338,8 @@ final class Settings {
                     }
 
                     ps.setUserState(userId, enabled, installed, stopped, notLaunched, hidden,
-                            enabledCaller, enabledComponents, disabledComponents, blockUninstall);
+                            enabledCaller, enabledComponents, disabledComponents, blockUninstall,
+                            verifState);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -1364,7 +1486,9 @@ final class Settings {
                                 && ustate.enabledComponents.size() > 0)
                         || (ustate.disabledComponents != null
                                 && ustate.disabledComponents.size() > 0)
-                        || ustate.blockUninstall) {
+                        || ustate.blockUninstall
+                        || (ustate.domainVerificationStatus !=
+                            PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED)) {
                     serializer.startTag(null, TAG_PACKAGE);
                     serializer.attribute(null, ATTR_NAME, pkg.name);
                     if (DEBUG_MU) Log.i(TAG, "  pkg=" + pkg.name + ", state=" + ustate.enabled);
@@ -1392,6 +1516,11 @@ final class Settings {
                                     ustate.lastDisableAppCaller);
                         }
                     }
+                    if (ustate.domainVerificationStatus !=
+                            PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
+                        serializer.attribute(null, ATTR_DOMAIN_VERIFICATON_STATE,
+                                Integer.toString(ustate.domainVerificationStatus));
+                    }
                     if (ustate.enabledComponents != null
                             && ustate.enabledComponents.size() > 0) {
                         serializer.startTag(null, TAG_ENABLED_COMPONENTS);
@@ -1418,9 +1547,7 @@ final class Settings {
             }
 
             writePreferredActivitiesLPr(serializer, userId, true);
-
             writePersistentPreferredActivitiesLPr(serializer, userId);
-
             writeCrossProfileIntentFiltersLPr(serializer, userId);
 
             serializer.endTag(null, TAG_PACKAGE_RESTRICTIONS);
@@ -1933,6 +2060,7 @@ final class Settings {
         writeSigningKeySetsLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
         writeKeySetAliasesLPr(serializer, pkg.keySetData);
+        writeDomainVerificationsLPr(serializer, pkg.name, pkg.verificationInfo);
 
         serializer.endTag(null, "package");
     }
@@ -2109,7 +2237,8 @@ final class Settings {
                     // TODO: check whether this is okay! as it is very
                     // similar to how preferred-activities are treated
                     readCrossProfileIntentFiltersLPw(parser, 0);
-                } else if (tagName.equals("updated-package")) {
+                }
+                else if (tagName.equals("updated-package")) {
                     readDisabledSysPackageLPw(parser);
                 } else if (tagName.equals("cleaning-package")) {
                     String name = parser.getAttributeValue(null, ATTR_NAME);
@@ -3024,6 +3153,8 @@ final class Settings {
                     long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
                     String alias = parser.getAttributeValue(null, "alias");
                     packageSetting.keySetData.addDefinedKeySet(id, alias);
+                } else if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
+                    readDomainVerificationLPw(parser, packageSetting);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <package>: " + parser.getName());
@@ -3388,7 +3519,7 @@ final class Settings {
         return false;
     }
 
-    private List<UserInfo> getAllUsers() {
+    List<UserInfo> getAllUsers() {
         long id = Binder.clearCallingIdentity();
         try {
             return UserManagerService.getInstance().getUsers(false);

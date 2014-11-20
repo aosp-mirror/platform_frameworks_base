@@ -16,10 +16,12 @@
 
 package android.content;
 
+import android.content.pm.PackageParser;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
+import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.Log;
 import android.util.Printer;
@@ -150,6 +152,7 @@ public class IntentFilter implements Parcelable {
     private static final String CAT_STR = "cat";
     private static final String NAME_STR = "name";
     private static final String ACTION_STR = "action";
+    private static final String AUTO_VERIFY_STR = "autoVerify";
 
     /**
      * The filter {@link #setPriority} value at which system high-priority
@@ -247,6 +250,19 @@ public class IntentFilter implements Parcelable {
      */
     public static final int NO_MATCH_CATEGORY = -4;
 
+    /**
+     * HTTP scheme.
+     *
+     * @see #addDataScheme(String)
+     */
+    public static final String SCHEME_HTTP = "http";
+    /**
+     * HTTPS scheme.
+     *
+     * @see #addDataScheme(String)
+     */
+    public static final String SCHEME_HTTPS = "https";
+
     private int mPriority;
     private final ArrayList<String> mActions;
     private ArrayList<String> mCategories = null;
@@ -256,6 +272,13 @@ public class IntentFilter implements Parcelable {
     private ArrayList<PatternMatcher> mDataPaths = null;
     private ArrayList<String> mDataTypes = null;
     private boolean mHasPartialTypes = false;
+
+    private static final int STATE_VERIFY_AUTO         = 0x00000001;
+    private static final int STATE_NEED_VERIFY         = 0x00000010;
+    private static final int STATE_NEED_VERIFY_CHECKED = 0x00000100;
+    private static final int STATE_VERIFIED            = 0x00001000;
+
+    private int mVerifyState;
 
     // These functions are the start of more optimized code for managing
     // the string sets...  not yet implemented.
@@ -326,7 +349,7 @@ public class IntentFilter implements Parcelable {
         public MalformedMimeTypeException(String name) {
             super(name);
         }
-    };
+    }
 
     /**
      * Create a new IntentFilter instance with a specified action and MIME
@@ -421,6 +444,7 @@ public class IntentFilter implements Parcelable {
             mDataPaths = new ArrayList<PatternMatcher>(o.mDataPaths);
         }
         mHasPartialTypes = o.mHasPartialTypes;
+        mVerifyState = o.mVerifyState;
     }
 
     /**
@@ -449,6 +473,94 @@ public class IntentFilter implements Parcelable {
      */
     public final int getPriority() {
         return mPriority;
+    }
+
+    /**
+     * Set whether this filter will needs to be automatically verified against its data URIs or not.
+     * The default is false.
+     *
+     * The verification would need to happen only and only if the Intent action is
+     * {@link android.content.Intent#ACTION_VIEW} and the Intent category is
+     * {@link android.content.Intent#CATEGORY_BROWSABLE} and the Intent data scheme
+     * is "http" or "https".
+     *
+     * True means that the filter will need to use its data URIs to be verified.
+     *
+     * @param autoVerify The new autoVerify value.
+     *
+     * @see #getAutoVerify()
+     * @see #addAction(String)
+     * @see #getAction(int)
+     * @see #addCategory(String)
+     * @see #getCategory(int)
+     * @see #addDataScheme(String)
+     * @see #getDataScheme(int)
+     *
+     * @hide
+     */
+    public final void setAutoVerify(boolean autoVerify) {
+        mVerifyState &= ~STATE_VERIFY_AUTO;
+        if (autoVerify) mVerifyState |= STATE_VERIFY_AUTO;
+    }
+
+    /**
+     * Return if this filter will needs to be automatically verified again its data URIs or not.
+     *
+     * @return True if the filter will needs to be automatically verified. False otherwise.
+     *
+     * @see #setAutoVerify(boolean)
+     *
+     * @hide
+     */
+    public final boolean getAutoVerify() {
+        return ((mVerifyState & STATE_VERIFY_AUTO) == 1);
+    }
+
+    /**
+     * Return if this filter needs to be automatically verified again its data URIs or not.
+     *
+     * @return True if the filter needs to be automatically verified. False otherwise.
+     *
+     * This will check if if the Intent action is {@link android.content.Intent#ACTION_VIEW} and
+     * the Intent category is {@link android.content.Intent#CATEGORY_BROWSABLE} and the Intent
+     * data scheme is "http" or "https".
+     *
+     * @see #setAutoVerify(boolean)
+     *
+     * @hide
+     */
+    public final boolean needsVerification() {
+        return hasAction(Intent.ACTION_VIEW) &&
+                hasCategory(Intent.CATEGORY_BROWSABLE) &&
+                (hasDataScheme(SCHEME_HTTP) || hasDataScheme(SCHEME_HTTPS)) &&
+                getAutoVerify();
+    }
+
+    /**
+     * Return if this filter has been verified
+     *
+     * @return true if the filter has been verified or if autoVerify is false.
+     *
+     * @hide
+     */
+    public final boolean isVerified() {
+        if ((mVerifyState & STATE_NEED_VERIFY_CHECKED) == STATE_NEED_VERIFY_CHECKED) {
+            return ((mVerifyState & STATE_NEED_VERIFY) == STATE_NEED_VERIFY);
+        }
+        return false;
+    }
+
+    /**
+     * Set if this filter has been verified
+     *
+     * @param verified true if this filter has been verified. False otherwise.
+     *
+     * @hide
+     */
+    public void setVerified(boolean verified) {
+        mVerifyState |= STATE_NEED_VERIFY_CHECKED;
+        mVerifyState &= ~STATE_VERIFIED;
+        if (verified) mVerifyState |= STATE_VERIFIED;
     }
 
     /**
@@ -1333,6 +1445,7 @@ public class IntentFilter implements Parcelable {
      * Write the contents of the IntentFilter as an XML stream.
      */
     public void writeToXml(XmlSerializer serializer) throws IOException {
+        serializer.attribute(null, AUTO_VERIFY_STR, Boolean.toString(getAutoVerify()));
         int N = countActions();
         for (int i=0; i<N; i++) {
             serializer.startTag(null, ACTION_STR);
@@ -1407,6 +1520,9 @@ public class IntentFilter implements Parcelable {
 
     public void readFromXml(XmlPullParser parser) throws XmlPullParserException,
             IOException {
+        String autoVerify = parser.getAttributeValue(null, AUTO_VERIFY_STR);
+        setAutoVerify(TextUtils.isEmpty(autoVerify) ? false : Boolean.getBoolean(autoVerify));
+
         int outerDepth = parser.getDepth();
         int type;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -1548,6 +1664,11 @@ public class IntentFilter implements Parcelable {
                     sb.append(", mHasPartialTypes="); sb.append(mHasPartialTypes);
             du.println(sb.toString());
         }
+        {
+            sb.setLength(0);
+            sb.append(prefix); sb.append("AutoVerify="); sb.append(getAutoVerify());
+            du.println(sb.toString());
+        }
     }
 
     public static final Parcelable.Creator<IntentFilter> CREATOR
@@ -1614,6 +1735,7 @@ public class IntentFilter implements Parcelable {
         }
         dest.writeInt(mPriority);
         dest.writeInt(mHasPartialTypes ? 1 : 0);
+        dest.writeInt(getAutoVerify() ? 1 : 0);
     }
 
     /**
@@ -1680,6 +1802,7 @@ public class IntentFilter implements Parcelable {
         }
         mPriority = source.readInt();
         mHasPartialTypes = source.readInt() > 0;
+        setAutoVerify(source.readInt() > 0);
     }
 
     private final boolean findMimeType(String type) {
@@ -1723,5 +1846,28 @@ public class IntentFilter implements Parcelable {
         }
 
         return false;
+    }
+
+    /**
+     * @hide
+     */
+    public ArrayList<String> getHostsList() {
+        ArrayList<String> result = new ArrayList<>();
+        Iterator<IntentFilter.AuthorityEntry> it = authoritiesIterator();
+        if (it != null) {
+            while (it.hasNext()) {
+                IntentFilter.AuthorityEntry entry = it.next();
+                result.add(entry.getHost());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @hide
+     */
+    public String[] getHosts() {
+        ArrayList<String> list = getHostsList();
+        return list.toArray(new String[list.size()]);
     }
 }

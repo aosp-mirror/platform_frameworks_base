@@ -37,10 +37,14 @@ public class PackageUserState {
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
 
+    public int domainVerificationStatus;
+
     public PackageUserState() {
         installed = true;
         hidden = false;
         enabled = COMPONENT_ENABLED_STATE_DEFAULT;
+        domainVerificationStatus =
+                PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
 
     public PackageUserState(PackageUserState o) {
@@ -51,9 +55,10 @@ public class PackageUserState {
         hidden = o.hidden;
         lastDisableAppCaller = o.lastDisableAppCaller;
         disabledComponents = o.disabledComponents != null
-                ? new ArraySet<String>(o.disabledComponents) : null;
+                ? new ArraySet<>(o.disabledComponents) : null;
         enabledComponents = o.enabledComponents != null
-                ? new ArraySet<String>(o.enabledComponents) : null;
+                ? new ArraySet<>(o.enabledComponents) : null;
         blockUninstall = o.blockUninstall;
+        domainVerificationStatus = o.domainVerificationStatus;
     }
 }

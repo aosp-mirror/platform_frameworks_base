@@ -73,6 +73,7 @@
     <protected-broadcast android:name="android.intent.action.USER_BACKGROUND" />
     <protected-broadcast android:name="android.intent.action.USER_FOREGROUND" />
     <protected-broadcast android:name="android.intent.action.USER_SWITCHED" />
+    <protected-broadcast android:name="android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
@@ -2797,6 +2798,23 @@
     <permission android:name="android.permission.BIND_PACKAGE_VERIFIER"
         android:label="@string/permlab_bindPackageVerifier"
         android:description="@string/permdesc_bindPackageVerifier"
+        android:protectionLevel="signature" />
+
+    <!-- @SystemApi @hide Intent filter verifier needs to have this permission before the
+         PackageManager will trust it to verify intent filters.
+    -->
+    <permission android:name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"
+        android:label="@string/permlab_intentFilterVerificationAgent"
+        android:description="@string/permdesc_intentFilterVerificationAgent"
+        android:protectionLevel="signature|system" />
+
+    <!-- Must be required by intent filter verifier receiver, to ensure that only the
+         system can interact with it.
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_INTENT_FILTER_VERIFIER"
+        android:label="@string/permlab_bindIntentFilterVerifier"
+        android:description="@string/permdesc_bindIntentFilterVerifier"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows applications to access serial ports via the SerialManager.

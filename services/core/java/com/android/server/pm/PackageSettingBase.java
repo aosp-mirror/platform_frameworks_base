@@ -20,6 +20,8 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
+import android.content.pm.IntentFilterVerificationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageUserState;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -108,6 +110,9 @@ abstract class PackageSettingBase extends SettingBase {
 
     /* package name of the app that installed this package */
     String installerPackageName;
+
+    IntentFilterVerificationInfo verificationInfo;
+
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
@@ -214,6 +219,7 @@ abstract class PackageSettingBase extends SettingBase {
         }
         installStatus = base.installStatus;
         keySetData = base.keySetData;
+        verificationInfo = base.verificationInfo;
     }
 
     private PackageUserState modifyUserState(int userId) {
@@ -317,7 +323,7 @@ abstract class PackageSettingBase extends SettingBase {
     void setUserState(int userId, int enabled, boolean installed, boolean stopped,
             boolean notLaunched, boolean hidden,
             String lastDisableAppCaller, ArraySet<String> enabledComponents,
-            ArraySet<String> disabledComponents, boolean blockUninstall) {
+            ArraySet<String> disabledComponents, boolean blockUninstall, int domainVerifState) {
         PackageUserState state = modifyUserState(userId);
         state.enabled = enabled;
         state.installed = installed;
@@ -328,6 +334,7 @@ abstract class PackageSettingBase extends SettingBase {
         state.enabledComponents = enabledComponents;
         state.disabledComponents = disabledComponents;
         state.blockUninstall = blockUninstall;
+        state.domainVerificationStatus = domainVerifState;
     }
 
     ArraySet<String> getEnabledComponents(int userId) {
@@ -414,5 +421,26 @@ abstract class PackageSettingBase extends SettingBase {
 
     void removeUser(int userId) {
         userState.delete(userId);
+    }
+
+    public IntentFilterVerificationInfo getIntentFilterVerificationInfo() {
+        return verificationInfo;
+    }
+
+    public void setIntentFilterVerificationInfo(IntentFilterVerificationInfo info) {
+        verificationInfo = info;
+    }
+
+    public int getDomainVerificationStatusForUser(int userId) {
+        return readUserState(userId).domainVerificationStatus;
+    }
+
+    public void setDomainVerificationStatusForUser(int status, int userId) {
+        modifyUserState(userId).domainVerificationStatus = status;
+    }
+
+    public void clearDomainVerificationStatusForUser(int userId) {
+        modifyUserState(userId).domainVerificationStatus =
+                PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
 }

@@ -3149,7 +3149,7 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);
-                if (!parseIntent(res, parser, attrs, true, intent, outError)) {
+                if (!parseIntent(res, parser, attrs, true, true, intent, outError)) {
                     return null;
                 }
                 if (intent.countActions() == 0) {
@@ -3161,7 +3161,7 @@ public class PackageParser {
                 }
             } else if (!receiver && parser.getName().equals("preferred")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);
-                if (!parseIntent(res, parser, attrs, false, intent, outError)) {
+                if (!parseIntent(res, parser, attrs, false, false, intent, outError)) {
                     return null;
                 }
                 if (intent.countActions() == 0) {
@@ -3341,7 +3341,7 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);
-                if (!parseIntent(res, parser, attrs, true, intent, outError)) {
+                if (!parseIntent(res, parser, attrs, true, true, intent, outError)) {
                     return null;
                 }
                 if (intent.countActions() == 0) {
@@ -3521,7 +3521,7 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ProviderIntentInfo intent = new ProviderIntentInfo(outInfo);
-                if (!parseIntent(res, parser, attrs, true, intent, outError)) {
+                if (!parseIntent(res, parser, attrs, true, false, intent, outError)) {
                     return false;
                 }
                 outInfo.intents.add(intent);
@@ -3780,7 +3780,7 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ServiceIntentInfo intent = new ServiceIntentInfo(s);
-                if (!parseIntent(res, parser, attrs, true, intent, outError)) {
+                if (!parseIntent(res, parser, attrs, true, false, intent, outError)) {
                     return null;
                 }
 
@@ -3981,7 +3981,7 @@ public class PackageParser {
             = "http://schemas.android.com/apk/res/android";
 
     private boolean parseIntent(Resources res, XmlPullParser parser, AttributeSet attrs,
-            boolean allowGlobs, IntentInfo outInfo, String[] outError)
+            boolean allowGlobs, boolean allowAutoVerify, IntentInfo outInfo, String[] outError)
             throws XmlPullParserException, IOException {
 
         TypedArray sa = res.obtainAttributes(attrs,
@@ -4005,6 +4005,12 @@ public class PackageParser {
 
         outInfo.banner = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestIntentFilter_banner, 0);
+
+        if (allowAutoVerify) {
+            outInfo.setAutoVerify(sa.getBoolean(
+                    com.android.internal.R.styleable.AndroidManifestIntentFilter_autoVerify,
+                    false));
+        }
 
         sa.recycle();
 

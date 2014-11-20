@@ -143,6 +143,11 @@ public class ResolveInfo implements Parcelable {
      */
     public boolean system;
 
+    /**
+     * @hide Does the associated IntentFilter needs verification ?
+     */
+    public boolean filterNeedsVerification;
+
     private ComponentInfo getComponentInfo() {
         if (activityInfo != null) return activityInfo;
         if (serviceInfo != null) return serviceInfo;
@@ -283,6 +288,7 @@ public class ResolveInfo implements Parcelable {
         resolvePackageName = orig.resolvePackageName;
         system = orig.system;
         targetUserId = orig.targetUserId;
+        filterNeedsVerification = orig.filterNeedsVerification;
     }
 
     public String toString() {
@@ -344,6 +350,7 @@ public class ResolveInfo implements Parcelable {
         dest.writeInt(targetUserId);
         dest.writeInt(system ? 1 : 0);
         dest.writeInt(noResourceId ? 1 : 0);
+        dest.writeInt(filterNeedsVerification ? 1 : 0);
     }
 
     public static final Creator<ResolveInfo> CREATOR
@@ -389,6 +396,7 @@ public class ResolveInfo implements Parcelable {
         targetUserId = source.readInt();
         system = source.readInt() != 0;
         noResourceId = source.readInt() != 0;
+        filterNeedsVerification = source.readInt() != 0;
     }
     
     public static class DisplayNameComparator

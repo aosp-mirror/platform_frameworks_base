@@ -103,6 +103,7 @@ package android {
     field public static final java.lang.String INSTALL_LOCATION_PROVIDER = "android.permission.INSTALL_LOCATION_PROVIDER";
     field public static final java.lang.String INSTALL_PACKAGES = "android.permission.INSTALL_PACKAGES";
     field public static final java.lang.String INSTALL_SHORTCUT = "com.android.launcher.permission.INSTALL_SHORTCUT";
+    field public static final java.lang.String INTENT_FILTER_VERIFICATION_AGENT = "android.permission.INTENT_FILTER_VERIFICATION_AGENT";
     field public static final java.lang.String INTERACT_ACROSS_USERS = "android.permission.INTERACT_ACROSS_USERS";
     field public static final java.lang.String INTERNAL_SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW";
     field public static final java.lang.String INTERNET = "android.permission.INTERNET";
@@ -401,6 +402,7 @@ package android {
     field public static final int autoStart = 16843445; // 0x10102b5
     field public static final deprecated int autoText = 16843114; // 0x101016a
     field public static final int autoUrlDetect = 16843404; // 0x101028c
+    field public static final int autoVerify = 16844010; // 0x10104ea
     field public static final int background = 16842964; // 0x10100d4
     field public static final int backgroundDimAmount = 16842802; // 0x1010032
     field public static final int backgroundDimEnabled = 16843295; // 0x101021f
@@ -8175,6 +8177,7 @@ package android.content {
     field public static final java.lang.String ACTION_INSERT = "android.intent.action.INSERT";
     field public static final java.lang.String ACTION_INSERT_OR_EDIT = "android.intent.action.INSERT_OR_EDIT";
     field public static final java.lang.String ACTION_INSTALL_PACKAGE = "android.intent.action.INSTALL_PACKAGE";
+    field public static final java.lang.String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
     field public static final java.lang.String ACTION_LOCALE_CHANGED = "android.intent.action.LOCALE_CHANGED";
     field public static final java.lang.String ACTION_MAIN = "android.intent.action.MAIN";
     field public static final java.lang.String ACTION_MANAGED_PROFILE_ADDED = "android.intent.action.MANAGED_PROFILE_ADDED";
@@ -8472,6 +8475,8 @@ package android.content {
     field public static final int NO_MATCH_CATEGORY = -4; // 0xfffffffc
     field public static final int NO_MATCH_DATA = -2; // 0xfffffffe
     field public static final int NO_MATCH_TYPE = -1; // 0xffffffff
+    field public static final java.lang.String SCHEME_HTTP = "http";
+    field public static final java.lang.String SCHEME_HTTPS = "https";
     field public static final int SYSTEM_HIGH_PRIORITY = 1000; // 0x3e8
     field public static final int SYSTEM_LOW_PRIORITY = -1000; // 0xfffffc18
   }
@@ -9070,6 +9075,25 @@ package android.content.pm {
     field public java.lang.String targetPackage;
   }
 
+  public final class IntentFilterVerificationInfo implements android.os.Parcelable {
+    ctor public IntentFilterVerificationInfo();
+    ctor public IntentFilterVerificationInfo(java.lang.String, java.lang.String[]);
+    ctor public IntentFilterVerificationInfo(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    ctor public IntentFilterVerificationInfo(android.os.Parcel);
+    method public int describeContents();
+    method public java.lang.String[] getDomains();
+    method public java.lang.String getDomainsString();
+    method public java.lang.String getPackageName();
+    method public int getStatus();
+    method public java.lang.String getStatusString();
+    method public static java.lang.String getStatusStringFromValue(int);
+    method public void readFromXml(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public void setStatus(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    method public void writeToXml(org.xmlpull.v1.XmlSerializer) throws java.io.IOException;
+    field public static final android.os.Parcelable.Creator<android.content.pm.IntentFilterVerificationInfo> CREATOR;
+  }
+
   public class LabeledIntent extends android.content.Intent {
     ctor public LabeledIntent(android.content.Intent, java.lang.String, int, int);
     ctor public LabeledIntent(android.content.Intent, java.lang.String, java.lang.CharSequence, int);
@@ -9304,6 +9328,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
     method public abstract java.lang.String getInstallerPackageName(java.lang.String);
     method public abstract android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(java.lang.String);
     method public abstract android.content.Intent getLaunchIntentForPackage(java.lang.String);
     method public abstract android.content.Intent getLeanbackLaunchIntentForPackage(java.lang.String);
     method public abstract java.lang.String getNameForUid(int);
@@ -32903,6 +32928,7 @@ package android.test.mock {
     method public java.util.List<android.content.pm.PackageInfo> getInstalledPackages(int);
     method public java.lang.String getInstallerPackageName(java.lang.String);
     method public android.content.pm.InstrumentationInfo getInstrumentationInfo(android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
+    method public java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(java.lang.String);
     method public android.content.Intent getLaunchIntentForPackage(java.lang.String);
     method public android.content.Intent getLeanbackLaunchIntentForPackage(java.lang.String);
     method public java.lang.String getNameForUid(int);
