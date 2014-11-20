@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
+import android.os.IBinder;
 import com.android.annotations.Nullable;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
@@ -938,7 +939,19 @@ public final class BridgeContext extends Context {
     }
 
     @Override
+    public int checkPermission(String arg0, int arg1, int arg2, IBinder arg3) {
+        // pass
+        return 0;
+    }
+
+    @Override
     public int checkUriPermission(Uri arg0, int arg1, int arg2, int arg3) {
+        // pass
+        return 0;
+    }
+
+    @Override
+    public int checkUriPermission(Uri arg0, int arg1, int arg2, int arg3, IBinder arg4) {
         // pass
         return 0;
     }
