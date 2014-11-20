@@ -39,6 +39,7 @@ public abstract class ExpandableView extends FrameLayout {
     private int mActualHeight;
     protected int mClipTopAmount;
     private boolean mActualHeightInitialized;
+    private boolean mDark;
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
 
     public ExpandableView(Context context, AttributeSet attrs) {
@@ -185,8 +186,14 @@ public abstract class ExpandableView extends FrameLayout {
      *
      * @param dark Whether the notification should be dark.
      * @param fade Whether an animation should be played to change the state.
+     * @param delay If fading, the delay of the animation.
      */
-    public void setDark(boolean dark, boolean fade) {
+    public void setDark(boolean dark, boolean fade, long delay) {
+        mDark = dark;
+    }
+
+    public boolean isDark() {
+        return mDark;
     }
 
     /**

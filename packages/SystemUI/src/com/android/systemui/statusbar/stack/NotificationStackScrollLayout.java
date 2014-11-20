@@ -2455,7 +2455,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
                 // ANIMATION_TYPE_DARK
                 new AnimationFilter()
-                        .animateDark(),
+                        .animateDark()
+                        .hasDelays(),
 
                 // ANIMATION_TYPE_GO_TO_FULL_SHADE
                 new AnimationFilter()
