@@ -3298,6 +3298,8 @@
     <!-- This is the default button label in the system-wide search UI.
          It is also used by the home screen's search "widget". It should be short -->
     <string name="search_go">Search</string>
+    <!-- Default hint text for the system-wide search UI's text field. [CHAR LIMIT=30] -->
+    <string name="search_hint">Search…</string>
     <!-- SearchView accessibility description for search button [CHAR LIMIT=NONE] -->
     <string name="searchview_description_search">Search</string>
     <!-- SearchView accessibility description for search text field [CHAR LIMIT=NONE] -->
