@@ -84,8 +84,8 @@ public class NotificationContentView extends FrameLayout {
     }
 
     @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
         updateVisibility();
     }
 
