@@ -232,6 +232,12 @@ public class TrustAgentWrapper {
             mTrustManagerService.mArchive.logAgentConnected(mUserId, name);
             setCallback(mCallback);
             updateDevicePolicyFeatures();
+
+            if (mTrustManagerService.isDeviceLockedInner(mUserId)) {
+                onDeviceLocked();
+            } else {
+                onDeviceUnlocked();
+            }
         }
 
         @Override
@@ -287,12 +293,35 @@ public class TrustAgentWrapper {
             onError(e);
         }
     }
+
     /**
      * @see android.service.trust.TrustAgentService#onUnlockAttempt(boolean)
      */
     public void onUnlockAttempt(boolean successful) {
         try {
             if (mTrustAgentService != null) mTrustAgentService.onUnlockAttempt(successful);
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /**
+     * @see android.service.trust.TrustAgentService#onDeviceLocked()
+     */
+    public void onDeviceLocked() {
+        try {
+            if (mTrustAgentService != null) mTrustAgentService.onDeviceLocked();
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /**
+     * @see android.service.trust.TrustAgentService#onDeviceUnlocked()
+     */
+    public void onDeviceUnlocked() {
+        try {
+            if (mTrustAgentService != null) mTrustAgentService.onDeviceUnlocked();
         } catch (RemoteException e) {
             onError(e);
         }

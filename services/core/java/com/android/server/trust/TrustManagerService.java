@@ -26,7 +26,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.Manifest;
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustListener;
 import android.app.trust.ITrustManager;
@@ -61,8 +60,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
+import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -98,6 +97,10 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_DISPATCH_UNLOCK_ATTEMPT = 3;
     private static final int MSG_ENABLED_AGENTS_CHANGED = 4;
     private static final int MSG_REQUIRE_CREDENTIAL_ENTRY = 5;
+    private static final int MSG_KEYGUARD_SHOWING_CHANGED = 6;
+    private static final int MSG_START_USER = 7;
+    private static final int MSG_CLEANUP_USER = 8;
+    private static final int MSG_SWITCH_USER = 9;
 
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<AgentInfo>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<ITrustListener>();
@@ -112,7 +115,11 @@ public class TrustManagerService extends SystemService {
     @GuardedBy("mUserIsTrusted")
     private final SparseBooleanArray mUserIsTrusted = new SparseBooleanArray();
 
+    @GuardedBy("mDeviceLockedForUser")
+    private final SparseBooleanArray mDeviceLockedForUser = new SparseBooleanArray();
+
     private boolean mTrustAgentsCanRun = false;
+    private int mCurrentUser = UserHandle.USER_OWNER;
 
     public TrustManagerService(Context context) {
         super(context);
@@ -179,10 +186,15 @@ public class TrustManagerService extends SystemService {
     public void updateTrust(int userId, boolean initiatedByUser) {
         dispatchOnTrustManagedChanged(aggregateIsTrustManaged(userId), userId);
         boolean trusted = aggregateIsTrusted(userId);
+        boolean changed;
         synchronized (mUserIsTrusted) {
+            changed = mUserIsTrusted.get(userId) != trusted;
             mUserIsTrusted.put(userId, trusted);
         }
         dispatchOnTrustChanged(trusted, userId, initiatedByUser);
+        if (changed) {
+            refreshDeviceLockedForUser(userId);
+        }
     }
 
     void refreshAgentList(int userId) {
@@ -214,8 +226,7 @@ public class TrustManagerService extends SystemService {
                     || userInfo.guestToRemove) continue;
             if (!userInfo.supportsSwitchTo()) continue;
             if (!mActivityManager.isUserRunning(userInfo.id)) continue;
-            if (lockPatternUtils.getKeyguardStoredPasswordQuality(userInfo.id)
-                    == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) continue;
+            if (!lockPatternUtils.isSecure(userInfo.id)) continue;
             if (!mUserHasAuthenticatedSinceBoot.get(userInfo.id)) continue;
             DevicePolicyManager dpm = lockPatternUtils.getDevicePolicyManager();
             int disabledFeatures = dpm.getKeyguardDisabledFeatures(null, userInfo.id);
@@ -271,6 +282,73 @@ public class TrustManagerService extends SystemService {
                 updateTrustAll();
             } else {
                 updateTrust(userId, false /* initiatedByUser */);
+            }
+        }
+    }
+
+    boolean isDeviceLockedInner(int userId) {
+        synchronized (mDeviceLockedForUser) {
+            return mDeviceLockedForUser.get(userId, true);
+        }
+    }
+
+    private void refreshDeviceLockedForUser(int userId) {
+        if (userId != UserHandle.USER_ALL && userId < UserHandle.USER_OWNER) {
+            Log.e(TAG, "refreshAgentList(userId=" + userId + "): Invalid user handle,"
+                    + " must be USER_ALL or a specific user.", new Throwable("here"));
+            userId = UserHandle.USER_ALL;
+        }
+
+        List<UserInfo> userInfos;
+        if (userId == UserHandle.USER_ALL) {
+            userInfos = mUserManager.getUsers(true /* excludeDying */);
+        } else {
+            userInfos = new ArrayList<>();
+            userInfos.add(mUserManager.getUserInfo(userId));
+        }
+
+        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+
+        for (int i = 0; i < userInfos.size(); i++) {
+            UserInfo info = userInfos.get(i);
+
+            if (info == null || info.partial || !info.isEnabled() || info.guestToRemove
+                    || !info.supportsSwitchTo()) {
+                continue;
+            }
+
+            int id = info.id;
+            boolean secure = mLockPatternUtils.isSecure(id);
+            boolean trusted = aggregateIsTrusted(id);
+            boolean showingKeyguard = true;
+            if (mCurrentUser == id) {
+                try {
+                    showingKeyguard = wm.isKeyguardLocked();
+                } catch (RemoteException e) {
+                }
+            }
+            boolean deviceLocked = secure && showingKeyguard && !trusted;
+
+            boolean changed;
+            synchronized (mDeviceLockedForUser) {
+                changed = isDeviceLockedInner(id) != deviceLocked;
+                mDeviceLockedForUser.put(id, deviceLocked);
+            }
+            if (changed) {
+                dispatchDeviceLocked(id, deviceLocked);
+            }
+        }
+    }
+
+    private void dispatchDeviceLocked(int userId, boolean isLocked) {
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo agent = mActiveAgents.valueAt(i);
+            if (agent.userId == userId) {
+                if (isLocked) {
+                    agent.agent.onDeviceLocked();
+                } else{
+                    agent.agent.onDeviceUnlocked();
+                }
             }
         }
     }
@@ -542,12 +620,17 @@ public class TrustManagerService extends SystemService {
 
     @Override
     public void onStartUser(int userId) {
-        refreshAgentList(userId);
+        mHandler.obtainMessage(MSG_START_USER, userId, 0, null).sendToTarget();
     }
 
     @Override
     public void onCleanupUser(int userId) {
-        refreshAgentList(userId);
+        mHandler.obtainMessage(MSG_CLEANUP_USER, userId, 0, null).sendToTarget();
+    }
+
+    @Override
+    public void onSwitchUser(int userId) {
+        mHandler.obtainMessage(MSG_SWITCH_USER, userId, 0, null).sendToTarget();
     }
 
     // Plumbing
@@ -580,6 +663,14 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
+        public void reportKeyguardShowingChanged() throws RemoteException {
+            enforceReportPermission();
+            // coalesce refresh messages.
+            mHandler.removeMessages(MSG_KEYGUARD_SHOWING_CHANGED);
+            mHandler.sendEmptyMessage(MSG_KEYGUARD_SHOWING_CHANGED);
+        }
+
+        @Override
         public void registerTrustListener(ITrustListener trustListener) throws RemoteException {
             enforceListenerPermission();
             mHandler.obtainMessage(MSG_REGISTER_LISTENER, trustListener).sendToTarget();
@@ -597,21 +688,7 @@ public class TrustManagerService extends SystemService {
                     false /* allowAll */, true /* requireFull */, "isDeviceLocked", null);
             userId = resolveProfileParent(userId);
 
-            boolean isSecure = mLockPatternUtils.isSecure(userId);
-
-            boolean isTrusted;
-            synchronized (mUserIsTrusted) {
-                isTrusted = mUserIsTrusted.get(userId);
-            }
-
-            boolean isLocked;
-            if (ActivityManager.getCurrentUser() != userId) {
-                isLocked = true;
-            } else {
-                isLocked = WindowManagerGlobal.getWindowManagerService().isKeyguardLocked();
-            }
-
-            return isSecure && isLocked && !isTrusted;
+            return isDeviceLockedInner(userId);
         }
 
         private void enforceReportPermission() {
@@ -636,19 +713,13 @@ public class TrustManagerService extends SystemService {
                 fout.println("disabled because the third-party apps can't run yet.");
                 return;
             }
-            final UserInfo currentUser;
             final List<UserInfo> userInfos = mUserManager.getUsers(true /* excludeDying */);
-            try {
-                currentUser = ActivityManagerNative.getDefault().getCurrentUser();
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
             mHandler.runWithScissors(new Runnable() {
                 @Override
                 public void run() {
                     fout.println("Trust manager state:");
                     for (UserInfo user : userInfos) {
-                        dumpUser(fout, user, user.id == currentUser.id);
+                        dumpUser(fout, user, user.id == mCurrentUser);
                     }
                 }
             }, 1500);
@@ -657,11 +728,17 @@ public class TrustManagerService extends SystemService {
         private void dumpUser(PrintWriter fout, UserInfo user, boolean isCurrent) {
             fout.printf(" User \"%s\" (id=%d, flags=%#x)",
                     user.name, user.id, user.flags);
+            if (!user.supportsSwitchTo()) {
+                fout.println("(managed profile)");
+                fout.println("   disabled because switching to this user is not possible.");
+                return;
+            }
             if (isCurrent) {
                 fout.print(" (current)");
             }
             fout.print(": trusted=" + dumpBool(aggregateIsTrusted(user.id)));
             fout.print(", trustManaged=" + dumpBool(aggregateIsTrustManaged(user.id)));
+            fout.print(", deviceLocked=" + dumpBool(isDeviceLockedInner(user.id)));
             fout.println();
             fout.println("   Enabled agents:");
             boolean duplicateSimpleNames = false;
@@ -726,9 +803,22 @@ public class TrustManagerService extends SystemService {
                     break;
                 case MSG_ENABLED_AGENTS_CHANGED:
                     refreshAgentList(UserHandle.USER_ALL);
+                    // This is also called when the security mode of a user changes.
+                    refreshDeviceLockedForUser(UserHandle.USER_ALL);
                     break;
                 case MSG_REQUIRE_CREDENTIAL_ENTRY:
                     requireCredentialEntry(msg.arg1);
+                    break;
+                case MSG_KEYGUARD_SHOWING_CHANGED:
+                    refreshDeviceLockedForUser(UserHandle.USER_CURRENT);
+                    break;
+                case MSG_START_USER:
+                case MSG_CLEANUP_USER:
+                    refreshAgentList(msg.arg1);
+                    break;
+                case MSG_SWITCH_USER:
+                    mCurrentUser = msg.arg1;
+                    refreshDeviceLockedForUser(UserHandle.USER_ALL);
                     break;
             }
         }
@@ -771,8 +861,14 @@ public class TrustManagerService extends SystemService {
                 int userId = getUserId(intent);
                 if (userId > 0) {
                     mUserHasAuthenticatedSinceBoot.delete(userId);
-                    mUserIsTrusted.delete(userId);
+                    synchronized (mUserIsTrusted) {
+                        mUserIsTrusted.delete(userId);
+                    }
+                    synchronized (mDeviceLockedForUser) {
+                        mDeviceLockedForUser.delete(userId);
+                    }
                     refreshAgentList(userId);
+                    refreshDeviceLockedForUser(userId);
                 }
             }
         }
