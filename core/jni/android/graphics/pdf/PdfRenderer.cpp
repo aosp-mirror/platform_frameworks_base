@@ -86,8 +86,8 @@ static jlong nativeCreate(JNIEnv* env, jclass thiz, jint fd, jlong size) {
 
     if (!document) {
         const long error = FPDF_GetLastError();
-        jniThrowException(env, "java/io/IOException",
-                "cannot create document. Error:" + error);
+        jniThrowExceptionFmt(env, "java/io/IOException",
+                "cannot create document. Error: %ld", error);
         destroyLibraryIfNeeded();
         return -1;
     }

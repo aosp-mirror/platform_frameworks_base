@@ -1164,7 +1164,7 @@ android_media_AudioSystem_listAudioPatches(JNIEnv *env, jobject clazz,
             jStatus = AUDIO_JAVA_ERROR;
             goto exit;
         }
-        ALOGV("listAudioPatches patch %d num_sources %d num_sinks %d",
+        ALOGV("listAudioPatches patch %zu num_sources %d num_sinks %d",
               i, nPatches[i].num_sources, nPatches[i].num_sinks);
 
         env->SetIntField(patchHandle, gAudioHandleFields.mId, nPatches[i].id);
@@ -1188,7 +1188,7 @@ android_media_AudioSystem_listAudioPatches(JNIEnv *env, jobject clazz,
             env->SetObjectArrayElement(jSources, j, jSource);
             env->DeleteLocalRef(jSource);
             jSource = NULL;
-            ALOGV("listAudioPatches patch %d source %d is a %s handle %d",
+            ALOGV("listAudioPatches patch %zu source %zu is a %s handle %d",
                   i, j,
                   nPatches[i].sources[j].type == AUDIO_PORT_TYPE_DEVICE ? "device" : "mix",
                   nPatches[i].sources[j].id);
@@ -1213,7 +1213,7 @@ android_media_AudioSystem_listAudioPatches(JNIEnv *env, jobject clazz,
             env->SetObjectArrayElement(jSinks, j, jSink);
             env->DeleteLocalRef(jSink);
             jSink = NULL;
-            ALOGV("listAudioPatches patch %d sink %d is a %s handle %d",
+            ALOGV("listAudioPatches patch %zu sink %zu is a %s handle %d",
                   i, j,
                   nPatches[i].sinks[j].type == AUDIO_PORT_TYPE_DEVICE ? "device" : "mix",
                   nPatches[i].sinks[j].id);

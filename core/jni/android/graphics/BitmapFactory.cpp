@@ -49,12 +49,6 @@ jmethodID gInsetStruct_constructorMethodID;
 
 using namespace android;
 
-static inline int32_t validOrNeg1(bool isValid, int32_t value) {
-//    return isValid ? value : -1;
-    SkASSERT((int)isValid == 0 || (int)isValid == 1);
-    return ((int32_t)isValid - 1) | value;
-}
-
 jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format) {
     static const struct {
         SkImageDecoder::Format fFormat;
@@ -185,8 +179,8 @@ public:
 
         const size_t size = sk_64_asS32(size64);
         if (size > mSize) {
-            ALOGW("bitmap marked for reuse (%d bytes) can't fit new bitmap (%d bytes)",
-                    mSize, size);
+            ALOGW("bitmap marked for reuse (%u bytes) can't fit new bitmap "
+                  "(%zu bytes)", mSize, size);
             return false;
         }
 
