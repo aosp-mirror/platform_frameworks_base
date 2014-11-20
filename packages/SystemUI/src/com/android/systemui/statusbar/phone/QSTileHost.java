@@ -122,7 +122,7 @@ public class QSTileHost implements QSTile.Host {
                     tile.userSwitch(newUserId);
                 }
                 mSecurity.onUserSwitched(newUserId);
-                mNetwork.onUserSwitched(newUserId);
+                mNetwork.getAccessPointController().onUserSwitched(newUserId);
                 mObserver.register();
             }
         };
