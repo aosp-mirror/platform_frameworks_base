@@ -91,8 +91,8 @@ public class MockContentProvider extends ContentProvider {
 
         @Override
         public ParcelFileDescriptor openFile(
-                String callingPackage, Uri url, String mode, ICancellationSignal signal)
-                throws RemoteException, FileNotFoundException {
+                String callingPackage, Uri url, String mode, ICancellationSignal signal,
+                IBinder callerToken) throws RemoteException, FileNotFoundException {
             return MockContentProvider.this.openFile(url, mode);
         }
 
