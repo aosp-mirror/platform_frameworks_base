@@ -65,7 +65,6 @@ private:
     JNIEnv* fEnv;
     void*   fPointer;
     jarray  fArray;
-    jint    fRemaining;
     jboolean fCommit;
 };
 

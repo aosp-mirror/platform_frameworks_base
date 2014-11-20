@@ -43,8 +43,11 @@ static void FromColor_D32(void* dst, const SkColor src[], int width,
 
 static void FromColor_D32_Raw(void* dst, const SkColor src[], int width,
                           int, int) {
+    // Needed to thwart the unreachable code detection from clang.
+    static const bool sk_color_ne_zero = SK_COLOR_MATCHES_PMCOLOR_BYTE_ORDER;
+
     // SkColor's ordering may be different from SkPMColor
-    if (SK_COLOR_MATCHES_PMCOLOR_BYTE_ORDER) {
+    if (sk_color_ne_zero) {
         memcpy(dst, src, width * sizeof(SkColor));
         return;
     }

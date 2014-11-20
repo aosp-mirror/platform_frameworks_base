@@ -97,12 +97,12 @@ static jlong nativeOpen(JNIEnv* env, jclass thiz, jint fd, jlong size) {
         switch (error) {
             case FPDF_ERR_PASSWORD:
             case FPDF_ERR_SECURITY: {
-                jniThrowException(env, "java/lang/SecurityException",
-                        "cannot create document. Error:" + error);
+                jniThrowExceptionFmt(env, "java/lang/SecurityException",
+                        "cannot create document. Error: %ld", error);
             } break;
             default: {
-                jniThrowException(env, "java/io/IOException",
-                        "cannot create document. Error:" + error);
+                jniThrowExceptionFmt(env, "java/io/IOException",
+                        "cannot create document. Error: %ld", error);
             } break;
         }
         destroyLibraryIfNeeded();
@@ -169,8 +169,8 @@ static void nativeWrite(JNIEnv* env, jclass thiz, jlong documentPtr, jint fd) {
     writer.WriteBlock = &writeBlock;
     const bool success = FPDF_SaveAsCopy(document, &writer, FPDF_NO_INCREMENTAL);
     if (!success) {
-        jniThrowException(env, "java/io/IOException",
-                "cannot write to fd. Error:" + errno);
+        jniThrowExceptionFmt(env, "java/io/IOException",
+                "cannot write to fd. Error: %d", errno);
         destroyLibraryIfNeeded();
     }
 }

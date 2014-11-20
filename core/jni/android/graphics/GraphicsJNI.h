@@ -19,7 +19,7 @@ class SkCanvas;
 
 namespace android {
 class Paint;
-class TypefaceImpl;
+struct TypefaceImpl;
 }
 
 class GraphicsJNI {
@@ -203,7 +203,6 @@ public:
 
 private:
     JavaVM* fVM;
-    bool fAllocateInJavaHeap;
     jbyteArray fStorageObj;
     int fAllocCount;
 };

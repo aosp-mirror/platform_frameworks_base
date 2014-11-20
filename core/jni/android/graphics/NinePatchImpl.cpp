@@ -120,7 +120,7 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
     const int32_t* yDivs = chunk.getYDivs();
     // if our SkCanvas were back by GL we should enable this and draw this as
     // a mesh, which will be faster in most cases.
-    if (false) {
+    if ((false)) {
         SkNinePatch::DrawMesh(canvas, bounds, bitmap,
                               xDivs, chunk.numXDivs,
                               yDivs, chunk.numYDivs,
