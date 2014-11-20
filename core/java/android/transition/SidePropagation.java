@@ -44,8 +44,8 @@ public class SidePropagation extends VisibilityPropagation {
      * farther from the edge. The default is {@link Gravity#BOTTOM}.
      *
      * @param side The side that is used to calculate the transition propagation. Must be one of
-     *             {@link Gravity#LEFT}, {@link Gravity#TOP}, {@link Gravity#RIGHT}, or
-     *             {@link Gravity#BOTTOM}.
+     *             {@link Gravity#LEFT}, {@link Gravity#TOP}, {@link Gravity#RIGHT},
+     *             {@link Gravity#BOTTOM}, {@link Gravity#START}, or {@link Gravity#END}.
      */
     public void setSide(int side) {
         mSide = side;
@@ -106,7 +106,7 @@ public class SidePropagation extends VisibilityPropagation {
             epicenterY = (top + bottom) / 2;
         }
 
-        float distance = distance(viewCenterX, viewCenterY, epicenterX, epicenterY,
+        float distance = distance(sceneRoot, viewCenterX, viewCenterY, epicenterX, epicenterY,
                 left, top, right, bottom);
         float maxDistance = getMaxDistance(sceneRoot);
         float distanceFraction = distance/maxDistance;
@@ -119,10 +119,20 @@ public class SidePropagation extends VisibilityPropagation {
         return Math.round(duration * directionMultiplier / mPropagationSpeed * distanceFraction);
     }
 
-    private int distance(int viewX, int viewY, int epicenterX, int epicenterY,
+    private int distance(View sceneRoot, int viewX, int viewY, int epicenterX, int epicenterY,
             int left, int top, int right, int bottom) {
+        final int side;
+        if (mSide == Gravity.START) {
+            final boolean isRtl = sceneRoot.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+            side = isRtl ? Gravity.RIGHT : Gravity.LEFT;
+        } else if (mSide == Gravity.END) {
+            final boolean isRtl = sceneRoot.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+            side = isRtl ? Gravity.LEFT : Gravity.RIGHT;
+        } else {
+            side = mSide;
+        }
         int distance = 0;
-        switch (mSide) {
+        switch (side) {
             case Gravity.LEFT:
                 distance = right - viewX + Math.abs(epicenterY - viewY);
                 break;
@@ -143,6 +153,8 @@ public class SidePropagation extends VisibilityPropagation {
         switch (mSide) {
             case Gravity.LEFT:
             case Gravity.RIGHT:
+            case Gravity.START:
+            case Gravity.END:
                 return sceneRoot.getWidth();
             default:
                 return sceneRoot.getHeight();

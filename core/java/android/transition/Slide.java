@@ -76,6 +76,20 @@ public class Slide extends Visibility {
         }
     };
 
+    private static final CalculateSlide sCalculateStart = new CalculateSlideHorizontal() {
+        @Override
+        public float getGoneX(ViewGroup sceneRoot, View view) {
+            final boolean isRtl = sceneRoot.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+            final float x;
+            if (isRtl) {
+                x = view.getTranslationX() + sceneRoot.getWidth();
+            } else {
+                x = view.getTranslationX() - sceneRoot.getWidth();
+            }
+            return x;
+        }
+    };
+
     private static final CalculateSlide sCalculateTop = new CalculateSlideVertical() {
         @Override
         public float getGoneY(ViewGroup sceneRoot, View view) {
@@ -87,6 +101,20 @@ public class Slide extends Visibility {
         @Override
         public float getGoneX(ViewGroup sceneRoot, View view) {
             return view.getTranslationX() + sceneRoot.getWidth();
+        }
+    };
+
+    private static final CalculateSlide sCalculateEnd = new CalculateSlideHorizontal() {
+        @Override
+        public float getGoneX(ViewGroup sceneRoot, View view) {
+            final boolean isRtl = sceneRoot.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+            final float x;
+            if (isRtl) {
+                x = view.getTranslationX() - sceneRoot.getWidth();
+            } else {
+                x = view.getTranslationX() + sceneRoot.getWidth();
+            }
+            return x;
         }
     };
 
@@ -144,7 +172,8 @@ public class Slide extends Visibility {
      *
      * @param slideEdge The edge of the scene to use for Views appearing and disappearing. One of
      *                  {@link android.view.Gravity#LEFT}, {@link android.view.Gravity#TOP},
-     *                  {@link android.view.Gravity#RIGHT}, {@link android.view.Gravity#BOTTOM}.
+     *                  {@link android.view.Gravity#RIGHT}, {@link android.view.Gravity#BOTTOM},
+     *                  {@link android.view.Gravity#START}, {@link android.view.Gravity#END}.
      * @attr ref android.R.styleable#Slide_slideEdge
      */
     public void setSlideEdge(int slideEdge) {
@@ -161,6 +190,12 @@ public class Slide extends Visibility {
             case Gravity.BOTTOM:
                 mSlideCalculator = sCalculateBottom;
                 break;
+            case Gravity.START:
+                mSlideCalculator = sCalculateStart;
+                break;
+            case Gravity.END:
+                mSlideCalculator = sCalculateEnd;
+                break;
             default:
                 throw new IllegalArgumentException("Invalid slide direction");
         }
@@ -175,7 +210,8 @@ public class Slide extends Visibility {
      *
      * @return the edge of the scene to use for Views appearing and disappearing. One of
      *         {@link android.view.Gravity#LEFT}, {@link android.view.Gravity#TOP},
-     *         {@link android.view.Gravity#RIGHT}, {@link android.view.Gravity#BOTTOM}.
+     *         {@link android.view.Gravity#RIGHT}, {@link android.view.Gravity#BOTTOM},
+     *         {@link android.view.Gravity#START}, {@link android.view.Gravity#END}.
      * @attr ref android.R.styleable#Slide_slideEdge
      */
     public int getSlideEdge() {
