@@ -6260,7 +6260,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (this) {
                 ActivityStack stack = ActivityRecord.getStackLocked(token);
                 if (stack != null) {
-                    stack.backgroundResourcesReleased(token);
+                    stack.backgroundResourcesReleased();
                 }
             }
         } finally {
