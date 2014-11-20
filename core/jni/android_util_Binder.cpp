@@ -935,7 +935,8 @@ static jstring android_os_BinderProxy_getInterfaceDescriptor(JNIEnv* env, jobjec
     IBinder* target = (IBinder*) env->GetLongField(obj, gBinderProxyOffsets.mObject);
     if (target != NULL) {
         const String16& desc = target->getInterfaceDescriptor();
-        return env->NewString(desc.string(), desc.size());
+        return env->NewString(reinterpret_cast<const jchar*>(desc.string()),
+                              desc.size());
     }
     jniThrowException(env, "java/lang/RuntimeException",
             "No binder found for object");

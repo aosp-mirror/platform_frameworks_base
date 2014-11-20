@@ -40,7 +40,8 @@ hash_t ShadowText::hash() const {
     hash = JenkinsHashMix(hash, android::hash_type(italicStyle));
     hash = JenkinsHashMix(hash, android::hash_type(scaleX));
     if (text) {
-        hash = JenkinsHashMixShorts(hash, text, charCount);
+        hash = JenkinsHashMixShorts(
+            hash, reinterpret_cast<const uint16_t*>(text), charCount);
     }
     if (positions) {
         for (uint32_t i = 0; i < charCount * 2; i++) {

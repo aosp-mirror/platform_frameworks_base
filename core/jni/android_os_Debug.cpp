@@ -916,7 +916,8 @@ static void android_os_Debug_dumpNativeBacktraceToFile(JNIEnv* env, jobject claz
     const jchar* str = env->GetStringCritical(fileName, 0);
     String8 fileName8;
     if (str) {
-        fileName8 = String8(str, env->GetStringLength(fileName));
+        fileName8 = String8(reinterpret_cast<const char16_t*>(str),
+                            env->GetStringLength(fileName));
         env->ReleaseStringCritical(fileName, str);
     }
 
