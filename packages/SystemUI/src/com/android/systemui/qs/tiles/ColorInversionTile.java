@@ -41,8 +41,10 @@ public class ColorInversionTile extends QSTile<QSTile.BooleanState> {
         mSetting = new SecureSetting(mContext, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED) {
             @Override
-            protected void handleValueChanged(int value) {
-                mUsageTracker.trackUsage();
+            protected void handleValueChanged(int value, boolean observedChange) {
+                if (value != 0 || observedChange) {
+                    mUsageTracker.trackUsage();
+                }
                 if (mListening) {
                     handleRefreshState(value);
                 }
