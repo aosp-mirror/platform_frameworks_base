@@ -30,6 +30,7 @@
         android:contentDescription="@string/keyguard_accessibility_pin_unlock">
 
     <ImageView
+            android:id="@+id/keyguard_sim"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_lockscreen_sim"/>
