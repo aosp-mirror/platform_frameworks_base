@@ -207,11 +207,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
-    public void setDark(boolean dark, boolean fade) {
-        super.setDark(dark, fade);
+    public void setDark(boolean dark, boolean fade, long delay) {
+        super.setDark(dark, fade, delay);
         final NotificationContentView showing = getShowingLayout();
         if (showing != null) {
-            showing.setDark(dark, fade);
+            showing.setDark(dark, fade, delay);
         }
     }
 
