@@ -16,8 +16,6 @@
 package android.media;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,16 +23,14 @@ import android.media.browse.MediaBrowser;
 import android.media.session.MediaController;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.CancellationSignal;
-import android.os.OperationCanceledException;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Size;
 import android.util.SparseArray;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 /**
@@ -569,6 +565,29 @@ public final class MediaMetadata implements Parcelable {
         }
 
         /**
+         * Create a Builder using a {@link MediaMetadata} instance to set
+         * initial values, but replace bitmaps with a scaled down copy if they
+         * are larger than maxBitmapSize.
+         *
+         * @param source The original metadata to copy.
+         * @param maxBitmapSize The maximum height/width for bitmaps contained
+         *            in the metadata.
+         * @hide
+         */
+        public Builder(MediaMetadata source, int maxBitmapSize) {
+            this(source);
+            for (String key : mBundle.keySet()) {
+                Object value = mBundle.get(key);
+                if (value != null && value instanceof Bitmap) {
+                    Bitmap bmp = (Bitmap) value;
+                    if (bmp.getHeight() > maxBitmapSize || bmp.getWidth() > maxBitmapSize) {
+                        putBitmap(key, scaleBitmap(bmp, maxBitmapSize));
+                    }
+                }
+            }
+        }
+
+        /**
          * Put a CharSequence value into the metadata. Custom keys may be used,
          * but if the METADATA_KEYs defined in this class are used they may only
          * be one of the following:
@@ -707,6 +726,10 @@ public final class MediaMetadata implements Parcelable {
          * <li>{@link #METADATA_KEY_ALBUM_ART}</li>
          * <li>{@link #METADATA_KEY_DISPLAY_ICON}</li>
          * </ul>
+         * <p>
+         * Large bitmaps may be scaled down by the system. To pass full
+         * resolution images {@link Uri Uris} should be used with
+         * {@link #putString}.
          *
          * @param key The key for referencing this value
          * @param value The Bitmap to store
@@ -730,6 +753,16 @@ public final class MediaMetadata implements Parcelable {
          */
         public MediaMetadata build() {
             return new MediaMetadata(mBundle);
+        }
+
+        private Bitmap scaleBitmap(Bitmap bmp, int maxSize) {
+            float maxSizeF = maxSize;
+            float widthScale = maxSizeF / bmp.getWidth();
+            float heightScale = maxSizeF / bmp.getHeight();
+            float scale = Math.min(widthScale, heightScale);
+            int height = (int) (bmp.getHeight() * scale);
+            int width = (int) (bmp.getWidth() * scale);
+            return Bitmap.createScaledBitmap(bmp, width, height, true);
         }
     }
 }
