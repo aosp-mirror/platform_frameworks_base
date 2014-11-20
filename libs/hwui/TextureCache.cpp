@@ -26,6 +26,7 @@
 #include "Caches.h"
 #include "TextureCache.h"
 #include "Properties.h"
+#include "utils/TraceUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -266,7 +267,7 @@ void TextureCache::generateTexture(const SkBitmap* bitmap, Texture* texture, boo
         return;
     }
 
-    ATRACE_CALL();
+    ATRACE_FORMAT("Upload %ux%u Texture", bitmap->width(), bitmap->height());
 
     // We could also enable mipmapping if both bitmap dimensions are powers
     // of 2 but we'd have to deal with size changes. Let's keep this simple

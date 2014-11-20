@@ -132,7 +132,7 @@ int Program::getUniform(const char* name) {
 }
 
 GLuint Program::buildShader(const char* source, GLenum type) {
-    ATRACE_CALL();
+    ATRACE_NAME("Build GL Shader");
 
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, 0);
