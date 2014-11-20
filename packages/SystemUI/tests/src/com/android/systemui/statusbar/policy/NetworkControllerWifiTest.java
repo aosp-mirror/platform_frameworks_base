@@ -6,8 +6,6 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 
-import com.android.systemui.R;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -16,14 +14,10 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     private static final int MIN_RSSI = -100;
     private static final int MAX_RSSI = -55;
 
-    // TODO: Move this into WifiIcons, remove all R.drawable from NetworkControllerImpl.
-    private static final int NULL_SIGNAL = R.drawable.stat_sys_wifi_signal_null;
-    private static final int QS_NO_NET = R.drawable.ic_qs_wifi_no_network;
-
     public void testWifiIcon() {
         String testSsid = "Test SSID";
         setWifiEnabled(true);
-        verifyLastWifiIcon(false, NULL_SIGNAL);
+        verifyLastWifiIcon(false, WifiIcons.WIFI_NO_NETWORK);
 
         setWifiState(true, testSsid);
         verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[0][0]);
@@ -42,10 +36,10 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         String testSsid = "Test SSID";
 
         setWifiEnabled(false);
-        verifyLastQsWifiIcon(false, false, 0, null);
+        verifyLastQsWifiIcon(false, false, WifiIcons.QS_WIFI_NO_NETWORK, null);
 
         setWifiEnabled(true);
-        verifyLastQsWifiIcon(true, false, QS_NO_NET, null);
+        verifyLastQsWifiIcon(true, false, WifiIcons.QS_WIFI_NO_NETWORK, null);
 
         setWifiState(true, testSsid);
         for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
@@ -118,8 +112,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
     protected void setWifiActivity(int activity) {
         // TODO: Not this, because this variable probably isn't sticking around.
-        mNetworkController.mWifiActivity = activity;
-        mNetworkController.refreshViews();
+        mNetworkController.mWifiSignalController.setActivity(activity);
     }
 
     protected void setWifiLevel(int level) {

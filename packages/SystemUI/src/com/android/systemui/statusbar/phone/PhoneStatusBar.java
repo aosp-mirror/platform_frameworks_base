@@ -79,6 +79,7 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -821,7 +822,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         signalClusterQs.setNetworkController(mNetworkController);
         final boolean isAPhone = mNetworkController.hasVoiceCallingFeature();
         if (isAPhone) {
-            mNetworkController.addEmergencyLabelView(mHeader);
+            mNetworkController.addEmergencyListener(new NetworkControllerImpl.EmergencyListener() {
+                @Override
+                public void setEmergencyCallsOnly(boolean emergencyOnly) {
+                    mHeader.setShowEmergencyCallsOnly(emergencyOnly);
+                }
+            });
         }
 
         mCarrierLabel = (TextView)mStatusBarWindow.findViewById(R.id.carrier_label);
@@ -830,13 +836,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mShowCarrierInPanel) {
             mCarrierLabel.setVisibility(mCarrierLabelVisible ? View.VISIBLE : View.INVISIBLE);
 
-            // for mobile devices, we always show mobile connection info here (SPN/PLMN)
-            // for other devices, we show whatever network is connected
-            if (mNetworkController.hasMobileDataFeature()) {
-                mNetworkController.addMobileLabelView(mCarrierLabel);
-            } else {
-                mNetworkController.addCombinedLabelView(mCarrierLabel);
-            }
+            mNetworkController.addCarrierLabel(new NetworkControllerImpl.CarrierLabelListener() {
+                @Override
+                public void setCarrierLabel(String label) {
+                    mCarrierLabel.setText(label);
+                    if (mNetworkController.hasMobileDataFeature()) {
+                        if (TextUtils.isEmpty(label)) {
+                            mCarrierLabel.setVisibility(View.GONE);
+                        } else {
+                            mCarrierLabel.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+            });
 
             // set up the dynamic hide/show of the label
             // TODO: uncomment, handle this for the Stack scroller aswell

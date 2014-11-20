@@ -17,6 +17,7 @@ import android.util.Log;
 
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
+import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SignalCluster;
 
 import org.mockito.ArgumentCaptor;
@@ -44,6 +45,7 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
     protected ConnectivityManager mMockCm;
     protected WifiManager mMockWm;
     protected TelephonyManager mMockTm;
+    protected Config mConfig;
 
     @Override
     protected void setUp() throws Exception {
@@ -59,16 +61,19 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
 
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);
-        mSignalCluster = mock(SignalCluster.class);
-        mNetworkSignalChangedCallback = mock(NetworkSignalChangedCallback.class);
 
+        mConfig = new Config();
+        mConfig.hspaDataDistinguishable = true;
         mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
-                mock(AccessPointController.class), mock(MobileDataController.class));
+                mConfig, mock(AccessPointControllerImpl.class),
+                mock(MobileDataControllerImpl.class));
         setupNetworkController();
     }
 
     protected void setupNetworkController() {
-        mPhoneStateListener = mNetworkController.mPhoneStateListener;
+        mPhoneStateListener = mNetworkController.mMobileSignalController.mPhoneStateListener;
+        mSignalCluster = mock(SignalCluster.class);
+        mNetworkSignalChangedCallback = mock(NetworkSignalChangedCallback.class);
         mNetworkController.addSignalCluster(mSignalCluster);
         mNetworkController.addNetworkSignalChangedCallback(mNetworkSignalChangedCallback);
     }
