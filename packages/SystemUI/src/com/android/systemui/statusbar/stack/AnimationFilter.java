@@ -33,6 +33,7 @@ public class AnimationFilter {
     boolean animateHideSensitive;
     boolean hasDelays;
     boolean hasGoToFullShadeEvent;
+    boolean hasDarkEvent;
 
     public AnimationFilter animateAlpha() {
         animateAlpha = true;
@@ -98,6 +99,10 @@ public class AnimationFilter {
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_GO_TO_FULL_SHADE) {
                 hasGoToFullShadeEvent = true;
             }
+            if (events.get(i).animationType ==
+                    NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_DARK) {
+                hasDarkEvent = true;
+            }
         }
     }
 
@@ -126,5 +131,6 @@ public class AnimationFilter {
         animateHideSensitive = false;
         hasDelays = false;
         hasGoToFullShadeEvent = false;
+        hasDarkEvent = false;
     }
 }

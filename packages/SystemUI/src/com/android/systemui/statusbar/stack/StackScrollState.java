@@ -154,7 +154,7 @@ public class StackScrollState {
                 child.setDimmed(state.dimmed, false /* animate */);
 
                 // apply dark
-                child.setDark(state.dark, false /* animate */);
+                child.setDark(state.dark, false /* animate */, 0 /* delay */);
 
                 // apply hiding sensitive
                 child.setHideSensitive(
