@@ -376,7 +376,7 @@ public class ChangeTransform extends Transition {
         while (outerTransition.mParent != null) {
             outerTransition = outerTransition.mParent;
         }
-        GhostListener listener = new GhostListener(view, ghostView, endMatrix);
+        GhostListener listener = new GhostListener(view, startValues.view, ghostView);
         outerTransition.addListener(listener);
 
         if (startValues.view != endValues.view) {
@@ -466,13 +466,13 @@ public class ChangeTransform extends Transition {
 
     private static class GhostListener extends Transition.TransitionListenerAdapter {
         private View mView;
+        private View mStartView;
         private GhostView mGhostView;
-	private Matrix mEndMatrix;
 
-        public GhostListener(View view, GhostView ghostView, Matrix endMatrix) {
+        public GhostListener(View view, View startView, GhostView ghostView) {
             mView = view;
+            mStartView = startView;
             mGhostView = ghostView;
-            mEndMatrix = endMatrix;
         }
 
         @Override
@@ -481,6 +481,7 @@ public class ChangeTransform extends Transition {
             GhostView.removeGhost(mView);
             mView.setTagInternal(R.id.transitionTransform, null);
             mView.setTagInternal(R.id.parentMatrix, null);
+            mStartView.setTransitionAlpha(1);
         }
 
         @Override
