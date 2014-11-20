@@ -73,7 +73,7 @@ namespace {
             size_t len;
             String16 key(parser.getAttributeName(i, &len));
             if (key == String16("targetPackage")) {
-                const uint16_t *p = parser.getAttributeStringValue(i, &len);
+                const char16_t *p = parser.getAttributeStringValue(i, &len);
                 if (p != NULL) {
                     target = String16(p, len);
                 }
