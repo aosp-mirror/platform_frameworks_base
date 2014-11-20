@@ -18,7 +18,10 @@ package android.media.tv;
 
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
@@ -590,6 +593,42 @@ public class TvView extends ViewGroup {
         setMeasuredDimension(resolveSizeAndState(width, widthMeasureSpec, childState),
                 resolveSizeAndState(height, heightMeasureSpec,
                         childState << MEASURED_HEIGHT_STATE_SHIFT));
+    }
+
+    @Override
+    public boolean gatherTransparentRegion(Region region) {
+        if (mWindowZOrder != ZORDER_ON_TOP) {
+            if (region != null) {
+                int width = getWidth();
+                int height = getHeight();
+                if (width > 0 && height > 0) {
+                    int location[] = new int[2];
+                    getLocationInWindow(location);
+                    int left = location[0];
+                    int top = location[1];
+                    region.op(left, top, left + width, top + height, Region.Op.UNION);
+                }
+            }
+        }
+        return super.gatherTransparentRegion(region);
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        if (mWindowZOrder != ZORDER_ON_TOP) {
+            // Punch a hole so that the underlying overlay view and surface can be shown.
+            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        }
+        super.draw(canvas);
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        if (mWindowZOrder != ZORDER_ON_TOP) {
+            // Punch a hole so that the underlying overlay view and surface can be shown.
+            canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+        }
+        super.dispatchDraw(canvas);
     }
 
     @Override
