@@ -30,7 +30,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @hide
  */
 @SystemApi
-public abstract class Conference {
+public abstract class Conference implements IConferenceable {
 
     /** @hide */
     public abstract static class Listener {
