@@ -199,7 +199,7 @@ public class WifiStressTest extends ConnectivityManagerTestBase {
                 Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
         // set wifi sleep policy to never on while in sleep
         Settings.Global.putInt(mRunner.getContext().getContentResolver(),
-                Settings.Global.WIFI_SLEEP_POLICY, Settings.Global.WIFI_SLEEP_POLICY_NEVER);
+                Settings.Global.WIFI_SLEEP_POLICY, Settings.Global.WIFI_SLEEP_POLICY_DEFAULT);
         // set idle timeout for wifi to 15s
         Settings.Global.putLong(mRunner.getContext().getContentResolver(),
                 Settings.Global.WIFI_IDLE_MS, WIFI_IDLE_MS);
