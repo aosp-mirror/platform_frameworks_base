@@ -50,7 +50,6 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicyConfig;
-import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
@@ -61,7 +60,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -75,12 +73,11 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.view.KeyEvent;
+import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.OrientationEventListener;
 
-import com.android.internal.telephony.ITelephony;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
 
@@ -91,8 +88,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -100,6 +95,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The implementation of the volume manager service.
@@ -1152,6 +1148,10 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#adjustMasterVolume(int, int) */
     public void adjustMasterVolume(int steps, int flags, String callingPackage) {
+        adjustMasterVolume(steps, flags, callingPackage, Binder.getCallingUid());
+    }
+
+    public void adjustMasterVolume(int steps, int flags, String callingPackage, int uid) {
         if (mUseFixedVolume) {
             return;
         }
@@ -1166,7 +1166,7 @@ public class AudioService extends IAudioService.Stub {
         }
 
         //Log.d(TAG, "adjustMasterVolume volume: " + volume + " steps: " + steps);
-        setMasterVolume(volume, flags, callingPackage);
+        setMasterVolume(volume, flags, callingPackage, uid);
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of
@@ -1679,18 +1679,24 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    @Override
     public int getMasterVolume() {
         if (isMasterMute()) return 0;
         return getLastAudibleMasterVolume();
     }
 
+    @Override
     public void setMasterVolume(int volume, int flags, String callingPackage) {
+        setMasterVolume(volume, flags, callingPackage, Binder.getCallingUid());
+    }
+
+    public void setMasterVolume(int volume, int flags, String callingPackage, int uid) {
         if (mUseFixedVolume) {
             return;
         }
 
-        if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, Binder.getCallingUid(),
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+        if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, uid, callingPackage)
+                != AppOpsManager.MODE_ALLOWED) {
             return;
         }
 
@@ -5666,6 +5672,12 @@ public class AudioService extends IAudioService.Stub {
         public void setStreamVolumeForUid(int streamType, int direction, int flags,
                 String callingPackage, int uid) {
             setStreamVolume(streamType, direction, flags, callingPackage, uid);
+        }
+
+        @Override
+        public void adjustMasterVolumeForUid(int steps, int flags, String callingPackage,
+                int uid) {
+            adjustMasterVolume(steps, flags, callingPackage, uid);
         }
     }
 
