@@ -69,6 +69,7 @@ public class TaskViewHeader extends FrameLayout {
     RippleDrawable mBackground;
     GradientDrawable mBackgroundColorDrawable;
     AnimatorSet mFocusAnimator;
+    String mDismissContentDescription;
 
     // Static highlight that we draw at the top of each view
     static Paint sHighlightPaint;
@@ -105,6 +106,8 @@ public class TaskViewHeader extends FrameLayout {
         Resources res = context.getResources();
         mLightDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_light);
         mDarkDismissDrawable = res.getDrawable(R.drawable.recents_dismiss_dark);
+        mDismissContentDescription =
+                res.getString(R.string.accessibility_recents_item_will_be_dismissed);
 
         // Configure the highlight paint
         if (sHighlightPaint == null) {
@@ -127,14 +130,6 @@ public class TaskViewHeader extends FrameLayout {
 
     @Override
     protected void onFinishInflate() {
-        // Set the outline provider
-        setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRect(0, 0, getMeasuredWidth(), getMeasuredHeight());
-            }
-        });
-
         // Initialize the icon and description views
         mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
         mActivityDescription = (TextView) findViewById(R.id.activity_description);
@@ -217,9 +212,8 @@ public class TaskViewHeader extends FrameLayout {
                 mConfig.taskBarViewLightTextColor : mConfig.taskBarViewDarkTextColor);
         mDismissButton.setImageDrawable(t.useLightOnPrimaryColor ?
                 mLightDismissDrawable : mDarkDismissDrawable);
-        mDismissButton.setContentDescription(
-                getContext().getString(R.string.accessibility_recents_item_will_be_dismissed,
-                        t.activityLabel));
+        mDismissButton.setContentDescription(String.format(mDismissContentDescription,
+                t.activityLabel));
     }
 
     /** Unbinds the bar view from the task */
@@ -307,7 +301,7 @@ public class TaskViewHeader extends FrameLayout {
             int currentColor = mBackgroundColor;
             int lightPrimaryColor = getSecondaryColor(mCurrentPrimaryColor, mCurrentPrimaryColorIsDark);
             ValueAnimator backgroundColor = ValueAnimator.ofObject(new ArgbEvaluator(),
-                    lightPrimaryColor, currentColor);
+                    currentColor, lightPrimaryColor);
             backgroundColor.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationStart(Animator animation) {
