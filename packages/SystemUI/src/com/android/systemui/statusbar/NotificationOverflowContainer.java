@@ -21,6 +21,8 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.ViewInvertHelper;
+import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 /**
  * Container view for overflowing notification icons on Keyguard.
@@ -28,6 +30,8 @@ import com.android.systemui.R;
 public class NotificationOverflowContainer extends ActivatableNotificationView {
 
     private NotificationOverflowIconsView mIconsView;
+    private ViewInvertHelper mViewInvertHelper;
+    private boolean mDark;
 
     public NotificationOverflowContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -39,6 +43,20 @@ public class NotificationOverflowContainer extends ActivatableNotificationView {
         mIconsView = (NotificationOverflowIconsView) findViewById(R.id.overflow_icons_view);
         mIconsView.setMoreText((TextView) findViewById(R.id.more_text));
         mIconsView.setOverflowIndicator(findViewById(R.id.more_icon_overflow));
+        mViewInvertHelper = new ViewInvertHelper(findViewById(R.id.content),
+                NotificationPanelView.DOZE_ANIMATION_DURATION);
+    }
+
+    @Override
+    public void setDark(boolean dark, boolean fade, long delay) {
+        super.setDark(dark, fade, delay);
+        if (mDark == dark) return;
+        mDark = dark;
+        if (fade) {
+            mViewInvertHelper.fade(dark, delay);
+        } else {
+            mViewInvertHelper.update(dark);
+        }
     }
 
     public NotificationOverflowIconsView getIconsView() {

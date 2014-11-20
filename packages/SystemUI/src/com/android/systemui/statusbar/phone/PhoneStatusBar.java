@@ -3708,14 +3708,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mState != StatusBarState.KEYGUARD && !mNotificationPanel.isDozing()) {
             return;
         }
-        mNotificationPanel.setDozing(mDozing, mDozeScrimController.isPulsing() /*animate*/);
-        if (mDozing) {
-            mStackScroller.setDark(true, false /*animate*/);
-        } else {
-            mStackScroller.setDark(false, false /*animate*/);
-        }
+        boolean animate = !mDozing && mDozeScrimController.isPulsing();
+        mNotificationPanel.setDozing(mDozing, animate);
+        mStackScroller.setDark(mDozing, animate);
         mScrimController.setDozing(mDozing);
-        mDozeScrimController.setDozing(mDozing, mDozeScrimController.isPulsing() /* animate */);
+        mDozeScrimController.setDozing(mDozing, animate);
     }
 
     public void updateStackScrollerState(boolean goingToFullShade) {
