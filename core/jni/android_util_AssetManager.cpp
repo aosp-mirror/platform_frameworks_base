@@ -652,23 +652,29 @@ static jint android_content_AssetManager_getResourceIdentifier(JNIEnv* env, jobj
         return 0;
     }
 
-    const char16_t* defType16 = defType
-        ? env->GetStringChars(defType, NULL) : NULL;
+    const char16_t* defType16 = reinterpret_cast<const char16_t*>(defType)
+        ? reinterpret_cast<const char16_t*>(env->GetStringChars(defType, NULL))
+        : NULL;
     jsize defTypeLen = defType
         ? env->GetStringLength(defType) : 0;
-    const char16_t* defPackage16 = defPackage
-        ? env->GetStringChars(defPackage, NULL) : NULL;
+    const char16_t* defPackage16 = reinterpret_cast<const char16_t*>(defPackage)
+        ? reinterpret_cast<const char16_t*>(env->GetStringChars(defPackage,
+                                                                NULL))
+        : NULL;
     jsize defPackageLen = defPackage
         ? env->GetStringLength(defPackage) : 0;
 
     jint ident = am->getResources().identifierForName(
-        name16.get(), name16.size(), defType16, defTypeLen, defPackage16, defPackageLen);
+        reinterpret_cast<const char16_t*>(name16.get()), name16.size(),
+        defType16, defTypeLen, defPackage16, defPackageLen);
 
     if (defPackage16) {
-        env->ReleaseStringChars(defPackage, defPackage16);
+        env->ReleaseStringChars(defPackage,
+                                reinterpret_cast<const jchar*>(defPackage16));
     }
     if (defType16) {
-        env->ReleaseStringChars(defType, defType16);
+        env->ReleaseStringChars(defType,
+                                reinterpret_cast<const jchar*>(defType16));
     }
 
     return ident;
@@ -928,8 +934,11 @@ static jobject android_content_AssetManager_getAssignedPackageIdentifiers(JNIEnv
     const size_t N = res.getBasePackageCount();
     for (size_t i = 0; i < N; i++) {
         const String16 name = res.getBasePackageName(i);
-        env->CallVoidMethod(sparseArray, gSparseArrayOffsets.put, (jint) res.getBasePackageId(i),
-                env->NewString(name, name.size()));
+        env->CallVoidMethod(
+            sparseArray, gSparseArrayOffsets.put,
+            static_cast<jint>(res.getBasePackageId(i)),
+            env->NewString(reinterpret_cast<const jchar*>(name.string()),
+                           name.size()));
     }
     return sparseArray;
 }
@@ -1851,7 +1860,8 @@ static jobjectArray android_content_AssetManager_getArrayStringResource(JNIEnv* 
                 str = env->NewStringUTF(str8);
             } else {
                 const char16_t* str16 = pool->stringAt(value.data, &strLen);
-                str = env->NewString(str16, strLen);
+                str = env->NewString(reinterpret_cast<const jchar*>(str16),
+                                     strLen);
             }
 
             // If one of our NewString{UTF} calls failed due to memory, an
