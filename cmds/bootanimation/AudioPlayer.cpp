@@ -98,16 +98,16 @@ static bool setMixerValue(struct mixer* mixer, const char* name, const char* val
                         ALOGE("mixer_ctl_set_value failed for %s %d", name, intValue);
                     }
                 } else {
-                    ALOGE("Could not parse %s as int for %d", intValue, name);
+                    ALOGE("Could not parse %s as int for %s", values, name);
                 }
                 break;
             case MIXER_CTL_TYPE_ENUM:
                 if (sscanf(values, "%s", stringValue) == 1) {
                     if (mixer_ctl_set_enum_by_string(ctl, stringValue) != 0) {
-                        ALOGE("mixer_ctl_set_enum_by_string failed for %s %%s", name, stringValue);
+                        ALOGE("mixer_ctl_set_enum_by_string failed for %s %s", name, stringValue);
                     }
                 } else {
-                    ALOGE("Could not parse %s as enum for %d", stringValue, name);
+                    ALOGE("Could not parse %s as enum for %s", values, name);
                 }
                 break;
             default:
