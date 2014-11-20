@@ -79,7 +79,7 @@ public class ValueAnimator extends Animator {
      * Set when setCurrentPlayTime() is called. If negative, animation is not currently seeked
      * to a value.
      */
-    long mSeekTime = -1;
+    float mSeekFraction = -1;
 
     /**
      * Set on the next frame after pause() is called, used to calculate a new startTime
@@ -537,14 +537,31 @@ public class ValueAnimator extends Animator {
      * @param playTime The time, in milliseconds, to which the animation is advanced or rewound.
      */
     public void setCurrentPlayTime(long playTime) {
+        float fraction = mUnscaledDuration > 0 ? (float) playTime / mUnscaledDuration :
+                playTime == 0 ? 0 : 1;
+        setCurrentFraction(fraction);
+    }
+
+    /**
+     * Sets the position of the animation to the specified fraction. This fraction should
+     * be between 0 and the total fraction of the animation, including any repetition. That is,
+     * a fraction of 0 will position the animation at the beginning, a value of 1 at the end,
+     * and a value of 2 at the beginning of a reversing animator that repeats once. If
+     * the animation has not yet been started, then it will not advance forward after it is
+     * set to this fraction; it will simply set the fraction to this value and perform any
+     * appropriate actions based on that fraction. If the animation is already running, then
+     * setCurrentFraction() will set the current fraction to this value and continue
+     * playing from that point.
+     *
+     * @param fraction The fraction to which the animation is advanced or rewound.
+     */
+    public void setCurrentFraction(float fraction) {
         initAnimation();
-        long currentTime = AnimationUtils.currentAnimationTimeMillis();
         if (mPlayingState != RUNNING) {
-            mSeekTime = playTime;
+            mSeekFraction = fraction;
             mPlayingState = SEEKED;
         }
-        mStartTime = currentTime - playTime;
-        doAnimationFrame(currentTime);
+        animateValue(fraction);
     }
 
     /**
@@ -948,6 +965,7 @@ public class ValueAnimator extends Animator {
         }
         mPlayingBackwards = playBackwards;
         mCurrentIteration = 0;
+        int prevPlayingState = mPlayingState;
         mPlayingState = STOPPED;
         mStarted = true;
         mStartedDelay = false;
@@ -957,7 +975,9 @@ public class ValueAnimator extends Animator {
         animationHandler.mPendingAnimations.add(this);
         if (mStartDelay == 0) {
             // This sets the initial value of the animation, prior to actually starting it running
-            setCurrentPlayTime(0);
+            if (prevPlayingState != SEEKED) {
+                setCurrentPlayTime(0);
+            }
             mPlayingState = STOPPED;
             mRunning = true;
             notifyStartListeners();
@@ -1221,12 +1241,12 @@ public class ValueAnimator extends Animator {
     final boolean doAnimationFrame(long frameTime) {
         if (mPlayingState == STOPPED) {
             mPlayingState = RUNNING;
-            if (mSeekTime < 0) {
+            if (mSeekFraction < 0) {
                 mStartTime = frameTime;
             } else {
-                mStartTime = frameTime - mSeekTime;
-                // Now that we're playing, reset the seek time
-                mSeekTime = -1;
+                long seekTime = (long) (mDuration * mSeekFraction);
+                mStartTime = frameTime - seekTime;
+                mSeekFraction = -1;
             }
         }
         if (mPaused) {
@@ -1292,7 +1312,7 @@ public class ValueAnimator extends Animator {
         if (mUpdateListeners != null) {
             anim.mUpdateListeners = new ArrayList<AnimatorUpdateListener>(mUpdateListeners);
         }
-        anim.mSeekTime = -1;
+        anim.mSeekFraction = -1;
         anim.mPlayingBackwards = false;
         anim.mCurrentIteration = 0;
         anim.mInitialized = false;
