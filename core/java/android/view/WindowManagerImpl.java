@@ -16,6 +16,9 @@
 
 package android.view;
 
+import android.annotation.NonNull;
+import android.os.IBinder;
+
 /**
  * Provides low-level communication with the system window manager for
  * operations that are bound to a particular context, display or parent window.
@@ -47,6 +50,8 @@ public final class WindowManagerImpl implements WindowManager {
     private final Display mDisplay;
     private final Window mParentWindow;
 
+    private IBinder mDefaultToken;
+
     public WindowManagerImpl(Display display) {
         this(display, null);
     }
@@ -64,14 +69,41 @@ public final class WindowManagerImpl implements WindowManager {
         return new WindowManagerImpl(display, mParentWindow);
     }
 
+    /**
+     * Sets the window token to assign when none is specified by the client or
+     * available from the parent window.
+     *
+     * @param token The default token to assign.
+     */
+    public void setDefaultToken(IBinder token) {
+        mDefaultToken = token;
+    }
+
     @Override
-    public void addView(View view, ViewGroup.LayoutParams params) {
+    public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
+        applyDefaultToken(params);
         mGlobal.addView(view, params, mDisplay, mParentWindow);
     }
 
     @Override
-    public void updateViewLayout(View view, ViewGroup.LayoutParams params) {
+    public void updateViewLayout(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
+        applyDefaultToken(params);
         mGlobal.updateViewLayout(view, params);
+    }
+
+    private void applyDefaultToken(@NonNull ViewGroup.LayoutParams params) {
+        // Only use the default token if we don't have a parent window.
+        if (mDefaultToken != null && mParentWindow == null) {
+            if (!(params instanceof WindowManager.LayoutParams)) {
+                throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
+            }
+
+            // Only use the default token if we don't already have a token.
+            final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
+            if (wparams.token == null) {
+                wparams.token = mDefaultToken;
+            }
+        }
     }
 
     @Override
