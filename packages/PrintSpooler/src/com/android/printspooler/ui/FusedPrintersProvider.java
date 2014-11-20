@@ -346,7 +346,6 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         private List<PrinterInfo> mHistoricalPrinters = new ArrayList<>();
 
         private boolean mReadHistoryCompleted;
-        private boolean mReadHistoryInProgress;
 
         private ReadTask mReadTask;
 
@@ -358,7 +357,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         }
 
         public boolean isReadHistoryInProgress() {
-            return mReadHistoryInProgress;
+            return mReadTask != null;
         }
 
         public boolean isReadHistoryCompleted() {
@@ -366,9 +365,7 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         }
 
         public boolean stopReadPrinterHistory() {
-            final boolean cancelled = mReadTask.cancel(true);
-            mReadTask = null;
-            return cancelled;
+            return mReadTask.cancel(true);
         }
 
         public void readPrinterHistory() {
@@ -376,7 +373,6 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                 Log.i(LOG_TAG, "read history started "
                         + FusedPrintersProvider.this.hashCode());
             }
-            mReadHistoryInProgress = true;
             mReadTask = new ReadTask();
             mReadTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
         }
@@ -534,15 +530,20 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                 mFavoritePrinters.clear();
                 mFavoritePrinters.addAll(computeFavoritePrinters(mHistoricalPrinters));
 
-                mReadHistoryInProgress = false;
                 mReadHistoryCompleted = true;
 
                 // Deliver the printers.
                 updatePrinters(mDiscoverySession.getPrinters(), mFavoritePrinters);
 
+                // We are done.
+                mReadTask = null;
+
                 // Loading the available printers if needed.
                 loadInternal();
+            }
 
+            @Override
+            protected void onCancelled(List<PrinterInfo> printerInfos) {
                 // We are done.
                 mReadTask = null;
             }
