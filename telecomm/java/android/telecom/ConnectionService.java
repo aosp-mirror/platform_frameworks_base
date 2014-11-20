@@ -515,11 +515,11 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onConferenceableConnectionsChanged(
-                Connection connection, List<Connection> conferenceableConnections) {
+        public void onConferenceablesChanged(
+                Connection connection, List<IConferenceable> conferenceables) {
             mAdapter.setConferenceableConnections(
                     mIdByConnection.get(connection),
-                    createConnectionIdList(conferenceableConnections));
+                    createIdList(conferenceables));
         }
 
         @Override
@@ -602,7 +602,7 @@ public abstract class ConnectionService extends Service {
                         connection.getAudioModeIsVoip(),
                         connection.getStatusHints(),
                         connection.getDisconnectCause(),
-                        createConnectionIdList(connection.getConferenceableConnections())));
+                        createIdList(connection.getConferenceables())));
     }
 
     private void abort(String callId) {
@@ -682,12 +682,19 @@ public abstract class ConnectionService extends Service {
     private void conference(String callId1, String callId2) {
         Log.d(this, "conference %s, %s", callId1, callId2);
 
+        // Attempt to get second connection or conference.
         Connection connection2 = findConnectionForAction(callId2, "conference");
+        Conference conference2 = getNullConference();
         if (connection2 == getNullConnection()) {
-            Log.w(this, "Connection2 missing in conference request %s.", callId2);
-            return;
+            conference2 = findConferenceForAction(callId2, "conference");
+            if (conference2 == getNullConference()) {
+                Log.w(this, "Connection2 or Conference2 missing in conference request %s.",
+                        callId2);
+                return;
+            }
         }
 
+        // Attempt to get first connection or conference and perform merge.
         Connection connection1 = findConnectionForAction(callId1, "conference");
         if (connection1 == getNullConnection()) {
             Conference conference1 = findConferenceForAction(callId1, "addConnection");
@@ -696,10 +703,26 @@ public abstract class ConnectionService extends Service {
                         "Connection1 or Conference1 missing in conference request %s.",
                         callId1);
             } else {
-                conference1.onMerge(connection2);
+                // Call 1 is a conference.
+                if (connection2 != getNullConnection()) {
+                    // Call 2 is a connection so merge via call 1 (conference).
+                    conference1.onMerge(connection2);
+                } else {
+                    // Call 2 is ALSO a conference; this should never happen.
+                    Log.wtf(this, "There can only be one conference and an attempt was made to " +
+                            "merge two conferences.");
+                    return;
+                }
             }
         } else {
-            onConference(connection1, connection2);
+            // Call 1 is a connection.
+            if (conference2 != getNullConference()) {
+                // Call 2 is a conference, so merge via call 2.
+                conference2.onMerge(connection1);
+            } else {
+                // Call 2 is a connection, so merge together.
+                onConference(connection1, connection2);
+            }
         }
     }
 
@@ -1105,6 +1128,33 @@ public abstract class ConnectionService extends Service {
         for (Connection c : connections) {
             if (mIdByConnection.containsKey(c)) {
                 ids.add(mIdByConnection.get(c));
+            }
+        }
+        Collections.sort(ids);
+        return ids;
+    }
+
+    /**
+     * Builds a list of {@link Connection} and {@link Conference} IDs based on the list of
+     * {@link IConferenceable}s passed in.
+     *
+     * @param conferenceables The {@link IConferenceable} connections and conferences.
+     * @return List of string conference and call Ids.
+     */
+    private List<String> createIdList(List<IConferenceable> conferenceables) {
+        List<String> ids = new ArrayList<>();
+        for (IConferenceable c : conferenceables) {
+            // Only allow Connection and Conference conferenceables.
+            if (c instanceof Connection) {
+                Connection connection = (Connection) c;
+                if (mIdByConnection.containsKey(connection)) {
+                    ids.add(mIdByConnection.get(connection));
+                }
+            } else if (c instanceof Conference) {
+                Conference conference = (Conference) c;
+                if (mIdByConference.containsKey(conference)) {
+                    ids.add(mIdByConference.get(conference));
+                }
             }
         }
         Collections.sort(ids);
