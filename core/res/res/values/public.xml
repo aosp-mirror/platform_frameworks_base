@@ -2600,5 +2600,6 @@
     <public type="attr" name="accessibilityTraversalBefore" />
     <public type="attr" name="accessibilityTraversalAfter" />
     <public type="attr" name="dialogPreferredPadding" />
+    <public type="attr" name="searchHintIcon" />
 
 </resources>
