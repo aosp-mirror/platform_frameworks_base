@@ -395,10 +395,17 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * connected to each other. The two sockets are indistinguishable.
      */
     public static ParcelFileDescriptor[] createSocketPair() throws IOException {
+        return createSocketPair(SOCK_STREAM);
+    }
+
+    /**
+     * @hide
+     */
+    public static ParcelFileDescriptor[] createSocketPair(int type) throws IOException {
         try {
             final FileDescriptor fd0 = new FileDescriptor();
             final FileDescriptor fd1 = new FileDescriptor();
-            Os.socketpair(AF_UNIX, SOCK_STREAM, 0, fd0, fd1);
+            Os.socketpair(AF_UNIX, type, 0, fd0, fd1);
             return new ParcelFileDescriptor[] {
                     new ParcelFileDescriptor(fd0),
                     new ParcelFileDescriptor(fd1) };
@@ -417,11 +424,18 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * This can also be used to detect remote crashes.
      */
     public static ParcelFileDescriptor[] createReliableSocketPair() throws IOException {
+        return createReliableSocketPair(SOCK_STREAM);
+    }
+
+    /**
+     * @hide
+     */
+    public static ParcelFileDescriptor[] createReliableSocketPair(int type) throws IOException {
         try {
             final FileDescriptor[] comm = createCommSocketPair();
             final FileDescriptor fd0 = new FileDescriptor();
             final FileDescriptor fd1 = new FileDescriptor();
-            Os.socketpair(AF_UNIX, SOCK_STREAM, 0, fd0, fd1);
+            Os.socketpair(AF_UNIX, type, 0, fd0, fd1);
             return new ParcelFileDescriptor[] {
                     new ParcelFileDescriptor(fd0, comm[0]),
                     new ParcelFileDescriptor(fd1, comm[1]) };
