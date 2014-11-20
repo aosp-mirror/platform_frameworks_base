@@ -8772,9 +8772,11 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_CAMERA = "android.hardware.camera";
     field public static final java.lang.String FEATURE_CAMERA_ANY = "android.hardware.camera.any";
     field public static final java.lang.String FEATURE_CAMERA_AUTOFOCUS = "android.hardware.camera.autofocus";
+    field public static final java.lang.String FEATURE_CAMERA_CAPABILITY_BURST_CAPTURE = "android.hardware.camera.capability.burst_capture";
     field public static final java.lang.String FEATURE_CAMERA_CAPABILITY_MANUAL_POST_PROCESSING = "android.hardware.camera.capability.manual_post_processing";
     field public static final java.lang.String FEATURE_CAMERA_CAPABILITY_MANUAL_SENSOR = "android.hardware.camera.capability.manual_sensor";
     field public static final java.lang.String FEATURE_CAMERA_CAPABILITY_RAW = "android.hardware.camera.capability.raw";
+    field public static final java.lang.String FEATURE_CAMERA_CAPABILITY_READ_SENSOR_SETTINGS = "android.hardware.camera.capability.read_sensor_settings";
     field public static final java.lang.String FEATURE_CAMERA_EXTERNAL = "android.hardware.camera.external";
     field public static final java.lang.String FEATURE_CAMERA_FLASH = "android.hardware.camera.flash";
     field public static final java.lang.String FEATURE_CAMERA_FRONT = "android.hardware.camera.front";
