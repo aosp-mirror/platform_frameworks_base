@@ -255,7 +255,9 @@ android_media_AudioSystem_setParameters(JNIEnv *env, jobject thiz, jstring keyVa
     const jchar* c_keyValuePairs = env->GetStringCritical(keyValuePairs, 0);
     String8 c_keyValuePairs8;
     if (keyValuePairs) {
-        c_keyValuePairs8 = String8(c_keyValuePairs, env->GetStringLength(keyValuePairs));
+        c_keyValuePairs8 = String8(
+            reinterpret_cast<const char16_t*>(c_keyValuePairs),
+            env->GetStringLength(keyValuePairs));
         env->ReleaseStringCritical(keyValuePairs, c_keyValuePairs);
     }
     int status = check_AudioSystem_Command(AudioSystem::setParameters(c_keyValuePairs8));
@@ -268,7 +270,8 @@ android_media_AudioSystem_getParameters(JNIEnv *env, jobject thiz, jstring keys)
     const jchar* c_keys = env->GetStringCritical(keys, 0);
     String8 c_keys8;
     if (keys) {
-        c_keys8 = String8(c_keys, env->GetStringLength(keys));
+        c_keys8 = String8(reinterpret_cast<const char16_t*>(c_keys),
+                          env->GetStringLength(keys));
         env->ReleaseStringCritical(keys, c_keys);
     }
     return env->NewStringUTF(AudioSystem::getParameters(c_keys8).string());

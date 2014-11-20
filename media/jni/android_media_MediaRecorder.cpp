@@ -461,11 +461,13 @@ android_media_MediaRecorder_native_setup(JNIEnv *env, jobject thiz, jobject weak
     sp<JNIMediaRecorderListener> listener = new JNIMediaRecorderListener(env, thiz, weak_this);
     mr->setListener(listener);
 
-   // Convert client name jstring to String16
-    const char16_t *rawClientName = env->GetStringChars(packageName, NULL);
+    // Convert client name jstring to String16
+    const char16_t *rawClientName = reinterpret_cast<const char16_t*>(
+        env->GetStringChars(packageName, NULL));
     jsize rawClientNameLen = env->GetStringLength(packageName);
     String16 clientName(rawClientName, rawClientNameLen);
-    env->ReleaseStringChars(packageName, rawClientName);
+    env->ReleaseStringChars(packageName,
+                            reinterpret_cast<const jchar*>(rawClientName));
 
     // pass client package name for permissions tracking
     mr->setClientName(clientName);
