@@ -715,6 +715,10 @@
   <java-symbol type="string" name="perms_description_app" />
   <java-symbol type="string" name="perms_new_perm_prefix" />
   <java-symbol type="string" name="petabyteShort" />
+  <java-symbol type="string" name="peerTtyModeFull" />
+  <java-symbol type="string" name="peerTtyModeHco" />
+  <java-symbol type="string" name="peerTtyModeVco" />
+  <java-symbol type="string" name="peerTtyModeOff" />
   <java-symbol type="string" name="phoneTypeAssistant" />
   <java-symbol type="string" name="phoneTypeCallback" />
   <java-symbol type="string" name="phoneTypeCar" />
