@@ -3763,7 +3763,7 @@ public class Intent implements Parcelable, Cloneable {
      * This flag is used to open a document into a new task rooted at the activity launched
      * by this Intent. Through the use of this flag, or its equivalent attribute,
      * {@link android.R.attr#documentLaunchMode} multiple instances of the same activity
-     * containing different douments will appear in the recent tasks list.
+     * containing different documents will appear in the recent tasks list.
      *
      * <p>The use of the activity attribute form of this,
      * {@link android.R.attr#documentLaunchMode}, is
