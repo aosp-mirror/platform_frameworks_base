@@ -139,6 +139,10 @@
     <!-- milliseconds before the heads up notification auto-dismisses. -->
     <integer name="heads_up_notification_decay">10000</integer>
 
+    <!-- milliseconds after a heads up notification is pushed back
+     before the app can interrupt again. -->
+    <integer name="heads_up_default_snooze_length_ms">60000</integer>
+
     <!-- milliseconds before the heads up notification accepts touches. -->
     <integer name="heads_up_sensitivity_delay">700</integer>
 
