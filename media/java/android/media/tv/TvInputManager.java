@@ -1012,6 +1012,12 @@ public final class TvInputManager {
     /**
      * Returns the TvStreamConfig list of the given TV input.
      *
+     * If you are using {@link Hardware} object from {@link
+     * #acquireTvInputHardware}, you should get the list of available streams
+     * from {@link HardwareCallback#onStreamConfigChanged} method, not from
+     * here. This method is designed to be used with {@link #captureFrame} in
+     * capture scenarios specifically and not suitable for any other use.
+     *
      * @param inputId the id of the TV input.
      * @return List of {@link TvStreamConfig} which is available for capturing
      *   of the given TV input.
