@@ -97,4 +97,7 @@
 
     <dimen name="dialog_padding_material">24dp</dimen>
     <dimen name="dialog_padding_top_material">18dp</dimen>
+
+    <!-- Padding above and below selection dialog lists. -->
+    <dimen name="dialog_list_padding_vertical_material">8dp</dimen>
 </resources>
