@@ -32,7 +32,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
 
     private CheckBox mReportUnlockAttempts;
     private CheckBox mManagingTrust;
-    private TextView mCheckTrustedStateResult;
+    private TextView mCheckDeviceLockedResult;
 
     private KeyguardManager mKeyguardManager;
 
@@ -48,7 +48,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
         findViewById(R.id.enable_trust).setOnClickListener(this);
         findViewById(R.id.revoke_trust).setOnClickListener(this);
         findViewById(R.id.crash).setOnClickListener(this);
-        findViewById(R.id.check_trusted).setOnClickListener(this);
+        findViewById(R.id.check_device_locked).setOnClickListener(this);
 
         mReportUnlockAttempts = (CheckBox) findViewById(R.id.report_unlock_attempts);
         mReportUnlockAttempts.setOnCheckedChangeListener(this);
@@ -56,7 +56,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
         mManagingTrust = (CheckBox) findViewById(R.id.managing_trust);
         mManagingTrust.setOnCheckedChangeListener(this);
 
-        mCheckTrustedStateResult = (TextView) findViewById(R.id.check_trusted_result);
+        mCheckDeviceLockedResult = (TextView) findViewById(R.id.check_device_locked_result);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
             SampleTrustAgent.sendRevokeTrust(this);
         } else if (id == R.id.crash) {
             throw new RuntimeException("crash");
-        } else if (id == R.id.check_trusted) {
+        } else if (id == R.id.check_device_locked) {
             updateTrustedState();
         }
     }
@@ -92,7 +92,7 @@ public class SampleTrustAgentSettings extends Activity implements View.OnClickLi
     }
 
     private void updateTrustedState() {
-        mCheckTrustedStateResult.setText(Boolean.toString(
-                mKeyguardManager.isKeyguardInTrustedState()));
+        mCheckDeviceLockedResult.setText(Boolean.toString(
+                mKeyguardManager.isDeviceLocked()));
     }
 }

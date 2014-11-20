@@ -384,8 +384,16 @@ public class LockPatternUtils {
      * @return Whether a saved pattern exists.
      */
     public boolean savedPatternExists() {
+        return savedPatternExists(getCurrentOrCallingUserId());
+    }
+
+    /**
+     * Check to see if the user has stored a lock pattern.
+     * @return Whether a saved pattern exists.
+     */
+    public boolean savedPatternExists(int userId) {
         try {
-            return getLockSettings().havePattern(getCurrentOrCallingUserId());
+            return getLockSettings().havePattern(userId);
         } catch (RemoteException re) {
             return false;
         }
@@ -396,8 +404,16 @@ public class LockPatternUtils {
      * @return Whether a saved pattern exists.
      */
     public boolean savedPasswordExists() {
+        return savedPasswordExists(getCurrentOrCallingUserId());
+    }
+
+     /**
+     * Check to see if the user has stored a lock pattern.
+     * @return Whether a saved pattern exists.
+     */
+    public boolean savedPasswordExists(int userId) {
         try {
-            return getLockSettings().havePassword(getCurrentOrCallingUserId());
+            return getLockSettings().havePassword(userId);
         } catch (RemoteException re) {
             return false;
         }
@@ -955,8 +971,15 @@ public class LockPatternUtils {
      * @return true if the lockscreen method is set to biometric weak
      */
     public boolean usingBiometricWeak() {
-        int quality =
-                (int) getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED);
+        return usingBiometricWeak(getCurrentOrCallingUserId());
+    }
+
+    /**
+     * @return true if the lockscreen method is set to biometric weak
+     */
+    public boolean usingBiometricWeak(int userId) {
+        int quality = (int) getLong(
+                PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userId);
         return quality == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK;
     }
 
@@ -1096,15 +1119,22 @@ public class LockPatternUtils {
      * @return Whether the lock pattern is enabled, or if it is set as a backup for biometric weak
      */
     public boolean isLockPatternEnabled() {
+        return isLockPatternEnabled(getCurrentOrCallingUserId());
+    }
+
+    /**
+     * @return Whether the lock pattern is enabled, or if it is set as a backup for biometric weak
+     */
+    public boolean isLockPatternEnabled(int userId) {
         final boolean backupEnabled =
                 getLong(PASSWORD_TYPE_ALTERNATE_KEY,
-                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED)
+                        DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userId)
                                 == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 
-        return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED, false)
-                && (getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED)
-                        == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING ||
-                        (usingBiometricWeak() && backupEnabled));
+        return getBoolean(Settings.Secure.LOCK_PATTERN_ENABLED, false, userId)
+                && (getLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
+                        userId) == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING
+                        || (usingBiometricWeak(userId) && backupEnabled));
     }
 
     /**
@@ -1485,15 +1515,20 @@ public class LockPatternUtils {
     }
 
     public boolean isSecure() {
-        long mode = getKeyguardStoredPasswordQuality();
+        return isSecure(getCurrentOrCallingUserId());
+    }
+
+    public boolean isSecure(int userId) {
+        long mode = getKeyguardStoredPasswordQuality(userId);
         final boolean isPattern = mode == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
         final boolean isPassword = mode == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC
                 || mode == DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
-        final boolean secure = isPattern && isLockPatternEnabled() && savedPatternExists()
-                || isPassword && savedPasswordExists();
+        final boolean secure =
+                isPattern && isLockPatternEnabled(userId) && savedPatternExists(userId)
+                || isPassword && savedPasswordExists(userId);
         return secure;
     }
 
