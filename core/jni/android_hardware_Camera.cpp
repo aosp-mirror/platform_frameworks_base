@@ -206,7 +206,7 @@ jbyteArray JNICameraContext::getCallbackBuffer(
 
     // Vector access should be protected by lock in postData()
     if (!buffers->isEmpty()) {
-        ALOGV("Using callback buffer from queue of length %d", buffers->size());
+        ALOGV("Using callback buffer from queue of length %zu", buffers->size());
         jbyteArray globalBuffer = buffers->itemAt(0);
         buffers->removeAt(0);
 
@@ -216,7 +216,7 @@ jbyteArray JNICameraContext::getCallbackBuffer(
         if (obj != NULL) {
             jsize bufferLength = env->GetArrayLength(obj);
             if ((int)bufferLength < (int)bufferSize) {
-                ALOGE("Callback buffer was too small! Expected %d bytes, but got %d bytes!",
+                ALOGE("Callback buffer was too small! Expected %zu bytes, but got %d bytes!",
                     bufferSize, bufferLength);
                 env->DeleteLocalRef(obj);
                 return NULL;
@@ -402,7 +402,7 @@ void JNICameraContext::addCallbackBuffer(
                 jbyteArray callbackBuffer = (jbyteArray)env->NewGlobalRef(cbb);
                 mCallbackBuffers.push(callbackBuffer);
 
-                ALOGV("Adding callback buffer to queue, %d total",
+                ALOGV("Adding callback buffer to queue, %zu total",
                         mCallbackBuffers.size());
 
                 // We want to make sure the camera knows we're ready for the
@@ -438,7 +438,7 @@ void JNICameraContext::clearCallbackBuffers_l(JNIEnv *env)
 }
 
 void JNICameraContext::clearCallbackBuffers_l(JNIEnv *env, Vector<jbyteArray> *buffers) {
-    ALOGV("Clearing callback buffers, %d remained", buffers->size());
+    ALOGV("Clearing callback buffers, %zu remained", buffers->size());
     while (!buffers->isEmpty()) {
         env->DeleteGlobalRef(buffers->top());
         buffers->pop();

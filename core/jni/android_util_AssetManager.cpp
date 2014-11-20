@@ -19,28 +19,27 @@
 
 #include <android_runtime/android_util_AssetManager.h>
 
-#include "jni.h"
-#include "JNIHelp.h"
-#include "ScopedStringChars.h"
-#include "ScopedUtfChars.h"
-#include "android_util_Binder.h"
-#include <utils/misc.h>
-#include <android_runtime/AndroidRuntime.h>
-#include <utils/Log.h>
-
-#include <androidfw/Asset.h>
-#include <androidfw/AssetManager.h>
-#include <androidfw/ResourceTypes.h>
-
-#include <private/android_filesystem_config.h> // for AID_SYSTEM
-
-#include "core_jni_helpers.h"
-
+#include <inttypes.h>
+#include <linux/capability.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include <linux/capability.h>
+#include <private/android_filesystem_config.h> // for AID_SYSTEM
+
+#include "JNIHelp.h"
+#include "ScopedStringChars.h"
+#include "ScopedUtfChars.h"
+#include "android_runtime/AndroidRuntime.h"
+#include "android_util_Binder.h"
+#include "androidfw/Asset.h"
+#include "androidfw/AssetManager.h"
+#include "androidfw/ResourceTypes.h"
+#include "core_jni_helpers.h"
+#include "jni.h"
+#include "utils/Log.h"
+#include "utils/misc.h"
+
 extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
 
@@ -1034,8 +1033,8 @@ static jboolean android_content_AssetManager_resolveAttrs(JNIEnv* env, jobject c
     }
 
     if (kDebugStyles) {
-        ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x",
-                themeToken, defStyleAttr, defStyleRes);
+        ALOGI("APPLY STYLE: theme=0x%" PRIx64 " defStyleAttr=0x%x "
+              "defStyleRes=0x%x", themeToken, defStyleAttr, defStyleRes);
     }
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);
@@ -1241,8 +1240,9 @@ static jboolean android_content_AssetManager_applyStyle(JNIEnv* env, jobject cla
     }
 
     if (kDebugStyles) {
-    ALOGI("APPLY STYLE: theme=0x%x defStyleAttr=0x%x defStyleRes=0x%x xml=0x%x",
-          themeToken, defStyleAttr, defStyleRes, xmlParserToken);
+    ALOGI("APPLY STYLE: theme=0x%" PRIx64 " defStyleAttr=0x%x defStyleRes=0x%x "
+          "xml=0x%" PRIx64, themeToken, defStyleAttr, defStyleRes,
+          xmlParserToken);
     }
 
     ResTable::Theme* theme = reinterpret_cast<ResTable::Theme*>(themeToken);

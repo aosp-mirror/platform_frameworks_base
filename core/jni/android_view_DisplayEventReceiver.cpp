@@ -18,8 +18,9 @@
 
 //#define LOG_NDEBUG 0
 
-
 #include "JNIHelp.h"
+
+#include <inttypes.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
@@ -144,7 +145,7 @@ int NativeDisplayEventReceiver::handleEvent(int receiveFd, int events, void* dat
     int32_t vsyncDisplayId;
     uint32_t vsyncCount;
     if (processPendingEvents(&vsyncTimestamp, &vsyncDisplayId, &vsyncCount)) {
-        ALOGV("receiver %p ~ Vsync pulse: timestamp=%lld, id=%d, count=%d",
+        ALOGV("receiver %p ~ Vsync pulse: timestamp=%" PRId64 ", id=%d, count=%d",
                 this, vsyncTimestamp, vsyncDisplayId, vsyncCount);
         mWaitingForVsync = false;
         dispatchVsync(vsyncTimestamp, vsyncDisplayId, vsyncCount);
