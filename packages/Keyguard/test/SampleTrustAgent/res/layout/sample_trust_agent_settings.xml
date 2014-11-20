@@ -48,11 +48,11 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-        <Button android:id="@+id/check_trusted"
+        <Button android:id="@+id/check_device_locked"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Keyguard in trusted state?" />
-        <TextView android:id="@+id/check_trusted_result"
+                android:text="Device locked?" />
+        <TextView android:id="@+id/check_device_locked_result"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />

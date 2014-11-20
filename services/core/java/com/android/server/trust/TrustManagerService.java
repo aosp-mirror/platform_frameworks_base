@@ -61,6 +61,8 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
+import android.view.WindowManagerGlobal;
+import android.view.WindowManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -590,13 +592,26 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
-        public boolean isTrusted(int userId) throws RemoteException {
+        public boolean isDeviceLocked(int userId) throws RemoteException {
             userId = ActivityManager.handleIncomingUser(getCallingPid(), getCallingUid(), userId,
-                    false /* allowAll */, true /* requireFull */, "isTrusted", null);
+                    false /* allowAll */, true /* requireFull */, "isDeviceLocked", null);
             userId = resolveProfileParent(userId);
+
+            boolean isSecure = mLockPatternUtils.isSecure(userId);
+
+            boolean isTrusted;
             synchronized (mUserIsTrusted) {
-                return mUserIsTrusted.get(userId);
+                isTrusted = mUserIsTrusted.get(userId);
             }
+
+            boolean isLocked;
+            if (ActivityManager.getCurrentUser() != userId) {
+                isLocked = true;
+            } else {
+                isLocked = WindowManagerGlobal.getWindowManagerService().isKeyguardLocked();
+            }
+
+            return isSecure && isLocked && !isTrusted;
         }
 
         private void enforceReportPermission() {
