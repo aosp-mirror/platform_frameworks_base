@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.view.KeyEvent;
@@ -564,13 +565,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_TAB: {
-                boolean hasRepKeyTimeElapsed = (System.currentTimeMillis() -
+                boolean hasRepKeyTimeElapsed = (SystemClock.elapsedRealtime() -
                         mLastTabKeyEventTime) > mConfig.altTabKeyDelay;
                 if (event.getRepeatCount() <= 0 || hasRepKeyTimeElapsed) {
                     // Focus the next task in the stack
                     final boolean backward = event.isShiftPressed();
                     mRecentsView.focusNextTask(!backward);
-                    mLastTabKeyEventTime = System.currentTimeMillis();
+                    mLastTabKeyEventTime = SystemClock.elapsedRealtime();
                 }
                 return true;
             }
