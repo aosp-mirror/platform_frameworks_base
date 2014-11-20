@@ -1,0 +1,117 @@
+page.title=应用内结算 API
+parent.title=In-app Billing
+parent.link=index.html
+@jd:body
+
+      <div id="qv-wrapper">
+  <div id="qv">
+
+    <h2>主题</h2>
+    <ol>
+      <li><a href="#producttypes">商品类型</a>
+         <ol>
+         <li><a href="#managed">托管的应用内商品</a><li>
+         <li><a href="#subs">订阅</a><li>
+         </li></li></li></li></ol>
+      </li>
+      <li><a href="#purchase">购买商品</a></li>
+      <li><a href="#consume">消耗应用内商品</a>
+         <ol>
+         <li><a href="#consumetypes">非消耗型和消耗型应用内商品</a><li>
+         <li><a href="#managingconsumables">管理消耗型商品购买流程</a><li>
+         </li></li></li></li></ol>
+      </li>
+      <li><a href="#caching">本地缓存</a></li>
+    </ol>
+
+    <h2>参考</h2>
+    <ol>
+      <li><a href="{@docRoot}google/play/billing/billing_reference.html">应用内结算参考 (V3)</a></li>
+    </ol>
+
+   <h2>另请参见</h2>
+    <ol>
+      <li><a href="{@docRoot}training/in-app-billing/index.html">销售应用内商品</a></li>
+    </ol>  
+  </div>
+  </div>
+
+  <p>借助应用内结算 API 第 3 版，您可以更轻松地将应用内结算功能集成到自己的应用中。此版本包括下列功能：经过改进的同步购买流程、可让您轻松跟踪消耗型商品所有权的 API 以及在本地缓存应用内购买数据。</p>
+
+  <h2 id="producttypes">商品类型</h2>
+  <p>您可以使用 Google Play 开发者控制台来定义您的商品，包括商品类型、SKU、价格和说明等等。有关详情，请参阅<a href="{@docRoot}google/play/billing/billing_admin.html">管理应用内结算</a>。API 第 3 版支持两种商品类型，即托管的应用内商品和订阅。</p>
+  <h3 id="managed">托管的应用内商品</h3>
+  <p>托管的应用内商品是指由 Google Play 跟踪和管理其所有权信息的商品。当用户购买托管的应用内商品时，Google Play 会针对每位用户分别存储各商品的购买信息。这使得您日后可随时向 Google Play 进行查询，恢复特定用户购买的商品的状态。这类信息会永久保存在 Google Play 服务器上，即使用户卸载应用或更换设备也是如此。</p>
+  <p>如果您使用的是 API 第 3 版，还可以在应用内消耗托管的商品。通常情况下，您可以对那些可供多次购买的商品（例如游戏中使用的货币、燃料或魔法药）实施消耗。托管的商品在被购买后，必须先向 Google Play 发送消耗请求进行消耗，然后才能供用户再次购买。要详细了解应用内商品的消耗，请参阅<a href="#consume">消耗商品</a></p>
+
+  <h3 id="subs">订阅</h3>
+  <p>订阅是应用内结算中提供的一种商品类型，可让您通过按月或按年结算的方式在应用内向用户销售内容、服务或功能。您可以在各类应用或游戏中销售对几乎所有类型的数字内容的订阅。要了解订阅的工作原理，请参阅<a href="{@docRoot}google/play/billing/billing_subscriptions.html">应用内结算订阅</a>。</p>
+  <p>使用 API 第 3 版，您可以使用与应用内商品相同的购买流程来购买订阅和检索订阅购买信息。有关代码示例，请参阅<a href="{@docRoot}google/play/billing/billing_integrate.html#Subs">实施订阅</a>。</p>
+  <p class="caution"><strong>重要提示</strong>：与应用内商品不同，订阅无法消耗。</p>
+
+  <h2 id="purchase">购买商品</h2>
+
+  <div class="figure" style="width:430px">
+  <img src="{@docRoot}images/in-app-billing/v3/iab_v3_purchase_flow.png" id="figure1" height="530" />
+  <p class="img-caption">
+    <strong>图 1. </strong> 购买请求的基本顺序。
+  </p>
+  </div>
+
+  <p>API 第 3 版中的典型购买流程如下所示：
+  <ol>
+  <li>您的应用向 Google Play 发送 <code>isBillingSupported</code> 请求，以确定您当前使用的应用内结算 API 目标版本是否受支持。</li>
+  <li>当您的应用启动或用户登录时，最好向 Google Play 进行查询，确定该用户拥有哪些商品。要查询用户的应用内购买，请发送 <code>getPurchases</code> 请求。如果该请求成功，Google Play 会返回一个 <code>Bundle</code>，其中包含所购商品的商品 ID 列表、各项购买详情的列表以及购买签名的列表。</li>
+  <li>通常情况下，您需要通知用户商品是否可供购买。要查询您在 Google Play 中定义的应用内商品的详细信息，应用可以发送 <code>getSkuDetails</code> 请求。您必须在该查询请求中指定商品 ID 列表。如果该请求成功，Google Play 会返回一个包含产品详情（包括商品的价格、标题、说明和购买类型）的 <code>Bundle</code>。
+  </li>
+  <li>如果该用户还未拥有应用内商品，您可以提示购买。为了发起购买请求，您的应用会发送 <code>getBuyIntent</code> 请求，指定要购买商品的商品 ID 以及其他参数。当您在开发者控制台中创建新的应用内商品时，应记录其商品 ID。
+    <ol type="a">
+    <li>Google Play 返回的 <code>Bundle</code> 中包含 <code>PendingIntent</code>，您的应用可用它来启动购买结帐界面。</li>
+    <li>您的应用通过调用 <code>startIntentSenderForResult</code> 方法来启动 PendingIntent。</li>
+    <li>当结帐流程结束后（即用户成功购买商品或取消购买），Google Play 会向您的 <code>onActivityResult</code> 方法发送响应 <code>Intent</code>。<code>onActivityResult</code> 的结果代码中有一个代码将用于表明用户是完成了购买还是取消了购买。响应 <code>Intent</code> 中会包含所购商品的相关信息，其中包括 Google Play 为了唯一标识此次购买交易而生成的 <code>purchaseToken</code> 字符串。<code>Intent</code> 中还包含使用您的私人开发者密钥签署的购买签名。</li> 
+    </ol>
+  </li>
+  </ol>
+  </p>
+  <p>要详细了解 API 第 3 版的调用和服务器响应，请参阅<a href="{@docRoot}google/play/billing/billing_reference.html">应用内结算参考</a>。</p>
+
+  <h2 id="consume">消耗应用内商品</h2>
+  <p>您可以使用消耗机制来跟踪用户对应用内商品的所有权。</p>
+  <p>在第 3 版中，所有应用内商品都是托管的。也就是说，用户对所购应用内商品的所有权由 Google Play 进行维护，您的应用可以在需要时查询用户的购买信息。当用户成功购买应用内商品后，该次购买就会记录在 Google Play 中。应用内商品一经售出，就会被视为“被拥有”。处于“被拥有”状态的应用内商品无法再通过 Google Play 购买。您必须对“被拥有”的应用内商品发送消耗请求，然后 Google Play 才能再次将其设成可购买状态。消耗应用内商品会将商品切换回“未被拥有”状态并删除之前的购买数据。</p>
+  <div class="figure" style="width:420px">
+  <img src="{@docRoot}images/in-app-billing/v3/iab_v3_consumption_flow.png" id="figure2" height="300" />
+  <p class="img-caption">
+    <strong>图 2. </strong> 消耗请求的基本顺序。
+  </p>
+  </div>
+  <p>为了检索用户所拥有商品的列表，您的应用会向 Google Play 发送 <code>getPurchases</code> 调用。您的应用可以通过发送 <code>consumePurchase</code> 调用提出消耗请求。在请求参数中，您必须指定应用内商品独一无二的 <code>purchaseToken</code> 字符串，此字符串是在商品售出时由 Google Play 指定的。Google Play 会返回一个状态代码，指明此次消耗是否已成功记录。</p>
+
+  <h3 id="consumetypes">非消耗型和消耗型应用内商品</h3>
+  <p>您需要决定您的应用内商品是非消耗型商品还是消耗型商品。</p>
+  <dl>
+  <dt>非消耗型商品</dt>
+  <dd>通常情况下，对于在应用内购买一次就能永久使用的应用内商品，您无需实施消耗。这些商品在购买后将永久与用户的 Google 帐户相关联。高级版升级和关卡包就属于非消耗型应用内商品。</dd>
+  <dt>消耗型商品</dt>
+  <dd>相反，对于可多次购买的商品，您可以实施消耗。通常情况下，这类商品提供某些临时效果。例如，用户在游戏中的角色可以从自己的存货中获得生命值或额外的金币。在您的应用中分配所购商品的收益或效果称之为“配置”应用内商品。<em></em>您负责控制和跟踪如何向用户配置应用内商品。
+  <p class="note"><strong>重要提示</strong>：您必须先向 Google Play 发送消耗请求，在收到表明此次消耗已成功记录的响应之后，您才能在应用中配置消耗型应用内商品。</p>
+  </dd>
+  </dl>
+  <h3 id="managingconsumables">在应用中管理消耗型商品购买</h3>
+  <p>下面是购买消耗型应用内商品的基本流程：</p>
+  <ol>
+  <li>调用 <code>getBuyIntent</code> 启动购买流程。</li>
+  <li>从 Google Play 接收指示购买是否成功完成的响应 <code>Bundle</code>。</li>
+  <li>如果购买成功，通过调用 <code>consumePurchase</code> 消耗此次购买。</li>
+  <li>从 Google Play 接收指示消耗是否成功完成的响应代码。</li>
+  <li>如果消耗成功，在应用中配置商品。</li>
+  </ol>
+  <p>之后，当用户启动或登录到您的应用时，您应检查该用户是否拥有任何尚未消耗的消耗型应用内商品。如果有，请务必消耗并配置这些商品。如果您在应用中实施消耗型应用内商品，则可以采用以下推荐的应用启动流程：</p>
+  <ol>
+  <li>发送 <code>getPurchases</code> 请求，查询该用户拥有的应用内商品。</li>
+  <li>如果有消耗型应用内商品，通过调用 <code>consumePurchase</code> 消耗这些商品。必须执行这步操作，因为应用虽可能已完成该消耗型商品的购买订单，但在其发送消耗请求之前仍有可能停止运行或断开连接。</li>
+  <li>从 Google Play 接收指示消耗是否成功完成的响应代码。</li>
+  <li>如果消耗成功，在应用中配置商品。</li>
+  </ol>
+
+  <h2 id="caching">本地缓存</h2>
+  <p>目前，由于 Google Play 客户端在设备上本地缓存应用内结算信息，因此您可以使用 API 第 3 版更频繁地查询此类信息，例如通过调用 <code>getPurchases</code> 进行查询。与旧版本的 API 不同，API 第 3 版的很多调用都是在缓存中进行查找，而不用通过网络连接到 Google Play，这样就显著加快了 API 的响应速度。</p>

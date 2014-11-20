@@ -1,0 +1,142 @@
+page.title=发布概述
+page.type=工具
+
+@jd:body
+
+    <div id="qv-wrapper">
+<div id="qv">
+  <h2>概述</h2>
+  <ul>
+    <li>了解如何发布 Android 应用。</li>
+    <li>了解如何准备应用以进行发布。</li>
+    <li>了解如何向用户发布应用。</li>
+  </ul>
+  <h2>本文内容</h2>
+  <ol>
+    <li><a href="#publishing-prepare">准备应用以进行发布</a></li>
+    <li><a href="#publishing-release">向用户发布应用</a>
+  </li></ol>
+  <h2>另请参见</h2>
+  <ol>
+    <li><a href="{@docRoot}distribute/tools/launch-checklist.html">在 Google Play 上发布应用</a></li>
+  </ol>
+</div>
+</div>
+
+<p>发布是将您的 Android 应用提供给用户的常规流程。您在发布 Android 应用时需要执行两大任务：</p>
+
+<ul>
+  <li>准备应用以进行发布。
+    <p>在准备阶段，您需要构建应用的发布版本，以供 Android 设备用户下载和安装。</p>
+  </li>
+  <li>向用户发布应用。
+    <p>在发布阶段，您向用户宣传、销售和分发应用的发布版本。</p>
+  </li>
+</ul>
+
+<p>通常情况下，您可以通过 <a href="{@docRoot}distribute/googleplay/index.html">Google Play</a> 等应用市场发布应用。不过，您也可以通过以下方式发布应用：将应用直接发送给用户；让用户从您的网站下载应用。</p>
+
+<p>图 1 展示了发布流程在整个 Android <a href="{@docRoot}tools/workflow/index.html">应用开发流程</a>中所处的位置。一般来说，您要先在调试环境中完成对应用的测试，然后再执行发布流程。此外，在开始发布流程之前，您最好确保应用符合针对功能、性能和稳定性的所有发布标准。</p>
+
+<img src="{@docRoot}images/publishing/publishing_overview.png" alt="展示了发布流程在整个开发流程中所处的位置" height="86" id="figure1" />
+<p class="img-caption">
+  <strong>图 1. </strong> 发布是 Android <a href="{@docRoot}tools/workflow/index.html">应用开发流程</a>中的最后一个阶段。
+</p>
+
+<h2 id="publishing-prepare">准备应用以进行发布</h2>
+
+<p>发布之前的准备过程涉及多个步骤，需要您完成以下任务：</p>
+
+<ul>
+  <li>配置应用以进行发布。
+    <p>您至少需要从清单文件中移除 <code><a href="{@docRoot}reference/android/util/Log.html">Log</a></code> 调用和 <a href="{@docRoot}guide/topics/manifest/application-element.html#debug">android:debuggable</a> 属性，还应为 <code>android:versionCode</code> 和 <code>android:versionName</code> 属性（位于 <a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a> 元素中）提供值。此外，您还可能需要配置多项其他设置，以符合 Google Play 的发布要求，或者符合其他应用发布方式的要求。</p>
+  </li>
+  <li>构建应用的发布版本并签名。
+    <p>Android SDK 工具中随附的 Android Development Tools (ADT) 插件和 Ant 构建脚本可向您提供构建应用的发布版本并签名所需的全部信息。</p>
+  </li>
+  <li>测试应用的发布版本。
+    <p>在分发应用之前，您至少应在一部适配的手机和一台适配的平板电脑上全面测试应用的发布版本。</p>
+  </li>
+  <li>更新应用资源以进行发布。
+    <p>您需确保所有应用资源（例如多媒体文件和图形）都是最新的，且已包含在应用中或者已存储到正确的生产服务器上。</p>
+  </li>
+  <li>准备应用所依赖的远程服务器和服务。
+    <p>如果您的应用依赖于外部服务器或服务，您要确保这些服务器或服务是安全的，随时可投入实际使用。</p>
+  </li>
+</ul>
+
+<p>在准备阶段，您可能还需要执行其他一些任务。例如，您需要获取私钥来为应用签名；如果您使用 <a href="http://code.google.com/android/add-ons/google-apis/maps-overview.html">Google 地图外部库</a>，则需要获取 Maps API 发布密钥。此外，您还需要为应用创建一个图标，而且可能需要准备最终用户许可协议 (EULA) 以保护您的员工、公司和知识产权。</p>
+
+<p>当您完成发布应用所需的准备工作之后，您将得到一个已签名的 <code>.apk</code> 文件，可以将文件分发给用户。</p>
+
+<p>要了解如何准备应用以进行发布，请参阅开发者指南中的<a href="{@docRoot}tools/publishing/preparing.html">准备发布</a>。这篇文章提供了有关如何配置和构建应用的发布版本的分步说明。</p>
+
+<h2 id="publishing-release">向用户发布应用</h2>
+
+<p>您可以通过多种方式发布您的 Android 应用。通常情况下，您通过 Google Play 等应用市场发布应用，但您也可以在自己的网站上发布应用或直接将应用发送给用户。
+
+<h3 id="publishing-marketplace">通过应用市场发布应用</h3>
+
+<p>如果您希望向尽可能多的目标用户分发应用，最好通过 Google Play 等应用市场发布应用。</p>
+
+<p>Google Play 是 Android 应用的主要市场，它尤其适合向遍布全球的众多目标用户分发您的应用。不过，您也可以通过自己喜欢的其他应用市场分发您的应用，也可以在多个市场中分发。</p>
+
+
+<h4 id="publishing-market">在 Google Play 上发布应用</h4>
+
+<p>Google Play 是一个强大的应用发布平台，可帮助您向全球用户宣传、销售和分发您的 Android 应用。当通过 Google Play 发布应用时，您可以使用一系列开发者工具，分析您的销售数据、了解市场趋势以及控制向哪些用户分发应用。此外，您还能使用多种有助您增加收入的功能，如<a href="{@docRoot}google/play/billing/index.html">应用内结算</a>和<a href="{@docRoot}google/play/licensing/index.html">应用许可</a>。丰富的工具和功能，以及为数众多的最终用户社区功能，让 Google Play 成为销售和购买 Android 应用的主要平台。</p>
+
+<p>在 Google Play 上发布应用相当简单，只需三个基本步骤：</p>
+
+<ul>
+  <li>准备宣传材料。
+    <p>为了充分利用 Google Play 的营销和宣传功能，您需要为应用制作宣传材料，例如屏幕截图、视频、图形以及宣传文字。</p>
+  </li>
+  <li>配置选项并上传资源。
+    <p>利用 Google Play，您可以将应用定位到全球的用户和设备。通过配置各种 Google Play 设置，您可以选择要覆盖的国家/地区、要使用的商品详情语言以及应用在各个国家/地区的价格。此外，您还可以配置商品详情，例如应用类型、类别和内容分级。配置各种选项之后，您可以上传宣传材料和草稿版（未发布的）应用。</p>
+  </li>
+  <li>发布应用的发布版本。
+    <p>如果您确认各项发布设置均配置正确，而且您上传的应用可以公开发布，只需点击开发者控制台中的<strong>发布</strong>即可。在几分钟之内，您的应用就会发布到网络上供全球用户下载。</p>
+  </li>
+</ul>
+
+<p>如需了解完整信息，请访问 <a href="{@docRoot}distribute/googleplay/index.html">Google Play</a>。</p>
+
+
+<h3 id="publishing-email">通过电子邮件发布应用</h3>
+
+<div class="figure" style="width:246px">
+  <img src="{@docRoot}images/publishing/publishing_via_email.png" alt="此屏幕截图展示了用户在收到您发送的应用时看到的图形界面" style="width:240px" />
+  <p class="img-caption">
+    <strong>图 1. </strong> 当您通过电子邮件向用户发送应用时，用户只需点击<strong>安装</strong>即可。
+  </p>
+</div>
+
+<p>最简单快捷的应用发布方式就是通过电子邮件将应用发送给用户。为此，您需要准备好应用的发布版本，将其添加为电子邮件的附件，然后发送给用户。当用户在其 Android 设备上打开您的电子邮件时，Android 系统会识别出该 APK 并在电子邮件中显示<strong>立即安装</strong>按钮（参见图 1）。用户触摸该按钮即可安装您的应用。</p>
+
+<p class="note"><strong>注意</strong>：只有当用户将其设备配置为允许安装来自<a href="#unknown-sources">未知来源</a>的应用且通过本机的 Gmail 应用打开您的电子邮件时，才会出现图 1 所示的<strong>立即安装</strong>按钮。</p>
+
+<p>如果您只将应用发送给几位受信任的用户，那么通过电子邮件分发就非常方便。不过，这种发布方式不利于阻止盗版和未经授权的分发，也就是说，收到您应用的任何人都可以将应用转发给其他人。</p>
+
+<h2 id="publishing-website">通过网站发布应用</h2>
+
+<p>如果您不想在 Google Play 这样的市场上发布应用，则可以将应用放在您的网站或服务器（包括私人服务器或企业服务器）上供用户下载。为此，您必须先按正常流程准备好应用的发布版本，然后您只需将准备好的 APK 文件托管到网站上并向用户提供下载链接即可。
+</p>
+
+<p>当用户在其 Android 设备上访问该下载链接时，文件就会开始下载，Android 系统会在下载完成后自动将应用安装到设备上。不过，只有当用户将其“设置”配置为允许安装来自<a href="#unknown-sources">未知来源</a>的应用时，安装进程才会自动启动。</p>
+
+<p>虽然在您的网站上发布应用相对比较简单，但效率可能并不高。例如，如果您想通过自己的应用获利，则必须自行处理和跟踪所有财务交易且不能使用 Google Play 的<a href="{@docRoot}google/play/billing/index.html">应用内结算服务</a>来销售应用内商品。此外，您也不能使用<a href="{@docRoot}google/play/licensing/index.html">许可服务</a>来阻止他人未经授权安装和使用您的应用。</p>
+
+
+<h2 id="unknown-sources">用户选择安装来自未知来源的应用</h2>
+
+<div class="figure" style="width:246px;margin-top:0">
+  <img src="{@docRoot}images/publishing/publishing_unknown_sources_sm.png" alt="此屏幕截图展示了用于接受从未知来源下载和安装应用的设置" style="width:240px" />
+  <p class="img-caption">
+    <strong>图 2. </strong> 用户必须启用<strong>未知来源</strong>设置，才能安装从 Google Play 以外的位置下载的应用。
+  </p>
+</div> 
+
+<p>Android 可防止用户无意中从 Google Play（受信任的市场）以外的位置下载并安装应用。只要用户未启用“设置”<strong>&gt;</strong>“安全”下的<strong>未知来源</strong>（如图 2 所示），它就会阻止此类安装。要允许安装来自其他来源的应用，用户必须在其设备上启用“未知来源”设置，且必须先更改此项配置才能将您的应用下载到设备上。<em></em></p> 
+
+<p class="note">请注意，部分网络提供商不允许用户安装来自未知来源的应用。</p>
