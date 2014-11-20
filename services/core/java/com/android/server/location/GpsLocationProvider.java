@@ -73,8 +73,8 @@ import android.provider.Telephony.Carriers;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.SmsMessage;
 import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionListener;
 import android.telephony.SubscriptionManager;
+import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
@@ -462,9 +462,10 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     };
 
-    private final SubscriptionListener mSubscriptionListener = new SubscriptionListener() {
+    private final OnSubscriptionsChangedListener mOnSubscriptionsChangedListener =
+            new OnSubscriptionsChangedListener() {
         @Override
-        public void onSubscriptionInfoChanged() {
+        public void onSubscriptionsChanged() {
             subscriptionOrSimChanged(mContext);
         }
     };
@@ -640,14 +641,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
                                                 mSuplEsEnabled);
 
         // TODO: When this object "finishes" we should unregister by invoking
-        // SubscriptionManager.unregister(mContext, mSubscriptionListener);
+        // SubscriptionManager.getInstance(mContext).unregister(mOnSubscriptionsChangedListener);
         // This is not strictly necessary because it will be unregistered if the
         // notification fails but it is good form.
 
         // Register for SubscriptionInfo list changes which is guaranteed
-        // to invoke onSubscriptionInfoChanged the first time.
-        SubscriptionManager.register(mContext, mSubscriptionListener,
-                SubscriptionListener.LISTEN_SUBSCRIPTION_INFO_LIST_CHANGED);
+        // to invoke onSubscriptionsChanged the first time.
+        SubscriptionManager.from(mContext)
+            .registerOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
 
         // construct handler, listen for events
         mHandler = new ProviderHandler(looper);
