@@ -16,19 +16,8 @@
 
 package android.net;
 
-import android.net.IpConfiguration;
-import android.net.IEthernetServiceListener;
-
-/**
- * Interface that answers queries about, and allows changing
- * ethernet configuration.
- */
-/** {@hide} */
-interface IEthernetManager
+/** @hide */
+oneway interface IEthernetServiceListener
 {
-    IpConfiguration getConfiguration();
-    void setConfiguration(in IpConfiguration config);
-    boolean isAvailable();
-    void addListener(in IEthernetServiceListener listener);
-    void removeListener(in IEthernetServiceListener listener);
+    void onAvailabilityChanged(boolean isAvailable);
 }
