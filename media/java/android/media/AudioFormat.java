@@ -128,6 +128,29 @@ public class AudioFormat {
 
     /**
      * @hide
+     * Return the input channel mask corresponding to an output channel mask.
+     * This can be used for submix rerouting for the mask of the recorder to map to that of the mix.
+     * @param outMask a combination of the CHANNEL_OUT_* definitions, but not CHANNEL_OUT_DEFAULT
+     * @return a combination of CHANNEL_IN_* definitions matching an output channel mask
+     * @throws IllegalArgumentException
+     */
+    public static int inChannelMaskFromOutChannelMask(int outMask) throws IllegalArgumentException {
+        if (outMask == CHANNEL_OUT_DEFAULT) {
+            throw new IllegalArgumentException(
+                    "Illegal CHANNEL_OUT_DEFAULT channel mask for input.");
+        }
+        switch (channelCountFromOutChannelMask(outMask)) {
+            case 1:
+                return CHANNEL_IN_MONO;
+            case 2:
+                return CHANNEL_IN_STEREO;
+            default:
+                throw new IllegalArgumentException("Unsupported channel configuration for input.");
+        }
+    }
+
+    /**
+     * @hide
      * Return the number of channels from an input channel mask
      * @param mask a combination of the CHANNEL_IN_* definitions, even CHANNEL_IN_DEFAULT
      * @return number of channels for the mask
