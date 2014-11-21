@@ -173,6 +173,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -958,9 +959,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     private boolean mRunningVoice = false;
 
     /**
-     * State of external calls telling us if the device is asleep.
+     * State of external calls telling us if the device is awake or asleep.
      */
-    private boolean mWentToSleep = false;
+    private int mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
 
     static final int LOCK_SCREEN_HIDDEN = 0;
     static final int LOCK_SCREEN_LEAVING = 1;
@@ -6061,6 +6062,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mWindowManager.keyguardWaitingForActivityDrawn();
                 if (mLockScreenShown == LOCK_SCREEN_SHOWN) {
                     mLockScreenShown = LOCK_SCREEN_LEAVING;
+                    updateSleepIfNeededLocked();
                 }
             }
         } finally {
@@ -9925,32 +9927,55 @@ public final class ActivityManagerService extends ActivityManagerNative
         return mSleeping;
     }
 
-    void goingToSleep() {
+    void onWakefulnessChanged(int wakefulness) {
         synchronized(this) {
-            mWentToSleep = true;
-            goToSleepIfNeededLocked();
+            mWakefulness = wakefulness;
+            updateSleepIfNeededLocked();
         }
     }
 
     void finishRunningVoiceLocked() {
         if (mRunningVoice) {
             mRunningVoice = false;
-            goToSleepIfNeededLocked();
+            updateSleepIfNeededLocked();
         }
     }
 
-    void goToSleepIfNeededLocked() {
-        if (mWentToSleep && !mRunningVoice) {
-            if (!mSleeping) {
-                mSleeping = true;
-                mStackSupervisor.goingToSleepLocked();
+    void updateSleepIfNeededLocked() {
+        if (mSleeping && !shouldSleepLocked()) {
+            mSleeping = false;
+            mStackSupervisor.comeOutOfSleepIfNeededLocked();
+        } else if (!mSleeping && shouldSleepLocked()) {
+            mSleeping = true;
+            mStackSupervisor.goingToSleepLocked();
 
-                // Initialize the wake times of all processes.
-                checkExcessivePowerUsageLocked(false);
-                mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
-                mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
-            }
+            // Initialize the wake times of all processes.
+            checkExcessivePowerUsageLocked(false);
+            mHandler.removeMessages(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+            Message nmsg = mHandler.obtainMessage(CHECK_EXCESSIVE_WAKE_LOCKS_MSG);
+            mHandler.sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
+        }
+    }
+
+    private boolean shouldSleepLocked() {
+        // Resume applications while running a voice interactor.
+        if (mRunningVoice) {
+            return false;
+        }
+
+        switch (mWakefulness) {
+            case PowerManagerInternal.WAKEFULNESS_AWAKE:
+            case PowerManagerInternal.WAKEFULNESS_DREAMING:
+                // If we're interactive but applications are already paused then defer
+                // resuming them until the lock screen is hidden.
+                return mSleeping && mLockScreenShown != LOCK_SCREEN_HIDDEN;
+            case PowerManagerInternal.WAKEFULNESS_DOZING:
+                // If we're dozing then pause applications whenever the lock screen is shown.
+                return mLockScreenShown != LOCK_SCREEN_HIDDEN;
+            case PowerManagerInternal.WAKEFULNESS_ASLEEP:
+            default:
+                // If we're asleep then pause applications unconditionally.
+                return true;
         }
     }
 
@@ -10016,31 +10041,16 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     void logLockScreen(String msg) {
-        if (DEBUG_LOCKSCREEN) Slog.d(TAG, Debug.getCallers(2) + ":" + msg +
-                " mLockScreenShown=" + lockScreenShownToString() + " mWentToSleep=" +
-                mWentToSleep + " mSleeping=" + mSleeping);
-    }
-
-    void comeOutOfSleepIfNeededLocked() {
-        if ((!mWentToSleep && mLockScreenShown == LOCK_SCREEN_HIDDEN) || mRunningVoice) {
-            if (mSleeping) {
-                mSleeping = false;
-                mStackSupervisor.comeOutOfSleepIfNeededLocked();
-            }
-        }
-    }
-
-    void wakingUp() {
-        synchronized(this) {
-            mWentToSleep = false;
-            comeOutOfSleepIfNeededLocked();
-        }
+        if (DEBUG_LOCKSCREEN) Slog.d(TAG, Debug.getCallers(2) + ":" + msg
+                + " mLockScreenShown=" + lockScreenShownToString() + " mWakefulness="
+                + PowerManagerInternal.wakefulnessToString(mWakefulness)
+                + " mSleeping=" + mSleeping);
     }
 
     void startRunningVoiceLocked() {
         if (!mRunningVoice) {
             mRunningVoice = true;
-            comeOutOfSleepIfNeededLocked();
+            updateSleepIfNeededLocked();
         }
     }
 
@@ -10060,7 +10070,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             try {
                 if (DEBUG_LOCKSCREEN) logLockScreen(" shown=" + shown);
                 mLockScreenShown = shown ? LOCK_SCREEN_SHOWN : LOCK_SCREEN_HIDDEN;
-                comeOutOfSleepIfNeededLocked();
+                updateSleepIfNeededLocked();
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -12830,13 +12840,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         if (dumpPackage == null) {
-            if (mSleeping || mWentToSleep || mLockScreenShown != LOCK_SCREEN_HIDDEN) {
-                pw.println("  mSleeping=" + mSleeping + " mWentToSleep=" + mWentToSleep
-                        + " mLockScreenShown " + lockScreenShownToString());
-            }
-            if (mShuttingDown || mRunningVoice) {
-                pw.print("  mShuttingDown=" + mShuttingDown + " mRunningVoice=" + mRunningVoice);
-            }
+            pw.println("  mWakefulness="
+                    + PowerManagerInternal.wakefulnessToString(mWakefulness));
+            pw.println("  mSleeping=" + mSleeping + " mLockScreenShown="
+                    + lockScreenShownToString());
+            pw.print("  mShuttingDown=" + mShuttingDown + " mRunningVoice=" + mRunningVoice);
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
@@ -19204,13 +19212,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final class LocalService extends ActivityManagerInternal {
         @Override
-        public void goingToSleep() {
-            ActivityManagerService.this.goingToSleep();
-        }
-
-        @Override
-        public void wakingUp() {
-            ActivityManagerService.this.wakingUp();
+        public void onWakefulnessChanged(int wakefulness) {
+            ActivityManagerService.this.onWakefulnessChanged(wakefulness);
         }
 
         @Override
