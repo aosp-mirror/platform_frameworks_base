@@ -1872,6 +1872,21 @@ class ContextImpl extends Context {
         }
     }
 
+    /** @hide */
+    @Override
+    public int checkPermission(String permission, int pid, int uid, IBinder callerToken) {
+        if (permission == null) {
+            throw new IllegalArgumentException("permission is null");
+        }
+
+        try {
+            return ActivityManagerNative.getDefault().checkPermissionWithToken(
+                    permission, pid, uid, callerToken);
+        } catch (RemoteException e) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+    }
+
     @Override
     public int checkCallingPermission(String permission) {
         if (permission == null) {
@@ -1960,7 +1975,19 @@ class ContextImpl extends Context {
         try {
             return ActivityManagerNative.getDefault().checkUriPermission(
                     ContentProvider.getUriWithoutUserId(uri), pid, uid, modeFlags,
-                    resolveUserId(uri));
+                    resolveUserId(uri), null);
+        } catch (RemoteException e) {
+            return PackageManager.PERMISSION_DENIED;
+        }
+    }
+
+    /** @hide */
+    @Override
+    public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags, IBinder callerToken) {
+        try {
+            return ActivityManagerNative.getDefault().checkUriPermission(
+                    ContentProvider.getUriWithoutUserId(uri), pid, uid, modeFlags,
+                    resolveUserId(uri), callerToken);
         } catch (RemoteException e) {
             return PackageManager.PERMISSION_DENIED;
         }
