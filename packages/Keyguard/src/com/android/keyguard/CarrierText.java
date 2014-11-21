@@ -48,7 +48,7 @@ public class CarrierText extends TextView {
         }
 
         @Override
-        public void onSimStateChanged(IccCardConstants.State simState) {
+        public void onSimStateChanged(int subId, int slotId, State simState) {
             mSimState = simState;
             updateCarrierText(mSimState, mPlmn, mSpn);
         }

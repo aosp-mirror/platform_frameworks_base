@@ -240,12 +240,16 @@
     <string name="kg_pattern_instructions">Draw your pattern</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
     <string name="kg_sim_pin_instructions">Enter SIM PIN</string>
+    <!-- Instructions for using the SIM PIN unlock screen when there's more than one SIM -->
+    <string name="kg_sim_pin_instructions_multi">Enter SIM PIN for \"<xliff:g id="carrier" example="CARD 1">%1$s</xliff:g>\"</string>
     <!-- Instructions for using the PIN unlock screen -->
     <string name="kg_pin_instructions">Enter PIN</string>
     <!-- Instructions for using the password unlock screen -->
     <string name="kg_password_instructions">Enter Password</string>
     <!-- Hint shown in the PUK screen that asks the user to enter the PUK code given to them by their provider -->
     <string name="kg_puk_enter_puk_hint">SIM is now disabled. Enter PUK code to continue. Contact carrier for details.</string>
+    <!-- Hint shown when there are multiple SIMs in the device to ask the user to enter the PUK code given to them by their provider -->
+    <string name="kg_puk_enter_puk_hint_multi">SIM \"<xliff:g id="carrier" example="CARD 1">%1$s</xliff:g>\" is now disabled. Enter PUK code to continue. Contact carrier for details.</string>
     <!-- Hint shown in the PUK unlock screen PIN TextView -->
     <string name="kg_puk_enter_pin_hint">Enter desired PIN code</string>
     <!-- Message shown when the user needs to confirm the PIN they just entered in the PUK screen -->
