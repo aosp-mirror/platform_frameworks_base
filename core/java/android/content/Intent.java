@@ -4010,6 +4010,20 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final int URI_ANDROID_APP_SCHEME = 1<<1;
 
+    /**
+     * Flag for use with {@link #toUri} and {@link #parseUri}: allow parsing
+     * of unsafe information.  In particular, the flags {@link #FLAG_GRANT_READ_URI_PERMISSION},
+     * {@link #FLAG_GRANT_WRITE_URI_PERMISSION}, {@link #FLAG_GRANT_PERSISTABLE_URI_PERMISSION},
+     * and {@link #FLAG_GRANT_PREFIX_URI_PERMISSION} flags can not be set, so that the
+     * generated Intent can not cause unexpected data access to happen.
+     *
+     * <p>If you do not trust the source of the URI being parsed, you should still do further
+     * processing to protect yourself from it.  In particular, when using it to start an
+     * activity you should usually add in {@link #CATEGORY_BROWSABLE} to limit the activities
+     * that can handle it.</p>
+     */
+    public static final int URI_ALLOW_UNSAFE = 1<<2;
+
     // ---------------------------------------------------------------------
 
     private String mAction;
@@ -4309,7 +4323,7 @@ public class Intent implements Parcelable, Cloneable {
             // old format Intent URI
             } else if (!uri.startsWith("#Intent;", i)) {
                 if (!androidApp) {
-                    return getIntentOld(uri);
+                    return getIntentOld(uri, flags);
                 } else {
                     i = -1;
                 }
@@ -4359,6 +4373,9 @@ public class Intent implements Parcelable, Cloneable {
                 // launch flags
                 else if (uri.startsWith("launchFlags=", i)) {
                     intent.mFlags = Integer.decode(value).intValue();
+                    if ((flags& URI_ALLOW_UNSAFE) == 0) {
+                        intent.mFlags &= ~IMMUTABLE_FLAGS;
+                    }
                 }
 
                 // package
@@ -4488,6 +4505,10 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     public static Intent getIntentOld(String uri) throws URISyntaxException {
+        return getIntentOld(uri, 0);
+    }
+
+    private static Intent getIntentOld(String uri, int flags) throws URISyntaxException {
         Intent intent;
 
         int i = uri.lastIndexOf('#');
@@ -4536,6 +4557,9 @@ public class Intent implements Parcelable, Cloneable {
                 i += 12;
                 int j = uri.indexOf(')', i);
                 intent.mFlags = Integer.decode(uri.substring(i, j)).intValue();
+                if ((flags& URI_ALLOW_UNSAFE) == 0) {
+                    intent.mFlags &= ~IMMUTABLE_FLAGS;
+                }
                 i = j + 1;
             }
 
