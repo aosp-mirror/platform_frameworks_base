@@ -245,7 +245,7 @@ public final class ViewRootImpl implements ViewParent,
 
     // These can be accessed by any thread, must be protected with a lock.
     // Surface can never be reassigned or cleared (use Surface.clear()).
-    private final Surface mSurface = new Surface();
+    final Surface mSurface = new Surface();
 
     boolean mAdded;
     boolean mAddedTouchMode;
