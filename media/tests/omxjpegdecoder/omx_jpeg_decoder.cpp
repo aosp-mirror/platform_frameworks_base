@@ -30,34 +30,17 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkImage.h>
 #include <SkMallocPixelRef.h>
+#pragma GCC diagnostic pop
 
 #include "omx_jpeg_decoder.h"
 #include "StreamSource.h"
 
 using namespace android;
-
-static void getJpegOutput(MediaBuffer* buffer, const char* filename) {
-    int size = buffer->range_length();
-    int offset = buffer->range_offset();
-    FILE *pFile = fopen(filename, "w+");
-
-    if (pFile == NULL) {
-        printf("Error: cannot open %s.\n", filename);
-    } else {
-        char* data = (char*) buffer->data();
-        data += offset;
-        while (size > 0) {
-            int numChars = fwrite(data, sizeof(char), 1024, pFile);
-            int numBytes = numChars * sizeof(char);
-            size -= numBytes;
-            data += numBytes;
-        }
-        fclose(pFile);
-    }
-    return;
-}
 
 extern int storeBitmapToFile(SkBitmap* bitmap, const char* filename) {
     bitmap->lockPixels();
@@ -140,7 +123,7 @@ sp<MediaSource> OmxJpegImageDecoder::getDecoder(
 }
 
 bool OmxJpegImageDecoder::decodeSource(sp<MediaSource> decoder,
-        const sp<MediaSource>& source, SkBitmap* bm) {
+        const sp<MediaSource>& /* source */, SkBitmap* bm) {
     status_t rt = decoder->start();
     if (rt != OK) {
         ALOGE("Cannot start OMX Decoder!");
@@ -169,7 +152,7 @@ bool OmxJpegImageDecoder::decodeSource(sp<MediaSource> decoder,
     return true;
 }
 
-void OmxJpegImageDecoder::configBitmapSize(SkBitmap* bm, SkColorType pref,
+void OmxJpegImageDecoder::configBitmapSize(SkBitmap* bm, SkColorType /* pref */,
         int width, int height) {
     // Set the color space to ARGB_8888 for now (ignoring pref)
     // because of limitation in hardware support.
