@@ -397,6 +397,9 @@
     <dimen name="datepicker_header_height">30dp</dimen>
     <dimen name="datepicker_header_text_size">14dp</dimen>
 
+    <!-- Minimum size of the fast scroller thumb's touch target. -->
+    <dimen name="fast_scroller_minimum_touch_target">48dp</dimen>
+
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->
     <dimen name="immersive_mode_cling_width">-1px</dimen>
 
