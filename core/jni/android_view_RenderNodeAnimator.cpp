@@ -45,6 +45,15 @@ static JNIEnv* getEnv(JavaVM* vm) {
     return env;
 }
 
+class AnimationListenerLifecycleChecker : public AnimationListener {
+public:
+    virtual void onAnimationFinished(BaseRenderNodeAnimator* animator) {
+        LOG_ALWAYS_FATAL("Lifecycle failure, nStart(%p) wasn't called", animator);
+    }
+};
+
+static AnimationListenerLifecycleChecker sLifecycleChecker;
+
 class AnimationListenerBridge : public AnimationListener {
 public:
     // This holds a strong reference to a Java WeakReference<T> object. This avoids
@@ -100,6 +109,7 @@ static jlong createAnimator(JNIEnv* env, jobject clazz,
         jint propertyRaw, jfloat finalValue) {
     RenderPropertyAnimator::RenderProperty property = toRenderProperty(propertyRaw);
     BaseRenderNodeAnimator* animator = new RenderPropertyAnimator(property, finalValue);
+    animator->setListener(&sLifecycleChecker);
     return reinterpret_cast<jlong>( animator );
 }
 
@@ -107,6 +117,7 @@ static jlong createCanvasPropertyFloatAnimator(JNIEnv* env, jobject clazz,
         jlong canvasPropertyPtr, jfloat finalValue) {
     CanvasPropertyPrimitive* canvasProperty = reinterpret_cast<CanvasPropertyPrimitive*>(canvasPropertyPtr);
     BaseRenderNodeAnimator* animator = new CanvasPropertyPrimitiveAnimator(canvasProperty, finalValue);
+    animator->setListener(&sLifecycleChecker);
     return reinterpret_cast<jlong>( animator );
 }
 
@@ -117,12 +128,14 @@ static jlong createCanvasPropertyPaintAnimator(JNIEnv* env, jobject clazz,
     CanvasPropertyPaintAnimator::PaintField paintField = toPaintField(paintFieldRaw);
     BaseRenderNodeAnimator* animator = new CanvasPropertyPaintAnimator(
             canvasProperty, paintField, finalValue);
+    animator->setListener(&sLifecycleChecker);
     return reinterpret_cast<jlong>( animator );
 }
 
 static jlong createRevealAnimator(JNIEnv* env, jobject clazz,
         jint centerX, jint centerY, jfloat startRadius, jfloat endRadius) {
     BaseRenderNodeAnimator* animator = new RevealAnimator(centerX, centerY, startRadius, endRadius);
+    animator->setListener(&sLifecycleChecker);
     return reinterpret_cast<jlong>( animator );
 }
 
@@ -166,9 +179,7 @@ static void setAllowRunningAsync(JNIEnv* env, jobject clazz, jlong animatorPtr, 
 
 static void start(JNIEnv* env, jobject clazz, jlong animatorPtr, jobject finishListener) {
     BaseRenderNodeAnimator* animator = reinterpret_cast<BaseRenderNodeAnimator*>(animatorPtr);
-    if (finishListener) {
-        animator->setListener(new AnimationListenerBridge(env, finishListener));
-    }
+    animator->setListener(new AnimationListenerBridge(env, finishListener));
     animator->start();
 }
 
@@ -211,6 +222,9 @@ static JNINativeMethod gMethods[] = {
         LOG_FATAL_IF(! var, "Unable to find method " methodName);
 
 int register_android_view_RenderNodeAnimator(JNIEnv* env) {
+#ifdef USE_OPENGL_RENDERER
+    sLifecycleChecker.incStrong(0);
+#endif
     FIND_CLASS(gRenderNodeAnimatorClassInfo.clazz, kClassPathName);
     gRenderNodeAnimatorClassInfo.clazz = jclass(env->NewGlobalRef(gRenderNodeAnimatorClassInfo.clazz));
 
