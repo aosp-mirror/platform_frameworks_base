@@ -2012,6 +2012,7 @@ package android {
     field public static final int Theme_DeviceDefault_Dialog = 16974126; // 0x103012e
     field public static final int Theme_DeviceDefault_DialogWhenLarge = 16974134; // 0x1030136
     field public static final int Theme_DeviceDefault_DialogWhenLarge_NoActionBar = 16974135; // 0x1030137
+    field public static final int Theme_DeviceDefault_Dialog_Alert = 16974545; // 0x10302d1
     field public static final int Theme_DeviceDefault_Dialog_MinWidth = 16974127; // 0x103012f
     field public static final int Theme_DeviceDefault_Dialog_NoActionBar = 16974128; // 0x1030130
     field public static final int Theme_DeviceDefault_Dialog_NoActionBar_MinWidth = 16974129; // 0x1030131
@@ -2021,6 +2022,7 @@ package android {
     field public static final int Theme_DeviceDefault_Light_Dialog = 16974130; // 0x1030132
     field public static final int Theme_DeviceDefault_Light_DialogWhenLarge = 16974136; // 0x1030138
     field public static final int Theme_DeviceDefault_Light_DialogWhenLarge_NoActionBar = 16974137; // 0x1030139
+    field public static final int Theme_DeviceDefault_Light_Dialog_Alert = 16974546; // 0x10302d2
     field public static final int Theme_DeviceDefault_Light_Dialog_MinWidth = 16974131; // 0x1030133
     field public static final int Theme_DeviceDefault_Light_Dialog_NoActionBar = 16974132; // 0x1030134
     field public static final int Theme_DeviceDefault_Light_Dialog_NoActionBar_MinWidth = 16974133; // 0x1030135
