@@ -216,7 +216,7 @@ class GLES20Canvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void callDrawGLFunction(long drawGLFunction) {
+    public void callDrawGLFunction2(long drawGLFunction) {
         nCallDrawGLFunction(mRenderer, drawGLFunction);
     }
 

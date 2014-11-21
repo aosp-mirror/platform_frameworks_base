@@ -98,7 +98,7 @@ public abstract class HardwareCanvas extends Canvas {
      *
      * @hide
      */
-    public void callDrawGLFunction(long drawGLFunction) {
+    public void callDrawGLFunction2(long drawGLFunction) {
         // Noop - this is done in the display list recorder subclass
     }
 
