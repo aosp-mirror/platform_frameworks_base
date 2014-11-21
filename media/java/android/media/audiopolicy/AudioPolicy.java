@@ -155,6 +155,7 @@ public class AudioPolicy {
         {
             throw new IllegalArgumentException("Invalid AudioMix: not defined for loop back");
         }
+        // TODO also check mix is defined for playback or recording, and matches forTrack argument
     }
 
     /**
@@ -175,13 +176,19 @@ public class AudioPolicy {
             return null;
         }
         checkMixReadyToUse(mix, false/*not for an AudioTrack*/);
+        // create an AudioFormat from the mix format compatible with recording, as the mix
+        // was defined for playback
+        AudioFormat mixFormat = new AudioFormat.Builder(mix.getFormat())
+                .setChannelMask(AudioFormat.inChannelMaskFromOutChannelMask(
+                        mix.getFormat().getChannelMask()))
+                .build();
         // create the AudioRecord, configured for loop back, using the same format as the mix
         AudioRecord ar = new AudioRecord(
                 new AudioAttributes.Builder()
                         .setInternalCapturePreset(MediaRecorder.AudioSource.REMOTE_SUBMIX)
                         .addTag(mix.getRegistration())
                         .build(),
-                mix.getFormat(),
+                mixFormat,
                 AudioRecord.getMinBufferSize(mix.getFormat().getSampleRate(),
                         // using stereo for buffer size to avoid the current poor support for masks
                         AudioFormat.CHANNEL_IN_STEREO, mix.getFormat().getEncoding()),
