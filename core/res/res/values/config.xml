@@ -1927,6 +1927,10 @@
     <!-- Show the next-alarm as a zen exit condition if it occurs in the next n hours. -->
     <integer name="config_next_alarm_condition_lookahead_threshold_hrs">12</integer>
 
+    <!-- Flags enabling default window features. See Window.java -->
+    <bool name="config_defaultWindowFeatureOptionsPanel">true</bool>
+    <bool name="config_defaultWindowFeatureContextMenu">true</bool>
+
     <!-- This config is used to check if the carrier requires converting destination
          number before sending out a SMS.
          Formats for this configuration as below:
