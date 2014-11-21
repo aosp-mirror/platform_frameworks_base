@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <utils/misc.h>
+#include <inttypes.h>
 
 #include <SkBitmap.h>
 
@@ -372,7 +373,7 @@ nContextGetErrorMessage(JNIEnv *_env, jobject _this, jlong con)
                                  &receiveLen, sizeof(receiveLen),
                                  &subID, sizeof(subID));
     if (!id && receiveLen) {
-        ALOGV("message receive buffer too small.  %i", receiveLen);
+        ALOGV("message receive buffer too small.  %zu", receiveLen);
     }
     return _env->NewStringUTF(buf);
 }
@@ -392,7 +393,7 @@ nContextGetUserMessage(JNIEnv *_env, jobject _this, jlong con, jintArray data)
                                  &receiveLen, sizeof(receiveLen),
                                  &subID, sizeof(subID));
     if (!id && receiveLen) {
-        ALOGV("message receive buffer too small.  %i", receiveLen);
+        ALOGV("message receive buffer too small.  %zu", receiveLen);
     }
     _env->ReleaseIntArrayElements(data, ptr, 0);
     return (jint)id;
@@ -456,7 +457,7 @@ nElementCreate(JNIEnv *_env, jobject _this, jlong con, jlong type, jint kind, jb
                jint size)
 {
     if (kLogApi) {
-        ALOGD("nElementCreate, con(%p), type(%i), kind(%i), norm(%i), size(%i)", (RsContext)con,
+        ALOGD("nElementCreate, con(%p), type(%" PRId64 "), kind(%i), norm(%i), size(%i)", (RsContext)con,
               type, kind, norm, size);
     }
     return (jlong)(uintptr_t)rsElementCreate((RsContext)con, (RsDataType)type, (RsDataKind)kind,
@@ -561,7 +562,7 @@ nTypeCreate(JNIEnv *_env, jobject _this, jlong con, jlong eid,
 {
     if (kLogApi) {
         ALOGD("nTypeCreate, con(%p) eid(%p), x(%i), y(%i), z(%i), mips(%i), faces(%i), yuv(%i)",
-              (RsContext)con, eid, dimx, dimy, dimz, mips, faces, yuv);
+              (RsContext)con, (void*)eid, dimx, dimy, dimz, mips, faces, yuv);
     }
 
     return (jlong)(uintptr_t)rsTypeCreate((RsContext)con, (RsElement)eid, dimx, dimy, dimz, mips,
@@ -651,7 +652,7 @@ static void
 nAllocationIoSend(JNIEnv *_env, jobject _this, jlong con, jlong alloc)
 {
     if (kLogApi) {
-        ALOGD("nAllocationIoSend, con(%p), alloc(%p)", (RsContext)con, alloc);
+        ALOGD("nAllocationIoSend, con(%p), alloc(%p)", (RsContext)con, (RsAllocation)alloc);
     }
     rsAllocationIoSend((RsContext)con, (RsAllocation)alloc);
 }
@@ -660,7 +661,7 @@ static void
 nAllocationIoReceive(JNIEnv *_env, jobject _this, jlong con, jlong alloc)
 {
     if (kLogApi) {
-        ALOGD("nAllocationIoReceive, con(%p), alloc(%p)", (RsContext)con, alloc);
+        ALOGD("nAllocationIoReceive, con(%p), alloc(%p)", (RsContext)con, (RsAllocation)alloc);
     }
     rsAllocationIoReceive((RsContext)con, (RsAllocation)alloc);
 }
@@ -1089,7 +1090,7 @@ static void
 nScriptSetVarObj(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot, jlong val)
 {
     if (kLogApi) {
-        ALOGD("nScriptSetVarObj, con(%p), s(%p), slot(%i), val(%i)", (RsContext)con, (void *)script,
+        ALOGD("nScriptSetVarObj, con(%p), s(%p), slot(%i), val(%" PRId64 ")", (RsContext)con, (void *)script,
               slot, val);
     }
     rsScriptSetVarObj((RsContext)con, (RsScript)script, slot, (RsObjectBase)val);
@@ -1099,7 +1100,7 @@ static void
 nScriptSetVarJ(JNIEnv *_env, jobject _this, jlong con, jlong script, jint slot, jlong val)
 {
     if (kLogApi) {
-        ALOGD("nScriptSetVarJ, con(%p), s(%p), slot(%i), val(%lli)", (RsContext)con, (void *)script,
+        ALOGD("nScriptSetVarJ, con(%p), s(%p), slot(%i), val(%" PRId64 ")", (RsContext)con, (void *)script,
               slot, val);
     }
     rsScriptSetVarJ((RsContext)con, (RsScript)script, slot, val);
