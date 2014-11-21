@@ -76,6 +76,9 @@ public final class MediaProjection {
         if (callback == null) {
             throw new IllegalArgumentException("callback should not be null");
         }
+        if (handler == null) {
+            handler = new Handler();
+        }
         mCallbacks.put(callback, new CallbackRecord(callback, handler));
     }
 
@@ -183,16 +186,15 @@ public final class MediaProjection {
     private final class MediaProjectionCallback extends IMediaProjectionCallback.Stub {
         @Override
         public void onStop() {
-            final int N = mCallbacks.size();
-            for (int i = 0; i < N; i++) {
-                mCallbacks.get(i).onStop();
+            for (CallbackRecord cbr : mCallbacks.values()) {
+                cbr.onStop();
             }
         }
     }
 
     private final static class CallbackRecord {
-        private Callback mCallback;
-        private Handler mHandler;
+        private final Callback mCallback;
+        private final Handler mHandler;
 
         public CallbackRecord(Callback callback, Handler handler) {
             mCallback = callback;
