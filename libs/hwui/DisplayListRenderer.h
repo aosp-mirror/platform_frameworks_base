@@ -23,7 +23,6 @@
 #include <SkPath.h>
 #include <SkRegion.h>
 #include <SkTLazy.h>
-#include <SkPorterDuff.h>
 #include <cutils/compiler.h>
 
 #include "CanvasState.h"
@@ -190,14 +189,6 @@ public:
     virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) { }
     virtual GLuint onGetTargetFbo() const { return -1; }
 
-    void setOverrideXfermode(int xfermode) {
-        if (xfermode != -1) {
-            SkPorterDuff::Mode porterDuffMode = static_cast<SkPorterDuff::Mode>(xfermode);
-            xfermode = SkPorterDuff::ToXfermodeMode(porterDuffMode);
-        }
-        mOverrideXfermode = xfermode;
-    };
-
 private:
 
     CanvasState mState;
@@ -262,16 +253,10 @@ private:
 
         // If there is a draw filter apply it here and store the modified paint
         // so that we don't need to modify the paint every time we access it.
-        SkTLazy<SkPaint> localPaint;
+        SkTLazy<SkPaint> filteredPaint;
         if (mDrawFilter.get()) {
-           paint = localPaint.set(*paint);
-           mDrawFilter->filter(localPaint.get(), SkDrawFilter::kPaint_Type);
-        }
-
-        if (mOverrideXfermode != -1) {
-            SkPaint* overriddenPaint = localPaint.set(*paint);
-            overriddenPaint->setXfermodeMode(static_cast<SkXfermode::Mode>(mOverrideXfermode));
-            paint = overriddenPaint;
+           paint = filteredPaint.init();
+           mDrawFilter->filter(filteredPaint.get(), SkDrawFilter::kPaint_Type);
         }
 
         // compute the hash key for the paint and check the cache.
@@ -348,9 +333,6 @@ private:
     bool mHasDeferredTranslate;
     DeferredBarrierType mDeferredBarrierType;
     bool mHighContrastText;
-
-    // -1 if unset, or SkXfermode::Mode value if set
-    int mOverrideXfermode;
 
     int mRestoreSaveCount;
 
