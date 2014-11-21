@@ -237,7 +237,8 @@ distinctions at all, so you'll always get the <code>other</code> string.
 <p>The selection of which string to use is made solely based on grammatical <i>necessity</i>.
 In English, a string for <code>zero</code> will be ignored even if the quantity is 0, because 0
 isn't grammatically different from 2, or any other number except 1 ("zero books", "one book",
-"two books", and so on).
+"two books", and so on). Conversely, in Korean <i>only</i> the <code>other</code> string will
+ever be used.
 
 <p>Don't be misled either by the fact that, say, <code>two</code> sounds like it could only apply to
 the quantity 2: a language may require that 2, 12, 102 (and so on) are all treated like one
@@ -343,7 +344,14 @@ values, with non-exhaustive examples in parentheses:
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;resources>
     &lt;plurals name="numberOfSongsAvailable">
-        &lt;item quantity="one">One song found.&lt;/item>
+        &lt;!--
+             As a developer, you should always supply "one" and "other"
+             strings. Your translators will know which strings are actually
+             needed for their language. Always include %d in "one" because
+             translators will need to use %d for languages where "one"
+             doesn't mean 1 (as explained above).
+          -->
+        &lt;item quantity="one">%d song found.&lt;/item>
         &lt;item quantity="other">%d songs found.&lt;/item>
     &lt;/plurals>
 &lt;/resources>
@@ -353,7 +361,7 @@ values, with non-exhaustive examples in parentheses:
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;resources>
     &lt;plurals name="numberOfSongsAvailable">
-        &lt;item quantity="one">Znaleziono jedn&#x0105; piosenk&#x0119;.&lt;/item>
+        &lt;item quantity="one">Znaleziono %d piosenk&#x0119;.&lt;/item>
         &lt;item quantity="few">Znaleziono %d piosenki.&lt;/item>
         &lt;item quantity="other">Znaleziono %d piosenek.&lt;/item>
     &lt;/plurals>
