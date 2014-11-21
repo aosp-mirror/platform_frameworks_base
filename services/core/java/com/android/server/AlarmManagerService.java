@@ -1124,7 +1124,7 @@ class AlarmManagerService extends SystemService {
 
                     if (DEBUG_ALARM_CLOCK) {
                         Log.v(TAG, "Found AlarmClockInfo at " +
-                                formatNextAlarm(getContext(), a.alarmClock) +
+                                formatNextAlarm(getContext(), a.alarmClock, userId) +
                                 " for user " + userId);
                     }
 
@@ -1162,7 +1162,7 @@ class AlarmManagerService extends SystemService {
         if (alarmClock != null) {
             if (DEBUG_ALARM_CLOCK) {
                 Log.v(TAG, "Next AlarmClockInfoForUser(" + userId + "): " +
-                        formatNextAlarm(getContext(), alarmClock));
+                        formatNextAlarm(getContext(), alarmClock, userId));
             }
             mNextAlarmClockForUser.put(userId, alarmClock);
         } else {
@@ -1204,7 +1204,7 @@ class AlarmManagerService extends SystemService {
             AlarmManager.AlarmClockInfo alarmClock = pendingUsers.valueAt(i);
             Settings.System.putStringForUser(getContext().getContentResolver(),
                     Settings.System.NEXT_ALARM_FORMATTED,
-                    formatNextAlarm(getContext(), alarmClock),
+                    formatNextAlarm(getContext(), alarmClock, userId),
                     userId);
 
             getContext().sendBroadcastAsUser(NEXT_ALARM_CLOCK_CHANGED_INTENT,
@@ -1215,8 +1215,9 @@ class AlarmManagerService extends SystemService {
     /**
      * Formats an alarm like platform/packages/apps/DeskClock used to.
      */
-    private static String formatNextAlarm(final Context context, AlarmManager.AlarmClockInfo info) {
-        String skeleton = DateFormat.is24HourFormat(context) ? "EHm" : "Ehma";
+    private static String formatNextAlarm(final Context context, AlarmManager.AlarmClockInfo info,
+            int userId) {
+        String skeleton = DateFormat.is24HourFormat(context, userId) ? "EHm" : "Ehma";
         String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
         return (info == null) ? "" :
                 DateFormat.format(pattern, info.getTriggerTime()).toString();
