@@ -23,7 +23,7 @@
 
 #include <jni.h>
 #include <JNIHelp.h>
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <utils/Log.h>
 #include <media/AudioSystem.h>
@@ -134,21 +134,10 @@ static JNINativeMethod gMethods[] = {
 
 
 int register_android_media_ToneGenerator(JNIEnv *env) {
-    jclass clazz;
+    jclass clazz = FindClassOrDie(env, "android/media/ToneGenerator");
 
-    clazz = env->FindClass("android/media/ToneGenerator");
-    if (clazz == NULL) {
-        ALOGE("Can't find %s", "android/media/ToneGenerator");
-        return -1;
-    }
-
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "J");
-    if (fields.context == NULL) {
-        ALOGE("Can't find ToneGenerator.mNativeContext");
-        return -1;
-    }
+    fields.context = GetFieldIDOrDie(env, clazz, "mNativeContext", "J");
     ALOGV("register_android_media_ToneGenerator ToneGenerator fields.context: %p", fields.context);
 
-    return AndroidRuntime::registerNativeMethods(env,
-            "android/media/ToneGenerator", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/media/ToneGenerator", gMethods, NELEM(gMethods));
 }

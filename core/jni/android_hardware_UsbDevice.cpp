@@ -20,7 +20,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #include <usbhost/usbhost.h>
 
@@ -54,6 +54,6 @@ static JNINativeMethod method_table[] = {
 
 int register_android_hardware_UsbDevice(JNIEnv *env)
 {
-    return AndroidRuntime::registerNativeMethods(env, "android/hardware/usb/UsbDevice",
+    return RegisterMethodsOrDie(env, "android/hardware/usb/UsbDevice",
             method_table, NELEM(method_table));
 }

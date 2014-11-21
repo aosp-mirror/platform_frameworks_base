@@ -23,19 +23,15 @@
 
 #include "SkBitmap.h"
 #include "SkCanvas.h"
+#include "SkColorPriv.h"
 #include "SkNinePatch.h"
 #include "SkPaint.h"
 #include "SkUnPreMultiply.h"
 
-#define USE_TRACE
-
-#ifdef USE_TRACE
-    static bool gTrace;
-#endif
-
-#include "SkColorPriv.h"
-
 #include <utils/Log.h>
+
+static const bool kUseTrace = true;
+static bool gTrace = false;
 
 static bool getColor(const SkBitmap& bitmap, int x, int y, SkColor* c) {
     switch (bitmap.colorType()) {
@@ -128,37 +124,34 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
         return;
     }
 
-#ifdef USE_TRACE
-    gTrace = true;
-#endif
+    if (kUseTrace) {
+        gTrace = true;
+    }
 
     SkASSERT(canvas || outRegion);
 
-#ifdef USE_TRACE
-    if (canvas) {
-        const SkMatrix& m = canvas->getTotalMatrix();
-        ALOGV("ninepatch [%g %g %g] [%g %g %g]\n",
-                 SkScalarToFloat(m[0]), SkScalarToFloat(m[1]), SkScalarToFloat(m[2]),
-                 SkScalarToFloat(m[3]), SkScalarToFloat(m[4]), SkScalarToFloat(m[5]));
-    }
-#endif
+    if (kUseTrace) {
+        if (canvas) {
+            const SkMatrix& m = canvas->getTotalMatrix();
+            ALOGV("ninepatch [%g %g %g] [%g %g %g]\n",
+                    SkScalarToFloat(m[0]), SkScalarToFloat(m[1]), SkScalarToFloat(m[2]),
+                    SkScalarToFloat(m[3]), SkScalarToFloat(m[4]), SkScalarToFloat(m[5]));
+        }
 
-#ifdef USE_TRACE
-    if (gTrace) {
-        ALOGV("======== ninepatch bounds [%g %g]\n", SkScalarToFloat(bounds.width()), SkScalarToFloat(bounds.height()));
+        ALOGV("======== ninepatch bounds [%g %g]\n", SkScalarToFloat(bounds.width()),
+                SkScalarToFloat(bounds.height()));
         ALOGV("======== ninepatch paint bm [%d,%d]\n", bitmap.width(), bitmap.height());
         ALOGV("======== ninepatch xDivs [%d,%d]\n", xDivs[0], xDivs[1]);
         ALOGV("======== ninepatch yDivs [%d,%d]\n", yDivs[0], yDivs[1]);
     }
-#endif
 
     if (bounds.isEmpty() ||
         bitmap.width() == 0 || bitmap.height() == 0 ||
         (paint && paint->getXfermode() == NULL && paint->getAlpha() == 0))
     {
-#ifdef USE_TRACE
-        if (gTrace) ALOGV("======== abort ninepatch draw\n");
-#endif
+        if (kUseTrace) {
+            ALOGV("======== abort ninepatch draw\n");
+        }
         return;
     }
     
@@ -202,13 +195,13 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
     }
     int numFixedYPixelsRemaining = bitmapHeight - numStretchyYPixelsRemaining;
 
-#ifdef USE_TRACE
-    ALOGV("NinePatch [%d %d] bounds [%g %g %g %g] divs [%d %d]\n",
-             bitmap.width(), bitmap.height(),
-             SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
-             SkScalarToFloat(bounds.width()), SkScalarToFloat(bounds.height()),
-             numXDivs, numYDivs);
-#endif
+    if (kUseTrace) {
+        ALOGV("NinePatch [%d %d] bounds [%g %g %g %g] divs [%d %d]\n",
+                bitmap.width(), bitmap.height(),
+                SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
+                SkScalarToFloat(bounds.width()), SkScalarToFloat(bounds.height()),
+                numXDivs, numYDivs);
+    }
 
     src.fTop = 0;
     dst.fTop = bounds.fTop;
@@ -307,15 +300,15 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
                 goto nextDiv;
             }
             if (canvas) {
-#ifdef USE_TRACE
-                ALOGV("-- src [%d %d %d %d] dst [%g %g %g %g]\n",
-                         src.fLeft, src.fTop, src.width(), src.height(),
-                         SkScalarToFloat(dst.fLeft), SkScalarToFloat(dst.fTop),
-                         SkScalarToFloat(dst.width()), SkScalarToFloat(dst.height()));
-                if (2 == src.width() && SkIntToScalar(5) == dst.width()) {
-                    ALOGV("--- skip patch\n");
+                if (kUseTrace) {
+                    ALOGV("-- src [%d %d %d %d] dst [%g %g %g %g]\n",
+                            src.fLeft, src.fTop, src.width(), src.height(),
+                            SkScalarToFloat(dst.fLeft), SkScalarToFloat(dst.fTop),
+                            SkScalarToFloat(dst.width()), SkScalarToFloat(dst.height()));
+                    if (2 == src.width() && SkIntToScalar(5) == dst.width()) {
+                        ALOGV("--- skip patch\n");
+                    }
                 }
-#endif
                 drawStretchyPatch(canvas, src, dst, bitmap, *paint, initColor,
                                   color, hasXfer);
             }

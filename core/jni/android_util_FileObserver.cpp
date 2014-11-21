@@ -19,7 +19,7 @@
 #include "jni.h"
 #include "utils/Log.h"
 #include "utils/misc.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -138,24 +138,12 @@ static JNINativeMethod sMethods[] = {
 
 int register_android_os_FileObserver(JNIEnv* env)
 {
-    jclass clazz;
+    jclass clazz = FindClassOrDie(env, "android/os/FileObserver$ObserverThread");
 
-    clazz = env->FindClass("android/os/FileObserver$ObserverThread");
+    method_onEvent = GetMethodIDOrDie(env, clazz, "onEvent", "(IILjava/lang/String;)V");
 
-    if (clazz == NULL)
-	{
-        ALOGE("Can't find android/os/FileObserver$ObserverThread");
-        return -1;
-    }
-
-    method_onEvent = env->GetMethodID(clazz, "onEvent", "(IILjava/lang/String;)V");
-    if (method_onEvent == NULL)
-    {
-        ALOGE("Can't find FileObserver.onEvent(int, int, String)");
-        return -1;
-    }
-
-    return AndroidRuntime::registerNativeMethods(env, "android/os/FileObserver$ObserverThread", sMethods, NELEM(sMethods));
+    return RegisterMethodsOrDie(env, "android/os/FileObserver$ObserverThread", sMethods,
+                                NELEM(sMethods));
 }
 
 } /* namespace android */

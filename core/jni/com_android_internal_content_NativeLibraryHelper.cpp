@@ -17,7 +17,7 @@
 #define LOG_TAG "NativeLibraryHelper"
 //#define LOG_NDEBUG 0
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <ScopedUtfChars.h>
 #include <UniquePtr.h>
@@ -563,8 +563,8 @@ static JNINativeMethod gMethods[] = {
 
 int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env)
 {
-    return AndroidRuntime::registerNativeMethods(env,
-                "com/android/internal/content/NativeLibraryHelper", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env,
+            "com/android/internal/content/NativeLibraryHelper", gMethods, NELEM(gMethods));
 }
 
 };

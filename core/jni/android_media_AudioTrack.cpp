@@ -19,7 +19,7 @@
 
 #include <JNIHelp.h>
 #include <JniConstants.h>
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "ScopedBytes.h"
 
@@ -1062,68 +1062,34 @@ int register_android_media_AudioTrack(JNIEnv *env)
     javaAudioTrackFields.postNativeEventInJava = NULL;
 
     // Get the AudioTrack class
-    jclass audioTrackClass = env->FindClass(kClassPathName);
-    if (audioTrackClass == NULL) {
-        ALOGE("Can't find %s", kClassPathName);
-        return -1;
-    }
+    jclass audioTrackClass = FindClassOrDie(env, kClassPathName);
 
     // Get the postEvent method
-    javaAudioTrackFields.postNativeEventInJava = env->GetStaticMethodID(
-            audioTrackClass,
-            JAVA_POSTEVENT_CALLBACK_NAME, "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    if (javaAudioTrackFields.postNativeEventInJava == NULL) {
-        ALOGE("Can't find AudioTrack.%s", JAVA_POSTEVENT_CALLBACK_NAME);
-        return -1;
-    }
+    javaAudioTrackFields.postNativeEventInJava = GetStaticMethodIDOrDie(env,
+            audioTrackClass, JAVA_POSTEVENT_CALLBACK_NAME,
+            "(Ljava/lang/Object;IIILjava/lang/Object;)V");
 
     // Get the variables fields
     //      nativeTrackInJavaObj
-    javaAudioTrackFields.nativeTrackInJavaObj = env->GetFieldID(
-            audioTrackClass,
-            JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME, "J");
-    if (javaAudioTrackFields.nativeTrackInJavaObj == NULL) {
-        ALOGE("Can't find AudioTrack.%s", JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME);
-        return -1;
-    }
+    javaAudioTrackFields.nativeTrackInJavaObj = GetFieldIDOrDie(env,
+            audioTrackClass, JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME, "J");
     //      jniData
-    javaAudioTrackFields.jniData = env->GetFieldID(
-            audioTrackClass,
-            JAVA_JNIDATA_FIELD_NAME, "J");
-    if (javaAudioTrackFields.jniData == NULL) {
-        ALOGE("Can't find AudioTrack.%s", JAVA_JNIDATA_FIELD_NAME);
-        return -1;
-    }
+    javaAudioTrackFields.jniData = GetFieldIDOrDie(env,
+            audioTrackClass, JAVA_JNIDATA_FIELD_NAME, "J");
     //      fieldStreamType
-    javaAudioTrackFields.fieldStreamType = env->GetFieldID(audioTrackClass,
-            JAVA_STREAMTYPE_FIELD_NAME, "I");
-    if (javaAudioTrackFields.fieldStreamType == NULL) {
-        ALOGE("Can't find AudioTrack.%s", JAVA_STREAMTYPE_FIELD_NAME);
-        return -1;
-    }
+    javaAudioTrackFields.fieldStreamType = GetFieldIDOrDie(env,
+            audioTrackClass, JAVA_STREAMTYPE_FIELD_NAME, "I");
 
     // Get the AudioAttributes class and fields
-    jclass audioAttrClass = env->FindClass(kAudioAttributesClassPathName);
-    if (audioAttrClass == NULL) {
-        ALOGE("Can't find %s", kAudioAttributesClassPathName);
-        return -1;
-    }
-    jclass audioAttributesClassRef = (jclass)env->NewGlobalRef(audioAttrClass);
-    javaAudioAttrFields.fieldUsage = env->GetFieldID(audioAttributesClassRef, "mUsage", "I");
-    javaAudioAttrFields.fieldContentType
-                                   = env->GetFieldID(audioAttributesClassRef, "mContentType", "I");
-    javaAudioAttrFields.fieldFlags = env->GetFieldID(audioAttributesClassRef, "mFlags", "I");
-    javaAudioAttrFields.fieldFormattedTags =
-            env->GetFieldID(audioAttributesClassRef, "mFormattedTags", "Ljava/lang/String;");
-    env->DeleteGlobalRef(audioAttributesClassRef);
-    if (javaAudioAttrFields.fieldUsage == NULL || javaAudioAttrFields.fieldContentType == NULL
-            || javaAudioAttrFields.fieldFlags == NULL
-            || javaAudioAttrFields.fieldFormattedTags == NULL) {
-        ALOGE("Can't initialize AudioAttributes fields");
-        return -1;
-    }
+    jclass audioAttrClass = FindClassOrDie(env, kAudioAttributesClassPathName);
+    javaAudioAttrFields.fieldUsage = GetFieldIDOrDie(env, audioAttrClass, "mUsage", "I");
+    javaAudioAttrFields.fieldContentType = GetFieldIDOrDie(env,
+            audioAttrClass, "mContentType", "I");
+    javaAudioAttrFields.fieldFlags = GetFieldIDOrDie(env, audioAttrClass, "mFlags", "I");
+    javaAudioAttrFields.fieldFormattedTags = GetFieldIDOrDie(env,
+            audioAttrClass, "mFormattedTags", "Ljava/lang/String;");
 
-    return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
 

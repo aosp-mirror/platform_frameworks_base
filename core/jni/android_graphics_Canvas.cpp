@@ -16,7 +16,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "Canvas.h"
 #include "SkDrawFilter.h"
@@ -700,7 +700,7 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_android_graphics_Canvas(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, "android/graphics/Canvas", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/graphics/Canvas", gMethods, NELEM(gMethods));
 }
 
 }; // namespace android

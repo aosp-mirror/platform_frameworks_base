@@ -24,8 +24,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef HarfBuzzNGFaceSkia_h
-#define HarfBuzzNGFaceSkia_h
+#ifndef _ANDROID_GRAPHICS_HARF_BUZZ_NG_FACE_SKIA_H_
+#define _ANDROID_GRAPHICS_HARF_BUZZ_NG_FACE_SKIA_H_
 
 #include <SkScalar.h>
 #include <SkPaint.h>
@@ -56,4 +56,4 @@ hb_font_t* createFont(hb_face_t* face, SkPaint* paint, float sizeX, float sizeY)
 
 }  // namespace android
 
-#endif
+#endif  // _ANDROID_GRAPHICS_HARF_BUZZ_NG_FACE_SKIA_H_

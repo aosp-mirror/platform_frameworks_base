@@ -15,7 +15,7 @@
 #include "JNIHelp.h"
 #include "GraphicsJNI.h"
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <androidfw/Asset.h>
 #include <androidfw/ResourceTypes.h>
 #include <cutils/compiler.h>
@@ -573,52 +573,40 @@ static JNINativeMethod gOptionsMethods[] = {
     {   "requestCancel", "()V", (void*)nativeRequestCancel }
 };
 
-static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
-                                const char fieldname[], const char type[]) {
-    jfieldID id = env->GetFieldID(clazz, fieldname, type);
-    SkASSERT(id);
-    return id;
-}
-
 int register_android_graphics_BitmapFactory(JNIEnv* env) {
-    jclass options_class = env->FindClass("android/graphics/BitmapFactory$Options");
-    SkASSERT(options_class);
-    gOptions_bitmapFieldID = getFieldIDCheck(env, options_class, "inBitmap",
+    jclass options_class = FindClassOrDie(env, "android/graphics/BitmapFactory$Options");
+    gOptions_bitmapFieldID = GetFieldIDOrDie(env, options_class, "inBitmap",
             "Landroid/graphics/Bitmap;");
-    gOptions_justBoundsFieldID = getFieldIDCheck(env, options_class, "inJustDecodeBounds", "Z");
-    gOptions_sampleSizeFieldID = getFieldIDCheck(env, options_class, "inSampleSize", "I");
-    gOptions_configFieldID = getFieldIDCheck(env, options_class, "inPreferredConfig",
+    gOptions_justBoundsFieldID = GetFieldIDOrDie(env, options_class, "inJustDecodeBounds", "Z");
+    gOptions_sampleSizeFieldID = GetFieldIDOrDie(env, options_class, "inSampleSize", "I");
+    gOptions_configFieldID = GetFieldIDOrDie(env, options_class, "inPreferredConfig",
             "Landroid/graphics/Bitmap$Config;");
-    gOptions_premultipliedFieldID = getFieldIDCheck(env, options_class, "inPremultiplied", "Z");
-    gOptions_mutableFieldID = getFieldIDCheck(env, options_class, "inMutable", "Z");
-    gOptions_ditherFieldID = getFieldIDCheck(env, options_class, "inDither", "Z");
-    gOptions_preferQualityOverSpeedFieldID = getFieldIDCheck(env, options_class,
+    gOptions_premultipliedFieldID = GetFieldIDOrDie(env, options_class, "inPremultiplied", "Z");
+    gOptions_mutableFieldID = GetFieldIDOrDie(env, options_class, "inMutable", "Z");
+    gOptions_ditherFieldID = GetFieldIDOrDie(env, options_class, "inDither", "Z");
+    gOptions_preferQualityOverSpeedFieldID = GetFieldIDOrDie(env, options_class,
             "inPreferQualityOverSpeed", "Z");
-    gOptions_scaledFieldID = getFieldIDCheck(env, options_class, "inScaled", "Z");
-    gOptions_densityFieldID = getFieldIDCheck(env, options_class, "inDensity", "I");
-    gOptions_screenDensityFieldID = getFieldIDCheck(env, options_class, "inScreenDensity", "I");
-    gOptions_targetDensityFieldID = getFieldIDCheck(env, options_class, "inTargetDensity", "I");
-    gOptions_widthFieldID = getFieldIDCheck(env, options_class, "outWidth", "I");
-    gOptions_heightFieldID = getFieldIDCheck(env, options_class, "outHeight", "I");
-    gOptions_mimeFieldID = getFieldIDCheck(env, options_class, "outMimeType", "Ljava/lang/String;");
-    gOptions_mCancelID = getFieldIDCheck(env, options_class, "mCancel", "Z");
+    gOptions_scaledFieldID = GetFieldIDOrDie(env, options_class, "inScaled", "Z");
+    gOptions_densityFieldID = GetFieldIDOrDie(env, options_class, "inDensity", "I");
+    gOptions_screenDensityFieldID = GetFieldIDOrDie(env, options_class, "inScreenDensity", "I");
+    gOptions_targetDensityFieldID = GetFieldIDOrDie(env, options_class, "inTargetDensity", "I");
+    gOptions_widthFieldID = GetFieldIDOrDie(env, options_class, "outWidth", "I");
+    gOptions_heightFieldID = GetFieldIDOrDie(env, options_class, "outHeight", "I");
+    gOptions_mimeFieldID = GetFieldIDOrDie(env, options_class, "outMimeType", "Ljava/lang/String;");
+    gOptions_mCancelID = GetFieldIDOrDie(env, options_class, "mCancel", "Z");
 
-    jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
-    SkASSERT(bitmap_class);
-    gBitmap_nativeBitmapFieldID = getFieldIDCheck(env, bitmap_class, "mNativeBitmap", "J");
-    gBitmap_ninePatchInsetsFieldID = getFieldIDCheck(env, bitmap_class, "mNinePatchInsets",
+    jclass bitmap_class = FindClassOrDie(env, "android/graphics/Bitmap");
+    gBitmap_nativeBitmapFieldID = GetFieldIDOrDie(env, bitmap_class, "mNativeBitmap", "J");
+    gBitmap_ninePatchInsetsFieldID = GetFieldIDOrDie(env, bitmap_class, "mNinePatchInsets",
             "Landroid/graphics/NinePatch$InsetStruct;");
 
-    gInsetStruct_class = (jclass) env->NewGlobalRef(env->FindClass("android/graphics/NinePatch$InsetStruct"));
-    gInsetStruct_constructorMethodID = env->GetMethodID(gInsetStruct_class, "<init>", "(IIIIIIIIFIF)V");
+    gInsetStruct_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
+        "android/graphics/NinePatch$InsetStruct"));
+    gInsetStruct_constructorMethodID = GetMethodIDOrDie(env, gInsetStruct_class, "<init>",
+                                                        "(IIIIIIIIFIF)V");
 
-    int ret = AndroidRuntime::registerNativeMethods(env,
-                                    "android/graphics/BitmapFactory$Options",
-                                    gOptionsMethods,
-                                    SK_ARRAY_COUNT(gOptionsMethods));
-    if (ret) {
-        return ret;
-    }
-    return android::AndroidRuntime::registerNativeMethods(env, "android/graphics/BitmapFactory",
-                                         gMethods, SK_ARRAY_COUNT(gMethods));
+    android::RegisterMethodsOrDie(env, "android/graphics/BitmapFactory$Options",
+                                  gOptionsMethods, NELEM(gOptionsMethods));
+    return android::RegisterMethodsOrDie(env, "android/graphics/BitmapFactory",
+                                         gMethods, NELEM(gMethods));
 }

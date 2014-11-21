@@ -21,7 +21,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include <system/sound_trigger.h>
 #include <soundtrigger/SoundTriggerCallback.h>
 #include <soundtrigger/SoundTrigger.h>
@@ -798,112 +798,102 @@ static JNINativeMethod gModuleMethods[] = {
 
 int register_android_hardware_SoundTrigger(JNIEnv *env)
 {
-    jclass arrayListClass = env->FindClass("java/util/ArrayList");
-    gArrayListClass = (jclass) env->NewGlobalRef(arrayListClass);
-    gArrayListMethods.add = env->GetMethodID(arrayListClass, "add", "(Ljava/lang/Object;)Z");
+    jclass arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
+    gArrayListClass = MakeGlobalRefOrDie(env, arrayListClass);
+    gArrayListMethods.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
-    jclass uuidClass = env->FindClass("java/util/UUID");
-    gUUIDClass = (jclass) env->NewGlobalRef(uuidClass);
-    gUUIDMethods.toString = env->GetMethodID(uuidClass, "toString", "()Ljava/lang/String;");
+    jclass uuidClass = FindClassOrDie(env, "java/util/UUID");
+    gUUIDClass = MakeGlobalRefOrDie(env, uuidClass);
+    gUUIDMethods.toString = GetMethodIDOrDie(env, uuidClass, "toString", "()Ljava/lang/String;");
 
-    jclass lClass = env->FindClass(kSoundTriggerClassPathName);
-    gSoundTriggerClass = (jclass) env->NewGlobalRef(lClass);
+    jclass lClass = FindClassOrDie(env, kSoundTriggerClassPathName);
+    gSoundTriggerClass = MakeGlobalRefOrDie(env, lClass);
 
-    jclass moduleClass = env->FindClass(kModuleClassPathName);
-    gModuleClass = (jclass) env->NewGlobalRef(moduleClass);
-    gPostEventFromNative = env->GetStaticMethodID(moduleClass, "postEventFromNative",
-                                            "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    gModuleFields.mNativeContext = env->GetFieldID(moduleClass, "mNativeContext", "J");
-    gModuleFields.mId = env->GetFieldID(moduleClass, "mId", "I");
+    jclass moduleClass = FindClassOrDie(env, kModuleClassPathName);
+    gModuleClass = MakeGlobalRefOrDie(env, moduleClass);
+    gPostEventFromNative = GetStaticMethodIDOrDie(env, moduleClass, "postEventFromNative",
+                                                  "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    gModuleFields.mNativeContext = GetFieldIDOrDie(env, moduleClass, "mNativeContext", "J");
+    gModuleFields.mId = GetFieldIDOrDie(env, moduleClass, "mId", "I");
 
+    jclass modulePropertiesClass = FindClassOrDie(env, kModulePropertiesClassPathName);
+    gModulePropertiesClass = MakeGlobalRefOrDie(env, modulePropertiesClass);
+    gModulePropertiesCstor = GetMethodIDOrDie(env, modulePropertiesClass, "<init>",
+            "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;IIIIIZIZIZ)V");
 
-    jclass modulePropertiesClass = env->FindClass(kModulePropertiesClassPathName);
-    gModulePropertiesClass = (jclass) env->NewGlobalRef(modulePropertiesClass);
-    gModulePropertiesCstor = env->GetMethodID(modulePropertiesClass, "<init>",
-                              "(ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;IIIIIZIZIZ)V");
+    jclass soundModelClass = FindClassOrDie(env, kSoundModelClassPathName);
+    gSoundModelClass = MakeGlobalRefOrDie(env, soundModelClass);
+    gSoundModelFields.uuid = GetFieldIDOrDie(env, soundModelClass, "uuid", "Ljava/util/UUID;");
+    gSoundModelFields.vendorUuid = GetFieldIDOrDie(env, soundModelClass, "vendorUuid",
+                                                   "Ljava/util/UUID;");
+    gSoundModelFields.data = GetFieldIDOrDie(env, soundModelClass, "data", "[B");
 
-    jclass soundModelClass = env->FindClass(kSoundModelClassPathName);
-    gSoundModelClass = (jclass) env->NewGlobalRef(soundModelClass);
-    gSoundModelFields.uuid = env->GetFieldID(soundModelClass, "uuid", "Ljava/util/UUID;");
-    gSoundModelFields.vendorUuid = env->GetFieldID(soundModelClass, "vendorUuid", "Ljava/util/UUID;");
-    gSoundModelFields.data = env->GetFieldID(soundModelClass, "data", "[B");
+    jclass keyphraseClass = FindClassOrDie(env, kKeyphraseClassPathName);
+    gKeyphraseClass = MakeGlobalRefOrDie(env, keyphraseClass);
+    gKeyphraseFields.id = GetFieldIDOrDie(env, keyphraseClass, "id", "I");
+    gKeyphraseFields.recognitionModes = GetFieldIDOrDie(env, keyphraseClass, "recognitionModes",
+                                                        "I");
+    gKeyphraseFields.locale = GetFieldIDOrDie(env, keyphraseClass, "locale", "Ljava/lang/String;");
+    gKeyphraseFields.text = GetFieldIDOrDie(env, keyphraseClass, "text", "Ljava/lang/String;");
+    gKeyphraseFields.users = GetFieldIDOrDie(env, keyphraseClass, "users", "[I");
 
-    jclass keyphraseClass = env->FindClass(kKeyphraseClassPathName);
-    gKeyphraseClass = (jclass) env->NewGlobalRef(keyphraseClass);
-    gKeyphraseFields.id = env->GetFieldID(keyphraseClass, "id", "I");
-    gKeyphraseFields.recognitionModes = env->GetFieldID(keyphraseClass, "recognitionModes", "I");
-    gKeyphraseFields.locale = env->GetFieldID(keyphraseClass, "locale", "Ljava/lang/String;");
-    gKeyphraseFields.text = env->GetFieldID(keyphraseClass, "text", "Ljava/lang/String;");
-    gKeyphraseFields.users = env->GetFieldID(keyphraseClass, "users", "[I");
-
-    jclass keyphraseSoundModelClass = env->FindClass(kKeyphraseSoundModelClassPathName);
-    gKeyphraseSoundModelClass = (jclass) env->NewGlobalRef(keyphraseSoundModelClass);
-    gKeyphraseSoundModelFields.keyphrases = env->GetFieldID(keyphraseSoundModelClass,
+    jclass keyphraseSoundModelClass = FindClassOrDie(env, kKeyphraseSoundModelClassPathName);
+    gKeyphraseSoundModelClass = MakeGlobalRefOrDie(env, keyphraseSoundModelClass);
+    gKeyphraseSoundModelFields.keyphrases = GetFieldIDOrDie(env, keyphraseSoundModelClass,
                                          "keyphrases",
                                          "[Landroid/hardware/soundtrigger/SoundTrigger$Keyphrase;");
 
-
-    jclass recognitionEventClass = env->FindClass(kRecognitionEventClassPathName);
-    gRecognitionEventClass = (jclass) env->NewGlobalRef(recognitionEventClass);
-    gRecognitionEventCstor = env->GetMethodID(recognitionEventClass, "<init>",
+    jclass recognitionEventClass = FindClassOrDie(env, kRecognitionEventClassPathName);
+    gRecognitionEventClass = MakeGlobalRefOrDie(env, recognitionEventClass);
+    gRecognitionEventCstor = GetMethodIDOrDie(env, recognitionEventClass, "<init>",
                                               "(IIZIIIZLandroid/media/AudioFormat;[B)V");
 
-    jclass keyphraseRecognitionEventClass = env->FindClass(kKeyphraseRecognitionEventClassPathName);
-    gKeyphraseRecognitionEventClass = (jclass) env->NewGlobalRef(keyphraseRecognitionEventClass);
-    gKeyphraseRecognitionEventCstor = env->GetMethodID(keyphraseRecognitionEventClass, "<init>",
+    jclass keyphraseRecognitionEventClass = FindClassOrDie(env,
+                                                           kKeyphraseRecognitionEventClassPathName);
+    gKeyphraseRecognitionEventClass = MakeGlobalRefOrDie(env, keyphraseRecognitionEventClass);
+    gKeyphraseRecognitionEventCstor = GetMethodIDOrDie(env, keyphraseRecognitionEventClass, "<init>",
               "(IIZIIIZLandroid/media/AudioFormat;[B[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;)V");
 
 
-    jclass keyRecognitionConfigClass = env->FindClass(kRecognitionConfigClassPathName);
-    gRecognitionConfigClass = (jclass) env->NewGlobalRef(keyRecognitionConfigClass);
-    gRecognitionConfigFields.captureRequested = env->GetFieldID(keyRecognitionConfigClass,
-                                                              "captureRequested",
-                                                              "Z");
-    gRecognitionConfigFields.keyphrases = env->GetFieldID(keyRecognitionConfigClass,
-                        "keyphrases",
-                        "[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;");
-    gRecognitionConfigFields.data = env->GetFieldID(keyRecognitionConfigClass,
-                                                              "data",
-                                                              "[B");
+    jclass keyRecognitionConfigClass = FindClassOrDie(env, kRecognitionConfigClassPathName);
+    gRecognitionConfigClass = MakeGlobalRefOrDie(env, keyRecognitionConfigClass);
+    gRecognitionConfigFields.captureRequested = GetFieldIDOrDie(env, keyRecognitionConfigClass,
+                                                                "captureRequested", "Z");
+    gRecognitionConfigFields.keyphrases = GetFieldIDOrDie(env, keyRecognitionConfigClass,
+           "keyphrases", "[Landroid/hardware/soundtrigger/SoundTrigger$KeyphraseRecognitionExtra;");
+    gRecognitionConfigFields.data = GetFieldIDOrDie(env, keyRecognitionConfigClass, "data", "[B");
 
-    jclass keyphraseRecognitionExtraClass = env->FindClass(kKeyphraseRecognitionExtraClassPathName);
-    gKeyphraseRecognitionExtraClass = (jclass) env->NewGlobalRef(keyphraseRecognitionExtraClass);
-    gKeyphraseRecognitionExtraCstor = env->GetMethodID(keyphraseRecognitionExtraClass, "<init>",
-                           "(III[Landroid/hardware/soundtrigger/SoundTrigger$ConfidenceLevel;)V");
-    gKeyphraseRecognitionExtraFields.id = env->GetFieldID(gKeyphraseRecognitionExtraClass, "id", "I");
-    gKeyphraseRecognitionExtraFields.recognitionModes = env->GetFieldID(gKeyphraseRecognitionExtraClass,
-                                                                        "recognitionModes", "I");
-    gKeyphraseRecognitionExtraFields.coarseConfidenceLevel = env->GetFieldID(gKeyphraseRecognitionExtraClass,
-                                                                        "coarseConfidenceLevel", "I");
-    gKeyphraseRecognitionExtraFields.confidenceLevels = env->GetFieldID(gKeyphraseRecognitionExtraClass,
-                                             "confidenceLevels",
-                                             "[Landroid/hardware/soundtrigger/SoundTrigger$ConfidenceLevel;");
+    jclass keyphraseRecognitionExtraClass = FindClassOrDie(env,
+                                                           kKeyphraseRecognitionExtraClassPathName);
+    gKeyphraseRecognitionExtraClass = MakeGlobalRefOrDie(env, keyphraseRecognitionExtraClass);
+    gKeyphraseRecognitionExtraCstor = GetMethodIDOrDie(env, keyphraseRecognitionExtraClass,
+            "<init>", "(III[Landroid/hardware/soundtrigger/SoundTrigger$ConfidenceLevel;)V");
+    gKeyphraseRecognitionExtraFields.id = GetFieldIDOrDie(env, gKeyphraseRecognitionExtraClass,
+                                                          "id", "I");
+    gKeyphraseRecognitionExtraFields.recognitionModes = GetFieldIDOrDie(env,
+            gKeyphraseRecognitionExtraClass, "recognitionModes", "I");
+    gKeyphraseRecognitionExtraFields.coarseConfidenceLevel = GetFieldIDOrDie(env,
+            gKeyphraseRecognitionExtraClass, "coarseConfidenceLevel", "I");
+    gKeyphraseRecognitionExtraFields.confidenceLevels = GetFieldIDOrDie(env,
+            gKeyphraseRecognitionExtraClass, "confidenceLevels",
+            "[Landroid/hardware/soundtrigger/SoundTrigger$ConfidenceLevel;");
 
-    jclass confidenceLevelClass = env->FindClass(kConfidenceLevelClassPathName);
-    gConfidenceLevelClass = (jclass) env->NewGlobalRef(confidenceLevelClass);
-    gConfidenceLevelCstor = env->GetMethodID(confidenceLevelClass, "<init>", "(II)V");
-    gConfidenceLevelFields.userId = env->GetFieldID(confidenceLevelClass, "userId", "I");
-    gConfidenceLevelFields.confidenceLevel = env->GetFieldID(confidenceLevelClass,
+    jclass confidenceLevelClass = FindClassOrDie(env, kConfidenceLevelClassPathName);
+    gConfidenceLevelClass = MakeGlobalRefOrDie(env, confidenceLevelClass);
+    gConfidenceLevelCstor = GetMethodIDOrDie(env, confidenceLevelClass, "<init>", "(II)V");
+    gConfidenceLevelFields.userId = GetFieldIDOrDie(env, confidenceLevelClass, "userId", "I");
+    gConfidenceLevelFields.confidenceLevel = GetFieldIDOrDie(env, confidenceLevelClass,
                                                              "confidenceLevel", "I");
 
-    jclass audioFormatClass = env->FindClass(kAudioFormatClassPathName);
-    gAudioFormatClass = (jclass) env->NewGlobalRef(audioFormatClass);
-    gAudioFormatCstor = env->GetMethodID(audioFormatClass, "<init>", "(III)V");
+    jclass audioFormatClass = FindClassOrDie(env, kAudioFormatClassPathName);
+    gAudioFormatClass = MakeGlobalRefOrDie(env, audioFormatClass);
+    gAudioFormatCstor = GetMethodIDOrDie(env, audioFormatClass, "<init>", "(III)V");
 
-    jclass soundModelEventClass = env->FindClass(kSoundModelEventClassPathName);
-    gSoundModelEventClass = (jclass) env->NewGlobalRef(soundModelEventClass);
-    gSoundModelEventCstor = env->GetMethodID(soundModelEventClass, "<init>",
-                                              "(II[B)V");
-
-
-    int status = AndroidRuntime::registerNativeMethods(env,
-                kSoundTriggerClassPathName, gMethods, NELEM(gMethods));
-
-    if (status == 0) {
-        status = AndroidRuntime::registerNativeMethods(env,
-                kModuleClassPathName, gModuleMethods, NELEM(gModuleMethods));
-    }
+    jclass soundModelEventClass = FindClassOrDie(env, kSoundModelEventClassPathName);
+    gSoundModelEventClass = MakeGlobalRefOrDie(env, soundModelEventClass);
+    gSoundModelEventCstor = GetMethodIDOrDie(env, soundModelEventClass, "<init>", "(II[B)V");
 
 
-    return status;
+    RegisterMethodsOrDie(env, kSoundTriggerClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, kModuleClassPathName, gModuleMethods, NELEM(gModuleMethods));
 }

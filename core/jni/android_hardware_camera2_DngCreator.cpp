@@ -36,7 +36,7 @@
 #include <img_utils/Input.h>
 #include <img_utils/StripSource.h>
 
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "android_runtime/android_hardware_camera2_CameraMetadata.h"
 
 #include <jni.h>
@@ -803,29 +803,20 @@ static TiffWriter* DngCreator_getCreator(JNIEnv* env, jobject thiz) {
 static void DngCreator_nativeClassInit(JNIEnv* env, jclass clazz) {
     ALOGV("%s:", __FUNCTION__);
 
-    gDngCreatorClassInfo.mNativeContext = env->GetFieldID(clazz,
-            ANDROID_DNGCREATOR_CTX_JNI_ID, "J");
-    LOG_ALWAYS_FATAL_IF(gDngCreatorClassInfo.mNativeContext == NULL,
-            "can't find android/hardware/camera2/DngCreator.%s",
-            ANDROID_DNGCREATOR_CTX_JNI_ID);
+    gDngCreatorClassInfo.mNativeContext = GetFieldIDOrDie(env,
+            clazz, ANDROID_DNGCREATOR_CTX_JNI_ID, "J");
 
-    jclass outputStreamClazz = env->FindClass("java/io/OutputStream");
-    LOG_ALWAYS_FATAL_IF(outputStreamClazz == NULL, "Can't find java/io/OutputStream class");
-    gOutputStreamClassInfo.mWriteMethod = env->GetMethodID(outputStreamClazz, "write", "([BII)V");
-    LOG_ALWAYS_FATAL_IF(gOutputStreamClassInfo.mWriteMethod == NULL, "Can't find write method");
+    jclass outputStreamClazz = FindClassOrDie(env, "java/io/OutputStream");
+    gOutputStreamClassInfo.mWriteMethod = GetMethodIDOrDie(env,
+            outputStreamClazz, "write", "([BII)V");
 
-    jclass inputStreamClazz = env->FindClass("java/io/InputStream");
-    LOG_ALWAYS_FATAL_IF(inputStreamClazz == NULL, "Can't find java/io/InputStream class");
-    gInputStreamClassInfo.mReadMethod = env->GetMethodID(inputStreamClazz, "read", "([BII)I");
-    LOG_ALWAYS_FATAL_IF(gInputStreamClassInfo.mReadMethod == NULL, "Can't find read method");
-    gInputStreamClassInfo.mSkipMethod = env->GetMethodID(inputStreamClazz, "skip", "(J)J");
-    LOG_ALWAYS_FATAL_IF(gInputStreamClassInfo.mSkipMethod == NULL, "Can't find skip method");
+    jclass inputStreamClazz = FindClassOrDie(env, "java/io/InputStream");
+    gInputStreamClassInfo.mReadMethod = GetMethodIDOrDie(env, inputStreamClazz, "read", "([BII)I");
+    gInputStreamClassInfo.mSkipMethod = GetMethodIDOrDie(env, inputStreamClazz, "skip", "(J)J");
 
-    jclass inputBufferClazz = env->FindClass("java/nio/ByteBuffer");
-    LOG_ALWAYS_FATAL_IF(inputBufferClazz == NULL, "Can't find java/nio/ByteBuffer class");
-    gInputByteBufferClassInfo.mGetMethod = env->GetMethodID(inputBufferClazz, "get",
-            "([BII)Ljava/nio/ByteBuffer;");
-    LOG_ALWAYS_FATAL_IF(gInputByteBufferClassInfo.mGetMethod == NULL, "Can't find get method");
+    jclass inputBufferClazz = FindClassOrDie(env, "java/nio/ByteBuffer");
+    gInputByteBufferClassInfo.mGetMethod = GetMethodIDOrDie(env,
+            inputBufferClazz, "get", "([BII)Ljava/nio/ByteBuffer;");
 }
 
 static void DngCreator_init(JNIEnv* env, jobject thiz, jobject characteristicsPtr,
@@ -1985,7 +1976,6 @@ static JNINativeMethod gDngCreatorMethods[] = {
 };
 
 int register_android_hardware_camera2_DngCreator(JNIEnv *env) {
-    return AndroidRuntime::registerNativeMethods(env,
-                   "android/hardware/camera2/DngCreator", gDngCreatorMethods,
-                   NELEM(gDngCreatorMethods));
+    return RegisterMethodsOrDie(env,
+            "android/hardware/camera2/DngCreator", gDngCreatorMethods, NELEM(gDngCreatorMethods));
 }

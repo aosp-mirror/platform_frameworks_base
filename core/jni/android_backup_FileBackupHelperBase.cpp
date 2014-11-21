@@ -18,7 +18,7 @@
 #include <utils/Log.h>
 
 #include "JNIHelp.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <androidfw/BackupHelpers.h>
 
@@ -118,7 +118,7 @@ static const JNINativeMethod g_methods[] = {
 
 int register_android_backup_FileBackupHelperBase(JNIEnv* env)
 {
-    return AndroidRuntime::registerNativeMethods(env, "android/app/backup/FileBackupHelperBase",
+    return RegisterMethodsOrDie(env, "android/app/backup/FileBackupHelperBase",
             g_methods, NELEM(g_methods));
 }
 

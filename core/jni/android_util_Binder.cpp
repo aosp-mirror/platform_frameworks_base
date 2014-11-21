@@ -46,8 +46,6 @@
 #include <ScopedUtfChars.h>
 #include <ScopedLocalRef.h>
 
-#include <android_runtime/AndroidRuntime.h>
-
 #include "core_jni_helpers.h"
 
 //#undef ALOGV
@@ -834,7 +832,7 @@ static int int_register_android_os_Binder(JNIEnv* env)
     gBinderOffsets.mExecTransact = GetMethodIDOrDie(env, clazz, "execTransact", "(IJJI)Z");
     gBinderOffsets.mObject = GetFieldIDOrDie(env, clazz, "mObject", "J");
 
-    return AndroidRuntime::registerNativeMethods(
+    return RegisterMethodsOrDie(
         env, kBinderPathName,
         gBinderMethods, NELEM(gBinderMethods));
 }
@@ -909,7 +907,7 @@ static int int_register_android_os_BinderInternal(JNIEnv* env)
     gBinderInternalOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
     gBinderInternalOffsets.mForceGc = GetStaticMethodIDOrDie(env, clazz, "forceBinderGc", "()V");
 
-    return AndroidRuntime::registerNativeMethods(
+    return RegisterMethodsOrDie(
         env, kBinderInternalPathName,
         gBinderInternalMethods, NELEM(gBinderInternalMethods));
 }
@@ -1240,7 +1238,7 @@ static int int_register_android_os_BinderProxy(JNIEnv* env)
     clazz = FindClassOrDie(env, "java/lang/Class");
     gClassOffsets.mGetName = GetMethodIDOrDie(env, clazz, "getName", "()Ljava/lang/String;");
 
-    return AndroidRuntime::registerNativeMethods(
+    return RegisterMethodsOrDie(
         env, kBinderProxyPathName,
         gBinderProxyMethods, NELEM(gBinderProxyMethods));
 }
