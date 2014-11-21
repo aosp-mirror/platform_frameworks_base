@@ -451,6 +451,40 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertIndexBeforeAfter(stats, 4, 4, Long.MAX_VALUE);
     }
 
+    public void testIntersects() throws Exception {
+        final long BUCKET_SIZE = HOUR_IN_MILLIS;
+        stats = new NetworkStatsHistory(BUCKET_SIZE);
+
+        final long FIRST_START = TEST_START;
+        final long FIRST_END = FIRST_START + (2 * HOUR_IN_MILLIS);
+        final long SECOND_START = TEST_START + WEEK_IN_MILLIS;
+        final long SECOND_END = SECOND_START + HOUR_IN_MILLIS;
+        final long THIRD_START = TEST_START + (2 * WEEK_IN_MILLIS);
+        final long THIRD_END = THIRD_START + (2 * HOUR_IN_MILLIS);
+
+        stats.recordData(FIRST_START, FIRST_END,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 2L));
+        stats.recordData(SECOND_START, SECOND_END,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 2L));
+        stats.recordData(THIRD_START, THIRD_END,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 2L));
+
+        assertFalse(stats.intersects(10, 20));
+        assertFalse(stats.intersects(TEST_START + YEAR_IN_MILLIS, TEST_START + YEAR_IN_MILLIS + 1));
+        assertFalse(stats.intersects(Long.MAX_VALUE, Long.MIN_VALUE));
+
+        assertTrue(stats.intersects(Long.MIN_VALUE, Long.MAX_VALUE));
+        assertTrue(stats.intersects(10, TEST_START + YEAR_IN_MILLIS));
+        assertTrue(stats.intersects(TEST_START, TEST_START));
+        assertTrue(stats.intersects(TEST_START + DAY_IN_MILLIS, TEST_START + DAY_IN_MILLIS + 1));
+        assertTrue(stats.intersects(TEST_START + DAY_IN_MILLIS, Long.MAX_VALUE));
+        assertTrue(stats.intersects(TEST_START + 1, Long.MAX_VALUE));
+
+        assertFalse(stats.intersects(Long.MIN_VALUE, TEST_START - 1));
+        assertTrue(stats.intersects(Long.MIN_VALUE, TEST_START));
+        assertTrue(stats.intersects(Long.MIN_VALUE, TEST_START + 1));
+    }
+
     private static void assertIndexBeforeAfter(
             NetworkStatsHistory stats, int before, int after, long time) {
         assertEquals("unexpected before", before, stats.getIndexBefore(time));
