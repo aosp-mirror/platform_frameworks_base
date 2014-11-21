@@ -20,7 +20,7 @@
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -454,7 +454,7 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
 }; // namespace android

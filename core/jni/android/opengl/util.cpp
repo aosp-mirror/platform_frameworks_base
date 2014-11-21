@@ -29,7 +29,7 @@
 
 #include <SkBitmap.h>
 
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #undef LOG_TAG
 #define LOG_TAG "OpenGLUtil"
@@ -732,24 +732,22 @@ static jfieldID elementSizeShiftID;
 /* Cache method IDs each time the class is loaded. */
 
 static void
-nativeClassInitBuffer(JNIEnv *_env)
+nativeClassInitBuffer(JNIEnv *env)
 {
-    jclass nioAccessClassLocal = _env->FindClass("java/nio/NIOAccess");
-    nioAccessClass = (jclass) _env->NewGlobalRef(nioAccessClassLocal);
-
-    jclass bufferClassLocal = _env->FindClass("java/nio/Buffer");
-    bufferClass = (jclass) _env->NewGlobalRef(bufferClassLocal);
-
-    getBasePointerID = _env->GetStaticMethodID(nioAccessClass,
+    jclass nioAccessClassLocal = FindClassOrDie(env, "java/nio/NIOAccess");
+    nioAccessClass = MakeGlobalRefOrDie(env, nioAccessClassLocal);
+    getBasePointerID = GetStaticMethodIDOrDie(env, nioAccessClass,
             "getBasePointer", "(Ljava/nio/Buffer;)J");
-    getBaseArrayID = _env->GetStaticMethodID(nioAccessClass,
+    getBaseArrayID = GetStaticMethodIDOrDie(env, nioAccessClass,
             "getBaseArray", "(Ljava/nio/Buffer;)Ljava/lang/Object;");
-    getBaseArrayOffsetID = _env->GetStaticMethodID(nioAccessClass,
+    getBaseArrayOffsetID = GetStaticMethodIDOrDie(env, nioAccessClass,
             "getBaseArrayOffset", "(Ljava/nio/Buffer;)I");
-    positionID = _env->GetFieldID(bufferClass, "position", "I");
-    limitID = _env->GetFieldID(bufferClass, "limit", "I");
-    elementSizeShiftID =
-        _env->GetFieldID(bufferClass, "_elementSizeShift", "I");
+
+    jclass bufferClassLocal = FindClassOrDie(env, "java/nio/Buffer");
+    bufferClass = MakeGlobalRefOrDie(env, bufferClassLocal);
+    positionID = GetFieldIDOrDie(env, bufferClass, "position", "I");
+    limitID = GetFieldIDOrDie(env, bufferClass, "limit", "I");
+    elementSizeShiftID = GetFieldIDOrDie(env, bufferClass, "_elementSizeShift", "I");
 }
 
 static void *
@@ -1056,12 +1054,7 @@ int register_android_opengl_classes(JNIEnv* env)
     int result = 0;
     for (int i = 0; i < NELEM(gClasses); i++) {
         ClassRegistrationInfo* cri = &gClasses[i];
-        result = AndroidRuntime::registerNativeMethods(env,
-                cri->classPath, cri->methods, cri->methodCount);
-        if (result < 0) {
-            ALOGE("Failed to register %s: %d", cri->classPath, result);
-            break;
-        }
+        result = RegisterMethodsOrDie(env, cri->classPath, cri->methods, cri->methodCount);
     }
     return result;
 }

@@ -18,7 +18,7 @@
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <Interpolator.h>
 
@@ -98,7 +98,7 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
 

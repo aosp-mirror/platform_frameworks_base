@@ -21,7 +21,7 @@
 #include "utils/misc.h"
 #include <utils/Log.h>
 #include "jni.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include <nativehelper/JNIHelp.h>
 
 namespace android
@@ -239,9 +239,8 @@ static JNINativeMethod method_table[] = {
 
 int register_android_os_SystemProperties(JNIEnv *env)
 {
-    return AndroidRuntime::registerNativeMethods(
-        env, "android/os/SystemProperties",
-        method_table, NELEM(method_table));
+    return RegisterMethodsOrDie(env, "android/os/SystemProperties", method_table,
+                                NELEM(method_table));
 }
 
 };

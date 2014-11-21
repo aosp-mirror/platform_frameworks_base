@@ -23,7 +23,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <jni.h>
 #include <ScopedUtfChars.h>
 #include <utils/misc.h>
@@ -192,8 +192,7 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_android_net_TrafficStats(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, "android/net/TrafficStats",
-            gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/net/TrafficStats", gMethods, NELEM(gMethods));
 }
 
 }

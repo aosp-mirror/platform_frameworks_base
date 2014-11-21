@@ -21,8 +21,8 @@
 
  // TODO: does this really need to be separate from MinikinSkia?
 
-#ifndef ANDROID_MINIKIN_UTILS_H
-#define ANDROID_MINIKIN_UTILS_H
+#ifndef _ANDROID_GRAPHICS_MINIKIN_UTILS_H_
+#define _ANDROID_GRAPHICS_MINIKIN_UTILS_H_
 
 #include <minikin/Layout.h>
 #include "Paint.h"
@@ -81,4 +81,4 @@ public:
 
 }  // namespace android
 
-#endif  // ANDROID_MINIKIN_UTILS_H
+#endif  // _ANDROID_GRAPHICS_MINIKIN_UTILS_H_

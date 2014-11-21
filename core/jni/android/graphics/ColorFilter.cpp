@@ -17,7 +17,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "SkColorFilter.h"
 #include "SkColorMatrixFilter.h"
@@ -74,18 +74,15 @@ static JNINativeMethod colormatrix_methods[] = {
     { "nativeColorMatrixFilter", "([F)J", (void*) SkColorFilterGlue::CreateColorMatrixFilter   },
 };
 
-#define REG(env, name, array) \
-    result = android::AndroidRuntime::registerNativeMethods(env, name, array, \
-                                                    SK_ARRAY_COUNT(array));  \
-    if (result < 0) return result
-
 int register_android_graphics_ColorFilter(JNIEnv* env) {
-    int result;
-    
-    REG(env, "android/graphics/ColorFilter", colorfilter_methods);
-    REG(env, "android/graphics/PorterDuffColorFilter", porterduff_methods);
-    REG(env, "android/graphics/LightingColorFilter", lighting_methods);
-    REG(env, "android/graphics/ColorMatrixColorFilter", colormatrix_methods);
+    android::RegisterMethodsOrDie(env, "android/graphics/ColorFilter", colorfilter_methods,
+                                  NELEM(colorfilter_methods));
+    android::RegisterMethodsOrDie(env, "android/graphics/PorterDuffColorFilter", porterduff_methods,
+                                  NELEM(porterduff_methods));
+    android::RegisterMethodsOrDie(env, "android/graphics/LightingColorFilter", lighting_methods,
+                                  NELEM(lighting_methods));
+    android::RegisterMethodsOrDie(env, "android/graphics/ColorMatrixColorFilter",
+                                  colormatrix_methods, NELEM(colormatrix_methods));
     
     return 0;
 }

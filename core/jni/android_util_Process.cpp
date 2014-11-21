@@ -26,7 +26,7 @@
 #include <utils/Vector.h>
 #include <processgroup/processgroup.h>
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "android_util_Binder.h"
 #include "JNIHelp.h"
@@ -1054,11 +1054,7 @@ static const JNINativeMethod methods[] = {
     {"removeAllProcessGroups", "()V", (void*)android_os_Process_removeAllProcessGroups},
 };
 
-const char* const kProcessPathName = "android/os/Process";
-
 int register_android_os_Process(JNIEnv* env)
 {
-    return AndroidRuntime::registerNativeMethods(
-        env, kProcessPathName,
-        methods, NELEM(methods));
+    return RegisterMethodsOrDie(env, "android/os/Process", methods, NELEM(methods));
 }

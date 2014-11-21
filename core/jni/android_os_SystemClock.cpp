@@ -27,7 +27,7 @@
 
 #include "JNIHelp.h"
 #include "jni.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #include <sys/time.h>
 #include <time.h>
@@ -135,8 +135,7 @@ static JNINativeMethod gMethods[] = {
 };
 int register_android_os_SystemClock(JNIEnv* env)
 {
-    return AndroidRuntime::registerNativeMethods(env,
-            "android/os/SystemClock", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/os/SystemClock", gMethods, NELEM(gMethods));
 }
 
 }; // namespace android

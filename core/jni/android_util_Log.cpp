@@ -26,10 +26,8 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "utils/misc.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "android_util_Log.h"
-
-#define MIN(a,b) ((a<b)?a:b)
 
 namespace android {
 
@@ -145,21 +143,16 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_util_Log(JNIEnv* env)
 {
-    jclass clazz = env->FindClass("android/util/Log");
+    jclass clazz = FindClassOrDie(env, "android/util/Log");
 
-    if (clazz == NULL) {
-        ALOGE("Can't find android/util/Log");
-        return -1;
-    }
+    levels.verbose = env->GetStaticIntField(clazz, GetStaticFieldIDOrDie(env, clazz, "VERBOSE", "I"));
+    levels.debug = env->GetStaticIntField(clazz, GetStaticFieldIDOrDie(env, clazz, "DEBUG", "I"));
+    levels.info = env->GetStaticIntField(clazz, GetStaticFieldIDOrDie(env, clazz, "INFO", "I"));
+    levels.warn = env->GetStaticIntField(clazz, GetStaticFieldIDOrDie(env, clazz, "WARN", "I"));
+    levels.error = env->GetStaticIntField(clazz, GetStaticFieldIDOrDie(env, clazz, "ERROR", "I"));
+    levels.assert = env->GetStaticIntField(clazz, GetStaticFieldIDOrDie(env, clazz, "ASSERT", "I"));
 
-    levels.verbose = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "VERBOSE", "I"));
-    levels.debug = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "DEBUG", "I"));
-    levels.info = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "INFO", "I"));
-    levels.warn = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "WARN", "I"));
-    levels.error = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "ERROR", "I"));
-    levels.assert = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "ASSERT", "I"));
-
-    return AndroidRuntime::registerNativeMethods(env, "android/util/Log", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/util/Log", gMethods, NELEM(gMethods));
 }
 
 }; // namespace android

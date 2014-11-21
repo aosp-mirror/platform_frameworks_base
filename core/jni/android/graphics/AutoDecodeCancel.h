@@ -1,5 +1,5 @@
-#ifndef AutoDecodeCancel_DEFINED
-#define AutoDecodeCancel_DEFINED
+#ifndef _ANDROID_GRAPHICS_AUTO_DECODE_CANCEL_H_
+#define _ANDROID_GRAPHICS_AUTO_DECODE_CANCEL_H_
 
 #include <jni.h>
 #include "SkImageDecoder.h"
@@ -24,4 +24,4 @@ private:
 #endif
 };
 
-#endif
+#endif  // _ANDROID_GRAPHICS_AUTO_DECODE_CANCEL_H_

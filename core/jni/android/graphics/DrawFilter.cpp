@@ -24,6 +24,8 @@
 #include "GraphicsJNI.h"
 #include <android_runtime/AndroidRuntime.h>
 
+#include "core_jni_helpers.h"
+
 #include "SkDrawFilter.h"
 #include "SkPaintFlagsDrawFilter.h"
 #include "SkPaint.h"
@@ -103,16 +105,11 @@ static JNINativeMethod paintflags_methods[] = {
     {"nativeConstructor","(II)J", (void*) SkDrawFilterGlue::CreatePaintFlagsDF}
 };
 
-#define REG(env, name, array)                                                                       \
-    result = android::AndroidRuntime::registerNativeMethods(env, name, array, SK_ARRAY_COUNT(array));  \
-    if (result < 0) return result
-
-
 int register_android_graphics_DrawFilter(JNIEnv* env) {
-    int result;
-    
-    REG(env, "android/graphics/DrawFilter", drawfilter_methods);
-    REG(env, "android/graphics/PaintFlagsDrawFilter", paintflags_methods);
+    int result = RegisterMethodsOrDie(env, "android/graphics/DrawFilter", drawfilter_methods,
+                                      NELEM(drawfilter_methods));
+    result |= RegisterMethodsOrDie(env, "android/graphics/PaintFlagsDrawFilter", paintflags_methods,
+                                   NELEM(paintflags_methods));
     
     return 0;
 }
