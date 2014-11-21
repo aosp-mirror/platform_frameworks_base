@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_GRAPHICS_MATRIX_H
-#define _ANDROID_GRAPHICS_MATRIX_H
+#ifndef _ANDROID_GRAPHICS_MATRIX_H_
+#define _ANDROID_GRAPHICS_MATRIX_H_
 
 #include "jni.h"
 #include "SkMatrix.h"
@@ -27,4 +27,4 @@ extern SkMatrix* android_graphics_Matrix_getSkMatrix(JNIEnv* env, jobject matrix
 
 } // namespace android
 
-#endif // _ANDROID_GRAPHICS_MATRIX_H
+#endif // _ANDROID_GRAPHICS_MATRIX_H_

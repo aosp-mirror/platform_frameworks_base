@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef NinePatchPeeker_h
-#define NinePatchPeeker_h
+#ifndef _ANDROID_GRAPHICS_NINE_PATCH_PEEKER_H_
+#define _ANDROID_GRAPHICS_NINE_PATCH_PEEKER_H_
 
 #include "SkImageDecoder.h"
 #include <androidfw/ResourceTypes.h>
@@ -53,4 +53,4 @@ public:
     uint8_t mOutlineAlpha;
 };
 
-#endif // NinePatchPeeker_h
+#endif  // _ANDROID_GRAPHICS_NINE_PATCH_PEEKER_H_

@@ -23,7 +23,7 @@
 #include "utils/Log.h"
 #include "ScopedPrimitiveArray.h"
 #include "JNIHelp.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <cstdint>
 #include <vector>
 #include <list>
@@ -582,15 +582,14 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_text_StaticLayout(JNIEnv* env)
 {
-    gLineBreaks_class = reinterpret_cast<jclass>(env->NewGlobalRef(
-            env->FindClass("android/text/StaticLayout$LineBreaks")));
+    gLineBreaks_class = MakeGlobalRefOrDie(env,
+            FindClassOrDie(env, "android/text/StaticLayout$LineBreaks"));
 
-    gLineBreaks_fieldID.breaks = env->GetFieldID(gLineBreaks_class, "breaks", "[I");
-    gLineBreaks_fieldID.widths = env->GetFieldID(gLineBreaks_class, "widths", "[F");
-    gLineBreaks_fieldID.flags = env->GetFieldID(gLineBreaks_class, "flags", "[Z");
+    gLineBreaks_fieldID.breaks = GetFieldIDOrDie(env, gLineBreaks_class, "breaks", "[I");
+    gLineBreaks_fieldID.widths = GetFieldIDOrDie(env, gLineBreaks_class, "widths", "[F");
+    gLineBreaks_fieldID.flags = GetFieldIDOrDie(env, gLineBreaks_class, "flags", "[Z");
 
-    return AndroidRuntime::registerNativeMethods(env, "android/text/StaticLayout",
-            gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/text/StaticLayout", gMethods, NELEM(gMethods));
 }
 
 }

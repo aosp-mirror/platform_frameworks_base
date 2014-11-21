@@ -28,7 +28,7 @@
 
 #include "SkMatrix.h"
 
-#include <android_runtime/AndroidRuntime.h>
+#include <core_jni_helpers.h>
 #include <vector>
 #include <utils/Log.h>
 #include <unistd.h>
@@ -355,19 +355,19 @@ static JNINativeMethod gPdfEditor_Methods[] = {
 };
 
 int register_android_graphics_pdf_PdfEditor(JNIEnv* env) {
-    const int result = android::AndroidRuntime::registerNativeMethods(
+    const int result = RegisterMethodsOrDie(
             env, "android/graphics/pdf/PdfEditor", gPdfEditor_Methods,
             NELEM(gPdfEditor_Methods));
 
-    jclass pointClass = env->FindClass("android/graphics/Point");
-    gPointClassInfo.x = env->GetFieldID(pointClass, "x", "I");
-    gPointClassInfo.y = env->GetFieldID(pointClass, "y", "I");
+    jclass pointClass = FindClassOrDie(env, "android/graphics/Point");
+    gPointClassInfo.x = GetFieldIDOrDie(env, pointClass, "x", "I");
+    gPointClassInfo.y = GetFieldIDOrDie(env, pointClass, "y", "I");
 
-    jclass rectClass = env->FindClass("android/graphics/Rect");
-    gRectClassInfo.left = env->GetFieldID(rectClass, "left", "I");
-    gRectClassInfo.top = env->GetFieldID(rectClass, "top", "I");
-    gRectClassInfo.right = env->GetFieldID(rectClass, "right", "I");
-    gRectClassInfo.bottom = env->GetFieldID(rectClass, "bottom", "I");
+    jclass rectClass = FindClassOrDie(env, "android/graphics/Rect");
+    gRectClassInfo.left = GetFieldIDOrDie(env, rectClass, "left", "I");
+    gRectClassInfo.top = GetFieldIDOrDie(env, rectClass, "top", "I");
+    gRectClassInfo.right = GetFieldIDOrDie(env, rectClass, "right", "I");
+    gRectClassInfo.bottom = GetFieldIDOrDie(env, rectClass, "bottom", "I");
 
     return result;
 };

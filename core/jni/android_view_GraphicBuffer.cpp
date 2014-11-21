@@ -47,16 +47,7 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 // Debug
-#define DEBUG_GRAPHIC_BUFFER 0
-
-// Debug
-#if DEBUG_GRAPHIC_BUFFER
-    #define GB_LOGD(...) ALOGD(__VA_ARGS__)
-    #define GB_LOGW(...) ALOGW(__VA_ARGS__)
-#else
-    #define GB_LOGD(...)
-    #define GB_LOGW(...)
-#endif
+static const bool kDebugGraphicBuffer = false;
 
 #define LOCK_CANVAS_USAGE GraphicBuffer::USAGE_SW_READ_OFTEN | GraphicBuffer::USAGE_SW_WRITE_OFTEN
 
@@ -118,14 +109,18 @@ static jlong android_view_GraphiceBuffer_create(JNIEnv* env, jobject clazz,
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     sp<IGraphicBufferAlloc> alloc(composer->createGraphicBufferAlloc());
     if (alloc == NULL) {
-        GB_LOGW("createGraphicBufferAlloc() failed in GraphicBuffer.create()");
+        if (kDebugGraphicBuffer) {
+            ALOGW("createGraphicBufferAlloc() failed in GraphicBuffer.create()");
+        }
         return NULL;
     }
 
     status_t error;
     sp<GraphicBuffer> buffer(alloc->createGraphicBuffer(width, height, format, usage, &error));
     if (buffer == NULL) {
-        GB_LOGW("createGraphicBuffer() failed in GraphicBuffer.create()");
+        if (kDebugGraphicBuffer) {
+            ALOGW("createGraphicBuffer() failed in GraphicBuffer.create()");
+        }
         return NULL;
     }
 

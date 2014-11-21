@@ -15,8 +15,8 @@
  */
 
 
-#ifndef ANDROID_TYPEFACE_IMPL_H
-#define ANDROID_TYPEFACE_IMPL_H
+#ifndef _ANDROID_GRAPHICS_TYPEFACE_IMPL_H_
+#define _ANDROID_GRAPHICS_TYPEFACE_IMPL_H_
 
 #include "jni.h"  // for jlong, eventually remove
 #include "SkTypeface.h"
@@ -62,4 +62,4 @@ void TypefaceImpl_setDefault(TypefaceImpl* face);
 
 }
 
-#endif  // ANDROID_TYPEFACE_IMPL_H
+#endif  // _ANDROID_GRAPHICS_TYPEFACE_IMPL_H_

@@ -22,7 +22,7 @@
 #include "hardware_legacy/uevent.h"
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #include <utils/Mutex.h>
 #include <utils/Vector.h>
@@ -117,16 +117,9 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_os_UEventObserver(JNIEnv *env)
 {
-    jclass clazz;
+    FindClassOrDie(env, "android/os/UEventObserver");
 
-    clazz = env->FindClass("android/os/UEventObserver");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/os/UEventObserver");
-        return -1;
-    }
-
-    return AndroidRuntime::registerNativeMethods(env,
-            "android/os/UEventObserver", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/os/UEventObserver", gMethods, NELEM(gMethods));
 }
 
 }   // namespace android

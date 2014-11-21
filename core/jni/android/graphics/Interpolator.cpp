@@ -1,5 +1,5 @@
 #include "jni.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "GraphicsJNI.h"
 #include "SkInterpolator.h"
@@ -83,8 +83,6 @@ static JNINativeMethod gInterpolatorMethods[] = {
 
 int register_android_graphics_Interpolator(JNIEnv* env)
 {
-    return android::AndroidRuntime::registerNativeMethods(env,
-                                                       "android/graphics/Interpolator",
-                                                       gInterpolatorMethods,
-                                                       SK_ARRAY_COUNT(gInterpolatorMethods));
+    return android::RegisterMethodsOrDie(env, "android/graphics/Interpolator",
+                                         gInterpolatorMethods, NELEM(gInterpolatorMethods));
 }

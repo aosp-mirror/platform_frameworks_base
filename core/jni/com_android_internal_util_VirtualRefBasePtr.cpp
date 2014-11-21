@@ -16,7 +16,7 @@
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 namespace android {
 
@@ -42,7 +42,7 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_com_android_internal_util_VirtualRefBasePtr(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, kClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 
 

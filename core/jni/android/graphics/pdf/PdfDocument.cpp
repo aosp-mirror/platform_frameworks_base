@@ -16,7 +16,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <vector>
 
 #include "Canvas.h"
@@ -164,10 +164,9 @@ static JNINativeMethod gPdfDocument_Methods[] = {
 };
 
 int register_android_graphics_pdf_PdfDocument(JNIEnv* env) {
-    int result = android::AndroidRuntime::registerNativeMethods(
+    return RegisterMethodsOrDie(
             env, "android/graphics/pdf/PdfDocument", gPdfDocument_Methods,
             NELEM(gPdfDocument_Methods));
-    return result;
 }
 
 };
