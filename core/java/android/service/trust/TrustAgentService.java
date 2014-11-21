@@ -92,6 +92,8 @@ public class TrustAgentService extends Service {
     private static final int MSG_UNLOCK_ATTEMPT = 1;
     private static final int MSG_CONFIGURE = 2;
     private static final int MSG_TRUST_TIMEOUT = 3;
+    private static final int MSG_DEVICE_LOCKED = 4;
+    private static final int MSG_DEVICE_UNLOCKED = 5;
 
     /**
      * Class containing raw data for a given configuration request.
@@ -134,6 +136,12 @@ public class TrustAgentService extends Service {
                 case MSG_TRUST_TIMEOUT:
                     onTrustTimeout();
                     break;
+                case MSG_DEVICE_LOCKED:
+                    onDeviceLocked();
+                    break;
+                case MSG_DEVICE_UNLOCKED:
+                    onDeviceUnlocked();
+                    break;
             }
         }
     };
@@ -171,6 +179,20 @@ public class TrustAgentService extends Service {
      * continued.
      */
     public void onTrustTimeout() {
+    }
+
+    /**
+     * Called when the device enters a state where a PIN, pattern or
+     * password must be entered to unlock it.
+     */
+    public void onDeviceLocked() {
+    }
+
+    /**
+     * Called when the device leaves a state where a PIN, pattern or
+     * password must be entered to unlock it.
+     */
+    public void onDeviceUnlocked() {
     }
 
     private void onError(String msg) {
@@ -298,6 +320,16 @@ public class TrustAgentService extends Service {
         public void onConfigure(List<PersistableBundle> args, IBinder token) {
             mHandler.obtainMessage(MSG_CONFIGURE, new ConfigurationData(args, token))
                     .sendToTarget();
+        }
+
+        @Override
+        public void onDeviceLocked() throws RemoteException {
+            mHandler.obtainMessage(MSG_DEVICE_LOCKED).sendToTarget();
+        }
+
+        @Override
+        public void onDeviceUnlocked() throws RemoteException {
+            mHandler.obtainMessage(MSG_DEVICE_UNLOCKED).sendToTarget();
         }
 
         @Override /* Binder API */
