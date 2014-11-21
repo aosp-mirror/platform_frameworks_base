@@ -26,6 +26,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
@@ -76,6 +77,19 @@ public class SwipeDismissLayout extends FrameLayout {
 
     private OnDismissedListener mDismissedListener;
     private OnSwipeProgressChangedListener mProgressListener;
+    private ViewTreeObserver.OnEnterAnimationCompleteListener mOnEnterAnimationCompleteListener =
+            new ViewTreeObserver.OnEnterAnimationCompleteListener() {
+                @Override
+                public void onEnterAnimationComplete() {
+                    // SwipeDismissLayout assumes that the host Activity is translucent
+                    // and temporarily disables translucency when it is fully visible.
+                    // As soon as the user starts swiping, we will re-enable
+                    // translucency.
+                    if (getContext() instanceof Activity) {
+                        ((Activity) getContext()).convertFromTranslucent();
+                    }
+                }
+            };
 
     private float mLastX;
 
@@ -103,13 +117,6 @@ public class SwipeDismissLayout extends FrameLayout {
                 android.R.integer.config_shortAnimTime);
         mCancelInterpolator = new DecelerateInterpolator(1.5f);
         mDismissInterpolator = new AccelerateInterpolator(1.5f);
-        // SwipeDismissLayout assumes that the host Activity is translucent
-        // and temporarily disables translucency when it is fully visible.
-        // As soon as the user starts swiping, we will re-enable
-        // translucency.
-        if (context instanceof Activity) {
-            ((Activity) context).convertFromTranslucent();
-        }
     }
 
     public void setOnDismissedListener(OnDismissedListener listener) {
@@ -118,6 +125,24 @@ public class SwipeDismissLayout extends FrameLayout {
 
     public void setOnSwipeProgressChangedListener(OnSwipeProgressChangedListener listener) {
         mProgressListener = listener;
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        if (getContext() instanceof Activity) {
+            getViewTreeObserver().addOnEnterAnimationCompleteListener(
+                    mOnEnterAnimationCompleteListener);
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (getContext() instanceof Activity) {
+            getViewTreeObserver().removeOnEnterAnimationCompleteListener(
+                    mOnEnterAnimationCompleteListener);
+        }
     }
 
     @Override
