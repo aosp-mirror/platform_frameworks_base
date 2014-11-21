@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef android_nio_utils_DEFINED
-#define android_nio_utils_DEFINED
+#ifndef _ANDROID_NIO_UTILS_H_
+#define _ANDROID_NIO_UTILS_H_
 
 #include <android_runtime/AndroidRuntime.h>
 
@@ -70,4 +70,4 @@ private:
 
 }   /* namespace android */
 
-#endif
+#endif  // _ANDROID_NIO_UTILS_H_

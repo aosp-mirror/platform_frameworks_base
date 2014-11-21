@@ -21,7 +21,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <ScopedUtfChars.h>
 
 #include "SkBlurDrawLooper.h"
@@ -1018,35 +1018,26 @@ static JNINativeMethod methods[] = {
     {"native_hasShadowLayer", "(J)Z", (void*)PaintGlue::hasShadowLayer}
 };
 
-static jfieldID req_fieldID(jfieldID id) {
-    SkASSERT(id);
-    return id;
-}
-
 int register_android_graphics_Paint(JNIEnv* env) {
-    gFontMetrics_class = env->FindClass("android/graphics/Paint$FontMetrics");
-    SkASSERT(gFontMetrics_class);
-    gFontMetrics_class = (jclass)env->NewGlobalRef(gFontMetrics_class);
+    gFontMetrics_class = FindClassOrDie(env, "android/graphics/Paint$FontMetrics");
+    gFontMetrics_class = MakeGlobalRefOrDie(env, gFontMetrics_class);
 
-    gFontMetrics_fieldID.top = req_fieldID(env->GetFieldID(gFontMetrics_class, "top", "F"));
-    gFontMetrics_fieldID.ascent = req_fieldID(env->GetFieldID(gFontMetrics_class, "ascent", "F"));
-    gFontMetrics_fieldID.descent = req_fieldID(env->GetFieldID(gFontMetrics_class, "descent", "F"));
-    gFontMetrics_fieldID.bottom = req_fieldID(env->GetFieldID(gFontMetrics_class, "bottom", "F"));
-    gFontMetrics_fieldID.leading = req_fieldID(env->GetFieldID(gFontMetrics_class, "leading", "F"));
+    gFontMetrics_fieldID.top = GetFieldIDOrDie(env, gFontMetrics_class, "top", "F");
+    gFontMetrics_fieldID.ascent = GetFieldIDOrDie(env, gFontMetrics_class, "ascent", "F");
+    gFontMetrics_fieldID.descent = GetFieldIDOrDie(env, gFontMetrics_class, "descent", "F");
+    gFontMetrics_fieldID.bottom = GetFieldIDOrDie(env, gFontMetrics_class, "bottom", "F");
+    gFontMetrics_fieldID.leading = GetFieldIDOrDie(env, gFontMetrics_class, "leading", "F");
 
-    gFontMetricsInt_class = env->FindClass("android/graphics/Paint$FontMetricsInt");
-    SkASSERT(gFontMetricsInt_class);
-    gFontMetricsInt_class = (jclass)env->NewGlobalRef(gFontMetricsInt_class);
+    gFontMetricsInt_class = FindClassOrDie(env, "android/graphics/Paint$FontMetricsInt");
+    gFontMetricsInt_class = MakeGlobalRefOrDie(env, gFontMetricsInt_class);
 
-    gFontMetricsInt_fieldID.top = req_fieldID(env->GetFieldID(gFontMetricsInt_class, "top", "I"));
-    gFontMetricsInt_fieldID.ascent = req_fieldID(env->GetFieldID(gFontMetricsInt_class, "ascent", "I"));
-    gFontMetricsInt_fieldID.descent = req_fieldID(env->GetFieldID(gFontMetricsInt_class, "descent", "I"));
-    gFontMetricsInt_fieldID.bottom = req_fieldID(env->GetFieldID(gFontMetricsInt_class, "bottom", "I"));
-    gFontMetricsInt_fieldID.leading = req_fieldID(env->GetFieldID(gFontMetricsInt_class, "leading", "I"));
+    gFontMetricsInt_fieldID.top = GetFieldIDOrDie(env, gFontMetricsInt_class, "top", "I");
+    gFontMetricsInt_fieldID.ascent = GetFieldIDOrDie(env, gFontMetricsInt_class, "ascent", "I");
+    gFontMetricsInt_fieldID.descent = GetFieldIDOrDie(env, gFontMetricsInt_class, "descent", "I");
+    gFontMetricsInt_fieldID.bottom = GetFieldIDOrDie(env, gFontMetricsInt_class, "bottom", "I");
+    gFontMetricsInt_fieldID.leading = GetFieldIDOrDie(env, gFontMetricsInt_class, "leading", "I");
 
-    int result = AndroidRuntime::registerNativeMethods(env, "android/graphics/Paint", methods,
-        sizeof(methods) / sizeof(methods[0]));
-    return result;
+    return RegisterMethodsOrDie(env, "android/graphics/Paint", methods, NELEM(methods));
 }
 
 }

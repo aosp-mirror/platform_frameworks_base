@@ -1,5 +1,5 @@
-#ifndef GraphicsJNI_DEFINED
-#define GraphicsJNI_DEFINED
+#ifndef _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
+#define _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -292,4 +292,4 @@ void doThrowIOE(JNIEnv* env, const char* msg = NULL);   // IO Exception
 #define NPE_CHECK_RETURN_VOID(env, object)    \
     do { if (NULL == (object)) { doThrowNPE(env); return; } } while (0)
 
-#endif
+#endif  // _ANDROID_GRAPHICS_GRAPHICS_JNI_H_

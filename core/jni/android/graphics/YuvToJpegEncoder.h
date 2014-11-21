@@ -1,5 +1,5 @@
-#ifndef YuvToJpegEncoder_DEFINED
-#define YuvToJpegEncoder_DEFINED
+#ifndef _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
+#define _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
 
 #include "SkTypes.h"
 #include "SkStream.h"
@@ -47,16 +47,16 @@ protected:
 
 class Yuv420SpToJpegEncoder : public YuvToJpegEncoder {
 public:
-     Yuv420SpToJpegEncoder(int* strides);
-     virtual ~Yuv420SpToJpegEncoder() {}
+    Yuv420SpToJpegEncoder(int* strides);
+    virtual ~Yuv420SpToJpegEncoder() {}
 
 private:
-     void configSamplingFactors(jpeg_compress_struct* cinfo);
-     void deinterleaveYuv(uint8_t* yuv, int width, int height,
+    void configSamplingFactors(jpeg_compress_struct* cinfo);
+    void deinterleaveYuv(uint8_t* yuv, int width, int height,
             uint8_t*& yPlanar, uint8_t*& uPlanar, uint8_t*& vPlanar);
-     void deinterleave(uint8_t* vuPlanar, uint8_t* uRows, uint8_t* vRows,
-             int rowIndex, int width, int height);
-     void compress(jpeg_compress_struct* cinfo, uint8_t* yuv, int* offsets);
+    void deinterleave(uint8_t* vuPlanar, uint8_t* uRows, uint8_t* vRows,
+            int rowIndex, int width, int height);
+    void compress(jpeg_compress_struct* cinfo, uint8_t* yuv, int* offsets);
 };
 
 class Yuv422IToJpegEncoder : public YuvToJpegEncoder {
@@ -71,4 +71,4 @@ private:
             uint8_t* vRows, int rowIndex, int width, int height);
 };
 
-#endif
+#endif  // _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_

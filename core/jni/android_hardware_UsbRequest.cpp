@@ -20,7 +20,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #include <usbhost/usbhost.h>
 
@@ -215,7 +215,7 @@ int register_android_hardware_UsbRequest(JNIEnv *env)
         return -1;
     }
 
-    return AndroidRuntime::registerNativeMethods(env, "android/hardware/usb/UsbRequest",
+    return RegisterMethodsOrDie(env, "android/hardware/usb/UsbRequest",
             method_table, NELEM(method_table));
 }
 

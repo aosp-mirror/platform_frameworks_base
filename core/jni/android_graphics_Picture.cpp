@@ -16,7 +16,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "Picture.h"
 
@@ -106,7 +106,7 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_android_graphics_Picture(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, "android/graphics/Picture", gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/graphics/Picture", gMethods, NELEM(gMethods));
 }
 
 }; // namespace android

@@ -22,7 +22,7 @@
 #include "android_os_Parcel.h"
 #include "android_util_Binder.h"
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/Log.h>
 
@@ -188,17 +188,15 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_media_RemoteDisplay(JNIEnv* env)
 {
-    int err = AndroidRuntime::registerNativeMethods(env, "android/media/RemoteDisplay",
-            gMethods, NELEM(gMethods));
+    int err = RegisterMethodsOrDie(env, "android/media/RemoteDisplay", gMethods, NELEM(gMethods));
 
-    jclass clazz = env->FindClass("android/media/RemoteDisplay");
-    gRemoteDisplayClassInfo.notifyDisplayConnected =
-            env->GetMethodID(clazz, "notifyDisplayConnected",
-                    "(Landroid/view/Surface;IIII)V");
-    gRemoteDisplayClassInfo.notifyDisplayDisconnected =
-            env->GetMethodID(clazz, "notifyDisplayDisconnected", "()V");
-    gRemoteDisplayClassInfo.notifyDisplayError =
-            env->GetMethodID(clazz, "notifyDisplayError", "(I)V");
+    jclass clazz = FindClassOrDie(env, "android/media/RemoteDisplay");
+    gRemoteDisplayClassInfo.notifyDisplayConnected = GetMethodIDOrDie(env,
+            clazz, "notifyDisplayConnected", "(Landroid/view/Surface;IIII)V");
+    gRemoteDisplayClassInfo.notifyDisplayDisconnected = GetMethodIDOrDie(env,
+            clazz, "notifyDisplayDisconnected", "()V");
+    gRemoteDisplayClassInfo.notifyDisplayError = GetMethodIDOrDie(env,
+            clazz, "notifyDisplayError", "(I)V");
     return err;
 }
 

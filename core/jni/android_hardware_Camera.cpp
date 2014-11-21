@@ -21,7 +21,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <android_runtime/android_view_Surface.h>
 
@@ -991,26 +991,14 @@ struct field {
     jfieldID   *jfield;
 };
 
-static int find_fields(JNIEnv *env, field *fields, int count)
+static void find_fields(JNIEnv *env, field *fields, int count)
 {
     for (int i = 0; i < count; i++) {
         field *f = &fields[i];
-        jclass clazz = env->FindClass(f->class_name);
-        if (clazz == NULL) {
-            ALOGE("Can't find %s", f->class_name);
-            return -1;
-        }
-
-        jfieldID field = env->GetFieldID(clazz, f->field_name, f->field_type);
-        if (field == NULL) {
-            ALOGE("Can't find %s.%s", f->class_name, f->field_name);
-            return -1;
-        }
-
+        jclass clazz = FindClassOrDie(env, f->class_name);
+        jfieldID field = GetFieldIDOrDie(env, clazz, f->field_name, f->field_type);
         *(f->jfield) = field;
     }
-
-    return 0;
 }
 
 // Get all the required offsets in java class and register native functions
@@ -1030,32 +1018,18 @@ int register_android_hardware_Camera(JNIEnv *env)
         { "android/graphics/Rect", "bottom", "I", &fields.rect_bottom },
     };
 
-    if (find_fields(env, fields_to_find, NELEM(fields_to_find)) < 0)
-        return -1;
+    find_fields(env, fields_to_find, NELEM(fields_to_find));
 
-    jclass clazz = env->FindClass("android/hardware/Camera");
-    fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
+    jclass clazz = FindClassOrDie(env, "android/hardware/Camera");
+    fields.post_event = GetStaticMethodIDOrDie(env, clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
-    if (fields.post_event == NULL) {
-        ALOGE("Can't find android/hardware/Camera.postEventFromNative");
-        return -1;
-    }
 
-    clazz = env->FindClass("android/graphics/Rect");
-    fields.rect_constructor = env->GetMethodID(clazz, "<init>", "()V");
-    if (fields.rect_constructor == NULL) {
-        ALOGE("Can't find android/graphics/Rect.Rect()");
-        return -1;
-    }
+    clazz = FindClassOrDie(env, "android/graphics/Rect");
+    fields.rect_constructor = GetMethodIDOrDie(env, clazz, "<init>", "()V");
 
-    clazz = env->FindClass("android/hardware/Camera$Face");
-    fields.face_constructor = env->GetMethodID(clazz, "<init>", "()V");
-    if (fields.face_constructor == NULL) {
-        ALOGE("Can't find android/hardware/Camera$Face.Face()");
-        return -1;
-    }
+    clazz = FindClassOrDie(env, "android/hardware/Camera$Face");
+    fields.face_constructor = GetMethodIDOrDie(env, clazz, "<init>", "()V");
 
     // Register native functions
-    return AndroidRuntime::registerNativeMethods(env, "android/hardware/Camera",
-                                              camMethods, NELEM(camMethods));
+    return RegisterMethodsOrDie(env, "android/hardware/Camera", camMethods, NELEM(camMethods));
 }

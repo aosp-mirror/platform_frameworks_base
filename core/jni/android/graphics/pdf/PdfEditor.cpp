@@ -20,7 +20,7 @@
 #include "fpdfedit.h"
 #include "fpdfsave.h"
 
-#include <android_runtime/AndroidRuntime.h>
+#include <core_jni_helpers.h>
 #include <vector>
 #include <utils/Log.h>
 #include <unistd.h>
@@ -153,7 +153,7 @@ static JNINativeMethod gPdfEditor_Methods[] = {
 };
 
 int register_android_graphics_pdf_PdfEditor(JNIEnv* env) {
-    return android::AndroidRuntime::registerNativeMethods(
+    return android::RegisterMethodsOrDie(
             env, "android/graphics/pdf/PdfEditor", gPdfEditor_Methods,
             NELEM(gPdfEditor_Methods));
 };

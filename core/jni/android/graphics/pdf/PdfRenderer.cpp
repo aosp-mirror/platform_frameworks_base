@@ -26,7 +26,7 @@
 #include "fsdk_rendercontext.h"
 #pragma GCC diagnostic pop
 
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <vector>
 #include <utils/Log.h>
 #include <unistd.h>
@@ -273,13 +273,13 @@ static JNINativeMethod gPdfRenderer_Methods[] = {
 };
 
 int register_android_graphics_pdf_PdfRenderer(JNIEnv* env) {
-    int result = android::AndroidRuntime::registerNativeMethods(
+    int result = RegisterMethodsOrDie(
             env, "android/graphics/pdf/PdfRenderer", gPdfRenderer_Methods,
             NELEM(gPdfRenderer_Methods));
 
-    jclass clazz = env->FindClass("android/graphics/Point");
-    gPointClassInfo.x = env->GetFieldID(clazz, "x", "I");
-    gPointClassInfo.y = env->GetFieldID(clazz, "y", "I");
+    jclass clazz = FindClassOrDie(env, "android/graphics/Point");
+    gPointClassInfo.x = GetFieldIDOrDie(env, clazz, "x", "I");
+    gPointClassInfo.y = GetFieldIDOrDie(env, clazz, "y", "I");
 
     return result;
 };

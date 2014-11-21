@@ -20,7 +20,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -260,17 +260,9 @@ static JNINativeMethod method_table[] = {
 
 int register_android_hardware_SerialPort(JNIEnv *env)
 {
-    jclass clazz = env->FindClass("android/hardware/SerialPort");
-    if (clazz == NULL) {
-        ALOGE("Can't find android/hardware/SerialPort");
-        return -1;
-    }
-    field_context = env->GetFieldID(clazz, "mNativeContext", "I");
-    if (field_context == NULL) {
-        ALOGE("Can't find SerialPort.mNativeContext");
-        return -1;
-    }
+    jclass clazz = FindClassOrDie(env, "android/hardware/SerialPort");
+    field_context = GetFieldIDOrDie(env, clazz, "mNativeContext", "I");
 
-    return AndroidRuntime::registerNativeMethods(env, "android/hardware/SerialPort",
+    return RegisterMethodsOrDie(env, "android/hardware/SerialPort",
             method_table, NELEM(method_table));
 }

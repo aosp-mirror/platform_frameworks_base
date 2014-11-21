@@ -20,7 +20,7 @@
 
 #include <JNIHelp.h>
 #include <jni.h>
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <utils/Log.h>
 #include <utils/String8.h>
@@ -110,7 +110,8 @@ static JNINativeMethod method_table[] = {
 };
 
 int register_android_ddm_DdmHandleNativeHeap(JNIEnv* env) {
-    return AndroidRuntime::registerNativeMethods(env, "android/ddm/DdmHandleNativeHeap", method_table, NELEM(method_table));
+    return RegisterMethodsOrDie(env, "android/ddm/DdmHandleNativeHeap", method_table,
+                                NELEM(method_table));
 }
 
 };

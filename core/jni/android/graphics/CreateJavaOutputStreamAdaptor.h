@@ -1,5 +1,5 @@
-#ifndef CreateJavaOutputStream_DEFINED
-#define CreateJavaOutputStream_DEFINED
+#ifndef _ANDROID_GRAPHICS_CREATE_JAVA_OUTPUT_STREAM_ADAPTOR_H_
+#define _ANDROID_GRAPHICS_CREATE_JAVA_OUTPUT_STREAM_ADAPTOR_H_
 
 //#include <android_runtime/AndroidRuntime.h>
 #include "jni.h"
@@ -38,4 +38,5 @@ SkStreamRewindable* CopyJavaInputStream(JNIEnv* env, jobject stream,
 
 SkWStream* CreateJavaOutputStreamAdaptor(JNIEnv* env, jobject stream,
                                          jbyteArray storage);
-#endif
+
+#endif  // _ANDROID_GRAPHICS_CREATE_JAVA_OUTPUT_STREAM_ADAPTOR_H_

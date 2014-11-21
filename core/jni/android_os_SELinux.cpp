@@ -19,7 +19,7 @@
 
 #include "JNIHelp.h"
 #include "jni.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "selinux/selinux.h"
 #include "selinux/android.h"
 #include <errno.h>
@@ -469,8 +469,7 @@ int register_android_os_SELinux(JNIEnv *env) {
 
     isSELinuxDisabled = (is_selinux_enabled() != 1) ? true : false;
 
-    return AndroidRuntime::registerNativeMethods(env, "android/os/SELinux", method_table,
-            NELEM(method_table));
+    return RegisterMethodsOrDie(env, "android/os/SELinux", method_table, NELEM(method_table));
 }
 
 }

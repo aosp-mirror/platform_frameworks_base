@@ -23,7 +23,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "android_runtime/android_view_Surface.h"
 #include "android_runtime/android_graphics_SurfaceTexture.h"
 
@@ -719,7 +719,7 @@ static JNINativeMethod gCameraDeviceMethods[] = {
 int register_android_hardware_camera2_legacy_LegacyCameraDevice(JNIEnv* env)
 {
     // Register native functions
-    return AndroidRuntime::registerNativeMethods(env,
+    return RegisterMethodsOrDie(env,
             CAMERA_DEVICE_CLASS_NAME,
             gCameraDeviceMethods,
             NELEM(gCameraDeviceMethods));
