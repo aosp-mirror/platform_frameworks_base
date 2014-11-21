@@ -1186,6 +1186,18 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case CHECK_PERMISSION_WITH_TOKEN_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            String perm = data.readString();
+            int pid = data.readInt();
+            int uid = data.readInt();
+            IBinder token = data.readStrongBinder();
+            int res = checkPermissionWithToken(perm, pid, uid, token);
+            reply.writeNoException();
+            reply.writeInt(res);
+            return true;
+        }
+
         case CHECK_URI_PERMISSION_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             Uri uri = Uri.CREATOR.createFromParcel(data);
@@ -1193,7 +1205,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int uid = data.readInt();
             int mode = data.readInt();
             int userId = data.readInt();
-            int res = checkUriPermission(uri, pid, uid, mode, userId);
+            IBinder callerToken = data.readStrongBinder();
+            int res = checkUriPermission(uri, pid, uid, mode, userId, callerToken);
             reply.writeNoException();
             reply.writeInt(res);
             return true;
@@ -3742,7 +3755,7 @@ class ActivityManagerProxy implements IActivityManager
         mRemote.transact(GET_INTENT_SENDER_TRANSACTION, data, reply, 0);
         reply.readException();
         IIntentSender res = IIntentSender.Stub.asInterface(
-            reply.readStrongBinder());
+                reply.readStrongBinder());
         data.recycle();
         reply.recycle();
         return res;
@@ -3851,6 +3864,22 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return res;
     }
+    public int checkPermissionWithToken(String permission, int pid, int uid, IBinder callerToken)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(permission);
+        data.writeInt(pid);
+        data.writeInt(uid);
+        data.writeStrongBinder(callerToken);
+        mRemote.transact(CHECK_PERMISSION_WITH_TOKEN_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int res = reply.readInt();
+        data.recycle();
+        reply.recycle();
+        return res;
+    }
     public boolean clearApplicationUserData(final String packageName,
             final IPackageDataObserver observer, final int userId) throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -3866,8 +3895,8 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return res;
     }
-    public int checkUriPermission(Uri uri, int pid, int uid, int mode, int userId)
-            throws RemoteException {
+    public int checkUriPermission(Uri uri, int pid, int uid, int mode, int userId,
+            IBinder callerToken) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -3876,6 +3905,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(uid);
         data.writeInt(mode);
         data.writeInt(userId);
+        data.writeStrongBinder(callerToken);
         mRemote.transact(CHECK_URI_PERMISSION_TRANSACTION, data, reply, 0);
         reply.readException();
         int res = reply.readInt();
