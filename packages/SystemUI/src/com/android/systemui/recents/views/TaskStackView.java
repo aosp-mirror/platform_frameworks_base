@@ -132,21 +132,13 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Sets the task stack */
     void setStack(TaskStack stack) {
-        // Unset the old stack
-        if (mStack != null) {
-            mStack.setCallbacks(null);
-
-            // Return all existing views to the pool
-            reset();
-            // Layout again with the new stack
-            requestLayout();
-        }
-
         // Set the new stack
         mStack = stack;
         if (mStack != null) {
             mStack.setCallbacks(this);
         }
+        // Layout again with the new stack
+        requestLayout();
     }
 
     /** Sets the debug overlay */
@@ -178,6 +170,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         }
 
         // Reset the stack state
+        mStack.reset();
         mStackViewsDirty = true;
         mStackViewsClipDirty = true;
         mAwaitingFirstLayout = true;
@@ -239,11 +232,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                                        float stackScroll,
                                        int[] visibleRangeOut,
                                        boolean boundTranslationsToRect) {
-        // XXX: We should be intelligent about where to look for the visible stack range using the
-        //      current stack scroll.
-        // XXX: We should log extra cases like the ones below where we don't expect to hit very often
-        // XXX: Print out approximately how many indices we have to go through to find the first visible transform
-
         int taskTransformCount = taskTransforms.size();
         int taskCount = tasks.size();
         int frontMostVisibleIndex = -1;
@@ -293,20 +281,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             visibleRangeOut[1] = backMostVisibleIndex;
         }
         return frontMostVisibleIndex != -1 && backMostVisibleIndex != -1;
-    }
-
-    /**
-     * Gets the stack transforms of a list of tasks, and returns the visible range of tasks. This
-     * call is less optimal than calling updateStackTransforms directly.
-     */
-    private ArrayList<TaskViewTransform> getStackTransforms(ArrayList<Task> tasks,
-                                                            float stackScroll,
-                                                            int[] visibleRangeOut,
-                                                            boolean boundTranslationsToRect) {
-        ArrayList<TaskViewTransform> taskTransforms = new ArrayList<TaskViewTransform>();
-        updateStackTransforms(taskTransforms, tasks, stackScroll, visibleRangeOut,
-                boundTranslationsToRect);
-        return taskTransforms;
     }
 
     /** Synchronizes the views with the model */
@@ -440,8 +414,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     /** Updates the min and max virtual scroll bounds */
     void updateMinMaxScroll(boolean boundScrollToNewMinMax, boolean launchedWithAltTab,
             boolean launchedFromHome) {
-        if (mStack == null) return;
-
         // Compute the min and max scroll values
         mLayoutAlgorithm.computeMinMaxScroll(mStack.getTasks(), launchedWithAltTab, launchedFromHome);
 
@@ -498,7 +470,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     /**
-     * Ensures that there is a task focused, if nothign is focused, then we will use the task
+     * Ensures that there is a task focused, if nothing is focused, then we will use the task
      * at the center of the visible stack.
      */
     public boolean ensureFocusedTask() {
@@ -545,8 +517,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Dismisses the focused task. */
     public void dismissFocusedTask() {
-        // Return early if there is no focused task index
-        if (mFocusedTaskIndex < 0) return;
+        // Return early if the focused task index is invalid
+        if (mFocusedTaskIndex < 0 || mFocusedTaskIndex >= mStack.getTaskCount()) {
+            mFocusedTaskIndex = -1;
+            return;
+        }
 
         Task t = mStack.getTasks().get(mFocusedTaskIndex);
         TaskView tv = getChildViewForTask(t);
@@ -567,8 +542,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
-        if (mStack == null) return;
-
         int childCount = getChildCount();
         if (childCount > 0) {
             TaskView backMostTask = (TaskView) getChildAt(0);
@@ -599,8 +572,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void computeScroll() {
-        if (mStack == null) return;
-
         mStackScroller.computeScroll();
         // Synchronize the views
         synchronizeStackViewsWithModel();
@@ -643,11 +614,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mStack == null) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            return;
-        }
-
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
@@ -660,10 +626,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // If this is the first layout, then scroll to the front of the stack and synchronize the
         // stack views immediately to load all the views
         if (mAwaitingFirstLayout) {
-            if (mStackScroller.setStackScrollToInitialState()) {
-                requestSynchronizeStackViewsWithModel();
-                synchronizeStackViewsWithModel();
-            }
+            mStackScroller.setStackScrollToInitialState();
+            requestSynchronizeStackViewsWithModel();
+            synchronizeStackViewsWithModel();
         }
 
         // Measure each of the TaskViews
@@ -694,11 +659,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      */
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (mStack == null) {
-            super.onLayout(changed, left, top, right, bottom);
-            return;
-        }
-
         // Layout each of the children
         int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -856,7 +816,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     /** Final callback after Recents is finally hidden. */
     void onRecentsHidden() {
-        setStack(null);
+        reset();
     }
 
     public boolean isTransformedTouchPointInView(float x, float y, View child) {
@@ -1030,8 +990,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void prepareViewToLeavePool(TaskView tv, Task task, boolean isNewView) {
-        if (mStack == null) return;
-
         // It is possible for a view to be returned to the view pool before it is laid out,
         // which means that we will need to relayout the view when it is first used next.
         boolean requiresRelayout = tv.getWidth() <= 0 && !isNewView;
@@ -1170,8 +1128,6 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
     @Override
     public void onPackagesChanged(RecentsPackageMonitor monitor, String packageName, int userId) {
-        if (mStack == null) return;
-
         // Compute which components need to be removed
         HashSet<ComponentName> removedComponents = monitor.computeComponentsRemoved(
                 mStack.getTaskKeys(), packageName, userId);
