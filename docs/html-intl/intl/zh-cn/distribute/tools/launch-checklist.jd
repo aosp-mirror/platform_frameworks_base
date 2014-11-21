@@ -1,0 +1,709 @@
+page.title=发布检查清单 
+page.metaDescription=向用户发布应用的完整过程的基本概述。在开发的早期阅读这份清单将有助于你做出规划并在Google Play成功发布应用。
+page.image=/distribute/images/launch-checklist.jpg
+
+@jd:body
+
+    <div id="qv-wrapper">
+  <div id="qv" style="width:280px">
+    <h2>检查清单</h2>
+    <ol>
+      <li><a href="#understand-publishing">1. 了解发布流程</a></li>
+      <li><a href="#understand-policies">2. 了解 Google Play 政策</a></li>
+      <li><a href="#test-quality">3. 测试应用的核心质量</a></li>
+      <li><a href="#determine-rating">4. 确定内容分级</a></li>
+      <li><a href="#determine-country">5. 确定分发国家/地区</a></li>
+      <li><a href="#confirm-size">6. 确认总大小</a></li>
+      <li><a href="#confirm-platform">7. 确认平台和屏幕范围</a></li>
+      <li><a href="#decide-price">8. 决定免费或付费</a></li>
+      <li><a href="#consider-billing">9. 使用应用内结算</a></li>
+      <li><a href="#set-prices">10. 设置商品价格</a></li>
+      <li><a href="#start-localization">11. 开始本地化</a></li>
+      <li><a href="#prepare-graphics">12. 准备宣传图片、屏幕截图和视频</a></li>
+      <li><a href="#build-upload">13. 构建发布版 APK</a></li>
+      <li><a href="#plan-beta">14. 计划 Beta 版的发布</a></li>
+      <li><a href="#complete-details">15. 填写商品详情</a></li>
+      <li><a href="#use-badges">16. 使用 Google Play 徽章和链接</a></li>
+      <li><a href="#final-checks">17. 最终检查和发布</a></li>
+      <li><a href="#support-users">18. 在发布后为用户提供支持</a></li>
+    </ol>
+  </div>
+</div>
+
+<div class="top-right-float" style="width:194px"><img src="{@docRoot}distribute/images/launch-checklist.jpg" /></div>
+
+<p>
+  在 Google Play 上发布应用以将其分发给用户之前，你需要准备好要发布的应用、进行测试并准备相关宣传材料。
+</p>
+
+<p>
+  本页面旨在帮助你了解发布流程，以及在 Google Play 上成功发布商品所需的准备工作，另外还总结了一些需要你在通过 Google Play 发布应用之前完成的任务，例如创建已签名的发布版应用包 (APK)、了解应用的要求以及为各个应用创建商品页和图形资源。
+</p>
+
+<p>
+  准备和发布任务已按先后顺序列出，这是为了让你对任务执行顺序有个大致了解。不过，你可以按适合自己的顺序来执行这些任务，也可以根据具体情况跳过某些步骤。
+</p>
+
+<p>
+  在完成发布之前的各项工作时，你可以使用各种支持资源。每一步中都提供了相关链接。
+</p>
+
+<div class="headerLine">
+  <h2 id="understand-publishing">
+    1. 了解发布流程
+  </h2>
+
+
+</div>
+
+<p>
+  在开始执行此检查清单中的各个步骤之前，你应抽时间查看和了解整个发布工作流程，并熟悉该流程的工作原理。特别要注意的是，你或你的开发小组需要按照所有 Android 应用通用的流程准备应用以进行发布。<a href="/tools/publishing/publishing_overview.html">发布工作流程文档</a>中详细说明了发布的工作原理以及如何准备 APK 以进行发布。
+</p>
+
+<p>
+  当你基本熟悉发布流程后，请继续阅读以了解在 Google Play 上发布应用时应注意哪些问题。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/understanding/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="understand-policies">
+    2. 了解 Google Play 政策和协议
+  </h2>
+
+
+</div>
+
+<p>
+  请务必了解并遵守你在注册时接受的 Google Play 计划政策。Google Play 要求强制执行这些政策，违反任何一条都可能导致你的应用被暂停。如果屡次违规，你的开发者帐户将被终止。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/policies/zhcn" data-sortorder="-timestamp" data-cardsizes="6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="test-quality">
+    3. 测试质量
+  </h2>
+
+
+</div>
+
+<p>
+  在 Google Play 上发布应用之前，请务必确保这些应用在所有目标设备上都符合适用于所有 Android 应用的基本质量要求。你可以设置测试环境，然后测试应用是否符合一系列<strong>适用于所有应用的质量标准</strong>，以此来检查应用的质量。有关完整信息，请参阅<a href="/distribute/essentials/quality/core.html">应用核心质量指南</a>。
+</p>
+
+<p>
+  如果你的应用适用于平板电脑，请确保其能为你的平板电脑用户提供引人入胜的丰富体验。请参阅<a href="/distribute/essentials/quality/tablets.html">平板电脑应用的质量</a>指南，了解如何针对平板电脑优化应用的相关建议。
+</p>
+
+<p>
+  如果你要将应用发布到 Google Play for Education，则需确保这些应用适合中小学课堂且能提供非凡的教育价值。请参阅<a href="/distribute/essentials/gpfe-guidelines.html">教育指南</a>，了解教育类应用应具备哪些特征。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/quality/zhcn" data-sortorder="-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="determine-rating">
+    4. 确定应用的内容分级
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 要求你为应用设置内容分级，以便 Google Play 用户了解应用的心智成熟度级别。发布应用之前，你应先确认自己要使用哪一分级。有以下四种内容分级可供选择：
+</p>
+
+<ul>
+  <li>
+    <p>所有人</p>
+  </li>
+
+  <li>
+    <p>心智成熟度-低</p>
+  </li>
+
+  <li>
+    <p>心智成熟度-中</p>
+  </li>
+
+  <li>
+    <p>心智成熟度-高</p>
+  </li>
+</ul>
+
+<p>
+  Android 用户可以在其 Android 设备上设置要浏览的心智成熟度级别，Google Play 会根据该设置对应用进行过滤。因此，你选择的内容分级会影响应用对用户的分发情况。你可以在开发者控制台中为应用指定（或更改）内容分级，无需在应用二进制文件中进行任何更改。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/rating/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="determine-country">
+    5. 确定分发国家/地区
+  </h2>
+
+
+</div>
+
+<p>
+  借助 Google Play，你可以控制将应用分发到哪些国家和地区。为了尽可能扩大覆盖面和潜在客户群，你通常会希望将应用分发到所有适用的国家和地区。不过，由于业务需求、应用要求或发布时的依赖关系，你可能需要从分发范围中排除一个或多个国家/地区。
+</p>
+
+<p>
+  请务必尽早确定目标国家/地区，因为这可能会影响：
+</p>
+
+<ul>
+  <li>
+    <p>是否需要对应用中的资源进行本地化。
+    </p>
+  </li>
+
+  <li>
+    <p>是否需要对开发者控制台中的应用说明进行本地化。
+    </p>
+  </li>
+
+  <li>
+    <p>某些国家/地区是否对应用有相应的法律要求。
+    </p>
+  </li>
+
+  <li>
+    <p>时区支持、本地价格等。
+    </p>
+  </li>
+</ul>
+
+<p>
+  确定目标国家/地区后，你应该评估应用及其 Google Play 商品详情是否需要本地化，然后在预订的发布日期之前就开始本地化工作。
+</p>
+
+<p>
+  请参阅<a href="/distribute/tools/localization-checklist.html">本地化检查清单</a>，了解本地化流程中的关键步骤和注意事项。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/country/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="confirm-size">
+    6. 确认应用的总大小
+  </h2>
+
+
+</div>
+
+<p>
+  应用的总大小会对应用的设计以及在 Google Play 上的发布产生影响。目前，在 Google Play 上发布的 APK 最大不得超过 <strong>50MB</strong>。如果你的应用超过该上限或要提供辅助下载，则可以使用 <a href="/google/play/expansion-files.html">APK 扩展文件</a>。Google Play 会将扩展文件免费托管在其服务器基础架构上，并自动处理这些文件下载到设备的过程。
+</p>
+
+<ul>
+  <li>
+    <p>在 Google Play 上发布的 APK 最大不得超过 50MB。
+    </p>
+  </li>
+
+  <li>
+    <p>对于每个 APK，你最多可以使用两 (2) 个 APK 扩展文件，每个都不得超过 2GB。
+    </p>
+  </li>
+</ul>
+
+<p>
+  在分发大型应用时，使用 APK 扩展文件是一种经济高效的简便方法。不过，使用 APK 扩展文件需要你在应用二进制文件中稍作更改，因此你需要在创建发布版 APK 之前完成这些更改。
+</p>
+
+<p>
+  为了尽可能精简应用的二进制文件，请务必在构建发布版 APK 时运行 <a href="/tools/help/proguard.html">Proguard</a> 工具或类似的代码混淆工具。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/size/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="confirm-platform">
+    7. 确认应用的平台和屏幕兼容性范围
+  </h2>
+
+
+</div>
+
+<p>发布应用之前，请务必确保你的应用可在目标 Android 平台版本和设备屏幕尺寸上正常运行。
+</p>
+
+<p>
+  从应用兼容性角度来看，Android 平台版本由 <a href="/guide/topics/manifest/uses-sdk-element.html#ApiLevels">API 级别</a>定义。你应该使用 <a href="/guide/topics/manifest/uses-sdk-element.html">&lt;minSdkVersion&gt;</a> 确认你的应用兼容的最低版本，因为这将影响已发布的应用在 Android 设备上的分发情况。
+</p>
+
+<p>
+  对于屏幕尺寸，你应该确认应用可在支持的各种屏幕尺寸和像素密度上正常运行且拥有精美外观。你还应按照<a href="/guide/practices/screens_support.html">支持跨屏</a>中给出的建议，为多种屏幕尺寸提供相应的支持。如果你无法提供跨屏支持，请使用 <a href="/guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a> 声明应用支持的最小屏幕尺寸。Google Play 会据此对你的应用做出限制，只将其提供给屏幕尺寸大于或等于已声明尺寸的设备。
+</p>
+
+<p>
+  要更好地了解目前 Android 平台版本和屏幕尺寸在所有 Android 设备上的普及情况，请参阅<a href="/about/dashboards/index.html">设备信息中心</a>图表。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/platform" data-sortorder="-timestamp" data-cardsizes="6x3,6x3,6x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="decide-price">
+    8. 决定你的应用是免费还是付费
+  </h2>
+
+
+</div>
+
+<div class="figure">
+  <img src="{@docRoot}images/gp-launch-checklist-1.png" />
+</div>
+
+<p>
+  在 Google Play 上，你可以发布免费下载的应用和付费下载的应用。免费应用可供 Google Play 中的所有 Android 用户下载。付费应用仅供其所在国家/地区支持付费下载且已在 Google Play 中注册了付款方式（例如信用卡或运营商直接代扣）的用户下载。
+</p>
+
+<p>
+  决定你的应用是否免费非常重要，因为在 Google Play 上，<strong>免费应用必须始终免费</strong>。
+</p>
+
+<ul>
+  <li>
+    <p>将应用发布为免费应用后，你无法再将其改成付费应用。不过，你仍能通过 Google Play 的<a href="/google/play/billing/index.html">应用内结算</a>服务销售<a href="/google/play/billing/billing_overview.html#products">应用内商品</a>和<a href="/google/play/billing/billing_subscriptions.html">订阅</a>。
+    </p>
+  </li>
+
+  <li>
+    <p>如果你将应用发布为付费应用，则可以随时将其改成免费应用（<strong>但之后无法再将其改回为付费应用</strong>）。<em></em>你也可以销售应用内商品和订阅。
+    </p>
+  </li>
+</ul>
+
+<p>
+  如果你的应用是付费应用或者你要销售应用内商品，你需要先<a href="https://developers.google.com/wallet/digital/training/getting-started/merchant-setup">设置 Google 电子钱包商家帐户</a>，然后才能发布应用。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/price/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="consider-billing">
+    9. 考虑使用应用内结算
+  </h2>
+
+
+</div>
+
+<p>
+  借助 Google Play <a href="/google/play/billing/index.html">应用内结算</a>，你可以在应用中销售数字内容。你可以使用该服务销售众多内容，包括可下载内容（例如媒体文件或照片）和虚拟内容（例如游戏关卡或魔药）。借助应用内结算服务，你可以在应用内销售一次性购买的商品，还可以销售订阅。这有助于你在应用安装后的整个生命周期内都能获利。
+</p>
+
+<p>
+  如果你希望找到更多方法以通过应用获利并建立与用户的互动，则应考虑使用“应用内结算”或“Instant Buy”服务。这些服务深受用户和开发者的欢迎。要使用“应用内结算”和“Instant Buy”，你需要对应用的二进制文件进行更改。因此，你需要先完成更改并测试实施情况，然后才能创建发布版 APK。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/purchasemethod/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="set-prices">
+    10. 设置商品价格
+  </h2>
+
+
+</div>
+
+<p>
+  如果你的应用是付费应用或者你要销售应用内商品或实体商品，Google Play 可让你针对全球市场的用户为商品设置以不同货币为单位的价格。你可以分别使用不同货币设置价格，以便根据市场情况和汇率灵活调整你的价格。
+</p>
+
+<p>
+  发布应用之前，请想好如何为你的商品定价及以不同货币为单位的价格各是多少。之后，你可以通过开发者控制台设置以所有可用货币为单位的各种价格。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/setprice/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,9x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="start-localization">
+    11. 开始本地化
+  </h2>
+
+
+</div>
+
+<p>
+  确定目标国家/地区后，你最好评估一下你的本地化需求，确保你的应用已国际化，并在预订的发布日期之前就开始本地化工作。
+</p>
+
+<p>
+  除了应用设计外，你至少还应考虑本地化工作中的三个方面：
+</p>
+
+<ul>
+  <li>
+    <p>本地化应用中的字符串、图片及其他资源。
+    </p>
+  </li>
+
+  <li>
+    <p>本地化应用在 Google Play 商店中的商品详情。
+    </p>
+  </li>
+
+  <li>
+    <p>本地化应用的商品详情中随附的图形资源、屏幕截图和视频。
+    </p>
+  </li>
+</ul>
+
+<p>
+  请参阅<a href="/distribute/tools/localization-checklist.html">本地化检查清单</a>，了解本地化流程中的关键步骤和注意事项。
+</p>
+
+<p>
+  要本地化你的商品详情，请先创建并完成应用标题、说明和宣传文字。将所有这些信息收集起来，然后发送给相关人员进行本地化。在应用更新时，你也可以选择翻译“最近更改”的文本。之后，你可以在开发者控制台中添加本地化的商品详情，或者选择让 Google Play 将你的商品详情自动翻译成你支持的语言。
+</p>
+
+<p>
+  要让你的应用详情吸引全球的用户，关键是创建本地化版本的宣传图片、屏幕截图和视频。例如，应用的置顶大图中可能包含文字，这些文字应翻译成相应语言以获得最佳效果。你可以为每种目标语言创建相应版本的宣传图片，并将它们上传到开发者控制台。如果你提供宣传视频，则可以创建本地化版本的视频，然后添加指向各目标语言版本的视频的链接。
+</p>
+
+<p>
+  完成翻译后，根据需要将翻译放入应用的资源中并测试能否正常加载。在上传资源和配置商品详情时，请保存应用的翻译版商品详情以供日后使用。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/localization/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="prepare-graphics">
+    12. 准备宣传图片、屏幕截图和视频
+  </h2>
+
+
+</div>
+
+<p>
+  在 Google Play 上发布应用时，你可以提供各种高品质的图形资源，用来宣传你的应用或品牌。应用发布后，这些资源将显示在你的商品详情页、搜索结果及其他位置上。这些图形资源是商品详情页成功与否的关键，它们能吸引用户的注意力并让用户参与互动。因此，你应考虑聘请专业人士为你制作这些资源。屏幕截图和视频也相当重要，因为它们将展示应用的外观、使用或操作方式及其独特之处。
+</p>
+
+<p>
+  所有的图形资源均应精心设计以便足够醒目，并以多彩、有趣的方式突显你的应用或品牌。这些资源应该采用相同的徽标和图标，以便用户在下载应用后可以在“所有应用”启动器中找到你的应用。你的图形资源还应与你发布的所有应用的图形资源（也会显示在商品详情页上供用户查看）相互配套。
+</p>
+
+<p>
+  为了帮你将应用更有效地推广给全球用户，Google Play 允许你创建本地化版本的宣传图片、屏幕截图和视频并上传到开发者控制台中。当用户访问你应用的商品详情时，Google Play 会向其展示你针对该用户所用语言提供的宣传图片、屏幕截图和视频。
+</p>
+
+<p>
+  要本地化你的宣传图片，你可以翻译所有嵌入的文本、使用不同的图像或展示方式，或者改变你的营销方式，以尽可能满足使用特定语言的用户的需求。例如，如果你的置顶大图或宣传图片中包含嵌入的商品名称或宣传口号，则可以将名称或口号翻译成相应语言，然后添加到本地化版本的宣传图片中。
+</p>
+
+<p>
+  由于本地化的图形资源和视频非常重要，因此你应在预订的发布日期之前就开始创建并进行本地化。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/graphics/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="build-upload">
+    13. 构建并上传发布版 APK
+  </h2>
+
+
+</div>
+
+<p>
+  当确定你的应用符合界面、兼容性和质量要求后，你可以构建应用的发布版本。之后，你可以将发布版 APK 上传到开发者控制台并分发给用户。
+</p>
+
+<p>
+  所有应用的发布版 APK 准备流程都一样，无论应用采用哪种分发方式。一般情况下，该流程包括基本的代码清理和优化、构建和使用发布密钥签名以及最后的测试这几部分。
+</p>
+
+<p>
+  如需了解如何创建发布版应用的完整详情，请参阅<a href="/tools/publishing/preparing.html">准备发布</a>。
+</p>
+
+<p>
+  准备好发布版 APK 后，你可以将其上传到开发者控制台。如果需要，你可以在发布之前将 APK 替换为较新的版本。
+</p>
+<!--<h3 class="rel-resources clearfloat">Related resources</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/build/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6"></div>-->
+
+<div class="headerLine">
+  <h2 id="plan-beta">
+    14. 计划 Beta 版的发布
+  </h2>
+
+
+</div>
+
+<div class="sidebox-wrapper" style="float:right">
+  <div class="sidebox">
+    <h2>
+      简单的 Beta 测试
+    </h2>
+
+    <p>
+      Google Play 允许你在世界范围内设立 Alpha 版和 Beta 版测试者小组。下次登录到开发者控制台时请别忘记了解这一强大的功能。
+    </p>
+  </div>
+</div>
+
+<p>
+  在发布应用之前收集用户的真实反馈是很有必要的，特别是发布新应用时，应该收集更多反馈。我们强烈建议你向主要目标市场的用户分发应用的预览版本，并让这些用户能够方便地向你提供反馈和报告错误。
+</p>
+
+<p>
+  Google Play 可以帮助你为应用设置 Beta 测试计划。登录到开发者控制台并上传你的 APK 之后，你可以设立用户小组，以便进行应用的 Alpha 版和 Beta 版测试。你可以先进行小范围的 Alpha 版测试，然后推进到更大范围的 Beta 版测试。用户被添加到小组之后，他们可以访问你应用的商品详情并安装应用。
+  <strong>Alpha 或 Beta 版本的用户不能留下评论或评分</strong>，因此你在 Google Play 上的<strong>评分不会受到不利影响</strong>。你需要安排具体途径以便用户提供测试反馈，例如 Google 论坛或 Google+。
+</p>
+
+<p>
+  收到的反馈可以帮助你调整界面、翻译和商品详情，以确保为用户提供优质体验。
+</p>
+<!-- Related resources
+
+<table>
+  <tr>
+    <td>Beta-testing and Staged Rollouts
+See how you can facilitate testing with Google Play.</td>
+  </tr>
+</table> -->
+
+<div class="headerLine">
+  <h2 id="complete-details">
+    15. 填写应用的商品详情
+  </h2>
+
+
+</div>
+
+<p>
+  在 Google Play 上，应用的商品信息会在用户的 Android 设备或网络上的以下页面中显示给用户：应用的商品详情页；用户为详细了解应用而访问的页面；用户决定购买或下载应用的页面上。
+</p>
+
+<p>
+  为了让你宣传应用以及在商品详情页上与用户互动，Google Play 提供了许多方式，包括多彩的图片、屏幕截图和视频，本地化的说明、发布详情以及指向你其他应用的链接。当你准备发布应用时，请确保充分利用商品详情页提供的所有资源，让你的应用尽可能地引人入胜。
+</p>
+
+<p>
+  你应在预订的发布日期之前就开始规划商品页，准备本地化的说明以及高品质的图形资源、屏幕截图和视频等。
+</p>
+
+<p>
+  当临近预订的发布日期时，你应该熟悉开发者控制台中与商品详情配置页相关的所有字段、选项和资源。收集此页面上的信息和资源时，请将它们输入或上传到开发者控制台中，直到完成该页面，可以进行发布。
+</p>
+
+<p>
+  在开发者控制台中为应用设置地理位置定位后，请记得针对所有支持的目标语言添加本地化的商品详情、宣传图片等。
+</p>
+
+<p>
+  如果你的应用适用于平板电脑，请确保至少加入一张应用在平板电脑上运行时的屏幕截图，并在应用说明、版本备注、宣传活动及其他位置注重介绍你的应用支持平板电脑。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/productdetails/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="use-badges">
+    16. 在宣传活动中使用 Google Play 徽章和链接
+  </h2>
+
+
+</div>
+
+<p>
+  Google Play 徽章是官方品牌标识，你可以使用该徽章向 Android 用户推广你的应用。使用 <a href="/distribute/tools/promote/badges.html">Google Play 徽章生成器</a>可快速创建徽章，让用户从网页、广告、评论等链接到你的商品。你还可以使用特殊的<a href="/distribute/tools/promote/linking.html">链接格式</a>，将用户直接链接到你的商品详情页、商品列表或搜索结果页。
+</p>
+
+<p>
+  为了帮你的应用在发布后获得用户关注，强烈建议你通过宣传活动来支持应用的发布，这些宣传活动应通过尽可能多的渠道、向尽可能多的国家/地区介绍你的商品。例如，你可以通过广告展示、社交网络或博客、视频及其他媒体、采访和评论，或者任何其他可用渠道推广应用的发布。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/badges/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="final-checks">
+    17. 最终检查和发布</h2>
+
+
+</div>
+
+<p>
+  如果你认为已做好发布准备，请登录到开发者控制台，花些时间做最后几项检查。
+</p>
+
+<p>
+  请确保：
+</p>
+
+<ul>
+  <li>
+    <p>你的开发者资料准确无误且已与相应的 Google 电子钱包商家帐户相关联（如果你要销售商品）。
+    </p>
+  </li>
+
+  <li>
+    <p>你上传的应用版本准确无误。
+    </p>
+  </li>
+
+  <li>
+    <p>商品详情的各个方面都已准备完善，包括所有图形资源、屏幕截图、视频、本地化的说明等。
+    </p>
+  </li>
+
+  <li>
+    <p>你已将应用设置为免费应用或付费应用。
+    </p>
+  </li>
+
+  <li>
+    <p>你已设置目标国家/地区（以及运营商），并已确定以买家货币为单位的商品价格（如果适用）
+    </p>
+  </li>
+
+  <li>
+    <p>“兼容设备”显示你的应用当前覆盖的是你要定位的设备。如果不是，你应与开发小组联系以了解应用的要求和过滤规则。
+    </p>
+  </li>
+
+  <li>
+    <p>你已提供指向你网站的正确链接以及正确的支持电子邮件地址。
+    </p>
+  </li>
+
+  <li>
+    <p>你的应用未违反任何内容政策指南。
+    </p>
+  </li>
+
+  <li>
+    <p>你已确认你的应用符合 Google Play 上的 Android 内容指南及美国出口法。
+    </p>
+  </li>
+</ul>
+
+<p>
+  你的应用现在随时可以发布了！
+</p>
+
+<p>
+  如果你要发布更新，请务必阅读<a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=zh-CN&amp;answer=113476&amp;topic=2365760&amp;ctx=topic">发布更新的相关要求</a>。
+</p>
+
+<p>
+  当一切就绪后，请点击开发者控制台中的<strong>发布</strong>按钮。几个小时内，你的应用就会提供给广大用户，你的商品页将显示在 Google Play 上，供用户浏览、搜索或从宣传资料中链接到该页面。
+</p>
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/finalchecks/zhcn" data-sortorder="-timestamp" data-cardsizes="6x3,6x3,6x3,9x3,9x3,9x3" data-maxresults="6">
+</div>
+
+<div class="headerLine">
+  <h2 id="support-users">
+    18. 在发布后为用户提供支持
+  </h2>
+
+
+</div>
+
+<p>
+  发布应用或应用更新后，请务必为你的客户提供相关支持。及时周到的支持可让用户获得更好的体验，你的商品也就能获得更高的评分和更多的好评。如果你积极响应用户的需求和反馈，他们可能会与你的应用进行更多互动，还会向其他人推荐你的应用。如果你运用多种方式开展宣传活动，这种效果在应用发布后会更加明显。
+</p>
+
+<p>
+  你可以通过多种方式与用户保持联系并为其提供支持。其中最常见的就是在商品详情页上提供你的支持电子邮件地址。<em></em>除此之外，你还可以提供其他支持方式，例如论坛、邮寄名单或 Google+ 信息页。Google Play 小组会为用户提供下载、安装和付款方面的支持，但其他方面的问题则由你自行解决。由你向用户提供支持的示例包括：功能请求、应用的使用问题以及兼容性设置问题。
+</p>
+
+<p>
+  发布应用后，你应：
+</p>
+
+<ul>
+  <li>
+    <p>经常查看你应用的商品详情页上的评分和评论。注意反复出现的主题，这可能表示存在错误或其他问题。
+    </p>
+  </li>
+
+  <li>
+    <p>关注新发布的 Android 平台版本，因为你应用的兼容性设置可能需要更新。
+    </p>
+  </li>
+
+  <li>
+    <p>在你的网站上放置一个指向支持资源的链接，并设置其他支持方式，例如论坛。
+    </p>
+  </li>
+
+  <li>
+    <p>在商品详情页上提供相应的支持电子邮件地址并回复用户发来的电子邮件。
+    </p>
+  </li>
+
+  <li>
+    <p>除了 Google Play 提供的自动退款窗口外，请诚心制定你的退款政策，因为满意的用户将来更有可能购买你的商品。
+    </p>
+  </li>
+
+  <li>
+    <p>确认并解决你应用中出现的问题。保持公开透明并主动在商品详情页上列出已知问题是明智有益之举。
+    </p>
+  </li>
+
+  <li>
+    <p>尽可能经常发布更新，但不要牺牲质量，也不能过于频繁以免干扰用户。
+    </p>
+  </li>
+
+  <li>
+    <p>每次更新时，请务必总结一下变更内容。你可以在开发者控制台中输入此信息。用户会查看这些信息并认为你是在努力提高应用的质量。
+    </p>
+  </li>
+</ul>
+
+
+<h3 class="rel-resources clearfloat">相关资源</h3>
+
+<div class="resource-widget resource-flow-layout col-13" data-query="collection:distribute/toolsreference/launchchecklist/afterlaunch/zhcn" data-sortorder="-timestamp" data-cardsizes="9x3,9x3,9x3,9x3,9x3,9x3" data-maxresults="6"></div>
