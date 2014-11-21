@@ -22,49 +22,69 @@ import com.android.internal.telephony.ISubscriptionListener;
 
 interface ISub {
     /**
-     * Get the SubscriptionInfo according to an index
-     * @param subId The unique SubscriptionInfo index in database
-     * @return SubscriptionInfo, maybe null
-     */
-    SubscriptionInfo getSubInfoForSubscriber(int subId);
-
-    /**
-     * Get the SubscriptionInfo according to an IccId
-     * @param iccId the IccId of SIM card
-     * @return SubscriptionInfo, maybe null
-     */
-    List<SubscriptionInfo> getSubInfoUsingIccId(String iccId);
-
-    /**
-     * Get the SubscriptionInfo according to slotId
-     * @param slotId the slot which the SIM is inserted
-     * @return SubscriptionInfo, maybe null
-     */
-    List<SubscriptionInfo> getSubInfoUsingSlotId(int slotId);
-
-    /**
-     * Get all the SubscriptionInfo(s) in subinfo database
-     * @return Array list of all SubInfoRecords in database, include thsoe that were inserted before
+     * @return a list of all subscriptions in the database, this includes
+     * all subscriptions that have been seen.
      */
     List<SubscriptionInfo> getAllSubInfoList();
 
     /**
-     * Get the SubscriptionInfo(s) of the currently inserted SIM(s)
-     * @return Array list of currently inserted SubscriptionInfo(s)
-     */
-    List<SubscriptionInfo> getActiveSubInfoList();
-
-    /**
-     * Get the SUB count of all SUB(s) in subinfo database
-     * @return all SIM count in database, include what was inserted before
+     * @return the count of all subscriptions in the database, this includes
+     * all subscriptions that have been seen.
      */
     int getAllSubInfoCount();
 
     /**
-     * Get the count of active SUB(s)
-     * @return active SIM count
+     * Get the active SubscriptionInfo with the subId key
+     * @param subId The unique SubscriptionInfo key in database
+     * @return SubscriptionInfo, maybe null if its not active
+     */
+    SubscriptionInfo getActiveSubscriptionInfo(int subId);
+
+    /**
+     * Get the active SubscriptionInfo associated with the iccId
+     * @param iccId the IccId of SIM card
+     * @return SubscriptionInfo, maybe null if its not active
+     */
+    SubscriptionInfo getActiveSubscriptionInfoForIccId(String iccId);
+
+    /**
+     * Get the active SubscriptionInfo associated with the slotIdx
+     * @param slotIdx the slot which the subscription is inserted
+     * @return SubscriptionInfo, maybe null if its not active
+     */
+    SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIdx);
+
+    /**
+     * Get the SubscriptionInfo(s) of the active subscriptions. The records will be sorted
+     * by {@link SubscriptionInfo#getSimSlotIndex} then by {@link SubscriptionInfo#getSubscriptionId}.
+     *
+     * @return Sorted list of the currently {@link SubscriptionInfo} records available on the device.
+     * <ul>
+     * <li>
+     * If null is returned the current state is unknown but if a {@link OnSubscriptionsChangedListener}
+     * has been registered {@link OnSubscriptionsChangedListener#onSubscriptionsChanged} will be
+     * invoked in the future.
+     * </li>
+     * <li>
+     * If the list is empty then there are no {@link SubscriptionInfo} records currently available.
+     * </li>
+     * <li>
+     * if the list is non-empty the list is sorted by {@link SubscriptionInfo#getSimSlotIndex}
+     * then by {@link SubscriptionInfo#getSubscriptionId}.
+     * </li>
+     * </ul>
+     */
+    List<SubscriptionInfo> getActiveSubscriptionInfoList();
+
+    /**
+     * @return the number of active subscriptions
      */
     int getActiveSubInfoCount();
+
+    /**
+     * @return the maximum number of subscriptions this device will support at any one time.
+     */
+    int getActiveSubInfoCountMax();
 
     /**
      * Add a new SubscriptionInfo to subinfo database if needed
