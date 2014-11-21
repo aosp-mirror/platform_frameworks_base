@@ -483,16 +483,7 @@ public final class BridgeContext extends Context {
             // In some cases, style may not be a dynamic id, so we do a full search.
             ResourceReference ref = resolveId(resid);
             if (ref != null) {
-                if (ref.isFramework()) {
-                    ref =
-                      getRenderResources().getFrameworkResource(ResourceType.STYLE, ref.getName());
-                } else {
-                    ref =
-                      getRenderResources().getProjectResource(ResourceType.STYLE, ref.getName());
-                }
-                if (ref instanceof StyleResourceValue) {
-                    style = ((StyleResourceValue) ref);
-                }
+                mRenderResources.getStyle(ref.getName(), ref.isFramework());
             }
         }
 
