@@ -1942,4 +1942,8 @@
     <string-array translatable="false" name="config_sms_convert_destination_number_support">
         <item>false</item>
     </string-array>
+
+    <!-- The maximum bitmap size that can be written to a MediaMetadata object. This value
+         is the max width/height allowed in dips.-->
+    <dimen name="config_mediaMetadataBitmapMaxSize">320dp</dimen>
 </resources>
