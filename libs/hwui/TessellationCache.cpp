@@ -365,7 +365,7 @@ void TessellationCache::clear() {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void TessellationCache::BufferRemovedListener::operator()(Description& description,
+void TessellationCache::BufferRemovedListener::operator()(Description& /* description */,
         Buffer*& buffer) {
     delete buffer;
 }

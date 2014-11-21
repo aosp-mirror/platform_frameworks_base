@@ -171,7 +171,7 @@ void RenderThread::initThreadLocals() {
     mRenderState = new RenderState();
 }
 
-int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
+int RenderThread::displayEventReceiverCallback(int /* fd */, int events, void* data) {
     if (events & (Looper::EVENT_ERROR | Looper::EVENT_HANGUP)) {
         ALOGE("Display event receiver pipe was closed or an error occurred.  "
                 "events=0x%x", events);
