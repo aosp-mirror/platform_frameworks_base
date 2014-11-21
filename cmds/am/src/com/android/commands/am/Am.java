@@ -55,11 +55,8 @@ import android.text.TextUtils;
 import android.util.AndroidException;
 import android.util.ArrayMap;
 import android.view.IWindowManager;
-import android.view.View;
 
 import com.android.internal.os.BaseCommand;
-
-import dalvik.system.VMRuntime;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -619,7 +616,7 @@ public class Am extends BaseCommand {
             // The argument is a URI.  Fully parse it, and use that result
             // to fill in any data not specified so far.
             baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME
-                    | Intent.URI_ANDROID_APP_SCHEME);
+                    | Intent.URI_ANDROID_APP_SCHEME | Intent.URI_ALLOW_UNSAFE);
         } else if (arg.indexOf('/') >= 0) {
             // The argument is a component name.  Build an Intent to launch
             // it.
