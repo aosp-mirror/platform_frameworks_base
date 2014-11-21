@@ -2126,5 +2126,6 @@
   <java-symbol type="string" name="android_system_label" />
   <java-symbol type="string" name="system_error_wipe_data" />
   <java-symbol type="string" name="system_error_manufacturer" />
+  <java-symbol type="dimen" name="fast_scroller_minimum_touch_target" />
 
 </resources>
