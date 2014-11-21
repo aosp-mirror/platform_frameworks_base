@@ -22,7 +22,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "SkPorterDuff.h"
 
@@ -43,10 +43,7 @@ static JNINativeMethod methods[] = {
 };
 
 int register_android_graphics_PorterDuff(JNIEnv* env) {
-    int result = AndroidRuntime::registerNativeMethods(env,
-                                "android/graphics/PorterDuffXfermode", methods,
-                                        sizeof(methods) / sizeof(methods[0]));
-    return result;
+    return RegisterMethodsOrDie(env, "android/graphics/PorterDuffXfermode", methods, NELEM(methods));
 }
 
 }

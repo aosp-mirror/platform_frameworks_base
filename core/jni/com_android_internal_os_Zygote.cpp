@@ -44,7 +44,7 @@
 #include <selinux/android.h>
 #include <processgroup/processgroup.h>
 
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 #include "JNIHelp.h"
 #include "ScopedLocalRef.h"
 #include "ScopedPrimitiveArray.h"
@@ -613,15 +613,11 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
-  gZygoteClass = (jclass) env->NewGlobalRef(env->FindClass(kZygoteClassName));
-  if (gZygoteClass == NULL) {
-    RuntimeAbort(env);
-  }
-  gCallPostForkChildHooks = env->GetStaticMethodID(gZygoteClass, "callPostForkChildHooks",
+  gZygoteClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteClassName));
+  gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(ILjava/lang/String;)V");
 
-  return AndroidRuntime::registerNativeMethods(env, "com/android/internal/os/Zygote",
-      gMethods, NELEM(gMethods));
+  return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
 }
 }  // namespace android
 

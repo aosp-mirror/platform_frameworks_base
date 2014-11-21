@@ -23,7 +23,7 @@
 #include "utils/Log.h"
 #include "ScopedPrimitiveArray.h"
 #include "JNIHelp.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include <vector>
 
 namespace android {
@@ -103,8 +103,7 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_text_StaticLayout(JNIEnv* env)
 {
-    return AndroidRuntime::registerNativeMethods(env, "android/text/StaticLayout",
-            gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/text/StaticLayout", gMethods, NELEM(gMethods));
 }
 
 }

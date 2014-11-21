@@ -25,7 +25,7 @@
 
 #include "jni.h"
 #include <JNIHelp.h>
-#include "android_runtime/AndroidRuntime.h"
+#include "core_jni_helpers.h"
 
 #include <sys/capability.h>
 #include <sys/prctl.h>
@@ -258,7 +258,7 @@ static JNINativeMethod gMethods[] = {
 };
 int register_com_android_internal_os_ZygoteInit(JNIEnv* env)
 {
-    return AndroidRuntime::registerNativeMethods(env,
+    return RegisterMethodsOrDie(env,
             "com/android/internal/os/ZygoteInit", gMethods, NELEM(gMethods));
 }
 

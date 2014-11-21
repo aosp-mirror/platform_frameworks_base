@@ -19,7 +19,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include <android_runtime/AndroidRuntime.h>
+#include <core_jni_helpers.h>
 #include <androidfw/AssetManager.h>
 #include <androidfw/ResourceTypes.h>
 #include <utils/Log.h>
@@ -412,7 +412,7 @@ static JNINativeMethod gXmlBlockMethods[] = {
 
 int register_android_content_XmlBlock(JNIEnv* env)
 {
-    return AndroidRuntime::registerNativeMethods(env,
+    return RegisterMethodsOrDie(env,
             "android/content/res/XmlBlock", gXmlBlockMethods, NELEM(gXmlBlockMethods));
 }
 

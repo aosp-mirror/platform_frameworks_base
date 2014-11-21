@@ -17,7 +17,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include <core_jni_helpers.h>
 
 #include "SkPathMeasure.h"
 
@@ -156,9 +156,7 @@ static JNINativeMethod methods[] = {
 };
 
 int register_android_graphics_PathMeasure(JNIEnv* env) {
-    int result = AndroidRuntime::registerNativeMethods(env, "android/graphics/PathMeasure", methods,
-        sizeof(methods) / sizeof(methods[0]));
-    return result;
+    return RegisterMethodsOrDie(env, "android/graphics/PathMeasure", methods, NELEM(methods));
 }
 
 }

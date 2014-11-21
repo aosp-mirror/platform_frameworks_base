@@ -22,7 +22,7 @@
 
 #include <jni.h>
 #include <JNIHelp.h>
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include <media/AudioSystem.h>
 
@@ -1357,99 +1357,94 @@ static JNINativeMethod gEventHandlerMethods[] = {
 
 int register_android_media_AudioSystem(JNIEnv *env)
 {
+    jclass arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
+    gArrayListClass = MakeGlobalRefOrDie(env, arrayListClass);
+    gArrayListMethods.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
-    jclass arrayListClass = env->FindClass("java/util/ArrayList");
-    gArrayListClass = (jclass) env->NewGlobalRef(arrayListClass);
-    gArrayListMethods.add = env->GetMethodID(arrayListClass, "add", "(Ljava/lang/Object;)Z");
+    jclass audioHandleClass = FindClassOrDie(env, "android/media/AudioHandle");
+    gAudioHandleClass = MakeGlobalRefOrDie(env, audioHandleClass);
+    gAudioHandleCstor = GetMethodIDOrDie(env, audioHandleClass, "<init>", "(I)V");
+    gAudioHandleFields.mId = GetFieldIDOrDie(env, audioHandleClass, "mId", "I");
 
-    jclass audioHandleClass = env->FindClass("android/media/AudioHandle");
-    gAudioHandleClass = (jclass) env->NewGlobalRef(audioHandleClass);
-    gAudioHandleCstor = env->GetMethodID(audioHandleClass, "<init>", "(I)V");
-    gAudioHandleFields.mId = env->GetFieldID(audioHandleClass, "mId", "I");
-
-    jclass audioPortClass = env->FindClass("android/media/AudioPort");
-    gAudioPortClass = (jclass) env->NewGlobalRef(audioPortClass);
-    gAudioPortCstor = env->GetMethodID(audioPortClass, "<init>",
-                               "(Landroid/media/AudioHandle;I[I[I[I[Landroid/media/AudioGain;)V");
-    gAudioPortFields.mHandle = env->GetFieldID(audioPortClass, "mHandle",
+    jclass audioPortClass = FindClassOrDie(env, "android/media/AudioPort");
+    gAudioPortClass = MakeGlobalRefOrDie(env, audioPortClass);
+    gAudioPortCstor = GetMethodIDOrDie(env, audioPortClass, "<init>",
+            "(Landroid/media/AudioHandle;I[I[I[I[Landroid/media/AudioGain;)V");
+    gAudioPortFields.mHandle = GetFieldIDOrDie(env, audioPortClass, "mHandle",
                                                "Landroid/media/AudioHandle;");
-    gAudioPortFields.mRole = env->GetFieldID(audioPortClass, "mRole", "I");
-    gAudioPortFields.mGains = env->GetFieldID(audioPortClass, "mGains",
+    gAudioPortFields.mRole = GetFieldIDOrDie(env, audioPortClass, "mRole", "I");
+    gAudioPortFields.mGains = GetFieldIDOrDie(env, audioPortClass, "mGains",
                                               "[Landroid/media/AudioGain;");
-    gAudioPortFields.mActiveConfig = env->GetFieldID(audioPortClass, "mActiveConfig",
-                                              "Landroid/media/AudioPortConfig;");
+    gAudioPortFields.mActiveConfig = GetFieldIDOrDie(env, audioPortClass, "mActiveConfig",
+                                                     "Landroid/media/AudioPortConfig;");
 
-    jclass audioPortConfigClass = env->FindClass("android/media/AudioPortConfig");
-    gAudioPortConfigClass = (jclass) env->NewGlobalRef(audioPortConfigClass);
-    gAudioPortConfigCstor = env->GetMethodID(audioPortConfigClass, "<init>",
-                                 "(Landroid/media/AudioPort;IIILandroid/media/AudioGainConfig;)V");
-    gAudioPortConfigFields.mPort = env->GetFieldID(audioPortConfigClass, "mPort",
+    jclass audioPortConfigClass = FindClassOrDie(env, "android/media/AudioPortConfig");
+    gAudioPortConfigClass = MakeGlobalRefOrDie(env, audioPortConfigClass);
+    gAudioPortConfigCstor = GetMethodIDOrDie(env, audioPortConfigClass, "<init>",
+            "(Landroid/media/AudioPort;IIILandroid/media/AudioGainConfig;)V");
+    gAudioPortConfigFields.mPort = GetFieldIDOrDie(env, audioPortConfigClass, "mPort",
                                                    "Landroid/media/AudioPort;");
-    gAudioPortConfigFields.mSamplingRate = env->GetFieldID(audioPortConfigClass,
+    gAudioPortConfigFields.mSamplingRate = GetFieldIDOrDie(env, audioPortConfigClass,
                                                            "mSamplingRate", "I");
-    gAudioPortConfigFields.mChannelMask = env->GetFieldID(audioPortConfigClass,
+    gAudioPortConfigFields.mChannelMask = GetFieldIDOrDie(env, audioPortConfigClass,
                                                           "mChannelMask", "I");
-    gAudioPortConfigFields.mFormat = env->GetFieldID(audioPortConfigClass, "mFormat", "I");
-    gAudioPortConfigFields.mGain = env->GetFieldID(audioPortConfigClass, "mGain",
+    gAudioPortConfigFields.mFormat = GetFieldIDOrDie(env, audioPortConfigClass, "mFormat", "I");
+    gAudioPortConfigFields.mGain = GetFieldIDOrDie(env, audioPortConfigClass, "mGain",
                                                    "Landroid/media/AudioGainConfig;");
-    gAudioPortConfigFields.mConfigMask = env->GetFieldID(audioPortConfigClass, "mConfigMask", "I");
+    gAudioPortConfigFields.mConfigMask = GetFieldIDOrDie(env, audioPortConfigClass, "mConfigMask",
+                                                         "I");
 
-    jclass audioDevicePortConfigClass = env->FindClass("android/media/AudioDevicePortConfig");
-    gAudioDevicePortConfigClass = (jclass) env->NewGlobalRef(audioDevicePortConfigClass);
-    gAudioDevicePortConfigCstor = env->GetMethodID(audioDevicePortConfigClass, "<init>",
-                         "(Landroid/media/AudioDevicePort;IIILandroid/media/AudioGainConfig;)V");
+    jclass audioDevicePortConfigClass = FindClassOrDie(env, "android/media/AudioDevicePortConfig");
+    gAudioDevicePortConfigClass = MakeGlobalRefOrDie(env, audioDevicePortConfigClass);
+    gAudioDevicePortConfigCstor = GetMethodIDOrDie(env, audioDevicePortConfigClass, "<init>",
+            "(Landroid/media/AudioDevicePort;IIILandroid/media/AudioGainConfig;)V");
 
-    jclass audioMixPortConfigClass = env->FindClass("android/media/AudioMixPortConfig");
-    gAudioMixPortConfigClass = (jclass) env->NewGlobalRef(audioMixPortConfigClass);
-    gAudioMixPortConfigCstor = env->GetMethodID(audioMixPortConfigClass, "<init>",
-                         "(Landroid/media/AudioMixPort;IIILandroid/media/AudioGainConfig;)V");
+    jclass audioMixPortConfigClass = FindClassOrDie(env, "android/media/AudioMixPortConfig");
+    gAudioMixPortConfigClass = MakeGlobalRefOrDie(env, audioMixPortConfigClass);
+    gAudioMixPortConfigCstor = GetMethodIDOrDie(env, audioMixPortConfigClass, "<init>",
+            "(Landroid/media/AudioMixPort;IIILandroid/media/AudioGainConfig;)V");
 
-    jclass audioDevicePortClass = env->FindClass("android/media/AudioDevicePort");
-    gAudioDevicePortClass = (jclass) env->NewGlobalRef(audioDevicePortClass);
-    gAudioDevicePortCstor = env->GetMethodID(audioDevicePortClass, "<init>",
-             "(Landroid/media/AudioHandle;[I[I[I[Landroid/media/AudioGain;ILjava/lang/String;)V");
+    jclass audioDevicePortClass = FindClassOrDie(env, "android/media/AudioDevicePort");
+    gAudioDevicePortClass = MakeGlobalRefOrDie(env, audioDevicePortClass);
+    gAudioDevicePortCstor = GetMethodIDOrDie(env, audioDevicePortClass, "<init>",
+            "(Landroid/media/AudioHandle;[I[I[I[Landroid/media/AudioGain;ILjava/lang/String;)V");
 
-    jclass audioMixPortClass = env->FindClass("android/media/AudioMixPort");
-    gAudioMixPortClass = (jclass) env->NewGlobalRef(audioMixPortClass);
-    gAudioMixPortCstor = env->GetMethodID(audioMixPortClass, "<init>",
-                              "(Landroid/media/AudioHandle;I[I[I[I[Landroid/media/AudioGain;)V");
+    jclass audioMixPortClass = FindClassOrDie(env, "android/media/AudioMixPort");
+    gAudioMixPortClass = MakeGlobalRefOrDie(env, audioMixPortClass);
+    gAudioMixPortCstor = GetMethodIDOrDie(env, audioMixPortClass, "<init>",
+            "(Landroid/media/AudioHandle;I[I[I[I[Landroid/media/AudioGain;)V");
 
-    jclass audioGainClass = env->FindClass("android/media/AudioGain");
-    gAudioGainClass = (jclass) env->NewGlobalRef(audioGainClass);
-    gAudioGainCstor = env->GetMethodID(audioGainClass, "<init>", "(IIIIIIIII)V");
+    jclass audioGainClass = FindClassOrDie(env, "android/media/AudioGain");
+    gAudioGainClass = MakeGlobalRefOrDie(env, audioGainClass);
+    gAudioGainCstor = GetMethodIDOrDie(env, audioGainClass, "<init>", "(IIIIIIIII)V");
 
-    jclass audioGainConfigClass = env->FindClass("android/media/AudioGainConfig");
-    gAudioGainConfigClass = (jclass) env->NewGlobalRef(audioGainConfigClass);
-    gAudioGainConfigCstor = env->GetMethodID(audioGainConfigClass, "<init>",
+    jclass audioGainConfigClass = FindClassOrDie(env, "android/media/AudioGainConfig");
+    gAudioGainConfigClass = MakeGlobalRefOrDie(env, audioGainConfigClass);
+    gAudioGainConfigCstor = GetMethodIDOrDie(env, audioGainConfigClass, "<init>",
                                              "(ILandroid/media/AudioGain;II[II)V");
-    gAudioGainConfigFields.mIndex = env->GetFieldID(gAudioGainConfigClass, "mIndex", "I");
-    gAudioGainConfigFields.mMode = env->GetFieldID(audioGainConfigClass, "mMode", "I");
-    gAudioGainConfigFields.mChannelMask = env->GetFieldID(audioGainConfigClass, "mChannelMask",
+    gAudioGainConfigFields.mIndex = GetFieldIDOrDie(env, gAudioGainConfigClass, "mIndex", "I");
+    gAudioGainConfigFields.mMode = GetFieldIDOrDie(env, audioGainConfigClass, "mMode", "I");
+    gAudioGainConfigFields.mChannelMask = GetFieldIDOrDie(env, audioGainConfigClass, "mChannelMask",
                                                           "I");
-    gAudioGainConfigFields.mValues = env->GetFieldID(audioGainConfigClass, "mValues", "[I");
-    gAudioGainConfigFields.mRampDurationMs = env->GetFieldID(audioGainConfigClass,
+    gAudioGainConfigFields.mValues = GetFieldIDOrDie(env, audioGainConfigClass, "mValues", "[I");
+    gAudioGainConfigFields.mRampDurationMs = GetFieldIDOrDie(env, audioGainConfigClass,
                                                              "mRampDurationMs", "I");
 
-    jclass audioPatchClass = env->FindClass("android/media/AudioPatch");
-    gAudioPatchClass = (jclass) env->NewGlobalRef(audioPatchClass);
-    gAudioPatchCstor = env->GetMethodID(audioPatchClass, "<init>",
+    jclass audioPatchClass = FindClassOrDie(env, "android/media/AudioPatch");
+    gAudioPatchClass = MakeGlobalRefOrDie(env, audioPatchClass);
+    gAudioPatchCstor = GetMethodIDOrDie(env, audioPatchClass, "<init>",
 "(Landroid/media/AudioHandle;[Landroid/media/AudioPortConfig;[Landroid/media/AudioPortConfig;)V");
-    gAudioPatchFields.mHandle = env->GetFieldID(audioPatchClass, "mHandle",
+    gAudioPatchFields.mHandle = GetFieldIDOrDie(env, audioPatchClass, "mHandle",
                                                 "Landroid/media/AudioHandle;");
 
-    jclass eventHandlerClass = env->FindClass(kEventHandlerClassPathName);
-    gPostEventFromNative = env->GetStaticMethodID(eventHandlerClass, "postEventFromNative",
-                                            "(Ljava/lang/Object;IIILjava/lang/Object;)V");
+    jclass eventHandlerClass = FindClassOrDie(env, kEventHandlerClassPathName);
+    gPostEventFromNative = GetStaticMethodIDOrDie(env, eventHandlerClass, "postEventFromNative",
+                                                  "(Ljava/lang/Object;IIILjava/lang/Object;)V");
 
 
     AudioSystem::setErrorCallback(android_media_AudioSystem_error_callback);
 
-    int status = AndroidRuntime::registerNativeMethods(env,
-                kClassPathName, gMethods, NELEM(gMethods));
-
-    if (status == 0) {
-        status = AndroidRuntime::registerNativeMethods(env,
-                kEventHandlerClassPathName, gEventHandlerMethods, NELEM(gEventHandlerMethods));
-    }
-    return status;
+    RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, kEventHandlerClassPathName, gEventHandlerMethods,
+                                NELEM(gEventHandlerMethods));
 }

@@ -19,7 +19,7 @@
 
 #include "JNIHelp.h"
 #include "ScopedPrimitiveArray.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 #include "utils/misc.h"
 #include "utils/Log.h"
 #include "unicode/uchar.h"
@@ -193,8 +193,7 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_text_AndroidCharacter(JNIEnv* env)
 {
-    return AndroidRuntime::registerNativeMethods(env, "android/text/AndroidCharacter",
-            gMethods, NELEM(gMethods));
+    return RegisterMethodsOrDie(env, "android/text/AndroidCharacter", gMethods, NELEM(gMethods));
 }
 
 }

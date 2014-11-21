@@ -16,7 +16,7 @@
 
 #include "jni.h"
 #include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
+#include "core_jni_helpers.h"
 
 #include "SkAvoidXfermode.h"
 #include "SkPixelXorXfermode.h"
@@ -59,19 +59,15 @@ static JNINativeMethod gPixelXorMethods[] = {
     {"nativeCreate", "(I)J", (void*) SkXfermodeGlue::pixelxor_create}
 };
 
-#include <android_runtime/AndroidRuntime.h>
-
-#define REG(env, name, array)                                              \
-    result = android::AndroidRuntime::registerNativeMethods(env, name, array, \
-                                                  SK_ARRAY_COUNT(array));  \
-    if (result < 0) return result
-
 int register_android_graphics_Xfermode(JNIEnv* env) {
-    int result;
-    
-    REG(env, "android/graphics/Xfermode", gXfermodeMethods);
-    REG(env, "android/graphics/AvoidXfermode", gAvoidMethods);
-    REG(env, "android/graphics/PixelXorXfermode", gPixelXorMethods);
+    android::RegisterMethodsOrDie(env, "android/graphics/Xfermode", gXfermodeMethods,
+                                  NELEM(gXfermodeMethods));
+    android::RegisterMethodsOrDie(env, "android/graphics/Xfermode", gXfermodeMethods,
+                                  NELEM(gXfermodeMethods));
+    android::RegisterMethodsOrDie(env, "android/graphics/AvoidXfermode", gAvoidMethods,
+                                  NELEM(gAvoidMethods));
+    android::RegisterMethodsOrDie(env, "android/graphics/PixelXorXfermode", gPixelXorMethods,
+                                  NELEM(gPixelXorMethods));
 
     return 0;
 }
