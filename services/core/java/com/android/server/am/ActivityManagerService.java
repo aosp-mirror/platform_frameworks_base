@@ -13224,7 +13224,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             if (mReceiverResolver.dump(pw, needSep ?
                     "\n  Receiver Resolver Table:" : "  Receiver Resolver Table:",
-                    "    ", dumpPackage, false)) {
+                    "    ", dumpPackage, false, false)) {
                 needSep = true;
                 printedAnything = true;
             }
