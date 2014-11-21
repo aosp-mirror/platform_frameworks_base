@@ -17,15 +17,21 @@
 package com.android.keyguard;
 
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.telephony.PhoneConstants;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.WindowManager;
@@ -35,13 +41,22 @@ import android.view.WindowManager;
  */
 public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     private static final String LOG_TAG = "KeyguardSimPinView";
-    private static final boolean DEBUG = KeyguardConstants.DEBUG;
+    private static final boolean DEBUG = KeyguardConstants.DEBUG_SIM_STATES;
     public static final String TAG = "KeyguardSimPinView";
 
     private ProgressDialog mSimUnlockProgressDialog = null;
     private CheckSimPin mCheckSimPinThread;
 
     private AlertDialog mRemainingAttemptsDialog;
+    private int mSubId;
+
+    KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
+        @Override
+        public void onSimStateChanged(int subId, int slotId, State simState) {
+           if (DEBUG) Log.v(TAG, "onSimStateChanged(subId=" + subId + ",state=" + simState + ")");
+           resetState();
+       };
+    };
 
     public KeyguardSimPinView(Context context) {
         this(context, null);
@@ -53,7 +68,22 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
     public void resetState() {
         super.resetState();
-        mSecurityMessageDisplay.setMessage(R.string.kg_sim_pin_instructions, true);
+        if (DEBUG) Log.v(TAG, "Resetting state");
+        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+        mSubId = monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED);
+        if (mSubId != SubscriptionManager.INVALID_SUB_ID) {
+            int count = TelephonyManager.getDefault().getSimCount();
+            Resources rez = getResources();
+            final String msg;
+            if (count < 2) {
+                msg = rez.getString(R.string.kg_sim_pin_instructions);
+            } else {
+                SubscriptionInfo info = monitor.getSubscriptionInfoForSubId(mSubId);
+                CharSequence displayName = info != null ? info.getDisplayName() : ""; // don't crash
+                msg = rez.getString(R.string.kg_sim_pin_instructions_multi, displayName);
+            }
+            mSecurityMessageDisplay.setMessage(msg, true);
+        }
     }
 
     private String getPinPasswordErrorMessage(int attemptsRemaining) {
@@ -95,6 +125,18 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mUpdateMonitorCallback);
+    }
+
+    @Override
     public void showUsabilityHint() {
     }
 
@@ -113,9 +155,11 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
      */
     private abstract class CheckSimPin extends Thread {
         private final String mPin;
+        private int mSubId;
 
-        protected CheckSimPin(String pin) {
+        protected CheckSimPin(String pin, int subId) {
             mPin = pin;
+            mSubId = subId;
         }
 
         abstract void onSimCheckResponse(final int result, final int attemptsRemaining);
@@ -123,10 +167,14 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         @Override
         public void run() {
             try {
-                Log.v(TAG, "call supplyPinReportResult()");
+                if (DEBUG) {
+                    Log.v(TAG, "call supplyPinReportResultForSubscriber(subid=" + mSubId + ")");
+                }
                 final int[] result = ITelephony.Stub.asInterface(ServiceManager
-                        .checkService("phone")).supplyPinReportResult(mPin);
-                Log.v(TAG, "supplyPinReportResult returned: " + result[0] + " " + result[1]);
+                        .checkService("phone")).supplyPinReportResultForSubscriber(mSubId, mPin);
+                if (DEBUG) {
+                    Log.v(TAG, "supplyPinReportResult returned: " + result[0] + " " + result[1]);
+                }
                 post(new Runnable() {
                     public void run() {
                         onSimCheckResponse(result[0], result[1]);
@@ -187,15 +235,17 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         getSimUnlockProgressDialog().show();
 
         if (mCheckSimPinThread == null) {
-            mCheckSimPinThread = new CheckSimPin(mPasswordEntry.getText()) {
+            mCheckSimPinThread = new CheckSimPin(mPasswordEntry.getText(), mSubId) {
                 void onSimCheckResponse(final int result, final int attemptsRemaining) {
                     post(new Runnable() {
                         public void run() {
                             if (mSimUnlockProgressDialog != null) {
                                 mSimUnlockProgressDialog.hide();
                             }
+                            resetPasswordText(true /* animate */);
                             if (result == PhoneConstants.PIN_RESULT_SUCCESS) {
-                                KeyguardUpdateMonitor.getInstance(getContext()).reportSimUnlocked();
+                                KeyguardUpdateMonitor.getInstance(getContext())
+                                        .reportSimUnlocked(mSubId);
                                 mCallback.dismiss(true);
                             } else {
                                 if (result == PhoneConstants.PIN_PASSWORD_INCORRECT) {
@@ -216,7 +266,6 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                                 if (DEBUG) Log.d(LOG_TAG, "verifyPasswordAndUnlock "
                                         + " CheckSimPin.onSimCheckResponse: " + result
                                         + " attemptsRemaining=" + attemptsRemaining);
-                                resetPasswordText(true /* animate */);
                             }
                             mCallback.userActivity();
                             mCheckSimPinThread = null;
