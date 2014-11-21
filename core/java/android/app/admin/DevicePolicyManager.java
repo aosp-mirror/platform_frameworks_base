@@ -1345,6 +1345,24 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns the profile with the smallest maximum failed passwords for wipe,
+     * for the given user. So for primary user, it might return the primary or
+     * a managed profile. For a secondary user, it would be the same as the
+     * user passed in.
+     * @hide Used only by Keyguard
+     */
+    public int getProfileWithMinimumFailedPasswordsForWipe(int userHandle) {
+        if (mService != null) {
+            try {
+                return mService.getProfileWithMinimumFailedPasswordsForWipe(userHandle);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return UserHandle.USER_NULL;
+    }
+
+    /**
      * Flag for {@link #resetPassword}: don't allow other admins to change
      * the password again until the user has entered it.
      */
