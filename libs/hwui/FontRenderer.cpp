@@ -47,7 +47,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // TextSetupFunctor
 ///////////////////////////////////////////////////////////////////////////////
-status_t TextSetupFunctor::operator ()(int what, void* data) {
+status_t TextSetupFunctor::operator ()(int /* what */, void* data) {
     Data* typedData = reinterpret_cast<Data*>(data);
     GLenum glyphFormat = typedData ? typedData->glyphFormat : GL_ALPHA;
 

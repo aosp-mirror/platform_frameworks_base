@@ -385,13 +385,13 @@ private:
 
     bool bindIndicesBufferInternal(const GLuint buffer);
 
-    static void eventMarkNull(GLsizei length, const GLchar* marker) { }
-    static void startMarkNull(GLsizei length, const GLchar* marker) { }
+    static void eventMarkNull(GLsizei /* length */, const GLchar* /* marker */) { }
+    static void startMarkNull(GLsizei /* length */, const GLchar* /* marker */) { }
     static void endMarkNull() { }
 
-    static void setLabelNull(GLenum type, uint object, GLsizei length,
-            const char* label) { }
-    static void getLabelNull(GLenum type, uint object, GLsizei bufferSize,
+    static void setLabelNull(GLenum /* type */, uint /* object */, GLsizei /* length */,
+            const char* /* label */) { }
+    static void getLabelNull(GLenum /* type */, uint /* object */, GLsizei /* bufferSize */,
             GLsizei* length, char* label) {
         if (length) *length = 0;
         if (label) *label = '\0';

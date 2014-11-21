@@ -344,13 +344,15 @@ void RenderProxy::trimMemory(int level) {
     }
 }
 
+template <typename T>
+void UNUSED(T) {}
+
+
 CREATE_BRIDGE0(fence) {
     // Intentionally empty
+    UNUSED(args);
     return NULL;
 }
-
-template <typename T>
-void UNUSED(T t) {}
 
 void RenderProxy::fence() {
     SETUP_TASK(fence);

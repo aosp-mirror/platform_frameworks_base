@@ -70,7 +70,7 @@ public:
         }
     }
 
-    FontRenderer& getFontRenderer(const SkPaint* paint) {
+    FontRenderer& getFontRenderer(const SkPaint* /* paint */) {
         if (!mRenderer) {
             mRenderer = new FontRenderer;
         }
@@ -81,7 +81,7 @@ public:
         return 1;
     }
 
-    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
+    uint32_t getFontRendererSize(uint32_t /* fontRenderer */, GLenum format) const {
         return mRenderer ? mRenderer->getCacheSize(format) : 0;
     }
 
@@ -116,7 +116,7 @@ public:
         }
     }
 
-    FontRenderer& getFontRenderer(const SkPaint* paint) {
+    FontRenderer& getFontRenderer(const SkPaint* /* paint */) {
         if (!mRenderer) {
             mRenderer = new FontRenderer;
             mRenderer->setGammaTable(&mGammaTable[0]);
@@ -128,14 +128,14 @@ public:
         return 1;
     }
 
-    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
+    uint32_t getFontRendererSize(uint32_t /* fontRenderer */, GLenum format) const {
         return mRenderer ? mRenderer->getCacheSize(format) : 0;
     }
 
-    void describe(ProgramDescription& description, const SkPaint* paint) const {
+    void describe(ProgramDescription& /* description */, const SkPaint* /* paint */) const {
     }
 
-    void setupProgram(ProgramDescription& description, Program* program) const {
+    void setupProgram(ProgramDescription& /* description */, Program* /* program */) const {
     }
 
     void endPrecaching();
@@ -171,10 +171,10 @@ public:
         return renderer->getCacheSize(format);
     }
 
-    void describe(ProgramDescription& description, const SkPaint* paint) const {
+    void describe(ProgramDescription& /* description */, const SkPaint* /* paint */) const {
     }
 
-    void setupProgram(ProgramDescription& description, Program* program) const {
+    void setupProgram(ProgramDescription& /* description */, Program* /* program */) const {
     }
 
     void endPrecaching();
