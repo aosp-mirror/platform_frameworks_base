@@ -66,6 +66,7 @@ interface IDevicePolicyManager {
 
     boolean isActivePasswordSufficient(int userHandle);
     int getCurrentFailedPasswordAttempts(int userHandle);
+    int getProfileWithMinimumFailedPasswordsForWipe(int userHandle);
 
     void setMaximumFailedPasswordsForWipe(in ComponentName admin, int num, int userHandle);
     int getMaximumFailedPasswordsForWipe(in ComponentName admin, int userHandle);
