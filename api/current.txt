@@ -34456,6 +34456,7 @@ package android.view {
     method public final android.content.Context getContext();
     method public abstract android.view.View getCurrentFocus();
     method public abstract android.view.View getDecorView();
+    method public static int getDefaultFeatures(android.content.Context);
     method public android.transition.Transition getEnterTransition();
     method public android.transition.Transition getExitTransition();
     method protected final int getFeatures();
@@ -34557,7 +34558,7 @@ package android.view {
     method public abstract void takeKeyEvents(boolean);
     method public abstract void takeSurface(android.view.SurfaceHolder.Callback2);
     method public abstract void togglePanel(int, android.view.KeyEvent);
-    field protected static final int DEFAULT_FEATURES = 65; // 0x41
+    field protected static final deprecated int DEFAULT_FEATURES = 65; // 0x41
     field public static final int FEATURE_ACTION_BAR = 8; // 0x8
     field public static final int FEATURE_ACTION_BAR_OVERLAY = 9; // 0x9
     field public static final int FEATURE_ACTION_MODE_OVERLAY = 10; // 0xa
