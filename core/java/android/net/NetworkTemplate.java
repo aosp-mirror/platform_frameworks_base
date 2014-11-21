@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
 import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
@@ -34,9 +35,9 @@ import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Objects;
-
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Objects;
 
 /**
  * Template definition used to generically match {@link NetworkIdentity},
@@ -53,6 +54,7 @@ public class NetworkTemplate implements Parcelable {
     public static final int MATCH_ETHERNET = 5;
     public static final int MATCH_MOBILE_WILDCARD = 6;
     public static final int MATCH_WIFI_WILDCARD = 7;
+    public static final int MATCH_BLUETOOTH = 8;
 
     /**
      * Set of {@link NetworkInfo#getType()} that reflect data usage.
@@ -132,6 +134,14 @@ public class NetworkTemplate implements Parcelable {
      */
     public static NetworkTemplate buildTemplateEthernet() {
         return new NetworkTemplate(MATCH_ETHERNET, null, null);
+    }
+
+    /**
+     * Template to combine all {@link ConnectivityManager#TYPE_BLUETOOTH} style
+     * networks together.
+     */
+    public static NetworkTemplate buildTemplateBluetooth() {
+        return new NetworkTemplate(MATCH_BLUETOOTH, null, null);
     }
 
     private final int mMatchRule;
@@ -222,6 +232,8 @@ public class NetworkTemplate implements Parcelable {
                 return matchesMobileWildcard(ident);
             case MATCH_WIFI_WILDCARD:
                 return matchesWifiWildcard(ident);
+            case MATCH_BLUETOOTH:
+                return matchesBluetooth(ident);
             default:
                 throw new IllegalArgumentException("unknown network template");
         }
@@ -316,6 +328,16 @@ public class NetworkTemplate implements Parcelable {
         }
     }
 
+    /**
+     * Check if matches Bluetooth network template.
+     */
+    private boolean matchesBluetooth(NetworkIdentity ident) {
+        if (ident.mType == TYPE_BLUETOOTH) {
+            return true;
+        }
+        return false;
+    }
+
     private static String getMatchRuleName(int matchRule) {
         switch (matchRule) {
             case MATCH_MOBILE_3G_LOWER:
@@ -332,6 +354,8 @@ public class NetworkTemplate implements Parcelable {
                 return "MOBILE_WILDCARD";
             case MATCH_WIFI_WILDCARD:
                 return "WIFI_WILDCARD";
+            case MATCH_BLUETOOTH:
+                return "BLUETOOTH";
             default:
                 return "UNKNOWN";
         }
