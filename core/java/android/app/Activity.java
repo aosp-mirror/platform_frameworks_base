@@ -5620,6 +5620,16 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * @hide
+     */
+    public void dispatchEnterAnimationComplete() {
+        onEnterAnimationComplete();
+        if (getWindow() != null && getWindow().getDecorView() != null) {
+            getWindow().getDecorView().getViewTreeObserver().dispatchOnEnterAnimationComplete();
+        }
+    }
+
+    /**
      * Adjust the current immersive mode setting.
      *
      * Note that changing this value will have no effect on the activity's
