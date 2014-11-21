@@ -3813,7 +3813,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Display the error later, after the first layout pass
             post(new Runnable() {
                 public void run() {
-                    setError(error);
+                    if (mEditor == null || !mEditor.mErrorWasChanged) {
+                        setError(error);
+                    }
                 }
             });
         }
