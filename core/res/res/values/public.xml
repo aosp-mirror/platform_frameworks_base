@@ -2602,4 +2602,7 @@
     <public type="attr" name="dialogPreferredPadding" />
     <public type="attr" name="searchHintIcon" />
 
+    <public type="style" name="Theme.DeviceDefault.Dialog.Alert" />
+    <public type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" />
+
 </resources>
