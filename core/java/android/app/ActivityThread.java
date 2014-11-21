@@ -2536,7 +2536,7 @@ public final class ActivityThread {
     private void handleEnterAnimationComplete(IBinder token) {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
-            r.activity.onEnterAnimationComplete();
+            r.activity.dispatchEnterAnimationComplete();
         }
     }
 

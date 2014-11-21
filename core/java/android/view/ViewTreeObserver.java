@@ -37,6 +37,8 @@ public final class ViewTreeObserver {
     private CopyOnWriteArrayList<OnWindowAttachListener> mOnWindowAttachListeners;
     private CopyOnWriteArrayList<OnGlobalFocusChangeListener> mOnGlobalFocusListeners;
     private CopyOnWriteArrayList<OnTouchModeChangeListener> mOnTouchModeChangeListeners;
+    private CopyOnWriteArrayList<OnEnterAnimationCompleteListener>
+            mOnEnterAnimationCompleteListeners;
 
     // Non-recursive listeners use CopyOnWriteArray
     // Any listener invoked from ViewRootImpl.performTraversals() should not be recursive
@@ -313,6 +315,13 @@ public final class ViewTreeObserver {
          * returned, if there are multiple such listeners in the window.
          */
         public void onComputeInternalInsets(InternalInsetsInfo inoutInfo);
+    }
+
+    /**
+     * @hide
+     */
+    public interface OnEnterAnimationCompleteListener {
+        public void onEnterAnimationComplete();
     }
 
     /**
@@ -780,6 +789,29 @@ public final class ViewTreeObserver {
         mOnComputeInternalInsetsListeners.remove(victim);
     }
 
+    /**
+     * @hide
+     */
+    public void addOnEnterAnimationCompleteListener(OnEnterAnimationCompleteListener listener) {
+        checkIsAlive();
+        if (mOnEnterAnimationCompleteListeners == null) {
+            mOnEnterAnimationCompleteListeners =
+                    new CopyOnWriteArrayList<OnEnterAnimationCompleteListener>();
+        }
+        mOnEnterAnimationCompleteListeners.add(listener);
+    }
+
+    /**
+     * @hide
+     */
+    public void removeOnEnterAnimationCompleteListener(OnEnterAnimationCompleteListener listener) {
+        checkIsAlive();
+        if (mOnEnterAnimationCompleteListeners == null) {
+            return;
+        }
+        mOnEnterAnimationCompleteListeners.remove(listener);
+    }
+
     private void checkIsAlive() {
         if (!mAlive) {
             throw new IllegalStateException("This ViewTreeObserver is not alive, call "
@@ -1017,6 +1049,23 @@ public final class ViewTreeObserver {
                 }
             } finally {
                 listeners.end();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public final void dispatchOnEnterAnimationComplete() {
+        // NOTE: because of the use of CopyOnWriteArrayList, we *must* use an iterator to
+        // perform the dispatching. The iterator is a safe guard against listeners that
+        // could mutate the list by calling the various add/remove methods. This prevents
+        // the array from being modified while we iterate it.
+        final CopyOnWriteArrayList<OnEnterAnimationCompleteListener> listeners =
+                mOnEnterAnimationCompleteListeners;
+        if (listeners != null && !listeners.isEmpty()) {
+            for (OnEnterAnimationCompleteListener listener : listeners) {
+                listener.onEnterAnimationComplete();
             }
         }
     }
