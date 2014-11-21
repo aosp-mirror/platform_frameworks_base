@@ -51,7 +51,7 @@
       <li><a href="<?cs var:toroot ?>design/style/color.html">Color</a></li>
       <li><a href="<?cs var:toroot ?>design/style/iconography.html">Iconography</a></li>
       <li><a href="<?cs var:toroot ?>design/style/branding.html">Your Branding</a></li>
-      <li><a href="<?cs var:toroot ?>design/style/writing.html">Writing Style</a></li>
+      <li><a href="<?cs var:toroot ?>design/style/writing.html" zh-cn-lang="写作风格">Writing Style</a></li>
     </ul>
   </li>
 

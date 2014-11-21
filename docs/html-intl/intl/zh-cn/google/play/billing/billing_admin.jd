@@ -1,0 +1,364 @@
+page.title=管理应用内结算
+parent.title=In-app Billing
+parent.link=index.html
+@jd:body
+
+      <div id="qv-wrapper">
+  <div id="qv">
+    <h2>本文内容</h2>
+    <ol>
+      <li><a href="#billing-list-setup">创建商品列表</a></li>
+      <li><a href="#billing-purchase-type">选择商品类型</a></li>
+      <li><a href="#billing-testing-setup">设置测试帐户</a></li>
+      <li><a href="#billing-refunds">处理退款</a></li>
+      <li><a href="#billing-refunds">使用订单号</a></li>
+      <li><a href="#billing-support">获取相关支持</a></li>
+    </ol>
+
+    
+    <h2>另请参见</h2>
+    <ol>
+      <li><a href="{@docRoot}google/play/billing/billing_overview.html">应用内结算概述</a></li>
+    </ol>
+  </div>
+  </div>
+
+  <p>如果您使用应用内结算，您就无需处理任何财务交易。不过，您仍需执行一些管理任务，包括在 Google Play 开发者控制台上创建和维护您的商品列表、注册测试帐户以及在需要时处理退款。</p>
+
+  <p>您必须有 Google Play 发布商帐户才能注册测试帐户。而且，您必须有 Google 电子钱包商家帐户才能创建商品列表以及向用户发放退款。如果您已有 Google Play 发布商帐户，则可以使用您的现有帐户，无需注册新帐户就能使用应用内结算。</p>
+
+  <p>如果您没有发布商帐户，可以在 <a href="http://play.google.com/apps/publish">Google Play 开发者控制台</a>中以 Google Play 开发者的身份注册设置一个发布商帐户。如果您没有 Google 电子钱包商家帐户，也可以通过开发者控制台注册一个。</p>
+
+  <h2 id="billing-list-setup">创建商品列表</h2>
+
+  <p>Google Play 开发者控制台为您发布的每个应用都提供一份商品列表。您可以使用 Google Play 的应用内结算功能销售商品，但前提是该商品已在应用的商品列表中列出。每个应用都有自己的商品列表，您不能在某个应用中销售其他应用的商品列表中列出的商品。</p>
+
+  <p>您可以点击开发者帐户中列出的应用内的<strong>应用内商品</strong>链接，访问该应用的商品列表（参见图 1）。只有当您拥有 Google 电子钱包商家帐户且该应用的清单中包含 <code>com.android.vending.BILLING</code> 权限时，<strong>应用内商品</strong>链接才会显示。</p>
+
+  <p>商品列表列出了您在应用内销售的商品（应用内商品、订阅内容或两者的组合）。对于每件商品，商品列表中都会包含商品 ID、商品说明和价格等信息。商品列表只存储应用内所售商品的相关元数据，而不会存储任何数字内容。应用内销售的数字内容的存储和发送是由您负责的。</p>
+
+  <div style="margin:1em">
+  <img src="{@docRoot}images/in-app-billing/billing_product_list.png" id="figure1" style="border:1px solid #ddd;padding-bottom:.5em" xheight="548" />
+  <p class="img-caption" style="padding-left:.5em">
+    <strong>图 1. </strong> 您可以点击“应用”主导航面板中的<strong>应用内商品</strong>链接，访问应用的商品列表。
+  </p>
+  </div>
+
+  <p>您可以为所有已发布的应用或者 Alpha 或 Beta 渠道中的所有应用（这些应用上传并保存到开发者控制台）创建商品列表。不过，您必须有 Google 电子钱包商家帐户且该应用的清单中必须包含 <code>com.android.vending.BILLING</code> 权限。如果应用的清单中未包含此权限，您只能在商品列表中修改现有商品但不能向该列表添加新商品。要详细了解此权限，请参阅<a href="{@docRoot}google/play/billing/billing_integrate.html#billing-permission">更新您应用的清单</a>。</p>
+
+  <p class="note"><strong>注意</strong>：过去，您可以通过上传未发布的“草稿”版本来测试应用，但现在系统已不再支持此功能。因此，您必须将应用发布到 Alpha 或 Beta 分发渠道，才能进行测试。有关详情，请参阅<a href="{@docRoot}google/play/billing/billing_testing.html#draft_apps">草稿应用不再受支持</a>。
+
+  <p>此外，一个应用包只能有一个商品列表。如果您为某个应用创建商品列表且使用<a href="{@docRoot}google/play/publishing/multiple-apks.html">多 APK 功能</a>为该应用分发多个 APK，那么此商品列表将应用到与该应用商品详情相关联的所有 APK 版本。如果您使用的是多 APK 功能，则无法为各个 APK 创建单独的商品列表。</p>
+
+  <p>您可以通过两种方式向商品列表添加商品：通过应用内商品界面逐一添加商品（参见图 2）；通过导入逗号分隔值 (CSV) 文件中的商品批量添加商品。如果您的应用只有几件应用内商品或您只是向商品列表添加几件测试商品，那么逐一添加商品这种方法就非常实用。如果您的应用有大量应用内商品，使用 CSV 文件的方法就较为实用。</p>
+
+  <p class="note"><strong>注意</strong>：目前系统尚不支持批量上传包含订阅内容的商品列表。</p>
+
+  <h3 id="billing-form-add">向商品列表逐一添加商品</h3>
+
+  <p>要通过应用内商品界面向商品列表添加一件商品，请按以下步骤操作：</p>
+
+  <ol>
+    <li><a href="http://play.google.com/apps/publish">登录</a>到您的发布商帐户。</li>
+    <li>在<strong>所有应用</strong>面板中，点击相应的应用名称，然后选择<strong>应用内商品</strong>。</li>
+    <li>点击<strong>添加新商品</strong>（参见图 2），提供所售商品的详细信息，然后点击<strong>保存</strong>或<strong>发布</strong>。</li>
+  </ol>
+
+  <div style="margin:1em">
+  <img src="{@docRoot}images/in-app-billing/billing_add.png" height="300" id="figure2" style="border:1px solid #ddd;padding-bottom:.5em" />
+  <p class="img-caption" style="padding-left:.5em">
+    <strong>图 2. </strong> 通过“添加新商品”页面，您可以向应用的商品列表添加商品。
+  </p>
+  </div>
+
+  <p>对于商品列表中的每件商品，您都必须输入以下信息：</p>
+  <ul>
+    <li><strong>应用内商品 ID</strong>
+      <p>每件商品的 ID 在应用的命名空间中都是独一无二的。商品 ID 必须以小写字母或数字开头，且只能由小写字母 (a-z)、数字 (0-9)、下划线 (_) 和点 (.) 组成。商品 ID“android.test”是系统预留的 ID，所有以“android.test”开头的商品 ID 都是如此。</p>
+      <p>此外，商品的商品 ID 创建后就无法再修改，而且您不能重复使用任何商品 ID。</p>
+    </li>
+    <li><strong>商品类型</strong>
+      <p>商品类型可以是<strong>按用户帐户管理的商品</strong>、<strong>不受管理的商品</strong>或<strong>订阅内容</strong>。商品类型设置后就无法再更改。有关详情，请参阅下文中的<a href="#billing-purchase-type">选择商品类型</a>。</p>
+    </li>
+    <li><strong>发布状态</strong>
+      <p>商品的发布状态可以是<strong>已发布</strong>或<strong>未发布</strong>。为了让用户在结帐时可以看到所购商品，该商品的发布状态必须设置为<strong>已发布</strong>且该商品所属的应用必须已发布到 Google Play 上。</p>
+      <p class="note"><strong>注意</strong>：这种情况并不适用于测试帐户。也就是说，对于测试帐户来说，即使应用未发布而商品已发布，测试帐户中的用户是可以看到该商品的。有关详情，请参阅<a href="{@docRoot}google/play/billing/billing_testing.html#billing-testing-real">测试应用内结算</a>。</p>
+    </li>
+    <li><strong>语言和翻译</strong>
+      <p>您可以使用“添加翻译”按钮，为您的应用内商品提供经过本地化的标题和说明。如果您希望 Google Play 根据您的默认语言为您翻译标题和说明，只需点击您要提供的语言即可。如果您想自行翻译成特定语言，也是可以的。默认情况下，应用内商品会沿用其所属应用的默认语言。</p>
+    </li>
+    <li><strong>标题</strong>
+      <p>标题是对商品的简短描述，例如“沉睡药水”。每个标题在应用的命名空间中必须是独一无二的，且每件商品都必须有标题。标题在用户结帐时必须显示。为了获得最佳的显示效果，标题不应超过 25 个字符；不过，标题最长可达 55 个字符。</p>
+    </li>
+    <li><strong>说明</strong>
+      <p>说明是对商品的详细描述，例如“立即让服用者陷入沉睡，但对愤怒的精灵无效”。每件商品都必须有一段说明，最长可达 80 个字符。</p>
+    </li>
+    <li><strong>价格</strong>
+      <p>您必须提供一个以您本地货币为单位的默认价格。您也可以提供以其他货币为单位的价格，但前提是此货币所属的国家/地区是您的应用要定位的目标国家/地区。您可以在 Google Play 开发者控制台中的“修改应用”页面上指定目标国家/地区。</p>
+      <p>要指定以其他货币为单位的价格，您可以手动输入与每种货币对应的价格，也可以点击<strong>自动填充</strong>，让 Google Play 一次性将您的本地货币换算成目标货币（参见图 3）。</p>
+      <p>请注意，订阅型商品发布后就无法再更改其价格。</p>
+    </li>
+  </ul>
+
+  <div style="margin:1em">
+  <img src="{@docRoot}images/in-app-billing/billing_list_form_2.png" id="figure3" style="border:1px solid #ddd;padding-bottom:.5em" xheight="1226" />
+  <p class="img-caption" style="padding-left:.5em">
+    <strong>图 3. </strong> 为应用内商品指定其他货币。
+  </p>
+  </div>
+
+  <p>要详细了解商品 ID 和商品列表，请参阅<a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=zh-CN&amp;answer=1072599">创建应用内商品 ID</a>。要详细了解定价，请参阅<a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=zh-CN&amp;answer=1153485">应用内结算定价</a>。</p>
+
+  <p class="note"><strong>注意</strong>：请务必规划好您的商品 ID 命名空间。商品 ID 保存后就无法再重复使用或更改。</p>
+
+  <h3 id="billing-bulk-add">向商品列表批量添加商品</h3>
+
+  <p>要使用 CSV 文件向商品列表批量添加商品，您需要先创建 CSV 文件。您在 CSV 文件中指定的数据值与您通过应用内商品界面手动指定的数据值相同（请参阅<a href="#billing-form-add">向商品列表逐一添加商品</a>）。
+
+  <p>如果您通过 CSV 文件导入和导出应用内商品，请记得提供含税价格。如果您使用自动填充，请提供不含税的默认价格，系统会自动填充含税的价格。如果您不使用自动填充，您提供的价格必须是含税价格。</p>
+
+  <p class="note"><strong>注意</strong>：目前系统尚不支持批量上传包含订阅内容的商品列表。</p>
+
+  CSV 文件使用逗号 (,) 和分号 (;) 来分隔数据值。逗号用来分隔主要数据值，分号用来分隔次要数据值。例如，CSV 文件的语法如下所示：</p>
+
+  <p>"<em>product_id</em>","<em>publish_state</em>","<em>purchase_type</em>","<em>autotranslate</em>
+  ","<em>locale</em>; <em>title</em>; <em>description</em>","<em>autofill</em>","<em>country</em>;
+  <em>price</em>"
+  </p>
+
+  <p>相关说明和使用详情如下所示。</p>
+
+  <ul>
+    <li><em>product_id</em>
+      <p>等同于应用内商品界面中的“应用内商品 ID”设置。如果您指定的“product_id”在商品列表中已经存在，且您选择在导入 CSV 文件时覆盖商品列表，则 CSV 文件中指定的值就会覆盖现有商品的数据。<em></em>覆盖功能不会删除商品列表中已列出但不包含在 CSV 文件中的商品。</p>
+    </li>
+    <li><em>publish_state</em>
+      <p>等同于应用内商品界面中的“发布状态”设置。值可以是 <code>published</code> 或 <code>unpublished</code>。</p>
+    </li>
+    <li><em>purchase_type</em>
+      <p>等同于应用内商品界面中的“商品类型”设置。值可以是 <code>managed_by_android</code>（等同于应用内商品界面中的<strong>按用户帐户管理的商品</strong>）或 <code>managed_by_publisher</code>（等同于应用内商品界面中的<strong>不受管理的商品</strong>）。</p>
+    </li>
+    <li><em>autotranslate</em>
+      <p>等同于选中应用内商品界面中的<strong>使用自动翻译填充字段</strong>复选框。值可以是 <code>true</code> 或 <code>false</code>。</p>
+    </li>
+    <li><em>locale</em>
+      <p>等同于应用内商品界面中的“语言”设置。您必须有一个默认语言区域项。默认语言区域必须是语言区域列表中的第一项，且必须包含“title”和“description”。<em></em><em></em>如果除默认语言外您还想提供翻译版本的“title”和“description”，则必须使用下面的语法规则：<em></em><em></em></p>
+      <p>如果“autotranslate”为 <code>true</code>，您必须按照以下格式指定默认语言区域、默认标题、默认说明及其他语言区域：<em></em></p>
+      <p>"true,"<em>default_locale</em>; <em>default_locale_title</em>;
+      <em>default_locale_description</em>; <em>locale_2</em>;    <em>locale_3</em>, ..."</p>
+      <p>如果“autotranslate”为 <code>false</code>，您必须按照以下格式指定默认语言区域、默认标题、默认说明以及翻译后的标题和说明：<em></em></p>
+      <p>"false,"<em>default_locale</em>; <em>default_locale_title</em>;
+      <em>default_locale_description</em>; <em>locale_2</em>; <em>locale_2_title</em>;
+      <em>local_2_description</em>; <em>locale_3</em>; <em>locale_3_title</em>;
+       <em>locale_3_description</em>; ..."</p>
+      <p>请参见表 1，了解您可以在<em></em>“locale”字段中使用的语言代码的列表。</p>
+    </li>
+    <li><em>title</em>
+      <p>等同于应用内商品界面中的“标题”设置。如果“title”包含分号，必须使用反斜杠进行转义（例如“\;”）。<em></em>如果标题本身包含反斜杠，也应使用反斜杠进行转义（例如“\\”）。</p>
+    </li>
+    <li><em>description</em>
+      <p>等同于应用内商品界面中的“说明”。如果“description”包含分号，则必须使用反斜杠进行转义（例如“\;”）。<em></em>如果说明本身包含反斜杠，也应使用反斜杠进行转义（例如“\\”）。</p>
+    </li>
+    <li><em>autofill</em>
+      <p>等同于点击应用内商品界面中的<strong>自动填充</strong>。值可以是 <code>true</code> 或 <code>false</code>。用于指定“country”和“price”的语法视您使用的“autofill”设置而定。<em></em><em></em><em></em></p>
+      <p>如果“autofill”设为 <code>true</code>，您只需指定采用本地货币的默认价格且必须使用以下语法：<em></em></p>
+      <p>"true","<em>default_price_in_home_currency</em>"
+      <p><em></em>如果“autofill”设为 <code>false</code>，您需要为每种货币指定“country”和“price”且必须使用以下语法：<em></em><em></em></p>
+      <p>"false", "<em>home_country</em>; <em>default_price_in_home_currency</em>; <em>country_2</em>;
+      <em>country_2_price</em>; <em>country_3</em>; <em>country_3_price</em>; ..."</p>
+    </p></li>
+    <li><em>country</em>
+      <p>您为其指定价格的国家/地区。您只能列出您的应用所定位的国家/地区。国家/地区代码是按照 <a href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166-2</a> 的定义，由两个大写字母组成的 ISO 国家/地区代码（例如“US”）。</p>
+    </li>
+    <li><em>price</em>
+      <p>等同于应用内商品界面中的“价格”。此价格必须使用微单位指定。要将货币值换算成微单位，请用实际值乘以 1,000,000。例如，如果您要以 1.99 元销售某件应用内商品，则需要在“price”字段中输入 1990000。<em></em></p>
+    </li>
+  </ul>
+
+  <p class="table-caption" id="language-table"><strong>表 1. </strong> 您可以在“locale”字段中使用的语言代码。<em></em></p>
+
+  <table>
+
+  <tr>
+  <th>语言</th>
+  <th>代码</th>
+  <th>语言</th>
+  <th>代码</th>
+  </tr>
+  <tr>
+  <td>中文</td>
+  <td>zh_TW</td>
+  <td>意大利语</td>
+  <td>it_IT</td>
+  </tr>
+  <tr>
+  <td>捷克语</td>
+  <td>cs_CZ</td>
+  <td>日语</td>
+  <td>ja_JP</td>
+  </tr>
+  <tr>
+  <td>丹麦语</td>
+  <td>da_DK</td>
+  <td>韩语</td>
+  <td>ko_KR</td>
+  </tr>
+  <tr>
+  <td>荷兰语</td>
+  <td>nl_NL</td>
+  <td>挪威语</td>
+  <td>no_NO</td>
+  </tr>
+  <tr>
+  <td>英语</td>
+  <td>en_US</td>
+  <td>波兰语</td>
+  <td>pl_PL</td>
+  </tr>
+  <tr>
+  <td>法语</td>
+  <td>fr_FR</td>
+  <td>葡萄牙语</td>
+  <td>pt_PT</td>
+  </tr>
+  <tr>
+  <td>芬兰语</td>
+  <td>fi_FI</td>
+  <td>俄语</td>
+  <td>ru_RU</td>
+  </tr>
+  <tr>
+  <td>德语</td>
+  <td>de_DE</td>
+  <td>西班牙语</td>
+  <td>es_ES</td>
+  </tr>
+  <tr>
+  <td>希伯来语</td>
+  <td>iw_IL</td>
+  <td>瑞典语</td>
+  <td>sv_SE</td>
+  </tr>
+  <tr>
+  <td>印地语</td>
+  <td>hi_IN</td>
+  <td>--</td>
+  <td>--</td>
+  </tr>
+  </table>
+
+  <p>要导入您在 CSV 文件中指定的商品，请执行以下操作：</p>
+
+  <ol>
+    <li><a href="http://play.google.com/apps/publish">登录</a>到您的发布商帐户。</li>
+    <li>在<strong>所有应用</strong>面板中，点击相应的应用名称，然后选择<strong>应用内商品</strong>。</li>
+    <li>在“应用内商品列表”页面上，点击<strong>导入/导出</strong> &gt; <strong>从 CSV 文件中导入应用内商品</strong>，然后选择 CSV 文件。
+      <p>CSV 文件必须位于您的本地计算机上或连接到您计算机的本地磁盘上。</p>
+    </li>
+    <li>如果您想覆盖商品列表中的现有商品，请选中<strong>覆盖</strong>复选框。
+      <p>只有当 CSV 文件中的“product_id”值与商品列表中现有商品的应用内商品 ID 一致时，此选项才会覆盖现有商品的值。<em></em>覆盖功能不会删除商品列表中已列出但不包含在 CSV 文件中的商品。</p>
+    </li>
+  </ol>
+
+  <p>您还可以点击“应用内商品列表”页面上的<strong>导出为 CSV</strong>，将现有商品列表导出为 CSV 文件。如果您已将商品手动添加到商品列表，但现在想开始通过 CSV 文件管理该商品列表，此功能就非常有用。</p>
+
+  <h3 id="billing-purchase-type">选择商品类型</h3>
+
+  <p>商品的商品类型用来控制 Google Play 如何管理该商品的购买流程。商品类型有以下三种：“按用户帐户管理的商品”、“不受管理的商品”和“订阅内容”。但请注意，不同版本的应用内结算服务支持的商品类型不同，因此务必根据您的应用所用的应用内结算版本，选择合适的商品类型。</p>
+
+  <p>有关详情，请参阅<a href="{@docRoot}google/play/billing/api.html#producttype">应用内结算第 3 版</a>或<a href="{@docRoot}google/play/billing/v2/api.html#producttype">应用内结算第 2 版</a>的相关文档。
+
+  <h2 id="billing-refunds">处理退款</h2>
+
+  <p>应用内结算不允许用户向 Google Play 发送退款申请。应用内购买的退款事宜必须直接发送给您（应用开发者）。然后，您可以通过您的 Google 电子钱包商家帐户处理这笔退款。当您处理退款时，Google Play 会收到 Google 电子钱包发来的退款通知，并且 Google Play 会向您的应用发送退款消息。有关详情，请参阅<a href="{@docRoot}google/play/billing/v2/api.html#billing-action-notify">处理 IN_APP_NOTIFY 消息</a>和<a href="http://support.google.com/googleplay/android-developer/bin/answer.py?hl=zh-CN&amp;answer=1153485">应用内结算定价</a>。</p>
+
+  <p class="caution"><strong>重要提示</strong>：您不能使用 Google Wallet API 发放退款或取消应用内结算交易，而是必须通过您的 Google 电子钱包商家帐户手动执行此类操作。不过，您可以使用 Google Wallet API 检索订单信息。</p>
+
+  <h2 id="orderId">使用订单号</h2>
+
+  <p>当用户购买应用内商品时，Google 电子钱包会为此次交易分配一个永久有效且独一无二的订单号。Google Play 在购买流程结束时会向您提供该订单号，作为 <code>PURCHASE_STATE_CHANGED</code> Intent 中的 <code>orderId</code> 字段的值。</p>
+
+  <p>在您的应用中，您可以使用该订单号作为此次应用内购买交易的通用标识符。购买后，您可以利用该订单号在对帐报表中跟踪此次交易，以及在提供客户支持时使用该订单号。</p>
+
+  <p>订单号是完全由数字构成的字符串，格式由 Google 电子钱包指定和管理。</p>
+
+  <p>对于发生在 2012 年 12 月 5 日及以后的交易，Google 电子钱包会分配一个商家订单号（而非 Google 订单号）并将该商家订单号报告为 <code>orderID</code> 的值。示例如下：</p>
+
+  <pre>"orderId" : "12999556515565155651.5565135565155651"</pre>
+
+  <p>对于发生在 2012 年 12 月 5 日之前的交易，Google Checkout 分配的是 Google 订单号并已将该编号报告为 <code>orderID</code> 的值。下面是使用 Google 订单号的 <code>orderID</code> 的示例：</p>
+
+  <pre>"orderId" : "556515565155651"</pre>
+
+  <h2 id="billing-testing-setup">设置测试帐户</h2>
+
+  <p>通过 Google Play 开发者控制台，您可以设置一个或多个测试帐户。测试帐户是您在开发者控制台上注册为测试帐户的常规 Google 帐户。测试帐户已获得授权，可从您已上传到 Google Play 开发者控制台但尚未发布的应用中进行应用内购买。</p>
+
+  <p>您可以使用任意 Google 帐户作为测试帐户。如果您想让多位用户在应用上测试应用内结算但又不想让他们获得您的发布商帐户的登录凭据，测试帐户就非常有用。如果您想拥有并控制测试帐户，可以自行创建帐户，然后将凭据分发给您的开发者或测试者。</p>
+
+  <p>测试帐户有三条限制：</p>
+
+  <ul>
+    <li>测试帐户用户只能在已上传到您的发布商帐户的应用（该应用可以是尚未发布的）中提出购买请求。</li>
+    <li>测试帐户只能用来购买应用的商品列表中已列出（并已发布）的商品。</li>
+    <li>测试帐户用户无法访问您的发布商帐户，也不能向您的发布商帐户上传应用。</li>
+  </ul>
+
+  <p>要向您的发布商帐户添加测试帐户，请按以下步骤操作：</p>
+
+  <ol>
+    <li><a href="http://play.google.com/apps/publish">登录</a>到您的发布商帐户。</li>
+    <li>点击<strong>设置</strong>图标。</li>
+    <li>找到“许可测试”面板。</li>
+    <li>添加您要注册为测试帐户的电子邮件地址，各帐户之间用英文逗号分隔。</li>
+    <li>点击<strong>保存</strong>，保存您的个人资料更改。</li>
+  </ol>
+
+  <h3 id="license_key">获取应用的许可密钥</h3>
+
+  <p>Google Play 开发者控制台为每个应用都提供一个公用的许可密钥。要获取应用的密钥，请按以下步骤操作：</p>
+  <ol>
+    <li>打开<strong>所有应用</strong>面板。</li>
+    <li>点击相应的应用名称，然后选择<strong>服务和 API</strong>。</li>
+    <li>向下滚动到<strong>此应用的许可密钥</strong>字段，找到应用的密钥，如下图所示。</li>
+  </ol>
+  <p>过去，开发者控制台为每个开发者帐户都提供一个公钥。为了将应用迁移到按应用分配的新公钥，开发者控制台将应用专用密钥设置为之前的开发者密钥。这样做可确保依赖于（之前的）开发者密钥的应用能与新公钥兼容。</p>
+
+  <div style="margin:1em">
+  <img src="{@docRoot}images/in-app-billing/billing_app_key.png" id="figure4" style="border:1px solid #ddd;padding-bottom:.5em" xheight="510" />
+  <p class="img-caption" style="padding-left:.5em">
+    <strong>图 4. </strong> 您可以在<strong>服务和 API</strong> 面板中找到各个应用的许可密钥。
+  </p>
+  </div>
+
+  <h2 id="billing-support">获取相关支持</h2>
+
+  <p>如果您在实施应用内结算时有疑问或遇到问题，请与下表列出的支持资源联系（参见表 2）。将您的问题发布到正确的论坛上，可以更快获得所需支持。</p>
+
+  <p class="table-caption" id="support-table"><strong>表 2. </strong> 适用于 Google Play 应用内结算的开发者支持资源</p>
+
+  <table>
+
+  <tr>
+  <th>支持类型</th>
+  <th>资源</th>
+  <th>主题范围</th>
+  </tr>
+  <tr>
+  <td rowspan="2">开发与测试问题</td>
+  <td>Google 网上论坛：<a href="http://groups.google.com/group/android-developers">android-developers</a> </td>
+  <td rowspan="2">应用内结算集成问题、有关用户体验的提示、对响应的处理、混淆代码、进程间通信 (IPC)、测试环境设置。</td>
+  </tr>
+  <tr>
+  <td>堆栈溢出：<a href="http://stackoverflow.com/questions/tagged/android">http://stackoverflow.com/questions/tagged/
+  android</a></td>
+  </tr>
+  <tr>
+  <td>结算问题跟踪器</td>
+  <td><a href="http://code.google.com/p/marketbilling/issues/">结算项目问题跟踪器</a></td>
+  <td>与应用内结算示例代码直接相关的错误和问题报告。</td>
+  </tr>
+  </table>
+
+  <p>要了解如何向上述所列论坛发帖的一般信息，请参阅“资源”标签中的<a href="{@docRoot}resources/community-groups.html">开发者论坛</a>一文。</p>
+

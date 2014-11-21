@@ -1,0 +1,311 @@
+page.title=写作风格
+page.type=设计
+
+@jd:body
+
+  <h2 id="voa">Android 的语言风格</h2>
+
+  <p>撰写应用中显示的文本时，应力求简明、简易和友好。</p>
+
+  <h4 id="concise">简明</h4>
+
+  <ul>
+    <li>仅告知用户最必要的信息。</li>
+    <li>避免冗余的表述，例如标题重复陈述信息框中的正文内容。</li>
+    <li>尽可能缩短文本长度。</li>
+  </ul>
+
+  <p><em>避免使用啰嗦、生硬的文字</em></p>
+
+  <div class="layout-content-row">
+    <div class="layout-content-col span-6 layout-with-list-item-margins">
+
+      <div class="do-dont-label bad">错误做法</div>
+
+      <table class="ui-table good"><tbody><tr><td>
+      如需更详细的说明，请参考手机随附的文档。
+      </td></tr></tbody></table>
+
+    </div>
+    <div class="layout-content-col span-6">
+
+      <div class="do-dont-label good">正确做法</div>
+
+      <table class="ui-table good"><tbody><tr><td>
+      请阅读手机随附的说明。
+      </td></tr></tbody></table>
+
+    </div>
+  </div>
+
+  <p><em>请勿提供无关信息</em></p>
+
+  <div class="layout-content-row">
+    <div class="layout-content-col span-6 layout-with-list-item-margins">
+
+      <div class="do-dont-label bad">从“设置向导”屏幕</div>
+
+      <table class="ui-table bad">
+      <thead>
+        <tr>
+          <th>
+          登录…
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+          你的手机需要与 Google 服务器通信<br />
+          然后才能登录到你的帐户。<br />
+          此过程最多可能需要 5 分钟。
+          </td>
+        </tr>
+      </tbody>
+      </table>
+
+    </div>
+    <div class="layout-content-col span-6">
+
+      <div class="do-dont-label good">从“设置向导”屏幕</div>
+
+      <table class="ui-table good">
+      <thead>
+        <tr>
+          <th>
+          登录…
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+          你的手机正在连接 Google。<br />
+          此过程最多可能需要 5 分钟。
+          </td>
+        </tr>
+      </tbody>
+      </table>
+
+    </div>
+  </div>
+
+  <h4 id="simple">简易</h4>
+
+  <ul>
+    <li>使用简短字词、主动动词和常用名词。</li>
+    <li>最重要的内容放在最前面。用句首的几个字词来传达全句最重要的信息。</li>
+    <li>不要费力解释细枝末节，大部分用户并不关心这些。</li>
+  </ul>
+
+  <p><em>关注用户的兴趣点，而不是技术细节</em></p>
+
+  <div class="layout-content-row">
+    <div class="layout-content-col span-6 layout-with-list-item-margins">
+
+      <div class="do-dont-label bad">错误做法</div>
+
+      <table class="ui-table good"><tbody><tr><td>
+      手动控制 GPS，以防止其他应用使用它
+      </td></tr></tbody></table>
+
+    </div>
+    <div class="layout-content-col span-6">
+
+      <div class="do-dont-label good">正确做法</div>
+
+      <table class="ui-table good"><tbody><tr><td>
+      若想省电，请将“位置信息模式”切换为“耗电量低”
+      </td></tr></tbody></table>
+
+    </div>
+  </div>
+
+  <p><em>将重要信息放在最前面</em></p>
+
+  <div class="layout-content-row">
+    <div class="layout-content-col span-6 layout-with-list-item-margins">
+
+      <div class="do-dont-label bad">错误做法</div>
+
+      <table class="ui-table good"><tbody><tr><td>
+      其他 77 人为此 +1 了，包括张三
+      </td></tr></tbody></table>
+
+    </div>
+    <div class="layout-content-col span-6">
+
+      <div class="do-dont-label good">正确做法</div>
+
+      <table class="ui-table good"><tbody><tr><td>
+      张三及其他 76 人为此 +1 了
+      </td></tr></tbody></table>
+
+    </div>
+  </div>
+
+  <p><em>将用户目标放在最前面</em></p>
+
+  <div class="layout-content-row">
+    <div class="layout-content-col span-6 layout-with-list-item-margins">
+
+      <div class="do-dont-label bad">错误做法</div>
+
+      <table class="ui-table good"><tbody><tr><td>
+      触摸“下一步”，以完成 Wi-Fi 连接设置
+      </td></tr></tbody></table>
+
+    </div>
+    <div class="layout-content-col span-6">
+
+      <div class="do-dont-label good">正确做法</div>
+
+      <table class="ui-table good"><tbody><tr><td>
+      要完成 Wi-Fi 连接设置，请触摸“下一步”
+      </td></tr></tbody></table>
+
+    </div>
+  </div>
+
+
+  <h4 id="friendly">友好</h4>
+
+  <ul>
+    <li>使用缩写词。</li>
+    <li>使用“您”或“你”直接与读者对话。</li>
+    <li>语气应轻松自然，但要避免使用俚语。</li>
+  
+  </ul>
+
+  <p><em>避免使用令人困惑或令人厌烦的表达</em></p>
+  <div class="layout-content-row">
+    <div class="layout-content-col span-6 layout-with-list-item-margins">
+      <div class="do-dont-label bad">错误做法</div>
+      <table class="ui-table bad">
+      <thead>
+        <tr>
+          <th>
+          抱歉！
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+          “MyAppActivity”活动<br />
+          （在应用“MyApp”中）无响应
+          </td>
+        </tr>
+      </tbody>
+      </table>
+
+    </div>
+    <div class="layout-content-col span-6">
+      <div class="do-dont-label good">正确做法</div>
+      <table class="ui-table good">
+      <thead>
+        <tr>
+          <th>
+          MyApp 无响应
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+          是否将其关闭？
+          </td>
+        </tr>
+      </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <h4>应避免使用的字词</h4>
+
+  <div style="padding:5px 2.1em">
+  <table>
+    <tr>
+      <td class="do-dont-label bad" style="width:40%">不使用</td>
+      <td class="do-dont-label good" style="width:40%">使用</td>
+    </tr>
+    <tr>
+      <td>一、二、三、四…</td>
+      <td>1、2、3、4…</td>
+    </tr>
+    <tr>
+      <td>应用程序</td>
+      <td>应用</td>
+    </tr>
+    <tr>
+      <td>cannot、could not、do not、did not、will not、you will</td>
+      <td><em></em>缩写词：can’t、couldn’t、don’t、didn’t、won’t、you’ll 等等</td>
+    </tr>
+      <tr>
+      <td>okay、ok</td>
+      <td>OK</td>
+    </tr>
+    <tr>
+      <td>请、抱歉、谢谢</td>
+      <td><em>故作礼貌可能会令用户生厌，特别是在提示“出错”的消息中。<br />
+          例外情况：在日语中，必须使用“请”。所以，祈使动词均应据此进行本地化（打开 -&gt; 请打开）。
+          </em></td>
+    </tr>
+      <tr>
+      <td>there is、there are、it is<br />
+          <em>以及其他“无主语”表述（语法上称为虚指）</em></td>
+      <td><em>使用名词作为主语</em></td>
+    </tr>
+    <tr>
+      <td>abort、kill、terminate</td>
+      <td>stop、cancel、end、exit</td>
+    </tr>
+      <tr>
+      <td>fail、failed 等“否定用法”<em></em></td>
+      <td><em>一般情况下，请使用肯定用语<br />
+          （例如，使用“do”而非“don’t”，除非在“不再显示…”、“无法连接”等情况下。）</em></td>
+    </tr>
+    <tr>
+      <td>me、I、my、mine</td>
+      <td>you、your、yours</td>
+    </tr>
+      <tr>
+      <td>确定吗？警告！</td>
+      <td><em>应告诉用户后果，例如，“你的所有照片和媒体内容都将丢失”</em></td>
+    </tr>
+  </table>
+
+  </div>
+
+  <h2 id="formatting_text">设置文本格式</h2>
+
+  <h4 id="capitalization">大写</h4>
+
+  <ul>
+    <li>所有界面字符串都使用句子样式的大写：“Words to live by”。</li>
+    <li>大写以下各项中的所有重要字词：
+      <ul>
+        <li>应用名称（Calendar、Google Drive）</li>
+        <li>正式功能的名称（Android Beam、Face Unlock）</li>
+        <li>专有名词（Statue of Liberty、San Francisco Giants）</li>
+      </ul>
+    </li>
+    <li>避免滥用大写。对于不属于正式功能名称中的字词，请不要使用大写：
+      <ul>
+        <li>Sim card lock、Home screen；而非 Sim Card Lock、Home Screen。</li>
+      </ul>
+    </li>
+  </ul>
+
+
+  <h4 id="punctuation">标点符号</h4>
+  <ul>
+    <li><strong>句号。</strong> 只使用单个句子或短语时（如在问候语、标签或通知中），句尾无需加句号。但如果结合使用两句或更多句，则每一句的句尾都需加句号。</li>
+    <li><strong>省略号。</strong> 省略号 (…)（MacOS 中的 Option-; 和 HTML 中的 &amp;hellip;）用于表示：
+      <ul>
+        <li>未完成的状态，例如操作正在进行（“正在下载…”）或文本未完全显示。</li>
+        <li>需要用户在随后显示的界面中做出重要选择的菜单项（例如“打印…”或“共享…”）。例外情况：如果命令的措辞已经表明需要进一步的界面操作（但有限制范围），则无需使用省略号，例如<strong>在网页中查找</strong>或<strong>选择日期</strong>。</li>
+      </ul>
+    </li>
+  </ul>
