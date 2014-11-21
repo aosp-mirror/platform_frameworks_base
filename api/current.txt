@@ -4414,7 +4414,7 @@ package android.app {
     method public android.content.Intent createConfirmDeviceCredentialIntent(java.lang.CharSequence, java.lang.CharSequence);
     method public deprecated void exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult);
     method public boolean inKeyguardRestrictedInputMode();
-    method public boolean isKeyguardInTrustedState();
+    method public boolean isDeviceLocked();
     method public boolean isKeyguardLocked();
     method public boolean isKeyguardSecure();
     method public deprecated android.app.KeyguardManager.KeyguardLock newKeyguardLock(java.lang.String);
