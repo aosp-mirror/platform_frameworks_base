@@ -1,11 +1,11 @@
 <ul id="nav">
   <li class="nav-section">
-    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/quality/core.html">
+    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/quality/core.html" zh-cn-lang="应用的核心质量">
             <span class="en">Core App Quality</span></a>
     </div>
   </li>
   <li class="nav-section">
-    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/quality/tablets.html">
+    <div class="nav-section empty" style="font-weight:normal"><a href="<?cs var:toroot?>distribute/essentials/quality/tablets.html" zh-cn-lang="平板电脑应用的质量">
             <span class="en">Tablet App Quality</span>
           </a>
     </div>
