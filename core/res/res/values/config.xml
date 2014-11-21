@@ -1831,8 +1831,11 @@
          -->
     <string-array translatable="false" name="config_globalActionsList">
         <item>power</item>
+        <item>reboot</item>
+        <item>airplane</item>
         <item>bugreport</item>
         <item>users</item>
+        <item>silent</item>
     </string-array>
 
     <!-- default telephony hardware configuration for this platform.

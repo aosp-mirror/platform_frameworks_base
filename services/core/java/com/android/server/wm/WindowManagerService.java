@@ -5617,6 +5617,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    // Called by window manager policy. Not exposed externally.
+    @Override
+    public void reboot() {
+        ShutdownThread.reboot(mContext, null, true);
+    }
+
     public void setCurrentUser(final int newUserId, final int[] currentProfileIds) {
         synchronized (mWindowMap) {
             mCurrentUserId = newUserId;

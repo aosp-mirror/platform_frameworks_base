@@ -94,6 +94,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
     /* Valid settings for global actions keys.
      * see config.xml config_globalActionList */
     private static final String GLOBAL_ACTION_KEY_POWER = "power";
+    private static final String GLOBAL_ACTION_KEY_REBOOT = "reboot";
     private static final String GLOBAL_ACTION_KEY_AIRPLANE = "airplane";
     private static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
     private static final String GLOBAL_ACTION_KEY_SILENT = "silent";
@@ -271,7 +272,9 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 continue;
             }
             if (GLOBAL_ACTION_KEY_POWER.equals(actionKey)) {
-                mItems.add(new PowerAction());
+                mItems.add(getPowerAction());
+            } else if (GLOBAL_ACTION_KEY_REBOOT.equals(actionKey)) {
+                mItems.add(new RebootAction());
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 mItems.add(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
@@ -329,10 +332,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
         return dialog;
     }
 
-    private final class PowerAction extends SinglePressAction implements LongPressAction {
-        private PowerAction() {
-            super(com.android.internal.R.drawable.ic_lock_power_off,
-                R.string.global_action_power_off);
+    private final class RebootAction extends SinglePressAction implements LongPressAction {
+        private RebootAction() {
+            super(com.android.internal.R.drawable.ic_lock_reboot,
+                R.string.global_action_reboot);
         }
 
         @Override
@@ -353,8 +356,7 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
 
         @Override
         public void onPress() {
-            // shutdown by making sure radio and power are handled accordingly.
-            mWindowManagerFuncs.shutdown(false /* confirm */);
+            mWindowManagerFuncs.reboot();
         }
     }
 
@@ -409,6 +411,28 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                         com.android.internal.R.string.bugreport_status,
                         Build.VERSION.RELEASE,
                         Build.ID);
+            }
+        };
+    }
+
+    private Action getPowerAction() {
+        return new SinglePressAction(com.android.internal.R.drawable.ic_lock_power_off,
+                R.string.global_action_power_off) {
+
+            @Override
+            public void onPress() {
+                // shutdown by making sure radio and power are handled accordingly.
+                mWindowManagerFuncs.shutdown(false /* confirm */);
+            }
+
+            @Override
+            public boolean showDuringKeyguard() {
+                return true;
+            }
+
+            @Override
+            public boolean showBeforeProvisioning() {
+                return true;
             }
         };
     }
