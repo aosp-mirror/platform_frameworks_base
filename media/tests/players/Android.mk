@@ -26,5 +26,6 @@ LOCAL_SHARED_LIBRARIES:= \
 LOCAL_MODULE:= invoke_mock_media_player
 LOCAL_MODULE_TAGS := tests eng
 
+LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
 include $(BUILD_SHARED_LIBRARY)
