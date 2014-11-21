@@ -341,6 +341,27 @@
          [CHAR LIMIT=100]-->
     <string name="ssl_ca_cert_noti_managed">By <xliff:g id="managing_domain">%s</xliff:g></string>
 
+    <!-- Work profile deleted notification--> <skip />
+    <!-- Shows up in the notification's title when the system deletes the work profile. [CHAR LIMIT=NONE] -->
+    <string name="work_profile_deleted">Work profile deleted</string>
+    <!-- Content text for a notification. The Title of the notification is "work_profile_deleted",
+         i.e. "Work profile deleted". This says that the profile is deleted by the system as a result of
+         the current profile owner gone missing. [CHAR LIMIT=100]-->
+    <string name="work_profile_deleted_description">Work profile deleted due to missing admin app.</string>
+    <!-- Content text for an expanded notification. The Title of the notification is "work_profile_deleted",
+         i.e. "Work profile deleted". This further explains that the profile is deleted by the system
+         as a result of the current profile admin gone missing. [CHAR LIMIT=NONE]-->
+    <string name="work_profile_deleted_details">The work profile admin app is either missing or corrupted.
+         As a result, your work profile and related data have been deleted. Contact your administrator for assistance.</string>
+
+    <!-- Factory reset warning dialog strings--> <skip />
+    <!-- Shows up in the dialog's title to warn about an impeding factory reset. [CHAR LIMIT=NONE] -->
+    <string name="factory_reset_warning">Your device will be erased</string>
+    <!-- Text message in the factory reset warning dialog. This says that the the device admin app
+         is missing or corrupted. As a result the device will be erased. [CHAR LIMIT=NONE]-->
+    <string name="factory_reset_message">The admin app is missing components or corrupted, and can\'t be used.
+         Your device will now be erased. Contact your administrator for assistance.</string>
+
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
 
