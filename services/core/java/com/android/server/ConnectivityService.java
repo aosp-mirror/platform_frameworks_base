@@ -2598,7 +2598,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             String exclList = "";
             String pacFileUrl = "";
             if (proxyProperties != null && (!TextUtils.isEmpty(proxyProperties.getHost()) ||
-                    (proxyProperties.getPacFileUrl() != null))) {
+                    !Uri.EMPTY.equals(proxyProperties.getPacFileUrl()))) {
                 if (!proxyProperties.isValid()) {
                     if (DBG)
                         log("Invalid proxy properties, ignoring: " + proxyProperties.toString());
@@ -2608,7 +2608,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 host = mGlobalProxy.getHost();
                 port = mGlobalProxy.getPort();
                 exclList = mGlobalProxy.getExclusionListAsString();
-                if (proxyProperties.getPacFileUrl() != null) {
+                if (!Uri.EMPTY.equals(proxyProperties.getPacFileUrl())) {
                     pacFileUrl = proxyProperties.getPacFileUrl().toString();
                 }
             } else {
@@ -2670,7 +2670,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void handleApplyDefaultProxy(ProxyInfo proxy) {
         if (proxy != null && TextUtils.isEmpty(proxy.getHost())
-                && (proxy.getPacFileUrl() == null)) {
+                && Uri.EMPTY.equals(proxy.getPacFileUrl())) {
             proxy = null;
         }
         synchronized (mProxyLock) {
@@ -2686,7 +2686,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // global (to get the correct local port), and send a broadcast.
             // TODO: Switch PacManager to have its own message to send back rather than
             // reusing EVENT_HAS_CHANGED_PROXY and this call to handleApplyDefaultProxy.
-            if ((mGlobalProxy != null) && (proxy != null) && (proxy.getPacFileUrl() != null)
+            if ((mGlobalProxy != null) && (proxy != null)
+                    && (!Uri.EMPTY.equals(proxy.getPacFileUrl()))
                     && proxy.getPacFileUrl().equals(mGlobalProxy.getPacFileUrl())) {
                 mGlobalProxy = proxy;
                 sendProxyBroadcast(mGlobalProxy);
