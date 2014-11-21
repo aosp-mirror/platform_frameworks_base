@@ -105,6 +105,7 @@ public final class MediaSession {
     public @interface SessionFlags { }
 
     private final Object mLock = new Object();
+    private final int mMaxBitmapSize;
 
     private final MediaSession.Token mSessionToken;
     private final MediaController mController;
@@ -148,6 +149,8 @@ public final class MediaSession {
         if (TextUtils.isEmpty(tag)) {
             throw new IllegalArgumentException("tag cannot be null or empty");
         }
+        mMaxBitmapSize = context.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
         mCbStub = new CallbackStub(this);
         MediaSessionManager manager = (MediaSessionManager) context
                 .getSystemService(Context.MEDIA_SESSION_SERVICE);
@@ -427,6 +430,7 @@ public final class MediaSession {
      * @param metadata The new metadata
      */
     public void setMetadata(@Nullable MediaMetadata metadata) {
+        metadata = (new MediaMetadata.Builder(metadata, mMaxBitmapSize)).build();
         try {
             mBinder.setMetadata(metadata);
         } catch (RemoteException e) {
