@@ -66,7 +66,7 @@ sp<RenderNode> createCard(int x, int y, int width, int height) {
     return node;
 }
 
-int main(int argc, char* argv[]) {
+int main() {
     createTestEnvironment();
 
     // create the native surface
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
 
     for (int i = 0; i < 150; i++) {
         ATRACE_NAME("UI-Draw Frame");
-        for (int ci = 0; ci < cards.size(); ci++) {
+        for (size_t ci = 0; ci < cards.size(); ci++) {
             cards[ci]->mutateStagingProperties().setTranslationX(i);
             cards[ci]->mutateStagingProperties().setTranslationY(i);
             cards[ci]->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
