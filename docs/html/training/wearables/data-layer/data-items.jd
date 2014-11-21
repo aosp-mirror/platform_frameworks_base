@@ -15,9 +15,9 @@ page.title=Syncing Data Items
 </div>
 
 <p>
-A <a href="@{docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a>
+A <a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a>
 defines the data interface that the system uses to synchronize data between handhelds
-and wearables. A <a href="@{docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a> generally
+and wearables. A <a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a> generally
 consists of the following items:</p>
 <ul>
   <li><b>Payload</b> - A byte array, which you can set with whatever data you wish, allowing you
@@ -28,15 +28,15 @@ consists of the following items:</p>
 </ul>
 
 <p>
-You normally don't implement <a href="@{docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a>
+You normally don't implement <a href="{@docRoot}reference/com/google/android/gms/wearable/DataItem.html"><code>DataItem</code></a>
 directly. Instead, you:
 
 <ol>
   <li>Create a <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html"><code>PutDataRequest</code></a> object,
   specifying a string path to uniquely identify the item.
   </li>
-  <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html#setData(byte[])">setData()</a> to set
-  the payload.
+  <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/PutDataRequest.html#setData(byte[])">
+  <code>setData()</code></a> to set the payload.
   </li>
   <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>DataApi.putDataItem()</code></a> to request the system to create the data item.
   </li>
@@ -50,6 +50,7 @@ However, instead of working with raw bytes using <a href="{@docRoot}reference/co
 we recommend you <a href="#SyncData">use a data map</a>, which exposes
 a data item in an easy-to-use {@link android.os.Bundle}-like interface.
 </p>
+
 
 <h2 id="SyncData">Sync Data with a Data Map</h2>
 <p>
@@ -67,7 +68,7 @@ object, setting the path of the data item.
 <p class="note"><b>Note:</b> The path string is a unique identifier for the
 data item that allows you to access it from either side of the connection. The path must begin
 with a forward slash. If you're using hierarchical data in your
-app, you should create a path scheme that matches the structure of the data. 
+app, you should create a path scheme that matches the structure of the data.
 </p>
 </li>
 <li>Call
@@ -82,12 +83,12 @@ app, you should create a path scheme that matches the structure of the data.
   <li>Call <a href="{@docRoot}reference/com/google/android/gms/wearable/DataApi.html#putDataItem(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.wearable.PutDataRequest)"><code>DataApi.putDataItem()</code></a> to request the system to create the data item.
   <p class="note"><b>Note:</b>
   If the handset and wearable devices are disconnected,
-  the data is buffered and and synced when the connection is re-established.
+  the data is buffered and synced when the connection is re-established.
   </p>
   </li>
 </ol>
 
-<p>The following example shows how to create a data map, set data on it, and create it:</p>
+<p>The following example shows how to create a data map and put data on it:</p>
 
 <pre>
 PutDataMapRequest dataMap = PutDataMapRequest.create("/count");
@@ -103,7 +104,7 @@ to be notified of any changes on the other side of the connection.
 You can do this by implementing a listener for data item events.
 
 <p>For example, here's what a typical callback looks like to carry out certain actions
-when data changes.</p>
+when data changes:</p>
 
 <pre>
 &#64;Override
@@ -120,5 +121,6 @@ public void onDataChanged(DataEventBuffer dataEvents) {
 <p>
 This is just a snippet that requires more implementation details. Learn about
 how to implement a full listener service or activity in
-<a href="{@docRoot}training/wearables/data-layer/events.html#Listen">Listening for Data Layer Events</a>.
+<a href="{@docRoot}training/wearables/data-layer/events.html#Listen">Listen for Data Layer
+Events</a>.
 </p>
