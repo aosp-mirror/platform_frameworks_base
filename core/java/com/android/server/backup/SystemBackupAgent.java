@@ -23,6 +23,7 @@ import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.FullBackup;
 import android.app.backup.FullBackupDataOutput;
+import android.app.backup.RecentsBackupHelper;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.Context;
 import android.os.Environment;
@@ -83,6 +84,8 @@ public class SystemBackupAgent extends BackupAgentHelper {
             }
         }
         addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this, files, keys));
+        addHelper("recents", new RecentsBackupHelper(SystemBackupAgent.this));
+
         super.onBackup(oldState, data, newState);
     }
 
@@ -113,6 +116,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
         addHelper("system_files", new WallpaperBackupHelper(SystemBackupAgent.this,
                 new String[] { WALLPAPER_IMAGE },
                 new String[] { WALLPAPER_IMAGE_KEY} ));
+        addHelper("recents", new RecentsBackupHelper(SystemBackupAgent.this));
 
         try {
             super.onRestore(data, appVersionCode, newState);
