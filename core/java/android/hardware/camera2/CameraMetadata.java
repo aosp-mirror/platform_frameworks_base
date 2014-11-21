@@ -490,12 +490,16 @@ public abstract class CameraMetadata<TKey> {
      * <p>More specifically, this means that a size matching the
      * camera device's active array size is listed as a
      * supported size for the YUV_420_888 format in
-     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}, and the
-     * minimum frame duration for that format and size is &lt;=
-     * 1/20 s.</p>
+     * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}, the minimum frame
+     * duration for that format and size is &lt;= 1/20 s, and
+     * the {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} entry
+     * lists at least one FPS range where the minimum FPS
+     * is &gt;= 1 / minimumFrameDuration for the maximum-size
+     * YUV_420_888 format.</p>
      * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is
      * guaranted to have a value between 0 and 4, inclusive.</p>
      *
+     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
      * @see CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP
      * @see CameraCharacteristics#SYNC_MAX_LATENCY
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
