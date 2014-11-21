@@ -88,6 +88,19 @@ public class TrustManager {
     }
 
     /**
+     * Reports that the visibility of the keyguard has changed.
+     *
+     * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
+     */
+    public void reportKeyguardShowingChanged() {
+        try {
+            mService.reportKeyguardShowingChanged();
+        } catch (RemoteException e) {
+            onError(e);
+        }
+    }
+
+    /**
      * Registers a listener for trust events.
      *
      * Requires the {@link android.Manifest.permission#TRUST_LISTENER} permission.

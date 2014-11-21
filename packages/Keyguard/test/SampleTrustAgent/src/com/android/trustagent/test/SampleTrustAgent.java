@@ -56,6 +56,7 @@ public class SampleTrustAgent extends TrustAgentService
             = "preference.report_unlock_attempts";
     private static final String PREFERENCE_MANAGING_TRUST
             = "preference.managing_trust";
+    private static final String PREFERENCE_REPORT_DEVICE_LOCKED = "preference.report_device_locked";
 
     private static final String TAG = "SampleTrustAgent";
 
@@ -80,15 +81,35 @@ public class SampleTrustAgent extends TrustAgentService
     @Override
     public void onTrustTimeout() {
         super.onTrustTimeout();
-        Toast.makeText(this, "onTrustTimeout(): timeout expired", Toast.LENGTH_SHORT).show();
+        logAndShowToast("onTrustTimeout(): timeout expired");
+    }
+
+    @Override
+    public void onDeviceLocked() {
+        super.onDeviceLocked();
+        if (getReportDeviceLocked(this)) {
+            logAndShowToast("onDeviceLocked(): device is now locked");
+        }
+    }
+
+    @Override
+    public void onDeviceUnlocked() {
+        super.onDeviceUnlocked();
+        if (getReportDeviceLocked(this)) {
+            logAndShowToast("onDeviceUnlocked(): device is now unlocked");
+        }
     }
 
     @Override
     public void onUnlockAttempt(boolean successful) {
         if (getReportUnlockAttempts(this)) {
-            Toast.makeText(this, "onUnlockAttempt(successful=" + successful + ")",
-                    Toast.LENGTH_SHORT).show();
+            logAndShowToast("onUnlockAttempt(successful=" + successful + ")");
         }
+    }
+
+    private void logAndShowToast(String text) {
+        Log.i(TAG, text);
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -125,8 +146,7 @@ public class SampleTrustAgent extends TrustAgentService
                             intent.getLongExtra(EXTRA_DURATION, 0),
                             intent.getBooleanExtra(EXTRA_INITIATED_BY_USER, false));
                 } catch (IllegalStateException e) {
-                    Toast.makeText(context,
-                            "IllegalStateException: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    logAndShowToast("IllegalStateException: " + e.getMessage());
                 }
             } else if (ACTION_REVOKE_TRUST.equals(action)) {
                 revokeTrust();
@@ -158,6 +178,18 @@ public class SampleTrustAgent extends TrustAgentService
         SharedPreferences sharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(PREFERENCE_REPORT_UNLOCK_ATTEMPTS, false);
+    }
+
+    public static void setReportDeviceLocked(Context context, boolean enabled) {
+        SharedPreferences sharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        sharedPreferences.edit().putBoolean(PREFERENCE_REPORT_DEVICE_LOCKED, enabled).apply();
+    }
+
+    public static boolean getReportDeviceLocked(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean(PREFERENCE_REPORT_DEVICE_LOCKED, false);
     }
 
     public static void setIsManagingTrust(Context context, boolean enabled) {
