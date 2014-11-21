@@ -860,10 +860,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
                 (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
                 mKeyguardStatusBar, mNotificationPanel, mUserSwitcherController);
-        if (mUserSwitcherController != null) {
-            mUserSwitcherController.setKeyguardUserSwitcherAvailable(
-                    mKeyguardUserSwitcher.isEnabled());
-        }
 
 
         // Set up the quick settings tile panel
@@ -2130,9 +2126,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void setQsExpanded(boolean expanded) {
         mStatusBarWindowManager.setQsExpanded(expanded);
-        if (mUserSwitcherController != null) {
-            mUserSwitcherController.setQsExpanded(expanded);
-        }
     }
 
     public boolean isGoingToNotificationShade() {
