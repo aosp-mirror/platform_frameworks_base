@@ -455,7 +455,7 @@ Program* ProgramCache::get(const ProgramDescription& description) {
 // Program generation
 ///////////////////////////////////////////////////////////////////////////////
 
-Program* ProgramCache::generateProgram(const ProgramDescription& description, programid key) {
+Program* ProgramCache::generateProgram(const ProgramDescription& description, programid /* key */) {
     String8 vertexShader = generateVertexShader(description);
     String8 fragmentShader = generateFragmentShader(description);
 

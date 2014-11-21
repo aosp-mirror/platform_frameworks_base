@@ -57,12 +57,13 @@ public:
 
 class InvalidSkiaShader {
 public:
-    static void describe(Caches* caches, ProgramDescription& description,
-            const Extensions& extensions, const SkShader& shader) {
+    static void describe(Caches* /* caches */, ProgramDescription& /* description */,
+            const Extensions& /* extensions */, const SkShader& /* shader */) {
         // This shader is unsupported. Skip it.
     }
-    static void setupProgram(Caches* caches, const mat4& modelViewMatrix,
-            GLuint* textureUnit, const Extensions& extensions, const SkShader& shader) {
+    static void setupProgram(Caches* /* caches */, const mat4& /* modelViewMatrix */,
+            GLuint* /* textureUnit */, const Extensions& /* extensions */,
+            const SkShader& /* shader */) {
         // This shader is unsupported. Skip it.
     }
 

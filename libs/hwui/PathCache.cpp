@@ -196,7 +196,7 @@ void PathCache::setMaxSize(uint32_t maxSize) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void PathCache::operator()(PathDescription& entry, PathTexture*& texture) {
+void PathCache::operator()(PathDescription& /* entry */, PathTexture*& texture) {
     removeTexture(texture);
 }
 

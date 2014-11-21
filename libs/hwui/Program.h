@@ -285,6 +285,8 @@ struct ProgramDescription {
         programid k = key();
         PROGRAM_LOGD("%s (key = 0x%.8x%.8x)", message, uint32_t(k >> 32),
                 uint32_t(k & 0xffffffff));
+#else
+        (void)message;
 #endif
     }
 

@@ -912,6 +912,8 @@ int SpotShadow::setupAngleList(VertexAngleData* angleDataList,
         angleDataList[i].set(currentAngle, isPenumbra, i);
 #if DEBUG_SHADOW
         ALOGD("%s AngleList i %d %f", name, i, currentAngle);
+#else
+        (void)name;
 #endif
     }
     return maxAngleIndex;
@@ -941,6 +943,8 @@ bool SpotShadow::checkClockwise(int indexOfMaxAngle, int listLength, VertexAngle
         if (currentAngle < nextAngle) {
 #if DEBUG_SHADOW
             ALOGE("%s, is not CW, at index %d", name, currentIndex);
+#else
+            (void)name;
 #endif
             return false;
         }
@@ -1378,7 +1382,7 @@ int SpotShadow::convertPolysToVerticesPerRay(
 /**
  * Generate a triangle strip given two convex polygon
 **/
-void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrengthScale,
+void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float /* shadowStrengthScale */,
         Vector2* penumbra, int penumbraLength, Vector2* umbra, int umbraLength,
         const Vector3* poly, int polyLength, VertexBuffer& shadowTriangleStrip,
         const Vector2& centroid) {
