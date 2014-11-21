@@ -83,6 +83,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
@@ -90,7 +91,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -359,6 +362,11 @@ class MountService extends IMountService.Stub
     // Used in the ObbActionHandler
     private IMediaContainerService mContainerService = null;
 
+    // Last fstrim operation tracking
+    private static final String LAST_FSTRIM_FILE = "last-fstrim";
+    private final File mLastMaintenanceFile;
+    private long mLastMaintenance;
+
     // Handler messages
     private static final int H_UNMOUNT_PM_UPDATE = 1;
     private static final int H_UNMOUNT_PM_DONE = 2;
@@ -536,6 +544,15 @@ class MountService extends IMountService.Stub
                 case H_FSTRIM: {
                     waitForReady();
                     Slog.i(TAG, "Running fstrim idle maintenance");
+
+                    // Remember when we kicked it off
+                    try {
+                        mLastMaintenance = System.currentTimeMillis();
+                        mLastMaintenanceFile.setLastModified(mLastMaintenance);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Unable to record last fstrim!");
+                    }
+
                     try {
                         // This method must be run on the main (handler) thread,
                         // so it is safe to directly call into vold.
@@ -544,6 +561,7 @@ class MountService extends IMountService.Stub
                     } catch (NativeDaemonConnectorException ndce) {
                         Slog.e(TAG, "Failed to run fstrim!");
                     }
+
                     // invoke the completion callback, if any
                     Runnable callback = (Runnable) msg.obj;
                     if (callback != null) {
@@ -697,6 +715,18 @@ class MountService extends IMountService.Stub
 
     void runIdleMaintenance(Runnable callback) {
         mHandler.sendMessage(mHandler.obtainMessage(H_FSTRIM, callback));
+    }
+
+    // Binder entry point for kicking off an immediate fstrim
+    @Override
+    public void runMaintenance() {
+        validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
+        runIdleMaintenance(null);
+    }
+
+    @Override
+    public long lastMaintenance() {
+        return mLastMaintenance;
     }
 
     private void doShareUnshareVolume(String path, String method, boolean enable) {
@@ -1476,6 +1506,22 @@ class MountService extends IMountService.Stub
 
         // Add OBB Action Handler to MountService thread.
         mObbActionHandler = new ObbActionHandler(IoThread.get().getLooper());
+
+        // Initialize the last-fstrim tracking if necessary
+        File dataDir = Environment.getDataDirectory();
+        File systemDir = new File(dataDir, "system");
+        mLastMaintenanceFile = new File(systemDir, LAST_FSTRIM_FILE);
+        if (!mLastMaintenanceFile.exists()) {
+            // Not setting mLastMaintenance here means that we will force an
+            // fstrim during reboot following the OTA that installs this code.
+            try {
+                (new FileOutputStream(mLastMaintenanceFile)).close();
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to create fstrim record " + mLastMaintenanceFile.getPath());
+            }
+        } else {
+            mLastMaintenance = mLastMaintenanceFile.lastModified();
+        }
 
         /*
          * Create the connection to vold with a maximum queue of twice the
@@ -3075,6 +3121,12 @@ class MountService extends IMountService.Stub
         pw.increaseIndent();
         mConnector.dump(fd, pw, args);
         pw.decreaseIndent();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        pw.println();
+        pw.print("Last maintenance: ");
+        pw.println(sdf.format(new Date(mLastMaintenance)));
     }
 
     /** {@inheritDoc} */

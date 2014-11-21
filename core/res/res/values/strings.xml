@@ -3508,6 +3508,9 @@
     <!-- [CHAR LIMIT=40] Title of dialog that is shown when performing a system upgrade. -->
     <string name="android_upgrading_title">Android is upgrading\u2026</string>
 
+    <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog when doing an fstrim. -->
+    <string name="android_upgrading_fstrim">Optimizing storage.</string>
+
     <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk that is optimized. -->
     <string name="android_upgrading_apk">Optimizing app
         <xliff:g id="number" example="123">%1$d</xliff:g> of
