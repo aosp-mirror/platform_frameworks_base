@@ -27,6 +27,7 @@
 #include "Matrix.h"
 #include "Properties.h"
 #include "Rect.h"
+#include "utils/TraceUtils.h"
 
 namespace android {
 namespace uirenderer {
@@ -184,7 +185,7 @@ void LayerRenderer::generateMesh() {
 ///////////////////////////////////////////////////////////////////////////////
 
 Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width, uint32_t height) {
-    ATRACE_CALL();
+    ATRACE_FORMAT("Allocate %ux%u HW Layer", width, height);
     LAYER_RENDERER_LOGD("Requesting new render layer %dx%d", width, height);
 
     Caches& caches = Caches::getInstance();
@@ -309,7 +310,7 @@ void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t he
 
 void LayerRenderer::destroyLayer(Layer* layer) {
     if (layer) {
-        ATRACE_CALL();
+        ATRACE_FORMAT("Destroy %ux%u HW Layer", layer->getWidth(), layer->getHeight());
         LAYER_RENDERER_LOGD("Recycling layer, %dx%d fbo = %d",
                 layer->getWidth(), layer->getHeight(), layer->getFbo());
 
