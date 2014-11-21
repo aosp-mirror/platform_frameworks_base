@@ -79,7 +79,6 @@ public class TelephonyManager {
     }
 
     private final Context mContext;
-    private SubscriptionManager mSubscriptionManager;
 
     private static String multiSimConfig =
             SystemProperties.get(TelephonyProperties.PROPERTY_MULTI_SIM_CONFIG);
@@ -105,7 +104,6 @@ public class TelephonyManager {
         } else {
             mContext = context;
         }
-        mSubscriptionManager = SubscriptionManager.from(mContext);
 
         if (sRegistry == null) {
             sRegistry = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
@@ -159,9 +157,6 @@ public class TelephonyManager {
     public int getPhoneCount() {
         int phoneCount = 1;
         switch (getMultiSimConfiguration()) {
-            case UNKNOWN:
-                phoneCount = 1;
-                break;
             case DSDS:
             case DSDA:
                 phoneCount = PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
@@ -1532,7 +1527,7 @@ public class TelephonyManager {
      * @see #getSimState
      */
     public String getSimOperator() {
-        int subId = mSubscriptionManager.getDefaultDataSubId();
+        int subId = SubscriptionManager.getDefaultDataSubId();
         if (!SubscriptionManager.isUsableSubIdValue(subId)) {
             subId = SubscriptionManager.getDefaultSmsSubId();
             if (!SubscriptionManager.isUsableSubIdValue(subId)) {
@@ -1994,7 +1989,7 @@ public class TelephonyManager {
      * <p>Requires that the calling app has carrier privileges.
      * @see #hasCarrierPrivileges
      *
-     * @param subId The subscription id.
+     * @param subId The subscriber id.
      * @param alphaTag The alpha tag to display.
      * @param number The voicemail number.
      */
