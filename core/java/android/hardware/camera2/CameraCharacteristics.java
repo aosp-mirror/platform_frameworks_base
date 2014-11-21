@@ -395,6 +395,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p><b>Range of valid values:</b><br></p>
      * <p><code>Min.exposure compensation * {@link CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP android.control.aeCompensationStep} &lt;= -2 EV</code></p>
      * <p><code>Max.exposure compensation * {@link CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP android.control.aeCompensationStep} &gt;= 2 EV</code></p>
+     * <p>LEGACY devices may support a smaller range than this, including the range [0,0], which
+     * indicates that changing the exposure compensation is not supported.</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_COMPENSATION_STEP
