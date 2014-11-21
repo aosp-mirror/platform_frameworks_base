@@ -1477,7 +1477,7 @@ final class ActivityStack {
             mStackSupervisor.inResumeTopActivity = true;
             if (mService.mLockScreenShown == ActivityManagerService.LOCK_SCREEN_LEAVING) {
                 mService.mLockScreenShown = ActivityManagerService.LOCK_SCREEN_HIDDEN;
-                mService.comeOutOfSleepIfNeededLocked();
+                mService.updateSleepIfNeededLocked();
             }
             result = resumeTopActivityInnerLocked(prev, options);
         } finally {
