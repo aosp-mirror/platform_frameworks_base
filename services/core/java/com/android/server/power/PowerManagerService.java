@@ -61,7 +61,6 @@ import android.os.WorkSource;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.Display;
@@ -72,6 +71,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import libcore.util.Objects;
+
+import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
+import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
+import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
+import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
 
 /**
  * The power manager service is responsible for coordinating power management
@@ -115,24 +119,6 @@ public final class PowerManagerService extends SystemService
     private static final int DIRTY_DOCK_STATE = 1 << 10;
     // Dirty bit: brightness boost changed
     private static final int DIRTY_SCREEN_BRIGHTNESS_BOOST = 1 << 11;
-
-    // Wakefulness: The device is asleep and can only be awoken by a call to wakeUp().
-    // The screen should be off or in the process of being turned off by the display controller.
-    // The device typically passes through the dozing state first.
-    private static final int WAKEFULNESS_ASLEEP = 0;
-    // Wakefulness: The device is fully awake.  It can be put to sleep by a call to goToSleep().
-    // When the user activity timeout expires, the device may start dreaming or go to sleep.
-    private static final int WAKEFULNESS_AWAKE = 1;
-    // Wakefulness: The device is dreaming.  It can be awoken by a call to wakeUp(),
-    // which ends the dream.  The device goes to sleep when goToSleep() is called, when
-    // the dream ends or when unplugged.
-    // User activity may brighten the screen but does not end the dream.
-    private static final int WAKEFULNESS_DREAMING = 2;
-    // Wakefulness: The device is dozing.  It is almost asleep but is allowing a special
-    // low-power "doze" dream to run which keeps the display on but lets the application
-    // processor be suspended.  It can be awoken by a call to wakeUp() which ends the dream.
-    // The device fully goes to sleep if the dream cannot be started or ends on its own.
-    private static final int WAKEFULNESS_DOZING = 3;
 
     // Summarizes the state of all active wakelocks.
     private static final int WAKE_LOCK_CPU = 1 << 0;
@@ -187,6 +173,7 @@ public final class PowerManagerService extends SystemService
     // Indicates whether the device is awake or asleep or somewhere in between.
     // This is distinct from the screen power state, which is managed separately.
     private int mWakefulness;
+    private boolean mWakefulnessChanging;
 
     // True if the sandman has just been summoned for the first time since entering the
     // dreaming or dozing state.  Indicates whether a new dream should begin.
@@ -204,10 +191,6 @@ public final class PowerManagerService extends SystemService
 
     // A bitfield that summarizes the state of all active wakelocks.
     private int mWakeLockSummary;
-
-    // True if the device is in an interactive state.
-    private boolean mInteractive;
-    private boolean mInteractiveChanging;
 
     // If true, instructs the display controller to wait for the proximity sensor to
     // go negative before turning the screen on.
@@ -467,7 +450,6 @@ public final class PowerManagerService extends SystemService
             mHalInteractiveModeEnabled = true;
 
             mWakefulness = WAKEFULNESS_AWAKE;
-            mInteractive = true;
 
             nativeInit();
             nativeSetAutoSuspend(false);
@@ -1047,9 +1029,7 @@ public final class PowerManagerService extends SystemService
             }
 
             mLastWakeTime = eventTime;
-            mDirty |= DIRTY_WAKEFULNESS;
-            mWakefulness = WAKEFULNESS_AWAKE;
-            setInteractiveStateLocked(true, 0);
+            setWakefulnessLocked(WAKEFULNESS_AWAKE, 0);
 
             userActivityNoUpdateLocked(
                     eventTime, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, uid);
@@ -1109,10 +1089,8 @@ public final class PowerManagerService extends SystemService
             }
 
             mLastSleepTime = eventTime;
-            mDirty |= DIRTY_WAKEFULNESS;
-            mWakefulness = WAKEFULNESS_DOZING;
             mSandmanSummoned = true;
-            setInteractiveStateLocked(false, reason);
+            setWakefulnessLocked(WAKEFULNESS_DOZING, reason);
 
             // Report the number of wake locks that will be cleared by going to sleep.
             int numWakeLocksCleared = 0;
@@ -1161,10 +1139,8 @@ public final class PowerManagerService extends SystemService
         try {
             Slog.i(TAG, "Nap time (uid " + uid +")...");
 
-            mDirty |= DIRTY_WAKEFULNESS;
-            mWakefulness = WAKEFULNESS_DREAMING;
             mSandmanSummoned = true;
-            setInteractiveStateLocked(true, 0);
+            setWakefulnessLocked(WAKEFULNESS_DREAMING, 0);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
@@ -1187,29 +1163,28 @@ public final class PowerManagerService extends SystemService
         try {
             Slog.i(TAG, "Sleeping (uid " + uid +")...");
 
-            mDirty |= DIRTY_WAKEFULNESS;
-            mWakefulness = WAKEFULNESS_ASLEEP;
-            setInteractiveStateLocked(false, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+            setWakefulnessLocked(WAKEFULNESS_ASLEEP, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
         return true;
     }
 
-    private void setInteractiveStateLocked(boolean interactive, int reason) {
-        if (mInteractive != interactive) {
-            finishInteractiveStateChangeLocked();
+    private void setWakefulnessLocked(int wakefulness, int reason) {
+        if (mWakefulness != wakefulness) {
+            finishWakefulnessChangeLocked();
 
-            mInteractive = interactive;
-            mInteractiveChanging = true;
-            mNotifier.onInteractiveStateChangeStarted(interactive, reason);
+            mWakefulness = wakefulness;
+            mWakefulnessChanging = true;
+            mDirty |= DIRTY_WAKEFULNESS;
+            mNotifier.onWakefulnessChangeStarted(wakefulness, reason);
         }
     }
 
-    private void finishInteractiveStateChangeLocked() {
-        if (mInteractiveChanging) {
-            mNotifier.onInteractiveStateChangeFinished(mInteractive);
-            mInteractiveChanging = false;
+    private void finishWakefulnessChangeLocked() {
+        if (mWakefulnessChanging) {
+            mNotifier.onWakefulnessChangeFinished(mWakefulness);
+            mWakefulnessChanging = false;
         }
     }
 
@@ -1261,7 +1236,7 @@ public final class PowerManagerService extends SystemService
 
             // Phase 4: Send notifications, if needed.
             if (mDisplayReady) {
-                finishInteractiveStateChangeLocked();
+                finishWakefulnessChangeLocked();
             }
 
             // Phase 5: Update suspend blocker.
@@ -1450,7 +1425,7 @@ public final class PowerManagerService extends SystemService
 
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateWakeLockSummaryLocked: mWakefulness="
-                        + wakefulnessToString(mWakefulness)
+                        + PowerManagerInternal.wakefulnessToString(mWakefulness)
                         + ", mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary));
             }
         }
@@ -1527,7 +1502,7 @@ public final class PowerManagerService extends SystemService
 
             if (DEBUG_SPEW) {
                 Slog.d(TAG, "updateUserActivitySummaryLocked: mWakefulness="
-                        + wakefulnessToString(mWakefulness)
+                        + PowerManagerInternal.wakefulnessToString(mWakefulness)
                         + ", mUserActivitySummary=0x" + Integer.toHexString(mUserActivitySummary)
                         + ", nextTimeout=" + TimeUtils.formatUptime(nextTimeout));
             }
@@ -2150,7 +2125,7 @@ public final class PowerManagerService extends SystemService
 
     private boolean isInteractiveInternal() {
         synchronized (mLock) {
-            return mInteractive;
+            return PowerManagerInternal.isInteractive(mWakefulness);
         }
     }
 
@@ -2428,8 +2403,8 @@ public final class PowerManagerService extends SystemService
         synchronized (mLock) {
             pw.println("Power Manager State:");
             pw.println("  mDirty=0x" + Integer.toHexString(mDirty));
-            pw.println("  mWakefulness=" + wakefulnessToString(mWakefulness));
-            pw.println("  mInteractive=" + mInteractive);
+            pw.println("  mWakefulness=" + PowerManagerInternal.wakefulnessToString(mWakefulness));
+            pw.println("  mWakefulnessChanging=" + mWakefulnessChanging);
             pw.println("  mIsPowered=" + mIsPowered);
             pw.println("  mPlugType=" + mPlugType);
             pw.println("  mBatteryLevel=" + mBatteryLevel);
@@ -2562,21 +2537,6 @@ public final class PowerManagerService extends SystemService
         SuspendBlocker suspendBlocker = new SuspendBlockerImpl(name);
         mSuspendBlockers.add(suspendBlocker);
         return suspendBlocker;
-    }
-
-    private static String wakefulnessToString(int wakefulness) {
-        switch (wakefulness) {
-            case WAKEFULNESS_ASLEEP:
-                return "Asleep";
-            case WAKEFULNESS_AWAKE:
-                return "Awake";
-            case WAKEFULNESS_DREAMING:
-                return "Dreaming";
-            case WAKEFULNESS_DOZING:
-                return "Dozing";
-            default:
-                return Integer.toString(wakefulness);
-        }
     }
 
     private static WorkSource copyWorkSource(WorkSource workSource) {
