@@ -16,6 +16,7 @@
 
 package android.accessibilityservice;
 
+import android.annotation.NonNull;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -618,6 +620,23 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
+    @Override
+    public Object getSystemService(@ServiceName @NonNull String name) {
+        if (getBaseContext() == null) {
+            throw new IllegalStateException(
+                    "System services not available to Activities before onCreate()");
+        }
+
+        // Guarantee that we always return the same window manager instance.
+        if (WINDOW_SERVICE.equals(name)) {
+            if (mWindowManager == null) {
+                mWindowManager = (WindowManager) getBaseContext().getSystemService(name);
+            }
+            return mWindowManager;
+        }
+        return super.getSystemService(name);
+    }
+
     /**
      * Implement to return the implementation of the internal accessibility
      * service interface.
@@ -645,8 +664,10 @@ public abstract class AccessibilityService extends Service {
                 mConnectionId = connectionId;
                 mWindowToken = windowToken;
 
-                // Let the window manager know about our shiny new token.
-                WindowManagerGlobal.getInstance().setDefaultToken(mWindowToken);
+                // The client may have already obtained the window manager, so
+                // update the default token on whatever manager we gave them.
+                final WindowManagerImpl wm = (WindowManagerImpl) getSystemService(WINDOW_SERVICE);
+                wm.setDefaultToken(windowToken);
             }
 
             @Override
