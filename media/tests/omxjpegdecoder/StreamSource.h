@@ -20,7 +20,11 @@
 
 #include <stdio.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkStream.h>
+#pragma GCC diagnostic pop
+
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaErrors.h>
 #include <utils/threads.h>

@@ -25,8 +25,12 @@
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <SkImageDecoder.h>
 #include <SkStream.h>
+#pragma GCC diagnostic pop
 
 using namespace android;
 
