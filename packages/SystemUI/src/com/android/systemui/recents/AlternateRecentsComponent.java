@@ -170,7 +170,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     /** Hides the recents */
     public void onHideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) {
         if (mBootCompleted) {
-            if (isRecentsTopMost(getTopMostTask(), null)) {
+            ActivityManager.RunningTaskInfo topTask = getTopMostTask();
+            if (topTask != null && isRecentsTopMost(topTask, null)) {
                 // Notify recents to hide itself
                 Intent intent = new Intent(ACTION_HIDE_RECENTS_ACTIVITY);
                 intent.setPackage(mContext.getPackageName());
@@ -217,6 +218,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         if (stack.getTaskCount() == 0) return;
 
         ActivityManager.RunningTaskInfo runningTask = getTopMostTask();
+        // Return early if there is no running task (can't determine affiliated tasks in this case)
+        if (runningTask == null) return;
         // Return early if the running task is in the home stack (optimization)
         if (mSystemServicesProxy.isInHomeStack(runningTask.id)) return;
 
@@ -369,8 +372,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         // If Recents is the front most activity, then we should just communicate with it directly
         // to launch the first task or dismiss itself
         ActivityManager.RunningTaskInfo topTask = getTopMostTask();
-        AtomicBoolean isTopTaskHome = new AtomicBoolean();
-        if (isRecentsTopMost(topTask, isTopTaskHome)) {
+        AtomicBoolean isTopTaskHome = new AtomicBoolean(true);
+        if (topTask != null && isRecentsTopMost(topTask, isTopTaskHome)) {
             // Notify recents to toggle itself
             Intent intent = new Intent(ACTION_TOGGLE_RECENTS_ACTIVITY);
             intent.setPackage(mContext.getPackageName());
@@ -389,8 +392,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     void startRecentsActivity() {
         // Check if the top task is in the home stack, and start the recents activity
         ActivityManager.RunningTaskInfo topTask = getTopMostTask();
-        AtomicBoolean isTopTaskHome = new AtomicBoolean();
-        if (!isRecentsTopMost(topTask, isTopTaskHome)) {
+        AtomicBoolean isTopTaskHome = new AtomicBoolean(true);
+        if (topTask == null || !isRecentsTopMost(topTask, isTopTaskHome)) {
             startRecentsActivity(topTask, isTopTaskHome.get());
         }
     }
@@ -504,7 +507,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         TaskStackViewLayoutAlgorithm.VisibilityReport stackVr =
                 mDummyStackView.computeStackVisibilityReport();
         boolean hasRecentTasks = stack.getTaskCount() > 0;
-        boolean useThumbnailTransition = !isTopTaskHome && hasRecentTasks;
+        boolean useThumbnailTransition = (topTask != null) && !isTopTaskHome && hasRecentTasks;
 
         if (useThumbnailTransition) {
             // Ensure that we load the running task's icon
