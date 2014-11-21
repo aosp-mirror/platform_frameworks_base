@@ -42,6 +42,7 @@
 #include "ShadowTessellator.h"
 #include "SkiaShader.h"
 #include "utils/GLUtils.h"
+#include "utils/TraceUtils.h"
 #include "Vector.h"
 #include "VertexBuffer.h"
 
@@ -50,21 +51,6 @@
 #else
     #define EVENT_LOGD(...)
 #endif
-
-static void atraceFormatBegin(const char* fmt, ...) {
-    const int BUFFER_SIZE = 256;
-    va_list ap;
-    char buf[BUFFER_SIZE];
-
-    va_start(ap, fmt);
-    vsnprintf(buf, BUFFER_SIZE, fmt, ap);
-    va_end(ap);
-
-    ATRACE_BEGIN(buf);
-}
-
-#define ATRACE_FORMAT_BEGIN(fmt, ...) \
-    if (CC_UNLIKELY(ATRACE_ENABLED())) atraceFormatBegin(fmt, ##__VA_ARGS__)
 
 namespace android {
 namespace uirenderer {
@@ -466,7 +452,6 @@ void OpenGLRenderer::renderOverdraw() {
 bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
     if (layer->deferredUpdateScheduled && layer->renderer
             && layer->renderNode.get() && layer->renderNode->isRenderable()) {
-        ATRACE_CALL();
 
         if (inFrame) {
             endTiling();
@@ -523,20 +508,10 @@ void OpenGLRenderer::flushLayers() {
     int count = mLayerUpdates.size();
     if (count > 0) {
         startMark("Apply Layer Updates");
-        char layerName[12];
 
         // Note: it is very important to update the layers in order
         for (int i = 0; i < count; i++) {
-            Layer* layer = mLayerUpdates.itemAt(i).get();
-
-            sprintf(layerName, "Layer #%d", i);
-            startMark(layerName);
-            ATRACE_FORMAT_BEGIN("flushLayer %ux%u", layer->getWidth(), layer->getHeight());
-
-            layer->flush();
-
-            ATRACE_END();
-            endMark();
+            mLayerUpdates.itemAt(i)->flush();
         }
 
         mLayerUpdates.clear();
@@ -573,7 +548,7 @@ void OpenGLRenderer::cancelLayerUpdate(Layer* layer) {
 }
 
 void OpenGLRenderer::flushLayerUpdates() {
-    ATRACE_CALL();
+    ATRACE_NAME("Update HW Layers");
     syncState();
     updateLayers();
     flushLayers();

@@ -25,7 +25,6 @@
 #include <SkCanvas.h>
 #include <algorithm>
 
-#include <utils/Trace.h>
 
 #include "DamageAccumulator.h"
 #include "Debug.h"
@@ -34,6 +33,7 @@
 #include "LayerRenderer.h"
 #include "OpenGLRenderer.h"
 #include "utils/MathUtils.h"
+#include "utils/TraceUtils.h"
 #include "renderthread/CanvasContext.h"
 
 namespace android {
@@ -425,6 +425,10 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
                 properties().getClippingRectForFlags(clipFlags, &layerBounds);
                 clipFlags = 0; // all clipping done by saveLayer
             }
+
+            ATRACE_FORMAT("%s alpha caused %ssaveLayer %ux%u",
+                    getName(), clipFlags ? "" : "unclipped ",
+                    layerBounds.getWidth(), layerBounds.getHeight());
 
             SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
                     layerBounds.left, layerBounds.top, layerBounds.right, layerBounds.bottom,
