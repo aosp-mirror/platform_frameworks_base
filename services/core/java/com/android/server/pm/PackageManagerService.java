@@ -138,6 +138,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Environment.UserEnvironment;
+import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.os.Debug;
 import android.os.FileUtils;
@@ -161,6 +162,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.DisplayMetrics;
@@ -278,6 +280,18 @@ public class PackageManagerService extends IPackageManager.Stub {
      * such as installing multi-gigabyte applications, so ours needs to be longer.
      */
     private static final long WATCHDOG_TIMEOUT = 1000*60*10;     // ten minutes
+
+    /**
+     * Wall-clock timeout (in milliseconds) after which we *require* that an fstrim
+     * be run on this device.  We use the value in the Settings.Global.MANDATORY_FSTRIM_INTERVAL
+     * settings entry if available, otherwise we use the hardcoded default.  If it's been
+     * more than this long since the last fstrim, we force one during the boot sequence.
+     *
+     * This backstops other fstrim scheduling:  if the device is alive at midnight+idle,
+     * one gets run at the next available charging+idle time.  This final mandatory
+     * no-fstrim check kicks in only of the other scheduling criteria is never met.
+     */
+    private static final long DEFAULT_MANDATORY_FSTRIM_INTERVAL = 3 * DateUtils.DAY_IN_MILLIS;
 
     /**
      * Whether verification is enabled by default.
@@ -4505,6 +4519,37 @@ public class PackageManagerService extends IPackageManager.Stub {
     @Override
     public void performBootDexOpt() {
         enforceSystemOrRoot("Only the system can request dexopt be performed");
+
+        // Before everything else, see whether we need to fstrim.
+        try {
+            IMountService ms = PackageHelper.getMountService();
+            if (ms != null) {
+                final long interval = android.provider.Settings.Global.getLong(
+                        mContext.getContentResolver(),
+                        android.provider.Settings.Global.FSTRIM_MANDATORY_INTERVAL,
+                        DEFAULT_MANDATORY_FSTRIM_INTERVAL);
+                if (interval > 0) {
+                    final long timeSinceLast = System.currentTimeMillis() - ms.lastMaintenance();
+                    if (timeSinceLast > interval) {
+                        Slog.w(TAG, "No disk maintenance in " + timeSinceLast
+                                + "; running immediately");
+                        if (!isFirstBoot()) {
+                            try {
+                                ActivityManagerNative.getDefault().showBootMessage(
+                                        mContext.getResources().getString(
+                                                R.string.android_upgrading_fstrim), true);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                        ms.runMaintenance();
+                    }
+                }
+            } else {
+                Slog.e(TAG, "Mount service unavailable!");
+            }
+        } catch (RemoteException e) {
+            // Can't happen; MountService is local
+        }
 
         final HashSet<PackageParser.Package> pkgs;
         synchronized (mPackages) {
