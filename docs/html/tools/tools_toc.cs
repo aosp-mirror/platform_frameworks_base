@@ -143,9 +143,9 @@
     </ul>
   </li>
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/publishing/publishing_overview.html"><span class="en">Publishing</span></a></div>
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/publishing/publishing_overview.html" zh-cn-lang="发布概述"><span class="en">Publishing</span></a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>tools/publishing/preparing.html"><span class="en">Preparing for Release</span></a></li>
+          <li><a href="<?cs var:toroot ?>tools/publishing/preparing.html" zh-cn-lang="准备发布"><span class="en">Preparing for Release</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/publishing/versioning.html"><span class="en">Versioning Your Apps</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/publishing/app-signing.html"><span class="en">Signing Your Apps</span></a></li>
         </ul>
@@ -201,7 +201,7 @@ class="en">MonkeyImage</span></a></li>
 class="en">MonkeyRunner</span></a></li>
         </ul>
       </li>
-       <li><a href="<?cs var:toroot ?>tools/help/proguard.html">ProGuard</a></li>
+       <li><a href="<?cs var:toroot ?>tools/help/proguard.html" zh-cn-lang="ProGuard">ProGuard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/sdk-manager.html">SDK Manager</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/systrace.html">Systrace</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
