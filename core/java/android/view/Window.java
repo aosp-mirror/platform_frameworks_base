@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
@@ -155,6 +156,7 @@ public abstract class Window {
             "android:navigation:background";
 
     /** The default features enabled */
+    @Deprecated
     @SuppressWarnings({"PointlessBitwiseExpression"})
     protected static final int DEFAULT_FEATURES = (1 << FEATURE_OPTIONS_PANEL) |
             (1 << FEATURE_CONTEXT_MENU);
@@ -183,8 +185,8 @@ public abstract class Window {
     private boolean mSetCloseOnTouchOutside = false;
     private int mForcedWindowFlags = 0;
 
-    private int mFeatures = DEFAULT_FEATURES;
-    private int mLocalFeatures = DEFAULT_FEATURES;
+    private int mFeatures;
+    private int mLocalFeatures;
 
     private boolean mHaveWindowFormat = false;
     private boolean mHaveDimAmount = false;
@@ -442,6 +444,7 @@ public abstract class Window {
 
     public Window(Context context) {
         mContext = context;
+        mFeatures = mLocalFeatures = getDefaultFeatures(context);
     }
 
     /**
@@ -1267,6 +1270,25 @@ public abstract class Window {
     protected final int getFeatures()
     {
         return mFeatures;
+    }
+
+    /**
+     * Return the feature bits set by default on a window.
+     * @param context The context used to access resources
+     */
+    public static int getDefaultFeatures(Context context) {
+        int features = 0;
+
+        final Resources res = context.getResources();
+        if (res.getBoolean(com.android.internal.R.bool.config_defaultWindowFeatureOptionsPanel)) {
+            features |= 1 << FEATURE_OPTIONS_PANEL;
+        }
+
+        if (res.getBoolean(com.android.internal.R.bool.config_defaultWindowFeatureContextMenu)) {
+            features |= 1 << FEATURE_CONTEXT_MENU;
+        }
+
+        return features;
     }
 
     /**
