@@ -128,6 +128,7 @@ public final class PowerManagerService extends SystemService
     private static final int WAKE_LOCK_PROXIMITY_SCREEN_OFF = 1 << 4;
     private static final int WAKE_LOCK_STAY_AWAKE = 1 << 5; // only set if already awake
     private static final int WAKE_LOCK_DOZE = 1 << 6;
+    private static final int WAKE_LOCK_DRAW = 1 << 7;
 
     // Summarizes the user activity state.
     private static final int USER_ACTIVITY_SCREEN_BRIGHT = 1 << 0;
@@ -1398,12 +1399,15 @@ public final class PowerManagerService extends SystemService
                     case PowerManager.DOZE_WAKE_LOCK:
                         mWakeLockSummary |= WAKE_LOCK_DOZE;
                         break;
+                    case PowerManager.DRAW_WAKE_LOCK:
+                        mWakeLockSummary |= WAKE_LOCK_DRAW;
+                        break;
                 }
             }
 
             // Cancel wake locks that make no sense based on the current state.
             if (mWakefulness != WAKEFULNESS_DOZING) {
-                mWakeLockSummary &= ~WAKE_LOCK_DOZE;
+                mWakeLockSummary &= ~(WAKE_LOCK_DOZE | WAKE_LOCK_DRAW);
             }
             if (mWakefulness == WAKEFULNESS_ASLEEP
                     || (mWakeLockSummary & WAKE_LOCK_DOZE) != 0) {
@@ -1421,6 +1425,9 @@ public final class PowerManagerService extends SystemService
                 } else if (mWakefulness == WAKEFULNESS_DREAMING) {
                     mWakeLockSummary |= WAKE_LOCK_CPU;
                 }
+            }
+            if ((mWakeLockSummary & WAKE_LOCK_DRAW) != 0) {
+                mWakeLockSummary |= WAKE_LOCK_CPU;
             }
 
             if (DEBUG_SPEW) {
@@ -1845,6 +1852,10 @@ public final class PowerManagerService extends SystemService
 
             if (mDisplayPowerRequest.policy == DisplayPowerRequest.POLICY_DOZE) {
                 mDisplayPowerRequest.dozeScreenState = mDozeScreenStateOverrideFromDreamManager;
+                if (mDisplayPowerRequest.dozeScreenState == Display.STATE_DOZE_SUSPEND
+                        && (mWakeLockSummary & WAKE_LOCK_DRAW) != 0) {
+                    mDisplayPowerRequest.dozeScreenState = Display.STATE_DOZE;
+                }
                 mDisplayPowerRequest.dozeScreenBrightness =
                         mDozeScreenBrightnessOverrideFromDreamManager;
             } else {
@@ -2712,6 +2723,8 @@ public final class PowerManagerService extends SystemService
                     return "PROXIMITY_SCREEN_OFF_WAKE_LOCK";
                 case PowerManager.DOZE_WAKE_LOCK:
                     return "DOZE_WAKE_LOCK                ";
+                case PowerManager.DRAW_WAKE_LOCK:
+                    return "DRAW_WAKE_LOCK                ";
                 default:
                     return "???                           ";
             }
