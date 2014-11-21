@@ -274,6 +274,7 @@ public class TaskStackViewLayoutAlgorithm {
 
     /** Returns the scroll to such task top = 1f; */
     float getStackScrollForTask(Task t) {
+        if (!mTaskProgressMap.containsKey(t.key)) return 0f;
         return mTaskProgressMap.get(t.key);
     }
 

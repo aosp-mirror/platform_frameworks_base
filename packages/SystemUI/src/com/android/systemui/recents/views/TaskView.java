@@ -350,7 +350,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
             public void run() {
                 enableFocusAnimations();
             }
-        }, (startDelay / 2));
+        }, startDelay);
     }
 
     public void fadeInActionButton(int delay, int duration) {
