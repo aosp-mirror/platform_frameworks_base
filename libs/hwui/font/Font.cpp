@@ -138,7 +138,8 @@ void Font::invalidateTextureCache(CacheTexture* cacheTexture) {
 }
 
 void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
-        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
+        uint8_t* /* bitmap */, uint32_t /* bitmapW */, uint32_t /* bitmapH */, Rect* bounds,
+        const float* /* pos */) {
     int width = (int) glyph->mBitmapWidth;
     int height = (int) glyph->mBitmapHeight;
 
@@ -160,7 +161,8 @@ void Font::measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
 }
 
 void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
-        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
+        uint8_t* /* bitmap */, uint32_t /* bitmapW */, uint32_t /* bitmapH */, Rect* /* bounds */,
+        const float* /* pos */) {
     float width = (float) glyph->mBitmapWidth;
     float height = (float) glyph->mBitmapHeight;
 
@@ -179,7 +181,8 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
 }
 
 void Font::drawCachedGlyphTransformed(CachedGlyphInfo* glyph, int x, int y,
-        uint8_t* bitmap, uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* pos) {
+        uint8_t* /* bitmap */, uint32_t /* bitmapW */, uint32_t /* bitmapH */, Rect* /* bounds */,
+        const float* /* pos */) {
     float width = (float) glyph->mBitmapWidth;
     float height = (float) glyph->mBitmapHeight;
 
@@ -209,7 +212,8 @@ void Font::drawCachedGlyphTransformed(CachedGlyphInfo* glyph, int x, int y,
 }
 
 void Font::drawCachedGlyphBitmap(CachedGlyphInfo* glyph, int x, int y, uint8_t* bitmap,
-        uint32_t bitmapWidth, uint32_t bitmapHeight, Rect* bounds, const float* pos) {
+        uint32_t bitmapWidth, uint32_t /* bitmapHeight */, Rect* /* bounds */,
+        const float* /* pos */) {
     int dstX = x + glyph->mBitmapLeft;
     int dstY = y + glyph->mBitmapTop;
 
@@ -427,7 +431,7 @@ void Font::render(const SkPaint* paint, const char* text, uint32_t start, uint32
     }
 }
 
-void Font::updateGlyphCache(const SkPaint* paint, const SkGlyph& skiaGlyph,
+void Font::updateGlyphCache(const SkPaint* /* paint */, const SkGlyph& skiaGlyph,
         SkGlyphCache* skiaGlyphCache, CachedGlyphInfo* glyph, bool precaching) {
     glyph->mAdvanceX = skiaGlyph.fAdvanceX;
     glyph->mAdvanceY = skiaGlyph.fAdvanceY;

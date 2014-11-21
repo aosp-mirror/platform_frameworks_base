@@ -62,8 +62,8 @@ DisplayListData* DisplayListRenderer::finishRecording() {
     return data;
 }
 
-void DisplayListRenderer::prepareDirty(float left, float top,
-        float right, float bottom, bool opaque) {
+void DisplayListRenderer::prepareDirty(float /* left */, float /* top */,
+        float /* right */, float /* bottom */, bool opaque) {
 
     LOG_ALWAYS_FATAL_IF(mDisplayListData,
             "prepareDirty called a second time during a recording!");
@@ -88,7 +88,7 @@ void DisplayListRenderer::interrupt() {
 void DisplayListRenderer::resume() {
 }
 
-void DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
+void DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& /* dirty */) {
     // Ignore dirty during recording, it matters only when we replay
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
     mDisplayListData->functors.add(functor);
@@ -178,7 +178,8 @@ bool DisplayListRenderer::clipRegion(const SkRegion* region, SkRegion::Op op) {
     return mState.clipRegion(region, op);
 }
 
-void DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t flags) {
+void DisplayListRenderer::drawRenderNode(RenderNode* renderNode, Rect& /* dirty */,
+                                         int32_t flags) {
     LOG_ALWAYS_FATAL_IF(!renderNode, "missing rendernode");
 
     // dirty is an out parameter and should not be recorded,
@@ -373,7 +374,7 @@ static void simplifyPaint(int color, SkPaint* paint) {
 
 void DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, const float* positions, const SkPaint* paint,
-        float totalAdvance, const Rect& bounds, DrawOpMode drawOpMode) {
+        float totalAdvance, const Rect& bounds, DrawOpMode /* drawOpMode */) {
 
     if (!text || count <= 0 || paintWillNotDrawText(*paint)) return;
 

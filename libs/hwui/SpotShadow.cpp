@@ -871,7 +871,7 @@ inline Vector2 getCloserVertex(const Vector2& umbraVertex, const Vector2& centro
 /**
  * Generate a triangle strip given two convex polygon
 **/
-void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float shadowStrengthScale,
+void SpotShadow::generateTriangleStrip(bool isCasterOpaque, float /* shadowStrengthScale */,
         Vector2* penumbra, int penumbraLength, Vector2* umbra, int umbraLength,
         const Vector3* poly, int polyLength, VertexBuffer& shadowTriangleStrip,
         const Vector2& centroid) {

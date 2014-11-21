@@ -66,7 +66,7 @@ sp<RenderNode> createCard(int x, int y, int width, int height) {
     return node;
 }
 
-int main(int argc, char* argv[]) {
+int main() {
     createTestEnvironment();
 
     // create the native surface

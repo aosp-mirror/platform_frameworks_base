@@ -54,7 +54,7 @@ void AnimationContext::addAnimationHandle(AnimationHandle* handle) {
     handle->insertAfter(&mNextFrameAnimations);
 }
 
-void AnimationContext::startFrame(TreeInfo::TraversalMode mode) {
+void AnimationContext::startFrame(TreeInfo::TraversalMode /* mode */) {
     LOG_ALWAYS_FATAL_IF(mCurrentFrameAnimations.mNextHandle,
             "Missed running animations last frame!");
     AnimationHandle* head = mNextFrameAnimations.mNextHandle;
