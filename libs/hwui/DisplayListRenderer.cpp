@@ -41,7 +41,6 @@ DisplayListRenderer::DisplayListRenderer()
     , mHasDeferredTranslate(false)
     , mDeferredBarrierType(kBarrier_None)
     , mHighContrastText(false)
-    , mOverrideXfermode(-1)
     , mRestoreSaveCount(-1) {
 }
 
