@@ -60,4 +60,6 @@ interface INfcAdapter
 
     void addNfcUnlockHandler(INfcUnlockHandler unlockHandler, in int[] techList);
     void removeNfcUnlockHandler(INfcUnlockHandler unlockHandler);
+
+    void verifyNfcPermission();
 }
