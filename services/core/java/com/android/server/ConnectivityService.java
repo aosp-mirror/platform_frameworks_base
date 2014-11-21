@@ -3973,7 +3973,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     //                 another higher scoring network by another call to rematchNetworkAndRequests()
     //                 and this other call also lingered newNetwork.
     private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork, boolean nascent) {
-        if (!newNetwork.created) loge("ERROR: uncreated network being rematched.");
+        if (!newNetwork.created) return;
         if (nascent && !newNetwork.validated) loge("ERROR: nascent network not validated.");
         boolean keep = newNetwork.isVPN();
         boolean isNewDefault = false;
@@ -4272,7 +4272,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final int oldScore = nai.getCurrentScore();
         nai.setCurrentScore(score);
 
-        if (nai.created) rematchAllNetworksAndRequests(nai, oldScore);
+        rematchAllNetworksAndRequests(nai, oldScore);
 
         sendUpdatedScoreToFactories(nai);
     }
