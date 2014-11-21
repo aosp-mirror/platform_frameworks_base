@@ -340,6 +340,7 @@ public class ThreadedRenderer extends HardwareRenderer {
                 recordDuration, view.getResources().getDisplayMetrics().density);
         if ((syncResult & SYNC_LOST_SURFACE_REWARD_IF_FOUND) != 0) {
             setEnabled(false);
+            attachInfo.mViewRootImpl.mSurface.release();
             // Invalidate since we failed to draw. This should fetch a Surface
             // if it is still needed or do nothing if we are no longer drawing
             attachInfo.mViewRootImpl.invalidate();
