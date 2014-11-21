@@ -202,6 +202,12 @@ public class DozeService extends DreamService {
             // Here we need a wakelock to stay awake until the pulse is finished.
             mWakeLock.acquire();
             mPulsing = true;
+            if (!mDozeParameters.getProxCheckBeforePulse()) {
+                // skip proximity check
+                continuePulsing();
+                return;
+            }
+            // perform a proximity check before pulsing
             final long start = SystemClock.uptimeMillis();
             new ProximityCheck() {
                 @Override
@@ -216,26 +222,30 @@ public class DozeService extends DreamService {
                     }
 
                     // not in-pocket, continue pulsing
-                    mHost.pulseWhileDozing(new DozeHost.PulseCallback() {
-                        @Override
-                        public void onPulseStarted() {
-                            if (mPulsing && mDreaming) {
-                                turnDisplayOn();
-                            }
-                        }
-
-                        @Override
-                        public void onPulseFinished() {
-                            if (mPulsing && mDreaming) {
-                                mPulsing = false;
-                                turnDisplayOff();
-                            }
-                            mWakeLock.release(); // needs to be unconditional to balance acquire
-                        }
-                    });
+                    continuePulsing();
                 }
             }.check();
         }
+    }
+
+    private void continuePulsing() {
+        mHost.pulseWhileDozing(new DozeHost.PulseCallback() {
+            @Override
+            public void onPulseStarted() {
+                if (mPulsing && mDreaming) {
+                    turnDisplayOn();
+                }
+            }
+
+            @Override
+            public void onPulseFinished() {
+                if (mPulsing && mDreaming) {
+                    mPulsing = false;
+                    turnDisplayOff();
+                }
+                mWakeLock.release(); // needs to be unconditional to balance acquire
+            }
+        });
     }
 
     private void turnDisplayOff() {
