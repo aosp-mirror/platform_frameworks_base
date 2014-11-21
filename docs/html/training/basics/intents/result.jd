@@ -1,12 +1,8 @@
 page.title=Getting a Result from an Activity
-parent.title=Interacting with Other Apps
-parent.link=index.html
+page.tags=intents
+helpoutsWidget=true
 
 trainingnavtop=true
-previous.title=Sending the User to Another App
-previous.link=sending.html
-next.title=Allowing Other Apps to Start Your Activity
-next.link=filters.html
 
 @jd:body
 

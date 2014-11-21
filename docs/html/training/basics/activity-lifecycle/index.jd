@@ -1,9 +1,9 @@
 page.title=Managing the Activity Lifecycle
+page.tags=activity lifecycle
+helpoutsWidget=true
 
 trainingnavtop=true
 startpage=true
-next.title=Launching an Activity
-next.link=starting.html
 
 @jd:body
 
