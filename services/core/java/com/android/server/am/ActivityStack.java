@@ -700,6 +700,10 @@ final class ActivityStack {
                 activities.get(activityNdx).setSleeping(false);
             }
         }
+        if (mPausingActivity != null) {
+            Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
+            activityPausedLocked(mPausingActivity.appToken, true);
+        }
     }
 
     /**
