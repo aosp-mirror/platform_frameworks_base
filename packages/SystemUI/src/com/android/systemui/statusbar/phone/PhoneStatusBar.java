@@ -3183,6 +3183,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void userSwitched(int newUserId) {
         if (MULTIUSER_DEBUG) mNotificationPanelDebugText.setText("USER " + newUserId);
         animateCollapsePanels();
+        updatePublicMode();
         updateNotifications();
         resetUserSetupObserver();
         setControllerUsers();
@@ -3674,7 +3675,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void updatePublicMode() {
         setLockscreenPublicMode(mStatusBarKeyguardViewManager.isShowing()
-                && mStatusBarKeyguardViewManager.isSecure());
+                && mStatusBarKeyguardViewManager.isSecure(mCurrentUserId));
     }
 
     private void updateKeyguardState(boolean goingToFullShade, boolean fromShadeLocked) {
