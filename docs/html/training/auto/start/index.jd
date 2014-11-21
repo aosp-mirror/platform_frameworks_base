@@ -81,7 +81,8 @@ to 21 or higher.
 </li>
 <li><strong><a href="{@docRoot}tools/support-library/setup.html">Install the
 support library</a></strong> - If you are building messaging apps for Auto, you
-need the {@code NotificationCompat.CarExtender} class contained in the
+need the {@link android.support.v4.app.NotificationCompat.CarExtender} class
+contained in the
 <a href="{@docRoot}tools/support-library/features.html#v4">v4 support library</a>.
 This class allows you to create notifications that are compatible with Auto
 devices.</li>
