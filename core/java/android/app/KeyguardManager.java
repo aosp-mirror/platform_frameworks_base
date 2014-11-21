@@ -225,28 +225,28 @@ public class KeyguardManager {
     }
 
     /**
-     * Return whether unlocking the device is currently not requiring a password
-     * because of a trust agent.
+     * Returns whether the device is currently locked and requires a PIN, pattern or
+     * password to unlock.
      *
-     * @return true if the keyguard can currently be unlocked without entering credentials
-     *         because the device is in a trusted environment.
+     * @return true if unlocking the device currently requires a PIN, pattern or
+     * password.
      */
-    public boolean isKeyguardInTrustedState() {
-        return isKeyguardInTrustedState(UserHandle.getCallingUserId());
+    public boolean isDeviceLocked() {
+        return isDeviceLocked(UserHandle.getCallingUserId());
     }
 
     /**
-     * Return whether unlocking the device is currently not requiring a password
-     * because of a trust agent.
+     * Returns whether the device is currently locked and requires a PIN, pattern or
+     * password to unlock.
      *
-     * @param userId the user for which the trusted state should be reported.
-     * @return true if the keyguard can currently be unlocked without entering credentials
-     *         because the device is in a trusted environment.
+     * @param userId the user for which the locked state should be reported.
+     * @return true if unlocking the device currently requires a PIN, pattern or
+     * password.
      * @hide
      */
-    public boolean isKeyguardInTrustedState(int userId) {
+    public boolean isDeviceLocked(int userId) {
         try {
-            return mTrustManager.isTrusted(userId);
+            return mTrustManager.isDeviceLocked(userId);
         } catch (RemoteException e) {
             return false;
         }
