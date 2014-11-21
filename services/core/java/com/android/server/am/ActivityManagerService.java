@@ -5661,7 +5661,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     didSomething = true;
                     it.remove();
                     pir.canceled = true;
-                    if (pir.key.activity != null) {
+                    if (pir.key.activity != null && pir.key.activity.pendingResults != null) {
                         pir.key.activity.pendingResults.remove(pir.ref);
                     }
                 }
