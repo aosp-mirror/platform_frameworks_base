@@ -344,7 +344,7 @@ void OpenGLRenderer::resumeAfterLayer() {
     dirtyClip();
 }
 
-status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
+status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& /* dirty */) {
     if (currentSnapshot()->isIgnored()) return DrawGlInfo::kStatusDone;
 
     Rect clip(*currentClipRect());
@@ -397,6 +397,8 @@ void OpenGLRenderer::eventMarkDEBUG(const char* fmt, ...) const {
     va_end(ap);
 
     eventMark(buf);
+#else
+    (void)fmt;
 #endif
 }
 
@@ -1043,7 +1045,7 @@ public:
     }
 
 protected:
-    virtual void shadeSpan(int x, int y, SkPMColor[], int count) {
+    virtual void shadeSpan(int /* x */, int /* y */, SkPMColor[], int /* count */) {
         LOG_ALWAYS_FATAL("LayerShader should never be drawn with raster backend.");
     }
 

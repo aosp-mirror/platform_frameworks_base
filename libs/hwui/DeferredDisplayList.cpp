@@ -55,7 +55,7 @@ public:
     virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int index) = 0;
     virtual ~Batch() {}
     virtual bool purelyDrawBatch() { return false; }
-    virtual bool coversBounds(const Rect& bounds) { return false; }
+    virtual bool coversBounds(const Rect& /* bounds */) { return false; }
 };
 
 class DrawBatch : public Batch {
@@ -91,7 +91,7 @@ public:
         return false;
     }
 
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int index) {
+    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int /* index */) {
         DEFER_LOGD("%d  replaying DrawBatch %p, with %d ops (batch id %x, merge id %p)",
                 index, this, mOps.size(), getBatchId(), getMergeId());
 
@@ -269,7 +269,7 @@ public:
         if (newClipSideFlags & kClipSide_Bottom) mClipRect.bottom = state->mClip.bottom;
     }
 
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int index) {
+    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int /* index */) {
         DEFER_LOGD("%d  replaying MergingDrawBatch %p, with %d ops,"
                 " clip flags %x (batch id %x, merge id %p)",
                 index, this, mOps.size(), mClipSideFlags, getBatchId(), getMergeId());
@@ -313,7 +313,7 @@ public:
     // creates a single operation batch
     StateOpBatch(const StateOp* op, const DeferredDisplayState* state) : mOp(op), mState(state) {}
 
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int index) {
+    virtual status_t replay(OpenGLRenderer& renderer, Rect& /* dirty */, int /* index */) {
         DEFER_LOGD("replaying state op batch %p", this);
         renderer.restoreDisplayState(*mState);
 
@@ -332,10 +332,10 @@ private:
 
 class RestoreToCountBatch : public Batch {
 public:
-    RestoreToCountBatch(const StateOp* op, const DeferredDisplayState* state, int restoreCount) :
-            mState(state), mRestoreCount(restoreCount) {}
+    RestoreToCountBatch(const StateOp* /* op */, const DeferredDisplayState* state,
+                        int restoreCount) : mState(state), mRestoreCount(restoreCount) {}
 
-    virtual status_t replay(OpenGLRenderer& renderer, Rect& dirty, int index) {
+    virtual status_t replay(OpenGLRenderer& renderer, Rect& /* dirty */, int /* index */) {
         DEFER_LOGD("batch %p restoring to count %d", this, mRestoreCount);
 
         renderer.restoreDisplayState(*mState);
