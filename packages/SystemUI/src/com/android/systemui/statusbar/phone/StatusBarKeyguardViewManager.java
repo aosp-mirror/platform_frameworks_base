@@ -426,4 +426,8 @@ public class StatusBarKeyguardViewManager {
     public boolean isGoingToNotificationShade() {
         return mPhoneStatusBar.isGoingToNotificationShade();
     }
+
+    public boolean isSecure(int userId) {
+        return mBouncer.isSecure() || mLockPatternUtils.isSecure(userId);
+    }
 }
