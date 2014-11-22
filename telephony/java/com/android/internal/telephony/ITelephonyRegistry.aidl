@@ -27,11 +27,13 @@ import android.telephony.SignalStrength;
 import android.telephony.CellInfo;
 import android.telephony.VoLteServiceState;
 import com.android.internal.telephony.IPhoneStateListener;
-import com.android.internal.telephony.ISubscriptionListener;
+import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 
 interface ITelephonyRegistry {
-    void registerSubscriptionListener(String pkg, ISubscriptionListener callback, int events);
-    void unregisterSubscriptionListener(String pkg, ISubscriptionListener callback);
+    void registerOnSubscriptionsChangedListener(String pkg,
+            IOnSubscriptionsChangedListener callback);
+    void unregisterOnSubscriptionsChangedListener(String pkg,
+            IOnSubscriptionsChangedListener callback);
     void listen(String pkg, IPhoneStateListener callback, int events, boolean notifyNow);
     void listenForSubscriber(in int subId, String pkg, IPhoneStateListener callback, int events,
             boolean notifyNow);
