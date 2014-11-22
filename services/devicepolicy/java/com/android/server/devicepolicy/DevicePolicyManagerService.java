@@ -2522,6 +2522,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
     public int getMaximumFailedPasswordsForWipe(ComponentName who, int userHandle) {
         if (!mHasFeature) {
             return 0;
@@ -2531,6 +2532,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin admin = (who != null) ? getActiveAdminUncheckedLocked(who, userHandle)
                     : getAdminWithMinimumFailedPasswordsForWipeLocked(userHandle);
             return admin != null ? admin.maximumFailedPasswordsForWipe : 0;
+        }
+    }
+
+    @Override
+    public int getProfileWithMinimumFailedPasswordsForWipe(int userHandle) {
+        if (!mHasFeature) {
+            return UserHandle.USER_NULL;
+        }
+        enforceCrossUserPermission(userHandle);
+        synchronized (this) {
+            ActiveAdmin admin = getAdminWithMinimumFailedPasswordsForWipeLocked(userHandle);
+            return admin != null ? admin.getUserHandle().getIdentifier() : UserHandle.USER_NULL;
         }
     }
 
