@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-package android.service.carriermessaging;
+package android.service.carrier;
 
-parcelable CarrierMessagingService.SendSmsResponse;
+/**
+ * Callback interface definition for the Carrier Messaging Service client to get informed of the
+ * result of various API invocations.
+ * @hide
+ */
+oneway interface ICarrierMessagingCallback {
+    void onFilterComplete(boolean keepMessage);
+    void onSendSmsComplete(int result, int messageRef);
+    void onSendMultipartSmsComplete(int result, in int[] messageRefs);
+    void onSendMmsComplete(int result, in byte[] sendConfPdu);
+    void onDownloadMmsComplete(int result);
+}

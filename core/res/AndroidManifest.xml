@@ -2904,7 +2904,7 @@
         android:description="@string/permdesc_removeDrmCertificates"
         android:protectionLevel="signature|system" />
 
-    <!-- Must be required by a {@link android.service.carriermessaging.CarrierMessagingService}.
+    <!-- Must be required by a {@link android.service.carrier.CarrierMessagingService}.
          Any service that filters for this intent must be a carrier privileged app. -->
     <permission android:name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"
         android:label="@string/permlab_bindCarrierMessagingService"

@@ -207,20 +207,6 @@ public class MmsServiceBroker extends SystemService {
         return mTelephonyManager;
     }
 
-    /*
-     * Throws a security exception unless the caller has carrier privilege.
-     */
-    private void enforceCarrierPrivilege() {
-        final String[] packages = getPackageManager().getPackagesForUid(Binder.getCallingUid());
-        for (String pkg : packages) {
-            if (getTelephonyManager().checkCarrierPrivilegesForPackage(pkg) ==
-                    TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                return;
-            }
-        }
-        throw new SecurityException("No carrier privilege");
-    }
-
     private String getCallingPackageName() {
         final String[] packages = getPackageManager().getPackagesForUid(Binder.getCallingUid());
         if (packages != null && packages.length > 0) {
@@ -267,19 +253,6 @@ public class MmsServiceBroker extends SystemService {
 
             getServiceGuarded().downloadMessage(subId, callingPkg, locationUrl, contentUri,
                     configOverrides, downloadedIntent);
-        }
-
-        @Override
-        public void updateMmsSendStatus(int messageRef, byte[] pdu, int status)
-                throws RemoteException {
-            enforceCarrierPrivilege();
-            getServiceGuarded().updateMmsSendStatus(messageRef, pdu, status);
-        }
-
-        @Override
-        public void updateMmsDownloadStatus(int messageRef, int status) throws RemoteException {
-            enforceCarrierPrivilege();
-            getServiceGuarded().updateMmsDownloadStatus(messageRef, status);
         }
 
         @Override
