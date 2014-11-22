@@ -238,8 +238,8 @@ package android {
     field public static final int accessibilityFeedbackType = 16843650; // 0x1010382
     field public static final int accessibilityFlags = 16843652; // 0x1010384
     field public static final int accessibilityLiveRegion = 16843758; // 0x10103ee
-    field public static final int accessibilityTraversalAfter = 16844036; // 0x1010504
-    field public static final int accessibilityTraversalBefore = 16844035; // 0x1010503
+    field public static final int accessibilityTraversalAfter = 16843986; // 0x10104d2
+    field public static final int accessibilityTraversalBefore = 16843985; // 0x10104d1
     field public static final int accountPreferences = 16843423; // 0x101029f
     field public static final int accountType = 16843407; // 0x101028f
     field public static final int action = 16842797; // 0x101002d
@@ -403,7 +403,7 @@ package android {
     field public static final int closeIcon = 16843905; // 0x1010481
     field public static final int codes = 16843330; // 0x1010242
     field public static final int collapseColumns = 16843083; // 0x101014b
-    field public static final int collapseContentDescription = 16844034; // 0x1010502
+    field public static final int collapseContentDescription = 16843984; // 0x10104d0
     field public static final int color = 16843173; // 0x10101a5
     field public static final int colorAccent = 16843829; // 0x1010435
     field public static final int colorActivatedHighlight = 16843664; // 0x1010390
@@ -476,7 +476,7 @@ package android {
     field public static final int dialogLayout = 16843255; // 0x10101f7
     field public static final int dialogMessage = 16843251; // 0x10101f3
     field public static final int dialogPreferenceStyle = 16842897; // 0x1010091
-    field public static final int dialogPreferredPadding = 16844037; // 0x1010505
+    field public static final int dialogPreferredPadding = 16843987; // 0x10104d3
     field public static final int dialogTheme = 16843528; // 0x1010308
     field public static final int dialogTitle = 16843250; // 0x10101f2
     field public static final int digits = 16843110; // 0x1010166
@@ -1007,7 +1007,7 @@ package android {
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
     field public static final int requiresFadingEdge = 16843685; // 0x10103a5
     field public static final int requiresSmallestWidthDp = 16843620; // 0x1010364
-    field public static final int resizeClip = 16844033; // 0x1010501
+    field public static final int resizeClip = 16843983; // 0x10104cf
     field public static final int resizeMode = 16843619; // 0x1010363
     field public static final int resizeable = 16843405; // 0x101028d
     field public static final int resource = 16842789; // 0x1010025
@@ -1056,7 +1056,7 @@ package android {
     field public static final int scrollbars = 16842974; // 0x10100de
     field public static final int scrollingCache = 16843006; // 0x10100fe
     field public static final deprecated int searchButtonText = 16843269; // 0x1010205
-    field public static final int searchHintIcon = 16844038; // 0x1010506
+    field public static final int searchHintIcon = 16843988; // 0x10104d4
     field public static final int searchIcon = 16843907; // 0x1010483
     field public static final int searchMode = 16843221; // 0x10101d5
     field public static final int searchSettingsDescription = 16843402; // 0x101028a
