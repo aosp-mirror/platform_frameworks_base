@@ -387,7 +387,6 @@ public class CallLog {
         public static Uri addCall(CallerInfo ci, Context context, String number,
                 int presentation, int callType, int features, PhoneAccountHandle accountHandle,
                 long start, int duration, Long dataUsage) {
-            // FIXME using -1 as subId instead of SubscriptionManager.INVALID_SUB_ID
             return addCall(ci, context, number, presentation, callType, features, accountHandle,
                     start, duration, dataUsage, false);
         }

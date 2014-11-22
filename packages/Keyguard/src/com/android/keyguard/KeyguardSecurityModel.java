@@ -82,10 +82,10 @@ public class KeyguardSecurityModel {
         KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
         SecurityMode mode = SecurityMode.None;
         if (monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED)
-                != SubscriptionManager.INVALID_SUB_ID) {
+                != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             mode = SecurityMode.SimPin;
         } else if (monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED)
-                != SubscriptionManager.INVALID_SUB_ID
+                != SubscriptionManager.INVALID_SUBSCRIPTION_ID
                 && mLockPatternUtils.isPukUnlockScreenEnable()) {
             mode = SecurityMode.SimPuk;
         } else {
