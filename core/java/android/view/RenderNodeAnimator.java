@@ -189,9 +189,6 @@ public class RenderNodeAnimator extends Animator {
     }
 
     private void doStart() {
-        mState = STATE_RUNNING;
-        nStart(mNativePtr.get(), this);
-
         // Alpha is a special snowflake that has the canonical value stored
         // in mTransformationInfo instead of in RenderNode, so we need to update
         // it with the final value here.
@@ -201,12 +198,18 @@ public class RenderNodeAnimator extends Animator {
             mViewTarget.mTransformationInfo.mAlpha = mFinalValue;
         }
 
-        notifyStartListeners();
+        moveToRunningState();
 
         if (mViewTarget != null) {
             // Kick off a frame to start the process
             mViewTarget.invalidateViewProperty(true, false);
         }
+    }
+
+    private void moveToRunningState() {
+        mState = STATE_RUNNING;
+        nStart(mNativePtr.get(), this);
+        notifyStartListeners();
     }
 
     private void notifyStartListeners() {
@@ -222,7 +225,7 @@ public class RenderNodeAnimator extends Animator {
         if (mState != STATE_PREPARE && mState != STATE_FINISHED) {
             if (mState == STATE_DELAYED) {
                 getHelper().removeDelayedAnimation(this);
-                notifyStartListeners();
+                moveToRunningState();
             }
             nEnd(mNativePtr.get());
 
@@ -242,7 +245,15 @@ public class RenderNodeAnimator extends Animator {
     @Override
     public void end() {
         if (mState != STATE_FINISHED) {
+            if (mState < STATE_RUNNING) {
+                getHelper().removeDelayedAnimation(this);
+                doStart();
+            }
             nEnd(mNativePtr.get());
+            if (mViewTarget != null) {
+                // Kick off a frame to flush the state change
+                mViewTarget.invalidateViewProperty(true, false);
+            }
         }
     }
 
