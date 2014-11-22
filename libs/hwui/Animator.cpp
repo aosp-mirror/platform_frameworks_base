@@ -246,11 +246,11 @@ CanvasPropertyPrimitiveAnimator::CanvasPropertyPrimitiveAnimator(
         , mProperty(property) {
 }
 
-float CanvasPropertyPrimitiveAnimator::getValue(RenderNode* /* target */) const {
+float CanvasPropertyPrimitiveAnimator::getValue(RenderNode* target) const {
     return mProperty->value;
 }
 
-void CanvasPropertyPrimitiveAnimator::setValue(RenderNode* /* target */, float value) {
+void CanvasPropertyPrimitiveAnimator::setValue(RenderNode* target, float value) {
     mProperty->value = value;
 }
 
@@ -269,7 +269,7 @@ CanvasPropertyPaintAnimator::CanvasPropertyPaintAnimator(
         , mField(field) {
 }
 
-float CanvasPropertyPaintAnimator::getValue(RenderNode* /* target */) const {
+float CanvasPropertyPaintAnimator::getValue(RenderNode* target) const {
     switch (mField) {
     case STROKE_WIDTH:
         return mProperty->value.getStrokeWidth();
@@ -285,7 +285,7 @@ static uint8_t to_uint8(float value) {
     return static_cast<uint8_t>( c < 0 ? 0 : c > 255 ? 255 : c );
 }
 
-void CanvasPropertyPaintAnimator::setValue(RenderNode* /* target */, float value) {
+void CanvasPropertyPaintAnimator::setValue(RenderNode* target, float value) {
     switch (mField) {
     case STROKE_WIDTH:
         mProperty->value.setStrokeWidth(value);

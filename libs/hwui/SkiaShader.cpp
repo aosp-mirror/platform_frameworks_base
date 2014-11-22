@@ -164,7 +164,7 @@ void SkiaShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
 ///////////////////////////////////////////////////////////////////////////////
 
 void SkiaLayerShader::describe(Caches*, ProgramDescription& description,
-        const Extensions&, const SkShader& /* shader */) {
+        const Extensions&, const SkShader& shader) {
     description.hasBitmap = true;
 }
 
@@ -340,7 +340,7 @@ static bool isSimpleGradient(const SkShader::GradientInfo& gradInfo) {
 }
 
 void SkiaGradientShader::describe(Caches*, ProgramDescription& description,
-        const Extensions& /* extensions */, const SkShader& shader) {
+        const Extensions& extensions, const SkShader& shader) {
     SkShader::GradientInfo gradInfo;
     gradInfo.fColorCount = 0;
     gradInfo.fColors = NULL;
