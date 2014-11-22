@@ -1,8 +1,6 @@
 #ifndef _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
 #define _ANDROID_GRAPHICS_GRAPHICS_JNI_H_
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include "SkBitmap.h"
 #include "SkDevice.h"
 #include "SkPixelRef.h"
@@ -10,8 +8,6 @@
 #include "SkPoint.h"
 #include "SkRect.h"
 #include "SkImageDecoder.h"
-#pragma GCC diagnostic pop
-
 #include <jni.h>
 
 class SkBitmapRegionDecoder;
