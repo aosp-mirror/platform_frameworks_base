@@ -427,7 +427,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private int findIndexOfSessionsListenerLocked(IActiveSessionsListener listener) {
         for (int i = mSessionsListeners.size() - 1; i >= 0; i--) {
-            if (mSessionsListeners.get(i).mListener == listener) {
+            if (mSessionsListeners.get(i).mListener.asBinder() == listener.asBinder()) {
                 return i;
             }
         }
@@ -764,6 +764,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             pw.println();
 
             synchronized (mLock) {
+                pw.println(mSessionsListeners.size() + " sessions listeners.");
                 int count = mAllSessions.size();
                 pw.println(count + " Sessions:");
                 for (int i = 0; i < count; i++) {
