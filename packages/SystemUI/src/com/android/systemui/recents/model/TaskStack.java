@@ -61,6 +61,14 @@ class FilteredTaskList {
         }
     }
 
+    /** Resets this FilteredTaskList. */
+    void reset() {
+        mTasks.clear();
+        mFilteredTasks.clear();
+        mTaskIndices.clear();
+        mFilter = null;
+    }
+
     /** Removes the task filter and returns the previous touch state */
     void removeFilter() {
         mFilter = null;
@@ -188,6 +196,14 @@ public class TaskStack {
     /** Sets the callbacks for this task stack */
     public void setCallbacks(TaskStackCallbacks cb) {
         mCb = cb;
+    }
+
+    /** Resets this TaskStack. */
+    public void reset() {
+        mCb = null;
+        mTaskList.reset();
+        mGroups.clear();
+        mAffinitiesGroups.clear();
     }
 
     /** Adds a new task */
