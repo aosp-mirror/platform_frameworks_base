@@ -27,7 +27,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 
@@ -40,9 +39,7 @@ import static android.os.BatteryManager.EXTRA_LEVEL;
 import static android.os.BatteryManager.EXTRA_HEALTH;
 
 import android.media.AudioManager;
-import android.media.IRemoteControlDisplay;
 import android.os.BatteryManager;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IRemoteCallback;
 import android.os.Message;
@@ -60,8 +57,8 @@ import android.service.fingerprint.FingerprintManager;
 import android.service.fingerprint.FingerprintManagerReceiver;
 import android.service.fingerprint.FingerprintUtils;
 import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionListener;
 import android.telephony.SubscriptionManager;
+import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -158,7 +155,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mSwitchingUser;
 
     private boolean mScreenOn;
-    protected List<SubscriptionInfo> mSubscriptionInfo;
+    private SubscriptionManager mSubscriptionManager;
+    private List<SubscriptionInfo> mSubscriptionInfo;
 
     private final Handler mHandler = new Handler() {
         @Override
@@ -237,9 +235,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     };
 
-    private SubscriptionListener mSubscriptionListener = new SubscriptionListener() {
+    private OnSubscriptionsChangedListener mSubscriptionListener =
+            new OnSubscriptionsChangedListener() {
         @Override
-        public void onSubscriptionInfoChanged() {
+        public void onSubscriptionsChanged() {
             mHandler.sendEmptyMessage(MSG_SIM_SUBSCRIPTION_INFO_CHANGED);
         }
     };
@@ -267,8 +266,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     protected void handleSimSubscriptionInfoChanged() {
         if (DEBUG_SIM_STATES) {
             Log.v(TAG, "onSubscriptionInfoChanged()");
-            for (SubscriptionInfo subInfo : SubscriptionManager.getActiveSubscriptionInfoList()) {
-                Log.v(TAG, "SubInfo:" + subInfo);
+            List<SubscriptionInfo> sil = mSubscriptionManager.getActiveSubscriptionInfoList();
+            if (sil != null) {
+                for (SubscriptionInfo subInfo : sil) {
+                    Log.v(TAG, "SubInfo:" + subInfo);
+                }
+            } else {
+                Log.v(TAG, "onSubscriptionInfoChanged: list is null");
             }
         }
         List<SubscriptionInfo> subscriptionInfos = getSubscriptionInfo(true /* forceReload */);
@@ -291,9 +295,17 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    /** @return List of SubscriptionInfo records, maybe empty but never null */
     List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
-        if (mSubscriptionInfo == null || forceReload) {
-            mSubscriptionInfo = SubscriptionManager.getActiveSubscriptionInfoList();
+        List<SubscriptionInfo> sil = mSubscriptionInfo;
+        if (sil == null || forceReload) {
+            sil = mSubscriptionManager.getActiveSubscriptionInfoList();
+        }
+        if (sil == null) {
+            // getActiveSubscriptionInfoList was null callers expect an empty list.
+            mSubscriptionInfo = new ArrayList<SubscriptionInfo>();
+        } else {
+            mSubscriptionInfo = sil;
         }
         return mSubscriptionInfo;
     }
@@ -524,7 +536,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
             int slotId = intent.getIntExtra(PhoneConstants.SLOT_KEY, 0);
             int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
-                    SubscriptionManager.INVALID_SUB_ID);
+                    SubscriptionManager.INVALID_SUBSCRIPTION_ID);
             if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
                 final String absentReason = intent
                     .getStringExtra(IccCardConstants.INTENT_KEY_LOCKED_REASON);
@@ -660,6 +672,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     private KeyguardUpdateMonitor(Context context) {
         mContext = context;
+        mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
         // Since device can't be un-provisioned, we only need to register a content observer
         // to update mDeviceProvisioned when we are...
@@ -698,8 +711,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         context.registerReceiverAsUser(mBroadcastAllReceiver, UserHandle.ALL, allUserFilter,
                 null, null);
 
-        SubscriptionManager.register(mContext, mSubscriptionListener,
-                SubscriptionListener.LISTEN_SUBSCRIPTION_INFO_LIST_CHANGED);
+        mSubscriptionManager.registerOnSubscriptionsChangedListener(mSubscriptionListener);
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
                     new IUserSwitchObserver.Stub() {
@@ -952,7 +964,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     + slotId + ", state=" + state +")");
         }
 
-        if (subId == SubscriptionManager.INVALID_SUB_ID) {
+        if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             Log.w(TAG, "invalid subId in handleSimStateChange()");
             return;
         }
@@ -1338,11 +1350,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     /**
      * Find the next SubscriptionId for a SIM in the given state, favoring lower slot numbers first.
      * @param state
-     * @return subid or {@link SubscriptionManager#INVALID_SUB_ID} if none found
+     * @return subid or {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} if none found
      */
     public int getNextSubIdForState(State state) {
         List<SubscriptionInfo> list = getSubscriptionInfo(false /* forceReload */);
-        int resultId = SubscriptionManager.INVALID_SUB_ID;
+        int resultId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         int bestSlotId = Integer.MAX_VALUE; // Favor lowest slot first
         for (int i = 0; i < list.size(); i++) {
             final SubscriptionInfo info = list.get(i);

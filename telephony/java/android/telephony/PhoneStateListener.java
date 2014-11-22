@@ -227,7 +227,7 @@ public class PhoneStateListener {
      * @hide
      */
     /** @hide */
-    protected int mSubId = SubscriptionManager.INVALID_SUB_ID;
+    protected int mSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     private final Handler mHandler;
 
@@ -237,7 +237,7 @@ public class PhoneStateListener {
      * own non-null looper use PhoneStateListener(Looper looper) below.
      */
     public PhoneStateListener() {
-        this(SubscriptionManager.DEFAULT_SUB_ID, Looper.myLooper());
+        this(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, Looper.myLooper());
     }
 
     /**
@@ -246,7 +246,7 @@ public class PhoneStateListener {
      * @hide
      */
     public PhoneStateListener(Looper looper) {
-        this(SubscriptionManager.DEFAULT_SUB_ID, looper);
+        this(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID, looper);
     }
 
     /**
