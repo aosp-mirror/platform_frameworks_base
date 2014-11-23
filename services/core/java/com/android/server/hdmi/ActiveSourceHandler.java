@@ -89,11 +89,8 @@ final class ActiveSourceHandler {
                 tv.updateActiveSource(current);
                 invokeCallback(HdmiControlManager.RESULT_SUCCESS);
             } else {
-                HdmiCecMessage routingChange = HdmiCecMessageBuilder.buildRoutingChange(
-                        getSourceAddress(), newActive.physicalAddress, current.physicalAddress);
-                mService.sendCecCommand(routingChange);
-                tv.addAndStartAction(
-                        new RoutingControlAction(tv, current.physicalAddress, true, mCallback));
+                tv.startRoutingControl(newActive.physicalAddress, current.physicalAddress, true,
+                        mCallback);
             }
         }
     }
