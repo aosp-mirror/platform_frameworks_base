@@ -509,8 +509,6 @@ static JNINativeMethod gMethods[] = {
     {"native_finalize",      "()V",                             (void *)android_media_MediaRecorder_native_finalize},
 };
 
-static const char* const kClassPathName = "android/media/MediaRecorder";
-
 // This function only registers the native methods, and is called from
 // JNI_OnLoad in android_media_MediaPlayer.cpp
 int register_android_media_MediaRecorder(JNIEnv *env)
