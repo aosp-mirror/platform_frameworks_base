@@ -296,9 +296,9 @@ public class VpnService extends Service {
      *
      * This method only needs to be called if the VPN has explicitly bound its underlying
      * communications channels &mdash; such as the socket(s) passed to {@link #protect(int)} &mdash;
-     * to a {@code Network} using APIs such as {@link Network#bindSocket} or {@link
-     * Network#bindDatagramSocket}. The VPN should call this method every time the set of {@code
-     * Network}s it is using changes.
+     * to a {@code Network} using APIs such as {@link Network#bindSocket(Socket)} or
+     * {@link Network#bindSocket(DatagramSocket)}. The VPN should call this method every time
+     * the set of {@code Network}s it is using changes.
      *
      * {@code networks} is one of the following:
      * <ul>
