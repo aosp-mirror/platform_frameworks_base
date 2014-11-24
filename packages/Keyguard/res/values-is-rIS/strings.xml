@@ -107,9 +107,13 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Reyndu aftur eftir <xliff:g id="NUMBER">%d</xliff:g> sekúndur."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Teiknaðu mynstrið þitt"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Sláðu inn PIN-númer SIM-kortsins"</string>
+    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
+    <skip />
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Sláðu inn PIN-númer"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Sláðu inn aðgangsorð"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM-kortið hefur verið gert óvirkt. Sláðu inn PUK-númerið til að halda áfram. Hafðu samband við símafyrirtækið til að fá frekari upplýsingar."</string>
+    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
+    <skip />
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Sláðu inn nýtt PIN-númer"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Staðfestu nýja PIN-númerið"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Opnar SIM-kort…"</string>
@@ -128,10 +132,30 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Þú hefur slegið inn rangt PIN-númer <xliff:g id="NUMBER_0">%d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%d</xliff:g> sekúndur."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Þú hefur slegið inn rangt aðgangsorð <xliff:g id="NUMBER_0">%d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%d</xliff:g> sekúndur."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%d</xliff:g> sinnum. \n\nReyndu aftur eftir <xliff:g id="NUMBER_1">%d</xliff:g> sekúndur."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Þú hefur gert <xliff:g id="NUMBER_0">%d</xliff:g> tilraunir til að opna spjaldtölvuna. Eftir <xliff:g id="NUMBER_1">%d</xliff:g> árangurslausar tilraunir í viðbót verður tölvan stillt á sjálfgefar stillingar og öll notandagögn hennar glatast."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Þú hefur gert <xliff:g id="NUMBER_0">%d</xliff:g> tilraunir til að opna símann. Eftir <xliff:g id="NUMBER_1">%d</xliff:g> árangurslausar tilraunir í viðbót verður síminn stilltur á sjálfgefnar stillingar og öll notandagögn hans glatast."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> tilraunir til að opna spjaldtölvuna án árangurs. Hún verður nú stillt á sjálfgefnar stillingar."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> tilraunir til að opna símann án árangurs. Hann verður nú stilltur á sjálfgefnar stillingar."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%d</xliff:g> árangurslausar tilraunir í viðbót verður þú beðin(n) um að opna spjaldtölvuna með tölvupóstreikningi.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%d</xliff:g> sekúndur."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%d</xliff:g> árangurslausar tilraunir í viðbót verður þú beðin(n) um að opna símann með tölvupóstreikningi.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%d</xliff:g> sekúndur."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
