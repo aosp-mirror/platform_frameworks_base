@@ -107,9 +107,13 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"請在 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"畫出圖案"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"輸入 SIM 卡 PIN 碼"</string>
+    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
+    <skip />
     <string name="kg_pin_instructions" msgid="2377242233495111557">"輸入 PIN 碼"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"輸入密碼"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM 卡現已停用，請輸入 PUK 碼以繼續。詳情請與流動網絡供應商聯絡。"</string>
+    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
+    <skip />
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"輸入所需的 PIN 碼"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"確認所需的 PIN 碼"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"正在解開上鎖的 SIM 卡..."</string>
@@ -128,10 +132,30 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"您嘗試了 <xliff:g id="NUMBER_0">%d</xliff:g> 次仍未能成功解開這部上鎖的平板電腦。如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，平板電腦將回復原廠設定，所有使用者資料均會失去。"</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"您嘗試了 <xliff:g id="NUMBER_0">%d</xliff:g> 次仍未能成功解開這部上鎖的手機。如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，手機將回復原廠設定，所有使用者資料均會失去。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"您嘗試了 <xliff:g id="NUMBER">%d</xliff:g> 次仍未能成功解開這部上鎖的平板電腦。平板電腦現在將回復原廠設定。"</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"您嘗試了 <xliff:g id="NUMBER">%d</xliff:g> 次仍未能成功解開這部上鎖的手機。手機現在將回復原廠設定。"</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的平板電腦。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的手機。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>

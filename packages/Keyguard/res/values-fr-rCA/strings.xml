@@ -107,9 +107,13 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Dessinez votre schéma."</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Saisissez le NIP de la carte SIM"</string>
+    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
+    <skip />
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Saisissez le NIP."</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Saisissez votre mot de passe."</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"La carte SIM est maintenant désactivée. Saisissez le code PUK pour continuer. Contactez votre opérateur pour en savoir plus."</string>
+    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
+    <skip />
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Saisir le NIP souhaité"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Confirmer le NIP souhaité"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Déblocage de la carte SIM en cours…"</string>
@@ -128,10 +132,30 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Vous avez saisi un NIP incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. \n\nVeuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Vous avez saisi un mot de passe incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. \n\nVeuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises.\n\nVeuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Vous avez tenté de déverrouiller la tablette de façon incorrecte à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, sa configuration d\'usine sera rétablie, et toutes les données utilisateur seront perdues."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Vous avez tenté de déverrouiller le téléphone de façon incorrecte à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, sa configuration d\'usine sera rétablie, et toutes les données utilisateur seront perdues."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Vous avez tenté de déverrouiller la tablette de façon incorrecte à <xliff:g id="NUMBER">%d</xliff:g> reprises. Sa configuration d\'usine va être rétablie."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Vous avez tenté de déverrouiller le téléphone de façon incorrecte à <xliff:g id="NUMBER">%d</xliff:g> reprises. Sa configuration d\'usine va être rétablie."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide d\'un compte de messagerie électronique.\n\n Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique.\n\n Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
