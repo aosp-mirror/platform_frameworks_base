@@ -216,20 +216,11 @@ public class Vpn {
      * @return true if the operation is succeeded.
      */
     public synchronized boolean prepare(String oldPackage, String newPackage) {
-        // Return false if the package does not match.
         if (oldPackage != null && getAppUid(oldPackage, mUserHandle) != mOwnerUID) {
-            // The package doesn't match. If this VPN was not previously authorized, return false
-            // to force user authorization. Otherwise, revoke the VPN anyway.
+            // The package doesn't match. We return false (to obtain user consent) unless the user
+            // has already consented to that VPN package.
             if (!oldPackage.equals(VpnConfig.LEGACY_VPN) && isVpnUserPreConsented(oldPackage)) {
-                long token = Binder.clearCallingIdentity();
-                try {
-                    // This looks bizarre, but it is what ConfirmDialog in VpnDialogs is doing when
-                    // the user clicks through to allow the VPN to consent. So we are emulating the
-                    // action of the dialog without actually showing it.
-                    prepare(null, oldPackage);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
+                prepareInternal(oldPackage);
                 return true;
             }
             return false;
@@ -244,54 +235,58 @@ public class Vpn {
         // Check if the caller is authorized.
         enforceControlPermission();
 
-        // Reset the interface.
-        if (mInterface != null) {
-            mStatusIntent = null;
-            agentDisconnect();
-            jniReset(mInterface);
-            mInterface = null;
-            mVpnUsers = null;
-        }
+        prepareInternal(newPackage);
+        return true;
+    }
 
-        // Revoke the connection or stop LegacyVpnRunner.
-        if (mConnection != null) {
-            try {
-                mConnection.mService.transact(IBinder.LAST_CALL_TRANSACTION,
-                        Parcel.obtain(), null, IBinder.FLAG_ONEWAY);
-            } catch (Exception e) {
-                // ignore
-            }
-            mContext.unbindService(mConnection);
-            mConnection = null;
-        } else if (mLegacyVpnRunner != null) {
-            mLegacyVpnRunner.exit();
-            mLegacyVpnRunner = null;
-        }
-
+    /** Prepare the VPN for the given package. Does not perform permission checks. */
+    private void prepareInternal(String newPackage) {
         long token = Binder.clearCallingIdentity();
         try {
-            mNetd.denyProtect(mOwnerUID);
-        } catch (Exception e) {
-            Log.wtf(TAG, "Failed to disallow UID " + mOwnerUID + " to call protect() " + e);
+            // Reset the interface.
+            if (mInterface != null) {
+                mStatusIntent = null;
+                agentDisconnect();
+                jniReset(mInterface);
+                mInterface = null;
+                mVpnUsers = null;
+            }
+
+            // Revoke the connection or stop LegacyVpnRunner.
+            if (mConnection != null) {
+                try {
+                    mConnection.mService.transact(IBinder.LAST_CALL_TRANSACTION,
+                            Parcel.obtain(), null, IBinder.FLAG_ONEWAY);
+                } catch (Exception e) {
+                    // ignore
+                }
+                mContext.unbindService(mConnection);
+                mConnection = null;
+            } else if (mLegacyVpnRunner != null) {
+                mLegacyVpnRunner.exit();
+                mLegacyVpnRunner = null;
+            }
+
+            try {
+                mNetd.denyProtect(mOwnerUID);
+            } catch (Exception e) {
+                Log.wtf(TAG, "Failed to disallow UID " + mOwnerUID + " to call protect() " + e);
+            }
+
+            Log.i(TAG, "Switched from " + mPackage + " to " + newPackage);
+            mPackage = newPackage;
+            mOwnerUID = getAppUid(newPackage, mUserHandle);
+            try {
+                mNetd.allowProtect(mOwnerUID);
+            } catch (Exception e) {
+                Log.wtf(TAG, "Failed to allow UID " + mOwnerUID + " to call protect() " + e);
+            }
+            mConfig = null;
+
+            updateState(DetailedState.IDLE, "prepare");
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-
-        Log.i(TAG, "Switched from " + mPackage + " to " + newPackage);
-        mPackage = newPackage;
-        mOwnerUID = getAppUid(newPackage, mUserHandle);
-        token = Binder.clearCallingIdentity();
-        try {
-            mNetd.allowProtect(mOwnerUID);
-        } catch (Exception e) {
-            Log.wtf(TAG, "Failed to allow UID " + mOwnerUID + " to call protect() " + e);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-        mConfig = null;
-
-        updateState(DetailedState.IDLE, "prepare");
-        return true;
     }
 
     /**

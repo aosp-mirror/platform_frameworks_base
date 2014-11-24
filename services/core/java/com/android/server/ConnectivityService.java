@@ -2776,7 +2776,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Prepare for a VPN application. This method is used by system-privileged apps.
+     * Prepare for a VPN application.
      * Permissions are checked in Vpn class.
      * @hide
      */
