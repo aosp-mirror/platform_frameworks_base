@@ -1381,13 +1381,16 @@ public class DevicePolicyManager {
      * characters when the requested quality is only numeric), in which case
      * the currently active quality will be increased to match.
      *
+     * <p>Calling with a null or empty password will clear any existing PIN,
+     * pattern or password if the current password constraints allow it.
+     *
      * <p>The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_RESET_PASSWORD} to be able to call
      * this method; if it has not, a security exception will be thrown.
      *
      * <p>Calling this from a managed profile will throw a security exception.
      *
-     * @param password The new password for the user.
+     * @param password The new password for the user. Null or empty clears the password.
      * @param flags May be 0 or {@link #RESET_PASSWORD_REQUIRE_ENTRY}.
      * @return Returns true if the password was applied, or false if it is
      * not acceptable for the current constraints.
