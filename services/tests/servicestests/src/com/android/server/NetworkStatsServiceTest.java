@@ -1006,7 +1006,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        return new NetworkState(info, prop, null, null, TEST_SSID);
+        return new NetworkState(info, prop, null, null, null, TEST_SSID);
     }
 
     private static NetworkState buildMobile3gState(String subscriberId) {
@@ -1015,7 +1015,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
-        return new NetworkState(info, prop, null, subscriberId, null);
+        return new NetworkState(info, prop, null, null, subscriberId, null);
     }
 
     private static NetworkState buildMobile4gState(String iface) {
@@ -1023,7 +1023,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(iface);
-        return new NetworkState(info, prop, null);
+        return new NetworkState(info, prop, null, null);
     }
 
     private NetworkStats buildEmptyStats() {
