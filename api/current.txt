@@ -7273,6 +7273,7 @@ package android.content {
     field public static final java.lang.String STORAGE_SERVICE = "storage";
     field public static final java.lang.String TELECOM_SERVICE = "telecom";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
+    field public static final java.lang.String TELEPHONY_SUBSCRIPTION_SERVICE = "telephony_subscription_service";
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";
     field public static final java.lang.String UI_MODE_SERVICE = "uimode";
@@ -17174,8 +17175,8 @@ package android.net {
     field public static final deprecated int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
-    field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
     field public static final java.lang.String EXTRA_NETWORK = "android.net.extra.NETWORK";
+    field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
     field public static final java.lang.String EXTRA_NETWORK_REQUEST = "android.net.extra.NETWORK_REQUEST";
     field public static final java.lang.String EXTRA_NETWORK_TYPE = "networkType";
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
@@ -25821,7 +25822,7 @@ package android.provider {
     field public static final java.lang.String STATUS = "st";
     field public static final java.lang.String SUBJECT = "sub";
     field public static final java.lang.String SUBJECT_CHARSET = "sub_cs";
-    field public static final java.lang.String SUB_ID = "sub_id";
+    field public static final java.lang.String SUBSCRIPTION_ID = "sub_id";
     field public static final java.lang.String TEXT_ONLY = "text_only";
     field public static final java.lang.String THREAD_ID = "thread_id";
     field public static final java.lang.String TRANSACTION_ID = "tr_id";
@@ -25854,7 +25855,7 @@ package android.provider {
     field public static final java.lang.String PROXY = "proxy";
     field public static final java.lang.String ROAMING_PROTOCOL = "roaming_protocol";
     field public static final java.lang.String SERVER = "server";
-    field public static final java.lang.String SUB_ID = "sub_id";
+    field public static final java.lang.String SUBSCRIPTION_ID = "sub_id";
     field public static final java.lang.String TYPE = "type";
     field public static final java.lang.String USER = "user";
   }
@@ -25955,7 +25956,7 @@ package android.provider {
     field public static final java.lang.String MSG_TYPE = "msg_type";
     field public static final java.lang.String PROTO_TYPE = "proto_type";
     field public static final java.lang.String RETRY_INDEX = "retry_index";
-    field public static final java.lang.String SUB_ID = "pending_sub_id";
+    field public static final java.lang.String SUBSCRIPTION_ID = "pending_sub_id";
   }
 
   public static final class Telephony.Sms implements android.provider.BaseColumns android.provider.Telephony.TextBasedSmsColumns {
@@ -26041,7 +26042,7 @@ package android.provider {
     field public static final int STATUS_NONE = -1; // 0xffffffff
     field public static final int STATUS_PENDING = 32; // 0x20
     field public static final java.lang.String SUBJECT = "subject";
-    field public static final java.lang.String SUB_ID = "sub_id";
+    field public static final java.lang.String SUBSCRIPTION_ID = "sub_id";
     field public static final java.lang.String THREAD_ID = "thread_id";
     field public static final java.lang.String TYPE = "type";
   }
@@ -28880,6 +28881,8 @@ package android.telephony {
   public class SubscriptionInfo implements android.os.Parcelable {
     method public android.graphics.Bitmap createIconBitmap(android.content.Context);
     method public int describeContents();
+    method public java.lang.CharSequence getCarrierName();
+    method public java.lang.String getCountryIso();
     method public int getDataRoaming();
     method public java.lang.CharSequence getDisplayName();
     method public java.lang.String getIccId();
@@ -28894,20 +28897,22 @@ package android.telephony {
     field public static final android.os.Parcelable.Creator<android.telephony.SubscriptionInfo> CREATOR;
   }
 
-  public class SubscriptionListener {
-    ctor public SubscriptionListener();
-    ctor public SubscriptionListener(android.os.Looper);
-    method public void onSubscriptionInfoChanged();
-    field public static final int LISTEN_SUBSCRIPTION_INFO_LIST_CHANGED = 1; // 0x1
+  public class SubscriptionManager {
+    method public static android.telephony.SubscriptionManager from(android.content.Context);
+    method public android.telephony.SubscriptionInfo getActiveSubscriptionInfo(int);
+    method public int getActiveSubscriptionInfoCount();
+    method public int getActiveSubscriptionInfoCountMax();
+    method public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int);
+    method public java.util.List<android.telephony.SubscriptionInfo> getActiveSubscriptionInfoList();
+    method public boolean isNetworkRoaming(int);
+    method public void registerOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
+    method public void unregisterOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
+    field public static final int INVALID_SUBSCRIPTION_ID = -1; // 0xffffffff
   }
 
-  public class SubscriptionManager implements android.provider.BaseColumns {
-    method public static java.util.List<android.telephony.SubscriptionInfo> getActiveSubscriptionInfoList();
-    method public static android.telephony.SubscriptionInfo getSubscriptionInfoForSubscriber(int);
-    method public static java.util.List<android.telephony.SubscriptionInfo> getSubscriptionInfoUsingSlotId(int);
-    method public static void register(android.content.Context, android.telephony.SubscriptionListener, int);
-    method public static void unregister(android.content.Context, android.telephony.SubscriptionListener);
-    field public static final int INVALID_SUB_ID = -1000; // 0xfffffc18
+  public static class SubscriptionManager.OnSubscriptionsChangedListener {
+    ctor public SubscriptionManager.OnSubscriptionsChangedListener();
+    method public void onSubscriptionsChanged();
   }
 
   public class TelephonyManager {
@@ -28945,6 +28950,7 @@ package android.telephony {
     method public java.lang.String iccTransmitApduLogicalChannel(int, int, int, int, int, int, java.lang.String);
     method public boolean isNetworkRoaming();
     method public boolean isSmsCapable();
+    method public boolean isVoiceCapable();
     method public void listen(android.telephony.PhoneStateListener, int);
     method public java.lang.String sendEnvelopeWithStatus(java.lang.String);
     method public boolean setGlobalPreferredNetworkType();
