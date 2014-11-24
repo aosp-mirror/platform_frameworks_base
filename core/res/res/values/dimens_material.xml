@@ -37,12 +37,25 @@
     <dimen name="action_bar_default_height_material">56dp</dimen>
     <!-- Default padding of an action bar. -->
     <dimen name="action_bar_default_padding_material">4dp</dimen>
+    <!-- Default content inset of an action bar. -->
+    <dimen name="action_bar_content_inset_material">16dp</dimen>
     <!-- Vertical padding around action bar icons. -->
     <dimen name="action_bar_icon_vertical_padding_material">16dp</dimen>
     <!-- Top margin for action bar subtitles -->
     <dimen name="action_bar_subtitle_top_margin_material">-3dp</dimen>
     <!-- Bottom margin for action bar subtitles -->
     <dimen name="action_bar_subtitle_bottom_margin_material">5dp</dimen>
+
+    <!-- Default padding for list items. This should match the action bar
+         content inset so that ListActivity items line up correctly. -->
+    <dimen name="list_item_padding_horizontal_material">@dimen/action_bar_content_inset_material</dimen>
+
+    <!-- Padding to add to the start of the overflow action button. -->
+    <dimen name="action_bar_navigation_padding_start_material">0dp</dimen>
+    <!-- Padding to add to the start of the overflow action button. -->
+    <dimen name="action_bar_overflow_padding_start_material">6dp</dimen>
+    <!-- Padding to add to the end of the overflow action button. -->
+    <dimen name="action_bar_overflow_padding_end_material">10dp</dimen>
 
     <dimen name="action_button_min_width_overflow_material">36dp</dimen>
     <dimen name="action_button_min_width_material">48dp</dimen>
