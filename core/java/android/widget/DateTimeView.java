@@ -156,7 +156,7 @@ public class DateTimeView extends TextView {
                     format = getTimeFormat();
                     break;
                 case SHOW_MONTH_DAY_YEAR:
-                    format = getDateFormat();
+                    format = DateFormat.getDateInstance(DateFormat.SHORT);
                     break;
                 default:
                     throw new RuntimeException("unknown display value: " + display);
@@ -194,21 +194,6 @@ public class DateTimeView extends TextView {
 
     private DateFormat getTimeFormat() {
         return android.text.format.DateFormat.getTimeFormat(getContext());
-    }
-
-    private DateFormat getDateFormat() {
-        String format = Settings.System.getString(getContext().getContentResolver(),
-                Settings.System.DATE_FORMAT);
-        if (format == null || "".equals(format)) {
-            return DateFormat.getDateInstance(DateFormat.SHORT);
-        } else {
-            try {
-                return new SimpleDateFormat(format);
-            } catch (IllegalArgumentException e) {
-                // If we tried to use a bad format string, fall back to a default.
-                return DateFormat.getDateInstance(DateFormat.SHORT);
-            }
-        }
     }
 
     void clearFormatAndUpdate() {
@@ -283,14 +268,10 @@ public class DateTimeView extends TextView {
             filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
             context.registerReceiver(mReceiver, filter);
-
-            final Uri uri = Settings.System.getUriFor(Settings.System.DATE_FORMAT);
-            context.getContentResolver().registerContentObserver(uri, true, mObserver);
         }
 
         void unregister(Context context) {
             context.unregisterReceiver(mReceiver);
-            context.getContentResolver().unregisterContentObserver(mObserver);
         }
     }
 }
