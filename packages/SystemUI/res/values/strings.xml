@@ -483,17 +483,17 @@
     <string name="accessibility_brightness">Display brightness</string>
 
     <!-- Title of dialog shown when 2G-3G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_3g_title">2G-3G data is off</string>
+    <string name="data_usage_disabled_dialog_3g_title">2G-3G data is paused</string>
     <!-- Title of dialog shown when 4G data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_4g_title">4G data is off</string>
+    <string name="data_usage_disabled_dialog_4g_title">4G data is paused</string>
     <!-- Title of dialog shown when mobile data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_mobile_title">Cellular data is off</string>
+    <string name="data_usage_disabled_dialog_mobile_title">Cellular data is paused</string>
     <!-- Title of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=48] -->
-    <string name="data_usage_disabled_dialog_title">Data is off</string>
+    <string name="data_usage_disabled_dialog_title">Data is paused</string>
     <!-- Body of dialog shown when data usage has exceeded limit and has been disabled. [CHAR LIMIT=NONE] -->
-    <string name="data_usage_disabled_dialog">Your device turned off data because it reached the limit you set.\n\nTurning it back on may lead to charges from your carrier.</string>
+    <string name="data_usage_disabled_dialog">Because your set data limit was reached, the device has paused data usage for the remainder of this cycle.\n\nResuming may lead to charges from your carrier.</string>
     <!-- Dialog button indicating that data connection should be re-enabled. [CHAR LIMIT=28] -->
-    <string name="data_usage_disabled_dialog_enable">Turn on data</string>
+    <string name="data_usage_disabled_dialog_enable">Resume</string>
 
     <!-- Text to display underneath the graphical signal strength meter when
          no connection is available. [CHAR LIMIT=20] -->
