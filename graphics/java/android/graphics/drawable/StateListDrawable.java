@@ -24,6 +24,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.Arrays;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
@@ -288,18 +290,15 @@ public class StateListDrawable extends DrawableContainer {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            final int[][] sets = mStateListState.mStateSets;
-            final int count = sets.length;
-            mStateListState.mStateSets = new int[count][];
-            for (int i = 0; i < count; i++) {
-                final int[] set = sets[i];
-                if (set != null) {
-                    mStateListState.mStateSets[i] = set.clone();
-                }
-            }
+            mStateListState.mutate();
             mMutated = true;
         }
         return this;
+    }
+
+    @Override
+    StateListState cloneConstantState() {
+        return new StateListState(mStateListState, this, null);
     }
 
     /**
@@ -328,22 +327,21 @@ public class StateListDrawable extends DrawableContainer {
             super(orig, owner, res);
 
             if (orig != null) {
-                // Perform a deep copy.
-                final int[][] sets = orig.mStateSets;
-                final int count = sets.length;
-                mStateSets = new int[count][];
-                for (int i = 0; i < count; i++) {
-                    final int[] set = sets[i];
-                    if (set != null) {
-                        mStateSets[i] = set.clone();
-                    }
-                }
-
+                // Perform a shallow copy and rely on mutate() to deep-copy.
                 mThemeAttrs = orig.mThemeAttrs;
-                mStateSets = Arrays.copyOf(orig.mStateSets, orig.mStateSets.length);
+                mStateSets = orig.mStateSets;
             } else {
                 mThemeAttrs = null;
                 mStateSets = new int[getCapacity()][];
+            }
+        }
+
+        private void mutate() {
+            mThemeAttrs = mThemeAttrs != null ? mThemeAttrs.clone() : null;
+
+            final int[][] stateSets = new int[mStateSets.length][];
+            for (int i = mStateSets.length - 1; i >= 0; i--) {
+                stateSets[i] = mStateSets[i] != null ? mStateSets[i].clone() : null;
             }
         }
 
@@ -395,13 +393,14 @@ public class StateListDrawable extends DrawableContainer {
         onStateChange(getState());
     }
 
-    void setConstantState(StateListState state) {
+    protected void setConstantState(@NonNull StateListState state) {
         super.setConstantState(state);
 
         mStateListState = state;
     }
 
     private StateListDrawable(StateListState state, Resources res) {
+        // Every state list drawable has its own constant state.
         final StateListState newState = new StateListState(state, this, res);
         setConstantState(newState);
         onStateChange(getState());
@@ -411,7 +410,7 @@ public class StateListDrawable extends DrawableContainer {
      * This constructor exists so subclasses can avoid calling the default
      * constructor and setting up a StateListDrawable-specific constant state.
      */
-    StateListDrawable(StateListState state) {
+    StateListDrawable(@Nullable StateListState state) {
         if (state != null) {
             setConstantState(state);
         }
