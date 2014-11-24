@@ -47,6 +47,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -741,13 +742,14 @@ public class Am extends BaseCommand {
 
             if (mProfileFile != null) {
                 try {
-                    fd = ParcelFileDescriptor.open(
+                    fd = openForSystemServer(
                             new File(mProfileFile),
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE |
                             ParcelFileDescriptor.MODE_READ_WRITE);
                 } catch (FileNotFoundException e) {
                     System.err.println("Error: Unable to open file: " + mProfileFile);
+                    System.err.println("Consider using a file under /data/local/tmp/");
                     return;
                 }
                 profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop);
@@ -1053,13 +1055,14 @@ public class Am extends BaseCommand {
         if (start) {
             profileFile = nextArgRequired();
             try {
-                fd = ParcelFileDescriptor.open(
+                fd = openForSystemServer(
                         new File(profileFile),
                         ParcelFileDescriptor.MODE_CREATE |
                         ParcelFileDescriptor.MODE_TRUNCATE |
                         ParcelFileDescriptor.MODE_READ_WRITE);
             } catch (FileNotFoundException e) {
                 System.err.println("Error: Unable to open file: " + profileFile);
+                System.err.println("Consider using a file under /data/local/tmp/");
                 return;
             }
             profilerInfo = new ProfilerInfo(profileFile, fd, 0, false);
@@ -1113,12 +1116,13 @@ public class Am extends BaseCommand {
         try {
             File file = new File(heapFile);
             file.delete();
-            fd = ParcelFileDescriptor.open(file,
+            fd = openForSystemServer(file,
                     ParcelFileDescriptor.MODE_CREATE |
                     ParcelFileDescriptor.MODE_TRUNCATE |
                     ParcelFileDescriptor.MODE_READ_WRITE);
         } catch (FileNotFoundException e) {
             System.err.println("Error: Unable to open file: " + heapFile);
+            System.err.println("Consider using a file under /data/local/tmp/");
             return;
         }
 
@@ -1854,5 +1858,19 @@ public class Am extends BaseCommand {
 
         } catch (RemoteException e) {
         }
+    }
+
+    /**
+     * Open the given file for sending into the system process. This verifies
+     * with SELinux that the system will have access to the file.
+     */
+    private static ParcelFileDescriptor openForSystemServer(File file, int mode)
+            throws FileNotFoundException {
+        final ParcelFileDescriptor fd = ParcelFileDescriptor.open(file, mode);
+        final String tcon = SELinux.getFileContext(file.getAbsolutePath());
+        if (!SELinux.checkSELinuxAccess("u:r:system_server:s0", tcon, "file", "read")) {
+            throw new FileNotFoundException("System server has no access to file context " + tcon);
+        }
+        return fd;
     }
 }
