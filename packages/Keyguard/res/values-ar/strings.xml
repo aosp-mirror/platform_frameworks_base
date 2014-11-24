@@ -107,9 +107,13 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"حاول مرة أخرى خلال <xliff:g id="NUMBER">%d</xliff:g> ثانية."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"ارسم نقشك"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"‏أدخل رمز PIN لبطاقة SIM"</string>
+    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
+    <skip />
     <string name="kg_pin_instructions" msgid="2377242233495111557">"‏أدخل رمز PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"أدخل كلمة المرور"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"‏بطاقة SIM معطلة الآن. أدخل رمز PUK للمتابعة. اتصل بمشغل شبكة الجوال للاطلاع على التفاصيل."</string>
+    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
+    <skip />
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"‏إدخال رمز رمز PIN المراد"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"‏تأكيد رمز رمز PIN المراد"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"‏جارٍ إلغاء تأمين بطاقة SIM…"</string>
@@ -128,10 +132,30 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"‏لقد كتبت رمز PIN بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"لقد كتبت كلمة المرور بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"لقد رسمت نقش إلغاء التأمين بطريقة غير صحيحة <xliff:g id="NUMBER_0">%d</xliff:g> مرة. \n\nأعد المحاولة خلال <xliff:g id="NUMBER_1">%d</xliff:g> ثانية."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الجهاز اللوحي على الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستتم إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع وسيتم فقد جميع بيانات المستخدم."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"لقد حاولت إلغاء تأمين الجهاز اللوحي بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الجهاز اللوحي على الإعدادات الافتراضية للمصنع."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"لقد حاولت إلغاء تأمين الهاتف بشكل غير صحيح <xliff:g id="NUMBER">%d</xliff:g> مرة. سيتم الآن إعادة تعيين الهاتف على الإعدادات الافتراضية للمصنع."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستطالَب بإلغاء تأمين الجهاز اللوحي باستخدام معلومات حساب بريد إلكتروني.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%d</xliff:g> ثانية."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>

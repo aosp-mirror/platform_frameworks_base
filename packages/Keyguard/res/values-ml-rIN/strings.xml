@@ -107,9 +107,13 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"നിങ്ങളുടെ പാറ്റേൺ വരയ്‌ക്കുക"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"സിം പിൻ നൽകുക"</string>
+    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
+    <skip />
     <string name="kg_pin_instructions" msgid="2377242233495111557">"പിൻ നൽകുക"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"പാസ്‌വേഡ് നൽകുക"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"സിം ഇപ്പോൾ പ്രവർത്തനരഹിതമാക്കി. തുടരുന്നതിന് PUK കോഡ് നൽകുക. വിശദാംശങ്ങൾക്ക് കാരിയറെ ബന്ധപ്പെടുക."</string>
+    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
+    <skip />
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"താൽപ്പര്യപ്പെട്ട പിൻ കോഡ് നൽകുക"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"താൽപ്പര്യപ്പെട്ട പിൻ കോഡ് സ്ഥിരീകരിക്കുക"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"സിം കാർഡ് അൺലോക്കുചെയ്യുന്നു…"</string>
@@ -128,10 +132,30 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"നിങ്ങളുടെ പിൻ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"നിങ്ങളുടെ പാസ്‌വേഡ് <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി ടൈപ്പുചെയ്‌തു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"നിങ്ങളുടെ പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. \n\n<xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"നിങ്ങൾ ഫോൺ അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER_0">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ടാബ്‌ലെറ്റ് ഫാക്‌ടറി ഡിഫോൾട്ടിലേക്ക് പുനഃസജ്ജികരിക്കുകയും ഉപയോക്തൃ ഡാറ്റയെല്ലാം നഷ്‌ടപ്പെടുകയും ചെയ്യും."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"നിങ്ങൾ ഫോൺ അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER_0">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഫോൺ ഫാക്‌ടറി ഡിഫോൾട്ടിലേക്ക് പുനഃസജ്ജികരിക്കുകയും ഉപയോക്തൃ ഡാറ്റയെല്ലാം നഷ്‌ടപ്പെടുകയും ചെയ്യും."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"നിങ്ങൾ ടാബ്‌ലെറ്റ് അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. ടാബ്‌ലെറ്റ് ഇപ്പോൾ ഫാക്‌ടറി ഡിഫോൾട്ടിലേക്ക് പുനസജ്ജീകരിക്കും."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"നിങ്ങൾ ഫോൺ അൺലോക്കുചെയ്യാൻ തവണ <xliff:g id="NUMBER">%d</xliff:g> തെറ്റായി ശ്രമിച്ചു. ഫോൺ ഇപ്പോൾ ഫാക്‌ടറി ഡിഫോൾട്ടിലേക്ക് പുനസജ്ജീകരിക്കും."</string>
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
+    <skip />
+    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
+    <skip />
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"നിങ്ങളുടെ അൺലോക്ക് പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഒരു ഇമെയിൽ അക്കൗണ്ട് ഉപയോഗിച്ച് ടാബ്‌ലെറ്റ് അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> സെക്കൻഡിനുള്ള വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"നിങ്ങളുടെ അൺലോക്ക് പാറ്റേൺ <xliff:g id="NUMBER_0">%d</xliff:g> തവണ തെറ്റായി വരച്ചു. <xliff:g id="NUMBER_1">%d</xliff:g> ശ്രമങ്ങൾ കൂടി വിജയിച്ചില്ലെങ്കിൽ, ഒരു ഇമെയിൽ അക്കൗണ്ട് ഉപയോഗിച്ച് ഫോൺ അൺലോക്ക് ചെയ്യാൻ നിങ്ങളോട് ആവശ്യപ്പെടും.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> സെക്കൻഡിനുള്ള വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
