@@ -560,7 +560,7 @@ is sensitive to delays or lag in sound input or output.</td>
        <td></td>
     </tr>
     <tr>
-       <td rowspan="5">Camera</td>
+       <td rowspan="12">Camera</td>
        <td><code>android.hardware.camera</code></td>
        <td>The application uses the device's camera. If the device supports
            multiple cameras, the application uses the camera that facing
@@ -592,6 +592,30 @@ external camera device if one is connected. Use this in preference to
 <tr>
   <td><code>android.hardware.camera.external</code></td>
   <td>The application uses an external camera device if one is connected.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.level.full</code></td>
+  <td>The application uses a camera device with <code>FULL</code>-level support.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.capability.manual_sensor</code></td>
+  <td>The application uses a a camera device with the <code>MANUAL_SENSOR</code> capability.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.capability.manual_post_processing</code></td>
+  <td>The application uses a a camera device with the <code>MANUAL_POST_PROCESSING</code> capability.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.capability.raw</code></td>
+  <td>The application uses a a camera device with the <code>RAW</code> capability.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.capability.burst_capture</code></td>
+  <td>The application uses a a camera device with the <code>BURST_CAPTURE</code> capability.</td>
+</tr>
+<tr>
+  <td><code>android.hardware.camera.capability.read_sensor_settings</code></td>
+  <td>The application uses a a camera device with the <code>READ_SENSOR_SETTINGS</code> capability.</td>
 </tr>
 
 <tr>
