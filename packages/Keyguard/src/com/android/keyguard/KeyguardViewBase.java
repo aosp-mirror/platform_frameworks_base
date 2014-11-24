@@ -112,7 +112,7 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     /**
      * Called when the view needs to be shown.
      */
-    public void show() {
+    public void showPrimarySecurityScreen() {
         if (DEBUG) Log.d(TAG, "show()");
         mSecurityContainer.showPrimarySecurityScreen(false);
     }
@@ -224,7 +224,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
      */
     public void onResume() {
         if (DEBUG) Log.d(TAG, "screen on, instance " + Integer.toHexString(hashCode()));
-        mSecurityContainer.showPrimarySecurityScreen(false);
         mSecurityContainer.onResume(KeyguardSecurityView.SCREEN_ON);
         requestFocus();
     }
@@ -471,6 +470,10 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     public SecurityMode getSecurityMode() {
         return mSecurityContainer.getSecurityMode();
+    }
+
+    public SecurityMode getCurrentSecurityMode() {
+        return mSecurityContainer.getCurrentSecurityMode();
     }
 
     protected abstract void onUserSwitching(boolean switching);

@@ -110,7 +110,7 @@ public class StatusBarKeyguardViewManager {
 
             // The keyguard might be showing (already). So we need to hide it.
             mPhoneStatusBar.hideKeyguard();
-            mBouncer.show();
+            mBouncer.show(true /* resetSecuritySelection */);
         } else {
             mPhoneStatusBar.showKeyguard();
             mBouncer.hide(false /* destroyView */);
@@ -120,7 +120,7 @@ public class StatusBarKeyguardViewManager {
 
     private void showBouncer() {
         if (mShowing) {
-            mBouncer.show();
+            mBouncer.show(false /* resetSecuritySelection */);
         }
         updateStates();
     }
@@ -130,7 +130,7 @@ public class StatusBarKeyguardViewManager {
             if (!afterKeyguardGone) {
                 mBouncer.showWithDismissAction(r);
             } else {
-                mBouncer.show();
+                mBouncer.show(false /* resetSecuritySelection */);
                 mAfterKeyguardGoneAction = r;
             }
         }
@@ -354,7 +354,7 @@ public class StatusBarKeyguardViewManager {
         boolean showing = mShowing;
         boolean occluded = mOccluded;
         boolean bouncerShowing = mBouncer.isShowing();
-        boolean bouncerDismissible = !mBouncer.needsFullscreenBouncer();
+        boolean bouncerDismissible = !mBouncer.isFullscreenBouncer();
 
         if ((bouncerDismissible || !showing) != (mLastBouncerDismissible || !mLastShowing)
                 || mFirstUpdate) {
