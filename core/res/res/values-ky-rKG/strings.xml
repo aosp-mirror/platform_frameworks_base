@@ -924,8 +924,8 @@
     <!-- no translation found for permlab_cache_filesystem (5656487264819669824) -->
     <skip />
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"Колдонмого кэш файл тутумун окуу жана жазуу мүмкүнчүлүгүн берет."</string>
-    <string name="permlab_use_sip" msgid="2052499390128979920">"SIP чалууларын жасоо/кабыл алуу"</string>
-    <string name="permdesc_use_sip" msgid="2297804849860225257">"Колдонмонун SIP чалууларын жасап жана кабыл алуусуна жол ачат."</string>
+    <string name="permlab_use_sip" msgid="2052499390128979920">"SIP чалуу/чалууну кабыл алуу"</string>
+    <string name="permdesc_use_sip" msgid="2297804849860225257">"Колдонмого SIP чалууларга жана чалууларды кабыл алууга мүмкүнчүлүк берет."</string>
     <string name="permlab_bind_incall_service" msgid="6773648341975287125">"чалуу экраны менен байланыштыруу"</string>
     <string name="permdesc_bind_incall_service" msgid="8343471381323215005">"Колдонмого чалуу экраны качан жана кандай көрүнө тургандыгын башкаруу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_bind_connection_service" msgid="3557341439297014940">"телефония кызматтары"</string>

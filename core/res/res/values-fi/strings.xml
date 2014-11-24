@@ -681,11 +681,11 @@
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Antaa sovelluksen tarkastella tablet-laitteen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Antaa sovelluksen tarkastella puhelimen Bluetooth-asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä muihin laitteisiin."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"hallitse Near Field Communication -tunnistusta"</string>
-    <string name="permdesc_nfc" msgid="7120611819401789907">"Antaa sovelluksen kommunikoida NFC (Near Field Communication) -tunnisteiden, -korttien ja -lukijoiden kanssa."</string>
+    <string name="permdesc_nfc" msgid="7120611819401789907">"Antaa sovelluksen kommunikoida NFC (Near Field Communication) -tagien, -korttien ja -lukijoiden kanssa."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"poista ruudun lukitus käytöstä"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Antaa sovelluksen ottaa näppäinlukon ja siihen liittyvän salasanasuojauksen pois käytöstä. Esimerkki: puhelin poistaa näppäinlukon käytöstä puhelun saapuessa ja asettaa lukon takaisin käyttöön puhelun päättyessä."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lue synkronointiasetuksia"</string>
-    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Antaa sovelluksen lukea tilien synkronointiasetuksia. Sovellus voi esimerkiksi määrittää, onko Ihmiset-sovellus synkronoitu tilin kanssa."</string>
+    <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Antaa sovelluksen lukea tilien synkronointiasetuksia. Sovellus voi esimerkiksi määrittää, onko Henkilöt-sovellus synkronoitu tilin kanssa."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"ota synkronointi käyttöön tai poista se käytöstä"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Antaa sovelluksen muokata tilin synkronointiasetuksia. Sovellus voi esimerkiksi ottaa Ihmiset-sovelluksen synkronoinnin käyttöön tilissä."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"lue synkronointitilastoja"</string>
