@@ -33,6 +33,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.media.PlayerRecord.RemotePlaybackState;
+import android.media.audiopolicy.IAudioPolicyCallback;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -434,6 +435,9 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
+    /**
+     * Called synchronized on mAudioFocusLock
+     */
     private void notifyTopOfAudioFocusStack() {
         // notify the top of the stack it gained focus
         if (!mFocusStack.empty()) {
@@ -470,6 +474,7 @@ public class MediaFocusControl implements OnFinished {
                 stackIterator.next().dump(pw);
             }
         }
+        pw.println("\n Notify on duck: " + mNotifyFocusOwnerOnDuck +"\n");
     }
 
     /**
@@ -480,13 +485,19 @@ public class MediaFocusControl implements OnFinished {
      * @param signal if true and the listener was at the top of the focus stack, i.e. it was holding
      *   focus, notify the next item in the stack it gained focus.
      */
-    private void removeFocusStackEntry(String clientToRemove, boolean signal) {
+    private void removeFocusStackEntry(String clientToRemove, boolean signal,
+            boolean notifyFocusFollowers) {
         // is the current top of the focus stack abandoning focus? (because of request, not death)
         if (!mFocusStack.empty() && mFocusStack.peek().hasSameClient(clientToRemove))
         {
             //Log.i(TAG, "   removeFocusStackEntry() removing top of stack");
             FocusRequester fr = mFocusStack.pop();
             fr.release();
+            if (notifyFocusFollowers) {
+                final AudioFocusInfo afi = fr.toAudioFocusInfo();
+                afi.clearLossReceived();
+                notifyExtPolicyFocusLoss_syncAf(afi, false);
+            }
             if (signal) {
                 // notify the new top of the stack it gained focus
                 notifyTopOfAudioFocusStack();
@@ -610,6 +621,86 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
+    /**
+     * Indicates whether to notify an audio focus owner when it loses focus
+     * with {@link AudioManager#AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK} if it will only duck.
+     * This variable being false indicates an AudioPolicy has been registered and has signaled
+     * it will handle audio ducking.
+     */
+    private boolean mNotifyFocusOwnerOnDuck = true;
+
+    protected void setDuckingInExtPolicyAvailable(boolean available) {
+        mNotifyFocusOwnerOnDuck = !available;
+    }
+
+    boolean mustNotifyFocusOwnerOnDuck() { return mNotifyFocusOwnerOnDuck; }
+
+    private ArrayList<IAudioPolicyCallback> mFocusFollowers = new ArrayList<IAudioPolicyCallback>();
+
+    void addFocusFollower(IAudioPolicyCallback ff) {
+        if (ff == null) {
+            return;
+        }
+        synchronized(mAudioFocusLock) {
+            boolean found = false;
+            for (IAudioPolicyCallback pcb : mFocusFollowers) {
+                if (pcb.asBinder().equals(ff.asBinder())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                return;
+            } else {
+                mFocusFollowers.add(ff);
+            }
+        }
+    }
+
+    void removeFocusFollower(IAudioPolicyCallback ff) {
+        if (ff == null) {
+            return;
+        }
+        synchronized(mAudioFocusLock) {
+            for (IAudioPolicyCallback pcb : mFocusFollowers) {
+                if (pcb.asBinder().equals(ff.asBinder())) {
+                    mFocusFollowers.remove(pcb);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Called synchronized on mAudioFocusLock
+     */
+    void notifyExtPolicyFocusGrant_syncAf(AudioFocusInfo afi, int requestResult) {
+        for (IAudioPolicyCallback pcb : mFocusFollowers) {
+            try {
+                // oneway
+                pcb.notifyAudioFocusGrant(afi, requestResult);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Can't call newAudioFocusLoser() on IAudioPolicyCallback "
+                        + pcb.asBinder(), e);
+            }
+        }
+    }
+
+    /**
+     * Called synchronized on mAudioFocusLock
+     */
+    void notifyExtPolicyFocusLoss_syncAf(AudioFocusInfo afi, boolean wasDispatched) {
+        for (IAudioPolicyCallback pcb : mFocusFollowers) {
+            try {
+                // oneway
+                pcb.notifyAudioFocusLoss(afi, wasDispatched);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Can't call newAudioFocusLoser() on IAudioPolicyCallback "
+                        + pcb.asBinder(), e);
+            }
+        }
+    }
+
     protected int getCurrentAudioFocus() {
         synchronized(mAudioFocusLock) {
             if (mFocusStack.empty()) {
@@ -669,6 +760,8 @@ public class MediaFocusControl implements OnFinished {
                     // unlink death handler so it can be gc'ed.
                     // linkToDeath() creates a JNI global reference preventing collection.
                     cb.unlinkToDeath(afdh, 0);
+                    notifyExtPolicyFocusGrant_syncAf(fr.toAudioFocusInfo(),
+                            AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
                     return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
                 }
                 // the reason for the audio focus request has changed: remove the current top of
@@ -681,14 +774,18 @@ public class MediaFocusControl implements OnFinished {
             }
 
             // focus requester might already be somewhere below in the stack, remove it
-            removeFocusStackEntry(clientId, false /* signal */);
+            removeFocusStackEntry(clientId, false /* signal */, false /*notifyFocusFollowers*/);
 
             final FocusRequester nfr = new FocusRequester(aa, focusChangeHint, flags, fd, cb,
-                    clientId, afdh, callingPackageName, Binder.getCallingUid());
+                    clientId, afdh, callingPackageName, Binder.getCallingUid(), this);
             if (focusGrantDelayed) {
                 // focusGrantDelayed being true implies we can't reassign focus right now
                 // which implies the focus stack is not empty.
-                return pushBelowLockedFocusOwners(nfr);
+                final int requestResult = pushBelowLockedFocusOwners(nfr);
+                if (requestResult != AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
+                    notifyExtPolicyFocusGrant_syncAf(nfr.toAudioFocusInfo(), requestResult);
+                }
+                return requestResult;
             } else {
                 // propagate the focus change through the stack
                 if (!mFocusStack.empty()) {
@@ -698,6 +795,8 @@ public class MediaFocusControl implements OnFinished {
                 // push focus requester at the top of the audio focus stack
                 mFocusStack.push(nfr);
             }
+            notifyExtPolicyFocusGrant_syncAf(nfr.toAudioFocusInfo(),
+                    AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
 
         }//synchronized(mAudioFocusLock)
 
@@ -713,7 +812,7 @@ public class MediaFocusControl implements OnFinished {
         try {
             // this will take care of notifying the new focus owner if needed
             synchronized(mAudioFocusLock) {
-                removeFocusStackEntry(clientId, true /*signal*/);
+                removeFocusStackEntry(clientId, true /*signal*/, true /*notifyFocusFollowers*/);
             }
         } catch (java.util.ConcurrentModificationException cme) {
             // Catching this exception here is temporary. It is here just to prevent
@@ -729,7 +828,7 @@ public class MediaFocusControl implements OnFinished {
 
     protected void unregisterAudioFocusClient(String clientId) {
         synchronized(mAudioFocusLock) {
-            removeFocusStackEntry(clientId, false);
+            removeFocusStackEntry(clientId, false, true /*notifyFocusFollowers*/);
         }
     }
 
