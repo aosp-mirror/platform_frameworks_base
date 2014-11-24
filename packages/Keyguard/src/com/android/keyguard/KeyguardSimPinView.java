@@ -71,7 +71,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         if (DEBUG) Log.v(TAG, "Resetting state");
         KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
         mSubId = monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED);
-        if (mSubId != SubscriptionManager.INVALID_SUB_ID) {
+        if (mSubId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             int count = TelephonyManager.getDefault().getSimCount();
             Resources rez = getResources();
             final String msg;
