@@ -43,7 +43,6 @@ enum ResourceType {
 class ResourceReference {
 public:
 
-    ResourceReference() { refCount = 0; recycled = false; destroyed = false;}
     ResourceReference(ResourceType type) {
         refCount = 0; recycled = false; destroyed = false; resourceType = type;
     }
