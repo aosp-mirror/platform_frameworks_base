@@ -462,6 +462,16 @@ public class TelecomManager {
     }
 
     /**
+     * Returns the list of registered SIM call managers.
+     * @return List of registered SIM call managers.
+     * @hide
+     */
+    @SystemApi
+    public List<PhoneAccountHandle> getRegisteredConnectionManagers() {
+        return getSimCallManagers();
+    }
+
+    /**
      * Returns a list of the {@link PhoneAccountHandle}s which can be used to make and receive phone
      * calls which support the specified URI scheme.
      * <P>
