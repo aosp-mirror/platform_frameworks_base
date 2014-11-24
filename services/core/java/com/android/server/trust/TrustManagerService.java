@@ -294,7 +294,7 @@ public class TrustManagerService extends SystemService {
 
     private void refreshDeviceLockedForUser(int userId) {
         if (userId != UserHandle.USER_ALL && userId < UserHandle.USER_OWNER) {
-            Log.e(TAG, "refreshAgentList(userId=" + userId + "): Invalid user handle,"
+            Log.e(TAG, "refreshDeviceLockedForUser(userId=" + userId + "): Invalid user handle,"
                     + " must be USER_ALL or a specific user.", new Throwable("here"));
             userId = UserHandle.USER_ALL;
         }
@@ -810,7 +810,7 @@ public class TrustManagerService extends SystemService {
                     requireCredentialEntry(msg.arg1);
                     break;
                 case MSG_KEYGUARD_SHOWING_CHANGED:
-                    refreshDeviceLockedForUser(UserHandle.USER_CURRENT);
+                    refreshDeviceLockedForUser(mCurrentUser);
                     break;
                 case MSG_START_USER:
                 case MSG_CLEANUP_USER:
