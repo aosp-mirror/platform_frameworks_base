@@ -38,17 +38,24 @@ public final class Dpm extends BaseCommand {
       (new Dpm()).run(args);
     }
 
+    private static final String COMMAND_SET_ACTIVE_ADMIN = "set-active-admin";
     private static final String COMMAND_SET_DEVICE_OWNER = "set-device-owner";
     private static final String COMMAND_SET_PROFILE_OWNER = "set-profile-owner";
 
     private IDevicePolicyManager mDevicePolicyManager;
+    private int mUserId = UserHandle.USER_OWNER;
+    private ComponentName mComponent = null;
 
     @Override
     public void onShowUsage(PrintStream out) {
         out.println(
                 "usage: dpm [subcommand] [options]\n" +
+                "usage: dpm set-active-admin [ --user <USER_ID> ] <COMPONENT>\n" +
                 "usage: dpm set-device-owner <COMPONENT>\n" +
                 "usage: dpm set-profile-owner <COMPONENT> <USER_ID>\n" +
+                "\n" +
+                "dpm set-active-admin: Sets the given component as active admin" +
+                " for an existing user.\n" +
                 "\n" +
                 "dpm set-device-owner: Sets the given component as active admin, and its\n" +
                 "  package as device owner.\n" +
@@ -68,6 +75,9 @@ public final class Dpm extends BaseCommand {
 
         String command = nextArgRequired();
         switch (command) {
+            case COMMAND_SET_ACTIVE_ADMIN:
+                runSetActiveAdmin();
+                break;
             case COMMAND_SET_DEVICE_OWNER:
                 runSetDeviceOwner();
                 break;
@@ -77,6 +87,22 @@ public final class Dpm extends BaseCommand {
             default:
                 throw new IllegalArgumentException ("unknown command '" + command + "'");
         }
+    }
+
+    private void parseArgs(boolean canHaveUser) {
+        String nextArg = nextArgRequired();
+        if (canHaveUser && "--user".equals(nextArg)) {
+            mUserId = parseInt(nextArgRequired());
+            nextArg = nextArgRequired();
+        }
+        mComponent = parseComponentName(nextArg);
+    }
+
+    private void runSetActiveAdmin() throws RemoteException {
+        parseArgs(true);
+        mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
+
+        System.out.println("Success: Active admin set to component " + mComponent.toShortString());
     }
 
     private void runSetDeviceOwner() throws RemoteException {
@@ -99,6 +125,7 @@ public final class Dpm extends BaseCommand {
     }
 
     private void runSetProfileOwner() throws RemoteException {
+        // To be refactored later to use parseArgs(boolean). Currently in use by existing tests.
         ComponentName component = parseComponentName(nextArgRequired());
         int userId = parseInt(nextArgRequired());
         mDevicePolicyManager.setActiveAdmin(component, true /*refreshing*/, userId);
