@@ -464,7 +464,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         int newStackHeight = (int) height;
         int minStackHeight = getMinStackHeight();
         int stackHeight;
-        if (newStackHeight - mTopPadding >= minStackHeight || getNotGoneChildCount() == 0) {
+        if (newStackHeight - mTopPadding - mTopPaddingOverflow >= minStackHeight
+                || getNotGoneChildCount() == 0) {
             setTranslationY(mTopPaddingOverflow);
             stackHeight = newStackHeight;
         } else {
@@ -474,7 +475,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             int translationY = (newStackHeight - minStackHeight);
             // A slight parallax effect is introduced in order for the stack to catch up with
             // the top card.
-            float partiallyThere = (float) (newStackHeight - mTopPadding) / minStackHeight;
+            float partiallyThere = (newStackHeight - mTopPadding - mTopPaddingOverflow)
+                    / minStackHeight;
             partiallyThere = Math.max(0, partiallyThere);
             translationY += (1 - partiallyThere) * (mBottomStackPeekSize +
                     mCollapseSecondCardPadding);
