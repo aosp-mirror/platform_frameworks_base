@@ -43,7 +43,8 @@
     <string name="ellipsis" msgid="7899829516048813237">"…"</string>
     <string name="ellipsis_two_dots" msgid="1228078994866030736">"‥"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(No hay número de teléfono)"</string>
-    <string name="unknownName" msgid="2277556546742746522">"(Desconocida)"</string>
+    <!-- no translation found for unknownName (6867811765370350269) -->
+    <skip />
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Correo de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problema de conexión o código incorrecto de MMI."</string>
@@ -99,6 +100,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Los servicios de voz o datos están bloqueados."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Los servicios de voz/SMS están bloqueados."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Todos los servicios de voz, datos o SMS están bloqueados."</string>
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"El dispositivo del mismo nivel solicitó el modo TTY FULL."</string>
+    <string name="peerTtyModeHco" msgid="5728602160669216784">"El dispositivo del mismo nivel solicitó el modo TTY HCO."</string>
+    <string name="peerTtyModeVco" msgid="1742404978686538049">"El dispositivo del mismo nivel solicitó el modo TTY VCO."</string>
+    <string name="peerTtyModeOff" msgid="3280819717850602205">"El dispositivo del mismo nivel solicitó el modo TTY OFF."</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Voz"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Datos"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAX"</string>
@@ -156,6 +161,16 @@
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Es posible que la red esté supervisada"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por un tercero desconocido"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Por <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
+    <!-- no translation found for work_profile_deleted (5005572078641980632) -->
+    <skip />
+    <!-- no translation found for work_profile_deleted_description (6305147513054341102) -->
+    <skip />
+    <!-- no translation found for work_profile_deleted_details (226615743462361248) -->
+    <skip />
+    <!-- no translation found for factory_reset_warning (5423253125642394387) -->
+    <skip />
+    <!-- no translation found for factory_reset_message (4905025204141900666) -->
+    <skip />
     <string name="me" msgid="6545696007631404292">"Yo"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opciones de tablet"</string>
     <!-- no translation found for power_dialog (6153888706430556356) -->
@@ -1152,6 +1167,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"ingresar"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"borrar"</string>
     <string name="search_go" msgid="8298016669822141719">"Buscar"</string>
+    <string name="search_hint" msgid="1733947260773056054">"Buscar…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Buscar"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Consulta de búsqueda"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Eliminar la consulta"</string>
@@ -1879,7 +1895,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar PIN para quitar fijación"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Solicitar patrón de desbloqueo para quitar fijación"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Solicitar contraseña para quitar fijación"</string>
-    <string name="battery_saver_description" msgid="2510530476513605742">"Para ayudar a mejorar la duración de la batería, la función de ahorro de batería reduce el rendimiento del dispositivo y limita la vibración y la mayor parte de la transmisión de datos en segundo plano. Es posible que las aplicaciones que se sincronizan, como las de correo electrónico y mensajería, no se actualicen a menos que las abras.\n\nEl ahorro de batería se desactiva automáticamente cuando el dispositivo se está cargando."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Para ayudar a mejorar la duración de la batería, el ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayoría de los datos en segundo plano. Es posible que el correo electrónico, la mensajería y otras aplicaciones que se basan en la sincronización no puedan actualizarse, a menos que los abras.\n\nEl ahorro de batería se desactiva de forma automática cuando el dispositivo se está cargando."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Hasta que termine el tiempo de inactividad a la(s) <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Hasta que finalice el tiempo de inactividad"</string>
   <plurals name="zen_mode_duration_minutes_summary">
@@ -1906,16 +1922,10 @@
     <string name="muted_by" msgid="6147073845094180001">"Silenciados por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Existe un problema interno con el dispositivo, de modo que el dispositivo puede estar inestable hasta que restablezcas la configuración de fábrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Existe un problema interno con el dispositivo. Comunícate con el fabricante para obtener más información."</string>
-    <!-- no translation found for stk_cc_ussd_to_dial (5202342984749947872) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ss (2345360594181405482) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ussd (7466087659967191653) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial (2151304435775557162) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ussd (3951862188105305589) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ss (5470768854991452695) -->
-    <skip />
+    <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"La solicitud USSD cambió por una solicitud DIAL."</string>
+    <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"La solicitud USSD cambió por una solicitud SS."</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"La solicitud USSD cambió por una nueva solicitud USSD."</string>
+    <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"La solicitud SS cambió por una solicitud DIAL."</string>
+    <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"La solicitud SS cambió por una solicitud USSD."</string>
+    <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La solicitud SS cambió por una nueva solicitud SS."</string>
 </resources>
