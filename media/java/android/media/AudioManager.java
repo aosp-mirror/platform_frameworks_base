@@ -17,6 +17,7 @@
 package android.media;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
@@ -2318,14 +2319,25 @@ public class AudioManager {
         return status;
     }
 
-    // when adding new flags, add them to AUDIOFOCUS_FLAGS_ALL
+    // when adding new flags, add them to the relevant AUDIOFOCUS_FLAGS_APPS or SYSTEM masks
     /** @hide */
+    @SystemApi
     public static final int AUDIOFOCUS_FLAG_DELAY_OK = 0x1 << 0;
     /** @hide */
-    public static final int AUDIOFOCUS_FLAGS_ALL = AUDIOFOCUS_FLAG_DELAY_OK;
+    @SystemApi
+    public static final int AUDIOFOCUS_FLAG_LOCK     = 0x1 << 1;
+    /** @hide */
+    public static final int AUDIOFOCUS_FLAGS_APPS = AUDIOFOCUS_FLAG_DELAY_OK;
+    /** @hide */
+    public static final int AUDIOFOCUS_FLAGS_SYSTEM = AUDIOFOCUS_FLAG_DELAY_OK
+            | AUDIOFOCUS_FLAG_LOCK;
 
     /**
      * @hide
+     * Request audio focus.
+     * Send a request to obtain the audio focus. This method differs from
+     * {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)} in that it can express
+     * that the requester accepts delayed grants of audio focus.
      * @param l the listener to be notified of audio focus changes. It is not allowed to be null
      *     when the request is flagged with {@link #AUDIOFOCUS_FLAG_DELAY_OK}.
      * @param requestAttributes non null {@link AudioAttributes} describing the main reason for
@@ -2340,24 +2352,70 @@ public class AudioManager {
      *      usecases such as voice memo recording, or speech recognition.
      *      Use {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
      *      as the playback of a song or a video.
-     * @param flags use 0 when not using any flags for the request, which behaves like
-     *      {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, where either audio
-     *      focus is granted immediately, or the grant request fails because the system is in a
-     *      state where focus cannot change (e.g. a phone call).
-     *      Use {link #AUDIOFOCUS_FLAG_DELAY_OK} if it is ok for the requester to not be granted
-     *      audio focus immediately (as indicated by {@link #AUDIOFOCUS_REQUEST_DELAYED}) when
-     *      the system is in a state where focus cannot change, but be granted focus later when
-     *      this condition ends.
+     * @param flags 0 or {link #AUDIOFOCUS_FLAG_DELAY_OK}.
+     *     <br>Use 0 when not using any flags for the request, which behaves like
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, where either audio
+     *     focus is granted immediately, or the grant request fails because the system is in a
+     *     state where focus cannot change (e.g. a phone call).
+     *     <br>Use {link #AUDIOFOCUS_FLAG_DELAY_OK} if it is ok for the requester to not be granted
+     *     audio focus immediately (as indicated by {@link #AUDIOFOCUS_REQUEST_DELAYED}) when
+     *     the system is in a state where focus cannot change, but be granted focus later when
+     *     this condition ends.
      * @return {@link #AUDIOFOCUS_REQUEST_FAILED}, {@link #AUDIOFOCUS_REQUEST_GRANTED}
      *     or {@link #AUDIOFOCUS_REQUEST_DELAYED}.
      *     The return value is never {@link #AUDIOFOCUS_REQUEST_DELAYED} when focus is requested
      *     without the {@link #AUDIOFOCUS_FLAG_DELAY_OK} flag.
      * @throws IllegalArgumentException
      */
+    @SystemApi
     public int requestAudioFocus(OnAudioFocusChangeListener l,
-            AudioAttributes requestAttributes,
+            @NonNull AudioAttributes requestAttributes,
             int durationHint,
             int flags) throws IllegalArgumentException {
+        if (flags != (flags & AUDIOFOCUS_FLAGS_APPS)) {
+            throw new IllegalArgumentException("Invalid flags 0x"
+                    + Integer.toHexString(flags).toUpperCase());
+        }
+        return requestAudioFocus(l, requestAttributes, durationHint,
+                flags & AUDIOFOCUS_FLAGS_APPS,
+                null /* no AudioPolicy*/);
+    }
+
+    /**
+     * @hide
+     * Request or lock audio focus.
+     * This method is to be used by system components that have registered an
+     * {@link android.media.audiopolicy.AudioPolicy} to request audio focus, but also to "lock" it
+     * so focus granting is temporarily disabled.
+     * @param l see the description of the same parameter in
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
+     * @param requestAttributes non null {@link AudioAttributes} describing the main reason for
+     *     requesting audio focus.
+     * @param durationHint see the description of the same parameter in
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
+     * @param flags 0 or a combination of {link #AUDIOFOCUS_FLAG_DELAY_OK},
+     *     {@link #AUDIOFOCUS_FLAG_LOCK}
+     *     <br>Use 0 when not using any flags for the request, which behaves like
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, where either audio
+     *     focus is granted immediately, or the grant request fails because the system is in a
+     *     state where focus cannot change (e.g. a phone call).
+     *     <br>Use {link #AUDIOFOCUS_FLAG_DELAY_OK} if it is ok for the requester to not be granted
+     *     audio focus immediately (as indicated by {@link #AUDIOFOCUS_REQUEST_DELAYED}) when
+     *     the system is in a state where focus cannot change, but be granted focus later when
+     *     this condition ends.
+     *     <br>Use {@link #AUDIOFOCUS_FLAG_LOCK} when locking audio focus so granting is
+     *     temporarily disabled.
+     * @param ap a registered {@link android.media.audiopolicy.AudioPolicy} instance when locking
+     *     focus, or null.
+     * @return see the description of the same return value in
+     *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
+     * @throws IllegalArgumentException
+     */
+    public int requestAudioFocus(OnAudioFocusChangeListener l,
+            @NonNull AudioAttributes requestAttributes,
+            int durationHint,
+            int flags,
+            AudioPolicy ap) throws IllegalArgumentException {
         // parameter checking
         if (requestAttributes == null) {
             throw new IllegalArgumentException("Illegal null AudioAttributes argument");
@@ -2366,13 +2424,17 @@ public class AudioManager {
                 (durationHint > AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)) {
             throw new IllegalArgumentException("Invalid duration hint");
         }
-        if (flags != (flags & AUDIOFOCUS_FLAGS_ALL)) {
+        if (flags != (flags & AUDIOFOCUS_FLAGS_SYSTEM)) {
             throw new IllegalArgumentException("Illegal flags 0x"
                 + Integer.toHexString(flags).toUpperCase());
         }
         if (((flags & AUDIOFOCUS_FLAG_DELAY_OK) == AUDIOFOCUS_FLAG_DELAY_OK) && (l == null)) {
             throw new IllegalArgumentException(
                     "Illegal null focus listener when flagged as accepting delayed focus grant");
+        }
+        if (((flags & AUDIOFOCUS_FLAG_LOCK) == AUDIOFOCUS_FLAG_LOCK) && (ap == null)) {
+            throw new IllegalArgumentException(
+                    "Illegal null audio policy when locking audio focus");
         }
 
         int status = AUDIOFOCUS_REQUEST_FAILED;
@@ -2381,9 +2443,10 @@ public class AudioManager {
         try {
             status = service.requestAudioFocus(requestAttributes, durationHint, mICallBack,
                     mAudioFocusDispatcher, getIdForAudioFocusListener(l),
-                    mContext.getOpPackageName() /* package name */, flags);
+                    mContext.getOpPackageName() /* package name */, flags,
+                    ap != null ? ap.token() : null);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call requestAudioFocus() on AudioService due to "+e);
+            Log.e(TAG, "Can't call requestAudioFocus() on AudioService:", e);
         }
         return status;
     }
@@ -2405,9 +2468,11 @@ public class AudioManager {
                         .setInternalLegacyStreamType(streamType).build(),
                     durationHint, mICallBack, null,
                     MediaFocusControl.IN_VOICE_COMM_FOCUS_ID,
-                    mContext.getOpPackageName(), 0 /* flags, legacy behavior*/ );
+                    mContext.getOpPackageName(),
+                    AUDIOFOCUS_FLAG_LOCK,
+                    null /* policy token */);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService due to "+e);
+            Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService:", e);
         }
     }
 
@@ -2420,9 +2485,10 @@ public class AudioManager {
     public void abandonAudioFocusForCall() {
         IAudioService service = getService();
         try {
-            service.abandonAudioFocus(null, MediaFocusControl.IN_VOICE_COMM_FOCUS_ID);
+            service.abandonAudioFocus(null, MediaFocusControl.IN_VOICE_COMM_FOCUS_ID,
+                    null /*AudioAttributes, legacy behavior*/);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call abandonAudioFocusForCall() on AudioService due to "+e);
+            Log.e(TAG, "Can't call abandonAudioFocusForCall() on AudioService:", e);
         }
     }
 
@@ -2432,18 +2498,29 @@ public class AudioManager {
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
      */
     public int abandonAudioFocus(OnAudioFocusChangeListener l) {
+        return abandonAudioFocus(l, null /*AudioAttributes, legacy behavior*/);
+    }
+
+    /**
+     * @hide
+     * Abandon audio focus. Causes the previous focus owner, if any, to receive focus.
+     *  @param l the listener with which focus was requested.
+     * @param aa the {@link AudioAttributes} with which audio focus was requested
+     * @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
+     */
+    @SystemApi
+    public int abandonAudioFocus(OnAudioFocusChangeListener l, AudioAttributes aa) {
         int status = AUDIOFOCUS_REQUEST_FAILED;
         unregisterAudioFocusListener(l);
         IAudioService service = getService();
         try {
             status = service.abandonAudioFocus(mAudioFocusDispatcher,
-                    getIdForAudioFocusListener(l));
+                    getIdForAudioFocusListener(l), aa);
         } catch (RemoteException e) {
-            Log.e(TAG, "Can't call abandonAudioFocus() on AudioService due to "+e);
+            Log.e(TAG, "Can't call abandonAudioFocus() on AudioService:", e);
         }
         return status;
     }
-
 
     //====================================================================
     // Remote Control

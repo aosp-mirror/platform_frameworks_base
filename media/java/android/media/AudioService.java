@@ -49,6 +49,7 @@ import android.hardware.usb.UsbManager;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.audiopolicy.AudioMix;
+import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.os.Binder;
 import android.os.Build;
@@ -5018,13 +5019,34 @@ public class AudioService extends IAudioService.Stub {
     // Audio Focus
     //==========================================================================================
     public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags) {
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
+            IBinder policyToken) {
+        // permission checks
+        if ((flags & AudioManager.AUDIOFOCUS_FLAG_LOCK) == AudioManager.AUDIOFOCUS_FLAG_LOCK) {
+            if (mMediaFocusControl.IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
+                if (PackageManager.PERMISSION_GRANTED != mContext.checkCallingOrSelfPermission(
+                            android.Manifest.permission.MODIFY_PHONE_STATE)) {
+                    Log.e(TAG, "Invalid permission to (un)lock audio focus", new Exception());
+                    return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+                }
+            } else {
+                // only a registered audio policy can be used to lock focus
+                synchronized (mAudioPolicies) {
+                    if (!mAudioPolicies.containsKey(policyToken)) {
+                        Log.e(TAG, "Invalid unregistered AudioPolicy to (un)lock audio focus",
+                                new Exception());
+                        return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
+                    }
+                }
+            }
+        }
+
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
                 clientId, callingPackageName, flags);
     }
 
-    public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId) {
-        return mMediaFocusControl.abandonAudioFocus(fd, clientId);
+    public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, AudioAttributes aa) {
+        return mMediaFocusControl.abandonAudioFocus(fd, clientId, aa);
     }
 
     public void unregisterAudioFocusClient(String clientId) {
@@ -5725,6 +5747,9 @@ public class AudioService extends IAudioService.Stub {
         // TODO implement clearing mix attribute matching info in native audio policy
     }
 
+    //======================
+    // Audio policy proxy
+    //======================
     /**
      * This internal class inherits from AudioPolicyConfig which contains all the mixes and
      * their configurations.
@@ -5742,8 +5767,8 @@ public class AudioService extends IAudioService.Stub {
         public void binderDied() {
             synchronized (mAudioPolicies) {
                 Log.i(TAG, "audio policy " + mToken + " died");
-                mAudioPolicies.remove(mToken);
                 disconnectMixes();
+                mAudioPolicies.remove(mToken);
             }
         }
 

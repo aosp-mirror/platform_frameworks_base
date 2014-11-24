@@ -118,9 +118,10 @@ interface IAudioService {
     boolean isBluetoothA2dpOn();
 
     int requestAudioFocus(in AudioAttributes aa, int durationHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags);
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
+            IBinder policyToken);
 
-    int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId);
+    int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, in AudioAttributes aa);
 
     void unregisterAudioFocusClient(String clientId);
 
