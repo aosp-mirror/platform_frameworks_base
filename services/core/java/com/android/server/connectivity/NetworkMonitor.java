@@ -27,6 +27,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.TrafficStats;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -222,6 +223,7 @@ public class NetworkMonitor extends StateMachine {
     private final TelephonyManager mTelephonyManager;
     private final WifiManager mWifiManager;
     private final AlarmManager mAlarmManager;
+    private final NetworkRequest mDefaultRequest;
 
     private String mServer;
     private boolean mIsCaptivePortalCheckEnabled = false;
@@ -239,7 +241,8 @@ public class NetworkMonitor extends StateMachine {
     private State mCaptivePortalState = new CaptivePortalState();
     private State mLingeringState = new LingeringState();
 
-    public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo) {
+    public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
+            NetworkRequest defaultRequest) {
         // Add suffix indicating which NetworkMonitor we're talking about.
         super(TAG + networkAgentInfo.name());
 
@@ -249,6 +252,7 @@ public class NetworkMonitor extends StateMachine {
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mDefaultRequest = defaultRequest;
 
         addState(mDefaultState);
         addState(mOfflineState, mDefaultState);
@@ -369,14 +373,25 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_REEVALUATE:
                     if (message.arg1 != mReevaluateToken)
                         return HANDLED;
-                    if (mNetworkAgentInfo.isVPN()) {
-                        transitionTo(mValidatedState);
-                        return HANDLED;
-                    }
-                    // If network provides no internet connectivity adjust evaluation.
-                    if (!mNetworkAgentInfo.networkCapabilities.hasCapability(
-                            NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-                        // TODO: Try to verify something works.  Do all gateways respond to pings?
+                    // Don't bother validating networks that don't satisify the default request.
+                    // This includes:
+                    //  - VPNs which can be considered explicitly desired by the user and the
+                    //    user's desire trumps whether the network validates.
+                    //  - Networks that don't provide internet access.  It's unclear how to
+                    //    validate such networks.
+                    //  - Untrusted networks.  It's unsafe to prompt the user to sign-in to
+                    //    such networks and the user didn't express interest in connecting to
+                    //    such networks (an app did) so the user may be unhappily surprised when
+                    //    asked to sign-in to a network they didn't want to connect to in the
+                    //    first place.  Validation could be done to adjust the network scores
+                    //    however these networks are app-requested and may not be intended for
+                    //    general usage, in which case general validation may not be an accurate
+                    //    measure of the network's quality.  Only the app knows how to evaluate
+                    //    the network so don't bother validating here.  Furthermore sending HTTP
+                    //    packets over the network may be undesirable, for example an extremely
+                    //    expensive metered network, or unwanted leaking of the User Agent string.
+                    if (!mDefaultRequest.networkCapabilities.satisfiedByNetworkCapabilities(
+                            mNetworkAgentInfo.networkCapabilities)) {
                         transitionTo(mValidatedState);
                         return HANDLED;
                     }
