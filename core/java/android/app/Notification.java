@@ -4115,9 +4115,9 @@ public class Notification implements Parcelable
      * <pre class="prettyprint">
      * Notification noti = new Notification.Builder()
      *     .setSmallIcon(R.drawable.ic_stat_player)
-     *     .setContentTitle(&quot;Track title&quot;)     // these three lines are optional
-     *     .setContentText(&quot;Artist - Album&quot;)   // if you use
-     *     .setLargeIcon(albumArtBitmap))      // setMediaSession(token)
+     *     .setContentTitle(&quot;Track title&quot;)
+     *     .setContentText(&quot;Artist - Album&quot;)
+     *     .setLargeIcon(albumArtBitmap))
      *     .setStyle(<b>new Notification.MediaStyle()</b>
      *         .setMediaSession(mySession))
      *     .build();
