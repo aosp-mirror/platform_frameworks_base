@@ -18,6 +18,7 @@ package com.android.server.content;
 
 import android.accounts.Account;
 import android.accounts.AccountAndUser;
+import android.app.backup.BackupManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -670,6 +671,7 @@ public class SyncStorageEngine extends Handler {
                     new Bundle());
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
+        queueBackup();
     }
 
     public int getIsSyncable(Account account, int userId, String providerName) {
@@ -1035,6 +1037,7 @@ public class SyncStorageEngine extends Handler {
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         mContext.sendBroadcast(ContentResolver.ACTION_SYNC_CONN_STATUS_CHANGED);
+        queueBackup();
     }
 
     public boolean getMasterSyncAutomatically(int userId) {
@@ -2809,5 +2812,13 @@ public class SyncStorageEngine extends Handler {
                 .append(", extras: " + pop.extras)
                 .append(")\n");
         }
+    }
+
+    /**
+     * Let the BackupManager know that account sync settings have changed. This will trigger
+     * {@link com.android.server.backup.SystemBackupAgent} to run.
+     */
+    public void queueBackup() {
+        BackupManager.dataChanged("android");
     }
 }
