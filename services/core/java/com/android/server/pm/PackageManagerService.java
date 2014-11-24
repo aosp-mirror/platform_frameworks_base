@@ -41,6 +41,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UID_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_USER_RESTRICTED;
+import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_FORWARD_LOCK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageParser.isApkFile;
@@ -4275,7 +4276,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // version of the new path against what we have stored to determine
                 // what to do.
                 if (DEBUG_INSTALL) Slog.d(TAG, "Path changing from " + ps.codePath);
-                if (pkg.mVersionCode < ps.versionCode) {
+                if (pkg.mVersionCode <= ps.versionCode) {
                     // The system package has been updated and the code path does not match
                     // Ignore entry. Skip it.
                     Slog.i(TAG, "Package " + ps.name + " at " + scanFile
@@ -4366,7 +4367,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                  * already installed version, hide it. It will be scanned later
                  * and re-added like an update.
                  */
-                if (pkg.mVersionCode < ps.versionCode) {
+                if (pkg.mVersionCode <= ps.versionCode) {
                     shouldHideSystemApp = true;
                     logCriticalInfo(Log.INFO, "Package " + ps.name + " appeared at " + scanFile
                             + " but new version " + pkg.mVersionCode + " better than installed "
@@ -8857,11 +8858,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                         // Check for downgrading.
                         if ((installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) == 0) {
-                            if (pkgLite.versionCode < pkg.mVersionCode) {
-                                Slog.w(TAG, "Can't install update of " + packageName
-                                        + " update version " + pkgLite.versionCode
-                                        + " is older than installed version "
-                                        + pkg.mVersionCode);
+                            try {
+                                checkDowngrade(pkg, pkgLite);
+                            } catch (PackageManagerException e) {
+                                Slog.w(TAG, "Downgrade detected: " + e.getMessage());
                                 return PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE;
                             }
                         }
@@ -13536,6 +13536,40 @@ public class PackageManagerService extends IPackageManager.Stub {
                 UsageStats usage = entry.getValue();
                 pkg.mLastPackageUsageTimeInMills = usage.getLastTimeUsed();
                 mPackageUsage.mIsHistoricalPackageUsageAvailable = true;
+            }
+        }
+    }
+
+    /**
+     * Check and throw if the given before/after packages would be considered a
+     * downgrade.
+     */
+    private static void checkDowngrade(PackageParser.Package before, PackageInfoLite after)
+            throws PackageManagerException {
+        if (after.versionCode < before.mVersionCode) {
+            throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                    "Update version code " + after.versionCode + " is older than current "
+                    + before.mVersionCode);
+        } else if (after.versionCode == before.mVersionCode) {
+            if (after.baseRevisionCode < before.baseRevisionCode) {
+                throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                        "Update base revision code " + after.baseRevisionCode
+                        + " is older than current " + before.baseRevisionCode);
+            }
+
+            if (!ArrayUtils.isEmpty(after.splitNames)) {
+                for (int i = 0; i < after.splitNames.length; i++) {
+                    final String splitName = after.splitNames[i];
+                    final int j = ArrayUtils.indexOf(before.splitNames, splitName);
+                    if (j != -1) {
+                        if (after.splitRevisionCodes[i] < before.splitRevisionCodes[j]) {
+                            throw new PackageManagerException(INSTALL_FAILED_VERSION_DOWNGRADE,
+                                    "Update split " + splitName + " revision code "
+                                    + after.splitRevisionCodes[i] + " is older than current "
+                                    + before.splitRevisionCodes[j]);
+                        }
+                    }
+                }
             }
         }
     }
