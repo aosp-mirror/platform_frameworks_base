@@ -17,11 +17,13 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.SubscriptionInfo;
@@ -30,6 +32,7 @@ import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IccCardConstants;
@@ -52,6 +55,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
     private StateMachine mStateMachine = new StateMachine();
     private AlertDialog mRemainingAttemptsDialog;
     private int mSubId;
+    private ImageView mSimImageView;
 
     KeyguardUpdateMonitorCallback mUpdateMonitorCallback = new KeyguardUpdateMonitorCallback() {
         @Override
@@ -118,14 +122,19 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
                 int count = TelephonyManager.getDefault().getSimCount();
                 Resources rez = getResources();
                 final String msg;
+                int color = Color.WHITE;
                 if (count < 2) {
                     msg = rez.getString(R.string.kg_puk_enter_puk_hint);
                 } else {
                     SubscriptionInfo info = monitor.getSubscriptionInfoForSubId(mSubId);
                     CharSequence displayName = info != null ? info.getDisplayName() : "";
                     msg = rez.getString(R.string.kg_puk_enter_puk_hint_multi, displayName);
+                    if (info != null) {
+                        color = info.getIconTint();
+                    }
                 }
                 mSecurityMessageDisplay.setMessage(msg, true);
+                mSimImageView.setImageTintList(ColorStateList.valueOf(color));
             }
             mPasswordEntry.requestFocus();
         }
@@ -172,6 +181,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
         if (mEcaView instanceof EmergencyCarrierArea) {
             ((EmergencyCarrierArea) mEcaView).setCarrierTextVisible(true);
         }
+        mSimImageView = (ImageView) findViewById(R.id.keyguard_sim);
     }
 
     @Override
