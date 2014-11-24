@@ -1607,13 +1607,7 @@ void OpenGLRenderer::setupDraw(bool clearLayer) {
             setScissorFromClip();
         }
 
-        if (clearLayer) {
-            setStencilFromClip();
-        } else {
-            // While clearing layer, force disable stencil buffer, since
-            // it's invalid to stencil-clip *during* the layer clear
-            mCaches.stencil.disable();
-        }
+        setStencilFromClip();
     }
 
     mDescription.reset();
