@@ -3608,31 +3608,36 @@ final class Settings {
         }
     }
 
-    void dumpSharedUsersLPr(PrintWriter pw, String packageName, DumpState dumpState) {
+    void dumpSharedUsersLPr(PrintWriter pw, String packageName, DumpState dumpState,
+            boolean checkin) {
         boolean printedSomething = false;
         for (SharedUserSetting su : mSharedUsers.values()) {
             if (packageName != null && su != dumpState.getSharedUser()) {
                 continue;
             }
-            if (!printedSomething) {
-                if (dumpState.onTitlePrinted())
-                    pw.println();
-                pw.println("Shared users:");
-                printedSomething = true;
-            }
-            pw.print("  SharedUser [");
-            pw.print(su.name);
-            pw.print("] (");
-            pw.print(Integer.toHexString(System.identityHashCode(su)));
-                    pw.println("):");
-            pw.print("    userId=");
-            pw.print(su.userId);
-            pw.print(" gids=");
-            pw.println(PackageManagerService.arrayToString(su.gids));
-            pw.println("    grantedPermissions:");
-            for (String s : su.grantedPermissions) {
-                pw.print("      ");
-                pw.println(s);
+            if (!checkin) {
+                if (!printedSomething) {
+                    if (dumpState.onTitlePrinted())
+                        pw.println();
+                    pw.println("Shared users:");
+                    printedSomething = true;
+                }
+                pw.print("  SharedUser [");
+                pw.print(su.name);
+                pw.print("] (");
+                pw.print(Integer.toHexString(System.identityHashCode(su)));
+                        pw.println("):");
+                pw.print("    userId=");
+                pw.print(su.userId);
+                pw.print(" gids=");
+                pw.println(PackageManagerService.arrayToString(su.gids));
+                pw.println("    grantedPermissions:");
+                for (String s : su.grantedPermissions) {
+                    pw.print("      ");
+                    pw.println(s);
+                }
+            } else {
+                pw.print("suid,"); pw.print(su.userId); pw.print(","); pw.println(su.name);
             }
         }
     }

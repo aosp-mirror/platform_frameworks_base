@@ -7379,6 +7379,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                     out.println(Integer.toHexString(System.identityHashCode(filter)));
         }
 
+        @Override
+        protected Object filterToLabel(PackageParser.ActivityIntentInfo filter) {
+            return filter.activity;
+        }
+
+        protected void dumpFilterLabel(PrintWriter out, String prefix, Object label, int count) {
+            PackageParser.Activity activity = (PackageParser.Activity)label;
+            out.print(prefix); out.print(
+                    Integer.toHexString(System.identityHashCode(activity)));
+                    out.print(' ');
+                    activity.printComponentShortName(out);
+            if (count > 1) {
+                out.print(" ("); out.print(count); out.print(" filters)");
+            }
+            out.println();
+        }
+
 //        List<ResolveInfo> filterEnabled(List<ResolveInfo> resolveInfoList) {
 //            final Iterator<ResolveInfo> i = resolveInfoList.iterator();
 //            final List<ResolveInfo> retList = Lists.newArrayList();
@@ -7576,6 +7593,23 @@ public class PackageManagerService extends IPackageManager.Stub {
                     filter.service.printComponentShortName(out);
                     out.print(" filter ");
                     out.println(Integer.toHexString(System.identityHashCode(filter)));
+        }
+
+        @Override
+        protected Object filterToLabel(PackageParser.ServiceIntentInfo filter) {
+            return filter.service;
+        }
+
+        protected void dumpFilterLabel(PrintWriter out, String prefix, Object label, int count) {
+            PackageParser.Service service = (PackageParser.Service)label;
+            out.print(prefix); out.print(
+                    Integer.toHexString(System.identityHashCode(service)));
+                    out.print(' ');
+                    service.printComponentShortName(out);
+            if (count > 1) {
+                out.print(" ("); out.print(count); out.print(" filters)");
+            }
+            out.println();
         }
 
 //        List<ResolveInfo> filterEnabled(List<ResolveInfo> resolveInfoList) {
@@ -7783,6 +7817,23 @@ public class PackageManagerService extends IPackageManager.Stub {
             filter.provider.printComponentShortName(out);
             out.print(" filter ");
             out.println(Integer.toHexString(System.identityHashCode(filter)));
+        }
+
+        @Override
+        protected Object filterToLabel(PackageParser.ProviderIntentInfo filter) {
+            return filter.provider;
+        }
+
+        protected void dumpFilterLabel(PrintWriter out, String prefix, Object label, int count) {
+            PackageParser.Provider provider = (PackageParser.Provider)label;
+            out.print(prefix); out.print(
+                    Integer.toHexString(System.identityHashCode(provider)));
+                    out.print(' ');
+                    provider.printComponentShortName(out);
+            if (count > 1) {
+                out.print(" ("); out.print(count); out.print(" filters)");
+            }
+            out.println();
         }
 
         private final ArrayMap<ComponentName, PackageParser.Provider> mProviders
@@ -12555,22 +12606,22 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (!checkin && dumpState.isDumping(DumpState.DUMP_RESOLVERS)) {
                 if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
                         : "Activity Resolver Table:", "  ", packageName,
-                        dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS))) {
+                        dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
                     dumpState.setTitlePrinted(true);
                 }
                 if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
                         : "Receiver Resolver Table:", "  ", packageName,
-                        dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS))) {
+                        dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
                     dumpState.setTitlePrinted(true);
                 }
                 if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
                         : "Service Resolver Table:", "  ", packageName,
-                        dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS))) {
+                        dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
                     dumpState.setTitlePrinted(true);
                 }
                 if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
                         : "Provider Resolver Table:", "  ", packageName,
-                        dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS))) {
+                        dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
                     dumpState.setTitlePrinted(true);
                 }
             }
@@ -12583,7 +12634,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                             dumpState.getTitlePrinted()
                                 ? "\nPreferred Activities User " + user + ":"
                                 : "Preferred Activities User " + user + ":", "  ",
-                            packageName, true)) {
+                            packageName, true, false)) {
                         dumpState.setTitlePrinted(true);
                     }
                 }
@@ -12676,8 +12727,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mSettings.dumpPackagesLPr(pw, packageName, dumpState, checkin);
             }
 
-            if (!checkin && dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
-                mSettings.dumpSharedUsersLPr(pw, packageName, dumpState);
+            if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
+                mSettings.dumpSharedUsersLPr(pw, packageName, dumpState, checkin);
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_INSTALLS) && packageName == null) {
