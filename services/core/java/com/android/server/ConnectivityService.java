@@ -865,6 +865,29 @@ public class ConnectivityService extends IConnectivityManager.Stub
         Network network = null;
 
         NetworkAgentInfo nai = mNetworkForRequestId.get(mDefaultRequest.requestId);
+
+        if (!mLockdownEnabled) {
+            int user = UserHandle.getUserId(uid);
+            synchronized (mVpns) {
+                Vpn vpn = mVpns.get(user);
+                if (vpn != null && vpn.appliesToUid(uid)) {
+                    // getUnderlyingNetworks() returns:
+                    // null => the VPN didn't specify anything, so we use the default.
+                    // empty array => the VPN explicitly said "no default network".
+                    // non-empty array => the VPN specified one or more default networks; we use the
+                    //                    first one.
+                    Network[] networks = vpn.getUnderlyingNetworks();
+                    if (networks != null) {
+                        if (networks.length > 0) {
+                            nai = getNetworkAgentInfoForNetwork(networks[0]);
+                        } else {
+                            nai = null;
+                        }
+                    }
+                }
+            }
+        }
+
         if (nai != null) {
             synchronized (nai) {
                 info = new NetworkInfo(nai.networkInfo);
@@ -4374,6 +4397,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         int user = UserHandle.getUserId(Binder.getCallingUid());
         synchronized (mVpns) {
             return mVpns.get(user).removeAddress(address, prefixLength);
+        }
+    }
+
+    @Override
+    public boolean setUnderlyingNetworksForVpn(Network[] networks) {
+        throwIfLockdownEnabled();
+        int user = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mVpns) {
+            return mVpns.get(user).setUnderlyingNetworks(networks);
         }
     }
 }
