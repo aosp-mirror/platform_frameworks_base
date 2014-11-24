@@ -1869,8 +1869,8 @@ public class NotificationManagerService extends SystemService {
         final Notification notification = record.sbn.getNotification();
 
         // Should this notification make noise, vibe, or use the LED?
-        final boolean canInterrupt = (record.score >= SCORE_INTERRUPTION_THRESHOLD) &&
-                !record.isIntercepted();
+        final boolean aboveThreshold = record.score >= SCORE_INTERRUPTION_THRESHOLD;
+        final boolean canInterrupt = aboveThreshold && !record.isIntercepted();
         if (DBG || record.isIntercepted())
             Slog.v(TAG,
                     "pkg=" + record.sbn.getPackageName() + " canInterrupt=" + canInterrupt +
@@ -2009,7 +2009,7 @@ public class NotificationManagerService extends SystemService {
         if (mLedNotification != null && record.getKey().equals(mLedNotification.getKey())) {
             mLedNotification = null;
         }
-        if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0 && canInterrupt) {
+        if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0 && aboveThreshold) {
             mLights.add(record.getKey());
             updateLightsLocked();
             if (mUseAttentionLight) {
