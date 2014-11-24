@@ -1766,8 +1766,8 @@
     <string name="lock_to_app_toast_accessible" msgid="8239120109365070664">"Hvis du vil frigøre dette skærmbillede, skal du trykke på Oversigt og holde fingeren nede."</string>
     <string name="lock_to_app_toast_locked" msgid="8739004135132606329">"Skærmen er fastgjort. Frigørelse er ikke tilladt af din organisation."</string>
     <string name="lock_to_app_title" msgid="1682643873107812874">"Vil du bruge Bliv i app?"</string>
-    <string name="lock_to_app_description" msgid="4120623404152035221">"Skærmfastholdelse låser skærmbilledet i en enkelt visning.\n\nDu frigør det ved at trykke på Tilbage og Oversigt på samme tid og holde fingeren nede."</string>
-    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Skærmfastholdelse låser skærmbilledet i en enkelt visning.\n\nDu frigør det ved at trykke på Oversigt og holde fingeren nede."</string>
+    <string name="lock_to_app_description" msgid="4120623404152035221">"Bliv i app låser skærmbilledet i en bestemt visning.\n\nDu frigør det ved at trykke på Tilbage og Oversigt samtidig og holde fingrene nede."</string>
+    <string name="lock_to_app_description_accessible" msgid="199664191087836099">"Bliv i app låser skærmbilledet i en bestemt visning.\n\nDu frigør det ved at trykke på Oversigt og holde fingeren nede."</string>
     <string name="lock_to_app_negative" msgid="2259143719362732728">"NEJ TAK"</string>
     <string name="lock_to_app_positive" msgid="7085139175671313864">"START"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skærmen blev fastgjort"</string>
