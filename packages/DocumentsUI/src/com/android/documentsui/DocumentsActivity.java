@@ -386,6 +386,7 @@ public class DocumentsActivity extends Activity {
         if (mDrawerToggle != null) {
             mDrawerToggle.syncState();
         }
+        updateActionBar();
     }
 
     public void setRootsDrawerOpen(boolean open) {
@@ -724,7 +725,6 @@ public class DocumentsActivity extends Activity {
     @Override
     protected void onRestoreInstanceState(Bundle state) {
         super.onRestoreInstanceState(state);
-        updateActionBar();
     }
 
     private BaseAdapter mStackAdapter = new BaseAdapter() {
