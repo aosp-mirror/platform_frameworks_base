@@ -192,10 +192,10 @@ class PrintPreviewController implements MutexFileProvider.OnReleaseRequestCallba
         });
     }
 
-    public void destroy() {
+    public void destroy(Runnable callback) {
         mHandler.cancelQueuedOperations();
         mRecyclerView.setAdapter(null);
-        mPageAdapter.destroy();
+        mPageAdapter.destroy(callback);
     }
 
     @Override
