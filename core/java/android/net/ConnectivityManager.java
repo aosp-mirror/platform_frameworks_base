@@ -1921,45 +1921,6 @@ public class ConnectivityManager {
     }
 
     /**
-     * get the information about a specific network link
-     * @hide
-     */
-    public LinkQualityInfo getLinkQualityInfo(int networkType) {
-        try {
-            LinkQualityInfo li = mService.getLinkQualityInfo(networkType);
-            return li;
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    /**
-     * get the information of currently active network link
-     * @hide
-     */
-    public LinkQualityInfo getActiveLinkQualityInfo() {
-        try {
-            LinkQualityInfo li = mService.getActiveLinkQualityInfo();
-            return li;
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    /**
-     * get the information of all network links
-     * @hide
-     */
-    public LinkQualityInfo[] getAllLinkQualityInfo() {
-        try {
-            LinkQualityInfo[] li = mService.getAllLinkQualityInfo();
-            return li;
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    /**
      * Set sign in error notification to visible or in visible
      *
      * @param visible
