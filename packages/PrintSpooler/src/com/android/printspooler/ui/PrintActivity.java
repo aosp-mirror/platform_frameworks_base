@@ -291,6 +291,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 if (isFinishing() || (isFinalState(mState) && !mPrintedDocument.isUpdating())) {
                     return;
                 }
+                if (mPrintedDocument.isUpdating()) {
+                    mPrintedDocument.cancel();
+                }
                 setState(STATE_PRINT_CANCELED);
                 doFinish();
             }
@@ -558,7 +561,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mPrintPreviewController.onOrientationChanged();
+        if (mPrintPreviewController != null) {
+            mPrintPreviewController.onOrientationChanged();
+        }
     }
 
     @Override
