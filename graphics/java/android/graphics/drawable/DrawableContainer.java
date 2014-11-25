@@ -536,7 +536,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
 
         if (schedule && animating) {
-            scheduleSelf(mAnimationRunnable, now + 1000/60);
+            scheduleSelf(mAnimationRunnable, now + 1000 / 60);
         }
     }
 
@@ -567,10 +567,21 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
+            mDrawableContainerState = cloneConstantState();
             mDrawableContainerState.mutate();
             mMutated = true;
         }
         return this;
+    }
+
+    /**
+     * Returns a shallow copy of the container's constant state to be used as
+     * the base state for {@link #mutate()}.
+     *
+     * @return a shallow copy of the constant state
+     */
+    DrawableContainerState cloneConstantState() {
+        return mDrawableContainerState;
     }
 
     /**
@@ -833,7 +844,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             return false;
         }
 
-        final void mutate() {
+        private void mutate() {
             // No need to call createAllFutures, since future drawables will
             // mutate when they are prepared.
             final int N = mNumChildren;
