@@ -493,13 +493,13 @@ public final class PageAdapter extends Adapter {
         return selectedPages;
     }
 
-    public void destroy() {
-        mPageContentRepository.destroy();
+    public void destroy(Runnable callback) {
         mCloseGuard.close();
         mState = STATE_DESTROYED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_DESTROYED");
         }
+        mPageContentRepository.destroy(callback);
     }
 
     @Override
@@ -507,7 +507,7 @@ public final class PageAdapter extends Adapter {
         try {
             if (mState != STATE_DESTROYED) {
                 mCloseGuard.warnIfOpen();
-                destroy();
+                destroy(null);
             }
         } finally {
             super.finalize();
