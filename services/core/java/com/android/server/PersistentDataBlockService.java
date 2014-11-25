@@ -433,7 +433,10 @@ public class PersistentDataBlockService extends SystemService {
 
         @Override
         public int getDataBlockSize() {
-            enforceUid(Binder.getCallingUid());
+            if (mContext.checkCallingPermission(Manifest.permission.ACCESS_PDB_STATE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                enforceUid(Binder.getCallingUid());
+            }
 
             DataInputStream inputStream;
             try {
