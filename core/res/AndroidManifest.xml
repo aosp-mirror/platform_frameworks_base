@@ -1130,6 +1130,12 @@
                 android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
                 android:protectionLevel="signature" />
 
+    <!-- @hide Allows querying state of PersistentDataBlock
+   <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.ACCESS_PDB_STATE"
+                android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+                android:protectionLevel="signature" />
+
 
     <!-- =========================================== -->
     <!-- Permissions associated with audio capture -->
