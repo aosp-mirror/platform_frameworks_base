@@ -527,16 +527,12 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mState.mutate();
+            final AnimatedStateListState newState = new AnimatedStateListState(mState, this, null);
+            setConstantState(newState);
             mMutated = true;
         }
 
         return this;
-    }
-
-    @Override
-    AnimatedStateListState cloneConstantState() {
-        return new AnimatedStateListState(mState, this, null);
     }
 
     /**
@@ -557,27 +553,21 @@ public class AnimatedStateListDrawable extends StateListDrawable {
 
         int[] mAnimThemeAttrs;
 
-        LongSparseLongArray mTransitions;
-        SparseIntArray mStateIds;
+        final LongSparseLongArray mTransitions;
+        final SparseIntArray mStateIds;
 
         AnimatedStateListState(@Nullable AnimatedStateListState orig,
                 @NonNull AnimatedStateListDrawable owner, @Nullable Resources res) {
             super(orig, owner, res);
 
             if (orig != null) {
-                // Perform a shallow copy and rely on mutate() to deep-copy.
                 mAnimThemeAttrs = orig.mAnimThemeAttrs;
-                mTransitions = orig.mTransitions;
-                mStateIds = orig.mStateIds;
+                mTransitions = orig.mTransitions.clone();
+                mStateIds = orig.mStateIds.clone();
             } else {
                 mTransitions = new LongSparseLongArray();
                 mStateIds = new SparseIntArray();
             }
-        }
-
-        private void mutate() {
-            mTransitions = mTransitions.clone();
-            mStateIds = mStateIds.clone();
         }
 
         int addTransition(int fromId, int toId, @NonNull Drawable anim, boolean reversible) {
@@ -651,7 +641,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         }
     }
 
-    protected void setConstantState(@NonNull AnimatedStateListState state) {
+    void setConstantState(@NonNull AnimatedStateListState state) {
         super.setConstantState(state);
 
         mState = state;
@@ -660,7 +650,6 @@ public class AnimatedStateListDrawable extends StateListDrawable {
     private AnimatedStateListDrawable(@Nullable AnimatedStateListState state, @Nullable Resources res) {
         super(null);
 
-        // Every animated state list drawable has its own constant state.
         final AnimatedStateListState newState = new AnimatedStateListState(state, this, res);
         setConstantState(newState);
         onStateChange(getState());
