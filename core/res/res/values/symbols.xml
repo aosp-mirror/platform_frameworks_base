@@ -2130,6 +2130,7 @@
   <java-symbol type="id" name="scrollIndicatorUp" />
   <java-symbol type="id" name="scrollIndicatorDown" />
   <java-symbol type="array" name="config_sms_convert_destination_number_support" />
+  <java-symbol type="string" name="prohibit_manual_network_selection_in_gobal_mode" />
 
   <!-- From SignalStrength -->
   <java-symbol type="integer" name="config_LTE_RSRP_threshold_type" />

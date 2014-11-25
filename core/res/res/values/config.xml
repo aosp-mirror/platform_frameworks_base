@@ -1950,4 +1950,6 @@
     <!-- The maximum bitmap size that can be written to a MediaMetadata object. This value
          is the max width/height allowed in dips.-->
     <dimen name="config_mediaMetadataBitmapMaxSize">320dp</dimen>
+
+    <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">false</string>
 </resources>
