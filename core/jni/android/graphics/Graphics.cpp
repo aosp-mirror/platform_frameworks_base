@@ -365,6 +365,9 @@ SkCanvas* GraphicsJNI::getNativeCanvas(JNIEnv* env, jobject canvas) {
     SkASSERT(canvas);
     SkASSERT(env->IsInstanceOf(canvas, gCanvas_class));
     jlong canvasHandle = env->GetLongField(canvas, gCanvas_nativeInstanceID);
+    if (!canvasHandle) {
+        return NULL;
+    }
     SkCanvas* c = reinterpret_cast<android::Canvas*>(canvasHandle)->getSkCanvas();
     SkASSERT(c);
     return c;
