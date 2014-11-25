@@ -474,13 +474,14 @@ public class ZenModeConfig implements Parcelable {
         return downtime;
     }
 
-    public static Condition toTimeCondition(Context context, int minutesFromNow) {
+    public static Condition toTimeCondition(Context context, int minutesFromNow, int userHandle) {
         final long now = System.currentTimeMillis();
         final long millis = minutesFromNow == 0 ? ZERO_VALUE_MS : minutesFromNow * MINUTES_MS;
-        return toTimeCondition(context, now + millis, minutesFromNow, now);
+        return toTimeCondition(context, now + millis, minutesFromNow, now, userHandle);
     }
 
-    public static Condition toTimeCondition(Context context, long time, int minutes, long now) {
+    public static Condition toTimeCondition(Context context, long time, int minutes, long now,
+            int userHandle) {
         final int num, summaryResId, line1ResId;
         if (minutes < 60) {
             // display as minutes
@@ -493,7 +494,7 @@ public class ZenModeConfig implements Parcelable {
             summaryResId = com.android.internal.R.plurals.zen_mode_duration_hours_summary;
             line1ResId = com.android.internal.R.plurals.zen_mode_duration_hours;
         }
-        final String skeleton = DateFormat.is24HourFormat(context) ? "Hm" : "hma";
+        final String skeleton = DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma";
         final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
         final CharSequence formattedTime = DateFormat.format(pattern, time);
         final Resources res = context.getResources();
