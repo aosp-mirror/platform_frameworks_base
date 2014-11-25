@@ -68,7 +68,7 @@ public class NetworkAgentInfo {
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, NetworkInfo info,
             LinkProperties lp, NetworkCapabilities nc, int score, Context context, Handler handler,
-            NetworkMisc misc) {
+            NetworkMisc misc, NetworkRequest defaultRequest) {
         this.messenger = messenger;
         asyncChannel = ac;
         network = null;
@@ -76,7 +76,7 @@ public class NetworkAgentInfo {
         linkProperties = lp;
         networkCapabilities = nc;
         currentScore = score;
-        networkMonitor = new NetworkMonitor(context, handler, this);
+        networkMonitor = new NetworkMonitor(context, handler, this, defaultRequest);
         networkMisc = misc;
         created = false;
         validated = false;

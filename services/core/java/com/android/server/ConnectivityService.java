@@ -3541,6 +3541,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private final HashMap<Messenger, NetworkAgentInfo> mNetworkAgentInfos =
             new HashMap<Messenger, NetworkAgentInfo>();
 
+    // Note: if mDefaultRequest is changed, NetworkMonitor needs to be updated.
     private final NetworkRequest mDefaultRequest;
 
     private boolean isDefaultNetwork(NetworkAgentInfo nai) {
@@ -3552,10 +3553,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             int currentScore, NetworkMisc networkMisc) {
         enforceConnectivityInternalPermission();
 
+        // TODO: Instead of passing mDefaultRequest, provide an API to determine whether a Network
+        // satisfies mDefaultRequest.
         NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
             new NetworkInfo(networkInfo), new LinkProperties(linkProperties),
             new NetworkCapabilities(networkCapabilities), currentScore, mContext, mTrackerHandler,
-            new NetworkMisc(networkMisc));
+            new NetworkMisc(networkMisc), mDefaultRequest);
         synchronized (this) {
             nai.networkMonitor.systemReady = mSystemReady;
         }
