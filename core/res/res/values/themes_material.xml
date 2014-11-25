@@ -115,10 +115,10 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceListItem">@style/TextAppearance.Material.Subhead</item>
         <item name="textAppearanceListItemSmall">@style/TextAppearance.Material.Subhead</item>
         <item name="textAppearanceListItemSecondary">@style/TextAppearance.Material.Body1</item>
-        <item name="listPreferredItemPaddingLeft">16dip</item>
-        <item name="listPreferredItemPaddingRight">16dip</item>
-        <item name="listPreferredItemPaddingStart">16dip</item>
-        <item name="listPreferredItemPaddingEnd">16dip</item>
+        <item name="listPreferredItemPaddingLeft">@dimen/list_item_padding_horizontal_material</item>
+        <item name="listPreferredItemPaddingRight">@dimen/list_item_padding_horizontal_material</item>
+        <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_horizontal_material</item>
+        <item name="listPreferredItemPaddingEnd">@dimen/list_item_padding_horizontal_material</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -467,10 +467,10 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceListItem">@style/TextAppearance.Material.Subhead</item>
         <item name="textAppearanceListItemSmall">@style/TextAppearance.Material.Subhead</item>
         <item name="textAppearanceListItemSecondary">@style/TextAppearance.Material.Body1</item>
-        <item name="listPreferredItemPaddingLeft">16dip</item>
-        <item name="listPreferredItemPaddingRight">16dip</item>
-        <item name="listPreferredItemPaddingStart">16dip</item>
-        <item name="listPreferredItemPaddingEnd">16dip</item>
+        <item name="listPreferredItemPaddingLeft">@dimen/list_item_padding_horizontal_material</item>
+        <item name="listPreferredItemPaddingRight">@dimen/list_item_padding_horizontal_material</item>
+        <item name="listPreferredItemPaddingStart">@dimen/list_item_padding_horizontal_material</item>
+        <item name="listPreferredItemPaddingEnd">@dimen/list_item_padding_horizontal_material</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
