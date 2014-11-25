@@ -600,6 +600,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
 
         mCurrentUserId = ActivityManager.getCurrentUser();
+        setHeadsUpUser(mCurrentUserId);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -662,7 +663,13 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void userSwitched(int newUserId) {
-        // should be overridden
+        setHeadsUpUser(newUserId);
+    }
+
+    private void setHeadsUpUser(int newUserId) {
+        if (mHeadsUpNotificationView != null) {
+            mHeadsUpNotificationView.setUser(newUserId);
+        }
     }
 
     public boolean isHeadsUp(String key) {
@@ -2062,6 +2069,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) {
                 Log.d(TAG, "Skipping HUN check for " + sbn.getKey() + " since it's filtered out.");
             }
+            return false;
+        }
+
+        if (mHeadsUpNotificationView.isSnoozed(sbn.getPackageName())) {
             return false;
         }
 
