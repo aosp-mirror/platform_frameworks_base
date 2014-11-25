@@ -170,6 +170,7 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -271,6 +272,26 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private static final int ENABLED  = 1;
     private static final int DISABLED = 0;
+
+    // Arguments to rematchNetworkAndRequests()
+    private enum NascentState {
+        // Indicates a network was just validated for the first time.  If the network is found to
+        // be unwanted (i.e. not satisfy any NetworkRequests) it is torn down.
+        JUST_VALIDATED,
+        // Indicates a network was not validated for the first time immediately prior to this call.
+        NOT_JUST_VALIDATED
+    };
+    private enum ReapUnvalidatedNetworks {
+        // Tear down unvalidated networks that have no chance (i.e. even if validated) of becoming
+        // the highest scoring network satisfying a NetworkRequest.  This should be passed when it's
+        // known that there may be unvalidated networks that could potentially be reaped, and when
+        // all networks have been rematched against all NetworkRequests.
+        REAP,
+        // Don't reap unvalidated networks.  This should be passed when it's known that there are
+        // no unvalidated networks that could potentially be reaped, and when some networks have
+        // not yet been rematched against all NetworkRequests.
+        DONT_REAP
+    };
 
     /**
      * used internally to change our mobile data enabled flag
@@ -1937,12 +1958,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         boolean valid = (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
                         if (valid) {
                             if (DBG) log("Validated " + nai.name());
-                            final boolean previouslyValidated = nai.validated;
-                            final int previousScore = nai.getCurrentScore();
-                            nai.validated = true;
-                            rematchNetworkAndRequests(nai, !previouslyValidated);
-                            // If score has changed, rebroadcast to NetworkFactories. b/17726566
-                            if (nai.getCurrentScore() != previousScore) {
+                            if (!nai.validated) {
+                                nai.validated = true;
+                                rematchNetworkAndRequests(nai, NascentState.JUST_VALIDATED,
+                                    ReapUnvalidatedNetworks.REAP);
+                                // If score has changed, rebroadcast to NetworkFactories. b/17726566
                                 sendUpdatedScoreToFactories(nai);
                             }
                         }
@@ -2161,7 +2181,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             for (NetworkAgentInfo networkToActivate : toActivate) {
                 unlinger(networkToActivate);
-                rematchNetworkAndRequests(networkToActivate, false);
+                rematchNetworkAndRequests(networkToActivate, NascentState.NOT_JUST_VALIDATED,
+                        ReapUnvalidatedNetworks.DONT_REAP);
             }
         }
     }
@@ -3883,15 +3904,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     //   satisfied by newNetwork, and reassigns to newNetwork
     //   any such requests for which newNetwork is the best.
     //
-    // - Lingers any Networks that as a result are no longer
+    // - Lingers any validated Networks that as a result are no longer
     //   needed. A network is needed if it is the best network for
     //   one or more NetworkRequests, or if it is a VPN.
     //
     // - Tears down newNetwork if it just became validated
-    //   (i.e. nascent==true) but turns out to be unneeded.
-    //   Does not tear down newNetwork if it is unvalidated,
-    //   because future validation may improve newNetwork's
-    //   score enough that it is needed.
+    //   (i.e. nascent==JUST_VALIDATED) but turns out to be unneeded.
+    //
+    // - If reapUnvalidatedNetworks==REAP, tears down unvalidated
+    //   networks that have no chance (i.e. even if validated)
+    //   of becoming the highest scoring network.
     //
     // NOTE: This function only adds NetworkRequests that "newNetwork" could satisfy,
     // it does not remove NetworkRequests that other Networks could better satisfy.
@@ -3899,16 +3921,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // This function should be used when possible instead of {@code rematchAllNetworksAndRequests}
     // as it performs better by a factor of the number of Networks.
     //
+    // @param newNetwork is the network to be matched against NetworkRequests.
     // @param nascent indicates if newNetwork just became validated, in which case it should be
-    //               torn down if unneeded.  If nascent is false, no action is taken if newNetwork
-    //               is found to be unneeded by this call.  Presumably, in this case, either:
-    //               - newNetwork is unvalidated (and left alive), or
-    //               - the NetworkRequests keeping newNetwork alive have been transitioned to
-    //                 another higher scoring network by another call to rematchNetworkAndRequests()
-    //                 and this other call also lingered newNetwork.
-    private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork, boolean nascent) {
+    //               torn down if unneeded.
+    // @param reapUnvalidatedNetworks indicates if an additional pass over all networks should be
+    //               performed to tear down unvalidated networks that have no chance (i.e. even if
+    //               validated) of becoming the highest scoring network.
+    private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork, NascentState nascent,
+            ReapUnvalidatedNetworks reapUnvalidatedNetworks) {
         if (!newNetwork.created) return;
-        if (nascent && !newNetwork.validated) loge("ERROR: nascent network not validated.");
+        if (nascent == NascentState.JUST_VALIDATED && !newNetwork.validated) {
+            loge("ERROR: nascent network not validated.");
+        }
         boolean keep = newNetwork.isVPN();
         boolean isNewDefault = false;
         if (DBG) log("rematching " + newNetwork.name());
@@ -4055,16 +4079,43 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (newNetwork.isVPN()) {
                 mLegacyTypeTracker.add(TYPE_VPN, newNetwork);
             }
-        } else if (nascent) {
+        } else if (nascent == NascentState.JUST_VALIDATED) {
             // Only tear down newly validated networks here.  Leave unvalidated to either become
-            // validated (and get evaluated against peers, one losing here) or
-            // NetworkMonitor reports a bad network and we tear it down then.
-            // Networks that have been up for a while and are validated should be torn down via
-            // the lingering process so communication on that network is given time to wrap up.
-            // TODO: Could teardown unvalidated networks when their NetworkCapabilities
-            // satisfy no NetworkRequests.
+            // validated (and get evaluated against peers, one losing here), or get reaped (see
+            // reapUnvalidatedNetworks) if they have no chance of becoming the highest scoring
+            // network.  Networks that have been up for a while and are validated should be torn
+            // down via the lingering process so communication on that network is given time to
+            // wrap up.
             if (DBG) log("Validated network turns out to be unwanted.  Tear it down.");
             teardownUnneededNetwork(newNetwork);
+        }
+        if (reapUnvalidatedNetworks == ReapUnvalidatedNetworks.REAP) {
+            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+                if (!nai.created || nai.validated || nai.isVPN()) continue;
+                boolean reap = true;
+                for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+                    // If this Network is already the highest scoring Network for a request, or if
+                    // there is hope for it to become one if it validated, then don't reap it.
+                    if (nri.isRequest && nai.satisfies(nri.request) &&
+                            (nai.networkRequests.get(nri.request.requestId) != null ||
+                            // Note that this catches two important cases:
+                            // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
+                            //    is currently satisfying the request.  This is desirable when
+                            //    cellular ends up validating but WiFi does not.
+                            // 2. Unvalidated WiFi will not be reaped when validated cellular
+                            //    is currently satsifying the request.  This is desirable when
+                            //    WiFi ends up validating and out scoring cellular.
+                            mNetworkForRequestId.get(nri.request.requestId).getCurrentScore() <
+                                    nai.getCurrentScoreAsValidated())) {
+                        reap = false;
+                        break;
+                    }
+                }
+                if (reap) {
+                    if (DBG) log("Reaping " + nai.name());
+                    teardownUnneededNetwork(nai);
+                }
+            }
         }
     }
 
@@ -4086,10 +4137,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // can only add more NetworkRequests satisfied by "changed", and this is exactly what
         // rematchNetworkAndRequests() handles.
         if (changed != null && oldScore < changed.getCurrentScore()) {
-            rematchNetworkAndRequests(changed, false);
+            rematchNetworkAndRequests(changed, NascentState.NOT_JUST_VALIDATED,
+                    ReapUnvalidatedNetworks.REAP);
         } else {
-            for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                rematchNetworkAndRequests(nai, false);
+            for (Iterator i = mNetworkAgentInfos.values().iterator(); i.hasNext(); ) {
+                rematchNetworkAndRequests((NetworkAgentInfo)i.next(),
+                        NascentState.NOT_JUST_VALIDATED,
+                        // Only reap the last time through the loop.  Reaping before all rematching
+                        // is complete could incorrectly teardown a network that hasn't yet been
+                        // rematched.
+                        i.hasNext() ? ReapUnvalidatedNetworks.DONT_REAP
+                                : ReapUnvalidatedNetworks.REAP);
             }
         }
     }
@@ -4171,7 +4229,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 // TODO: support proxy per network.
             }
             // Consider network even though it is not yet validated.
-            rematchNetworkAndRequests(networkAgent, false);
+            rematchNetworkAndRequests(networkAgent, NascentState.NOT_JUST_VALIDATED,
+                    ReapUnvalidatedNetworks.REAP);
         } else if (state == NetworkInfo.State.DISCONNECTED ||
                 state == NetworkInfo.State.SUSPENDED) {
             networkAgent.asyncChannel.disconnect();
