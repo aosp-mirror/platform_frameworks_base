@@ -408,6 +408,7 @@ static JNINativeMethod sMethods[] = {
 int register_android_server_hdmi_HdmiCecController(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, CLASS_PATH, sMethods, NELEM(sMethods));
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
+    (void)res; // Don't scream about unused variable in the LOG_NDEBUG case
     return 0;
 }
 

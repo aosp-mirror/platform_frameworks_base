@@ -193,8 +193,6 @@ static JNINativeMethod gMethods[] = {
     {"native_remove_storage",       "(I)V", (void *)android_mtp_MtpServer_remove_storage},
 };
 
-static const char* const kClassPathName = "android/mtp/MtpServer";
-
 int register_android_mtp_MtpServer(JNIEnv *env)
 {
     jclass clazz;
