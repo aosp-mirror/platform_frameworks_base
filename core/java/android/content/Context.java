@@ -2877,11 +2877,10 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
-     * android.app.usage.UsageStatsManager} for interacting with the status bar.
+     * android.app.usage.UsageStatsManager} for querying device usage stats.
      *
      * @see #getSystemService
      * @see android.app.usage.UsageStatsManager
-     * @hide
      */
     public static final String USAGE_STATS_SERVICE = "usagestats";
 
