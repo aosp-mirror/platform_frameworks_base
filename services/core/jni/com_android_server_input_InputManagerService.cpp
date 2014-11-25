@@ -1416,6 +1416,7 @@ static JNINativeMethod gInputManagerMethods[] = {
 int register_android_server_InputManager(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "com/android/server/input/InputManagerService",
             gInputManagerMethods, NELEM(gInputManagerMethods));
+    (void) res;  // Faked use when LOG_NDEBUG.
     LOG_FATAL_IF(res < 0, "Unable to register native methods.");
 
     // Callbacks
