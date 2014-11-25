@@ -7277,6 +7277,7 @@ package android.content {
     field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String TV_INPUT_SERVICE = "tv_input";
     field public static final java.lang.String UI_MODE_SERVICE = "uimode";
+    field public static final java.lang.String USAGE_STATS_SERVICE = "usagestats";
     field public static final java.lang.String USB_SERVICE = "usb";
     field public static final java.lang.String USER_SERVICE = "user";
     field public static final java.lang.String VIBRATOR_SERVICE = "vibrator";
