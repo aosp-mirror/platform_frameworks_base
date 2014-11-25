@@ -49,7 +49,7 @@ namespace uirenderer {
  * Any texture added to the cache causing the cache to grow beyond the maximum
  * allowed size will also cause the oldest texture to be kicked out.
  */
-class TextureCache: public OnEntryRemoved<const SkPixelRef*, Texture*> {
+class TextureCache: public OnEntryRemoved<uint32_t, Texture*> {
 public:
     TextureCache();
     TextureCache(uint32_t maxByteSize);
@@ -59,7 +59,7 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(const SkPixelRef*& pixelRef, Texture*& texture);
+    void operator()(uint32_t&, Texture*& texture);
 
     /**
      * Resets all Textures to not be marked as in use
@@ -83,16 +83,12 @@ public:
      * texture is not kept in the cache. The caller must destroy the texture.
      */
     Texture* getTransient(const SkBitmap* bitmap);
-    /**
-     * Removes the texture associated with the specified bitmap.
-     * Upon remove the texture is freed.
-     */
-    void remove(const SkBitmap* bitmap);
+
     /**
      * Removes the texture associated with the specified bitmap. This is meant
      * to be called from threads that are not the EGL context thread.
      */
-    void removeDeferred(const SkBitmap* bitmap);
+    void releaseTexture(const SkBitmap* bitmap);
     /**
      * Process deferred removals.
      */
@@ -147,7 +143,7 @@ private:
 
     void init();
 
-    LruCache<const SkPixelRef*, Texture*> mCache;
+    LruCache<uint32_t, Texture*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;
@@ -157,7 +153,7 @@ private:
 
     bool mDebugEnabled;
 
-    Vector<const SkBitmap*> mGarbage;
+    Vector<uint32_t> mGarbage;
     mutable Mutex mLock;
 }; // class TextureCache
 
