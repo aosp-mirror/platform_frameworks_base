@@ -96,7 +96,6 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
@@ -1645,12 +1644,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         private void manageNotification(UserHandle userHandle) {
+            final UserInfo userInfo = mUserManager.getUserInfo(userHandle.getIdentifier());
+
+            // Inactive users or managed profiles shouldn't provoke a warning
             if (!mUserManager.isUserRunning(userHandle)) {
                 return;
             }
+            if (userInfo == null || userInfo.isManagedProfile()) {
+                return;
+            }
 
+            // Call out to KeyChain to check for user-added CAs
             boolean hasCert = false;
-            final long id = Binder.clearCallingIdentity();
             try {
                 KeyChainConnection kcs = KeyChain.bindAsUser(mContext, userHandle);
                 try {
@@ -1666,8 +1671,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Thread.currentThread().interrupt();
             } catch (RuntimeException e) {
                 Log.e(LOG_TAG, "Could not connect to KeyChain service", e);
-            } finally {
-                Binder.restoreCallingIdentity(id);
             }
             if (!hasCert) {
                 getNotificationManager().cancelAsUser(
@@ -1675,6 +1678,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 return;
             }
 
+            // Build and show a warning notification
             int smallIconId;
             String contentText;
             final String ownerName = getDeviceOwnerName();
