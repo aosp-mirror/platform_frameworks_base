@@ -1017,6 +1017,7 @@ package android {
     field public static final int restrictionType = 16843923; // 0x1010493
     field public static final int resumeWhilePausing = 16843954; // 0x10104b2
     field public static final int reversible = 16843851; // 0x101044b
+    field public static final int revisionCode = 16843989; // 0x10104d5
     field public static final int right = 16843183; // 0x10101af
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
     field public static final int ringtoneType = 16843257; // 0x10101f9
@@ -8545,6 +8546,7 @@ package android.content.pm {
     field public static final int REQUESTED_PERMISSION_REQUIRED = 1; // 0x1
     field public android.content.pm.ActivityInfo[] activities;
     field public android.content.pm.ApplicationInfo applicationInfo;
+    field public int baseRevisionCode;
     field public android.content.pm.ConfigurationInfo[] configPreferences;
     field public android.content.pm.FeatureGroupInfo[] featureGroups;
     field public long firstInstallTime;
@@ -8564,6 +8566,7 @@ package android.content.pm {
     field public int sharedUserLabel;
     field public android.content.pm.Signature[] signatures;
     field public java.lang.String[] splitNames;
+    field public int[] splitRevisionCodes;
     field public int versionCode;
     field public java.lang.String versionName;
   }
