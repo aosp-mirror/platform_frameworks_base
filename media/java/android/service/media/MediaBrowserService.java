@@ -189,8 +189,10 @@ public abstract class MediaBrowserService extends Service {
                         } else {
                             try {
                                 mConnections.put(b, connection);
-                                callbacks.onConnect(connection.root.getRootId(),
-                                        mSession, connection.root.getExtras());
+                                if (mSession != null) {
+                                    callbacks.onConnect(connection.root.getRootId(),
+                                            mSession, connection.root.getExtras());
+                                }
                             } catch (RemoteException ex) {
                                 Log.w(TAG, "Calling onConnect() failed. Dropping client. "
                                         + "pkg=" + pkg);
@@ -319,16 +321,34 @@ public abstract class MediaBrowserService extends Service {
     /**
      * Call to set the media session.
      * <p>
-     * This must be called before onCreate returns.
+     * This should be called as soon as possible during the service's startup.
+     * It may only be called once.
      *
      * @return The media session token, must not be null.
      */
-    public void setSessionToken(MediaSession.Token token) {
+    public void setSessionToken(final MediaSession.Token token) {
         if (token == null) {
-            throw new IllegalStateException(this.getClass().getName()
-                    + ".onCreateSession() set invalid MediaSession.Token");
+            throw new IllegalArgumentException("Session token may not be null.");
         }
-        mSession = token;
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mSession != null) {
+                    throw new IllegalStateException("The session token has already been set.");
+                }
+                mSession = token;
+                for (IBinder key : mConnections.keySet()) {
+                    ConnectionRecord connection = mConnections.get(key);
+                    try {
+                        connection.callbacks.onConnect(connection.root.getRootId(), mSession,
+                                connection.root.getExtras());
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "Connection for " + connection.pkg + " is no longer valid.");
+                        mConnections.remove(key);
+                    }
+                }
+            }
+        });
     }
 
     /**
