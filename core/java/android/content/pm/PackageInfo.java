@@ -41,14 +41,30 @@ public class PackageInfo implements Parcelable {
      * attribute.
      */
     public int versionCode;
-    
+
     /**
      * The version name of this package, as specified by the &lt;manifest&gt;
      * tag's {@link android.R.styleable#AndroidManifest_versionName versionName}
      * attribute.
      */
     public String versionName;
-    
+
+    /**
+     * The revision number of the base APK for this package, as specified by the
+     * &lt;manifest&gt; tag's
+     * {@link android.R.styleable#AndroidManifest_revisionCode revisionCode}
+     * attribute.
+     */
+    public int baseRevisionCode;
+
+    /**
+     * The revision number of any split APKs for this package, as specified by
+     * the &lt;manifest&gt; tag's
+     * {@link android.R.styleable#AndroidManifest_revisionCode revisionCode}
+     * attribute. Indexes are a 1:1 mapping against {@link #splitNames}.
+     */
+    public int[] splitRevisionCodes;
+
     /**
      * The shared user ID name of this package, as specified by the &lt;manifest&gt;
      * tag's {@link android.R.styleable#AndroidManifest_sharedUserId sharedUserId}
@@ -257,21 +273,26 @@ public class PackageInfo implements Parcelable {
     public PackageInfo() {
     }
 
+    @Override
     public String toString() {
         return "PackageInfo{"
             + Integer.toHexString(System.identityHashCode(this))
             + " " + packageName + "}";
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeString(packageName);
         dest.writeStringArray(splitNames);
         dest.writeInt(versionCode);
         dest.writeString(versionName);
+        dest.writeInt(baseRevisionCode);
+        dest.writeIntArray(splitRevisionCodes);
         dest.writeString(sharedUserId);
         dest.writeInt(sharedUserLabel);
         if (applicationInfo != null) {
@@ -305,10 +326,12 @@ public class PackageInfo implements Parcelable {
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
             = new Parcelable.Creator<PackageInfo>() {
+        @Override
         public PackageInfo createFromParcel(Parcel source) {
             return new PackageInfo(source);
         }
 
+        @Override
         public PackageInfo[] newArray(int size) {
             return new PackageInfo[size];
         }
@@ -316,9 +339,11 @@ public class PackageInfo implements Parcelable {
 
     private PackageInfo(Parcel source) {
         packageName = source.readString();
-        splitNames = source.readStringArray();
+        splitNames = source.createStringArray();
         versionCode = source.readInt();
         versionName = source.readString();
+        baseRevisionCode = source.readInt();
+        splitRevisionCodes = source.createIntArray();
         sharedUserId = source.readString();
         sharedUserLabel = source.readInt();
         int hasApp = source.readInt();
