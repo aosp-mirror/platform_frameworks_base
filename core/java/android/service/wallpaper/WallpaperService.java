@@ -538,7 +538,7 @@ public abstract class WallpaperService extends Service {
             out.print(prefix); out.print("mType="); out.print(mType);
                     out.print(" mWindowFlags="); out.print(mWindowFlags);
                     out.print(" mCurWindowFlags="); out.println(mCurWindowFlags);
-                    out.print(" mWindowPrivateFlags="); out.print(mWindowPrivateFlags);
+            out.print(prefix); out.print("mWindowPrivateFlags="); out.print(mWindowPrivateFlags);
                     out.print(" mCurWindowPrivateFlags="); out.println(mCurWindowPrivateFlags);
             out.print(prefix); out.print("mVisibleInsets=");
                     out.print(mVisibleInsets.toShortString());
