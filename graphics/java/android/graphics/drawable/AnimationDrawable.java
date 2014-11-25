@@ -342,10 +342,15 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mAnimationState.mDurations = mAnimationState.mDurations.clone();
+            mAnimationState.mutate();
             mMutated = true;
         }
         return this;
+    }
+
+    @Override
+    AnimationState cloneConstantState() {
+        return new AnimationState(mAnimationState, this, null);
     }
 
     /**
@@ -371,6 +376,10 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                 mDurations = new int[getCapacity()];
                 mOneShot = true;
             }
+        }
+
+        private void mutate() {
+            mDurations = mDurations.clone();
         }
 
         @Override
