@@ -315,7 +315,17 @@ public class StackStateAnimator {
     }
 
     private long calculateDelayDark(StackScrollState.ViewState viewState) {
-        return viewState.notGoneIndex * ANIMATION_DELAY_PER_ELEMENT_DARK;
+        int referenceIndex;
+        if (mAnimationFilter.darkAnimationOriginIndex ==
+                NotificationStackScrollLayout.AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE) {
+            referenceIndex = 0;
+        } else if (mAnimationFilter.darkAnimationOriginIndex ==
+                NotificationStackScrollLayout.AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_BELOW) {
+            referenceIndex = mHostLayout.getNotGoneChildCount() - 1;
+        } else {
+            referenceIndex = mAnimationFilter.darkAnimationOriginIndex;
+        }
+        return Math.abs(referenceIndex - viewState.notGoneIndex) * ANIMATION_DELAY_PER_ELEMENT_DARK;
     }
 
     private long calculateDelayGoToFullShade(StackScrollState.ViewState viewState) {
