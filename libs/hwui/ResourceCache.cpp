@@ -185,10 +185,9 @@ void ResourceCache::destructorLocked(const SkBitmap* resource) {
     if (ref == NULL) {
         // If we're not tracking this resource, just delete it
         if (Caches::hasInstance()) {
-            Caches::getInstance().textureCache.removeDeferred(resource);
-        } else {
-            delete resource;
+            Caches::getInstance().textureCache.releaseTexture(resource);
         }
+        delete resource;
         return;
     }
     ref->destroyed = true;
@@ -238,6 +237,9 @@ bool ResourceCache::recycle(SkBitmap* resource) {
 bool ResourceCache::recycleLocked(SkBitmap* resource) {
     ssize_t index = mCache->indexOfKey(resource);
     if (index < 0) {
+        if (Caches::hasInstance()) {
+            Caches::getInstance().textureCache.releaseTexture(resource);
+        }
         // not tracking this resource; just recycle the pixel data
         resource->setPixels(NULL, NULL);
         return true;
@@ -262,17 +264,20 @@ bool ResourceCache::recycleLocked(SkBitmap* resource) {
  */
 void ResourceCache::deleteResourceReferenceLocked(const void* resource, ResourceReference* ref) {
     if (ref->recycled && ref->resourceType == kBitmap) {
-        ((SkBitmap*) resource)->setPixels(NULL, NULL);
+        SkBitmap* bitmap = (SkBitmap*) resource;
+        if (Caches::hasInstance()) {
+            Caches::getInstance().textureCache.releaseTexture(bitmap);
+        }
+        bitmap->setPixels(NULL, NULL);
     }
     if (ref->destroyed) {
         switch (ref->resourceType) {
             case kBitmap: {
                 SkBitmap* bitmap = (SkBitmap*) resource;
                 if (Caches::hasInstance()) {
-                    Caches::getInstance().textureCache.removeDeferred(bitmap);
-                } else {
-                    delete bitmap;
+                    Caches::getInstance().textureCache.releaseTexture(bitmap);
                 }
+                delete bitmap;
             }
             break;
             case kPath: {
