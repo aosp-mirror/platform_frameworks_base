@@ -18,6 +18,7 @@
 #define _BOOTANIMATION_AUDIOPLAYER_H
 
 #include <utils/Thread.h>
+#include <utils/FileMap.h>
 
 namespace android {
 
@@ -28,7 +29,7 @@ public:
     virtual     ~AudioPlayer();
     bool        init(const char* config);
 
-    void        playFile(struct FileMap* fileMap);
+    void        playFile(FileMap* fileMap);
 
 private:
     virtual bool        threadLoop();
@@ -39,7 +40,7 @@ private:
     int                 mPeriodSize;
     int                 mPeriodCount;
 
-    struct FileMap*     mCurrentFile;
+    FileMap*            mCurrentFile;
 };
 
 } // namespace android
