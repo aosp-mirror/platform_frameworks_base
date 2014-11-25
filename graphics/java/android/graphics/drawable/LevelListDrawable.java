@@ -146,11 +146,15 @@ public class LevelListDrawable extends DrawableContainer {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mLevelListState.mLows = mLevelListState.mLows.clone();
-            mLevelListState.mHighs = mLevelListState.mHighs.clone();
+            mLevelListState.mutate();
             mMutated = true;
         }
         return this;
+    }
+
+    @Override
+    LevelListState cloneConstantState() {
+        return new LevelListState(mLevelListState, this, null);
     }
 
     /**
@@ -169,12 +173,18 @@ public class LevelListDrawable extends DrawableContainer {
             super(orig, owner, res);
 
             if (orig != null) {
+                // Perform a shallow copy and rely on mutate() to deep-copy.
                 mLows = orig.mLows;
                 mHighs = orig.mHighs;
             } else {
                 mLows = new int[getCapacity()];
                 mHighs = new int[getCapacity()];
             }
+        }
+
+        private void mutate() {
+            mLows = mLows.clone();
+            mHighs = mHighs.clone();
         }
 
         public void addLevel(int low, int high, Drawable drawable) {
