@@ -30,9 +30,6 @@
 namespace android {
 namespace filterfw {
 
-// VBO attachment keys
-static const int kDefaultVboKey = 1;
-
 static const char* s_default_vertex_shader_source_ =
   "attribute vec4 a_position;\n"
   "attribute vec2 a_texcoord;\n"
@@ -53,10 +50,6 @@ static void GetTileCoords(const float* b, float x, float y, float* xt, float* yt
 
   *xt = w0 * b[0] + w1 * b[2] + w2 * b[4] + w3 * b[6];
   *yt = w0 * b[1] + w1 * b[3] + w2 * b[5] + w3 * b[7];
-}
-
-static inline float AdjustRatio(float current, float next) {
-  return (current + next) / 2.0;
 }
 
 // VertexAttrib implementation /////////////////////////////////////////////////

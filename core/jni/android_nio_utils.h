@@ -58,9 +58,9 @@ class AutoBufferPointer {
 public:
     AutoBufferPointer(JNIEnv* env, jobject nioBuffer, jboolean commit);
     ~AutoBufferPointer();
-    
+
     void* pointer() const { return fPointer; }
-    
+
 private:
     JNIEnv* fEnv;
     void*   fPointer;

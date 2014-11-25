@@ -417,8 +417,6 @@ static JNINativeMethod gMethods[] = {
                                         (void *)android_mtp_MtpDevice_import_file},
 };
 
-static const char* const kClassPathName = "android/mtp/MtpDevice";
-
 int register_android_mtp_MtpDevice(JNIEnv *env)
 {
     jclass clazz;

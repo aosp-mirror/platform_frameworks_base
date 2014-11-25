@@ -895,8 +895,6 @@ static JNINativeMethod gMethods[] = {
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer;)V",   (void *)android_media_MediaPlayer_setNextMediaPlayer},
 };
 
-static const char* const kClassPathName = "android/media/MediaPlayer";
-
 // This function only registers the native methods
 static int register_android_media_MediaPlayer(JNIEnv *env)
 {
