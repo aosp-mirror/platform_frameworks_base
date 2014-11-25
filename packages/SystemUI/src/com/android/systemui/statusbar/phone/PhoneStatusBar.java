@@ -53,6 +53,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -267,6 +268,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private UnlockMethodCache mUnlockMethodCache;
     private DozeServiceHost mDozeServiceHost;
     private boolean mScreenOnComingFromTouch;
+    private PointF mScreenOnTouchLocation;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -3711,7 +3713,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
         boolean animate = !mDozing && mDozeScrimController.isPulsing();
         mNotificationPanel.setDozing(mDozing, animate);
-        mStackScroller.setDark(mDozing, animate);
+        mStackScroller.setDark(mDozing, animate, mScreenOnTouchLocation);
         mScrimController.setDozing(mDozing);
         mDozeScrimController.setDozing(mDozing, animate);
     }
@@ -3967,6 +3969,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     public void onScreenTurnedOff() {
         mScreenOnFromKeyguard = false;
         mScreenOnComingFromTouch = false;
+        mScreenOnTouchLocation = null;
         mStackScroller.setAnimationsEnabled(false);
         updateVisibleToUser();
     }
@@ -4089,14 +4092,13 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         return !mNotificationData.getActiveNotifications().isEmpty();
     }
 
-    public void wakeUpIfDozing(long time, boolean fromTouch) {
+    public void wakeUpIfDozing(long time, MotionEvent event) {
         if (mDozing && mDozeScrimController.isPulsing()) {
             PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             pm.wakeUp(time);
-            if (fromTouch) {
-                mScreenOnComingFromTouch = true;
-                mNotificationPanel.setTouchDisabled(false);
-            }
+            mScreenOnComingFromTouch = true;
+            mScreenOnTouchLocation = new PointF(event.getX(), event.getY());
+            mNotificationPanel.setTouchDisabled(false);
         }
     }
 

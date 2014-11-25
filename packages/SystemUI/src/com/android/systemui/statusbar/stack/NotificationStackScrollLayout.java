@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.stack;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -149,6 +151,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mDimmedNeedsAnimation;
     private boolean mHideSensitiveNeedsAnimation;
     private boolean mDarkNeedsAnimation;
+    private int mDarkAnimationOriginIndex;
     private boolean mActivateNeedsAnimation;
     private boolean mGoToFullShadeNeedsAnimation;
     private boolean mIsExpanded = true;
@@ -210,6 +213,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     };
     private PhoneStatusBar mPhoneStatusBar;
+    private int[] mTempInt2 = new int[2];
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -587,10 +591,38 @@ public class NotificationStackScrollLayout extends ViewGroup
         return getChildAtPosition(ev.getX(), ev.getY());
     }
 
+    public ExpandableView getClosestChildAtRawPosition(float touchX, float touchY) {
+        getLocationOnScreen(mTempInt2);
+        float localTouchY = touchY - mTempInt2[1];
+
+        ExpandableView closestChild = null;
+        float minDist = Float.MAX_VALUE;
+
+        // find the view closest to the location, accounting for GONE views
+        final int count = getChildCount();
+        for (int childIdx = 0; childIdx < count; childIdx++) {
+            ExpandableView slidingChild = (ExpandableView) getChildAt(childIdx);
+            if (slidingChild.getVisibility() == GONE
+                    || slidingChild instanceof StackScrollerDecorView
+                    || slidingChild == mSpeedBumpView) {
+                continue;
+            }
+            float childTop = slidingChild.getTranslationY();
+            float top = childTop + slidingChild.getClipTopAmount();
+            float bottom = childTop + slidingChild.getActualHeight();
+
+            float dist = Math.min(Math.abs(top - localTouchY), Math.abs(bottom - localTouchY));
+            if (dist < minDist) {
+                closestChild = slidingChild;
+                minDist = dist;
+            }
+        }
+        return closestChild;
+    }
+
     public ExpandableView getChildAtRawPosition(float touchX, float touchY) {
-        int[] location = new int[2];
-        getLocationOnScreen(location);
-        return getChildAtPosition(touchX - location[0], touchY - location[1]);
+        getLocationOnScreen(mTempInt2);
+        return getChildAtPosition(touchX - mTempInt2[0], touchY - mTempInt2[1]);
     }
 
     public ExpandableView getChildAtPosition(float touchX, float touchY) {
@@ -1818,8 +1850,9 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void generateDarkEvent() {
         if (mDarkNeedsAnimation) {
-            mAnimationEvents.add(
-                    new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DARK));
+            AnimationEvent ev = new AnimationEvent(null, AnimationEvent.ANIMATION_TYPE_DARK);
+            ev.darkAnimationOriginIndex = mDarkAnimationOriginIndex;
+            mAnimationEvents.add(ev);
         }
         mDarkNeedsAnimation = false;
     }
@@ -2151,7 +2184,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mEmptyShadeView.setInvisible();
         mGoToFullShadeNeedsAnimation = true;
         mGoToFullShadeDelay = delay;
-        mNeedsAnimation =  true;
+        mNeedsAnimation = true;
         requestChildrenUpdate();
     }
 
@@ -2182,13 +2215,44 @@ public class NotificationStackScrollLayout extends ViewGroup
     /**
      * See {@link AmbientState#setDark}.
      */
-    public void setDark(boolean dark, boolean animate) {
+    public void setDark(boolean dark, boolean animate, @Nullable PointF touchWakeUpScreenLocation) {
         mAmbientState.setDark(dark);
         if (animate && mAnimationsEnabled) {
             mDarkNeedsAnimation = true;
+            mDarkAnimationOriginIndex = findDarkAnimationOriginIndex(touchWakeUpScreenLocation);
             mNeedsAnimation =  true;
         }
         requestChildrenUpdate();
+    }
+
+    private int findDarkAnimationOriginIndex(@Nullable PointF screenLocation) {
+        if (screenLocation == null || screenLocation.y < mTopPadding + mTopPaddingOverflow) {
+            return AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE;
+        }
+        if (screenLocation.y > getBottomMostNotificationBottom()) {
+            return AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_BELOW;
+        }
+        View child = getClosestChildAtRawPosition(screenLocation.x, screenLocation.y);
+        if (child != null) {
+            return getNotGoneIndex(child);
+        } else {
+            return AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE;
+        }
+    }
+
+    private int getNotGoneIndex(View child) {
+        int count = getChildCount();
+        int notGoneIndex = 0;
+        for (int i = 0; i < count; i++) {
+            View v = getChildAt(i);
+            if (child == v) {
+                return notGoneIndex;
+            }
+            if (v.getVisibility() != View.GONE) {
+                notGoneIndex++;
+            }
+        }
+        return -1;
     }
 
     public void setDismissView(DismissView dismissView) {
@@ -2556,12 +2620,16 @@ public class NotificationStackScrollLayout extends ViewGroup
         static final int ANIMATION_TYPE_VIEW_RESIZE = 12;
         static final int ANIMATION_TYPE_EVERYTHING = 13;
 
+        static final int DARK_ANIMATION_ORIGIN_INDEX_ABOVE = -1;
+        static final int DARK_ANIMATION_ORIGIN_INDEX_BELOW = -2;
+
         final long eventStartTime;
         final View changingView;
         final int animationType;
         final AnimationFilter filter;
         final long length;
         View viewAfterChangingView;
+        int darkAnimationOriginIndex;
 
         AnimationEvent(View view, int type) {
             this(view, type, LENGTHS[type]);
