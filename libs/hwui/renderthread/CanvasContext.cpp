@@ -60,6 +60,8 @@ CanvasContext::~CanvasContext() {
 
 void CanvasContext::destroy() {
     stopDrawing();
+    setSurface(NULL);
+    mEglManager.usePBufferSurface();
     freePrefetechedLayers();
     destroyHardwareResources();
     mAnimationContext->destroy();
@@ -67,7 +69,6 @@ void CanvasContext::destroy() {
         delete mCanvas;
         mCanvas = 0;
     }
-    setSurface(NULL);
 }
 
 void CanvasContext::setSurface(ANativeWindow* window) {
