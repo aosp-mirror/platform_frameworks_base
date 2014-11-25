@@ -30,7 +30,7 @@
 namespace android {
 
 struct IMediaHTTPService;
-struct MetaData;
+class MetaData;
 struct NuMediaExtractor;
 
 struct JMediaExtractor : public RefBase {
