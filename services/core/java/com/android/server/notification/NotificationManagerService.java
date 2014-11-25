@@ -190,8 +190,8 @@ public class NotificationManagerService extends SystemService {
 
     private boolean mDisableNotificationEffects;
     private int mCallState;
-    NotificationRecord mSoundNotification;
-    NotificationRecord mVibrateNotification;
+    private String mSoundNotificationKey;
+    private String mVibrateNotificationKey;
 
     private final ArraySet<ManagedServiceInfo> mListenersDisablingEffects = new ArraySet<>();
     private ComponentName mEffectsSuppressor;
@@ -210,8 +210,8 @@ public class NotificationManagerService extends SystemService {
             new ArrayMap<String, NotificationRecord>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
 
-    ArrayList<String> mLights = new ArrayList<String>();
-    NotificationRecord mLedNotification;
+    // The last key in this list owns the hardware.
+    ArrayList<String> mLights = new ArrayList<>();
 
     private AppOpsManager mAppOps;
 
@@ -568,7 +568,7 @@ public class NotificationManagerService extends SystemService {
             EventLogTags.writeNotificationPanelRevealed();
             synchronized (mNotificationList) {
                 // sound
-                mSoundNotification = null;
+                mSoundNotificationKey = null;
 
                 long identity = Binder.clearCallingIdentity();
                 try {
@@ -582,7 +582,7 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 // vibrate
-                mVibrateNotification = null;
+                mVibrateNotificationKey = null;
                 identity = Binder.clearCallingIdentity();
                 try {
                     mVibrator.cancel();
@@ -592,7 +592,6 @@ public class NotificationManagerService extends SystemService {
 
                 // light
                 mLights.clear();
-                mLedNotification = null;
                 updateLightsLocked();
             }
         }
@@ -1600,14 +1599,19 @@ public class NotificationManagerService extends SystemService {
                     if (N > 0) {
                         pw.println("  Lights List:");
                         for (int i=0; i<N; i++) {
-                            pw.println("    " + mLights.get(i));
+                            if (i == N - 1) {
+                                pw.print("  > ");
+                            } else {
+                                pw.print("    ");
+                            }
+                            pw.println(mLights.get(i));
                         }
                         pw.println("  ");
                     }
                     pw.println("  mUseAttentionLight=" + mUseAttentionLight);
                     pw.println("  mNotificationPulseEnabled=" + mNotificationPulseEnabled);
-                    pw.println("  mSoundNotification=" + mSoundNotification);
-                    pw.println("  mVibrateNotification=" + mVibrateNotification);
+                    pw.println("  mSoundNotificationKey=" + mSoundNotificationKey);
+                    pw.println("  mVibrateNotificationKey=" + mVibrateNotificationKey);
                     pw.println("  mDisableNotificationEffects=" + mDisableNotificationEffects);
                     pw.println("  mCallState=" + callStateToString(mCallState));
                     pw.println("  mSystemReady=" + mSystemReady);
@@ -1932,7 +1936,7 @@ public class NotificationManagerService extends SystemService {
                 boolean looping =
                         (notification.flags & Notification.FLAG_INSISTENT) != 0;
                 AudioAttributes audioAttributes = audioAttributesForNotification(notification);
-                mSoundNotification = record;
+                mSoundNotificationKey = record.getKey();
                 // do not play notifications if stream volume is 0 (typically because
                 // ringer mode is silent) or if there is a user of exclusive audio focus
                 if ((mAudioManager.getStreamVolume(
@@ -1975,7 +1979,7 @@ public class NotificationManagerService extends SystemService {
             if ((useDefaultVibrate || convertSoundToVibration || hasCustomVibrate)
                     && !(mAudioManager.getRingerModeInternal()
                             == AudioManager.RINGER_MODE_SILENT)) {
-                mVibrateNotification = record;
+                mVibrateNotificationKey = record.getKey();
 
                 if (useDefaultVibrate || convertSoundToVibration) {
                     // Escalate privileges so we can use the vibrator even if the
@@ -2006,9 +2010,6 @@ public class NotificationManagerService extends SystemService {
         // light
         // release the light
         boolean wasShowLights = mLights.remove(record.getKey());
-        if (mLedNotification != null && record.getKey().equals(mLedNotification.getKey())) {
-            mLedNotification = null;
-        }
         if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0 && aboveThreshold) {
             mLights.add(record.getKey());
             updateLightsLocked();
@@ -2332,9 +2333,11 @@ public class NotificationManagerService extends SystemService {
             mListeners.notifyRemovedLocked(r.sbn);
         }
 
+        final String canceledKey = r.getKey();
+
         // sound
-        if (mSoundNotification == r) {
-            mSoundNotification = null;
+        if (canceledKey.equals(mSoundNotificationKey)) {
+            mSoundNotificationKey = null;
             final long identity = Binder.clearCallingIdentity();
             try {
                 final IRingtonePlayer player = mAudioManager.getRingtonePlayer();
@@ -2348,8 +2351,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         // vibrate
-        if (mVibrateNotification == r) {
-            mVibrateNotification = null;
+        if (canceledKey.equals(mVibrateNotificationKey)) {
+            mVibrateNotificationKey = null;
             long identity = Binder.clearCallingIdentity();
             try {
                 mVibrator.cancel();
@@ -2360,10 +2363,7 @@ public class NotificationManagerService extends SystemService {
         }
 
         // light
-        mLights.remove(r.getKey());
-        if (mLedNotification == r) {
-            mLedNotification = null;
-        }
+        mLights.remove(canceledKey);
 
         // Record usage stats
         switch (reason) {
@@ -2390,7 +2390,7 @@ public class NotificationManagerService extends SystemService {
         // Save it for users of getHistoricalNotifications()
         mArchive.record(r.sbn);
 
-        EventLogTags.writeNotificationCanceled(r.getKey(), reason);
+        EventLogTags.writeNotificationCanceled(canceledKey, reason);
     }
 
     /**
@@ -2596,20 +2596,22 @@ public class NotificationManagerService extends SystemService {
     void updateLightsLocked()
     {
         // handle notification lights
-        if (mLedNotification == null) {
-            // get next notification, if any
-            int n = mLights.size();
-            if (n > 0) {
-                mLedNotification = mNotificationsByKey.get(mLights.get(n-1));
+        NotificationRecord ledNotification = null;
+        while (ledNotification == null && !mLights.isEmpty()) {
+            final String owner = mLights.get(mLights.size() - 1);
+            ledNotification = mNotificationsByKey.get(owner);
+            if (ledNotification == null) {
+                Slog.wtfStack(TAG, "LED Notification does not exist: " + owner);
+                mLights.remove(owner);
             }
         }
 
         // Don't flash while we are in a call or screen is on
-        if (mLedNotification == null || mInCall || mScreenOn) {
+        if (ledNotification == null || mInCall || mScreenOn) {
             mNotificationLight.turnOff();
             mStatusBar.notificationLightOff();
         } else {
-            final Notification ledno = mLedNotification.sbn.getNotification();
+            final Notification ledno = ledNotification.sbn.getNotification();
             int ledARGB = ledno.ledARGB;
             int ledOnMS = ledno.ledOnMS;
             int ledOffMS = ledno.ledOffMS;
