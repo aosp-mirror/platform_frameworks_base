@@ -105,8 +105,11 @@ void RenderNode::setStagingDisplayList(DisplayListData* data) {
  * display list. This function should remain in sync with the replay() function.
  */
 void RenderNode::output(uint32_t level) {
-    ALOGD("%*sStart display list (%p, %s, render=%d)", (level - 1) * 2, "", this,
-            getName(), isRenderable());
+    ALOGD("%*sStart display list (%p, %s%s%s%s)", (level - 1) * 2, "", this,
+            getName(),
+            (properties().hasShadow() ? ", casting shadow" : ""),
+            (isRenderable() ? "" : ", empty"),
+            (mLayer != NULL ? ", on HW Layer" : ""));
     ALOGD("%*s%s %d", level * 2, "", "Save",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
