@@ -857,6 +857,12 @@ public class WifiConfiguration implements Parcelable {
      */
     public HashMap<String, Integer>  linkedConfigurations;
 
+    /**
+     * @hide
+     * Duplicate Wifi Configuration
+     */
+    public boolean duplicateNetwork;
+
     public WifiConfiguration() {
         networkId = INVALID_NETWORK_ID;
         SSID = null;
@@ -882,6 +888,7 @@ public class WifiConfiguration implements Parcelable {
         ephemeral = false;
         validatedInternetAccess = false;
         mIpConfiguration = new IpConfiguration();
+        duplicateNetwork = false;
     }
 
     /**
@@ -1576,6 +1583,7 @@ public class WifiConfiguration implements Parcelable {
                     = source.autoJoinUseAggressiveJoinAttemptThreshold;
             autoJoinBailedDueToLowRssi = source.autoJoinBailedDueToLowRssi;
             dirty = source.dirty;
+            duplicateNetwork = source.duplicateNetwork;
             numNoInternetAccessReports = source.numNoInternetAccessReports;
         }
     }
