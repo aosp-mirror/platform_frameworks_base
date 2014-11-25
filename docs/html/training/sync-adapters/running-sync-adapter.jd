@@ -396,13 +396,11 @@ public class MainActivity extends FragmentActivity {
     // Account
     public static final String ACCOUNT = "default_account";
     // Sync interval constants
-    public static final long MILLISECONDS_PER_SECOND = 1000L;
     public static final long SECONDS_PER_MINUTE = 60L;
     public static final long SYNC_INTERVAL_IN_MINUTES = 60L;
     public static final long SYNC_INTERVAL =
             SYNC_INTERVAL_IN_MINUTES *
-            SECONDS_PER_MINUTE *
-            MILLISECONDS_PER_SECOND;
+            SECONDS_PER_MINUTE;
     // Global variables
     // A content resolver for accessing the provider
     ContentResolver mResolver;
@@ -419,7 +417,7 @@ public class MainActivity extends FragmentActivity {
         ContentResolver.addPeriodicSync(
                 ACCOUNT,
                 AUTHORITY,
-                null,
+                Bundle.EMPTY,
                 SYNC_INTERVAL);
         ...
     }
