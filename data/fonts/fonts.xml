@@ -277,6 +277,9 @@
     <family>
         <font weight="400" style="normal">NotoSansYi-Regular.ttf</font>
     </family>
+    <family>
+        <font weight="400" style="normal">Lohit-Odia.ttf</font>
+    </family>
     <family lang="zh-Hans">
         <font weight="400" style="normal">NotoSansHans-Regular.otf</font>
     </family>
