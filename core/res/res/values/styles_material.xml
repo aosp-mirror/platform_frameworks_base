@@ -815,6 +815,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Material.Toolbar.Button.Navigation" parent="Widget.Toolbar.Button.Navigation">
         <item name="background">?attr/selectableItemBackgroundBorderless</item>
+        <item name="paddingStart">@dimen/action_bar_navigation_padding_start_material</item>
     </style>
 
     <style name="Widget.Material.WebTextView" parent="Widget.WebTextView"/>
@@ -874,8 +875,8 @@ please see styles_device_defaults.xml.
         <item name="contentDescription">@string/action_menu_overflow_description</item>
         <item name="minWidth">@dimen/action_button_min_width_overflow_material</item>
         <item name="minHeight">@dimen/action_button_min_height_material</item>
-        <item name="paddingStart">6dp</item>
-        <item name="paddingEnd">10dp</item>
+        <item name="paddingStart">@dimen/action_bar_overflow_padding_start_material</item>
+        <item name="paddingEnd">@dimen/action_bar_overflow_padding_end_material</item>
     </style>
 
     <style name="Widget.Material.ActionBar.TabView" parent="Widget.ActionBar.TabView">
@@ -910,11 +911,12 @@ please see styles_device_defaults.xml.
         <item name="subtitleTextStyle">@style/TextAppearance.Material.Widget.ActionBar.Subtitle</item>
         <item name="progressBarStyle">?attr/progressBarStyleHorizontal</item>
         <item name="indeterminateProgressStyle">?attr/progressBarStyle</item>
-        <item name="progressBarPadding">32dip</item>
-        <item name="itemPadding">8dip</item>
+        <item name="progressBarPadding">32dp</item>
+        <item name="itemPadding">8dp</item>
         <item name="homeLayout">@layout/action_bar_home_material</item>
         <item name="gravity">center_vertical</item>
-        <item name="contentInsetStart">16dp</item>
+        <item name="contentInsetStart">@dimen/action_bar_content_inset_material</item>
+        <item name="contentInsetEnd">@dimen/action_bar_content_inset_material</item>
         <item name="elevation">8dp</item>
         <item name="popupTheme">?attr/actionBarPopupTheme</item>
     </style>
