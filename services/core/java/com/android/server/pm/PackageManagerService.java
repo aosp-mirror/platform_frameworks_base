@@ -12746,23 +12746,17 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 pw.println();
                 pw.println("Package warning messages:");
-                final File fname = getSettingsProblemFile();
-                FileInputStream in = null;
+                BufferedReader in = null;
+                String line = null;
                 try {
-                    in = new FileInputStream(fname);
-                    final int avail = in.available();
-                    final byte[] data = new byte[avail];
-                    in.read(data);
-                    pw.print(new String(data));
-                } catch (FileNotFoundException e) {
-                } catch (IOException e) {
-                } finally {
-                    if (in != null) {
-                        try {
-                            in.close();
-                        } catch (IOException e) {
-                        }
+                    in = new BufferedReader(new FileReader(getSettingsProblemFile()));
+                    while ((line = in.readLine()) != null) {
+                        if (line.contains("ignored: updated version")) continue;
+                        pw.println(line);
                     }
+                } catch (IOException ignored) {
+                } finally {
+                    IoUtils.closeQuietly(in);
                 }
             }
 
@@ -12772,6 +12766,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 try {
                     in = new BufferedReader(new FileReader(getSettingsProblemFile()));
                     while ((line = in.readLine()) != null) {
+                        if (line.contains("ignored: updated version")) continue;
                         pw.print("msg,");
                         pw.println(line);
                     }
