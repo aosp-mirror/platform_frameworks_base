@@ -470,6 +470,49 @@ public class AudioManager {
     public static final int FLAG_SHOW_UI_WARNINGS = 1 << 10;
 
     /**
+     * Adjusting the volume down from vibrated was prevented, display a hint in the UI.
+     * @hide
+     */
+    public static final int FLAG_SHOW_VIBRATE_HINT = 1 << 11;
+
+    private static final String[] FLAG_NAMES = {
+        "FLAG_SHOW_UI",
+        "FLAG_ALLOW_RINGER_MODES",
+        "FLAG_PLAY_SOUND",
+        "FLAG_REMOVE_SOUND_AND_VIBRATE",
+        "FLAG_VIBRATE",
+        "FLAG_FIXED_VOLUME",
+        "FLAG_BLUETOOTH_ABS_VOLUME",
+        "FLAG_SHOW_SILENT_HINT",
+        "FLAG_HDMI_SYSTEM_AUDIO_VOLUME",
+        "FLAG_ACTIVE_MEDIA_ONLY",
+        "FLAG_SHOW_UI_WARNINGS",
+        "FLAG_SHOW_VIBRATE_HINT",
+    };
+
+    /** @hide */
+    public static String flagsToString(int flags) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < FLAG_NAMES.length; i++) {
+            final int flag = 1 << i;
+            if ((flags & flag) != 0) {
+                if (sb.length() > 0) {
+                    sb.append(',');
+                }
+                sb.append(FLAG_NAMES[i]);
+                flags &= ~flag;
+            }
+        }
+        if (flags != 0) {
+            if (sb.length() > 0) {
+                sb.append(',');
+            }
+            sb.append(flags);
+        }
+        return sb.toString();
+    }
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
@@ -857,7 +900,7 @@ public class AudioManager {
     public int getRingerMode() {
         IAudioService service = getService();
         try {
-            return service.getRingerMode();
+            return service.getRingerModeExternal();
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in getRingerMode", e);
             return RINGER_MODE_NORMAL;
@@ -977,21 +1020,12 @@ public class AudioManager {
      * @see #isVolumeFixed()
      */
     public void setRingerMode(int ringerMode) {
-        setRingerMode(ringerMode, true /*checkZen*/);
-    }
-
-    /**
-     * @see #setRingerMode(int)
-     * @param checkZen  Update zen mode if necessary to compensate.
-     * @hide
-     */
-    public void setRingerMode(int ringerMode, boolean checkZen) {
         if (!isValidRingerMode(ringerMode)) {
             return;
         }
         IAudioService service = getService();
         try {
-            service.setRingerMode(ringerMode, checkZen);
+            service.setRingerModeExternal(ringerMode, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setRingerMode", e);
         }
@@ -3304,6 +3338,31 @@ public class AudioManager {
             getService().disableSafeMediaVolume();
         } catch (RemoteException e) {
             Log.w(TAG, "Error disabling safe media volume", e);
+        }
+    }
+
+    /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public void setRingerModeInternal(int ringerMode) {
+        try {
+            getService().setRingerModeInternal(ringerMode, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling setRingerModeInternal", e);
+        }
+    }
+
+    /**
+     * Only useful for volume controllers.
+     * @hide
+     */
+    public int getRingerModeInternal() {
+        try {
+            return getService().getRingerModeInternal();
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling getRingerModeInternal", e);
+            return RINGER_MODE_NORMAL;
         }
     }
 

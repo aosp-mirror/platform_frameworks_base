@@ -847,7 +847,7 @@ public class NotificationManagerService extends SystemService {
         mRankingHelper = new RankingHelper(getContext(),
                 new RankingWorkerHandler(mRankingThread.getLooper()),
                 extractorNames);
-        mZenModeHelper = new ZenModeHelper(getContext(), mHandler);
+        mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper());
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
             @Override
             public void onConfigChanged() {
@@ -970,7 +970,7 @@ public class NotificationManagerService extends SystemService {
 
             // Grab our optional AudioService
             mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
-            mZenModeHelper.setAudioManager(mAudioManager);
+            mZenModeHelper.onSystemReady();
         } else if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
             // This observer will force an update when observe is called, causing us to
             // bind to listener services.
@@ -1412,8 +1412,8 @@ public class NotificationManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationList) {
-                    mListeners.checkServiceTokenLocked(token);
-                    mZenModeHelper.requestFromListener(interruptionFilter);
+                    final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    mZenModeHelper.requestFromListener(info.component, interruptionFilter);
                     updateInterruptionFilterLocked();
                 }
             } finally {
@@ -1965,7 +1965,7 @@ public class NotificationManagerService extends SystemService {
             final boolean convertSoundToVibration =
                        !hasCustomVibrate
                     && hasValidSound
-                    && (mAudioManager.getRingerMode()
+                    && (mAudioManager.getRingerModeInternal()
                                == AudioManager.RINGER_MODE_VIBRATE);
 
             // The DEFAULT_VIBRATE flag trumps any custom vibration AND the fallback.
@@ -1973,7 +1973,7 @@ public class NotificationManagerService extends SystemService {
                     (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
 
             if ((useDefaultVibrate || convertSoundToVibration || hasCustomVibrate)
-                    && !(mAudioManager.getRingerMode()
+                    && !(mAudioManager.getRingerModeInternal()
                             == AudioManager.RINGER_MODE_SILENT)) {
                 mVibrateNotification = record;
 
