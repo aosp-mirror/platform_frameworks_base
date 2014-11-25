@@ -106,12 +106,26 @@ public final class PageContentRepository {
         mRenderer.close(callback);
     }
 
-    public void destroy() {
+    public void destroy(final Runnable callback) {
+        if (mState == STATE_OPENED) {
+            close(new Runnable() {
+                @Override
+                public void run() {
+                    destroy(callback);
+                }
+            });
+            return;
+        }
+
         mState = STATE_DESTROYED;
         if (DEBUG) {
             Log.i(LOG_TAG, "STATE_DESTROYED");
         }
         mRenderer.destroy();
+
+        if (callback != null) {
+            callback.run();
+        }
     }
 
     public void startPreload(int firstShownPage, int lastShownPage) {
@@ -158,7 +172,7 @@ public final class PageContentRepository {
         try {
             if (mState != STATE_DESTROYED) {
                 mCloseGuard.warnIfOpen();
-                destroy();
+                destroy(null);
             }
         } finally {
             super.finalize();
@@ -455,6 +469,10 @@ public final class PageContentRepository {
         public void close(final Runnable callback) {
             cancelAllRendering();
 
+            if (mOpenTask != null) {
+                mOpenTask.cancel();
+            }
+
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected void onPreExecute() {
@@ -490,10 +508,6 @@ public final class PageContentRepository {
             if (mBoundToService) {
                 mBoundToService = false;
                 mContext.unbindService(AsyncRenderer.this);
-            }
-
-            if (mOpenTask != null) {
-                mOpenTask.cancel();
             }
 
             mPageContentCache.invalidate();
