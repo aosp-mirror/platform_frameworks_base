@@ -91,11 +91,6 @@ public abstract class BatteryStats implements Parcelable {
      public static final int WIFI_MULTICAST_ENABLED = 7;
 
     /**
-     * A constant indicating an audio turn on timer
-     */
-    public static final int AUDIO_TURNED_ON = 7;
-
-    /**
      * A constant indicating a video turn on timer
      */
     public static final int VIDEO_TURNED_ON = 8;
@@ -129,6 +124,11 @@ public abstract class BatteryStats implements Parcelable {
      * A constant indicating a job timer
      */
     public static final int JOB = 14;
+
+    /**
+     * A constant indicating an audio turn on timer
+     */
+    public static final int AUDIO_TURNED_ON = 15;
 
     /**
      * Include all of the data in the stats, including previously saved data.
