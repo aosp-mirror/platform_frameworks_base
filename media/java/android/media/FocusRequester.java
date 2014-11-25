@@ -83,6 +83,10 @@ class FocusRequester {
         }
     }
 
+    boolean isLockedFocusOwner() {
+        return ((mGrantFlags & AudioManager.AUDIOFOCUS_FLAG_LOCK) != 0);
+    }
+
     boolean hasSameBinder(IBinder ib) {
         return (mSourceRef != null) && mSourceRef.equals(ib);
     }
@@ -99,6 +103,9 @@ class FocusRequester {
         return mCallingUid == uid;
     }
 
+    String getClientId() {
+        return mClientId;
+    }
 
     int getGainRequest() {
         return mFocusGainRequest;
@@ -144,12 +151,20 @@ class FocusRequester {
         return focusChangeToString(mFocusLossReceived);
     }
 
+    private static String flagsToString(int flags) {
+        String msg = new String();
+        if ((flags & AudioManager.AUDIOFOCUS_FLAG_DELAY_OK) != 0) { msg += "DELAY_OK"; }
+        if (!msg.isEmpty()) { msg += "|"; }
+        if ((flags & AudioManager.AUDIOFOCUS_FLAG_LOCK) != 0)     { msg += "LOCK"; }
+        return msg;
+    }
+
     void dump(PrintWriter pw) {
         pw.println("  source:" + mSourceRef
                 + " -- pack: " + mPackageName
                 + " -- client: " + mClientId
                 + " -- gain: " + focusGainToString()
-                + " -- grant: " + mGrantFlags
+                + " -- flags: " + flagsToString(mGrantFlags)
                 + " -- loss: " + focusLossToString()
                 + " -- uid: " + mCallingUid
                 + " -- attr: " + mAttributes);
