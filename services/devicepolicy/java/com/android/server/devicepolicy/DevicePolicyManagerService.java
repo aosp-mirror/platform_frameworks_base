@@ -78,6 +78,7 @@ import android.security.Credentials;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -2576,12 +2577,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return strictestAdmin;
     }
 
-    public boolean resetPassword(String password, int flags, int userHandle) {
+    public boolean resetPassword(String passwordOrNull, int flags, int userHandle) {
         if (!mHasFeature) {
             return false;
         }
         enforceCrossUserPermission(userHandle);
         enforceNotManagedProfile(userHandle, "reset the password");
+
+        String password = passwordOrNull != null ? passwordOrNull : "";
 
         int quality;
         synchronized (this) {
@@ -2686,7 +2689,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             LockPatternUtils utils = new LockPatternUtils(mContext);
-            utils.saveLockPassword(password, quality, false, userHandle);
+            if (!TextUtils.isEmpty(password)) {
+                utils.saveLockPassword(password, quality, false, userHandle);
+            } else {
+                utils.clearLock(false, userHandle);
+            }
             boolean requireEntry = (flags & DevicePolicyManager.RESET_PASSWORD_REQUIRE_ENTRY) != 0;
             if (requireEntry) {
                 utils.requireCredentialEntry(UserHandle.USER_ALL);
