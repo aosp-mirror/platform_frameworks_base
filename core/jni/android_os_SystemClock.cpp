@@ -60,18 +60,11 @@ static jlong android_os_SystemClock_elapsedRealtime(JNIEnv* env,
 static jlong android_os_SystemClock_currentThreadTimeMillis(JNIEnv* env,
         jobject clazz)
 {
-#if defined(HAVE_POSIX_CLOCKS)
     struct timespec tm;
 
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tm);
 
     return tm.tv_sec * 1000LL + tm.tv_nsec / 1000000;
-#else
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-    return tv.tv_sec * 1000LL + tv.tv_usec / 1000;
-#endif
 }
 
 /*
@@ -80,18 +73,11 @@ static jlong android_os_SystemClock_currentThreadTimeMillis(JNIEnv* env,
 static jlong android_os_SystemClock_currentThreadTimeMicro(JNIEnv* env,
         jobject clazz)
 {
-#if defined(HAVE_POSIX_CLOCKS)
     struct timespec tm;
 
     clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tm);
 
     return tm.tv_sec * 1000000LL + tm.tv_nsec / 1000;
-#else
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-    return tv.tv_sec * 1000000LL + tv.tv_nsec / 1000;
-#endif
 }
 
 /*
