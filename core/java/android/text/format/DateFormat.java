@@ -17,6 +17,7 @@
 package android.text.format;
 
 import android.content.Context;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -166,8 +167,20 @@ public class DateFormat {
      * @return true if 24 hour time format is selected, false otherwise.
      */
     public static boolean is24HourFormat(Context context) {
-        String value = Settings.System.getString(context.getContentResolver(),
-                Settings.System.TIME_12_24);
+        return is24HourFormat(context, UserHandle.myUserId());
+    }
+
+    /**
+     * Returns true if user preference with the given user handle is set to 24-hour format.
+     * @param context the context to use for the content resolver
+     * @param userHandle the user handle of the user to query.
+     * @return true if 24 hour time format is selected, false otherwise.
+     *
+     * @hide
+     */
+    public static boolean is24HourFormat(Context context, int userHandle) {
+        String value = Settings.System.getStringForUser(context.getContentResolver(),
+                Settings.System.TIME_12_24, userHandle);
 
         if (value == null) {
             Locale locale = context.getResources().getConfiguration().locale;
@@ -179,7 +192,7 @@ public class DateFormat {
             }
 
             java.text.DateFormat natural =
-                java.text.DateFormat.getTimeInstance(java.text.DateFormat.LONG, locale);
+                    java.text.DateFormat.getTimeInstance(java.text.DateFormat.LONG, locale);
 
             if (natural instanceof SimpleDateFormat) {
                 SimpleDateFormat sdf = (SimpleDateFormat) natural;
@@ -253,8 +266,19 @@ public class DateFormat {
      * @hide
      */
     public static String getTimeFormatString(Context context) {
+        return getTimeFormatString(context, UserHandle.myUserId());
+    }
+
+    /**
+     * Returns a String pattern that can be used to format the time according
+     * to the current locale and the user's 12-/24-hour clock preference.
+     * @param context the application context
+     * @param userHandle the user handle of the user to query the format for
+     * @hide
+     */
+    public static String getTimeFormatString(Context context, int userHandle) {
         LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
-        return is24HourFormat(context) ? d.timeFormat_Hm : d.timeFormat_hm;
+        return is24HourFormat(context, userHandle) ? d.timeFormat_Hm : d.timeFormat_hm;
     }
 
     /**

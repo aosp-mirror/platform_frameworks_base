@@ -18,6 +18,7 @@ package com.android.systemui.volume;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -218,7 +219,7 @@ public class ZenModePanel extends LinearLayout {
             } else {
                 mBucketIndex = DEFAULT_BUCKET_INDEX;
                 mTimeCondition = ZenModeConfig.toTimeCondition(mContext,
-                        MINUTE_BUCKETS[mBucketIndex]);
+                        MINUTE_BUCKETS[mBucketIndex], ActivityManager.getCurrentUser());
             }
             if (DEBUG) Log.d(mTag, "Initial bucket index: " + mBucketIndex);
             mConditions = null; // reset conditions
@@ -341,7 +342,7 @@ public class ZenModePanel extends LinearLayout {
         final long span = time - now;
         if (span <= 0 || span > MAX_BUCKET_MINUTES * MINUTES_MS) return null;
         return ZenModeConfig.toTimeCondition(mContext,
-                time, Math.round(span / (float) MINUTES_MS), now);
+                time, Math.round(span / (float) MINUTES_MS), now, ActivityManager.getCurrentUser());
     }
 
     private void handleUpdateConditions(Condition[] conditions) {
@@ -397,7 +398,8 @@ public class ZenModePanel extends LinearLayout {
         if (favoriteIndex == -1) {
             getConditionTagAt(FOREVER_CONDITION_INDEX).rb.setChecked(true);
         } else {
-            mTimeCondition = ZenModeConfig.toTimeCondition(mContext, MINUTE_BUCKETS[favoriteIndex]);
+            mTimeCondition = ZenModeConfig.toTimeCondition(mContext,
+                    MINUTE_BUCKETS[favoriteIndex], ActivityManager.getCurrentUser());
             mBucketIndex = favoriteIndex;
             bind(mTimeCondition, mZenConditions.getChildAt(TIME_CONDITION_INDEX));
             getConditionTagAt(TIME_CONDITION_INDEX).rb.setChecked(true);
@@ -511,7 +513,7 @@ public class ZenModePanel extends LinearLayout {
                 final long span = time - System.currentTimeMillis();
                 button1.setEnabled(span > MIN_BUCKET_MINUTES * MINUTES_MS);
                 final Condition maxCondition = ZenModeConfig.toTimeCondition(mContext,
-                        MAX_BUCKET_MINUTES);
+                        MAX_BUCKET_MINUTES, ActivityManager.getCurrentUser());
                 button2.setEnabled(!Objects.equals(condition.summary, maxCondition.summary));
             }
 
@@ -562,20 +564,20 @@ public class ZenModePanel extends LinearLayout {
                 if (up && bucketTime > time || !up && bucketTime < time) {
                     mBucketIndex = j;
                     newCondition = ZenModeConfig.toTimeCondition(mContext,
-                            bucketTime, bucketMinutes, now);
+                            bucketTime, bucketMinutes, now, ActivityManager.getCurrentUser());
                     break;
                 }
             }
             if (newCondition == null) {
                 mBucketIndex = DEFAULT_BUCKET_INDEX;
                 newCondition = ZenModeConfig.toTimeCondition(mContext,
-                        MINUTE_BUCKETS[mBucketIndex]);
+                        MINUTE_BUCKETS[mBucketIndex], ActivityManager.getCurrentUser());
             }
         } else {
             // on a known index, simply increment or decrement
             mBucketIndex = Math.max(0, Math.min(N - 1, mBucketIndex + (up ? 1 : -1)));
             newCondition = ZenModeConfig.toTimeCondition(mContext,
-                    MINUTE_BUCKETS[mBucketIndex]);
+                    MINUTE_BUCKETS[mBucketIndex], ActivityManager.getCurrentUser());
         }
         mTimeCondition = newCondition;
         bind(mTimeCondition, row);

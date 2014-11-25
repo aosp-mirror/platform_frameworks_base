@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
@@ -42,7 +44,9 @@ public class SplitClockView extends LinearLayout {
             final String action = intent.getAction();
             if (Intent.ACTION_TIME_CHANGED.equals(action)
                     || Intent.ACTION_TIMEZONE_CHANGED.equals(action)
-                    || Intent.ACTION_LOCALE_CHANGED.equals(action)) {
+                    || Intent.ACTION_LOCALE_CHANGED.equals(action)
+                    || Intent.ACTION_CONFIGURATION_CHANGED.equals(action)
+                    || Intent.ACTION_USER_SWITCHED.equals(action)) {
                 updatePatterns();
             }
         }
@@ -57,6 +61,8 @@ public class SplitClockView extends LinearLayout {
         super.onFinishInflate();
         mTimeView = (TextClock) findViewById(R.id.time_view);
         mAmPmView = (TextClock) findViewById(R.id.am_pm_view);
+        mTimeView.setShowCurrentUserTime(true);
+        mAmPmView.setShowCurrentUserTime(true);
     }
 
     @Override
@@ -67,7 +73,9 @@ public class SplitClockView extends LinearLayout {
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(Intent.ACTION_LOCALE_CHANGED);
-        getContext().registerReceiver(mIntentReceiver, filter, null, null);
+        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        getContext().registerReceiverAsUser(mIntentReceiver, UserHandle.ALL, filter, null, null);
 
         updatePatterns();
     }
@@ -79,7 +87,8 @@ public class SplitClockView extends LinearLayout {
     }
 
     private void updatePatterns() {
-        String formatString = DateFormat.getTimeFormatString(getContext());
+        String formatString = DateFormat.getTimeFormatString(getContext(),
+                ActivityManager.getCurrentUser());
         int index = getAmPmPartEndIndex(formatString);
         String timeString;
         String amPmString;
