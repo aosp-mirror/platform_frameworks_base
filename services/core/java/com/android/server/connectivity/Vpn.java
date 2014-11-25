@@ -46,6 +46,7 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
@@ -580,7 +581,13 @@ public class Vpn {
     }
 
     private boolean isRunningLocked() {
-        return mVpnUsers != null;
+        return mNetworkAgent != null && mInterface != null;
+    }
+
+    // Returns true if the VPN has been established and the calling UID is its owner. Used to check
+    // that a call to mutate VPN state is admissible.
+    private boolean isCallerEstablishedOwnerLocked() {
+        return isRunningLocked() && Binder.getCallingUid() == mOwnerUID;
     }
 
     // Note: Return type guarantees results are deduped and sorted, which callers require.
@@ -595,7 +602,7 @@ public class Vpn {
 
     // Note: This function adds to mVpnUsers but does not publish list to NetworkAgent.
     private void addVpnUserLocked(int userHandle) {
-        if (!isRunningLocked()) {
+        if (mVpnUsers == null) {
             throw new IllegalStateException("VPN is not active");
         }
 
@@ -647,7 +654,7 @@ public class Vpn {
     }
 
     private void removeVpnUserLocked(int userHandle) {
-        if (!isRunningLocked()) {
+        if (mVpnUsers == null) {
             throw new IllegalStateException("VPN is not active");
         }
         final List<UidRange> ranges = uidRangesForUser(userHandle);
@@ -767,25 +774,59 @@ public class Vpn {
     }
 
     public synchronized boolean addAddress(String address, int prefixLength) {
-        if (Binder.getCallingUid() != mOwnerUID || mInterface == null || mNetworkAgent == null) {
+        if (!isCallerEstablishedOwnerLocked()) {
             return false;
         }
         boolean success = jniAddAddress(mInterface, address, prefixLength);
-        if (mNetworkAgent != null) {
-            mNetworkAgent.sendLinkProperties(makeLinkProperties());
-        }
+        mNetworkAgent.sendLinkProperties(makeLinkProperties());
         return success;
     }
 
     public synchronized boolean removeAddress(String address, int prefixLength) {
-        if (Binder.getCallingUid() != mOwnerUID || mInterface == null || mNetworkAgent == null) {
+        if (!isCallerEstablishedOwnerLocked()) {
             return false;
         }
         boolean success = jniDelAddress(mInterface, address, prefixLength);
-        if (mNetworkAgent != null) {
-            mNetworkAgent.sendLinkProperties(makeLinkProperties());
-        }
+        mNetworkAgent.sendLinkProperties(makeLinkProperties());
         return success;
+    }
+
+    public synchronized boolean setUnderlyingNetworks(Network[] networks) {
+        if (!isCallerEstablishedOwnerLocked()) {
+            return false;
+        }
+        if (networks == null) {
+            mConfig.underlyingNetworks = null;
+        } else {
+            mConfig.underlyingNetworks = new Network[networks.length];
+            for (int i = 0; i < networks.length; ++i) {
+                if (networks[i] == null) {
+                    mConfig.underlyingNetworks[i] = null;
+                } else {
+                    mConfig.underlyingNetworks[i] = new Network(networks[i].netId);
+                }
+            }
+        }
+        return true;
+    }
+
+    public synchronized Network[] getUnderlyingNetworks() {
+        if (!isRunningLocked()) {
+            return null;
+        }
+        return mConfig.underlyingNetworks;
+    }
+
+    public synchronized boolean appliesToUid(int uid) {
+        if (!isRunningLocked()) {
+            return false;
+        }
+        for (UidRange uidRange : mVpnUsers) {
+            if (uidRange.start <= uid && uid <= uidRange.stop) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private native int jniCreate(int mtu);

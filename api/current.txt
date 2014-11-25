@@ -17686,6 +17686,7 @@ package android.net {
     method public boolean protect(int);
     method public boolean protect(java.net.Socket);
     method public boolean protect(java.net.DatagramSocket);
+    method public boolean setUnderlyingNetworks(android.net.Network[]);
     field public static final java.lang.String SERVICE_INTERFACE = "android.net.VpnService";
   }
 
@@ -17707,6 +17708,7 @@ package android.net {
     method public android.net.VpnService.Builder setConfigureIntent(android.app.PendingIntent);
     method public android.net.VpnService.Builder setMtu(int);
     method public android.net.VpnService.Builder setSession(java.lang.String);
+    method public android.net.VpnService.Builder setUnderlyingNetworks(android.net.Network[]);
   }
 
 }
