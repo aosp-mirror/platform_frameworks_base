@@ -407,6 +407,7 @@ public final class SystemServer {
         ConsumerIrService consumerIr = null;
         AudioService audioService = null;
         MmsServiceBroker mmsService = null;
+        EntropyMixer entropyMixer = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
@@ -430,7 +431,7 @@ public final class SystemServer {
             ServiceManager.addService("telephony.registry", telephonyRegistry);
 
             Slog.i(TAG, "Entropy Mixer");
-            ServiceManager.addService("entropy", new EntropyMixer(context));
+            entropyMixer = new EntropyMixer(context);
 
             mContentResolver = context.getContentResolver();
 
