@@ -2448,6 +2448,7 @@ public class AudioManager {
      *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
      * @throws IllegalArgumentException
      */
+    @SystemApi
     public int requestAudioFocus(OnAudioFocusChangeListener l,
             @NonNull AudioAttributes requestAttributes,
             int durationHint,
@@ -2842,17 +2843,17 @@ public class AudioManager {
 
     /**
      * @hide
-     * CANDIDATE FOR PUBLIC API
      * Register the given {@link AudioPolicy}.
      * This call is synchronous and blocks until the registration process successfully completed
      * or failed to complete.
-     * @param policy the {@link AudioPolicy} to register.
+     * @param policy the non-null {@link AudioPolicy} to register.
      * @return {@link #ERROR} if there was an error communicating with the registration service
      *    or if the user doesn't have the required
      *    {@link android.Manifest.permission#MODIFY_AUDIO_ROUTING} permission,
      *    {@link #SUCCESS} otherwise.
      */
-    public int registerAudioPolicy(AudioPolicy policy) {
+    @SystemApi
+    public int registerAudioPolicy(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");
         }
@@ -2874,16 +2875,17 @@ public class AudioManager {
 
     /**
      * @hide
-     * CANDIDATE FOR PUBLIC API
-     * @param policy the {@link AudioPolicy} to unregister.
+     * @param policy the non-null {@link AudioPolicy} to unregister.
      */
-    public void unregisterAudioPolicyAsync(AudioPolicy policy) {
+    @SystemApi
+    public void unregisterAudioPolicyAsync(@NonNull AudioPolicy policy) {
         if (policy == null) {
             throw new IllegalArgumentException("Illegal null AudioPolicy argument");
         }
         IAudioService service = getService();
         try {
             service.unregisterAudioPolicyAsync(policy.token());
+            policy.setRegistration(null);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterAudioPolicyAsync()", e);
         }

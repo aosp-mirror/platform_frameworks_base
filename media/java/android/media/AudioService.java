@@ -5520,6 +5520,8 @@ public class AudioService extends IAudioService.Stub {
         pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
         pw.print("  mMcc="); pw.println(mMcc);
         pw.print("  mHasVibrator="); pw.println(mHasVibrator);
+
+        dumpAudioPolicies(pw);
     }
 
     private static String safeMediaVolumeStateToString(Integer state) {
@@ -5789,6 +5791,10 @@ public class AudioService extends IAudioService.Stub {
         }
         synchronized (mAudioPolicies) {
             try {
+                if (mAudioPolicies.containsKey(cb)) {
+                    Slog.e(TAG, "Cannot re-register policy");
+                    return null;
+                }
                 AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, cb);
                 cb.linkToDeath(app, 0/*flags*/);
                 regId = app.connectMixes();
@@ -5809,6 +5815,7 @@ public class AudioService extends IAudioService.Stub {
             if (app == null) {
                 Slog.w(TAG, "Trying to unregister unknown audio policy for pid "
                         + Binder.getCallingPid() + " / uid " + Binder.getCallingUid());
+                return;
             } else {
                 cb.unlinkToDeath(app, 0/*flags*/);
             }
@@ -5817,12 +5824,21 @@ public class AudioService extends IAudioService.Stub {
         // TODO implement clearing mix attribute matching info in native audio policy
     }
 
+    private void dumpAudioPolicies(PrintWriter pw) {
+        pw.println("\nAudio policies:");
+        synchronized (mAudioPolicies) {
+            for(AudioPolicyProxy policy : mAudioPolicies.values()) {
+                pw.println(policy.toLogFriendlyString());
+            }
+        }
+    }
+
     //======================
     // Audio policy proxy
     //======================
     /**
-     * This internal class inherits from AudioPolicyConfig which contains all the mixes and
-     * their configurations.
+     * This internal class inherits from AudioPolicyConfig, each instance contains all the
+     * mixes of an AudioPolicy and their configurations.
      */
     public class AudioPolicyProxy extends AudioPolicyConfig implements IBinder.DeathRecipient {
         private static final String TAG = "AudioPolicyProxy";
@@ -5830,7 +5846,7 @@ public class AudioService extends IAudioService.Stub {
         IBinder mToken;
         AudioPolicyProxy(AudioPolicyConfig config, IBinder token) {
             super(config);
-            setRegistration(new String(config.toString() + ":ap:" + mAudioPolicyCounter++));
+            setRegistration(new String(config.hashCode() + ":ap:" + mAudioPolicyCounter++));
             mToken = token;
         }
 
@@ -5844,7 +5860,7 @@ public class AudioService extends IAudioService.Stub {
 
         String connectMixes() {
             updateMixes(AudioSystem.DEVICE_STATE_AVAILABLE);
-            return mRegistrationId;
+            return getRegistration();
         }
 
         void disconnectMixes() {
@@ -5855,8 +5871,9 @@ public class AudioService extends IAudioService.Stub {
             for (AudioMix mix : mMixes) {
                 // TODO implement sending the mix attribute matching info to native audio policy
                 if (DEBUG_AP) {
-                    Log.v(TAG, "AudioPolicyProxy connect mix state=" + connectionState
-                            + " addr=" + mix.getRegistration()); }
+                    Log.v(TAG, "AudioPolicyProxy mix new connection state=" + connectionState
+                            + " addr=" + mix.getRegistration());
+                }
                 AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_REMOTE_SUBMIX,
                         connectionState,
                         mix.getRegistration());
