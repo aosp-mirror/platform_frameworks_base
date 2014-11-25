@@ -78,7 +78,7 @@ page.type=about
               <div class="landing-section-header">
                 <div class="landing-h1 hero">Android Auto</div>
                 <div class="landing-subhead hero">Audio entertainment and
-                  messaging services in the car</div>
+                  messaging services in the car.</div>
                 <div class="landing-hero-description">
                   <p style="width:450px">Let drivers listen to and control
                     content in your music and other audio apps. Allow drivers to
@@ -86,11 +86,14 @@ page.type=about
                     car's controls and screen.</p>
                 </div>
 
-              <div class="landing-body">
+              <div class="landing-body" style="margin-top:40px;">
                 <a href="{@docRoot}training/auto/index.html"
-                   class="landing-button landing-primary"
-                   style="margin-top:40px;">
+                   class="landing-button landing-primary">
                   Get Started
+                </a>
+                <a href="https://www.youtube.com/watch?v=ctiaVxgclsg" class="video-shadowbox-button white"
+                    style="margin-left:40px">
+                  Watch the Intro Video
                 </a>
               </div>
             </div>
@@ -110,7 +113,7 @@ page.type=about
 
     <div class="landing-section landing-gray-background" id="android-in-car">
       <div class="wrap">
-        <div class="landing-section-h1">
+        <div class="landing-section-header">
           <div class="landing-h1">Extending Android to Cars</div>
           <div class="landing-subhead">Android Auto brings the Android
               platform into the car with a user interface that's optimized for driving.</div>
@@ -131,10 +134,6 @@ page.type=about
               </div>
             </div>
           </div>
-          <p>Before you start building, check out the
-              <a href="http://youtu.be/ctiaVxgclsg" class="external-link">Introduction to Android Auto</a> video to understand how
-              users see and interact with your app in Android Auto.
-          </p>
         </div>
       </div> <!-- end .wrap -->
     </div> <!-- end .landing-section -->
