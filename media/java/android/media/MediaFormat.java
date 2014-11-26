@@ -398,7 +398,7 @@ public final class MediaFormat {
      * The associated value is an integer.  These values are device and codec specific,
      * but lower values generally result in faster and/or less power-hungry encoding.
      *
-     * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#getComplexityRange
+     * @see MediaCodecInfo.EncoderCapabilities#getComplexityRange()
      */
     public static final String KEY_COMPLEXITY = "complexity";
 
@@ -411,7 +411,7 @@ public final class MediaFormat {
      *
      * @hide
      *
-     * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#getQualityRange
+     * @see MediaCodecInfo.EncoderCapabilities#getQualityRange()
      */
     public static final String KEY_QUALITY = "quality";
 
@@ -428,7 +428,7 @@ public final class MediaFormat {
      * A key describing the desired bitrate mode to be used by an encoder.
      * Constants are declared in {@link MediaCodecInfo.CodecCapabilities}.
      *
-     * @see MediaCodecInfo.CodecCapabilities.EncoderCapabilities#isBitrateModeSupported
+     * @see MediaCodecInfo.EncoderCapabilities#isBitrateModeSupported(int)
      */
     public static final String KEY_BITRATE_MODE = "bitrate-mode";
 

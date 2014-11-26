@@ -126,8 +126,7 @@ public final class MediaProjection {
      * invoked, or null if the callback should be invoked on the calling
      * thread's main {@link android.os.Looper}.
      *
-     * @see android.hardware.display.DisplayManager#createVirtualDisplay(
-     * String, int, int, int, int, Surface, VirtualDisplay.Callback, Handler)
+     * @see android.hardware.display.VirtualDisplay
      */
     public VirtualDisplay createVirtualDisplay(@NonNull String name,
             int width, int height, int dpi, int flags, @Nullable Surface surface,
