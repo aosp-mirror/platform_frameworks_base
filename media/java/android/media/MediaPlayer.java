@@ -1640,7 +1640,7 @@ public class MediaPlayer implements SubtitleController.Listener
      * Attaches an auxiliary effect to the player. A typical auxiliary effect is a reverberation
      * effect which can be applied on any sound source that directs a certain amount of its
      * energy to this effect. This amount is defined by setAuxEffectSendLevel().
-     * {@see #setAuxEffectSendLevel(float)}.
+     * See {@link #setAuxEffectSendLevel(float)}.
      * <p>After creating an auxiliary effect (e.g.
      * {@link android.media.audiofx.EnvironmentalReverb}), retrieve its ID with
      * {@link android.media.audiofx.AudioEffect#getId()} and use it when calling this method
@@ -1654,8 +1654,8 @@ public class MediaPlayer implements SubtitleController.Listener
 
 
     /**
-     * Sets the send level of the player to the attached auxiliary effect
-     * {@see #attachAuxEffect(int)}. The level value range is 0 to 1.0.
+     * Sets the send level of the player to the attached auxiliary effect.
+     * See {@link #attachAuxEffect(int)}. The level value range is 0 to 1.0.
      * <p>By default the send level is 0, so even if an effect is attached to the player
      * this method must be called for the effect to be applied.
      * <p>Note that the passed level value is a raw scalar. UI controls should be scaled
@@ -2283,9 +2283,9 @@ public class MediaPlayer implements SubtitleController.Listener
      * when {@code trackType} is not one of audio, video, or subtitle.
      * @throws IllegalStateException if called after {@link #release()}
      *
-     * @see {@link #getTrackInfo()}
-     * @see {@link #selectTrack(int)}
-     * @see {@link #deselectTrack(int)}
+     * @see #getTrackInfo()
+     * @see #selectTrack(int)
+     * @see #deselectTrack(int)
      */
     public int getSelectedTrack(int trackType) throws IllegalStateException {
         if (trackType == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE && mSubtitleController != null) {

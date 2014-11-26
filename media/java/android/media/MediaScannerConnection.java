@@ -228,7 +228,7 @@ public class MediaScannerConnection implements ServiceConnection {
      * @param callback Optional callback through which you can receive the
      * scanned URI and MIME type; If null, the file will be scanned but
      * you will not get a result back.
-     * @see scanFile(String, String)
+     * @see #scanFile(String, String)
      */
     public static void scanFile(Context context, String[] paths, String[] mimeTypes,
             OnScanCompletedListener callback) {
