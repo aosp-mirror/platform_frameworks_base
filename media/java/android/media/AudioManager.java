@@ -1245,6 +1245,9 @@ public class AudioManager {
      * @hide
      */
     public void forceVolumeControlStream(int streamType) {
+        if (mUseMasterVolume) {
+            return;
+        }
         IAudioService service = getService();
         try {
             service.forceVolumeControlStream(streamType, mICallBack);
