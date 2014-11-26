@@ -42,6 +42,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.BoringLayout;
 import android.text.DynamicLayout;
@@ -8391,8 +8392,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * to speak passwords.
      */
     private boolean shouldSpeakPasswordsForAccessibility() {
-        return (Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0) == 1);
+        return (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0, UserHandle.USER_CURRENT) == 1);
     }
 
     @Override
