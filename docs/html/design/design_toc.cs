@@ -23,6 +23,7 @@
           <li><a href="<?cs var:toroot ?>design/wear/creative-vision.html">Creative Vision</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/principles.html">Design Principles</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/structure.html">App Structure</a></li>
+          <li><a href="<?cs var:toroot ?>design/wear/context.html">Context Awareness</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/patterns.html">UI Patterns</a></li>
           <li><a href="<?cs var:toroot ?>design/wear/style.html">Style</a></li>
         </ul>
