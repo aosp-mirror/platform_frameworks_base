@@ -43,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -3178,6 +3179,39 @@ public class TelephonyManager {
             Rlog.e(TAG, "setOperatorBrandOverride RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "setOperatorBrandOverride NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Override the roaming preference for the current ICCID.
+     *
+     * Using this call, the carrier app (see #hasCarrierPrivileges) can override
+     * the platform's notion of a network operator being considered roaming or not.
+     * The change only affects the ICCID that was active when this call was made.
+     *
+     * If null is passed as any of the input, the corresponding value is deleted.
+     *
+     * <p>Requires that the caller have carrier privilege. See #hasCarrierPrivileges.
+     *
+     * @param gsmRoamingList - List of MCCMNCs to be considered roaming for 3GPP RATs.
+     * @param gsmNonRoamingList - List of MCCMNCs to be considered not roaming for 3GPP RATs.
+     * @param cdmaRoamingList - List of SIDs to be considered roaming for 3GPP2 RATs.
+     * @param cdmaNonRoamingList - List of SIDs to be considered not roaming for 3GPP2 RATs.
+     * @return true if the operation was executed correctly.
+     *
+     * @hide
+     */
+    public boolean setRoamingOverride(List<String> gsmRoamingList,
+            List<String> gsmNonRoamingList, List<String> cdmaRoamingList,
+            List<String> cdmaNonRoamingList) {
+        try {
+            return getITelephony().setRoamingOverride(gsmRoamingList, gsmNonRoamingList,
+                    cdmaRoamingList, cdmaNonRoamingList);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setRoamingOverride RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "setRoamingOverride NPE", ex);
         }
         return false;
     }
