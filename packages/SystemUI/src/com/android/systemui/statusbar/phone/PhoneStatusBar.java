@@ -3807,6 +3807,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * @param state The {@link StatusBarState} to set.
      */
     public void setBarState(int state) {
+        // If we're visible and switched to SHADE_LOCKED (the user dragged down
+        // on the lockscreen), clear notification LED, vibration, ringing.
+        // Other transitions are covered in handleVisibleToUserChanged().
+        if (mVisible && mState != state && state == StatusBarState.SHADE_LOCKED) {
+            try {
+                mBarService.clearNotificationEffects();
+            } catch (RemoteException e) {
+                // Ignore.
+            }
+        }
         mState = state;
         mStatusBarWindowManager.setStatusBarState(state);
     }
@@ -4138,6 +4148,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
         private final H mHandler = new H();
 
+        // Keeps the last reported state by fireNotificationLight.
+        private boolean mNotificationLightOn;
+
         @Override
         public String toString() {
             return "PSB.DozeServiceHost[mCallbacks=" + mCallbacks.size() + "]";
@@ -4156,6 +4169,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         public void fireNotificationLight(boolean on) {
+            mNotificationLightOn = on;
             for (Callback callback : mCallbacks) {
                 callback.onNotificationLight(on);
             }
@@ -4195,6 +4209,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         @Override
         public boolean isPowerSaveActive() {
             return mBatteryController != null && mBatteryController.isPowerSave();
+        }
+
+        @Override
+        public boolean isNotificationLightOn() {
+            return mNotificationLightOn;
         }
 
         private void handleStartDozing(@NonNull Runnable ready) {
