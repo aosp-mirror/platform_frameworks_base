@@ -399,8 +399,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                     showPrimarySecurityScreen(false);
                     break;
             }
-        } else {
-            showPrimarySecurityScreen(false);
         }
         if (finish) {
             mSecurityCallback.finish();
@@ -554,6 +552,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     public SecurityMode getSecurityMode() {
         return mSecurityModel.getSecurityMode();
+    }
+
+    public SecurityMode getCurrentSecurityMode() {
+        return mCurrentSecuritySelection;
     }
 
     public void verifyUnlock() {
