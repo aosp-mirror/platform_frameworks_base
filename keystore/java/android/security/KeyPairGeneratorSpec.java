@@ -26,7 +26,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.DSAParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Date;
 
@@ -58,11 +57,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /*
      * These must be kept in sync with system/security/keystore/defaults.h
      */
-
-    /* DSA */
-    private static final int DSA_DEFAULT_KEY_SIZE = 1024;
-    private static final int DSA_MIN_KEY_SIZE = 512;
-    private static final int DSA_MAX_KEY_SIZE = 8192;
 
     /* EC */
     private static final int EC_DEFAULT_KEY_SIZE = 256;
@@ -165,9 +159,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     private static int getDefaultKeySizeForType(int keyType) {
-        if (keyType == NativeCrypto.EVP_PKEY_DSA) {
-            return DSA_DEFAULT_KEY_SIZE;
-        } else if (keyType == NativeCrypto.EVP_PKEY_EC) {
+        if (keyType == NativeCrypto.EVP_PKEY_EC) {
             return EC_DEFAULT_KEY_SIZE;
         } else if (keyType == NativeCrypto.EVP_PKEY_RSA) {
             return RSA_DEFAULT_KEY_SIZE;
@@ -176,12 +168,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     private static void checkValidKeySize(int keyType, int keySize) {
-        if (keyType == NativeCrypto.EVP_PKEY_DSA) {
-            if (keySize < DSA_MIN_KEY_SIZE || keySize > DSA_MAX_KEY_SIZE) {
-                throw new IllegalArgumentException("DSA keys must be >= " + DSA_MIN_KEY_SIZE
-                        + " and <= " + DSA_MAX_KEY_SIZE);
-            }
-        } else if (keyType == NativeCrypto.EVP_PKEY_EC) {
+        if (keyType == NativeCrypto.EVP_PKEY_EC) {
             if (keySize < EC_MIN_KEY_SIZE || keySize > EC_MAX_KEY_SIZE) {
                 throw new IllegalArgumentException("EC keys must be >= " + EC_MIN_KEY_SIZE
                         + " and <= " + EC_MAX_KEY_SIZE);
@@ -198,11 +185,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
     private static void checkCorrectParametersSpec(int keyType, int keySize,
             AlgorithmParameterSpec spec) {
-        if (keyType == NativeCrypto.EVP_PKEY_DSA && spec != null) {
-            if (!(spec instanceof DSAParameterSpec)) {
-                throw new IllegalArgumentException("DSA keys must have DSAParameterSpec specified");
-            }
-        } else if (keyType == NativeCrypto.EVP_PKEY_RSA && spec != null) {
+        if (keyType == NativeCrypto.EVP_PKEY_RSA && spec != null) {
             if (spec instanceof RSAKeyGenParameterSpec) {
                 RSAKeyGenParameterSpec rsaSpec = (RSAKeyGenParameterSpec) spec;
                 if (keySize != -1 && keySize != rsaSpec.getKeysize()) {
