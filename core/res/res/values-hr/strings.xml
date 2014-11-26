@@ -41,8 +41,7 @@
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez naslova&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nema telefonskog broja)"</string>
-    <!-- no translation found for unknownName (6867811765370350269) -->
-    <skip />
+    <string name="unknownName" msgid="6867811765370350269">"Nepoznato"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Govorna pošta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Problem s vezom ili nevažeći MMI kôd."</string>
@@ -98,14 +97,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Glasovne/podatkovne usluge blokirane su."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Glasovne/SMS usluge su blokirane."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Sve su glasovne/podatkovne/SMS usluge blokirane."</string>
-    <!-- no translation found for peerTtyModeFull (6165351790010341421) -->
-    <skip />
-    <!-- no translation found for peerTtyModeHco (5728602160669216784) -->
-    <skip />
-    <!-- no translation found for peerTtyModeVco (1742404978686538049) -->
-    <skip />
-    <!-- no translation found for peerTtyModeOff (3280819717850602205) -->
-    <skip />
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"Način TTY FULL koji zahtijeva paralelni uređaj"</string>
+    <string name="peerTtyModeHco" msgid="5728602160669216784">"Način TTY HCO koji zahtijeva paralelni uređaj"</string>
+    <string name="peerTtyModeVco" msgid="1742404978686538049">"Način TTY VCO koji zahtijeva paralelni uređaj"</string>
+    <string name="peerTtyModeOff" msgid="3280819717850602205">"Način TTY OFF koji zahtijeva paralelni uređaj"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Voice"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Podaci"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"Faks"</string>
@@ -162,16 +157,11 @@
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Mreža se možda nadzire"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Od strane nepoznate treće strane"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Od strane domene <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
-    <!-- no translation found for work_profile_deleted (5005572078641980632) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_description (6305147513054341102) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_details (226615743462361248) -->
-    <skip />
-    <!-- no translation found for factory_reset_warning (5423253125642394387) -->
-    <skip />
-    <!-- no translation found for factory_reset_message (4905025204141900666) -->
-    <skip />
+    <string name="work_profile_deleted" msgid="5005572078641980632">"Radni je profil izbrisan"</string>
+    <string name="work_profile_deleted_description" msgid="6305147513054341102">"Radni je profil izbrisan jer nedostaje administratorska aplikacija."</string>
+    <string name="work_profile_deleted_details" msgid="226615743462361248">"Administratorska aplikacija radnog profila nedostaje ili je oštećena. Zbog toga su radni profil i povezani podaci izbrisani. Za pomoć se obratite svom administratoru."</string>
+    <string name="factory_reset_warning" msgid="5423253125642394387">"Uređaj će se izbrisati"</string>
+    <string name="factory_reset_message" msgid="4905025204141900666">"Nije moguće upotrijebiti administratorsku aplikaciju jer joj nedostaju komponente ili je oštećena. Vaš će se uređaj sada izbrisati. Za pomoć se obratite svom administratoru."</string>
     <string name="me" msgid="6545696007631404292">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opcije tabletnog uređaja"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Opcije televizora"</string>
@@ -1128,8 +1118,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"izbriši"</string>
     <string name="search_go" msgid="8298016669822141719">"Pretraži"</string>
-    <!-- no translation found for search_hint (1733947260773056054) -->
-    <skip />
+    <string name="search_hint" msgid="1733947260773056054">"Pretraživanje..."</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Pretraživanje"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Upit za pretraživanje"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Izbriši upit"</string>
@@ -1855,8 +1844,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Traži PIN radi otkvačivanja"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Traži uzorak za otključavanje radi otkvačivanja"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Traži zaporku radi otkvačivanja"</string>
-    <!-- no translation found for battery_saver_description (1960431123816253034) -->
-    <skip />
+    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produljilo trajanje baterije, ušteda baterije smanjuje rad uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Aplikacije za e-poštu, slanje poruka i druge aplikacije koje se oslanjaju na sinkronizaciju možda se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije isključuje se automatski dok se uređaj puni."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Dok razdoblje zastoja ne završi u <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Do završetka prekida rada"</string>
   <plurals name="zen_mode_duration_minutes_summary">
