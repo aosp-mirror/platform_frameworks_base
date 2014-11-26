@@ -17,9 +17,11 @@
 package com.android.server;
 
 import android.Manifest.permission;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
@@ -28,6 +30,7 @@ import android.net.NetworkScorerAppManager;
 import android.net.NetworkScorerAppManager.NetworkScorerAppData;
 import android.net.ScoredNetwork;
 import android.os.Binder;
+import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -35,6 +38,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -56,6 +60,35 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private final Map<Integer, INetworkScoreCache> mScoreCaches;
 
+    /** Lock used to update mReceiver when scorer package changes occur. */
+    private Object mReceiverLock = new Object[0];
+
+    /** Clears scores when the active scorer package is no longer valid. */
+    @GuardedBy("mReceiverLock")
+    private ScorerChangedReceiver mReceiver;
+
+    private class ScorerChangedReceiver extends BroadcastReceiver {
+        final String mRegisteredPackage;
+
+        ScorerChangedReceiver(String packageName) {
+            mRegisteredPackage = packageName;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if ((Intent.ACTION_PACKAGE_CHANGED.equals(action) ||
+                    Intent.ACTION_PACKAGE_REPLACED.equals(action) ||
+                    Intent.ACTION_PACKAGE_FULLY_REMOVED.equals(action)) &&
+                    NetworkScorerAppManager.getActiveScorer(mContext) == null) {
+                // Package change has invalidated a scorer.
+                Log.i(TAG, "Package " + mRegisteredPackage +
+                        " is no longer valid, disabling scoring");
+                setScorerInternal(null);
+            }
+        }
+    }
+
     public NetworkScoreService(Context context) {
         mContext = context;
         mScoreCaches = new HashMap<>();
@@ -73,6 +106,39 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 NetworkScorerAppManager.setActiveScorer(mContext, defaultPackage);
             }
             Settings.Global.putInt(cr, Settings.Global.NETWORK_SCORING_PROVISIONED, 1);
+        }
+
+        registerPackageReceiverIfNeeded();
+    }
+
+    private void registerPackageReceiverIfNeeded() {
+        NetworkScorerAppData scorer = NetworkScorerAppManager.getActiveScorer(mContext);
+        synchronized (mReceiverLock) {
+            // Unregister the receiver if the current scorer has changed since last registration.
+            if (mReceiver != null) {
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Unregistering receiver for " + mReceiver.mRegisteredPackage);
+                }
+                mContext.unregisterReceiver(mReceiver);
+                mReceiver = null;
+            }
+
+            // Register receiver if a scorer is active.
+            if (scorer != null) {
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+                filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+                filter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+                filter.addDataScheme("package");
+                filter.addDataSchemeSpecificPart(scorer.mPackageName,
+                        PatternMatcher.PATTERN_LITERAL);
+                mReceiver = new ScorerChangedReceiver(scorer.mPackageName);
+                // TODO: Need to update when we support per-user scorers.
+                mContext.registerReceiverAsUser(mReceiver, UserHandle.OWNER, filter, null, null);
+                if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                    Log.v(TAG, "Registered receiver for " + scorer.mPackageName);
+                }
+            }
         }
     }
 
@@ -170,6 +236,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
             clearInternal();
             boolean result = NetworkScorerAppManager.setActiveScorer(mContext, packageName);
             if (result) {
+                registerPackageReceiverIfNeeded();
                 Intent intent = new Intent(NetworkScoreManager.ACTION_SCORER_CHANGED);
                 intent.putExtra(NetworkScoreManager.EXTRA_NEW_SCORER, packageName);
                 mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
