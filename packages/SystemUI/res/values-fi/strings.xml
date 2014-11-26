@@ -269,7 +269,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Mobiilitiedonsiirto"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Datakäyttö"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Käytettävissä"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"Raja saavutettu - tietojen käyttö keskeytetty"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Kiintiö ylitetty"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"käytetty <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"kiintiö <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> – varoitus"</string>

@@ -269,7 +269,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Мобільні дані"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Використання даних"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Залишилося даних"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"Досягнуто ліміту. Передавання даних призупинено"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Обмеження перевищено"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Використовується: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Обмеження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Застереження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
