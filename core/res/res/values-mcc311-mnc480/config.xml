@@ -43,6 +43,9 @@
          provisioning, availability etc -->
     <bool name="config_carrier_volte_available">true</bool>
 
+    <!-- Flag specifying whether VoLTE availability is based on provisioning -->
+    <bool name="config_carrier_volte_provisioned">true</bool>
+
     <bool name="config_auto_attach_data_on_creation">false</bool>
     <!-- service number convert map in roaming network. -->
     <string-array translatable="false" name="dial_string_replace">
