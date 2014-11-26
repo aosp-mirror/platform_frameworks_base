@@ -98,14 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"已封鎖語音/數據傳輸服務。"</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"已封鎖語音/SMS 服務。"</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"已封鎖所有語音/數據傳輸/簡訊服務。"</string>
-    <!-- no translation found for peerTtyModeFull (6165351790010341421) -->
-    <skip />
-    <!-- no translation found for peerTtyModeHco (5728602160669216784) -->
-    <skip />
-    <!-- no translation found for peerTtyModeVco (1742404978686538049) -->
-    <skip />
-    <!-- no translation found for peerTtyModeOff (3280819717850602205) -->
-    <skip />
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"通訊對象要求使用 TTY 的 FULL 模式"</string>
+    <string name="peerTtyModeHco" msgid="5728602160669216784">"通訊對象要求使用 TTY 的 HCO 模式"</string>
+    <string name="peerTtyModeVco" msgid="1742404978686538049">"通訊對象要求使用 TTY 的 VCO 模式"</string>
+    <string name="peerTtyModeOff" msgid="3280819717850602205">"通訊對象要求使用 TTY 的 OFF 模式"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"語音服務"</string>
     <string name="serviceClassData" msgid="872456782077937893">"資料"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"傳真"</string>
@@ -1128,8 +1124,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"輸入"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"刪除"</string>
     <string name="search_go" msgid="8298016669822141719">"搜尋"</string>
-    <!-- no translation found for search_hint (1733947260773056054) -->
-    <skip />
+    <string name="search_hint" msgid="1733947260773056054">"搜尋…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"搜尋"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"搜尋查詢"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"清除查詢"</string>
@@ -1855,8 +1850,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖形"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
-    <!-- no translation found for battery_saver_description (1960431123816253034) -->
-    <skip />
+    <string name="battery_saver_description" msgid="1960431123816253034">"節約耗電量模式會透過降低裝置效能、震動限制、定位服務限制和大多數背景資料運作限制等方式，延長電池續航力。此外，如果未開啟電子郵件、簡訊和其他需要使用同步功能的應用程式，系統將不會自動更新這些應用程式。\n\n當您為裝置充電時，節約耗電量功能會自動關閉。"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"直到 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 停機時間結束"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"直到停機時間結束"</string>
   <plurals name="zen_mode_duration_minutes_summary">

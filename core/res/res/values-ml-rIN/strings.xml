@@ -41,8 +41,7 @@
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> സെക്കൻഡ്"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;ശീർഷകമില്ലാത്ത&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ഫോൺ നമ്പറില്ല)"</string>
-    <!-- no translation found for unknownName (6867811765370350269) -->
-    <skip />
+    <string name="unknownName" msgid="6867811765370350269">"അജ്ഞാതം"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"വോയ്സ് മെയില്‍"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"കണക്ഷൻ പ്രശ്‌നം അല്ലെങ്കിൽ MMI കോഡ് അസാധുവാണ്."</string>
@@ -98,14 +97,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"വോയ്‌സ്/ഡാറ്റ സേവനങ്ങൾ തടഞ്ഞു."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"വോയ്‌സ്/SMS സേവനങ്ങൾ തടഞ്ഞു."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"എല്ലാ വോയ്‌സ്/ഡാറ്റ/SMS സേവനങ്ങളും തടഞ്ഞു."</string>
-    <!-- no translation found for peerTtyModeFull (6165351790010341421) -->
-    <skip />
-    <!-- no translation found for peerTtyModeHco (5728602160669216784) -->
-    <skip />
-    <!-- no translation found for peerTtyModeVco (1742404978686538049) -->
-    <skip />
-    <!-- no translation found for peerTtyModeOff (3280819717850602205) -->
-    <skip />
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഫുൾ\'"</string>
+    <string name="peerTtyModeHco" msgid="5728602160669216784">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
+    <string name="peerTtyModeVco" msgid="1742404978686538049">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
+    <string name="peerTtyModeOff" msgid="3280819717850602205">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഓഫ്\'"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"ശബ്‌ദം"</string>
     <string name="serviceClassData" msgid="872456782077937893">"ഡാറ്റ"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"ഫാക്സ്"</string>
@@ -162,16 +157,11 @@
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"നെറ്റ്‌വർക്ക് നിരീക്ഷിക്കപ്പെടാം"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"അജ്ഞാത മൂന്നാം കക്ഷി നിരീക്ഷിക്കാം"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> നിരീക്ഷിക്കാം"</string>
-    <!-- no translation found for work_profile_deleted (5005572078641980632) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_description (6305147513054341102) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_details (226615743462361248) -->
-    <skip />
-    <!-- no translation found for factory_reset_warning (5423253125642394387) -->
-    <skip />
-    <!-- no translation found for factory_reset_message (4905025204141900666) -->
-    <skip />
+    <string name="work_profile_deleted" msgid="5005572078641980632">"ഔദ്യോഗിക പ്രൊഫൈൽ ഇല്ലാതാക്കി"</string>
+    <string name="work_profile_deleted_description" msgid="6305147513054341102">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതിനാൽ ഔദ്യോഗിക പ്രൊഫൈൽ ഇല്ലാതാക്കി."</string>
+    <string name="work_profile_deleted_details" msgid="226615743462361248">"ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിൻ അപ്ലിക്കേഷൻ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണ്. അക്കാരണത്താൽ നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലും ബന്ധപ്പെട്ട വിവരവും ഇല്ലാതാക്കിയിരിക്കുന്നു. സഹായത്തിന് അഡ്‌മിനിസ്‌ട്രേറ്ററുമായി ബന്ധപ്പെടുക."</string>
+    <string name="factory_reset_warning" msgid="5423253125642394387">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
+    <string name="factory_reset_message" msgid="4905025204141900666">"അഡ്‌മിൻ അപ്ലിക്കേഷൻ, ഘടകഭാഗങ്ങൾ നഷ്‌ടപ്പെട്ടതോ കേടായതോ ആണെങ്കിൽ ഉപയോഗിക്കാനാവില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ ഇല്ലാതാക്കും. സഹായത്തിന് നിങ്ങളുടെ അഡ്‌മിനിസ്‌ട്രേറ്ററെ ബന്ധപ്പെടുക."</string>
     <string name="me" msgid="6545696007631404292">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"ടിവി ഓപ്‌ഷനുകൾ"</string>
@@ -1128,8 +1118,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"delete"</string>
     <string name="search_go" msgid="8298016669822141719">"തിരയൽ"</string>
-    <!-- no translation found for search_hint (1733947260773056054) -->
-    <skip />
+    <string name="search_hint" msgid="1733947260773056054">"തിരയുക…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"തിരയൽ"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"തിരയൽ അന്വേഷണം"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"അന്വേഷണം മായ്‌ക്കുക"</string>
@@ -1855,8 +1844,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പിൻ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടുക"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിൻ ചെയ്യുന്നതിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടുക"</string>
-    <!-- no translation found for battery_saver_description (1960431123816253034) -->
-    <skip />
+    <string name="battery_saver_description" msgid="1960431123816253034">"ബാറ്ററി ആയുസ്സ് മെച്ചപ്പെടുത്താൻ സഹായിക്കുന്നതിന്, ബാറ്ററി സേവർ നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനത്തെ കുറയ്‌ക്കുകയും വൈബ്രേഷനെയും മിക്ക പശ്ചാത്തല വിവരത്തെയും പരിമിതപ്പെടുത്തുകയും ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് അപ്ലിക്കേഷനുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റുചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ്ജുചെയ്യുമ്പോൾ ബാറ്ററി സേവർ സ്വയം ഓഫാകും."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>-ന് നിങ്ങളുടെ കാലാവധി അവസാനിക്കുന്നതുവരെ"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"പ്രവർത്തനരഹിതമായിരിക്കുന്ന സമയം അവസാനിക്കുന്നതുവരെ"</string>
     <!-- String.format failed for translation -->

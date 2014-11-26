@@ -98,14 +98,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Ahots- eta datu-zerbitzuak blokeatuta daude."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Ahots eta SMS zerbitzuak blokeatuta daude."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Ahotsaren, datuen eta SMSen zerbitzuak blokeatuta daude."</string>
-    <!-- no translation found for peerTtyModeFull (6165351790010341421) -->
-    <skip />
-    <!-- no translation found for peerTtyModeHco (5728602160669216784) -->
-    <skip />
-    <!-- no translation found for peerTtyModeVco (1742404978686538049) -->
-    <skip />
-    <!-- no translation found for peerTtyModeOff (3280819717850602205) -->
-    <skip />
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"Beste gailuak TTY osagarria FULL moduan erabiltzea eskatu du"</string>
+    <string name="peerTtyModeHco" msgid="5728602160669216784">"Beste gailuak TTY osagarria HCO moduan erabiltzea eskatu du"</string>
+    <string name="peerTtyModeVco" msgid="1742404978686538049">"Beste gailuak TTY osagarria VCO moduan erabiltzea eskatu du"</string>
+    <string name="peerTtyModeOff" msgid="3280819717850602205">"Beste gailuak TTY osagarria desaktibatzea eskatu du"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Ahotsa"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Datuak"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAXA"</string>
@@ -586,7 +582,7 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM txartelera aginduak bidaltzeko aukera ematen die aplikazioei. Oso arriskutsua da."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Kamerarekin argazkiak ateratzeko eta bideoak grabatzeko baimena ematen die aplikazioei. Baimen horrekin, aplikazioak kamera edonoiz erabil dezake zure baimenik gabe."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Desgaitu LED argi adierazlea kamera erabiltzen ari denean"</string>
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Desgaitu LED argi adierazlea kamera abian denean"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Kamera erabiltzen ari dela adierazten duen LED argia desgaitzeko aukera ematen dio sisteman aurrez instalatutako aplikazio bati."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desgaitu telefonoa behin betiko"</string>
     <string name="permlab_brick" product="tv" msgid="4912674222121249410">"Desgaitu telebista betiko"</string>
@@ -1128,8 +1124,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"sartu tekla"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ezabatu"</string>
     <string name="search_go" msgid="8298016669822141719">"Bilatu"</string>
-    <!-- no translation found for search_hint (1733947260773056054) -->
-    <skip />
+    <string name="search_hint" msgid="1733947260773056054">"Bilatu…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Bilatu"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Bilaketa-kontsulta"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Garbitu kontsulta"</string>
@@ -1673,7 +1668,7 @@
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Konektatzen…"</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Erabilgarri"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Ez dago erabilgarri"</string>
-    <string name="media_route_status_in_use" msgid="4533786031090198063">"Erabiltzen"</string>
+    <string name="media_route_status_in_use" msgid="4533786031090198063">"Abian"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Pantaila barneratua"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI pantaila"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>. gainjartzea"</string>
@@ -1855,8 +1850,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Eskatu PIN kodea aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Eskatu desblokeatzeko eredua aingura kendu aurretik"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Eskatu pasahitza aingura kendu aurretik"</string>
-    <!-- no translation found for battery_saver_description (1960431123816253034) -->
-    <skip />
+    <string name="battery_saver_description" msgid="1960431123816253034">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren funtzionamendua, dardara,  kokapen-zerbitzuak eta atzeko planoko datuen erabilera gehiena mugatzen ditu. Posta elektronikoa, mezuak eta sinkronizatzen diren gainerako zerbitzuak ez dira eguneratuko ireki ezean.\n\nGailua kargatzen ezarri orduko desaktibatzen da bateria-aurrezlea."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> arte iraungo du jarduerarik gabeko aldiak"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Jarduerarik gabeko denbora amaitu arte"</string>
   <plurals name="zen_mode_duration_minutes_summary">
