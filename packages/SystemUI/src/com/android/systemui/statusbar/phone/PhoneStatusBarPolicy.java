@@ -208,7 +208,7 @@ public class PhoneStatusBarPolicy {
         }
     }
 
-    private final void updateVolumeZen() {
+    public final void updateVolumeZen() {
         AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
 
         boolean zenVisible = false;
@@ -230,7 +230,7 @@ public class PhoneStatusBarPolicy {
         }
 
         if (mZen != Global.ZEN_MODE_NO_INTERRUPTIONS &&
-                audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
+                audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
             volumeVisible = true;
             volumeIconId = R.drawable.stat_sys_ringer_vibrate;
             volumeDescription = mContext.getString(R.string.accessibility_ringer_vibrate);

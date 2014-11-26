@@ -182,6 +182,15 @@ public class VolumeUI extends SystemUI {
         }
 
         @Override
+        public void internalRingerModeChanged(int mode) throws RemoteException {
+            mPanel.postInternalRingerModeChanged(mode);
+            final PhoneStatusBar psb = getComponent(PhoneStatusBar.class);
+            if (psb != null) {
+                psb.onInternalRingerModeChanged();
+            }
+        }
+
+        @Override
         public ZenModeController getZenController() {
             return mPanel.getZenController();
         }

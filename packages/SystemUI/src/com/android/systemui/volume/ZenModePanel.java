@@ -16,8 +16,6 @@
 
 package com.android.systemui.volume;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -38,8 +36,6 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Interpolator;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
@@ -69,7 +65,6 @@ public class ZenModePanel extends LinearLayout {
     private static final int FOREVER_CONDITION_INDEX = 0;
     private static final int TIME_CONDITION_INDEX = 1;
     private static final int FIRST_CONDITION_INDEX = 2;
-    private static final float SILENT_HINT_PULSE_SCALE = 1.1f;
     private static final long SELECT_DEFAULT_DELAY = 300;
 
     public static final Intent ZEN_SETTINGS = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
@@ -78,7 +73,7 @@ public class ZenModePanel extends LinearLayout {
     private final LayoutInflater mInflater;
     private final H mHandler = new H();
     private final Prefs mPrefs;
-    private final Interpolator mFastOutSlowInInterpolator;
+    private final IconPulser mIconPulser;
     private final int mSubheadWarningColor;
     private final int mSubheadColor;
 
@@ -110,8 +105,7 @@ public class ZenModePanel extends LinearLayout {
         mContext = context;
         mPrefs = new Prefs();
         mInflater = LayoutInflater.from(mContext.getApplicationContext());
-        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(mContext,
-                android.R.interpolator.fast_out_slow_in);
+        mIconPulser = new IconPulser(mContext);
         final Resources res = mContext.getResources();
         mSubheadWarningColor = res.getColor(R.color.system_warning_color);
         mSubheadColor = res.getColor(R.color.qs_subhead);
@@ -283,16 +277,7 @@ public class ZenModePanel extends LinearLayout {
         if (DEBUG) Log.d(mTag, "showSilentHint");
         if (mZenButtons == null || mZenButtons.getChildCount() == 0) return;
         final View noneButton = mZenButtons.getChildAt(0);
-        if (noneButton.getScaleX() != 1) return;  // already running
-        noneButton.animate().cancel();
-        noneButton.animate().scaleX(SILENT_HINT_PULSE_SCALE).scaleY(SILENT_HINT_PULSE_SCALE)
-                .setInterpolator(mFastOutSlowInInterpolator)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        noneButton.animate().scaleX(1).scaleY(1).setListener(null);
-                    }
-                });
+        mIconPulser.start(noneButton);
     }
 
     private void handleUpdateZen(int zen) {

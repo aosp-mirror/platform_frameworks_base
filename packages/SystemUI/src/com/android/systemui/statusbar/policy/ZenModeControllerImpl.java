@@ -157,8 +157,9 @@ public class ZenModeControllerImpl implements ZenModeController {
         if (mRegistered) {
             mContext.unregisterReceiver(mReceiver);
         }
-        mContext.registerReceiverAsUser(mReceiver, new UserHandle(mUserId),
-                new IntentFilter(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED), null, null);
+        final IntentFilter filter = new IntentFilter(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
+        filter.addAction(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
+        mContext.registerReceiverAsUser(mReceiver, new UserHandle(mUserId), filter, null, null);
         mRegistered = true;
         mSetupObserver.register();
     }

@@ -77,9 +77,13 @@ interface IAudioService {
 
     void setMicrophoneMute(boolean on, String callingPackage);
 
-    void setRingerMode(int ringerMode, boolean checkZen);
+    void setRingerModeExternal(int ringerMode, String caller);
 
-    int getRingerMode();
+    void setRingerModeInternal(int ringerMode, String caller);
+
+    int getRingerModeExternal();
+
+    int getRingerModeInternal();
 
     boolean isValidRingerMode(int ringerMode);
 
