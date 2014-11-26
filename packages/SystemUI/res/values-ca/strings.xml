@@ -271,7 +271,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Dades mòbils"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Ús de dades"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Dades restants"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"Límit assolit: ús de dades aturat"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Límit excedit"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Utilitzats: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Límit: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Advertiment: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
