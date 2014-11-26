@@ -269,7 +269,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"ข้อมูลมือถือ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"การใช้อินเทอร์เน็ต"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ข้อมูลที่เหลืออยู่"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"ถึงขีดจำกัดแล้ว – หยุดการใช้งานข้อมูลชั่วคราวแล้ว"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"เกินขีดจำกัด"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"ใช้ไปแล้ว <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"ขีดจำกัด <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"คำเตือน <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
