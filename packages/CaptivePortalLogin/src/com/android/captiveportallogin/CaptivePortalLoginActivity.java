@@ -62,13 +62,19 @@ public class CaptivePortalLoginActivity extends Activity {
     // Intent broadcast to ConnectivityService indicating sign-in is complete.
     // Extras:
     //     EXTRA_TEXT       = netId
-    //     LOGGED_IN_RESULT = "1" if we should use network, "0" if not.
+    //     LOGGED_IN_RESULT = one of the CAPTIVE_PORTAL_APP_RETURN_* values below.
+    //     RESPONSE_TOKEN   = data fragment from launching Intent
     private static final String ACTION_CAPTIVE_PORTAL_LOGGED_IN =
             "android.net.netmon.captive_portal_logged_in";
     private static final String LOGGED_IN_RESULT = "result";
+    private static final int CAPTIVE_PORTAL_APP_RETURN_APPEASED = 0;
+    private static final int CAPTIVE_PORTAL_APP_RETURN_UNWANTED = 1;
+    private static final int CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS = 2;
+    private static final String RESPONSE_TOKEN = "response_token";
 
     private URL mURL;
     private int mNetId;
+    private String mResponseToken;
     private NetworkCallback mNetworkCallback;
 
     @Override
@@ -78,12 +84,18 @@ public class CaptivePortalLoginActivity extends Activity {
         String server = Settings.Global.getString(getContentResolver(), "captive_portal_server");
         if (server == null) server = DEFAULT_SERVER;
         try {
-            mURL = new URL("http://" + server + "/generate_204");
-        } catch (MalformedURLException e) {
-            done(true);
+            mURL = new URL("http", server, "/generate_204");
+            final Uri dataUri = getIntent().getData();
+            if (!dataUri.getScheme().equals("netid")) {
+                throw new MalformedURLException();
+            }
+            mNetId = Integer.parseInt(dataUri.getSchemeSpecificPart());
+            mResponseToken = dataUri.getFragment();
+        } catch (MalformedURLException|NumberFormatException e) {
+            // System misconfigured, bail out in a way that at least provides network access.
+            done(CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS);
         }
 
-        mNetId = Integer.parseInt(getIntent().getStringExtra(Intent.EXTRA_TEXT));
         final Network network = new Network(mNetId);
         ConnectivityManager.setProcessDefaultNetwork(network);
 
@@ -121,7 +133,7 @@ public class CaptivePortalLoginActivity extends Activity {
         mNetworkCallback = new NetworkCallback() {
             @Override
             public void onLost(Network lostNetwork) {
-                if (network.equals(lostNetwork)) done(false);
+                if (network.equals(lostNetwork)) done(CAPTIVE_PORTAL_APP_RETURN_UNWANTED);
             }
         };
         final NetworkRequest.Builder builder = new NetworkRequest.Builder();
@@ -165,11 +177,14 @@ public class CaptivePortalLoginActivity extends Activity {
         }
     }
 
-    private void done(boolean use_network) {
-        ConnectivityManager.from(this).unregisterNetworkCallback(mNetworkCallback);
+    private void done(int result) {
+        if (mNetworkCallback != null) {
+            ConnectivityManager.from(this).unregisterNetworkCallback(mNetworkCallback);
+        }
         Intent intent = new Intent(ACTION_CAPTIVE_PORTAL_LOGGED_IN);
         intent.putExtra(Intent.EXTRA_TEXT, String.valueOf(mNetId));
-        intent.putExtra(LOGGED_IN_RESULT, use_network ? "1" : "0");
+        intent.putExtra(LOGGED_IN_RESULT, String.valueOf(result));
+        intent.putExtra(RESPONSE_TOKEN, mResponseToken);
         sendBroadcast(intent);
         finish();
     }
@@ -194,11 +209,11 @@ public class CaptivePortalLoginActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_use_network) {
-            done(true);
+            done(CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS);
             return true;
         }
         if (id == R.id.action_do_not_use_network) {
-            done(false);
+            done(CAPTIVE_PORTAL_APP_RETURN_UNWANTED);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -227,7 +242,7 @@ public class CaptivePortalLoginActivity extends Activity {
                     if (urlConnection != null) urlConnection.disconnect();
                 }
                 if (httpResponseCode == 204) {
-                    done(true);
+                    done(CAPTIVE_PORTAL_APP_RETURN_APPEASED);
                 }
             }
         }).start();
