@@ -1011,6 +1011,22 @@ public class WifiManager {
     }
 
     /**
+     * startLocationRestrictedScan()
+     * Trigger a scan which will not make use of DFS channels and is thus not suitable for
+     * establishing wifi connection.
+     * @hide
+     */
+    @SystemApi
+    public boolean startLocationRestrictedScan(WorkSource workSource) {
+        try {
+            mService.startLocationRestrictedScan(workSource);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
      * Request a scan for access points in specified channel list. Each channel is specified by its
      * frequency in MHz, e.g. "5500" (do NOT include "DFS" even though it is). The availability of
      * the results is made known later in the same way as {@link #startScan}.
