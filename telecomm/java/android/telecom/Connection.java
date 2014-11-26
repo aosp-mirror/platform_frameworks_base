@@ -118,10 +118,10 @@ public abstract class Connection implements IConferenceable {
     public static final int CAPABILITY_SUPPORTS_VT_REMOTE = 0x00000200;
 
     /**
-     * Connection is using voice over LTE.
+     * Connection is using high definition audio.
      * @hide
      */
-    public static final int CAPABILITY_VoLTE = 0x00000400;
+    public static final int CAPABILITY_HIGH_DEF_AUDIO = 0x00000400;
 
     /**
      * Connection is using voice over WIFI.
@@ -224,8 +224,8 @@ public abstract class Connection implements IConferenceable {
         if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE)) {
             builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE");
         }
-        if (can(capabilities, CAPABILITY_VoLTE)) {
-            builder.append(" CAPABILITY_VoLTE");
+        if (can(capabilities, CAPABILITY_HIGH_DEF_AUDIO)) {
+            builder.append(" CAPABILITY_HIGH_DEF_AUDIO");
         }
         if (can(capabilities, CAPABILITY_VoWIFI)) {
             builder.append(" CAPABILITY_VoWIFI");
