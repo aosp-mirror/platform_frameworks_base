@@ -42,6 +42,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+
+// TODO: Unify this logic with platform settings (see WifiSettings and AccessPoint). There is a
+// fair amount of complexity here in statuses and logic beyond just connected/disconnected.
 public class AccessPointControllerImpl implements NetworkController.AccessPointController {
     private static final String TAG = "AccessPointController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -142,8 +145,7 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
                 && v.charAt(v.length() - 1) == '\"' ? v.substring(1, v.length() - 1) : v;
     }
 
-    private int getConnectedNetworkId() {
-        final WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+    private int getConnectedNetworkId(WifiInfo wifiInfo) {
         return wifiInfo != null ? wifiInfo.getNetworkId() : AccessPoint.NO_NETWORK;
     }
 
@@ -158,7 +160,8 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
     }
 
     private void updateAccessPoints() {
-        final int connectedNetworkId = getConnectedNetworkId();
+        final WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+        final int connectedNetworkId = getConnectedNetworkId(wifiInfo);
         if (DEBUG) Log.d(TAG, "connectedNetworkId: " + connectedNetworkId);
         final List<ScanResult> scanResults = mWifiManager.getScanResults();
         final ArrayMap<String, WifiConfiguration> configured = getConfiguredNetworksBySsid();
@@ -179,8 +182,13 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
             ap.networkId = config != null ? config.networkId : AccessPoint.NO_NETWORK;
             ap.ssid = ssid;
             ap.iconId = ICONS[level];
-            ap.isConnected = ap.networkId != AccessPoint.NO_NETWORK
-                    && ap.networkId == connectedNetworkId;
+            // Connected if either:
+            // -The network ID in the active WifiInfo matches this network's ID.
+            // -The network is ephemeral (no configuration) but the SSID matches.
+            ap.isConnected = (ap.networkId != AccessPoint.NO_NETWORK
+                    && ap.networkId == connectedNetworkId) ||
+                    (ap.networkId == WifiConfiguration.INVALID_NETWORK_ID && wifiInfo != null &&
+                    ap.ssid.equals(trimDoubleQuotes(wifiInfo.getSSID())));
             ap.level = level;
             // Based on Settings AccessPoint#getSecurity, keep up to date
             // with better methods of determining no security or not.
