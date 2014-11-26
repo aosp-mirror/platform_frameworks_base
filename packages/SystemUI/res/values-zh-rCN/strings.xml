@@ -271,7 +271,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"移动数据网络"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"流量使用情况"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"剩余流量"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"达到上限 - 已暂停流量使用"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"超出上限"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"已使用<xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限为<xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g>警告"</string>

@@ -269,7 +269,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"Ұялы деректер"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"Деректерді пайдалану"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"Қалған деректер"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"Шекке жеттіңіз – деректерді пайдалану кідіртілді"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"Шектен асу"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> пайдаланылған"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> шегі"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> туралы ескерту"</string>
