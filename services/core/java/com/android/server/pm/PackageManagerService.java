@@ -648,7 +648,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     try {
                         f = file.startWrite();
                         BufferedOutputStream out = new BufferedOutputStream(f);
-                        FileUtils.setPermissions(file.getBaseFile().getPath(), 0660, SYSTEM_UID, PACKAGE_INFO_GID);
+                        FileUtils.setPermissions(file.getBaseFile().getPath(), 0640, SYSTEM_UID, PACKAGE_INFO_GID);
                         StringBuilder sb = new StringBuilder();
                         for (PackageParser.Package pkg : mPackages.values()) {
                             if (pkg.mLastPackageUsageTimeInMills == 0) {
