@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -53,6 +54,7 @@ import java.util.Map;
  *
  * @hide Not part of the public API; only required by system implementors.
  */
+@SystemApi
 public interface WebViewProvider {
     //-------------------------------------------------------------------------
     // Main interface for backend provider of the WebView class.

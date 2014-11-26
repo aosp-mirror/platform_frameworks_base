@@ -29,6 +29,7 @@ import android.util.Log;
 public final class URLUtil {
 
     private static final String LOGTAG = "webkit";
+    private static final boolean TRACE = false;
 
     // to refer to bar.png under your package's asset/foo/ directory, use
     // "file:///android_asset/foo/bar.png".
@@ -49,7 +50,7 @@ public final class URLUtil {
         String retVal = inUrl;
         WebAddress webAddress;
 
-        if (DebugFlags.URL_UTIL) Log.v(LOGTAG, "guessURL before queueRequest: " + inUrl);
+        if (TRACE) Log.v(LOGTAG, "guessURL before queueRequest: " + inUrl);
 
         if (inUrl.length() == 0) return inUrl;
         if (inUrl.startsWith("about:")) return inUrl;
@@ -69,7 +70,7 @@ public final class URLUtil {
             webAddress = new WebAddress(inUrl);
         } catch (ParseException ex) {
 
-            if (DebugFlags.URL_UTIL) {
+            if (TRACE) {
                 Log.v(LOGTAG, "smartUrlFilter: failed to parse url = " + inUrl);
             }
             return retVal;
@@ -286,7 +287,7 @@ public final class URLUtil {
         }
         return url;
     }
-    
+
     /**
      * Guesses canonical filename that a download would have, using
      * the URL and contentDisposition. File extension, if not defined,
@@ -294,7 +295,7 @@ public final class URLUtil {
      * @param url Url to the content
      * @param contentDisposition Content-Disposition HTTP header or null
      * @param mimeType Mime-type of the content or null
-     * 
+     *
      * @return suggested filename
      */
     public static final String guessFileName(

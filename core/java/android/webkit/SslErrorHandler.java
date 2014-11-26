@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.os.Handler;
 
 /**
@@ -30,6 +31,7 @@ public class SslErrorHandler extends Handler {
     /**
      * @hide Only for use by WebViewProvider implementations.
      */
+    @SystemApi
     public SslErrorHandler() {}
 
     /**

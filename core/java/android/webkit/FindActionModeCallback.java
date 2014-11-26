@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -36,6 +37,7 @@ import android.widget.TextView;
 /**
  * @hide
  */
+@SystemApi
 public class FindActionModeCallback implements ActionMode.Callback, TextWatcher,
         View.OnClickListener, WebView.FindListener {
     private View mCustomView;
