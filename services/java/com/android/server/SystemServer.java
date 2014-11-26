@@ -524,23 +524,20 @@ public final class SystemServer {
 
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
-            //if (!disableNonCoreServices) { // TODO: View depends on these; mock them?
-            if (true) {
-                try {
-                    Slog.i(TAG, "Input Method Service");
-                    imm = new InputMethodManagerService(context, wm);
-                    ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
-                } catch (Throwable e) {
-                    reportWtf("starting Input Manager Service", e);
-                }
+            try {
+                Slog.i(TAG, "Input Method Service");
+                imm = new InputMethodManagerService(context, wm);
+                ServiceManager.addService(Context.INPUT_METHOD_SERVICE, imm);
+            } catch (Throwable e) {
+                reportWtf("starting Input Manager Service", e);
+            }
 
-                try {
-                    Slog.i(TAG, "Accessibility Manager");
-                    ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
-                            new AccessibilityManagerService(context));
-                } catch (Throwable e) {
-                    reportWtf("starting Accessibility Manager", e);
-                }
+            try {
+                Slog.i(TAG, "Accessibility Manager");
+                ServiceManager.addService(Context.ACCESSIBILITY_SERVICE,
+                        new AccessibilityManagerService(context));
+            } catch (Throwable e) {
+                reportWtf("starting Accessibility Manager", e);
             }
         }
 
