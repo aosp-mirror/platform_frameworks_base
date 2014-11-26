@@ -545,7 +545,7 @@
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM txartelera aginduak bidaltzeko aukera ematen die aplikazioei. Oso arriskutsua da."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permdesc_camera" msgid="8497216524735535009">"Kamerarekin argazkiak ateratzeko eta bideoak grabatzeko baimena ematen die aplikazioei. Baimen horrekin, aplikazioak kamera edonoiz erabil dezake zure baimenik gabe."</string>
-    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Desgaitu LED argi adierazlea kamera erabiltzen ari denean"</string>
+    <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"Desgaitu LED argi adierazlea kamera abian denean"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Kamera erabiltzen ari dela adierazten duen LED argia desgaitzeko aukera ematen dio sisteman aurrez instalatutako aplikazio bati."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"desgaitu telefonoa behin betiko"</string>
     <string name="permlab_brick" product="default" msgid="8337817093326370537">"desgaitu telefonoa behin betiko"</string>
@@ -1234,6 +1234,7 @@
     <string name="smv_process" msgid="5120397012047462446">"<xliff:g id="PROCESS">%1$s</xliff:g> prozesuak bere kabuz ezarritako StrictMode gidalerroak urratu ditu."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android bertsio-berritzen ari da…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android abiarazten ari da…"</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Memoria optimizatzen."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g>/<xliff:g id="NUMBER_1">%2$d</xliff:g> aplikazio optimizatzen."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Aplikazioak abiarazten."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Bertsio-berritzea amaitzen."</string>
@@ -1591,7 +1592,7 @@
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Konektatzen…"</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Erabilgarri"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Ez dago erabilgarri"</string>
-    <string name="media_route_status_in_use" msgid="4533786031090198063">"Erabiltzen"</string>
+    <string name="media_route_status_in_use" msgid="4533786031090198063">"Abian"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Pantaila barneratua"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI pantaila"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>. gainjartzea"</string>
