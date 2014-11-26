@@ -26,13 +26,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="bottom"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layoutDirection="ltr">
 
         <TextView
             android:id="@+id/hours"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="end" />
+            android:gravity="end"
+            android:layoutDirection="locale" />
 
         <TextView
             android:id="@+id/separator"
@@ -40,20 +42,23 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/timepicker_separator_padding"
             android:layout_marginRight="@dimen/timepicker_separator_padding"
-            android:importantForAccessibility="no" />
+            android:importantForAccessibility="no"
+            android:layoutDirection="locale" />
 
         <TextView
             android:id="@+id/minutes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="start" />
+            android:gravity="start"
+            android:layoutDirection="locale" />
 
         <LinearLayout
             android:id="@+id/ampm_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:baselineAlignedChildIndex="1">
+            android:baselineAlignedChildIndex="1"
+            android:layoutDirection="locale">
             <CheckedTextView
                 android:id="@+id/am_label"
                 android:layout_width="wrap_content"
