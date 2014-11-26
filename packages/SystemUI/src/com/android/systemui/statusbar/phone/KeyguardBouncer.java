@@ -57,13 +57,14 @@ public class KeyguardBouncer {
         mWindowManager = windowManager;
     }
 
-    public void show() {
+    public void show(boolean resetSecuritySelection) {
         ensureView();
+        if (resetSecuritySelection) {
+            // showPrimarySecurityScreen() updates the current security method. This is needed in
+            // case we are already showing and the current security method changed.
+            mKeyguardView.showPrimarySecurityScreen();
+        }
         if (mRoot.getVisibility() == View.VISIBLE || mShowingSoon) {
-
-            // show() updates the current security method. This is needed in case we are already
-            // showing and the current security method changed.
-            mKeyguardView.show();
             return;
         }
 
@@ -74,7 +75,7 @@ public class KeyguardBouncer {
 
             // Split up the work over multiple frames.
             mChoreographer.postCallbackDelayed(Choreographer.CALLBACK_ANIMATION, mShowRunnable,
-                    null, 48);
+                    null, 16);
         }
     }
 
@@ -96,7 +97,7 @@ public class KeyguardBouncer {
     public void showWithDismissAction(OnDismissAction r) {
         ensureView();
         mKeyguardView.setOnDismissAction(r);
-        show();
+        show(false /* resetSecuritySelection */);
     }
 
     public void hide(boolean destroyView) {
@@ -152,7 +153,11 @@ public class KeyguardBouncer {
     }
 
     public void prepare() {
+        boolean wasInitialized = mRoot != null;
         ensureView();
+        if (wasInitialized) {
+            mKeyguardView.showPrimarySecurityScreen();
+        }
     }
 
     private void ensureView() {
@@ -184,14 +189,25 @@ public class KeyguardBouncer {
     }
 
     /**
-     * @return True if and only if the current security method should be shown before showing
-     *         the notifications on Keyguard, like SIM PIN/PUK.
+     * @return True if and only if the security method should be shown before showing the
+     * notifications on Keyguard, like SIM PIN/PUK.
      */
     public boolean needsFullscreenBouncer() {
         if (mKeyguardView != null) {
             SecurityMode mode = mKeyguardView.getSecurityMode();
-            return mode == SecurityMode.SimPin
-                    || mode == SecurityMode.SimPuk;
+            return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
+        }
+        return false;
+    }
+
+    /**
+     * Like {@link #needsFullscreenBouncer}, but uses the currently visible security method, which
+     * makes this method much faster.
+     */
+    public boolean isFullscreenBouncer() {
+        if (mKeyguardView != null) {
+            SecurityMode mode = mKeyguardView.getCurrentSecurityMode();
+            return mode == SecurityMode.SimPin || mode == SecurityMode.SimPuk;
         }
         return false;
     }
