@@ -212,7 +212,7 @@ final class ProcessList {
     private void updateOomLevels(int displayWidth, int displayHeight, boolean write) {
         // Scale buckets from avail memory: at 300MB we use the lowest values to
         // 700MB or more for the top values.
-        float scaleMem = ((float)(mTotalMemMb-300))/(700-300);
+        float scaleMem = ((float)(mTotalMemMb-350))/(700-350);
 
         // Scale buckets from screen size.
         int minSize = 480*800;  //  384000
@@ -237,8 +237,8 @@ final class ProcessList {
 
         if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
             // Increase the high min-free levels for cached processes for 64-bit
-            mOomMinFreeHigh[4] = 225000;
-            mOomMinFreeHigh[5] = 325000;
+            mOomMinFreeHigh[4] = (mOomMinFreeHigh[4]*3)/2;
+            mOomMinFreeHigh[5] = (mOomMinFreeHigh[5]*7)/8;
         }
 
         for (int i=0; i<mOomAdj.length; i++) {
