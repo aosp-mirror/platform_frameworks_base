@@ -6,6 +6,28 @@ page.metaDescription=Download the official Android developer tools to develop ap
 
 sdk.version=23.0.2
 
+studio.linux32_bundle_download=android-studio-ide-135.1538390-linux.zip
+studio.linux32_bundle_bytes=176358193
+studio.linux32_bundle_checksum=718356b49254f6c4e55c64b99164d311995205dd
+
+studio.linux64_bundle_download=android-studio-ide-135.1538390-linux.zip
+studio.linux64_bundle_bytes=176358193
+studio.linux64_bundle_checksum=718356b49254f6c4e55c64b99164d311995205dd
+
+studio.mac64_bundle_download=android-studio-ide-135.1538390-mac.zip
+studio.mac64_bundle_bytes=176745627
+studio.mac64_bundle_checksum=4070e6f6a44d042266f46f1f2f9ca3448ac23f8cd
+
+studio.win32_bundle_download=android-studio-ide-135.1538390-windows.zip
+studio.win32_bundle_bytes=177343814
+studio.win32_bundle_checksum=b533480200ba893616c73b32477e66ebb357a1b3
+
+studio.win64_bundle_download=android-studio-ide-135.1538390-windows.zip
+studio.win64_bundle_bytes=177343814
+studio.win64_bundle_checksum=b533480200ba893616c73b32477e66ebb357a1b3
+
+
+
 sdk.linux32_bundle_download=adt-bundle-linux-x86-20140702.zip
 sdk.linux32_bundle_bytes=371950735
 sdk.linux32_bundle_checksum=5901c898bae4fe95476463a951b68404
@@ -199,7 +221,7 @@ This is the Android Software Development Kit License Agreement
 14.7 This License Agreement, and your relationship with Google under this License Agreement, shall be governed by the laws of the State of California without regard to its conflict of laws provisions. You and Google agree to submit to the exclusive jurisdiction of the courts located within the county of Santa Clara, California to resolve any legal matter arising from this License Agreement. Notwithstanding this, you agree that Google shall still be allowed to apply for injunctive remedies (or an equivalent type of urgent legal relief) in any jurisdiction.
 
 
-<em>November 13, 2012</em>
+<em>December 8, 2014</em>
 </div>
 
 
@@ -207,9 +229,8 @@ This is the Android Software Development Kit License Agreement
 
 <div id="next-steps" style="display:none;position:absolute;width:inherit">
   <p>You're just a few steps away from building apps for Android!</p>
-  <p>In a moment, you'll be redirected to <a
-  id="next-link" href="{@docRoot}sdk/installing/index.html">Installing the
-  Android SDK</a>.</p>
+  <p>In a moment, you'll be redirected to
+  <a id="next-link" href="{@docRoot}sdk/installing/index.html">Installing the Android SDK</a>.</p>
 
 </div><!-- end next-steps -->
 
@@ -244,18 +265,17 @@ This is the Android Software Development Kit License Agreement
 
 
 
-<p>The Android SDK provides the API libraries and developer tools necessary to build, test,
-and debug apps for Android.</p>
-
-<p>Android Studio is the new official Android IDE, and with a single download includes everything
-you need to begin developing Android apps:</p>
+<p>Android Studio is the new official Android IDE. It provides the SDK, API libraries and developer
+tools necessary to build, test, and debug apps for Android in one single download. The 
+Android Studio 1.0 download includes:</p>
 
 <ul>
-<li>IntelliJ IDE + Android Studio plugin</li>
-<li>Android SDK Tools</li>
-<li>Android Platform-tools</li>
-<li>A version of the Android platform</li>
-<li>A version of the Android system image for the emulator</li>
+<li>IntelliJ IDEA Community Edition + Android Studio plugin</li>
+<li>Android SDK and Platform</li>
+<li>Android 5.0 (Lollipop)Platform and API Support</li>
+<li>Gradle build system</li>
+<li>Support for Android Phones/Tablets, Android Wear, Android TV, Google Glass</li>
+<li>Optimized Android emulator with Android 5.0 system image with Google APIs & Google Maps</li>
 </ul>
 <a class="big button subtitle" id="download-bundle-button"
 href="" style="width:235px;display:block;margin:25px 0" ></a>
@@ -272,14 +292,14 @@ href="" style="width:235px;display:block;margin:25px 0" ></a>
 
 <!-- this appears when viewing the offline docs -->
 <p class="offline">
-To get Android Studio or stand-alone SDK Tools, please visit the web site at <a
-href="http://developer.android.com/download/index.html">developer.android.com/download/</a>
+To get Android Studio or stand-alone SDK Tools, please visit the web site at
+<a href="http://developer.android.com/download/index.html">developer.android.com/download/</a>
 </p>
 
 </div><!-- end col-6 (left column) -->
 
 
-<div class="col-7" style="background: #ddd;
+<div class="col-6" style="background: #ddd;
     padding: 20px 20px; width:350px; margin:0px 0 0 0px;">
 
   <h3 style="margin-top:0"><strong>Android Studio 1.0 has arrived!</strong>
@@ -289,27 +309,29 @@ href="http://developer.android.com/download/index.html">developer.android.com/do
 Android Studio. If you are still using Eclipse ADT,
 <a href="{@docRoot}tools/eclipse/migrate-adt.html">consider migrating to Android Studio</a>.</p> </div>
 
+</div>
 
-
-<div class="col-7" style="margin-right:0;">
+<div class="col-6" style="margin-right:0;">
   <img src="{@docRoot}images/tools/laptop-studio.png" alt="" height="327" width="370" />
 
+</div><!-- end col-6 -->
 
-</div><!-- end col-7 -->
 
-  <p>
-  Android Studio is a new IDE powered by IntelliJ that provides new features and improvements
+<div class="col-6" style="margin-right:0;">
+
+<p>Android Studio is a new IDE powered by IntelliJ that provides new features and improvements
   over ADT. It is the official Android IDE.</p>
   <p>
-  If you're a new Android developer, you should consider starting with Android Studio, because the
-  ADT plugin for Eclipse is no longer in active development.</p>
+  If you're a new Android developer, start your Android app development with Android Studio, because
+  the ADT plugin for Eclipse is no longer in active development.</p>
   <p style="margin: 0;">
-  <a href="/sdk/installing/studio.html" style="position:relative;z-index:99">Learn more about Android Studio</a></p>
-  </div>
+  <a href="/tools/studio/basics.html" style="position:relative;z-index:99">Learn more about Android Studio</a></p>
+
+</div><!-- end col-6 -->
 
 
 <!-- alternative SDK options -->
-<div class="col-13" style="margin:-70px 0 0;">
+<div class="col-13" style="margin:-170px 0 0;">
 
 
 <p style="width:340px">If you prefer to use another IDE or run the tools from the
@@ -342,20 +364,60 @@ and system image).
   onclick="toggleExpandable(this,'.reqs');hideExpandable('.pax,.myide');return false;"
   >SYSTEM REQUIREMENTS</a></h4>
 
-<div class="col-6 reqs" style="margin:0 0 15px;display:none;">
-<h5>Operating Systems</h5>
+<div class="reqs col-13 online" style="display:none;margin:0;">
+<table>
+<tr>
+<th>Windows</th>
+<th style="width:40%">Mac OS</th>
+<th>Linux</th>
+</tr>
+<tr>
+<td>
 <ul>
-  <li>Windows XP (32-bit), Vista (32- or 64-bit), or Windows 7 (32- or 64-bit)</li>
-  <li>Mac OS X 10.8.5 or later</li>
-  <li>Linux
-    <ul>
-      <li>64-bit distribution capable of running 32-bit applications</li>
-      <li>GNU C Library (glibc) 2.11 or later is required.</li>
-      <li>Tested on Ubuntu 12.04, Precise Pangolin</li>
-    </ul>
-  </li>
+  <li>Microsoft Windows 8/7/Vista/2003 (32 or 64 bit)</li>
+  <li>2 GB RAM minimum, 4 GB RAM recommended</li>
+  <li>400 MB disk space </li>
+  <li>At least 1 GB for Android SDK, emulator system images, and caches</li>
+  <li>1280x800 minimum screen resolution</li>
+  <li>Java Development Kit (JDK) 7 or higher</li>
+  <li>(Optional for accelerated emulator: Intel processor with support for Intel VT-x, Intel
+      EM64T (Intel 64), and Execute Disable (XD) Bit functionality)</li>
 </ul>
-</div>
+</td>
+<td>
+<ul>
+  <li>Mac OS X 10.8.5 or higher, up to 10.9 (Mavericks)</li>
+  <li>2 GB RAM minimum, 4 GB RAM recommended</li>
+  <li>400 MB disk space</li>
+  <li>At least 1 GB for Android SDK, emulator system images, and caches</li>
+  <li>1280x800 minimum screen resolution</li>
+  <li>Java Runtime Environment (JRE) 6</li>
+  <li>Java Development Kit (JDK) 7 or higher <p>On Mac OS, run Android Studio with Java Runtime
+      Environment (JRE) 6 for optimized font rendering. You can then configure your project to use
+      Java Development Kit (JDK) JDK 7.</p></li>
+  <li>(Optional for accelerated emulator: Intel processor with support for Intel VT-x, Intel
+      EM64T (Intel 64), and Execute Disable (XD) Bit functionality)</li>
+</ul>
+
+</td>
+<td>
+<ul>
+  <li>GNOME or KDE desktop.</li>
+  <li>Tested on Ubuntu 12.04, Precise Pangolin (64-bit distribution capable of running 32-bit
+      applications)</li>
+  <li>GNU C Library (glibc) 2.11 or later is required.</li>
+  <li>2 GB RAM minimum, 4 GB RAM recommended</li>
+  <li>400 MB disk space</li>
+  <li>At least 1 GB for Android SDK, emulator system images, and caches</li>
+  <li>1280x800 minimum screen resolution</li>
+  <li>Java Development Kit (JDK) 7 or higher</li>
+</ul>
+</td>
+</tr>
+</table>
+<p class="note"><strong>Note:</strong> A recent version of JDK 7 is recommended. There is a
+known compatibility issue with JDK 1.7.0_10. </p>
+</div><!-- end pax -->
 
 
 <div class="col-7 reqs" style="margin:0 0 80px 20px;display:none;">
