@@ -71,8 +71,6 @@ public class KeyStore {
     static int getKeyTypeForAlgorithm(String keyType) throws IllegalArgumentException {
         if ("RSA".equalsIgnoreCase(keyType)) {
             return NativeCrypto.EVP_PKEY_RSA;
-        } else if ("DSA".equalsIgnoreCase(keyType)) {
-            return NativeCrypto.EVP_PKEY_DSA;
         } else if ("EC".equalsIgnoreCase(keyType)) {
             return NativeCrypto.EVP_PKEY_EC;
         } else {
