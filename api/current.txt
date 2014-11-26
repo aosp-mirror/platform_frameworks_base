@@ -5441,6 +5441,7 @@ package android.app.admin {
     field public static final int PASSWORD_QUALITY_UNSPECIFIED = 0; // 0x0
     field public static final int RESET_PASSWORD_REQUIRE_ENTRY = 1; // 0x1
     field public static final int WIPE_EXTERNAL_STORAGE = 1; // 0x1
+    field public static final int WIPE_RESET_PROTECTION_DATA = 2; // 0x2
   }
 
 }
