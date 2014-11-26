@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
+
 /**
  * An instance of this class is passed as a parameter in various {@link WebChromeClient} action
  * notifications. The object is used as a handle onto the underlying JavaScript-originated request,
@@ -27,6 +29,7 @@ public class JsResult {
      * notifications when the JavaScript result represented by a JsResult instance has
      * @hide Only for use by WebViewProvider implementations
      */
+    @SystemApi
     public interface ResultReceiver {
         public void onJsResultComplete(JsResult result);
     }
@@ -54,6 +57,7 @@ public class JsResult {
     /**
      * @hide Only for use by WebViewProvider implementations
      */
+    @SystemApi
     public JsResult(ResultReceiver receiver) {
         mReceiver = receiver;
     }
@@ -61,6 +65,7 @@ public class JsResult {
     /**
      * @hide Only for use by WebViewProvider implementations
      */
+    @SystemApi
     public final boolean getResult() {
         return mResult;
     }

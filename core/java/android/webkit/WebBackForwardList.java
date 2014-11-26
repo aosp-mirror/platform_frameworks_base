@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.annotation.SystemApi;
 import java.io.Serializable;
 
 /**
@@ -23,56 +24,38 @@ import java.io.Serializable;
  * WebView.copyBackForwardList() will return a copy of this class used to
  * inspect the entries in the list.
  */
-public class WebBackForwardList implements Cloneable, Serializable {
-
-    /**
-     *  @hide
-     */
-    public WebBackForwardList() {
-    }
-
+public abstract class WebBackForwardList implements Cloneable, Serializable {
     /**
      * Return the current history item. This method returns null if the list is
      * empty.
      * @return The current history item.
      */
-    public synchronized WebHistoryItem getCurrentItem() {
-        throw new MustOverrideException();
-    }
+    public abstract WebHistoryItem getCurrentItem();
 
     /**
      * Get the index of the current history item. This index can be used to
      * directly index into the array list.
      * @return The current index from 0...n or -1 if the list is empty.
      */
-    public synchronized int getCurrentIndex() {
-        throw new MustOverrideException();
-    }
+    public abstract int getCurrentIndex();
 
     /**
      * Get the history item at the given index. The index range is from 0...n
      * where 0 is the first item and n is the last item.
      * @param index The index to retrieve.
      */
-    public synchronized WebHistoryItem getItemAtIndex(int index) {
-        throw new MustOverrideException();
-    }
+    public abstract WebHistoryItem getItemAtIndex(int index);
 
     /**
      * Get the total size of the back/forward list.
      * @return The size of the list.
      */
-    public synchronized int getSize() {
-        throw new MustOverrideException();
-    }
+    public abstract int getSize();
 
     /**
      * Clone the entire object to be used in the UI thread by clients of
      * WebView. This creates a copy that should never be modified by any of the
      * webkit package classes.
      */
-    protected synchronized WebBackForwardList clone() {
-        throw new MustOverrideException();
-    }
-
+    protected abstract WebBackForwardList clone();
 }

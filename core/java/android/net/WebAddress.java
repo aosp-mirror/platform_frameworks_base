@@ -18,6 +18,8 @@ package android.net;
 
 import static android.util.Patterns.GOOD_IRI_CHAR;
 
+import android.annotation.SystemApi;
+
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +40,9 @@ import java.util.regex.Pattern;
  * If given an https scheme but no port, fills in port
  *
  */
+// TODO(igsolla): remove WebAddress from the system SDK once the WebView apk does not
+// longer need to be binary compatible with the API 21 version of the framework.
+@SystemApi
 public class WebAddress {
 
     private String mScheme;
@@ -136,42 +141,52 @@ public class WebAddress {
         return mScheme + "://" + authInfo + mHost + port + mPath;
     }
 
+    /** {@hide} */
     public void setScheme(String scheme) {
       mScheme = scheme;
     }
 
+    /** {@hide} */
     public String getScheme() {
       return mScheme;
     }
 
+    /** {@hide} */
     public void setHost(String host) {
       mHost = host;
     }
 
+    /** {@hide} */
     public String getHost() {
       return mHost;
     }
 
+    /** {@hide} */
     public void setPort(int port) {
       mPort = port;
     }
 
+    /** {@hide} */
     public int getPort() {
       return mPort;
     }
 
+    /** {@hide} */
     public void setPath(String path) {
       mPath = path;
     }
 
+    /** {@hide} */
     public String getPath() {
       return mPath;
     }
 
+    /** {@hide} */
     public void setAuthInfo(String authInfo) {
       mAuthInfo = authInfo;
     }
 
+    /** {@hide} */
     public String getAuthInfo() {
       return mAuthInfo;
     }
