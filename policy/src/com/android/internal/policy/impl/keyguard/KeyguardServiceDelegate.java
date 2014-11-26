@@ -18,9 +18,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerPolicy.OnKeyguardExitResult;
 
 import com.android.internal.policy.IKeyguardExitCallback;
-import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardService;
-import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.policy.IKeyguardShowCallback;
 
 /**
  * A local class that keeps a cache of keyguard state that can be restored in the event
@@ -28,15 +27,16 @@ import com.android.internal.widget.LockPatternUtils;
  * local or remote instances of keyguard.
  */
 public class KeyguardServiceDelegate {
-    // TODO: propagate changes to these to {@link KeyguardTouchDelegate}
     public static final String KEYGUARD_PACKAGE = "com.android.systemui";
     public static final String KEYGUARD_CLASS = "com.android.systemui.keyguard.KeyguardService";
 
     private static final String TAG = "KeyguardServiceDelegate";
     private static final boolean DEBUG = true;
+
     protected KeyguardServiceWrapper mKeyguardService;
-    private View mScrim; // shown if keyguard crashes
-    private KeyguardState mKeyguardState = new KeyguardState();
+    private final Context mContext;
+    private final View mScrim; // shown if keyguard crashes
+    private final KeyguardState mKeyguardState = new KeyguardState();
 
     /* package */ static final class KeyguardState {
         KeyguardState() {
@@ -101,7 +101,8 @@ public class KeyguardServiceDelegate {
         }
     };
 
-    public KeyguardServiceDelegate(Context context, LockPatternUtils lockPatternUtils) {
+    public KeyguardServiceDelegate(Context context) {
+        mContext = context;
         mScrim = createScrim(context);
     }
 
@@ -123,7 +124,7 @@ public class KeyguardServiceDelegate {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Log.v(TAG, "*** Keyguard connected (yay!)");
-            mKeyguardService = new KeyguardServiceWrapper(
+            mKeyguardService = new KeyguardServiceWrapper(mContext,
                     IKeyguardService.Stub.asInterface(service));
             if (mKeyguardState.systemIsReady) {
                 // If the system is ready, it means keyguard crashed and restarted.
@@ -151,13 +152,6 @@ public class KeyguardServiceDelegate {
         return mKeyguardState.showing;
     }
 
-    public boolean isShowingAndNotOccluded() {
-        if (mKeyguardService != null) {
-            mKeyguardState.showingAndNotOccluded = mKeyguardService.isShowingAndNotOccluded();
-        }
-        return mKeyguardState.showingAndNotOccluded;
-    }
-
     public boolean isInputRestricted() {
         if (mKeyguardService != null) {
             mKeyguardState.inputRestricted = mKeyguardService.isInputRestricted();
@@ -177,13 +171,11 @@ public class KeyguardServiceDelegate {
         }
     }
 
-    public int setOccluded(boolean isOccluded) {
-        int result = 0;
+    public void setOccluded(boolean isOccluded) {
         if (mKeyguardService != null) {
-            result = mKeyguardService.setOccluded(isOccluded);
+            mKeyguardService.setOccluded(isOccluded);
         }
         mKeyguardState.occluded = isOccluded;
-        return result;
     }
 
     public void dismiss() {
@@ -242,13 +234,6 @@ public class KeyguardServiceDelegate {
         mKeyguardState.enabled = enabled;
     }
 
-    public boolean isDismissable() {
-        if (mKeyguardService != null) {
-            mKeyguardState.dismissable = mKeyguardService.isDismissable();
-        }
-        return mKeyguardState.dismissable;
-    }
-
     public void onSystemReady() {
         if (mKeyguardService != null) {
             mKeyguardService.onSystemReady();
@@ -260,12 +245,6 @@ public class KeyguardServiceDelegate {
     public void doKeyguardTimeout(Bundle options) {
         if (mKeyguardService != null) {
             mKeyguardService.doKeyguardTimeout(options);
-        }
-    }
-
-    public void showAssistant() {
-        if (mKeyguardService != null) {
-            mKeyguardService.showAssistant();
         }
     }
 

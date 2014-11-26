@@ -257,7 +257,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                 final int disabledFlags = dpm.getKeyguardDisabledFeatures(null, userId);
                 final  boolean disabledBecauseKeyguardSecure =
                         (disabledFlags & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) != 0
-                                && KeyguardTouchDelegate.getInstance(getContext()).isSecure();
+                                && mPhoneStatusBar.isKeyguardSecure();
                 return dpm.getCameraDisabled(null) || disabledBecauseKeyguardSecure;
             } catch (RemoteException e) {
                 Log.e(TAG, "Can't get userId", e);

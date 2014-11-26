@@ -16,16 +16,16 @@
 
 package com.android.internal.policy.impl.keyguard;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.MotionEvent;
 
-import com.android.internal.policy.IKeyguardServiceConstants;
-import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
+import com.android.internal.policy.IKeyguardShowCallback;
+import com.android.internal.policy.IKeyguardStateCallback;
 
 /**
  * A wrapper class for KeyguardService.  It implements IKeyguardService to ensure the interface
@@ -33,58 +33,16 @@ import com.android.internal.policy.IKeyguardService;
  *
  */
 public class KeyguardServiceWrapper implements IKeyguardService {
+    private KeyguardStateMonitor mKeyguardStateMonitor;
     private IKeyguardService mService;
     private String TAG = "KeyguardServiceWrapper";
 
-    public KeyguardServiceWrapper(IKeyguardService service) {
+    public KeyguardServiceWrapper(Context context, IKeyguardService service) {
         mService = service;
+        mKeyguardStateMonitor = new KeyguardStateMonitor(context, service);
     }
 
-    public boolean isShowing() {
-        try {
-            return mService.isShowing();
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-        return false;
-    }
-
-    public boolean isSecure() {
-        try {
-            return mService.isSecure();
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-        return false; // TODO cache state
-    }
-
-    public boolean isShowingAndNotOccluded() {
-        try {
-            return mService.isShowingAndNotOccluded();
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-        return false; // TODO cache state
-    }
-
-    public boolean isInputRestricted() {
-        try {
-            return mService.isInputRestricted();
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-        return false; // TODO cache state
-    }
-
-    public boolean isDismissable() {
-        try {
-            return mService.isDismissable();
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-        return true; // TODO cache state
-    }
-
+    @Override // Binder interface
     public void verifyUnlock(IKeyguardExitCallback callback) {
         try {
             mService.verifyUnlock(callback);
@@ -93,6 +51,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void keyguardDone(boolean authenticated, boolean wakeup) {
         try {
             mService.keyguardDone(authenticated, wakeup);
@@ -101,15 +60,25 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
-    public int setOccluded(boolean isOccluded) {
+    @Override // Binder interface
+    public void setOccluded(boolean isOccluded) {
         try {
-            return mService.setOccluded(isOccluded);
+            mService.setOccluded(isOccluded);
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
-            return IKeyguardServiceConstants.KEYGUARD_SERVICE_SET_OCCLUDED_RESULT_NONE;
         }
     }
 
+    @Override
+    public void addStateMonitorCallback(IKeyguardStateCallback callback) {
+        try {
+            mService.addStateMonitorCallback(callback);
+        } catch (RemoteException e) {
+            Slog.w(TAG , "Remote Exception", e);
+        }
+    }
+
+    @Override // Binder interface
     public void dismiss() {
         try {
             mService.dismiss();
@@ -118,6 +87,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void onDreamingStarted() {
         try {
             mService.onDreamingStarted();
@@ -126,6 +96,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void onDreamingStopped() {
         try {
             mService.onDreamingStopped();
@@ -134,6 +105,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void onScreenTurnedOff(int reason) {
         try {
             mService.onScreenTurnedOff(reason);
@@ -142,6 +114,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void onScreenTurnedOn(IKeyguardShowCallback result) {
         try {
             mService.onScreenTurnedOn(result);
@@ -150,6 +123,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void setKeyguardEnabled(boolean enabled) {
         try {
             mService.setKeyguardEnabled(enabled);
@@ -158,6 +132,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void onSystemReady() {
         try {
             mService.onSystemReady();
@@ -166,6 +141,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void doKeyguardTimeout(Bundle options) {
         try {
             mService.doKeyguardTimeout(options);
@@ -174,7 +150,9 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void setCurrentUser(int userId) {
+        mKeyguardStateMonitor.setCurrentUser(userId);
         try {
             mService.setCurrentUser(userId);
         } catch (RemoteException e) {
@@ -182,6 +160,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void onBootCompleted() {
         try {
             mService.onBootCompleted();
@@ -190,6 +169,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
         try {
             mService.startKeyguardExitAnimation(startTime, fadeoutDuration);
@@ -198,6 +178,7 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
+    @Override // Binder interface
     public void onActivityDrawn() {
         try {
             mService.onActivityDrawn();
@@ -206,21 +187,20 @@ public class KeyguardServiceWrapper implements IKeyguardService {
         }
     }
 
-    public void showAssistant() {
-        // Not used by PhoneWindowManager
-    }
-
-    public void dispatch(MotionEvent event) {
-        // Not used by PhoneWindowManager.  See code in {@link NavigationBarView}
-    }
-
-    public void launchCamera() {
-        // Not used by PhoneWindowManager.  See code in {@link NavigationBarView}
-    }
-
-    @Override
+    @Override // Binder interface
     public IBinder asBinder() {
         return mService.asBinder();
     }
 
+    public boolean isShowing() {
+        return mKeyguardStateMonitor.isShowing();
+    }
+
+    public boolean isSecure() {
+        return mKeyguardStateMonitor.isSecure();
+    }
+
+    public boolean isInputRestricted() {
+        return mKeyguardStateMonitor.isInputRestricted();
+    }
 }
