@@ -271,7 +271,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"モバイルデータ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"データ使用量"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"残りのデータ"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"上限に達しました – データの利用は一時停止"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"上限オーバー"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g>使用中"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"警告: 上限は<xliff:g id="DATA_LIMIT">%s</xliff:g>です"</string>

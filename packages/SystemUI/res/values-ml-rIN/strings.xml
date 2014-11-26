@@ -269,7 +269,7 @@
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"സെല്ലുലാർ ഡാറ്റ"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ഡാറ്റ ഉപയോഗം"</string>
     <string name="quick_settings_cellular_detail_remaining_data" msgid="722715415543541249">"ശേഷിക്കുന്ന ഡാറ്റ"</string>
-    <string name="quick_settings_cellular_detail_over_limit" msgid="3242930457130971204">"പരിധിയെത്തി – ഡാറ്റ ഉപയോഗം താൽക്കാലികമായി നിർത്തി"</string>
+    <string name="quick_settings_cellular_detail_over_limit" msgid="967669665390990427">"പരിധി കഴിഞ്ഞു"</string>
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> ഉപയോഗിച്ചു"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> പരിധി"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> മുന്നറിയിപ്പ്"</string>
