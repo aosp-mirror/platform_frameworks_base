@@ -100,14 +100,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Дыбыс/дерекқор қызметтері бөгелген."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Дауыс/SMS қызметтері бөгелген."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Барлық дыбыс/дерекқор/SMS қызметтері бөгелген."</string>
-    <!-- no translation found for peerTtyModeFull (6165351790010341421) -->
-    <skip />
-    <!-- no translation found for peerTtyModeHco (5728602160669216784) -->
-    <skip />
-    <!-- no translation found for peerTtyModeVco (1742404978686538049) -->
-    <skip />
-    <!-- no translation found for peerTtyModeOff (3280819717850602205) -->
-    <skip />
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"Пир TTY режимі ТОЛЫҚ сұрады"</string>
+    <string name="peerTtyModeHco" msgid="5728602160669216784">"Пир TTY режимінің HCO сұрады"</string>
+    <string name="peerTtyModeVco" msgid="1742404978686538049">"Пир TTY режимінің VCO сұрады"</string>
+    <string name="peerTtyModeOff" msgid="3280819717850602205">"Пир TTY режимін ӨШІРУДІ сұрады"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Дауыс"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Күні"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"ФАКС"</string>
@@ -1126,8 +1122,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"eнгізу"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"жою"</string>
     <string name="search_go" msgid="8298016669822141719">"Іздеу"</string>
-    <!-- no translation found for search_hint (1733947260773056054) -->
-    <skip />
+    <string name="search_hint" msgid="1733947260773056054">"Іздеу…"</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"Іздеу"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"Сұрақты іздеу"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"Сұрақты өшіру"</string>
@@ -1850,8 +1845,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Босату алдында PIN кодын сұрау"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Босату алдында бекітпесін ашу өрнегін сұрау"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Босату алдында құпия сөзді сұрау"</string>
-    <!-- no translation found for battery_saver_description (1960431123816253034) -->
-    <skip />
+    <string name="battery_saver_description" msgid="1960431123816253034">"Батареяның қызмет көрсету мерзімін жақсарту үшін батарея үнемдегіш құрылғының өнімділігін төмендетеді және дірілді, орынды анықтау қызметтерін және фондық деректердің көпшілігін шектейді. Электрондық пошта, хабар алмасу және синхрондауға негізделген басқа қолданбалар ашқанша жаңартылмауы мүмкін.\n\nБатарея үнемдегіш құрылғы зарядталып жатқанда автоматты түрде өшеді."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> уақытында әрекетсіздік аяқталғанша"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Бос тұру уақыты аяқталғанша"</string>
   <plurals name="zen_mode_duration_minutes_summary">
