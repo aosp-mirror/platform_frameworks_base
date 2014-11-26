@@ -107,13 +107,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Обидете се повторно за <xliff:g id="NUMBER">%d</xliff:g> секунди."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Употреби ја својата шема"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Внеси ПИН на СИМ картичка"</string>
-    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
-    <skip />
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Внесете ПИН на СИМ за „<xliff:g id="CARRIER">%1$s</xliff:g>“"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Внеси ПИН"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Внеси лозинка"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"СИМ картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
-    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"СИМ-картичката „<xliff:g id="CARRIER">%1$s</xliff:g>“ е сега оневозможена. Внесете ПУК за да продолжите. Контактирајте со давателот на услугата за детали."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Внеси посакуван ПИН код"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Потврди го саканиот ПИН код"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"СИМ картичката се отклучува..."</string>
@@ -132,30 +130,18 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Погрешно сте го впишале вашиот ПИН <xliff:g id="NUMBER_0">%d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Погрешно сте ја впишале вашата лозинка <xliff:g id="NUMBER_0">%d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Погрешно сте ја употребиле вашата шема за отклучување <xliff:g id="NUMBER_0">%d</xliff:g> пати. \n\nОбидете се повторно за <xliff:g id="NUMBER_1">%d</xliff:g> секунди."</string>
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
-    <skip />
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Неправилно се обидовте да го отклучите таблетот <xliff:g id="NUMBER_0">%d</xliff:g> пати. По уште <xliff:g id="NUMBER_1">%d</xliff:g> неправилни обиди, таблетот ќе се ресетира, со што ќе се избришат сите негови податоци."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Неправилно се обидовте да го отклучите телефонот <xliff:g id="NUMBER_0">%d</xliff:g> пати. По уште <xliff:g id="NUMBER_1">%d</xliff:g> неправилни обиди, телефонот ќе се ресетира, со што ќе се избришат сите негови податоци."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Неправилно се обидовте да го отклучите таблетот <xliff:g id="NUMBER">%d</xliff:g> пати. Овој таблет ќе се ресетира, со што ќе се избришат сите негови податоци."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"Неправилно се обидовте да го отклучите телефонот <xliff:g id="NUMBER">%d</xliff:g> пати. Овој телефон ќе се ресетира, со што ќе се избришат сите негови податоци."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"Неправилно се обидовте да го отклучите таблетот <xliff:g id="NUMBER_0">%d</xliff:g> пати. По уште <xliff:g id="NUMBER_1">%d</xliff:g> неправилни обиди, корисникот ќе се отстрани, со што ќе се избришат сите податоци на корисникот."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"Неправилно се обидовте да го отклучите телефонот <xliff:g id="NUMBER_0">%d</xliff:g> пати. По уште <xliff:g id="NUMBER_1">%d</xliff:g> неправилни обиди, корисникот ќе се отстрани, со што ќе се избришат сите податоци на корисникот."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"Неправилно се обидовте да го отклучите таблетот <xliff:g id="NUMBER">%d</xliff:g> пати. Овој корисник ќе се отстрани, со што ќе се избришат сите негови податоци."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"Неправилно се обидовте да го отклучите телефонот <xliff:g id="NUMBER">%d</xliff:g> пати. Овој корисник ќе се отстрани, со што ќе се избришат сите негови податоци."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"Неправилно се обидовте да го отклучите таблетот <xliff:g id="NUMBER_0">%d</xliff:g> пати. По уште <xliff:g id="NUMBER_1">%d</xliff:g> неправилни обиди, работниот профил ќе се отстрани, со што ќе се избришат сите податоци на профилот."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Неправилно се обидовте да го отклучите телефонот <xliff:g id="NUMBER_0">%d</xliff:g> пати. По уште <xliff:g id="NUMBER_1">%d</xliff:g> неправилни обиди, работниот профил ќе се отстрани, со што ќе се избришат сите податоци на профилот."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Неправилно се обидовте да го отклучите таблетот <xliff:g id="NUMBER">%d</xliff:g> пати. Работниот профил ќе се отстрани, со што ќе се избришат сите податоци на профилот."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Неправилно се обидовте да го отклучите телефонот <xliff:g id="NUMBER">%d</xliff:g> пати. Работниот профил ќе се отстрани, со што ќе се избришат сите податоци на профилот."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Погрешно сте ја употребиле вашата шема на отклучување <xliff:g id="NUMBER_0">%d</xliff:g> пати. По <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни обиди, ќе побараат од вас да го отклучите таблетот со користење сметка на е-пошта.\n\n Обидете се повторно за <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Погрешно сте ја употребиле вашата шема на отклучување <xliff:g id="NUMBER_0">%d</xliff:g> пати. По <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни обиди, ќе побараат од вас да го отклучите телефонот со користење сметка на е-пошта.\n\n Обидете се повторно за <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>

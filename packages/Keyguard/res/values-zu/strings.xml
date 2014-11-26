@@ -107,13 +107,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Zama futhi emasekhondini angu-<xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Dweba iphethini"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Faka iphinikhodi ye-SIM"</string>
-    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
-    <skip />
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Faka i-PIN ye-SIM ye-\"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Faka iphinikhodi"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Faka iphasiwedi"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"I-SIM manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Xhumana nenkampani yenethiwekhi ngemininingwane."</string>
-    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"I-SIM ye-\"<xliff:g id="CARRIER">%1$s</xliff:g>\" manje ikhutshaziwe. Faka ikhodi ye-PUK ukuze uqhubeke. Xhumana nenkampani yenethiwekhi ukuze uthole imininingwane."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Faka iphinikhodi oyithandayo"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Qiniseka iphinikhodi oyithandayo"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Ivula ikhadi le-SIM..."</string>
@@ -132,30 +130,18 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Ubhale iphinikhodi ykho ngendlela engafanele izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. \n\nZama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Ubhale iphasiwedi yakho ngendlela engafanele <xliff:g id="NUMBER_0">%d</xliff:g> izikhathi. \n\nZama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Udwebe iphathini yakho yokuvula ngendlela engafanele-<xliff:g id="NUMBER_0">%d</xliff:g>. \n\n Zama futhi emasekhondini angu-<xliff:g id="NUMBER_1">%d</xliff:g>"</string>
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
-    <skip />
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Uzame ngokungalungile ukuvula ithebulethi izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Ngemuva kwemizamo engaphezulu kwengu-<xliff:g id="NUMBER_1">%d</xliff:g> engaphumelelanga, le thebulethi izosethwa kabusha, okuzosusa yonke idatha yayo."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Uzame ngokungalungile ukuvula ifoni izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Ngemuva kwemizamo engaphezulu kwengu-<xliff:g id="NUMBER_1">%d</xliff:g> engaphumelelanga, le foni izosethwa kabusha, okuzosusa yonke idatha yayo."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Uzame ngokungalungile ukuvula ithebulethi izikhathi ezingu-<xliff:g id="NUMBER">%d</xliff:g>. Le thebulethi izosethwa kabusha, okuzosusa yonke idatha yayo."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"Uzame ngokungalungile ukuvula ifoni izikhathi ezingu-<xliff:g id="NUMBER">%d</xliff:g>. Le foni izosethwa kabusha, okuzosusa yonke idatha yayo."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"Uzame ngokungalungile ukuvula ithebulethi izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Ngemuva kwemizamo engaphezulu kwengu-<xliff:g id="NUMBER_1">%d</xliff:g> engaphumelelanga, lo msebenzisi uzosuswa, okuzosusa yonke idatha yomsebenzisi."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"Uzame ngokungalungile ukuvula ifoni izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Ngemuva kwemizamo engaphezulu kwengu-<xliff:g id="NUMBER_1">%d</xliff:g> engaphumelelanga, lo msebenzisi uzosuswa, okuzosusa yonke idatha yomsebenzisi."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"Uzame ngokungalungile ukuvula ithebulethi izikhathi ezingu-<xliff:g id="NUMBER">%d</xliff:g>. Lo msebenzisi uzosuswa, okuzosusa yonke idatha yomsebenzisi."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"Uzame ngokungalungile ukuvula ifoni izikhathi ezingu-<xliff:g id="NUMBER">%d</xliff:g>. Lo msebenzisi uzosuswa, okuzosusa yonke idatha yomsebenzisi."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"Uzame ngokungalungile ukuvula ithebulethi izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Ngemuva kwemizamo engaphezulu kwengu-<xliff:g id="NUMBER_1">%d</xliff:g> engaphumelelanga, iphrofayela yomsebenzi izosuswa, okuzosusa yonke idatha yephrofayela."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Uzame ngokungalungile ukuvula ifoni izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Ngemuva kwemizamo engaphezulu kwengu-<xliff:g id="NUMBER_1">%d</xliff:g> engaphumelelanga, iphrofayela yomsebenzi, izosuswa, okuzosusa yonke idatha yephrofayela."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Uzame ngokungalungile ukuvula ithebulethi izikhathi ezingu-<xliff:g id="NUMBER">%d</xliff:g>. Iphrofayela yomsebenzi izosuswa, okuzosusa yonke idatha yephrofayela."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Uzame ngokungalungile ukuvula ifoni izikhathi ezingu-<xliff:g id="NUMBER">%d</xliff:g>. Iphrofayela yomsebenzi izosuswa, okuzosusa yonke idatha yephrofayela."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Udwebe ngokungalungile iphathini yakho yokuvula izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Emva <xliff:g id="NUMBER_1">%d</xliff:g> kweminye imizamo engaphumelelanga, uzocelwa ukuvula ithebhulethi yakho usebenzisa ukungena ngemvume kwi-Google.\n\n Sicela uzame futhi emuva kwamasekhondi angu-<xliff:g id="NUMBER_2">%d</xliff:g>"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ukulayisha ungenisa iphathini yakho yokuvula ngendlela engalungile izikhathi ezi-<xliff:g id="NUMBER_0">%d</xliff:g> Emva kweminye imizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g>, uzocelwa ukuvula ifoni yakho usebenzisa ukungena ngemvume ku-Google\n\n Zame futhi emumva kwengu- <xliff:g id="NUMBER_2">%d</xliff:g> amasekhondi."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
