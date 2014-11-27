@@ -158,7 +158,7 @@ public final class Headers {
     }
 
     public void parseHeader(CharArrayBuffer buffer) {
-        int pos = CharArrayBuffers.setLowercaseIndexOf(buffer, ':');
+        int pos = setLowercaseIndexOf(buffer, ':');
         if (pos == -1) {
             return;
         }
@@ -459,12 +459,63 @@ public final class Headers {
     }
 
     private void setConnectionType(CharArrayBuffer buffer, int pos) {
-        if (CharArrayBuffers.containsIgnoreCaseTrimmed(
-                buffer, pos, HTTP.CONN_CLOSE)) {
+        if (containsIgnoreCaseTrimmed(buffer, pos, HTTP.CONN_CLOSE)) {
             connectionType = CONN_CLOSE;
-        } else if (CharArrayBuffers.containsIgnoreCaseTrimmed(
+        } else if (containsIgnoreCaseTrimmed(
                 buffer, pos, HTTP.CONN_KEEP_ALIVE)) {
             connectionType = CONN_KEEP_ALIVE;
         }
+    }
+
+
+    /**
+     * Returns true if the buffer contains the given string. Ignores leading
+     * whitespace and case.
+     *
+     * @param buffer to search
+     * @param beginIndex index at which we should start
+     * @param str to search for
+     */
+    static boolean containsIgnoreCaseTrimmed(CharArrayBuffer buffer,
+            int beginIndex, final String str) {
+        int len = buffer.length();
+        char[] chars = buffer.buffer();
+        while (beginIndex < len && HTTP.isWhitespace(chars[beginIndex])) {
+            beginIndex++;
+        }
+        int size = str.length();
+        boolean ok = len >= (beginIndex + size);
+        for (int j=0; ok && (j < size); j++) {
+            char a = chars[beginIndex + j];
+            char b = str.charAt(j);
+            if (a != b) {
+                a = Character.toLowerCase(a);
+                b = Character.toLowerCase(b);
+                ok = a == b;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Returns index of first occurence ch. Lower cases characters leading up
+     * to first occurrence of ch.
+     */
+    static int setLowercaseIndexOf(CharArrayBuffer buffer, final int ch) {
+
+        int beginIndex = 0;
+        int endIndex = buffer.length();
+        char[] chars = buffer.buffer();
+
+        for (int i = beginIndex; i < endIndex; i++) {
+            char current = chars[i];
+            if (current == ch) {
+                return i;
+            } else {
+                chars[i] = Character.toLowerCase(current);
+            }
+        }
+        return -1;
     }
 }
