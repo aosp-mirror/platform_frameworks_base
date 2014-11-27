@@ -266,7 +266,7 @@
         <activity
             android:name=".media.MediaProjectionPermissionActivity"
             android:exported="true"
-            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:theme="@style/Theme.AlertDialogHost"
             android:finishOnCloseSystemDialogs="true"
             android:launchMode="singleTop"
             android:excludeFromRecents="true" />
