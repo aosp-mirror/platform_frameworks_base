@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package android.net.http;
+package android.webkit;
 
 import android.content.Context;
+import android.net.http.EventHandler;
 import android.util.Log;
 
 /**
@@ -24,8 +25,8 @@ import android.util.Log;
  *
  * {@hide}
  */
-public class ErrorStrings {
-    private ErrorStrings() { /* Utility class, don't instantiate. */ }
+class LegacyErrorStrings {
+    private LegacyErrorStrings() { /* Utility class, don't instantiate. */ }
 
     private static final String LOGTAG = "Http";
 
@@ -33,7 +34,7 @@ public class ErrorStrings {
      * Get the localized error message resource for the given error code.
      * If the code is unknown, we'll return a generic error message.
      */
-    public static String getString(int errorCode, Context context) {
+    static String getString(int errorCode, Context context) {
         return context.getText(getResource(errorCode)).toString();
     }
 
@@ -41,7 +42,7 @@ public class ErrorStrings {
      * Get the localized error message resource for the given error code.
      * If the code is unknown, we'll return a generic error message.
      */
-    public static int getResource(int errorCode) {
+    private static int getResource(int errorCode) {
         switch(errorCode) {
             case EventHandler.OK:
                 return com.android.internal.R.string.httpErrorOk;
