@@ -138,6 +138,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             = new ArrayMap<IBinder, Callback>();
     final SparseArray<SparseArray<Restriction>> mAudioRestrictions
             = new SparseArray<SparseArray<Restriction>>();
+    SparseArray<String> mLoadPrivLaterPkgs;
 
     public final class Callback implements DeathRecipient {
         final IAppOpsCallback mCallback;
@@ -237,6 +238,39 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (pkgs.size() <= 0) {
                     mUidOps.removeAt(i);
                 }
+            }
+
+            IPackageManager packageManager = ActivityThread.getPackageManager();
+            if (mLoadPrivLaterPkgs != null && packageManager != null) {
+                for (int i=mLoadPrivLaterPkgs.size()-1; i>=0; i--) {
+                    int uid = mLoadPrivLaterPkgs.keyAt(i);
+                    String pkg = mLoadPrivLaterPkgs.valueAt(i);
+                    HashMap<String, Ops> pkgs = mUidOps.get(uid);
+                    if (pkgs == null) {
+                        continue;
+                    }
+                    Ops ops = pkgs.get(pkg);
+                    if (ops == null) {
+                        continue;
+                    }
+                    try {
+                        ApplicationInfo appInfo = packageManager.getApplicationInfo(
+                                pkg, 0, UserHandle.getUserId(uid));
+                        if (appInfo != null
+                                && (appInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0) {
+                            Slog.i(TAG, "Privileged package " + pkg);
+                            Ops newOps = new Ops(pkg, uid, true);
+                            for (int j=0; j<ops.size(); j++) {
+                                newOps.put(ops.keyAt(j), ops.valueAt(j));
+                            }
+                            pkgs.put(pkg, newOps);
+                            changed = true;
+                        }
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Could not contact PackageManager", e);
+                    }
+                }
+                mLoadPrivLaterPkgs = null;
             }
             if (changed) {
                 scheduleFastWriteLocked();
@@ -990,21 +1024,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         String isPrivilegedString = parser.getAttributeValue(null, "p");
         boolean isPrivileged = false;
         if (isPrivilegedString == null) {
-            try {
-                IPackageManager packageManager = ActivityThread.getPackageManager();
-                if (packageManager != null) {
-                    ApplicationInfo appInfo = ActivityThread.getPackageManager()
-                            .getApplicationInfo(pkgName, 0, UserHandle.getUserId(uid));
-                    if (appInfo != null) {
-                        isPrivileged = (appInfo.flags & ApplicationInfo.FLAG_PRIVILEGED) != 0;
-                    }
-                } else {
-                    // Could not load data, don't add to cache so it will be loaded later.
-                    return;
-                }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Could not contact PackageManager", e);
+            if (mLoadPrivLaterPkgs == null) {
+                mLoadPrivLaterPkgs = new SparseArray<String>();
             }
+            mLoadPrivLaterPkgs.put(uid, pkgName);
         } else {
             isPrivileged = Boolean.parseBoolean(isPrivilegedString);
         }
