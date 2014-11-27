@@ -651,6 +651,7 @@ public class AnimatedStateListDrawable extends StateListDrawable {
         }
     }
 
+    @Override
     protected void setConstantState(@NonNull DrawableContainerState state) {
         super.setConstantState(state);
 
