@@ -112,6 +112,7 @@
 
     <application android:theme="@style/Theme">
         <uses-library android:name="android.test.runner" />
+        <uses-library android:name="org.apache.http.legacy" android:required="false" />
         <activity android:name="android.view.ViewAttachTestActivity" android:label="View Attach Test">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

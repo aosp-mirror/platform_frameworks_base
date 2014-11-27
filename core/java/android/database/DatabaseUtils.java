@@ -16,8 +16,6 @@
 
 package android.database;
 
-import org.apache.commons.codec.binary.Hex;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
@@ -416,9 +414,31 @@ public class DatabaseUtils {
      * @return the collation key in hex format
      */
     public static String getHexCollationKey(String name) {
-        byte [] arr = getCollationKeyInBytes(name);
-        char[] keys = Hex.encodeHex(arr);
+        byte[] arr = getCollationKeyInBytes(name);
+        char[] keys = encodeHex(arr);
         return new String(keys, 0, getKeyLen(arr) * 2);
+    }
+
+
+    /**
+     * Used building output as Hex
+     */
+    private static final char[] DIGITS = {
+            '0', '1', '2', '3', '4', '5', '6', '7',
+            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+    };
+
+    private static char[] encodeHex(byte[] input) {
+        int l = input.length;
+        char[] out = new char[l << 1];
+
+        // two characters form the hex value.
+        for (int i = 0, j = 0; i < l; i++) {
+            out[j++] = DIGITS[(0xF0 & input[i]) >>> 4 ];
+            out[j++] = DIGITS[ 0x0F & input[i] ];
+        }
+
+        return out;
     }
 
     private static int getKeyLen(byte[] arr) {
