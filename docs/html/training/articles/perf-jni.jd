@@ -635,20 +635,31 @@ avoid some problems.
 <a name="faq_FindClass" id="faq_FindClass"></a>
 <h2>FAQ: Why didn't <code>FindClass</code> find my class?</h2>
 
+<p>(Most of this advice applies equally well to failures to find methods
+with <code>GetMethodID</code> or <code>GetStaticMethodID</code>, or fields
+with <code>GetFieldID</code> or <code>GetStaticFieldID</code>.)</p>
+
 <p>Make sure that the class name string has the correct format.  JNI class
 names start with the package name and are separated with slashes,
 such as <code>java/lang/String</code>.  If you're looking up an array class,
 you need to start with the appropriate number of square brackets and
 must also wrap the class with 'L' and ';', so a one-dimensional array of
-<code>String</code> would be <code>[Ljava/lang/String;</code>.</p>
+<code>String</code> would be <code>[Ljava/lang/String;</code>.
+If you're looking up an inner class, use '$' rather than '.'. In general,
+using <code>javap</code> on the .class file is a good way to find out the
+internal name of your class.</p>
+
+<p>If you're using ProGuard, make sure that
+<a href="{@docRoot}tools/help/proguard.html#configuring">ProGuard didn't
+strip out your class</a>. This can happen if your class/method/field is only
+used from JNI.
 
 <p>If the class name looks right, you could be running into a class loader
 issue.  <code>FindClass</code> wants to start the class search in the
 class loader associated with your code.  It examines the call stack,
 which will look something like:
 <pre>    Foo.myfunc(Native Method)
-    Foo.main(Foo.java:10)
-    dalvik.system.NativeStart.main(Native Method)</pre>
+    Foo.main(Foo.java:10)</pre>
 
 <p>The topmost method is <code>Foo.myfunc</code>.  <code>FindClass</code>
 finds the <code>ClassLoader</code> object associated with the <code>Foo</code>
@@ -656,12 +667,9 @@ class and uses that.</p>
 
 <p>This usually does what you want.  You can get into trouble if you
 create a thread yourself (perhaps by calling <code>pthread_create</code>
-and then attaching it with <code>AttachCurrentThread</code>).
-Now the stack trace looks like this:</p>
-<pre>    dalvik.system.NativeStart.run(Native Method)</pre>
-
-<p>The topmost method is <code>NativeStart.run</code>, which isn't part of
-your application.  If you call <code>FindClass</code> from this thread, the
+and then attaching it with <code>AttachCurrentThread</code>). Now there
+are no stack frames from your application.
+If you call <code>FindClass</code> from this thread, the
 JavaVM will start in the "system" class loader instead of the one associated
 with your application, so attempts to find app-specific classes will fail.</p>
 
