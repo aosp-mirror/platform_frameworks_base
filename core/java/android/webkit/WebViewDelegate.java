@@ -22,7 +22,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.net.http.ErrorStrings;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.SparseArray;
@@ -150,7 +149,7 @@ public final class WebViewDelegate {
      * Returns the error string for the given {@code errorCode}.
      */
     public String getErrorString(Context context, int errorCode) {
-        return ErrorStrings.getString(errorCode, context);
+        return LegacyErrorStrings.getString(errorCode, context);
     }
 
     /**
