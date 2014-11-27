@@ -436,7 +436,7 @@ abstract class Connection {
             ret = false;
             String error;
             if (errorId < 0) {
-                error = ErrorStrings.getString(errorId, mContext);
+                error = getEventHandlerErrorString(errorId);
             } else {
                 Throwable cause = e.getCause();
                 error = cause != null ? cause.toString() : e.getMessage();
@@ -449,6 +449,61 @@ abstract class Connection {
         mHttpContext.removeAttribute(HTTP_CONNECTION);
 
         return ret;
+    }
+
+    private static String getEventHandlerErrorString(int errorId) {
+        switch (errorId) {
+            case EventHandler.OK:
+                return "OK";
+
+            case EventHandler.ERROR:
+                return "ERROR";
+
+            case EventHandler.ERROR_LOOKUP:
+                return "ERROR_LOOKUP";
+
+            case EventHandler.ERROR_UNSUPPORTED_AUTH_SCHEME:
+                return "ERROR_UNSUPPORTED_AUTH_SCHEME";
+
+            case EventHandler.ERROR_AUTH:
+                return "ERROR_AUTH";
+
+            case EventHandler.ERROR_PROXYAUTH:
+                return "ERROR_PROXYAUTH";
+
+            case EventHandler.ERROR_CONNECT:
+                return "ERROR_CONNECT";
+
+            case EventHandler.ERROR_IO:
+                return "ERROR_IO";
+
+            case EventHandler.ERROR_TIMEOUT:
+                return "ERROR_TIMEOUT";
+
+            case EventHandler.ERROR_REDIRECT_LOOP:
+                return "ERROR_REDIRECT_LOOP";
+
+            case EventHandler.ERROR_UNSUPPORTED_SCHEME:
+                return "ERROR_UNSUPPORTED_SCHEME";
+
+            case EventHandler.ERROR_FAILED_SSL_HANDSHAKE:
+                return "ERROR_FAILED_SSL_HANDSHAKE";
+
+            case EventHandler.ERROR_BAD_URL:
+                return "ERROR_BAD_URL";
+
+            case EventHandler.FILE_ERROR:
+                return "FILE_ERROR";
+
+            case EventHandler.FILE_NOT_FOUND_ERROR:
+                return "FILE_NOT_FOUND_ERROR";
+
+            case EventHandler.TOO_MANY_REQUESTS_ERROR:
+                return "TOO_MANY_REQUESTS_ERROR";
+
+            default:
+                return "UNKNOWN_ERROR";
+        }
     }
 
     HttpContext getHttpContext() {
