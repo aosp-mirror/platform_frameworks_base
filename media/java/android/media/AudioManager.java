@@ -90,6 +90,17 @@ public class AudioManager {
     public static final String RINGER_MODE_CHANGED_ACTION = "android.media.RINGER_MODE_CHANGED";
 
     /**
+     * @hide
+     * Sticky broadcast intent action indicating that the internal ringer mode has
+     * changed. Includes the new ringer mode.
+     *
+     * @see #EXTRA_RINGER_MODE
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String INTERNAL_RINGER_MODE_CHANGED_ACTION =
+            "android.media.INTERNAL_RINGER_MODE_CHANGED_ACTION";
+
+    /**
      * The new ringer mode.
      *
      * @see #RINGER_MODE_CHANGED_ACTION

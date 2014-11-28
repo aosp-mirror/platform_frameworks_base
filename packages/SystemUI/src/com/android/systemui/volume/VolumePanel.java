@@ -546,6 +546,7 @@ public class VolumePanel extends Handler implements DemoMode {
     private void registerReceiver() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
@@ -554,7 +555,12 @@ public class VolumePanel extends Handler implements DemoMode {
 
                 if (AudioManager.RINGER_MODE_CHANGED_ACTION.equals(action)) {
                     removeMessages(MSG_RINGER_MODE_CHANGED);
-                    sendMessage(obtainMessage(MSG_RINGER_MODE_CHANGED));
+                    sendEmptyMessage(MSG_RINGER_MODE_CHANGED);
+                }
+
+                if (AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION.equals(action)) {
+                    removeMessages(MSG_INTERNAL_RINGER_MODE_CHANGED);
+                    sendEmptyMessage(MSG_INTERNAL_RINGER_MODE_CHANGED);
                 }
 
                 if (Intent.ACTION_SCREEN_OFF.equals(action)) {
@@ -989,11 +995,6 @@ public class VolumePanel extends Handler implements DemoMode {
     public void postLayoutDirection(int layoutDirection) {
         removeMessages(MSG_LAYOUT_DIRECTION);
         obtainMessage(MSG_LAYOUT_DIRECTION, layoutDirection, 0).sendToTarget();
-    }
-
-    public void postInternalRingerModeChanged(int mode) {
-        removeMessages(MSG_INTERNAL_RINGER_MODE_CHANGED);
-        obtainMessage(MSG_INTERNAL_RINGER_MODE_CHANGED, mode, 0).sendToTarget();
     }
 
     private static String flagsToString(int flags) {
