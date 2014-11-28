@@ -689,6 +689,12 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    protected boolean isCurrentProfile(int userId) {
+        synchronized (mCurrentProfiles) {
+            return mCurrentProfiles.get(userId) != null;
+        }
+    }
+
     @Override
     public String getCurrentMediaNotificationKey() {
         return null;
