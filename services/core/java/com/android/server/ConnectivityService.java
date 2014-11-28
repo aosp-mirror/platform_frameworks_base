@@ -3593,8 +3593,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
 //            updateMtu(lp, null);
 //        }
         updateTcpBufferSizes(networkAgent);
+
+        // TODO: deprecate and remove mDefaultDns when we can do so safely.
+        // For now, use it only when the network has Internet access. http://b/18327075
+        final boolean useDefaultDns = networkAgent.networkCapabilities.hasCapability(
+                NetworkCapabilities.NET_CAPABILITY_INTERNET);
         final boolean flushDns = updateRoutes(newLp, oldLp, netId);
-        updateDnses(newLp, oldLp, netId, flushDns);
+        updateDnses(newLp, oldLp, netId, flushDns, useDefaultDns);
+
         updateClat(newLp, oldLp, networkAgent);
         if (isDefaultNetwork(networkAgent)) handleApplyDefaultProxy(newLp.getHttpProxy());
         // TODO - move this check to cover the whole function
@@ -3688,10 +3694,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         return !routeDiff.added.isEmpty() || !routeDiff.removed.isEmpty();
     }
-    private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId, boolean flush) {
+    private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId,
+                             boolean flush, boolean useDefaultDns) {
         if (oldLp == null || (newLp.isIdenticalDnses(oldLp) == false)) {
             Collection<InetAddress> dnses = newLp.getDnsServers();
-            if (dnses.size() == 0 && mDefaultDns != null) {
+            if (dnses.size() == 0 && mDefaultDns != null && useDefaultDns) {
                 dnses = new ArrayList();
                 dnses.add(mDefaultDns);
                 if (DBG) {

@@ -1710,14 +1710,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setDnsServersForNetwork(int netId, String[] servers, String domains) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
-        final Command cmd = new Command("resolver", "setnetdns", netId,
-                (domains == null ? "" : domains));
-
-        for (String s : servers) {
-            InetAddress a = NetworkUtils.numericToInetAddress(s);
-            if (a.isAnyLocalAddress() == false) {
-                cmd.appendArg(a.getHostAddress());
+        Command cmd;
+        if (servers.length > 0) {
+            cmd = new Command("resolver", "setnetdns", netId,
+                    (domains == null ? "" : domains));
+            for (String s : servers) {
+                InetAddress a = NetworkUtils.numericToInetAddress(s);
+                if (a.isAnyLocalAddress() == false) {
+                    cmd.appendArg(a.getHostAddress());
+                }
             }
+        } else {
+            cmd = new Command("resolver", "clearnetdns", netId);
         }
 
         try {
