@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume;
 
+import android.animation.LayoutTransition;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,9 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
@@ -65,7 +69,6 @@ public class ZenModePanel extends LinearLayout {
     private static final int FOREVER_CONDITION_INDEX = 0;
     private static final int TIME_CONDITION_INDEX = 1;
     private static final int FIRST_CONDITION_INDEX = 2;
-    private static final long SELECT_DEFAULT_DELAY = 300;
 
     public static final Intent ZEN_SETTINGS = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS);
 
@@ -76,6 +79,8 @@ public class ZenModePanel extends LinearLayout {
     private final IconPulser mIconPulser;
     private final int mSubheadWarningColor;
     private final int mSubheadColor;
+    private final Interpolator mInterpolator;
+    private final int mMaxConditions;
 
     private String mTag = TAG + "/" + Integer.toHexString(System.identityHashCode(this));
 
@@ -96,6 +101,7 @@ public class ZenModePanel extends LinearLayout {
     private boolean mHidden = false;
     private int mSessionZen;
     private int mAttachedZen;
+    private boolean mAttached;
     private Condition mSessionExitCondition;
     private Condition[] mConditions;
     private Condition mTimeCondition;
@@ -109,6 +115,10 @@ public class ZenModePanel extends LinearLayout {
         final Resources res = mContext.getResources();
         mSubheadWarningColor = res.getColor(R.color.system_warning_color);
         mSubheadColor = res.getColor(R.color.qs_subhead);
+        mInterpolator = AnimationUtils.loadInterpolator(mContext,
+                com.android.internal.R.interpolator.fast_out_slow_in);
+        mMaxConditions = MathUtils.constrain(res.getInteger(R.integer.zen_mode_max_conditions),
+                1, 100);
         if (DEBUG) Log.d(mTag, "new ZenModePanel");
     }
 
@@ -149,17 +159,30 @@ public class ZenModePanel extends LinearLayout {
         Interaction.register(mMoreSettings, mInteractionCallback);
 
         mZenConditions = (LinearLayout) findViewById(R.id.zen_conditions);
+        setLayoutTransition(newLayoutTransition());
+    }
+
+    private LayoutTransition newLayoutTransition() {
+        final LayoutTransition transition = new LayoutTransition();
+        transition.disableTransitionType(LayoutTransition.DISAPPEARING);
+        transition.disableTransitionType(LayoutTransition.CHANGE_DISAPPEARING);
+        transition.setInterpolator(LayoutTransition.APPEARING, mInterpolator);
+        transition.setInterpolator(LayoutTransition.CHANGE_APPEARING, mInterpolator);
+        return transition;
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         if (DEBUG) Log.d(mTag, "onAttachedToWindow");
+        ((ViewGroup) getParent()).setLayoutTransition(newLayoutTransition());
+        mAttached = true;
         mAttachedZen = getSelectedZen(-1);
         mSessionZen = mAttachedZen;
         mSessionExitCondition = copy(mExitCondition);
         refreshExitConditionText();
         updateWidgets();
+        setRequestingConditions(!mHidden);
     }
 
     @Override
@@ -167,15 +190,19 @@ public class ZenModePanel extends LinearLayout {
         super.onDetachedFromWindow();
         if (DEBUG) Log.d(mTag, "onDetachedFromWindow");
         checkForAttachedZenChange();
+        mAttached = false;
         mAttachedZen = -1;
         mSessionZen = -1;
         mSessionExitCondition = null;
         setExpanded(false);
+        setRequestingConditions(false);
     }
 
     public void setHidden(boolean hidden) {
         if (mHidden == hidden) return;
+        if (DEBUG) Log.d(mTag, "hidden=" + hidden);
         mHidden = hidden;
+        setRequestingConditions(mAttached && !mHidden);
         updateWidgets();
     }
 
@@ -193,8 +220,10 @@ public class ZenModePanel extends LinearLayout {
     private void setExpanded(boolean expanded) {
         if (expanded == mExpanded) return;
         mExpanded = expanded;
+        if (mExpanded) {
+            ensureSelection();
+        }
         updateWidgets();
-        setRequestingConditions(mExpanded);
         fireExpanded();
     }
 
@@ -331,8 +360,36 @@ public class ZenModePanel extends LinearLayout {
     }
 
     private void handleUpdateConditions(Condition[] conditions) {
+        conditions = trimConditions(conditions);
+        if (Arrays.equals(conditions, mConditions)) {
+            final int count = mConditions == null ? 0 : mConditions.length;
+            if (DEBUG) Log.d(mTag, "handleUpdateConditions unchanged conditionCount=" + count);
+            return;
+        }
         mConditions = conditions;
         handleUpdateConditions();
+    }
+
+    private Condition[] trimConditions(Condition[] conditions) {
+        if (conditions == null || conditions.length <= mMaxConditions) {
+            // no need to trim
+            return conditions;
+        }
+        // look for current exit condition, ensure it is included if found
+        int found = -1;
+        for (int i = 0; i < conditions.length; i++) {
+            final Condition c = conditions[i];
+            if (mSessionExitCondition != null && sameConditionId(mSessionExitCondition, c)) {
+                found = i;
+                break;
+            }
+        }
+        final Condition[] rt = Arrays.copyOf(conditions, mMaxConditions);
+        if (found >= mMaxConditions) {
+            // found after the first N, promote to the end of the first N
+            rt[mMaxConditions - 1] = conditions[found];
+        }
+        return rt;
     }
 
     private void handleUpdateConditions() {
@@ -355,9 +412,10 @@ public class ZenModePanel extends LinearLayout {
         if (isDowntime(mSessionExitCondition) && !foundDowntime) {
             bind(mSessionExitCondition, null);
         }
-        // ensure something is selected, after waiting for providers to respond
-        mHandler.removeMessages(H.SELECT_DEFAULT);
-        mHandler.sendEmptyMessageDelayed(H.SELECT_DEFAULT, SELECT_DEFAULT_DELAY);
+        // ensure something is selected
+        if (mExpanded) {
+            ensureSelection();
+        }
     }
 
     private static boolean isDowntime(Condition c) {
@@ -368,9 +426,9 @@ public class ZenModePanel extends LinearLayout {
         return (ConditionTag) mZenConditions.getChildAt(index).getTag();
     }
 
-    private void handleSelectDefault() {
-        if (!mExpanded) return;
+    private void ensureSelection() {
         // are we left without anything selected?  if so, set a default
+        if (mZenConditions.getChildCount() == 0) return;
         for (int i = 0; i < mZenConditions.getChildCount(); i++) {
             if (getConditionTagAt(i).rb.isChecked()) {
                 if (DEBUG) Log.d(mTag, "Not selecting a default, checked="
@@ -419,7 +477,7 @@ public class ZenModePanel extends LinearLayout {
         }
         tag.condition = condition;
         tag.rb.setEnabled(enabled);
-        if (mSessionExitCondition != null
+        if ((mSessionExitCondition != null || mAttachedZen != Global.ZEN_MODE_OFF)
                 && sameConditionId(mSessionExitCondition, tag.condition)) {
             tag.rb.setChecked(true);
         }
@@ -623,7 +681,6 @@ public class ZenModePanel extends LinearLayout {
         private static final int UPDATE_CONDITIONS = 1;
         private static final int EXIT_CONDITION_CHANGED = 2;
         private static final int UPDATE_ZEN = 3;
-        private static final int SELECT_DEFAULT = 4;
 
         private H() {
             super(Looper.getMainLooper());
@@ -637,8 +694,6 @@ public class ZenModePanel extends LinearLayout {
                 handleExitConditionChanged((Condition) msg.obj);
             } else if (msg.what == UPDATE_ZEN) {
                 handleUpdateZen(msg.arg1);
-            } else if (msg.what == SELECT_DEFAULT) {
-                handleSelectDefault();
             }
         }
     }
