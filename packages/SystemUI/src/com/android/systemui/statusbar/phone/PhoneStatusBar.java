@@ -4183,8 +4183,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         @Override
-        public void pulseWhileDozing(@NonNull PulseCallback callback) {
-            mHandler.obtainMessage(H.MSG_PULSE_WHILE_DOZING, callback).sendToTarget();
+        public void pulseWhileDozing(@NonNull PulseCallback callback, int reason) {
+            mHandler.obtainMessage(H.MSG_PULSE_WHILE_DOZING, reason, 0, callback).sendToTarget();
         }
 
         @Override
@@ -4206,8 +4206,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             ready.run();
         }
 
-        private void handlePulseWhileDozing(@NonNull PulseCallback callback) {
-            mDozeScrimController.pulse(callback);
+        private void handlePulseWhileDozing(@NonNull PulseCallback callback, int reason) {
+            mDozeScrimController.pulse(callback, reason);
         }
 
         private void handleStopDozing() {
@@ -4230,7 +4230,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         handleStartDozing((Runnable) msg.obj);
                         break;
                     case MSG_PULSE_WHILE_DOZING:
-                        handlePulseWhileDozing((PulseCallback) msg.obj);
+                        handlePulseWhileDozing((PulseCallback) msg.obj, msg.arg1);
                         break;
                     case MSG_STOP_DOZING:
                         handleStopDozing();
