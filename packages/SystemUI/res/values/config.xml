@@ -287,8 +287,8 @@
     <!-- Number of times to show the strong alarm warning text in the volume dialog -->
     <integer name="zen_mode_alarm_warning_threshold">5</integer>
 
-    <!-- Maximum number of optional conditions to display in the zen mode selection panel -->
-    <integer name="zen_mode_max_conditions">3</integer>
+    <!-- Maximum number of total conditions to display in the zen mode selection panel -->
+    <integer name="zen_mode_max_conditions">5</integer>
 
     <!-- Enable the default volume dialog -->
     <bool name="enable_volume_ui">true</bool>

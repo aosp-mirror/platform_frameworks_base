@@ -89,12 +89,12 @@ public class ZenLog {
                 ringerModeToString(ringerModeExternalOut));
     }
 
-    public static void traceDowntime(int downtimeMode, int day, ArraySet<Integer> days) {
-        append(TYPE_DOWNTIME, zenModeToString(downtimeMode) + ",day=" + day + ",days=" + days);
+    public static void traceDowntimeAutotrigger(String result) {
+        append(TYPE_DOWNTIME, result);
     }
 
-    public static void traceSetZenMode(int mode, String reason) {
-        append(TYPE_SET_ZEN_MODE, zenModeToString(mode) + "," + reason);
+    public static void traceSetZenMode(int zenMode, String reason) {
+        append(TYPE_SET_ZEN_MODE, zenModeToString(zenMode) + "," + reason);
     }
 
     public static void traceUpdateZenMode(int fromMode, int toMode) {
