@@ -214,7 +214,7 @@ static void agps_status_callback(AGpsStatus* agps_status)
 
     size_t status_size = agps_status->size;
     if (status_size == sizeof(AGpsStatus_v3)) {
-      ALOGV("AGpsStatus is V3: %d", status_size);
+      ALOGV("AGpsStatus is V3: %zd", status_size);
       switch (agps_status->addr.ss_family)
       {
       case AF_INET:
@@ -256,7 +256,7 @@ static void agps_status_callback(AGpsStatus* agps_status)
           break;
       }
     } else if (status_size >= sizeof(AGpsStatus_v2)) {
-      ALOGV("AGpsStatus is V2+: %d", status_size);
+      ALOGV("AGpsStatus is V2+: %zd", status_size);
       // for back-compatibility reasons we check in v2 that the data structure size is greater or
       // equal to the declared size in gps.h
       uint32_t ipaddr = agps_status->ipaddr;
@@ -266,12 +266,12 @@ static void agps_status_callback(AGpsStatus* agps_status)
           isSupported = true;
       }
     } else if (status_size >= sizeof(AGpsStatus_v1)) {
-        ALOGV("AGpsStatus is V1+: %d", status_size);
+        ALOGV("AGpsStatus is V1+: %zd", status_size);
         // because we have to check for >= with regards to v2, we also need to relax the check here
         // and only make sure that the size is at least what we expect
         isSupported = true;
     } else {
-        ALOGE("Invalid size of AGpsStatus found: %d.", status_size);
+        ALOGE("Invalid size of AGpsStatus found: %zd.", status_size);
     }
 
     if (isSupported) {
@@ -758,7 +758,7 @@ static void android_location_GpsLocationProvider_agps_data_conn_open(
     } else if (interface_size == sizeof(AGpsInterface_v1)) {
         sAGpsInterface->data_conn_open(apnStr);
     } else {
-        ALOGE("Invalid size of AGpsInterface found: %d.", interface_size);
+        ALOGE("Invalid size of AGpsInterface found: %zd.", interface_size);
     }
 
     env->ReleaseStringUTFChars(apn, apnStr);
@@ -1260,7 +1260,7 @@ static void measurement_callback(GpsData* data) {
         env->DeleteLocalRef(gpsMeasurementsEventClass);
         env->DeleteLocalRef(gpsMeasurementsEvent);
     } else {
-        ALOGE("Invalid GpsData size found in gps_measurement_callback, size=%d", data->size);
+        ALOGE("Invalid GpsData size found in gps_measurement_callback, size=%zd", data->size);
     }
 }
 
@@ -1311,7 +1311,7 @@ static jobject translate_gps_navigation_message(JNIEnv* env, GpsNavigationMessag
     size_t dataLength = message->data_length;
     uint8_t* data = message->data;
     if (dataLength == 0 || data == NULL) {
-        ALOGE("Invalid Navigation Message found: data=%p, length=%d", data, dataLength);
+        ALOGE("Invalid Navigation Message found: data=%p, length=%zd", data, dataLength);
         return NULL;
     }
 
@@ -1370,7 +1370,7 @@ static void navigation_message_callback(GpsNavigationMessage* message) {
         env->DeleteLocalRef(navigationMessageEventClass);
         env->DeleteLocalRef(navigationMessageEvent);
     } else {
-        ALOGE("Invalid GpsNavigationMessage size found: %d", message->size);
+        ALOGE("Invalid GpsNavigationMessage size found: %zd", message->size);
     }
 }
 
