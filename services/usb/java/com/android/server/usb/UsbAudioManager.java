@@ -24,6 +24,8 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.media.AudioManager;
+import android.os.FileObserver;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -38,6 +40,8 @@ import java.util.HashMap;
 public class UsbAudioManager {
     private static final String TAG = UsbAudioManager.class.getSimpleName();
     private static final boolean DEBUG = false;
+
+    private static final String ALSA_DIRECTORY = "/dev/snd/";
 
     private final Context mContext;
 
@@ -69,11 +73,72 @@ public class UsbAudioManager {
         }
     }
 
+    private final class AlsaDevice {
+        public static final int TYPE_UNKNOWN = 0;
+        public static final int TYPE_PLAYBACK = 1;
+        public static final int TYPE_CAPTURE = 2;
+        public static final int TYPE_MIDI = 3;
+
+        public int mCard;
+        public int mDevice;
+        public int mType;
+
+        public AlsaDevice(int type, int card, int device) {
+            mType = type;
+            mCard = card;
+            mDevice = device;
+        }
+
+        public boolean equals(Object obj) {
+            if (! (obj instanceof AlsaDevice)) {
+                return false;
+            }
+            AlsaDevice other = (AlsaDevice)obj;
+            return (mType == other.mType && mCard == other.mCard && mDevice == other.mDevice);
+        }
+
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("AlsaDevice: [card: " + mCard);
+            sb.append(", device: " + mDevice);
+            sb.append(", type: " + mType);
+            sb.append("]");
+            return sb.toString();
+        }
+    }
+
     private final HashMap<UsbDevice,AudioDevice> mAudioDevices
             = new HashMap<UsbDevice,AudioDevice>();
 
+    private final HashMap<String,AlsaDevice> mAlsaDevices
+            = new HashMap<String,AlsaDevice>();
+
+    private final FileObserver mAlsaObserver = new FileObserver(ALSA_DIRECTORY,
+            FileObserver.CREATE | FileObserver.DELETE) {
+        public void onEvent(int event, String path) {
+            switch (event) {
+                case FileObserver.CREATE:
+                    alsaFileAdded(path);
+                    break;
+                case FileObserver.DELETE:
+                    alsaFileRemoved(path);
+                    break;
+            }
+        }
+    };
+
     /* package */ UsbAudioManager(Context context) {
         mContext = context;
+    }
+
+    public void systemReady() {
+        mAlsaObserver.startWatching();
+
+        // add existing alsa devices
+        File[] files = new File(ALSA_DIRECTORY).listFiles();
+        for (int i = 0; i < files.length; i++) {
+            alsaFileAdded(files[i].getName());
+        }
     }
 
     // Broadcasts the arrival/departure of a USB audio interface
@@ -93,30 +158,87 @@ public class UsbAudioManager {
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
-    private boolean waitForAlsaFile(int card, int device, boolean capture) {
-        // These values were empirically determined.
-        final int kNumRetries = 5;
-        final int kSleepTime = 500; // ms
-        String alsaDevPath = "/dev/snd/pcmC" + card + "D" + device + (capture ? "c" : "p");
-        File alsaDevFile = new File(alsaDevPath);
-        boolean exists = false;
-        for (int retry = 0; !exists && retry < kNumRetries; retry++) {
-            exists = alsaDevFile.exists();
-            if (!exists) {
-                try {
-                    Thread.sleep(kSleepTime);
-                } catch (IllegalThreadStateException ex) {
-                    Slog.d(TAG, "usb: IllegalThreadStateException while waiting for ALSA file.");
-                } catch (java.lang.InterruptedException ex) {
-                    Slog.d(TAG, "usb: InterruptedException while waiting for ALSA file.");
+    private AlsaDevice waitForAlsaDevice(int card, int device, int type) {
+        AlsaDevice testDevice = new AlsaDevice(type, card, device);
+
+        // This value was empirically determined.
+        final int kWaitTime = 2500; // ms
+
+        synchronized(mAlsaDevices) {
+            long timeout = SystemClock.elapsedRealtime() + kWaitTime;
+            do {
+                if (mAlsaDevices.values().contains(testDevice)) {
+                    return testDevice;
+                }
+                long waitTime = timeout - SystemClock.elapsedRealtime();
+                if (waitTime > 0) {
+                    try {
+                        mAlsaDevices.wait(waitTime);
+                    } catch (InterruptedException e) {
+                        Slog.d(TAG, "usb: InterruptedException while waiting for ALSA file.");
+                    }
+                }
+            } while (timeout > SystemClock.elapsedRealtime());
+        }
+
+        Slog.e(TAG, "waitForAlsaDevice failed for " + testDevice);
+        return null;
+    }
+
+    private void alsaFileAdded(String name) {
+        int type = AlsaDevice.TYPE_UNKNOWN;
+        int card = -1, device = -1;
+
+        if (name.startsWith("pcmC")) {
+            if (name.endsWith("p")) {
+                type = AlsaDevice.TYPE_PLAYBACK;
+            } else if (name.endsWith("c")) {
+                type = AlsaDevice.TYPE_CAPTURE;
+            }
+        } else if (name.startsWith("midiC")) {
+            type = AlsaDevice.TYPE_MIDI;
+        }
+
+        if (type != AlsaDevice.TYPE_UNKNOWN) {
+            try {
+                int c_index = name.indexOf('C');
+                int d_index = name.indexOf('D');
+                int end = name.length();
+                if (type == AlsaDevice.TYPE_PLAYBACK || type == AlsaDevice.TYPE_CAPTURE) {
+                    // skip trailing 'p' or 'c'
+                    end--;
+                }
+                card = Integer.parseInt(name.substring(c_index + 1, d_index));
+                device = Integer.parseInt(name.substring(d_index + 1, end));
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not parse ALSA file name " + name, e);
+                return;
+            }
+            synchronized(mAlsaDevices) {
+                if (mAlsaDevices.get(name) == null) {
+                    AlsaDevice alsaDevice = new AlsaDevice(type, card, device);
+                    Slog.d(TAG, "Adding ALSA device " + alsaDevice);
+                    mAlsaDevices.put(name, alsaDevice);
+                    mAlsaDevices.notifyAll();
                 }
             }
         }
+    }
 
-        return exists;
+    private void alsaFileRemoved(String path) {
+        synchronized(mAlsaDevices) {
+            AlsaDevice device = mAlsaDevices.remove(path);
+            if (device != null) {
+                Slog.d(TAG, "ALSA device removed: " + device);
+            }
+        }
     }
 
     /* package */ void deviceAdded(UsbDevice usbDevice) {
+       if (DEBUG) {
+          Slog.d(TAG, "deviceAdded(): " + usbDevice);
+        }
+
         // Is there an audio interface in there?
         boolean isAudioDevice = false;
 
@@ -134,7 +256,7 @@ public class UsbAudioManager {
         }
 
         //TODO(pmclean) The "Parser" objects inspect files in "/proc/asound" which we presume is
-        // present, unlike the waitForAlsaFile() which waits on a file in /dev/snd. It is not
+        // present, unlike the waitForAlsaDevice() which waits on a file in /dev/snd. It is not
         // clear why this works, or that it can be relied on going forward.  Needs further
         // research.
         AlsaCardsParser cardsParser = new AlsaCardsParser();
@@ -157,19 +279,21 @@ public class UsbAudioManager {
 
         // Playback device file needed/present?
         if (hasPlayback &&
-            !waitForAlsaFile(card, device, false)) {
+            waitForAlsaDevice(card, device, AlsaDevice.TYPE_PLAYBACK) == null) {
             return;
         }
 
         // Capture device file needed/present?
         if (hasCapture &&
-            !waitForAlsaFile(card, device, true)) {
+            waitForAlsaDevice(card, device, AlsaDevice.TYPE_CAPTURE) == null) {
             return;
         }
 
         if (DEBUG) {
             Slog.d(TAG,
-                    "usb: hasPlayback:" + hasPlayback + " hasCapture:" + hasCapture);
+                    "usb: hasPlayback:" + hasPlayback +
+                    " hasCapture:" + hasCapture +
+                    " hasMidi:" + hasMidi);
         }
 
         AudioDevice audioDevice = new AudioDevice(card, device, hasPlayback, hasCapture, hasMidi);
@@ -184,7 +308,9 @@ public class UsbAudioManager {
 
         AudioDevice audioDevice = mAudioDevices.remove(device);
         if (audioDevice != null) {
-            sendDeviceNotification(audioDevice, false);
+            if (audioDevice.mHasPlayback || audioDevice.mHasPlayback) {
+                sendDeviceNotification(audioDevice, false);
+            }
         }
     }
 
