@@ -9564,6 +9564,9 @@ public class WindowManagerService extends IWindowManager.Stub
                                     + " interesting=" + numInteresting
                                     + " drawn=" + wtoken.numDrawnWindows);
                             wtoken.allDrawn = true;
+                            // Force an additional layout pass where WindowStateAnimator#
+                            // commitFinishDrawingLocked() will call performShowLocked().
+                            displayContent.layoutNeeded = true;
                             mH.obtainMessage(H.NOTIFY_ACTIVITY_DRAWN, wtoken.token).sendToTarget();
                         }
                     }
