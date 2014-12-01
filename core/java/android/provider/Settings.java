@@ -4975,6 +4975,17 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether to wake the display when plugging or unplugging the charger
+         *
+         * @hide
+         */
+        public static final String WAKE_WHEN_PLUGGED_OR_UNPLUGGED =
+                "wake_when_plugged_or_unplugged";
+
+        /** @hide */
+        public static final Validator WAKE_WHEN_PLUGGED_OR_UNPLUGGED_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5209,6 +5220,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(RING_HOME_BUTTON_BEHAVIOR);
             PRIVATE_SETTINGS.add(SWAP_VOLUME_KEYS_ON_ROTATION);
             PRIVATE_SETTINGS.add(NAV_BAR_INVERSE);
+            PRIVATE_SETTINGS.add(WAKE_WHEN_PLUGGED_OR_UNPLUGGED);
         }
 
         /**
@@ -5346,6 +5358,7 @@ public final class Settings {
             VALIDATORS.put(RING_HOME_BUTTON_BEHAVIOR, RING_HOME_BUTTON_BEHAVIOR_VALIDATOR);
             VALIDATORS.put(SWAP_VOLUME_KEYS_ON_ROTATION, SWAP_VOLUME_KEYS_ON_ROTATION_VALIDATOR);
             VALIDATORS.put(NAV_BAR_INVERSE, NAV_BAR_INVERSE_VALIDATOR);
+            VALIDATORS.put(WAKE_WHEN_PLUGGED_OR_UNPLUGGED, WAKE_WHEN_PLUGGED_OR_UNPLUGGED_VALIDATOR);
         }
 
         /**
