@@ -80,6 +80,8 @@ import android.media.projection.MediaProjectionManager;
 import android.media.session.MediaSessionManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
+import android.midi.IMidiManager;
+import android.midi.MidiManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.EthernetManager;
@@ -777,6 +779,12 @@ class ContextImpl extends Context {
                 IBinder b = ServiceManager.getService(APPWIDGET_SERVICE);
                 return new AppWidgetManager(ctx, IAppWidgetService.Stub.asInterface(b));
             }});
+
+        registerService(MIDI_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService(MIDI_SERVICE);
+                    return new MidiManager(ctx, IMidiManager.Stub.asInterface(b));
+                }});
     }
 
     static ContextImpl getImpl(Context context) {

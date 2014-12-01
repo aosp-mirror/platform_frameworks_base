@@ -24,7 +24,11 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.media.AudioManager;
+import android.midi.IMidiManager;
 import android.os.FileObserver;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -44,6 +48,7 @@ public class UsbAudioManager {
     private static final String ALSA_DIRECTORY = "/dev/snd/";
 
     private final Context mContext;
+    private IMidiManager mMidiManager;
 
     private final class AudioDevice {
         public int mCard;
@@ -132,6 +137,8 @@ public class UsbAudioManager {
     }
 
     public void systemReady() {
+        final IBinder b = ServiceManager.getService(Context.MIDI_SERVICE);
+        mMidiManager = IMidiManager.Stub.asInterface(b);
         mAlsaObserver.startWatching();
 
         // add existing alsa devices
@@ -241,6 +248,7 @@ public class UsbAudioManager {
 
         // Is there an audio interface in there?
         boolean isAudioDevice = false;
+        AlsaDevice midiDevice = null;
 
         // FIXME - handle multiple configurations?
         int interfaceCount = usbDevice.getInterfaceCount();
@@ -289,6 +297,11 @@ public class UsbAudioManager {
             return;
         }
 
+        // MIDI device file needed/present?
+        if (hasMidi) {
+            midiDevice = waitForAlsaDevice(card, device, AlsaDevice.TYPE_MIDI);
+        }
+
         if (DEBUG) {
             Slog.d(TAG,
                     "usb: hasPlayback:" + hasPlayback +
@@ -299,6 +312,14 @@ public class UsbAudioManager {
         AudioDevice audioDevice = new AudioDevice(card, device, hasPlayback, hasCapture, hasMidi);
         mAudioDevices.put(usbDevice, audioDevice);
         sendDeviceNotification(audioDevice, true);
+
+        if (midiDevice != null && mMidiManager != null) {
+            try {
+                mMidiManager.alsaDeviceAdded(midiDevice.mCard, midiDevice.mDevice, usbDevice);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "MIDI Manager dead", e);
+            }
+        }
     }
 
     /* package */ void deviceRemoved(UsbDevice device) {
@@ -310,6 +331,13 @@ public class UsbAudioManager {
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasPlayback) {
                 sendDeviceNotification(audioDevice, false);
+            }
+            if (audioDevice.mHasMIDI) {
+                try {
+                    mMidiManager.alsaDeviceRemoved(device);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "MIDI Manager dead", e);
+                }
             }
         }
     }
