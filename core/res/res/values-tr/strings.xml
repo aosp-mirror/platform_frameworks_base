@@ -41,8 +41,7 @@
     <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sn."</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Adsız&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Telefon numarası yok)"</string>
-    <!-- no translation found for unknownName (6867811765370350269) -->
-    <skip />
+    <string name="unknownName" msgid="6867811765370350269">"Bilinmiyor"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Sesli Mesaj"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Bağlantı sorunu veya geçersiz MMI kodu."</string>
@@ -158,16 +157,11 @@
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Ağ izlenebilir"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Bunu, bilinmeyen üçüncü taraflar yapabilir"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> tarafından"</string>
-    <!-- no translation found for work_profile_deleted (5005572078641980632) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_description (6305147513054341102) -->
-    <skip />
-    <!-- no translation found for work_profile_deleted_details (226615743462361248) -->
-    <skip />
-    <!-- no translation found for factory_reset_warning (5423253125642394387) -->
-    <skip />
-    <!-- no translation found for factory_reset_message (4905025204141900666) -->
-    <skip />
+    <string name="work_profile_deleted" msgid="5005572078641980632">"İş profili silindi"</string>
+    <string name="work_profile_deleted_description" msgid="6305147513054341102">"Eksik yönetici uygulaması nedeniyle iş profili silindi."</string>
+    <string name="work_profile_deleted_details" msgid="226615743462361248">"İş profili yönetici uygulaması eksik ya da bozuk. Bunun sonucunda iş profiliniz ve ilgili veriler silindi. Yardım almak için yöneticiniz ile iletişim kurun."</string>
+    <string name="factory_reset_warning" msgid="5423253125642394387">"Cihazınız silinecek"</string>
+    <string name="factory_reset_message" msgid="4905025204141900666">"Yönetici uygulamasında bileşen eksik ya da uygulama bozuk ve kullanılamaz durumda. Cihazınız şimdi silinecek. Yardım için yöneticinizle iletişim kurun."</string>
     <string name="me" msgid="6545696007631404292">"Ben"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tablet seçenekleri"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV seçenekleri"</string>
@@ -308,11 +302,11 @@
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Uygulamaya, gelen çağrıları mesajla yanıtlama etkinliklerini işlemek üzere diğer mesajlaşma uygulamalarına istek gönderme izni verir."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"kısa mesajlarımı (SMS veya MMS) oku"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Uygulamaya tabletinizde veya SIM kartta saklanan SMS mesajlarını okuma izni verir. Bu izin, uygulamanın tüm SMS mesajlarını içeriğinden veya gizliliğinden bağımsız olarak okumasına olanak sağlar."</string>
-    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Uygulamaya, TV\'nizde veya SIM kartta depolanmış SMS iletilerini okuma izni verir. Bu izin, uygulamanın içeriğe veya gizliliğe bakılmaksızın tüm SMS iletilerini okumasına olanak sağlar."</string>
+    <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"Uygulamaya, TV\'nizde veya SIM kartta depolanmış SMS mesajlarını okuma izni verir. Bu izin, uygulamanın içeriğe veya gizliliğe bakılmaksızın tüm SMS mesajlarını okumasına olanak sağlar."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Uygulamaya telefonunuzda veya SIM kartta saklanan SMS mesajlarını okuma izni verir. Bu izin, uygulamanın tüm SMS mesajlarını içeriğinden veya gizliliğinden bağımsız olarak okumasına olanak sağlar."</string>
     <string name="permlab_writeSms" msgid="3216950472636214774">"kısa mesajlarımı (SMS veya MMS) düzenle"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Uygulamaya, tabletinizde veya SIM kartınızda depolanan SMS mesajlarına yazma izni verir. Kötü amaçlı uygulamalar mesajlarınızı silebilir."</string>
-    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Uygulamaya, TV\'niz ya da SIM kartınızda saklanan SMS iletilerine yazma izni verir. Kötü amaçlı uygulamalar iletilerinizi silebilir."</string>
+    <string name="permdesc_writeSms" product="tv" msgid="955871498983538187">"Uygulamaya, TV\'niz ya da SIM kartınızda saklanan SMS mesajlarına yazma izni verir. Kötü amaçlı uygulamalar mesajlarınızı silebilir."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Uygulamaya, telefonunuzdaki veya SIM kartınızdaki SMS mesajlarına yazma izni verir. Kötü amaçlı uygulamalar mesajlarınızı silebilir."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"kısa mesajları (WAP) al"</string>
     <string name="permdesc_receiveWapPush" msgid="748232190220583385">"Uygulamaya WAP mesajlarını alma ve işleme izni verir. Buna, size gönderilen mesajları takip edip size göstermeden silebilme izni de dahildir."</string>
@@ -512,7 +506,7 @@
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Uygulamaya telefonunuzda depolanan kişilerinizle ilgili verileri okuma izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar kişi verilerini sizden habersiz paylaşabilir."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"kişilerinizi değiştirme"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Uygulamaya tabletinizde depolanan kişilerinizle ilgili verileri değiştirme izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Uygulamaya, belli kişileri arama, bu kişilerle e-posta aracılığıyla haberleşme veya başka yollardan iletişim kurma sıklığınız da dahil olmak üzere, TV\'nizde kayıtlı kişiler ile ilgili verileri değiştirme izni verir. Bu izin, uygulamaların kişi verilerinizi silmesine olanak sağlar."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Uygulamaya, belirli kişileri arama, bu kişilerle e-posta aracılığıyla haberleşme veya başka yollardan iletişim kurma sıklığınız da dahil olmak üzere, TV\'nizde kayıtlı kişiler ile ilgili verileri değiştirme izni verir. Bu izin, uygulamaların kişi verilerinizi silmesine olanak sağlar."</string>
     <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Uygulamaya telefonunuzda depolanan kişilerinizle ilgili verileri değiştirme izni verir. Bu verilere belirli kişilerle ne sıklıkta çağrı, e-posta veya diğer yöntemlerle iletişim kurduğunuz bilgisi dahildir. Bu izin, uygulamanın kişi verilerinizi silmesine olanak sağlar."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"çağrı günlüğünü oku"</string>
     <string name="permdesc_readCallLog" product="tablet" msgid="3700645184870760285">"Uygulamaya, gelen ve giden çağrılarla ilgili veriler de dahil olmak üzere tabletinizin çağrı günlüğünü okuma izni verir. Bu izin, uygulamanın çağrı günlüğünüzü kaydetmesine olanak sağlar ve kötü amaçlı uygulamalar çağrı günlüğü verilerini sizden habersiz paylaşabilir."</string>
@@ -664,7 +658,7 @@
     <string name="permdesc_userActivity" msgid="651746160252248024">"Uygulamanın ekran zaman aşımı süresini sıfırlamasına olanak verir."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"fabrika test modunda çalıştır"</string>
     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Tabletin donanımına tam erişim veren alt düzey bir üretici testi olarak çalıştırılır. Yalnızca tablet üretici test modunda çalışırken kullanılabilir."</string>
-    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"Düşük seviye bir üretici testi olarak çalışır ve TV donanımına tam erişim izin verir. Sadece, TV üretici testi modunda çalışırken kullanılabilir."</string>
+    <string name="permdesc_factoryTest" product="tv" msgid="2105643629211155695">"Düşük seviye bir üretici testi olarak çalışır ve TV donanımına tam erişim izni verir. Sadece, TV üretici testi modunda çalışırken kullanılabilir."</string>
     <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Telefon donanımına tam erişim veren alt düzey bir üretici testi olarak çalıştırılır. Yalnızca telefon üretici test modunda çalışırken kullanılabilir."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"duvar kağıdını ayarla"</string>
     <string name="permdesc_setWallpaper" msgid="7373447920977624745">"Uygulamaya, sistem duvar kağıdını ayarlama izni verir."</string>
@@ -1090,7 +1084,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Uygulamaya Tarayıcının ziyaret ettiği tüm URL\'lerin geçmişini ve tüm Tarayıcı yer işaretlerini okuma izni verir. Not: Bu izin, üçüncü taraf tarayıcılar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"web yer işaretlerine ve geçmişe yaz"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Uygulamaya Tarayıcı geçmişini ve tabletinizde depolanan yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı geçmişini silmesine ve değiştirmesine olanak sağlar. Not: Bu izin, üçüncü taraf cihazlar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Uygulamaya, TV\'nizde saklanan Tarayıcı geçmişini veya yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı verilerini silmesine veya değiştirmesine olanak sağlayabilir. Not: Bu iznin üçüncü taraf tarayıcıları veya web tarama özelliğine sahip diğer uygulamalar tarafından uygulanması zorunlu tutulamaz."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Uygulamaya, TV\'nizde saklanan Tarayıcı geçmişini veya yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı verilerini silmesine veya değiştirmesine olanak sağlayabilir. Not: Bu iznin üçüncü taraf tarayıcılar veya web tarama özelliğine sahip diğer uygulamalar tarafından uygulanması zorunlu tutulamaz."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Uygulamaya Tarayıcı geçmişini ve telefonunuzda depolanan yer işaretlerini değiştirme izni verir. Bu izin, uygulamanın Tarayıcı geçmişini silmesine ve değiştirmesine olanak sağlar. Not: Bu izin, üçüncü taraf cihazlar veya Web\'e göz atma işlevine sahip diğer uygulamalar tarafından kullanılmayabilir."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"alarm ayarla"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Uygulamaya, çalar saat uygulamasının alarmını ayarlama izni verir. Bazı çalar saat uygulamaları bu özelliği uygulayamayabilir."</string>
