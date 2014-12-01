@@ -3553,6 +3553,9 @@ public class TelephonyManager {
                 if (name.equals(Settings.Global.MOBILE_DATA)) {
                     default_val = "true".equalsIgnoreCase(
                             SystemProperties.get("ro.com.android.mobiledata", "true")) ? 1 : 0;
+                } else if (name.equals(Settings.Global.DATA_ROAMING)) {
+                    default_val = "true".equalsIgnoreCase(
+                            SystemProperties.get("ro.com.android.dataroaming", "false")) ? 1 : 0;
                 }
 
                 if (default_val != val) {
