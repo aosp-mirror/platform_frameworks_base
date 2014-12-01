@@ -3768,8 +3768,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             int notificationType) {
         if (notificationType == ConnectivityManager.CALLBACK_AVAILABLE) {
             Intent intent = new Intent();
-            intent.putExtra(ConnectivityManager.EXTRA_NETWORK, nri.request);
-            intent.putExtra(ConnectivityManager.EXTRA_NETWORK_REQUEST, networkAgent.network);
+            intent.putExtra(ConnectivityManager.EXTRA_NETWORK, networkAgent.network);
+            intent.putExtra(ConnectivityManager.EXTRA_NETWORK_REQUEST, nri.request);
             sendIntent(nri.mPendingIntent, intent);
         }
         // else not handled
