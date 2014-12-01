@@ -67,6 +67,7 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
     private final UserManager mUserManager;
     private final Receiver mReceiver = new Receiver();
 
+    private NetworkControllerImpl mNetworkController;
     private boolean mScanning;
     private int mCurrentUser;
 
@@ -75,6 +76,10 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mCurrentUser = ActivityManager.getCurrentUser();
+    }
+
+    void setNetworkController(NetworkControllerImpl networkController) {
+        mNetworkController = networkController;
     }
 
     public boolean canConfigWifi() {
@@ -181,7 +186,6 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
             ap.isConfigured = config != null;
             ap.networkId = config != null ? config.networkId : AccessPoint.NO_NETWORK;
             ap.ssid = ssid;
-            ap.iconId = ICONS[level];
             // Connected if either:
             // -The network ID in the active WifiInfo matches this network's ID.
             // -The network is ephemeral (no configuration) but the SSID matches.
@@ -189,7 +193,13 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
                     && ap.networkId == connectedNetworkId) ||
                     (ap.networkId == WifiConfiguration.INVALID_NETWORK_ID && wifiInfo != null &&
                     ap.ssid.equals(trimDoubleQuotes(wifiInfo.getSSID())));
-            ap.level = level;
+            if (ap.isConnected && mNetworkController != null) {
+                // Ensure we have the connected network's RSSI.
+                ap.level = mNetworkController.getConnectedWifiLevel();
+            } else {
+                ap.level = level;
+            }
+            ap.iconId = ICONS[ap.level];
             // Based on Settings AccessPoint#getSecurity, keep up to date
             // with better methods of determining no security or not.
             ap.hasSecurity = scanResult.capabilities.contains("WEP")
