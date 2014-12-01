@@ -107,13 +107,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Versuchen Sie es in <xliff:g id="NUMBER">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Muster zeichnen"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM-PIN eingeben"</string>
-    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
-    <skip />
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"SIM-PIN für \"<xliff:g id="CARRIER">%1$s</xliff:g>\" eingeben"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN eingeben"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Passwort eingeben"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"Die SIM-Karte ist jetzt deaktiviert. Geben Sie den PUK-Code ein, um fortzufahren. Weitere Informationen erhalten Sie von Ihrem Mobilfunkanbieter."</string>
-    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"Die SIM-Karte \"<xliff:g id="CARRIER">%1$s</xliff:g>\" ist jetzt deaktiviert. Geben Sie den PUK-Code ein, um fortzufahren. Weitere Informationen erhalten Sie von Ihrem Mobilfunkanbieter."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Gewünschten PIN-Code eingeben"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Gewünschten PIN-Code bestätigen"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"SIM-Karte wird entsperrt…"</string>
@@ -132,30 +130,18 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Sie haben Ihre PIN <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch eingegeben.\n\nVersuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Sie haben Ihr Passwort <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch eingegeben.\n\nVersuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. \n\nVersuchen Sie es in <xliff:g id="NUMBER_1">%d</xliff:g> Sekunden erneut."</string>
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
-    <skip />
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"Sie haben <xliff:g id="NUMBER_0">%d</xliff:g>-mal erfolglos versucht, das Tablet zu entsperren. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen wird dieses Tablet zurückgesetzt. Dadurch werden alle Gerätedaten gelöscht."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"Sie haben <xliff:g id="NUMBER_0">%d</xliff:g>-mal erfolglos versucht, das Telefon zu entsperren. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen wird dieses Telefon zurückgesetzt. Dadurch werden alle Gerätedaten gelöscht."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"Sie haben <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Tablet zu entsperren. Dieses Tablet wird nun zurückgesetzt und alle Gerätedaten werden gelöscht."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"Sie haben <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Telefon zu entsperren. Dieses Telefon wird nun zurückgesetzt und alle Gerätedaten werden gelöscht."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"Sie haben <xliff:g id="NUMBER_0">%d</xliff:g>-mal erfolglos versucht, das Tablet zu entsperren. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen wird dieser Nutzer entfernt. Dadurch werden alle Nutzerdaten gelöscht."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"Sie haben <xliff:g id="NUMBER_0">%d</xliff:g>-mal erfolglos versucht, das Telefon zu entsperren. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen wird dieser Nutzer entfernt. Dadurch werden alle Nutzerdaten gelöscht."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"Sie haben <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Tablet zu entsperren. Dieser Nutzer wird nun entfernt und alle Nutzerdaten werden gelöscht."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"Sie haben <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Telefon zu entsperren. Dieser Nutzer wird nun entfernt und alle Nutzerdaten werden gelöscht."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"Sie haben <xliff:g id="NUMBER_0">%d</xliff:g>-mal erfolglos versucht, das Tablet zu entsperren. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen wird das Arbeitsprofil entfernt. Dadurch werden alle Profildaten gelöscht."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"Sie haben <xliff:g id="NUMBER_0">%d</xliff:g>-mal erfolglos versucht, das Telefon zu entsperren. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen wird das Arbeitsprofil entfernt. Dadurch werden alle Profildaten gelöscht."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"Sie haben <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Tablet zu entsperren. Das Arbeitsprofil wird nun entfernt und alle Profildaten werden gelöscht."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Sie haben <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Telefon zu entsperren. Das Arbeitsprofil wird nun entfernt und alle Profildaten werden gelöscht."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Tablet mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>

@@ -107,13 +107,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"پس از <xliff:g id="NUMBER">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"الگوی خود را رسم کنید"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"پین سیم کارت را وارد کنید"</string>
-    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
-    <skip />
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"پین سیم‌کارت «<xliff:g id="CARRIER">%1$s</xliff:g>» را وارد کنید"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"پین را وارد کنید"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"گذرواژه را وارد کنید"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"اکنون سیم کارت غیرفعال است. پین کد را برای ادامه وارد کنید. برای جزئیات با شرکت مخابراتی خود تماس بگیرید."</string>
-    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"‏اکنون سیم‌کارت «<xliff:g id="CARRIER">%1$s</xliff:g>» غیرفعال شده است. برای ادامه دادن، کد PUK را وارد کنید. برای اطلاع از جزئیات با شرکت مخابراتی تماس بگیرید."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"پین کد دلخواه را وارد کنید"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"تأیید پین کد دلخواه"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"بازگشایی قفل سیم کارت..."</string>
@@ -132,30 +130,18 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"پین خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"گذرواژه خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه تایپ کردید. \n\nپس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیدید. \n\nلطفاً پس از <xliff:g id="NUMBER_1">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
-    <skip />
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"<xliff:g id="NUMBER_0">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، این رایانه لوحی بازنشانی می‌شود که با آن کل اطلاعاتش حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"<xliff:g id="NUMBER_0">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، تلفن بازنشانی می‌شود که با آن کل اطلاعاتش حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. این رایانه لوحی بازنشانی می‌شود که با آن همه اطلاعاتش حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. این تلفن بازنشانی می‌شود که با آن همه اطلاعاتش حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"<xliff:g id="NUMBER_0">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، این کاربر حذف می‌شود که با آن کل اطلاعات کاربر حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"<xliff:g id="NUMBER_0">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، این کاربر حذف می‌شود که با آن کل اطلاعات کاربر حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. این کاربر حذف می‌شود که با آن همه اطلاعات کاربر حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. این کاربر حذف می‌شود که با آن همه اطلاعات کاربر حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"<xliff:g id="NUMBER_0">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، نمایه کار حذف می‌شود که با آن کل اطلاعات نمایه حذف می‌شود."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"<xliff:g id="NUMBER_0">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق دیگر، نمایه کار حذف می‌شود که با آن کل اطلاعات نمایه حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل رایانه لوحی داشته‌اید. نمایه کار حذف می‌شود که با آن همه اطلاعات نمایه حذف می‌شود."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"<xliff:g id="NUMBER">%d</xliff:g> تلاش ناموفق برای باز کردن قفل تلفن داشته‌اید. نمایه کار حذف می‌شود که با آن همه اطلاعات نمایه حذف می‌شود."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‎اید. بعد از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل رایانه لوحی خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
