@@ -163,7 +163,7 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Tööprofiil on kustutatud puuduva administraatori rakenduse tõttu."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"Tööprofiili administraatori rakendus puudub või on rikutud. Seetõttu on teie tööprofiil ja seotud andmed kustutatud. Abi saamiseks võtke ühendust administraatoriga."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Seade kustutatakse"</string>
-    <string name="factory_reset_message" msgid="4905025204141900666">"Administraatori rakendusel on puuduvaid osi või on see rikutud ja seda ei saa kasutada. Seadet ei kustutata. Abi saamiseks võtke ühendust administraatoriga."</string>
+    <string name="factory_reset_message" msgid="4905025204141900666">"Administraatori rakendusel on puuduvaid osi või on see rikutud ja seda ei saa kasutada. Seade kustutatakse. Abi saamiseks võtke ühendust administraatoriga."</string>
     <string name="me" msgid="6545696007631404292">"Mina"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tahvelarvuti valikud"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Teleri valikud"</string>
@@ -1298,6 +1298,7 @@
     <string name="smv_process" msgid="5120397012047462446">"Protsess <xliff:g id="PROCESS">%1$s</xliff:g> on rikkunud isejõustatud StrictMode\'i eeskirju."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android viiakse üle uuemale versioonile ..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android käivitub ..."</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Salvestusruumi optimeerimine."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_0">%1$d</xliff:g>. rakenduse <xliff:g id="NUMBER_1">%2$d</xliff:g>-st optimeerimine."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Rakenduste käivitamine."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Käivitamise lõpuleviimine."</string>
