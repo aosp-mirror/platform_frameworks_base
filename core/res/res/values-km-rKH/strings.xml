@@ -1236,8 +1236,7 @@
     <string name="smv_process" msgid="5120397012047462446">"ដំណើរការ <xliff:g id="PROCESS">%1$s</xliff:g> បាន​បំពាន​គោលនយោបាយ​​របៀប​​តឹង​រឹង​​​បង្ខំ​ដោយ​ខ្លួន​ឯង"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android កំពុង​ធ្វើ​បច្ចុប្បន្នភាព..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android កំពុង​ចាប់ផ្ដើម…"</string>
-    <!-- no translation found for android_upgrading_fstrim (8036718871534640010) -->
-    <skip />
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"កំពុងធ្វើឲ្យឧបករណ៍ផ្ទុកមានប្រសិទ្ធភាព។"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"ធ្វើ​ឲ្យ​កម្មវិធី​ប្រសើរ​ឡើង <xliff:g id="NUMBER_0">%1$d</xliff:g> នៃ <xliff:g id="NUMBER_1">%2$d</xliff:g> ។"</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"ចាប់ផ្ដើម​កម្មវិធី។"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"បញ្ចប់​ការ​ចាប់ផ្ដើម។"</string>
