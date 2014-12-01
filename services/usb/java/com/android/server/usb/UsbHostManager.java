@@ -245,6 +245,8 @@ public class UsbHostManager {
     }
 
     public void systemReady() {
+        mUsbAudioManager.systemReady();
+
         synchronized (mLock) {
             // Create a thread to call into native code to wait for USB host events.
             // This thread will call us back on usbDeviceAdded and usbDeviceRemoved.
