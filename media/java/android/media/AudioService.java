@@ -608,6 +608,10 @@ public class AudioService extends IAudioService.Stub {
 
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
+        mUseMasterVolume = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume);
+        mMasterVolumeRamp = context.getResources().getIntArray(
+                com.android.internal.R.array.config_masterVolumeRamp);
 
         // must be called before readPersistedSettings() which needs a valid mStreamVolumeAlias[]
         // array initialized by updateStreamVolumeAlias()
@@ -658,12 +662,7 @@ public class AudioService extends IAudioService.Stub {
 
         context.registerReceiver(mReceiver, intentFilter);
 
-        mUseMasterVolume = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_useMasterVolume);
         restoreMasterVolume();
-
-        mMasterVolumeRamp = context.getResources().getIntArray(
-                com.android.internal.R.array.config_masterVolumeRamp);
 
         LocalServices.addService(AudioManagerInternal.class, new AudioServiceInternal());
     }
@@ -3446,8 +3445,9 @@ public class AudioService extends IAudioService.Stub {
 
         public void readSettings() {
             synchronized (VolumeStreamState.class) {
-                // force maximum volume on all streams if fixed volume property is set
-                if (mUseFixedVolume) {
+                // force maximum volume on all streams if fixed volume property
+                // or master volume property is set
+                if (mUseFixedVolume || mUseMasterVolume) {
                     mIndex.put(AudioSystem.DEVICE_OUT_DEFAULT, mIndexMax);
                     return;
                 }
@@ -3672,7 +3672,7 @@ public class AudioService extends IAudioService.Stub {
         private int getValidIndex(int index) {
             if (index < 0) {
                 return 0;
-            } else if (mUseFixedVolume || index > mIndexMax) {
+            } else if (mUseFixedVolume || mUseMasterVolume || index > mIndexMax) {
                 return mIndexMax;
             }
 
