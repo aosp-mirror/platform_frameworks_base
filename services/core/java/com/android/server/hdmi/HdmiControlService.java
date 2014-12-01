@@ -2021,30 +2021,52 @@ public final class HdmiControlService extends SystemService {
     void setControlEnabled(boolean enabled) {
         assertRunOnServiceThread();
 
-        if (!enabled) {
-            // Call the vendor handler before the service is disabled.
-            invokeVendorCommandListenersOnControlStateChanged(false,
-                    HdmiControlManager.CONTROL_STATE_CHANGED_REASON_SETTING);
-        }
-        int value = toInt(enabled);
-        mCecController.setOption(OPTION_CEC_ENABLE, value);
-        mMhlController.setOption(OPTION_MHL_ENABLE, value);
-
         synchronized (mLock) {
             mHdmiControlEnabled = enabled;
         }
 
         if (enabled) {
-            initializeCec(INITIATED_BY_ENABLE_CEC);
-        } else {
-            disableDevices(new PendingActionClearedCallback() {
-                @Override
-                public void onCleared(HdmiCecLocalDevice device) {
-                    assertRunOnServiceThread();
-                    clearLocalDevices();
-                }
-            });
+            enableHdmiControlService();
+            return;
         }
+        // Call the vendor handler before the service is disabled.
+        invokeVendorCommandListenersOnControlStateChanged(false,
+                HdmiControlManager.CONTROL_STATE_CHANGED_REASON_SETTING);
+        // Post the remained tasks in the service thread again to give the vendor-issued-tasks
+        // a chance to run.
+        runOnServiceThread(new Runnable() {
+            @Override
+            public void run() {
+                disableHdmiControlService();
+            }
+        });
+        return;
+    }
+
+    @ServiceThreadOnly
+    private void enableHdmiControlService() {
+        mCecController.setOption(OPTION_CEC_ENABLE, ENABLED);
+        mMhlController.setOption(OPTION_MHL_ENABLE, ENABLED);
+
+        initializeCec(INITIATED_BY_ENABLE_CEC);
+    }
+
+    @ServiceThreadOnly
+    private void disableHdmiControlService() {
+        disableDevices(new PendingActionClearedCallback() {
+            @Override
+            public void onCleared(HdmiCecLocalDevice device) {
+                assertRunOnServiceThread();
+                mCecController.flush(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCecController.setOption(OPTION_CEC_ENABLE, DISABLED);
+                        mMhlController.setOption(OPTION_MHL_ENABLE, DISABLED);
+                        clearLocalDevices();
+                    }
+                });
+            }
+        });
     }
 
     @ServiceThreadOnly
