@@ -1,0 +1,65 @@
+# Copyright (C) 2014 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Logitech Bluetooth wireless gamepad (RedHawk)
+
+key 304 BUTTON_A
+key 305 BUTTON_B
+key 307 BUTTON_X
+key 308 BUTTON_Y
+key 310 BUTTON_L1
+key 311 BUTTON_R1
+key 312 BUTTON_L2
+key 313 BUTTON_R2
+
+key 314 BUTTON_SELECT
+key 315 BUTTON_START
+key 316 BUTTON_MODE
+key 317 BUTTON_THUMBL
+key 318 BUTTON_THUMBR
+
+key 103 DPAD_UP
+key 105 DPAD_LEFT
+key 106 DPAD_RIGHT
+key 108 DPAD_DOWN
+key 353 DPAD_CENTER
+
+key 113 VOLUME_MUTE
+key 114 VOLUME_DOWN
+key 115 VOLUME_UP
+key 152 POWER
+key 163 MEDIA_NEXT
+key 164 MEDIA_PLAY_PAUSE
+key 165 MEDIA_PREVIOUS
+
+key 158 BACK
+key 172 HOME
+
+key 217 SEARCH
+key 580 APP_SWITCH
+key 582 ASSIST
+
+axis 0x00 X
+axis 0x01 Y
+axis 0x02 Z
+axis 0x05 RZ
+axis 0x09 RTRIGGER
+axis 0x0a LTRIGGER
+axis 0x10 HAT_X
+axis 0x11 HAT_Y
+
+led 0x00 CONTROLLER_1
+led 0x01 CONTROLLER_2
+led 0x02 CONTROLLER_3
+led 0x03 CONTROLLER_4
