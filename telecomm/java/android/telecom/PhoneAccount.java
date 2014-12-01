@@ -120,9 +120,14 @@ public class PhoneAccount implements Parcelable {
     public static final String SCHEME_SIP = "sip";
 
     /**
-     * Indicating no color is set.
+     * Indicating no icon tint is set.
      */
-    public static final int NO_COLOR = -1;
+    public static final int NO_ICON_TINT = 0;
+
+    /**
+     * Indicating no hightlight color is set.
+     */
+    public static final int NO_HIGHLIGHT_COLOR = 0;
 
     /**
      * Indicating no resource ID is set.
@@ -153,8 +158,8 @@ public class PhoneAccount implements Parcelable {
         private int mIconResId;
         private String mIconPackageName;
         private Bitmap mIconBitmap;
-        private int mIconTint = NO_COLOR;
-        private int mHighlightColor = NO_COLOR;
+        private int mIconTint = NO_ICON_TINT;
+        private int mHighlightColor = NO_HIGHLIGHT_COLOR;
         private CharSequence mLabel;
         private CharSequence mShortDescription;
         private List<String> mSupportedUriSchemes = new ArrayList<String>();
@@ -240,7 +245,7 @@ public class PhoneAccount implements Parcelable {
          * @return The builder.
          */
         public Builder setIcon(String iconPackageName, int iconResId) {
-            return setIcon(iconPackageName, iconResId, NO_COLOR);
+            return setIcon(iconPackageName, iconResId, NO_ICON_TINT);
         }
 
         /**
@@ -280,7 +285,7 @@ public class PhoneAccount implements Parcelable {
             this.mIconBitmap = iconBitmap;
             this.mIconPackageName = null;
             this.mIconResId = NO_RESOURCE_ID;
-            this.mIconTint = NO_COLOR;
+            this.mIconTint = NO_ICON_TINT;
             return this;
         }
 
@@ -589,7 +594,7 @@ public class PhoneAccount implements Parcelable {
                 Context packageContext = context.createPackageContext(mIconPackageName, 0);
                 try {
                     Drawable iconDrawable = packageContext.getDrawable(mIconResId);
-                    if (mIconTint != NO_COLOR) {
+                    if (mIconTint != NO_ICON_TINT) {
                         iconDrawable.setTint(mIconTint);
                     }
                     return iconDrawable;

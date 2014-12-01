@@ -63,8 +63,179 @@ public abstract class Connection implements IConferenceable {
 
     public static final int STATE_DISCONNECTED = 6;
 
+    /** Connection can currently be put on hold or unheld. */
+    public static final int CAPABILITY_HOLD = 0x00000001;
+
+    /** Connection supports the hold feature. */
+    public static final int CAPABILITY_SUPPORT_HOLD = 0x00000002;
+
+    /**
+     * Connections within a conference can be merged. A {@link ConnectionService} has the option to
+     * add a {@link Conference} before the child {@link Connection}s are merged. This is how
+     * CDMA-based {@link Connection}s are implemented. For these unmerged {@link Conference}s, this
+     * capability allows a merge button to be shown while the conference is in the foreground
+     * of the in-call UI.
+     * <p>
+     * This is only intended for use by a {@link Conference}.
+     */
+    public static final int CAPABILITY_MERGE_CONFERENCE = 0x00000004;
+
+    /**
+     * Connections within a conference can be swapped between foreground and background.
+     * See {@link #CAPABILITY_MERGE_CONFERENCE} for additional information.
+     * <p>
+     * This is only intended for use by a {@link Conference}.
+     */
+    public static final int CAPABILITY_SWAP_CONFERENCE = 0x00000008;
+
+    /**
+     * @hide
+     */
+    public static final int CAPABILITY_UNUSED = 0x00000010;
+
+    /** Connection supports responding via text option. */
+    public static final int CAPABILITY_RESPOND_VIA_TEXT = 0x00000020;
+
+    /** Connection can be muted. */
+    public static final int CAPABILITY_MUTE = 0x00000040;
+
+    /**
+     * Connection supports conference management. This capability only applies to
+     * {@link Conference}s which can have {@link Connection}s as children.
+     */
+    public static final int CAPABILITY_MANAGE_CONFERENCE = 0x00000080;
+
+    /**
+     * Local device supports video telephony.
+     * @hide
+     */
+    public static final int CAPABILITY_SUPPORTS_VT_LOCAL = 0x00000100;
+
+    /**
+     * Remote device supports video telephony.
+     * @hide
+     */
+    public static final int CAPABILITY_SUPPORTS_VT_REMOTE = 0x00000200;
+
+    /**
+     * Connection is using voice over LTE.
+     * @hide
+     */
+    public static final int CAPABILITY_VoLTE = 0x00000400;
+
+    /**
+     * Connection is using voice over WIFI.
+     * @hide
+     */
+    public static final int CAPABILITY_VoWIFI = 0x00000800;
+
+    /**
+     * Connection is able to be separated from its parent {@code Conference}, if any.
+     */
+    public static final int CAPABILITY_SEPARATE_FROM_CONFERENCE = 0x00001000;
+
+    /**
+     * Connection is able to be individually disconnected when in a {@code Conference}.
+     */
+    public static final int CAPABILITY_DISCONNECT_FROM_CONFERENCE = 0x00002000;
+
+    /**
+     * Whether the call is a generic conference, where we do not know the precise state of
+     * participants in the conference (eg. on CDMA).
+     *
+     * @hide
+     */
+    public static final int CAPABILITY_GENERIC_CONFERENCE = 0x00004000;
+
     // Flag controlling whether PII is emitted into the logs
     private static final boolean PII_DEBUG = Log.isLoggable(android.util.Log.DEBUG);
+
+    /**
+     * Whether the given capabilities support the specified capability.
+     *
+     * @param capabilities A capability bit field.
+     * @param capability The capability to check capabilities for.
+     * @return Whether the specified capability is supported.
+     * @hide
+     */
+    public static boolean can(int capabilities, int capability) {
+        return (capabilities & capability) != 0;
+    }
+
+    /**
+     * Whether the capabilities of this {@code Connection} supports the specified capability.
+     *
+     * @param capability The capability to check capabilities for.
+     * @return Whether the specified capability is supported.
+     * @hide
+     */
+    public boolean can(int capability) {
+        return can(mConnectionCapabilities, capability);
+    }
+
+    /**
+     * Removes the specified capability from the set of capabilities of this {@code Connection}.
+     *
+     * @param capability The capability to remove from the set.
+     * @hide
+     */
+    public void removeCapability(int capability) {
+        mConnectionCapabilities &= ~capability;
+    }
+
+    /**
+     * Adds the specified capability to the set of capabilities of this {@code Connection}.
+     *
+     * @param capability The capability to add to the set.
+     * @hide
+     */
+    public void addCapability(int capability) {
+        mConnectionCapabilities |= capability;
+    }
+
+
+    public static String capabilitiesToString(int capabilities) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[Capabilities:");
+        if (can(capabilities, CAPABILITY_HOLD)) {
+            builder.append(" CAPABILITY_HOLD");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORT_HOLD)) {
+            builder.append(" CAPABILITY_SUPPORT_HOLD");
+        }
+        if (can(capabilities, CAPABILITY_MERGE_CONFERENCE)) {
+            builder.append(" CAPABILITY_MERGE_CONFERENCE");
+        }
+        if (can(capabilities, CAPABILITY_SWAP_CONFERENCE)) {
+            builder.append(" CAPABILITY_SWAP_CONFERENCE");
+        }
+        if (can(capabilities, CAPABILITY_RESPOND_VIA_TEXT)) {
+            builder.append(" CAPABILITY_RESPOND_VIA_TEXT");
+        }
+        if (can(capabilities, CAPABILITY_MUTE)) {
+            builder.append(" CAPABILITY_MUTE");
+        }
+        if (can(capabilities, CAPABILITY_MANAGE_CONFERENCE)) {
+            builder.append(" CAPABILITY_MANAGE_CONFERENCE");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_LOCAL)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_LOCAL");
+        }
+        if (can(capabilities, CAPABILITY_SUPPORTS_VT_REMOTE)) {
+            builder.append(" CAPABILITY_SUPPORTS_VT_REMOTE");
+        }
+        if (can(capabilities, CAPABILITY_VoLTE)) {
+            builder.append(" CAPABILITY_VoLTE");
+        }
+        if (can(capabilities, CAPABILITY_VoWIFI)) {
+            builder.append(" CAPABILITY_VoWIFI");
+        }
+        if (can(capabilities, CAPABILITY_GENERIC_CONFERENCE)) {
+            builder.append(" CAPABILITY_GENERIC_CONFERENCE");
+        }
+        builder.append("]");
+        return builder.toString();
+    }
 
     /** @hide */
     public abstract static class Listener {
@@ -77,7 +248,7 @@ public abstract class Connection implements IConferenceable {
         public void onPostDialWait(Connection c, String remaining) {}
         public void onRingbackRequested(Connection c, boolean ringback) {}
         public void onDestroyed(Connection c) {}
-        public void onCallCapabilitiesChanged(Connection c, int callCapabilities) {}
+        public void onConnectionCapabilitiesChanged(Connection c, int capabilities) {}
         public void onVideoProviderChanged(
                 Connection c, VideoProvider videoProvider) {}
         public void onAudioModeIsVoipChanged(Connection c, boolean isVoip) {}
@@ -152,7 +323,7 @@ public abstract class Connection implements IConferenceable {
         private static final int MSG_SEND_SESSION_MODIFY_REQUEST = 7;
         private static final int MSG_SEND_SESSION_MODIFY_RESPONSE = 8;
         private static final int MSG_REQUEST_CAMERA_CAPABILITIES = 9;
-        private static final int MSG_REQUEST_CALL_DATA_USAGE = 10;
+        private static final int MSG_REQUEST_CONNECTION_DATA_USAGE = 10;
         private static final int MSG_SET_PAUSE_IMAGE = 11;
 
         private final VideoProvider.VideoProviderHandler
@@ -194,8 +365,8 @@ public abstract class Connection implements IConferenceable {
                     case MSG_REQUEST_CAMERA_CAPABILITIES:
                         onRequestCameraCapabilities();
                         break;
-                    case MSG_REQUEST_CALL_DATA_USAGE:
-                        onRequestCallDataUsage();
+                    case MSG_REQUEST_CONNECTION_DATA_USAGE:
+                        onRequestConnectionDataUsage();
                         break;
                     case MSG_SET_PAUSE_IMAGE:
                         onSetPauseImage((String) msg.obj);
@@ -250,7 +421,7 @@ public abstract class Connection implements IConferenceable {
             }
 
             public void requestCallDataUsage() {
-                mMessageHandler.obtainMessage(MSG_REQUEST_CALL_DATA_USAGE).sendToTarget();
+                mMessageHandler.obtainMessage(MSG_REQUEST_CONNECTION_DATA_USAGE).sendToTarget();
             }
 
             public void setPauseImage(String uri) {
@@ -271,7 +442,7 @@ public abstract class Connection implements IConferenceable {
         }
 
         /**
-         * Sets the camera to be used for video recording in a video call.
+         * Sets the camera to be used for video recording in a video connection.
          *
          * @param cameraId The id of the camera.
          */
@@ -311,19 +482,19 @@ public abstract class Connection implements IConferenceable {
         /**
          * Issues a request to modify the properties of the current session.  The request is
          * sent to the remote device where it it handled by the In-Call UI.
-         * Some examples of session modification requests: upgrade call from audio to video,
-         * downgrade call from video to audio, pause video.
+         * Some examples of session modification requests: upgrade connection from audio to video,
+         * downgrade connection from video to audio, pause video.
          *
-         * @param requestProfile The requested call video properties.
+         * @param requestProfile The requested connection video properties.
          */
         public abstract void onSendSessionModifyRequest(VideoProfile requestProfile);
 
         /**te
-         * Provides a response to a request to change the current call session video
+         * Provides a response to a request to change the current connection session video
          * properties.
          * This is in response to a request the InCall UI has received via the InCall UI.
          *
-         * @param responseProfile The response call video properties.
+         * @param responseProfile The response connection video properties.
          */
         public abstract void onSendSessionModifyResponse(VideoProfile responseProfile);
 
@@ -335,10 +506,10 @@ public abstract class Connection implements IConferenceable {
 
         /**
          * Issues a request to the video telephony framework to retrieve the cumulative data usage
-         * for the current call.  Data usage is reported back to the caller via the
+         * for the current connection.  Data usage is reported back to the caller via the
          * InCall UI.
          */
-        public abstract void onRequestCallDataUsage();
+        public abstract void onRequestConnectionDataUsage();
 
         /**
          * Provides the video telephony framework with the URI of an image to be displayed to remote
@@ -351,7 +522,7 @@ public abstract class Connection implements IConferenceable {
         /**
          * Invokes callback method defined in In-Call UI.
          *
-         * @param videoProfile The requested video call profile.
+         * @param videoProfile The requested video connection profile.
          */
         public void receiveSessionModifyRequest(VideoProfile videoProfile) {
             if (mVideoCallback != null) {
@@ -482,7 +653,7 @@ public abstract class Connection implements IConferenceable {
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
     private boolean mRingbackRequested = false;
-    private int mCallCapabilities;
+    private int mConnectionCapabilities;
     private VideoProvider mVideoProvider;
     private boolean mAudioModeIsVoip;
     private StatusHints mStatusHints;
@@ -534,13 +705,13 @@ public abstract class Connection implements IConferenceable {
     }
 
     /**
-     * Returns the video state of the call.
+     * Returns the video state of the connection.
      * Valid values: {@link VideoProfile.VideoState#AUDIO_ONLY},
      * {@link VideoProfile.VideoState#BIDIRECTIONAL},
      * {@link VideoProfile.VideoState#TX_ENABLED},
      * {@link VideoProfile.VideoState#RX_ENABLED}.
      *
-     * @return The video state of the call.
+     * @return The video state of the connection.
      * @hide
      */
     public final int getVideoState() {
@@ -548,7 +719,7 @@ public abstract class Connection implements IConferenceable {
     }
 
     /**
-     * @return The audio state of the call, describing how its audio is currently
+     * @return The audio state of the connection, describing how its audio is currently
      *         being routed by the system. This is {@code null} if this Connection
      *         does not directly know about its audio state.
      */
@@ -628,6 +799,7 @@ public abstract class Connection implements IConferenceable {
      * @hide
      */
     final void setAudioState(AudioState state) {
+        checkImmutable();
         Log.d(this, "setAudioState %s", state);
         mAudioState = state;
         onAudioStateChanged(state);
@@ -660,10 +832,10 @@ public abstract class Connection implements IConferenceable {
     }
 
     /**
-     * Returns the connection's {@link PhoneCapabilities}
+     * Returns the connection's capabilities, as a bit mask of the {@code CAPABILITY_*} constants.
      */
-    public final int getCallCapabilities() {
-        return mCallCapabilities;
+    public final int getConnectionCapabilities() {
+        return mConnectionCapabilities;
     }
 
     /**
@@ -674,6 +846,7 @@ public abstract class Connection implements IConferenceable {
      *        See {@link TelecomManager} for valid values.
      */
     public final void setAddress(Uri address, int presentation) {
+        checkImmutable();
         Log.d(this, "setAddress %s", address);
         mAddress = address;
         mAddressPresentation = presentation;
@@ -690,6 +863,7 @@ public abstract class Connection implements IConferenceable {
      *        See {@link TelecomManager} for valid values.
      */
     public final void setCallerDisplayName(String callerDisplayName, int presentation) {
+        checkImmutable();
         Log.d(this, "setCallerDisplayName %s", callerDisplayName);
         mCallerDisplayName = callerDisplayName;
         mCallerDisplayNamePresentation = presentation;
@@ -709,6 +883,7 @@ public abstract class Connection implements IConferenceable {
      * @hide
      */
     public final void setVideoState(int videoState) {
+        checkImmutable();
         Log.d(this, "setVideoState %d", videoState);
         mVideoState = videoState;
         for (Listener l : mListeners) {
@@ -717,18 +892,20 @@ public abstract class Connection implements IConferenceable {
     }
 
     /**
-     * Sets state to active (e.g., an ongoing call where two or more parties can actively
+     * Sets state to active (e.g., an ongoing connection where two or more parties can actively
      * communicate).
      */
     public final void setActive() {
+        checkImmutable();
         setRingbackRequested(false);
         setState(STATE_ACTIVE);
     }
 
     /**
-     * Sets state to ringing (e.g., an inbound ringing call).
+     * Sets state to ringing (e.g., an inbound ringing connection).
      */
     public final void setRinging() {
+        checkImmutable();
         setState(STATE_RINGING);
     }
 
@@ -736,6 +913,7 @@ public abstract class Connection implements IConferenceable {
      * Sets state to initializing (this Connection is not yet ready to be used).
      */
     public final void setInitializing() {
+        checkImmutable();
         setState(STATE_INITIALIZING);
     }
 
@@ -743,13 +921,15 @@ public abstract class Connection implements IConferenceable {
      * Sets state to initialized (the Connection has been set up and is now ready to be used).
      */
     public final void setInitialized() {
+        checkImmutable();
         setState(STATE_NEW);
     }
 
     /**
-     * Sets state to dialing (e.g., dialing an outbound call).
+     * Sets state to dialing (e.g., dialing an outbound connection).
      */
     public final void setDialing() {
+        checkImmutable();
         setState(STATE_DIALING);
     }
 
@@ -757,15 +937,17 @@ public abstract class Connection implements IConferenceable {
      * Sets state to be on hold.
      */
     public final void setOnHold() {
+        checkImmutable();
         setState(STATE_HOLDING);
     }
 
     /**
-     * Sets the video call provider.
+     * Sets the video connection provider.
      * @param videoProvider The video provider.
      * @hide
      */
     public final void setVideoProvider(VideoProvider videoProvider) {
+        checkImmutable();
         mVideoProvider = videoProvider;
         for (Listener l : mListeners) {
             l.onVideoProviderChanged(this, videoProvider);
@@ -784,6 +966,7 @@ public abstract class Connection implements IConferenceable {
      *         {@link DisconnectCause}.
      */
     public final void setDisconnected(DisconnectCause disconnectCause) {
+        checkImmutable();
         mDisconnectCause = disconnectCause;
         setState(STATE_DISCONNECTED);
         Log.d(this, "Disconnected with cause %s", disconnectCause);
@@ -793,9 +976,17 @@ public abstract class Connection implements IConferenceable {
     }
 
     /**
-     * TODO: Needs documentation.
+     * Informs listeners that this {@code Connection} is in a post-dial wait state. This is done
+     * when (a) the {@code Connection} is issuing a DTMF sequence; (b) it has encountered a "wait"
+     * character; and (c) it wishes to inform the In-Call app that it is waiting for the end-user
+     * to send an {@link #onPostDialContinue(boolean)} signal.
+     *
+     * @param remaining The DTMF character sequence remaining to be emitted once the
+     *         {@link #onPostDialContinue(boolean)} is received, including any "wait" characters
+     *         that remaining sequence may contain.
      */
     public final void setPostDialWait(String remaining) {
+        checkImmutable();
         for (Listener l : mListeners) {
             l.onPostDialWait(this, remaining);
         }
@@ -803,11 +994,12 @@ public abstract class Connection implements IConferenceable {
 
     /**
      * Requests that the framework play a ringback tone. This is to be invoked by implementations
-     * that do not play a ringback tone themselves in the call's audio stream.
+     * that do not play a ringback tone themselves in the connection's audio stream.
      *
      * @param ringback Whether the ringback tone is to be played.
      */
     public final void setRingbackRequested(boolean ringback) {
+        checkImmutable();
         if (mRingbackRequested != ringback) {
             mRingbackRequested = ringback;
             for (Listener l : mListeners) {
@@ -816,16 +1008,22 @@ public abstract class Connection implements IConferenceable {
         }
     }
 
+    /** @hide */
+    @Deprecated public final void setCapabilities(int connectionCapabilities) {
+        setConnectionCapabilities(connectionCapabilities);
+    }
+
     /**
-     * Sets the connection's {@link PhoneCapabilities}.
+     * Sets the connection's capabilities as a bit mask of the {@code CAPABILITY_*} constants.
      *
-     * @param callCapabilities The new call capabilities.
+     * @param connectionCapabilities The new connection capabilities.
      */
-    public final void setCallCapabilities(int callCapabilities) {
-        if (mCallCapabilities != callCapabilities) {
-            mCallCapabilities = callCapabilities;
+    public final void setConnectionCapabilities(int connectionCapabilities) {
+        checkImmutable();
+        if (mConnectionCapabilities != connectionCapabilities) {
+            mConnectionCapabilities = connectionCapabilities;
             for (Listener l : mListeners) {
-                l.onCallCapabilitiesChanged(this, mCallCapabilities);
+                l.onConnectionCapabilitiesChanged(this, mConnectionCapabilities);
             }
         }
     }
@@ -845,6 +1043,7 @@ public abstract class Connection implements IConferenceable {
      * @param isVoip True if the audio mode is VOIP.
      */
     public final void setAudioModeIsVoip(boolean isVoip) {
+        checkImmutable();
         mAudioModeIsVoip = isVoip;
         for (Listener l : mListeners) {
             l.onAudioModeIsVoipChanged(this, isVoip);
@@ -857,6 +1056,7 @@ public abstract class Connection implements IConferenceable {
      * @param statusHints The status label and icon to set.
      */
     public final void setStatusHints(StatusHints statusHints) {
+        checkImmutable();
         mStatusHints = statusHints;
         for (Listener l : mListeners) {
             l.onStatusHintsChanged(this, statusHints);
@@ -869,6 +1069,7 @@ public abstract class Connection implements IConferenceable {
      * @param conferenceableConnections The set of connections this connection can conference with.
      */
     public final void setConferenceableConnections(List<Connection> conferenceableConnections) {
+        checkImmutable();
         clearConferenceableList();
         for (Connection c : conferenceableConnections) {
             // If statement checks for duplicates in input. It makes it N^2 but we're dealing with a
@@ -917,6 +1118,7 @@ public abstract class Connection implements IConferenceable {
      * @hide
      */
     public final void setConnectionService(ConnectionService connectionService) {
+        checkImmutable();
         if (mConnectionService != null) {
             Log.e(this, new Exception(), "Trying to set ConnectionService on a connection " +
                     "which is already associated with another ConnectionService.");
@@ -946,13 +1148,14 @@ public abstract class Connection implements IConferenceable {
 
     /**
      * Sets the conference that this connection is a part of. This will fail if the connection is
-     * already part of a conference call. {@link #resetConference} to un-set the conference first.
+     * already part of a conference. {@link #resetConference} to un-set the conference first.
      *
      * @param conference The conference.
      * @return {@code true} if the conference was successfully set.
      * @hide
      */
     public final boolean setConference(Conference conference) {
+        checkImmutable();
         // We check to see if it is already part of another conference.
         if (mConference == null) {
             mConference = conference;
@@ -979,7 +1182,7 @@ public abstract class Connection implements IConferenceable {
     /**
      * Notifies this Connection that the {@link #getAudioState()} property has a new value.
      *
-     * @param state The new call audio state.
+     * @param state The new connection audio state.
      */
     public void onAudioStateChanged(AudioState state) {}
 
@@ -1041,7 +1244,7 @@ public abstract class Connection implements IConferenceable {
      * Notifies this Connection, which is in {@link #STATE_RINGING}, of
      * a request to accept.
      *
-     * @param videoState The video state in which to answer the call.
+     * @param videoState The video state in which to answer the connection.
      * @hide
      */
     public void onAnswer(int videoState) {}
@@ -1091,6 +1294,7 @@ public abstract class Connection implements IConferenceable {
     }
 
     private void setState(int state) {
+        checkImmutable();
         if (mState == STATE_DISCONNECTED && mState != state) {
             Log.d(this, "Connection already DISCONNECTED; cannot transition out of this state.");
             return;
@@ -1108,6 +1312,10 @@ public abstract class Connection implements IConferenceable {
     private static class FailureSignalingConnection extends Connection {
         public FailureSignalingConnection(DisconnectCause disconnectCause) {
             setDisconnected(disconnectCause);
+        }
+
+        public void checkImmutable() {
+            throw new UnsupportedOperationException("Connection is immutable");
         }
     }
 
@@ -1127,21 +1335,30 @@ public abstract class Connection implements IConferenceable {
     }
 
     /**
+     * Override to throw an {@link UnsupportedOperationException} if this {@code Connection} is
+     * not intended to be mutated, e.g., if it is a marker for failure. Only for framework use;
+     * this should never be un-@hide-den.
+     *
+     * @hide
+     */
+    public void checkImmutable() {}
+
+    /**
      * Return a {@code Connection} which represents a canceled connection attempt. The returned
      * {@code Connection} will have state {@link #STATE_DISCONNECTED}, and cannot be moved out of
      * that state. This connection should not be used for anything, and no other
      * {@code Connection}s should be attempted.
      * <p>
-     * The returned {@code Connection} can be assumed to {@link #destroy()} itself when appropriate,
      * so users of this method need not maintain a reference to its return value to destroy it.
      *
-     * @return A {@code Connection} which indicates that the underlying call should be canceled.
+     * @return A {@code Connection} which indicates that the underlying connection should
+     * be canceled.
      */
     public static Connection createCanceledConnection() {
         return new FailureSignalingConnection(new DisconnectCause(DisconnectCause.CANCELED));
     }
 
-    private final void  fireOnConferenceableConnectionsChanged() {
+    private final void fireOnConferenceableConnectionsChanged() {
         for (Listener l : mListeners) {
             l.onConferenceablesChanged(this, getConferenceables());
         }
