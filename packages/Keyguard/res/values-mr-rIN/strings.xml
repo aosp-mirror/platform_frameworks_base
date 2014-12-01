@@ -107,13 +107,11 @@
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"आपला नमुना काढा"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम पिन प्रविष्ट करा"</string>
-    <!-- no translation found for kg_sim_pin_instructions_multi (7818515973197201434) -->
-    <skip />
+    <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" साठी सिम पिन प्रविष्ट करा"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"पिन प्रविष्ट करा"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"संकेतशब्द प्रविष्ट करा"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"सिम आता अक्षम केले आहे. सुरु ठेवण्यासाठी PUK कोड प्रविष्ट करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
-    <!-- no translation found for kg_puk_enter_puk_hint_multi (363822494559783025) -->
-    <skip />
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" सिम आता अक्षम आहे. सुरु ठेवण्यासाठी PUK कोड प्रविष्ट करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित पिन कोड प्रविष्ट करा"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित पिन कोड ची पुष्टी करा"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"सिम कार्ड अनलॉक करत आहे…"</string>
@@ -132,30 +130,18 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आपण आपला पिन <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने काढला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (8774056606869646621) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_wipe (1843331751334128428) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (258925501999698032) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_wiping (7154028908459817066) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6159955099372112688) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_user (6945823186629369880) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (3963486905355778734) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_user (7729009752252111673) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (4621778507387853694) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_almost_at_erase_profile (6853071165802933545) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4686386497449912146) -->
-    <skip />
-    <!-- no translation found for kg_failed_attempts_now_erasing_profile (4951507352869831265) -->
-    <skip />
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="8774056606869646621">"आपण अनलॉक करण्याचा <xliff:g id="NUMBER_0">%d</xliff:g> वेळा टॅब्लेट चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, हा टॅब्लेट रीसेट केला जाईल, जे त्याचा सर्व डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="1843331751334128428">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER_0">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, हा फोन रीसेट केला जाईल, जे त्याचा सर्व डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="258925501999698032">"आपण टॅब्लेट अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. हा टॅब्लेट रीसेट केला जाईल, जो त्याचा सर्व डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="7154028908459817066">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. हा फोन रीसेट केला जाईल, जे त्याचा सर्व डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="tablet" msgid="6159955099372112688">"आपण टॅब्लेट अनलॉक करण्याचा <xliff:g id="NUMBER_0">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, हा वापरकर्ता काढला जाईल, जे सर्व वापरकर्ता डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_almost_at_erase_user" product="default" msgid="6945823186629369880">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER_0">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, हा वापरकर्ता काढला जाईल, जे सर्व वापरकर्ता डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="tablet" msgid="3963486905355778734">"आपण टॅब्लेट अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. हा वापरकर्ता काढला जाईल, जे सर्व वापरकर्ता डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_now_erasing_user" product="default" msgid="7729009752252111673">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. हा वापरकर्ता काढला जाईल, जे सर्व वापरकर्ता डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="tablet" msgid="4621778507387853694">"आपण टॅब्लेट अनलॉक करण्याचा <xliff:g id="NUMBER_0">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, कार्य प्रोफाईल काढले जाईल, जे सर्व प्रोफाईल डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_almost_at_erase_profile" product="default" msgid="6853071165802933545">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER_0">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, कार्य प्रोफाईल काढले जाईल, जे सर्व प्रोफाईल डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="tablet" msgid="4686386497449912146">"आपण टॅब्लेट अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. कार्य प्रोफाईल काढले जाईल, जे सर्व प्रोफाईल डेटा हटवेल."</string>
+    <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. कार्य प्रोफाईल काढले जाईल, जे सर्व प्रोफाईल डेटा हटवेल."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, आपल्याला ईमेल खाते वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, आपल्याला ईमेल खाते वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
