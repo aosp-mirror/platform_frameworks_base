@@ -1030,12 +1030,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    public void onInternalRingerModeChanged() {
-        if (mIconPolicy != null) {
-            mIconPolicy.updateVolumeZen();
-        }
-    }
-
     private void startKeyguard() {
         KeyguardViewMediator keyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mStatusBarKeyguardViewManager = keyguardViewMediator.registerStatusBar(this,

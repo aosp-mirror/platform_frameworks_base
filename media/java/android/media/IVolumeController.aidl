@@ -34,6 +34,4 @@ oneway interface IVolumeController {
     void setLayoutDirection(int layoutDirection);
 
     void dismiss();
-
-    void internalRingerModeChanged(int mode);
 }
