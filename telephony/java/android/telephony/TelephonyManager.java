@@ -1811,9 +1811,10 @@ public class TelephonyManager {
      *
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
+     * @return true if the operation was executed correctly.
      */
-    public void setLine1NumberForDisplay(String alphaTag, String number) {
-        setLine1NumberForDisplayForSubscriber(getDefaultSubscription(), alphaTag, number);
+    public boolean setLine1NumberForDisplay(String alphaTag, String number) {
+        return setLine1NumberForDisplayForSubscriber(getDefaultSubscription(), alphaTag, number);
     }
 
     /**
@@ -1828,14 +1829,16 @@ public class TelephonyManager {
      * @param subId the subscriber that the alphatag and dialing number belongs to.
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
+     * @return true if the operation was executed correctly.
      * @hide
      */
-    public void setLine1NumberForDisplayForSubscriber(int subId, String alphaTag, String number) {
+    public boolean setLine1NumberForDisplayForSubscriber(int subId, String alphaTag, String number) {
         try {
-            getITelephony().setLine1NumberForDisplayForSubscriber(subId, alphaTag, number);
+            return getITelephony().setLine1NumberForDisplayForSubscriber(subId, alphaTag, number);
         } catch (RemoteException ex) {
         } catch (NullPointerException ex) {
         }
+        return false;
     }
 
     /**
