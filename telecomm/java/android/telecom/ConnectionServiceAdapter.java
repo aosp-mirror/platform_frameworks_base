@@ -175,10 +175,10 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
-    void setCallCapabilities(String callId, int capabilities) {
+    void setConnectionCapabilities(String callId, int capabilities) {
         for (IConnectionServiceAdapter adapter : mAdapters) {
             try {
-                adapter.setCallCapabilities(callId, capabilities);
+                adapter.setConnectionCapabilities(callId, capabilities);
             } catch (RemoteException ignored) {
             }
         }
