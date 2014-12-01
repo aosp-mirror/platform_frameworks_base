@@ -31,10 +31,16 @@
         android:orientation="horizontal"
         android:focusable="true" >
 
-        <include layout="@layout/split_clock_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:id="@+id/clock" />
+        <FrameLayout
+                android:id="@+id/clock" 
+                android:background="@drawable/ripple_drawable"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+            <include layout="@layout/split_clock_view"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+            />
+        </FrameLayout>
 
         <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:id="@+id/alarm_status_collapsed"
@@ -55,6 +61,7 @@
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Clock"
         android:textSize="@dimen/qs_time_collapsed_size"
         android:gravity="top"
+        android:background="@drawable/ripple_drawable"
         systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
     <com.android.systemui.statusbar.AlphaOptimizedButton
@@ -68,7 +75,7 @@
         android:textColor="#64ffffff"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
         android:gravity="top"
-        android:background="?android:attr/selectableItemBackground"
+        android:background="@drawable/ripple_drawable"
         android:visibility="gone" />
 
 </LinearLayout>
