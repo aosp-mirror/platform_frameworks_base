@@ -148,7 +148,7 @@ window.onhashchange = function () {
 </p>
 
 <p>
-  New tools give also give you powerful insight into your app's memory use. The
+  New tools also give you powerful insight into your app's memory use. The
   <strong>procstats tool</strong> details memory use over time, with run times
   and memory footprint for foreground apps and background services. An
   on-device view is also available as a new developer option. The
