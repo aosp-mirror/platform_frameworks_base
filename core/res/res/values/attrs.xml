@@ -5854,17 +5854,32 @@
         <attr name="valueTo" format="float|integer|color|dimension|string"/>
         <!-- The type of valueFrom and valueTo. -->
         <attr name="valueType">
-            <!-- valueFrom and valueTo are floats. This is the default value is valueType is
-                 unspecified. Note that if either valueFrom or valueTo represent colors
+            <!-- The given values are floats. This is the default value if valueType is
+                 unspecified. Note that if any value attribute has a color value
                  (beginning with "#"), then this attribute is ignored and the color values are
                  interpreted as integers. -->
             <enum name="floatType" value="0" />
-            <!-- valueFrom and valueTo are integers. -->
+            <!-- values are integers. -->
             <enum name="intType"   value="1" />
-            <!-- valueFrom and valueTo are paths defined as strings.
+            <!-- values are paths defined as strings.
                  This type is used for path morphing in AnimatedVectorDrawable. -->
             <enum name="pathType"   value="2" />
+            <!-- values are colors, which are integers starting with "#". -->
+            <enum name="colorType"   value="3" />
         </attr>
+    </declare-styleable>
+
+    <declare-styleable name="PropertyValuesHolder">
+        <attr name="valueType" />
+        <attr name="propertyName" />
+        <attr name="valueFrom" />
+        <attr name="valueTo" />
+    </declare-styleable>
+
+    <declare-styleable name="Keyframe">
+        <attr name="valueType" />
+        <attr name="value" />
+        <attr name="fraction" format="float" />
     </declare-styleable>
 
     <!-- ========================== -->

@@ -593,6 +593,7 @@ package android {
     field public static final int format = 16843013; // 0x1010105
     field public static final int format12Hour = 16843722; // 0x10103ca
     field public static final int format24Hour = 16843723; // 0x10103cb
+    field public static final int fraction = 16843992; // 0x10104d8
     field public static final int fragment = 16843491; // 0x10102e3
     field public static final int fragmentAllowEnterTransitionOverlap = 16843976; // 0x10104c8
     field public static final int fragmentAllowReturnTransitionOverlap = 16843977; // 0x10104c9

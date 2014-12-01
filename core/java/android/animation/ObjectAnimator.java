@@ -33,6 +33,27 @@ import java.util.ArrayList;
  * are then determined internally and the animation will call these functions as necessary to
  * animate the property.
  *
+ * <p>Animators can be created from either code or resource files, as shown here:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/anim/object_animator.xml ObjectAnimatorResources}
+ *
+ * <p>When using resource files, it is possible to use {@link PropertyValuesHolder} and
+ * {@link Keyframe} to create more complex animations. Using PropertyValuesHolders
+ * allows animators to animate several properties in parallel, as shown in this sample:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/anim/object_animator_pvh.xml
+ * PropertyValuesHolderResources}
+ *
+ * <p>Using Keyframes allows animations to follow more complex paths from the start
+ * to the end values. Note that you can specify explicit fractional values (from 0 to 1) for
+ * each keyframe to determine when, in the overall duration, the animation should arrive at that
+ * value. Alternatively, you can leave the fractions off and the keyframes will be equally
+ * distributed within the total duration. Also, a keyframe with no value will derive its value
+ * from the target object when the animator starts, just like animators with only one
+ * value specified.</p>
+ *
+ * {@sample development/samples/ApiDemos/res/anim/object_animator_pvh_kf.xml KeyframeResources}
+ *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
  * <p>For more information about animating with {@code ObjectAnimator}, read the
