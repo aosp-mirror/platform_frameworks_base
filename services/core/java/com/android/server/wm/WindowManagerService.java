@@ -825,7 +825,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_hasPermanentDpad);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mDisplaySettings = new DisplaySettings(context);
+        mDisplaySettings = new DisplaySettings();
         mDisplaySettings.readSettingsLocked();
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
@@ -8501,7 +8501,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.overscanBottom = bottom;
         }
 
-        mDisplaySettings.setOverscanLocked(displayInfo.name, left, top, right, bottom);
+        mDisplaySettings.setOverscanLocked(displayInfo.uniqueId, left, top, right, bottom);
         mDisplaySettings.writeSettingsLocked();
 
         reconfigureDisplayLocked(displayContent);
@@ -11483,7 +11483,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final Rect rect = new Rect();
-        mDisplaySettings.getOverscanLocked(displayInfo.name, rect);
+        mDisplaySettings.getOverscanLocked(displayInfo.name, displayInfo.uniqueId, rect);
         synchronized (displayContent.mDisplaySizeLock) {
             displayInfo.overscanLeft = rect.left;
             displayInfo.overscanTop = rect.top;
