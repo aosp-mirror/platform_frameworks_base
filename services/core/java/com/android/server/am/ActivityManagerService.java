@@ -9484,11 +9484,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                             if (DEBUG_PROVIDER) {
                                 Slog.d(TAG, "Installing in existing process " + proc);
                             }
-                            checkTime(startTime, "getContentProviderImpl: scheduling install");
-                            proc.pubProviders.put(cpi.name, cpr);
-                            try {
-                                proc.thread.scheduleInstallProvider(cpi);
-                            } catch (RemoteException e) {
+                            if (!proc.pubProviders.containsKey(cpi.name)) {
+                                checkTime(startTime, "getContentProviderImpl: scheduling install");
+                                proc.pubProviders.put(cpi.name, cpr);
+                                try {
+                                    proc.thread.scheduleInstallProvider(cpi);
+                                } catch (RemoteException e) {
+                                }
                             }
                         } else {
                             checkTime(startTime, "getContentProviderImpl: before start process");
