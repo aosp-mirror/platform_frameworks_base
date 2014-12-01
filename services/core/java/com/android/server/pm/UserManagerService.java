@@ -224,6 +224,7 @@ public class UserManagerService extends IUserManager.Stub {
                         |FileUtils.S_IROTH|FileUtils.S_IXOTH,
                         -1, -1);
                 mUserListFile = new File(mUsersDir, USER_LIST_FILENAME);
+                initDefaultGuestRestrictions();
                 readUserListLocked();
                 // Prune out any partially created/partially removed users.
                 ArrayList<UserInfo> partials = new ArrayList<UserInfo>();
@@ -469,7 +470,7 @@ public class UserManagerService extends IUserManager.Stub {
     private void initDefaultGuestRestrictions() {
         if (mGuestRestrictions.isEmpty()) {
             mGuestRestrictions.putBoolean(UserManager.DISALLOW_OUTGOING_CALLS, true);
-            writeUserListLocked();
+            mGuestRestrictions.putBoolean(UserManager.DISALLOW_SMS, true);
         }
     }
 
@@ -653,8 +654,15 @@ public class UserManagerService extends IUserManager.Stub {
                             }
                         }
                     } else if (name.equals(TAG_GUEST_RESTRICTIONS)) {
-                        mGuestRestrictions.clear();
-                        readRestrictionsLocked(parser, mGuestRestrictions);
+                        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                                && type != XmlPullParser.END_TAG) {
+                            if (type == XmlPullParser.START_TAG) {
+                                if (parser.getName().equals(TAG_RESTRICTIONS)) {
+                                    readRestrictionsLocked(parser, mGuestRestrictions);
+                                }
+                                break;
+                            }
+                        }
                     }
                 }
             }
