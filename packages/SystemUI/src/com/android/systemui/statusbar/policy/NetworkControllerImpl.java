@@ -82,7 +82,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     final WifiSignalController mWifiSignalController;
     @VisibleForTesting
     final MobileSignalController mMobileSignalController;
-    private final AccessPointController mAccessPoints;
+    private final AccessPointControllerImpl mAccessPoints;
     private final MobileDataControllerImpl mMobileDataController;
 
     // bluetooth
@@ -154,6 +154,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode(true);
+        mAccessPoints.setNetworkController(this);
     }
 
     private void registerListeners() {
@@ -176,6 +177,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private void unregisterListeners() {
         mMobileSignalController.unregisterListener();
         mContext.unregisterReceiver(this);
+    }
+
+    public int getConnectedWifiLevel() {
+        return mWifiSignalController.getState().level;
     }
 
     @Override
