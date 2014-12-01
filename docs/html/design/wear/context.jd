@@ -131,7 +131,7 @@ app.</p>
 
 <div class="slide">
 <h2>Zoo</h2>
-<p>Notifies visitors when the penguins are going to be fed!
+<p>Notifies visitors when the penguins are going to be fed.
 </p>
 <img src="{@docRoot}design/media/wear/ContextualExample.014.png" alt=""
      srcset="{@docRoot}design/media/wear/ContextualExample.014.png 1x,
