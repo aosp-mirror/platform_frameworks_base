@@ -44,7 +44,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_DISCONNECTED = 5;
     private static final int MSG_SET_ON_HOLD = 6;
     private static final int MSG_SET_RINGBACK_REQUESTED = 7;
-    private static final int MSG_SET_CALL_CAPABILITIES = 8;
+    private static final int MSG_SET_CONNECTION_CAPABILITIES = 8;
     private static final int MSG_SET_IS_CONFERENCED = 9;
     private static final int MSG_ADD_CONFERENCE_CALL = 10;
     private static final int MSG_REMOVE_CALL = 11;
@@ -109,8 +109,8 @@ final class ConnectionServiceAdapterServant {
                 case MSG_SET_RINGBACK_REQUESTED:
                     mDelegate.setRingbackRequested((String) msg.obj, msg.arg1 == 1);
                     break;
-                case MSG_SET_CALL_CAPABILITIES:
-                    mDelegate.setCallCapabilities((String) msg.obj, msg.arg1);
+                case MSG_SET_CONNECTION_CAPABILITIES:
+                    mDelegate.setConnectionCapabilities((String) msg.obj, msg.arg1);
                     break;
                 case MSG_SET_IS_CONFERENCED: {
                     SomeArgs args = (SomeArgs) msg.obj;
@@ -263,8 +263,9 @@ final class ConnectionServiceAdapterServant {
         }
 
         @Override
-        public void setCallCapabilities(String connectionId, int callCapabilities) {
-            mHandler.obtainMessage(MSG_SET_CALL_CAPABILITIES, callCapabilities, 0, connectionId)
+        public void setConnectionCapabilities(String connectionId, int connectionCapabilities) {
+            mHandler.obtainMessage(
+                    MSG_SET_CONNECTION_CAPABILITIES, connectionCapabilities, 0, connectionId)
                     .sendToTarget();
         }
 

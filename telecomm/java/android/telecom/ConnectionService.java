@@ -407,11 +407,13 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onCapabilitiesChanged(Conference conference, int capabilities) {
+        public void onConnectionCapabilitiesChanged(
+                Conference conference,
+                int connectionCapabilities) {
             String id = mIdByConference.get(conference);
             Log.d(this, "call capabilities: conference: %s",
-                    PhoneCapabilities.toString(capabilities));
-            mAdapter.setCallCapabilities(id, capabilities);
+                    Connection.capabilitiesToString(connectionCapabilities));
+            mAdapter.setConnectionCapabilities(id, connectionCapabilities);
         }
     };
 
@@ -489,11 +491,11 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
-        public void onCallCapabilitiesChanged(Connection c, int capabilities) {
+        public void onConnectionCapabilitiesChanged(Connection c, int capabilities) {
             String id = mIdByConnection.get(c);
             Log.d(this, "capabilities: parcelableconnection: %s",
-                    PhoneCapabilities.toString(capabilities));
-            mAdapter.setCallCapabilities(id, capabilities);
+                    Connection.capabilitiesToString(capabilities));
+            mAdapter.setConnectionCapabilities(id, capabilities);
         }
 
         @Override
@@ -581,7 +583,7 @@ public abstract class ConnectionService extends Service {
         Log.v(this, "createConnection, number: %s, state: %s, capabilities: %s",
                 Connection.toLogSafePhoneNumber(number),
                 Connection.stateToString(connection.getState()),
-                PhoneCapabilities.toString(connection.getCallCapabilities()));
+                Connection.capabilitiesToString(connection.getConnectionCapabilities()));
 
         Log.d(this, "createConnection, calling handleCreateConnectionSuccessful %s", callId);
         mAdapter.handleCreateConnectionComplete(
@@ -590,7 +592,7 @@ public abstract class ConnectionService extends Service {
                 new ParcelableConnection(
                         request.getAccountHandle(),
                         connection.getState(),
-                        connection.getCallCapabilities(),
+                        connection.getConnectionCapabilities(),
                         connection.getAddress(),
                         connection.getAddressPresentation(),
                         connection.getCallerDisplayName(),
@@ -873,7 +875,7 @@ public abstract class ConnectionService extends Service {
             ParcelableConference parcelableConference = new ParcelableConference(
                     conference.getPhoneAccountHandle(),
                     conference.getState(),
-                    conference.getCapabilities(),
+                    conference.getConnectionCapabilities(),
                     connectionIds);
             mAdapter.addConferenceCall(id, parcelableConference);
 
@@ -904,7 +906,7 @@ public abstract class ConnectionService extends Service {
             ParcelableConnection parcelableConnection = new ParcelableConnection(
                     phoneAccountHandle,
                     connection.getState(),
-                    connection.getCallCapabilities(),
+                    connection.getConnectionCapabilities(),
                     connection.getAddress(),
                     connection.getAddressPresentation(),
                     connection.getCallerDisplayName(),
