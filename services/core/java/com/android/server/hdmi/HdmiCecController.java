@@ -129,7 +129,7 @@ final class HdmiCecController {
     }
 
     private void init(long nativePtr) {
-        mIoHandler = new Handler(mService.getServiceLooper());
+        mIoHandler = new Handler(mService.getIoLooper());
         mControlHandler = new Handler(mService.getServiceLooper());
         mNativePtr = nativePtr;
     }
@@ -324,6 +324,7 @@ final class HdmiCecController {
     @ServiceThreadOnly
     void setOption(int flag, int value) {
         assertRunOnServiceThread();
+        HdmiLogger.debug("setOption: [flag:%d, value:%d]", flag, value);
         nativeSetOption(mNativePtr, flag, value);
     }
 
@@ -499,6 +500,19 @@ final class HdmiCecController {
 
     private void runOnServiceThread(Runnable runnable) {
         mControlHandler.post(runnable);
+    }
+
+    @ServiceThreadOnly
+    void flush(final Runnable runnable) {
+        assertRunOnServiceThread();
+        runOnIoThread(new Runnable() {
+            @Override
+            public void run() {
+                // This ensures the runnable for cleanup is performed after all the pending
+                // commands are processed by IO thread.
+                runOnServiceThread(runnable);
+            }
+        });
     }
 
     private boolean isAcceptableAddress(int address) {
