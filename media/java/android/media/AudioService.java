@@ -926,8 +926,9 @@ public class AudioService extends IAudioService.Stub {
 
         // Each stream will read its own persisted settings
 
-        // Broadcast the sticky intent
-        broadcastRingerMode(ringerMode);
+        // Broadcast the sticky intents
+        broadcastRingerMode(AudioManager.RINGER_MODE_CHANGED_ACTION, mRingerModeExternal);
+        broadcastRingerMode(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION, mRingerMode);
 
         // Broadcast vibrate settings
         broadcastVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER);
@@ -1836,7 +1837,6 @@ public class AudioService extends IAudioService.Stub {
         } else /*internal*/ {
             if (ringerMode != ringerModeInternal) {
                 setRingerModeInt(ringerMode, true /*persist*/);
-                mVolumeController.postInternalRingerModeChanged(ringerMode);
             }
             if (mRingerModeDelegate != null) {
                 ringerMode = mRingerModeDelegate.onSetRingerModeInternal(ringerModeInternal,
@@ -1852,11 +1852,13 @@ public class AudioService extends IAudioService.Stub {
             mRingerModeExternal = ringerMode;
         }
         // Send sticky broadcast
-        broadcastRingerMode(ringerMode);
+        broadcastRingerMode(AudioManager.RINGER_MODE_CHANGED_ACTION, ringerMode);
     }
 
     private void setRingerModeInt(int ringerMode, boolean persist) {
+        final boolean change;
         synchronized(mSettingsLock) {
+            change = mRingerMode != ringerMode;
             mRingerMode = ringerMode;
         }
 
@@ -1901,6 +1903,10 @@ public class AudioService extends IAudioService.Stub {
         if (persist) {
             sendMsg(mAudioHandler, MSG_PERSIST_RINGER_MODE,
                     SENDMSG_REPLACE, 0, 0, null, PERSIST_DELAY);
+        }
+        if (change) {
+            // Send sticky broadcast
+            broadcastRingerMode(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION, ringerMode);
         }
     }
 
@@ -3275,9 +3281,9 @@ public class AudioService extends IAudioService.Stub {
         return suggestedStreamType;
     }
 
-    private void broadcastRingerMode(int ringerMode) {
+    private void broadcastRingerMode(String action, int ringerMode) {
         // Send sticky broadcast
-        Intent broadcast = new Intent(AudioManager.RINGER_MODE_CHANGED_ACTION);
+        Intent broadcast = new Intent(action);
         broadcast.putExtra(AudioManager.EXTRA_RINGER_MODE, ringerMode);
         broadcast.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
@@ -5709,16 +5715,6 @@ public class AudioService extends IAudioService.Stub {
                 mController.dismiss();
             } catch (RemoteException e) {
                 Log.w(TAG, "Error calling dismiss", e);
-            }
-        }
-
-        public void postInternalRingerModeChanged(int mode) {
-            if (mController == null)
-                return;
-            try {
-                mController.internalRingerModeChanged(mode);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Error calling internalRingerModeChanged", e);
             }
         }
     }
