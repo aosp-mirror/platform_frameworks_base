@@ -150,6 +150,16 @@ public class VolumePreference extends SeekBarDialogPreference implements
     }
 
     @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
+        // noop
+    }
+
+    @Override
+    public void onMuted(boolean muted) {
+        // noop
+    }
+
+    @Override
     protected Parcelable onSaveInstanceState() {
         final Parcelable superState = super.onSaveInstanceState();
         if (isPersistent()) {
