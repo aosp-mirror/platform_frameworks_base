@@ -5033,8 +5033,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.getMatrix().mapRect(rect);
         }
 
-        int dx = child.mLeft - mScrollX;
-        int dy = child.mTop - mScrollY;
+        final int dx = child.mLeft - mScrollX;
+        final int dy = child.mTop - mScrollY;
 
         rect.offset(dx, dy);
 
@@ -5052,21 +5052,23 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             offset.y += dy;
         }
 
+        final int width = mRight - mLeft;
+        final int height = mBottom - mTop;
+
         boolean rectIsVisible = true;
         if (mParent instanceof ViewGroup && ((ViewGroup)mParent).getClipChildren()) {
-            // clipChildren clips to the child's bounds
-            rectIsVisible = rect.intersect(0, 0, mRight - mLeft, mBottom - mTop);
+            // Clip to bounds.
+            rectIsVisible = rect.intersect(0, 0, width, height);
         }
 
         if (rectIsVisible && (mGroupFlags & CLIP_TO_PADDING_MASK) == CLIP_TO_PADDING_MASK) {
-            // Clip to padding
+            // Clip to padding.
             rectIsVisible = rect.intersect(mPaddingLeft, mPaddingTop,
-                    mRight - mLeft - mPaddingLeft - mPaddingRight,
-                    mBottom - mTop - mPaddingTop - mPaddingBottom);
+                    width - mPaddingRight, height - mPaddingBottom);
         }
 
         if (rectIsVisible && mClipBounds != null) {
-            // Clip to clipBounds
+            // Clip to clipBounds.
             rectIsVisible = rect.intersect(mClipBounds.left, mClipBounds.top, mClipBounds.right,
                     mClipBounds.bottom);
         }
