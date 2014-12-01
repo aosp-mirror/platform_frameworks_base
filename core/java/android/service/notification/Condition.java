@@ -160,7 +160,7 @@ public class Condition implements Parcelable {
     }
 
     public static boolean isValidId(Uri id, String pkg) {
-        return id != null && id.getScheme().equals(SCHEME) && id.getAuthority().equals(pkg);
+        return id != null && SCHEME.equals(id.getScheme()) && pkg.equals(id.getAuthority());
     }
 
     public static final Parcelable.Creator<Condition> CREATOR
