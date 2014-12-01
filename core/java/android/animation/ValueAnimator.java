@@ -537,8 +537,7 @@ public class ValueAnimator extends Animator {
      * @param playTime The time, in milliseconds, to which the animation is advanced or rewound.
      */
     public void setCurrentPlayTime(long playTime) {
-        float fraction = mUnscaledDuration > 0 ? (float) playTime / mUnscaledDuration :
-                playTime == 0 ? 0 : 1;
+        float fraction = mUnscaledDuration > 0 ? (float) playTime / mUnscaledDuration : 1;
         setCurrentFraction(fraction);
     }
 
