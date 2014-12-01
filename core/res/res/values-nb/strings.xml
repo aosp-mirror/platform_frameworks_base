@@ -159,7 +159,7 @@
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Av <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Arbeidsprofilen er slettet"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Arbeidsprofilen er slettet på grunn av manglende admin-app."</string>
-    <string name="work_profile_deleted_details" msgid="226615743462361248">"Arbeidsprofilens admin-app mangler, eller så er den ødelagt. Dette har ført til at arbeidsprofilen og alle dens tilknyttede data har blitt slettet. Kontakt administratoren for å få hjelp."</string>
+    <string name="work_profile_deleted_details" msgid="226615743462361248">"Arbeidsprofilens admin-app mangler eller er ødelagt. Dette har ført til at arbeidsprofilen og alle data knyttet til den er blitt slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Enheten blir slettet"</string>
     <string name="factory_reset_message" msgid="4905025204141900666">"Admin-appen mangler komponenter eller er ødelagt, og kan ikke brukes. Enheten din blir nå slettet. Kontakt administratoren for å få hjelp."</string>
     <string name="me" msgid="6545696007631404292">"Meg"</string>
@@ -448,7 +448,7 @@
     <string name="permdesc_signalPersistentProcesses" msgid="4896992079182649141">"Lar appen be om at det leverte signalet sendes til alle vedvarende prosesser."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"angi at appen alltid skal kjøre"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Lar appen gjøre deler av seg selv vedvarende i minnet. Dette kan begrense minnet for andre apper og gjøre nettbrettet tregt."</string>
-    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Gjør at appen kan gjøre seg selv vedvarende i minnet. Dette kan begrense minnets tilgjengelighet for andre apper, noe som gjør at TV-en går langsommere."</string>
+    <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Gjør at deler av appen kan legge seg vedvarende i minnet. Dette kan begrense minnets tilgjengelighet for andre apper, noe som gjør at TV-en går langsommere."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Lar appen gjøre deler av seg selv vedvarende i minnet. Dette kan begrense minnet for andre apper og gjøre telefonen treg."</string>
     <string name="permlab_deletePackages" msgid="184385129537705938">"slette apper"</string>
     <string name="permdesc_deletePackages" msgid="7411480275167205081">"Lar appen slette Android-pakker. Ondsinnede apper kan bruke dette til å slette viktige apper."</string>
@@ -1844,7 +1844,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Krev PIN-kode for å løsne apper"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Krev bruk av opplåsningsmønster for å løsne apper"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Krev passord for å løsne apper"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"For å bidra til å forbedre batterilevetiden reduserer batterispareren ytelsen til enheten din og begrenser vibrering, posisjonstjenester og mesteparten av bakgrunnsdataen. E-post, sending av meldinger og andre apper som er avhengig av synkronisering oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"For å bidra til å forbedre batterilevetiden reduserer batterispareren ytelsen til enheten din og begrenser vibrering, posisjonstjenester og mesteparten av bakgrunnsdataene. E-post, sending av meldinger og andre apper som er avhengig av synkronisering oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Til hviletiden din ender kl. <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Inntil nedetiden din er over"</string>
   <plurals name="zen_mode_duration_minutes_summary">

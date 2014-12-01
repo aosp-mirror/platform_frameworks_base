@@ -161,7 +161,7 @@
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"A munkahelyi profilt a rendszer a hiányzó rendszergazda alkalmazás miatt törölte."</string>
     <string name="work_profile_deleted_details" msgid="226615743462361248">"A munkahelyi profil rendszergazda alkalmazása hiányzik vagy sérült. A rendszer ezért törölte munkahelyi profilját, és az ahhoz kapcsolódó adatokat. Ha segítségre van szüksége, vegye fel a kapcsolatot rendszergazdájával."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"A rendszer törölni fogja eszközét"</string>
-    <string name="factory_reset_message" msgid="4905025204141900666">"A rendszergazda alkalmazás egyes részei hiányoznak vagy az alkalmazás sérült, ezért nem használható. A rendszer most törölni fogja eszközét. Ha segítségre van szüksége, vegye fel a kapcsolatot rendszergazdájával."</string>
+    <string name="factory_reset_message" msgid="4905025204141900666">"A rendszergazda alkalmazás egyes részei hiányoznak, vagy az alkalmazás sérült, ezért nem használható. A rendszer most törölni fogja eszközét. Ha segítségre van szüksége, vegye fel a kapcsolatot rendszergazdájával."</string>
     <string name="me" msgid="6545696007631404292">"Saját"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Táblagép beállításai"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Tévébeállítások"</string>
