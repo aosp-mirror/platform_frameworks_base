@@ -134,6 +134,9 @@ public class TimePickerDialog extends AlertDialog implements OnClickListener,
                             mTimePicker.getCurrentMinute());
                 }
                 break;
+            case BUTTON_NEGATIVE:
+                cancel();
+                break;
         }
     }
 
