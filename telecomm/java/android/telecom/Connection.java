@@ -1009,7 +1009,7 @@ public abstract class Connection implements IConferenceable {
     }
 
     /** @hide */
-    @Deprecated public final void setCapabilities(int connectionCapabilities) {
+    @SystemApi @Deprecated public final void setCallCapabilities(int connectionCapabilities) {
         setConnectionCapabilities(connectionCapabilities);
     }
 
