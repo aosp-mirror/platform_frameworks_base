@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Таны саяхны дэлгэц энд харагдах болно"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Сүүлийн апп-уудыг хаах"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"Тойм харагдац дотор 1 дэлгэц"</item>
-    <item quantity="other" msgid="5523506463832158203">"Тойм харагдац дотор %d дэлгэц"</item>
+    <item quantity="one" msgid="3969335317929254918">"Тойм дээр 1 дэлгэц"</item>
+    <item quantity="other" msgid="5523506463832158203">"Тойм дээрх %d дэлгэц"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Мэдэгдэл байхгүй"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Гарсан"</string>
@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Буцах"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Гэрийн"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Цэс"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"Тойм харагдац"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"Тойм"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Хайх"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Камер"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Утас"</string>
@@ -165,7 +165,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Шуурхай тохиргоо."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Дэлгэц түгжих."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Тохиргоо"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Тойм харагдац."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Тойм"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Хэрэглэгч <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wifi унтраасан."</string>
@@ -261,6 +261,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Өөр тохиргоо"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Дууссан"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Холбогдсон"</string>
+    <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"Wi-Fi туслагчаар дамжуулан холбогдлоо"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Холбогдож байна..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Модем болгох"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Сүлжээний цэг"</string>
