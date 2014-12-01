@@ -47,6 +47,7 @@ public class DozeScrimController {
 
     private boolean mDozing;
     private DozeHost.PulseCallback mPulseCallback;
+    private int mPulseReason;
     private Animator mInFrontAnimator;
     private Animator mBehindAnimator;
     private float mInFrontTarget;
@@ -82,7 +83,7 @@ public class DozeScrimController {
     }
 
     /** When dozing, fade screen contents in and out using the front scrim. */
-    public void pulse(@NonNull DozeHost.PulseCallback callback) {
+    public void pulse(@NonNull DozeHost.PulseCallback callback, int reason) {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null");
         }
@@ -96,6 +97,7 @@ public class DozeScrimController {
         // Begin pulse.  Note that it's very important that the pulse finished callback
         // be invoked when we're done so that the caller can drop the pulse wakelock.
         mPulseCallback = callback;
+        mPulseReason = reason;
         mHandler.post(mPulseIn);
     }
 
@@ -219,7 +221,7 @@ public class DozeScrimController {
         public void run() {
             if (DEBUG) Log.d(TAG, "Pulse in, mDozing=" + mDozing);
             if (!mDozing) return;
-            DozeLog.tracePulseStart();
+            DozeLog.tracePulseStart(mPulseReason);
             startScrimAnimation(true /* inFront */, 0f, mDozeParameters.getPulseInDuration(),
                     mPulseInInterpolator, mDozeParameters.getPulseInDelay(), mPulseInFinished);
 
