@@ -118,9 +118,11 @@ public class DozeService extends DreamService {
 
         mSensors = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
         mSigMotionSensor = new TriggerSensor(Sensor.TYPE_SIGNIFICANT_MOTION,
-                mDozeParameters.getPulseOnSigMotion(), mDozeParameters.getVibrateOnSigMotion());
+                mDozeParameters.getPulseOnSigMotion(), mDozeParameters.getVibrateOnSigMotion(),
+                DozeLog.PULSE_REASON_SENSOR_SIGMOTION);
         mPickupSensor = new TriggerSensor(Sensor.TYPE_PICK_UP_GESTURE,
-                mDozeParameters.getPulseOnPickup(), mDozeParameters.getVibrateOnPickup());
+                mDozeParameters.getPulseOnPickup(), mDozeParameters.getVibrateOnPickup(),
+                DozeLog.PULSE_REASON_SENSOR_PICKUP);
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mTag);
         mWakeLock.setReferenceCounted(true);
@@ -195,7 +197,7 @@ public class DozeService extends DreamService {
         mHost.stopDozing();
     }
 
-    private void requestPulse() {
+    private void requestPulse(final int reason) {
         if (mHost != null && mDreaming && !mPulsing) {
             // Let the host know we want to pulse.  Wait for it to be ready, then
             // turn the screen on.  When finished, turn the screen off again.
@@ -204,7 +206,7 @@ public class DozeService extends DreamService {
             mPulsing = true;
             if (!mDozeParameters.getProxCheckBeforePulse()) {
                 // skip proximity check
-                continuePulsing();
+                continuePulsing(reason);
                 return;
             }
             // perform a proximity check before pulsing
@@ -214,7 +216,8 @@ public class DozeService extends DreamService {
                 public void onProximityResult(int result) {
                     // avoid pulsing in pockets
                     final boolean isNear = result == RESULT_NEAR;
-                    DozeLog.traceProximityResult(isNear, SystemClock.uptimeMillis() - start);
+                    final long end = SystemClock.uptimeMillis();
+                    DozeLog.traceProximityResult(isNear, end - start, reason);
                     if (isNear) {
                         mPulsing = false;
                         mWakeLock.release();
@@ -222,13 +225,13 @@ public class DozeService extends DreamService {
                     }
 
                     // not in-pocket, continue pulsing
-                    continuePulsing();
+                    continuePulsing(reason);
                 }
             }.check();
         }
     }
 
-    private void continuePulsing() {
+    private void continuePulsing(int reason) {
         mHost.pulseWhileDozing(new DozeHost.PulseCallback() {
             @Override
             public void onPulseStarted() {
@@ -245,7 +248,7 @@ public class DozeService extends DreamService {
                 }
                 mWakeLock.release(); // needs to be unconditional to balance acquire
             }
-        });
+        }, reason);
     }
 
     private void turnDisplayOff() {
@@ -380,13 +383,13 @@ public class DozeService extends DreamService {
         public void onReceive(Context context, Intent intent) {
             if (PULSE_ACTION.equals(intent.getAction())) {
                 if (DEBUG) Log.d(mTag, "Received pulse intent");
-                requestPulse();
+                requestPulse(DozeLog.PULSE_REASON_INTENT);
             }
             if (NOTIFICATION_PULSE_ACTION.equals(intent.getAction())) {
                 final long instance = intent.getLongExtra(EXTRA_INSTANCE, -1);
                 if (DEBUG) Log.d(mTag, "Received notification pulse intent instance=" + instance);
                 DozeLog.traceNotificationPulse(instance);
-                requestPulse();
+                requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
                 rescheduleNotificationPulse(mNotificationLightOn);
             }
             if (UiModeManager.ACTION_ENTER_CAR_MODE.equals(intent.getAction())) {
@@ -434,15 +437,17 @@ public class DozeService extends DreamService {
         private final Sensor mSensor;
         private final boolean mConfigured;
         private final boolean mDebugVibrate;
+        private final int mPulseReason;
 
         private boolean mRequested;
         private boolean mRegistered;
         private boolean mDisabled;
 
-        public TriggerSensor(int type, boolean configured, boolean debugVibrate) {
+        public TriggerSensor(int type, boolean configured, boolean debugVibrate, int pulseReason) {
             mSensor = mSensors.getDefaultSensor(type);
             mConfigured = configured;
             mDebugVibrate = debugVibrate;
+            mPulseReason = pulseReason;
         }
 
         public void setListening(boolean listen) {
@@ -494,7 +499,7 @@ public class DozeService extends DreamService {
                     }
                 }
 
-                requestPulse();
+                requestPulse(mPulseReason);
                 mRegistered = false;
                 updateListener();  // reregister, this sensor only fires once
 
