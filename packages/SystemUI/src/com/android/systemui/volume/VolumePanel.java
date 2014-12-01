@@ -223,8 +223,8 @@ public class VolumePanel extends Handler implements DemoMode {
                 false),
         RemoteStream(STREAM_REMOTE_MUSIC,
                 R.string.volume_icon_description_media, //FIXME should have its own description
-                R.drawable.ic_media_route_on_holo_dark,
-                R.drawable.ic_media_route_disabled_holo_dark,
+                com.android.systemui.R.drawable.ic_audio_remote,
+                com.android.systemui.R.drawable.ic_audio_remote,
                 false);// will be dynamically updated
 
         int streamType;
