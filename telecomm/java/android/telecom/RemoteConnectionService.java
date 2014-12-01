@@ -59,7 +59,7 @@ final class RemoteConnectionService {
             if (connection != NULL_CONNECTION && mPendingConnections.contains(connection)) {
                 mPendingConnections.remove(connection);
                 // Unconditionally initialize the connection ...
-                connection.setCallCapabilities(parcel.getCapabilities());
+                connection.setConnectionCapabilities(parcel.getConnectionCapabilities());
                 connection.setAddress(
                         parcel.getHandle(), parcel.getHandlePresentation());
                 connection.setCallerDisplayName(
@@ -139,13 +139,13 @@ final class RemoteConnectionService {
         }
 
         @Override
-        public void setCallCapabilities(String callId, int callCapabilities) {
+        public void setConnectionCapabilities(String callId, int connectionCapabilities) {
             if (mConnectionById.containsKey(callId)) {
-                findConnectionForAction(callId, "setCallCapabilities")
-                        .setCallCapabilities(callCapabilities);
+                findConnectionForAction(callId, "setConnectionCapabilities")
+                        .setConnectionCapabilities(connectionCapabilities);
             } else {
-                findConferenceForAction(callId, "setCallCapabilities")
-                        .setCallCapabilities(callCapabilities);
+                findConferenceForAction(callId, "setConnectionCapabilities")
+                        .setConnectionCapabilities(connectionCapabilities);
             }
         }
 
@@ -192,7 +192,7 @@ final class RemoteConnectionService {
             }
 
             conference.setState(parcel.getState());
-            conference.setCallCapabilities(parcel.getCapabilities());
+            conference.setConnectionCapabilities(parcel.getConnectionCapabilities());
             mConferenceById.put(callId, conference);
             conference.registerCallback(new RemoteConference.Callback() {
                 @Override
