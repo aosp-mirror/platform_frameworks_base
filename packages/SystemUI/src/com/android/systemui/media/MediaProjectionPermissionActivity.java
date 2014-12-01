@@ -16,6 +16,7 @@
 
 package com.android.systemui.media;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -32,6 +33,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
@@ -39,9 +41,11 @@ import android.widget.TextView;
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 
-public class MediaProjectionPermissionActivity extends AlertActivity
-        implements DialogInterface.OnClickListener, CheckBox.OnCheckedChangeListener {
+public class MediaProjectionPermissionActivity extends Activity
+        implements DialogInterface.OnClickListener, CheckBox.OnCheckedChangeListener,
+        DialogInterface.OnCancelListener {
     private static final String TAG = "MediaProjectionPermissionActivity";
 
     private boolean mPermanentGrant;
@@ -49,11 +53,12 @@ public class MediaProjectionPermissionActivity extends AlertActivity
     private int mUid;
     private IMediaProjectionManager mService;
 
+    private AlertDialog mDialog;
+
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        Intent intent = getIntent();
         mPackageName = getCallingPackage();
         IBinder b = ServiceManager.getService(MEDIA_PROJECTION_SERVICE);
         mService = IMediaProjectionManager.Stub.asInterface(b);
@@ -89,22 +94,27 @@ public class MediaProjectionPermissionActivity extends AlertActivity
 
         String appName = aInfo.loadLabel(packageManager).toString();
 
-        final AlertController.AlertParams ap = mAlertParams;
-        ap.mIcon = aInfo.loadIcon(packageManager);
-        ap.mMessage = getString(R.string.media_projection_dialog_text, appName);
-        ap.mPositiveButtonText = getString(R.string.media_projection_action_text);
-        ap.mNegativeButtonText = getString(android.R.string.cancel);
-        ap.mPositiveButtonListener = this;
-        ap.mNegativeButtonListener = this;
+        mDialog = new AlertDialog.Builder(this)
+                .setIcon(aInfo.loadIcon(packageManager))
+                .setMessage(getString(R.string.media_projection_dialog_text, appName))
+                .setPositiveButton(R.string.media_projection_action_text, this)
+                .setNegativeButton(android.R.string.cancel, this)
+                .setView(R.layout.remember_permission_checkbox)
+                .setOnCancelListener(this)
+                .create();
 
-        // add "always use" checkbox
-        LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ap.mView = inflater.inflate(R.layout.remember_permission_checkbox, null);
-        CheckBox rememberPermissionCheckbox =
-                (CheckBox)ap.mView.findViewById(R.id.remember);
-        rememberPermissionCheckbox.setOnCheckedChangeListener(this);
+        mDialog.create();
 
-        setupAlert();
+        ((CheckBox) mDialog.findViewById(R.id.remember)).setOnCheckedChangeListener(this);
+        mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+
+        mDialog.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mDialog.dismiss();
     }
 
     @Override
@@ -118,6 +128,7 @@ public class MediaProjectionPermissionActivity extends AlertActivity
             Log.e(TAG, "Error granting projection permission", e);
             setResult(RESULT_CANCELED);
         } finally {
+            mDialog.dismiss();
             finish();
         }
     }
@@ -134,5 +145,10 @@ public class MediaProjectionPermissionActivity extends AlertActivity
         Intent intent = new Intent();
         intent.putExtra(MediaProjectionManager.EXTRA_MEDIA_PROJECTION, projection.asBinder());
         return intent;
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        finish();
     }
 }
