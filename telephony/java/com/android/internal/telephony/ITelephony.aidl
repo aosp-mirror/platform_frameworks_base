@@ -740,8 +740,9 @@ interface ITelephony {
      * @param subId the subscriber that the alphatag and dialing number belongs to.
      * @param alphaTag alpha-tagging of the dailing nubmer
      * @param number The dialing number
+     * @return true if the operation was executed correctly.
      */
-    void setLine1NumberForDisplayForSubscriber(int subId, String alphaTag, String number);
+    boolean setLine1NumberForDisplayForSubscriber(int subId, String alphaTag, String number);
 
     /**
      * Returns the displayed dialing number string if it was set previously via
