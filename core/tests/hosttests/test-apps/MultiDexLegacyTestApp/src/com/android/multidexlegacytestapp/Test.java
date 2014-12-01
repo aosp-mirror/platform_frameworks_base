@@ -31,7 +31,7 @@ public class Test extends ActivityInstrumentationTestCase2<MainActivity> {
         assertEquals(3366, getActivity().getValue());
     }
 
-    public void testAnnotation() {
+    public void testAnnotation() throws Exception {
         assertEquals(ReferencedByAnnotation.B,
                 ((AnnotationWithEnum) TestApplication.annotation).value());
         assertEquals(ReferencedByAnnotation.B,
@@ -43,10 +43,25 @@ public class Test extends ActivityInstrumentationTestCase2<MainActivity> {
                 ((AnnotationWithClass) TestApplication.annotation3).value());
         // Just to verify that it doesn't crash
         ReferencedByClassInAnnotation.A.get();
+
+        // Tests about bug https://code.google.com/p/android/issues/detail?id=78144
+        // Dalvik may throw IllegalAccessError when a class is in a different dex than an enum
+        // used in its annotations.
+        String annotationPackage = "com.android.multidexlegacytestapp.annotation.";
+        Class<?> clazz = Class.forName(annotationPackage + "Annotated");
+        // Just to verify that it doesn't crash
+        clazz.getAnnotations();
+        clazz = Class.forName(annotationPackage + "Annotated2");
+        // Just to verify that it doesn't crash
+        clazz.getAnnotations();
+        clazz = Class.forName(annotationPackage + "Annotated3");
+        // Just to verify that it doesn't crash
+        clazz.getAnnotations();
     }
 
     public void testInterface() {
         assertEquals(InterfaceWithEnum.class,
                 TestApplication.interfaceClass);
     }
+
 }
