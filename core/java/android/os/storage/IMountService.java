@@ -856,6 +856,38 @@ public interface IMountService extends IInterface {
                 }
                 return _result;
             }
+
+            @Override
+            public long lastMaintenance() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                long _result;
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_lastMaintenance, _data, _reply, 0);
+                    _reply.readException();
+                    _result = _reply.readLong();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return _result;
+            }
+
+            @Override
+            public void runMaintenance() throws RemoteException {
+                Parcel _data = Parcel.obtain();
+                Parcel _reply = Parcel.obtain();
+                try {
+                    _data.writeInterfaceToken(DESCRIPTOR);
+                    mRemote.transact(Stub.TRANSACTION_runMaintenance, _data, _reply, 0);
+                    _reply.readException();
+                } finally {
+                    _reply.recycle();
+                    _data.recycle();
+                }
+                return;
+            }
         }
 
         private static final String DESCRIPTOR = "IMountService";
@@ -941,6 +973,10 @@ public interface IMountService extends IInterface {
         static final int TRANSACTION_getField = IBinder.FIRST_CALL_TRANSACTION + 39;
 
         static final int TRANSACTION_resizeSecureContainer = IBinder.FIRST_CALL_TRANSACTION + 40;
+
+        static final int TRANSACTION_lastMaintenance = IBinder.FIRST_CALL_TRANSACTION + 41;
+
+        static final int TRANSACTION_runMaintenance = IBinder.FIRST_CALL_TRANSACTION + 42;
 
         /**
          * Cast an IBinder object into an IMountService interface, generating a
@@ -1347,6 +1383,19 @@ public interface IMountService extends IInterface {
                     reply.writeInt(resultCode);
                     return true;
                 }
+                case TRANSACTION_lastMaintenance: {
+                    data.enforceInterface(DESCRIPTOR);
+                    long lastMaintenance = lastMaintenance();
+                    reply.writeNoException();
+                    reply.writeLong(lastMaintenance);
+                    return true;
+                }
+                case TRANSACTION_runMaintenance: {
+                    data.enforceInterface(DESCRIPTOR);
+                    runMaintenance();
+                    reply.writeNoException();
+                    return true;
+                }
             }
             return super.onTransact(code, data, reply, flags);
         }
@@ -1617,4 +1666,18 @@ public interface IMountService extends IInterface {
     public String getField(String field) throws RemoteException;
 
     public int resizeSecureContainer(String id, int sizeMb, String key) throws RemoteException;
+
+    /**
+     * Report the time of the last maintenance operation such as fstrim.
+     * @return Timestamp of the last maintenance operation, in the
+     *     System.currentTimeMillis() time base
+     * @throws RemoteException
+     */
+    public long lastMaintenance() throws RemoteException;
+
+    /**
+     * Kick off an immediate maintenance operation
+     * @throws RemoteException
+     */
+    public void runMaintenance() throws RemoteException;
 }
