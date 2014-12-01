@@ -57,7 +57,7 @@ Platform Versions</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on November 3, 2014.
+<p style="clear:both"><em>Data collected during a 7-day period ending on December 1, 2014.
 <br/>Any versions with less than 0.1% distribution are not shown.</em>
 </p>
 
@@ -88,7 +88,7 @@ Screens</a>.</p>
 </div>
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on November 3, 2014.
+<p style="clear:both"><em>Data collected during a 7-day period ending on December 1, 2014.
 
 <br/>Any screen configurations with less than 0.1% distribution are not shown.</em></p>
 
@@ -108,7 +108,8 @@ support for any lower version (for example, support for version 2.0 also implies
 
 
 <img alt="" style="float:right"
-src="//chart.googleapis.com/chart?chl=GL%202.0%7CGL%203.0&chd=t%3A74.7%2C25.3&chf=bg%2Cs%2C00000000&chco=c4df9b%2C6fad0c&cht=p&chs=400x250" />
+src="//chart.googleapis.com/chart?chl=GL%202.0%7CGL%203.0&chf=bg%2Cs%2C00000000&chd=t%3A72.2%2C27.8&chco=c4df9b%2C6fad0c&cht=p&chs=400x250" />
+
 
 <p>To declare which version of OpenGL ES your application requires, you should use the {@code
 android:glEsVersion} attribute of the <a
@@ -126,17 +127,17 @@ uses.</p>
 </tr>
 <tr>
 <td>2.0</td>
-<td>74.7%</td>
+<td>72.2%</td>
 </tr>
 <tr>
 <td>3.0</td>
-<td>25.3%</td>
+<td>27.8%</td>
 </tr>
 </table>
 
 
 
-<p style="clear:both"><em>Data collected during a 7-day period ending on November 3, 2014</em></p>
+<p style="clear:both"><em>Data collected during a 7-day period ending on December 1, 2014</em></p>
 
 
 
@@ -154,42 +155,42 @@ uses.</p>
 var VERSION_DATA =
 [
   {
-    "chart": "//chart.googleapis.com/chart?chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat&chd=t%3A0.6%2C9.8%2C8.5%2C50.9%2C30.2&chf=bg%2Cs%2C00000000&chco=c4df9b%2C6fad0c&cht=p&chs=500x250",
+    "chart": "//chart.googleapis.com/chart?chl=Froyo%7CGingerbread%7CIce%20Cream%20Sandwich%7CJelly%20Bean%7CKitKat&chf=bg%2Cs%2C00000000&chd=t%3A0.5%2C9.1%2C7.8%2C48.7%2C33.9&chco=c4df9b%2C6fad0c&cht=p&chs=500x250",
     "data": [
       {
         "api": 8,
         "name": "Froyo",
-        "perc": "0.6"
+        "perc": "0.5"
       },
       {
         "api": 10,
         "name": "Gingerbread",
-        "perc": "9.8"
+        "perc": "9.1"
       },
       {
         "api": 15,
         "name": "Ice Cream Sandwich",
-        "perc": "8.5"
+        "perc": "7.8"
       },
       {
         "api": 16,
         "name": "Jelly Bean",
-        "perc": "22.8"
+        "perc": "21.3"
       },
       {
         "api": 17,
         "name": "Jelly Bean",
-        "perc": "20.8"
+        "perc": "20.4"
       },
       {
         "api": 18,
         "name": "Jelly Bean",
-        "perc": "7.3"
+        "perc": "7.0"
       },
       {
         "api": 19,
         "name": "KitKat",
-        "perc": "30.2"
+        "perc": "33.9"
       }
     ]
   }
@@ -203,27 +204,28 @@ var SCREEN_DATA =
       "Large": {
         "hdpi": "0.6",
         "ldpi": "0.5",
-        "mdpi": "4.5",
-        "tvdpi": "1.9",
+        "mdpi": "4.6",
+        "tvdpi": "2.0",
         "xhdpi": "0.6"
       },
       "Normal": {
-        "hdpi": "36.6",
-        "mdpi": "9.9",
-        "xhdpi": "18.9",
-        "xxhdpi": "16.0"
+        "hdpi": "36.9",
+        "mdpi": "9.4",
+        "tvdpi": "0.2",
+        "xhdpi": "18.8",
+        "xxhdpi": "16.3"
       },
       "Small": {
-        "ldpi": "5.8"
+        "ldpi": "5.4"
       },
       "Xlarge": {
         "hdpi": "0.3",
-        "mdpi": "3.9",
-        "xhdpi": "0.5"
+        "mdpi": "3.8",
+        "xhdpi": "0.6"
       }
     },
-    "densitychart": "//chart.googleapis.com/chart?chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chd=t%3A6.3%2C18.3%2C1.9%2C37.5%2C20.0%2C16.0&chf=bg%2Cs%2C00000000&chco=c4df9b%2C6fad0c&cht=p&chs=400x250",
-    "layoutchart": "//chart.googleapis.com/chart?chl=Xlarge%7CLarge%7CNormal%7CSmall&chd=t%3A4.7%2C8.1%2C81.4%2C5.8&chf=bg%2Cs%2C00000000&chco=c4df9b%2C6fad0c&cht=p&chs=400x250"
+    "densitychart": "//chart.googleapis.com/chart?chl=ldpi%7Cmdpi%7Ctvdpi%7Chdpi%7Cxhdpi%7Cxxhdpi&chf=bg%2Cs%2C00000000&chd=t%3A5.9%2C17.8%2C2.2%2C37.8%2C20.0%2C16.3&chco=c4df9b%2C6fad0c&cht=p&chs=400x250",
+    "layoutchart": "//chart.googleapis.com/chart?chl=Xlarge%7CLarge%7CNormal%7CSmall&chf=bg%2Cs%2C00000000&chd=t%3A4.7%2C8.3%2C81.6%2C5.4&chco=c4df9b%2C6fad0c&cht=p&chs=400x250"
   }
 ];
 
