@@ -58,6 +58,8 @@
             android:background="@drawable/btn_borderless_rect"
             android:clickable="true"
             android:drawableEnd="@drawable/qs_subhead_caret"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:textAppearance="@style/TextAppearance.QS.Subhead" />
 
         <TextView
@@ -67,6 +69,8 @@
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
             android:paddingLeft="8dp"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:textAppearance="@style/TextAppearance.QS.Subhead" />
 
         <ImageView
@@ -87,6 +91,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="@dimen/qs_panel_padding" />
+        android:paddingBottom="@dimen/zen_mode_condition_detail_bottom_padding" />
 
 </com.android.systemui.volume.ZenModePanel>

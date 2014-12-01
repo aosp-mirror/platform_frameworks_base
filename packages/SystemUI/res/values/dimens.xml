@@ -197,7 +197,17 @@
     <!-- How far the expanded QS panel peeks from the header in collapsed state. -->
     <dimen name="qs_peek_height">8dp</dimen>
 
+    <!-- Zen mode panel: condition item button padding -->
     <dimen name="zen_mode_condition_detail_button_padding">8dp</dimen>
+
+    <!-- Zen mode panel: spacing between condition items -->
+    <dimen name="zen_mode_condition_detail_item_spacing">12dp</dimen>
+
+    <!-- Zen mode panel: spacing between two-line condition upper and lower lines -->
+    <dimen name="zen_mode_condition_detail_item_interline_spacing">4dp</dimen>
+
+    <!-- Zen mode panel: bottom padding, a bit less than qs_panel_padding -->
+    <dimen name="zen_mode_condition_detail_bottom_padding">4dp</dimen>
 
     <!-- used by DessertCase -->
     <dimen name="dessert_case_cell_size">192dp</dimen>
