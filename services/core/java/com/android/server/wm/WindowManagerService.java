@@ -6101,7 +6101,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
-                            ws.isDisplayedLw()) {
+                            ws.isDisplayedLw() && winAnim.mSurfaceShown) {
                         screenshotReady = true;
                     }
 
