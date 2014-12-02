@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
 public class NotificationCustomViewWrapper extends NotificationViewWrapper {
 
     private final ViewInvertHelper mInvertHelper;
-    private boolean mDark;
 
     protected NotificationCustomViewWrapper(View view) {
         super(view);
@@ -36,13 +35,10 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
 
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
-        if (mDark != dark) {
-            mDark = dark;
-            if (fade) {
-                mInvertHelper.fade(dark, delay);
-            } else {
-                mInvertHelper.update(dark);
-            }
+        if (fade) {
+            mInvertHelper.fade(dark, delay);
+        } else {
+            mInvertHelper.update(dark);
         }
     }
 }

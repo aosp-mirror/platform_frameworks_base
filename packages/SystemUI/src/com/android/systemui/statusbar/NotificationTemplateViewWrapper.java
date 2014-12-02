@@ -51,8 +51,6 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     private final int mIconBackgroundDarkColor;
     private final Interpolator mLinearOutSlowInInterpolator;
 
-    private boolean mDark;
-
     protected NotificationTemplateViewWrapper(Context ctx, View view) {
         super(view);
         mIconDarkAlpha = ctx.getResources().getInteger(R.integer.doze_small_icon_alpha);
@@ -95,26 +93,23 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
 
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
-        if (mDark != dark) {
-            mDark = dark;
-            if (mInvertHelper != null) {
-                if (fade) {
-                    mInvertHelper.fade(dark, delay);
-                } else {
-                    mInvertHelper.update(dark);
-                }
+        if (mInvertHelper != null) {
+            if (fade) {
+                mInvertHelper.fade(dark, delay);
+            } else {
+                mInvertHelper.update(dark);
             }
-            if (mIcon != null) {
-                if (fade) {
-                    fadeIconColorFilter(mIcon, dark, delay);
-                    fadeIconAlpha(mIcon, dark, delay);
-                } else {
-                    updateIconColorFilter(mIcon, dark);
-                    updateIconAlpha(mIcon, dark);
-                }
-            }
-            setPictureGrayscale(dark, fade, delay);
         }
+        if (mIcon != null) {
+            if (fade) {
+                fadeIconColorFilter(mIcon, dark, delay);
+                fadeIconAlpha(mIcon, dark, delay);
+            } else {
+                updateIconColorFilter(mIcon, dark);
+                updateIconAlpha(mIcon, dark);
+            }
+        }
+        setPictureGrayscale(dark, fade, delay);
     }
 
     protected void setPictureGrayscale(boolean grayscale, boolean fade, long delay) {
