@@ -116,6 +116,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -139,6 +140,7 @@ public class NotificationManagerService extends SystemService {
     static final int SHORT_DELAY = 2000; // 2 seconds
 
     static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250};
+
     static final int VIBRATE_PATTERN_MAXLEN = 8 * 2 + 1; // up to eight bumps
 
     static final int DEFAULT_STREAM_TYPE = AudioManager.STREAM_NOTIFICATION;
@@ -165,6 +167,15 @@ public class NotificationManagerService extends SystemService {
     static final int MATCHES_CALL_FILTER_CONTACTS_TIMEOUT_MS = 3000;
     static final float MATCHES_CALL_FILTER_TIMEOUT_AFFINITY =
             ValidateNotificationPeople.STARRED_CONTACT;
+
+    /** notification_enqueue status value for a newly enqueued notification. */
+    private static final int EVENTLOG_ENQUEUE_STATUS_NEW = 0;
+
+    /** notification_enqueue status value for an existing notification. */
+    private static final int EVENTLOG_ENQUEUE_STATUS_UPDATE = 1;
+
+    /** notification_enqueue status value for an ignored notification. */
+    private static final int EVENTLOG_ENQUEUE_STATUS_IGNORED = 2;
 
     private IActivityManager mAm;
     AudioManager mAudioManager;
@@ -209,6 +220,7 @@ public class NotificationManagerService extends SystemService {
     final ArrayMap<String, NotificationRecord> mNotificationsByKey =
             new ArrayMap<String, NotificationRecord>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<ToastRecord>();
+    final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
 
     ArrayList<String> mLights = new ArrayList<String>();
     NotificationRecord mLedNotification;
@@ -251,6 +263,7 @@ public class NotificationManagerService extends SystemService {
     private static final int REASON_LISTENER_CANCEL = 10;
     private static final int REASON_LISTENER_CANCEL_ALL = 11;
     private static final int REASON_GROUP_SUMMARY_CANCELED = 12;
+    private static final int REASON_GROUP_OPTIMIZATION = 13;
 
     private static class Archive {
         final int mBufferSize;
@@ -1658,6 +1671,16 @@ public class NotificationManagerService extends SystemService {
 
             pw.println("\n  Condition providers:");
             mConditionProviders.dump(pw, filter);
+
+            pw.println("\n  Group summaries:");
+            for (Entry<String, NotificationRecord> entry : mSummaryByGroupKey.entrySet()) {
+                NotificationRecord r = entry.getValue();
+                pw.println("    " + entry.getKey() + " -> " + r.getKey());
+                if (mNotificationsByKey.get(r.getKey()) != r) {
+                    pw.println("!!!!!!LEAK: Record not found in mNotificationsByKey.");
+                    r.dump(pw, "      ", getContext());
+                }
+            }
         }
     }
 
@@ -1779,16 +1802,34 @@ public class NotificationManagerService extends SystemService {
                         // Retain ranking information from previous record
                         r.copyRankingInformation(old);
                     }
-                    mRankingHelper.extractSignals(r);
+
+                    // Handle grouped notifications and bail out early if we
+                    // can to avoid extracting signals.
+                    handleGroupedNotificationLocked(r, old, callingUid, callingPid);
+                    boolean ignoreNotification =
+                            removeUnusedGroupedNotificationLocked(r, callingUid, callingPid);
 
                     // This conditional is a dirty hack to limit the logging done on
                     //     behalf of the download manager without affecting other apps.
                     if (!pkg.equals("com.android.providers.downloads")
                             || Log.isLoggable("DownloadManager", Log.VERBOSE)) {
+                        int enqueueStatus = EVENTLOG_ENQUEUE_STATUS_NEW;
+                        if (ignoreNotification) {
+                            enqueueStatus = EVENTLOG_ENQUEUE_STATUS_IGNORED;
+                        } else if (old != null) {
+                            enqueueStatus = EVENTLOG_ENQUEUE_STATUS_UPDATE;
+                        }
                         EventLogTags.writeNotificationEnqueue(callingUid, callingPid,
                                 pkg, id, tag, userId, notification.toString(),
-                                (old != null) ? 1 : 0);
+                                enqueueStatus);
                     }
+
+                    if (ignoreNotification) {
+                        return;
+                    }
+
+                    mRankingHelper.extractSignals(r);
+
                     // 3. Apply local rules
 
                     // blocked apps
@@ -1803,16 +1844,6 @@ public class NotificationManagerService extends SystemService {
                     if (r.score < SCORE_DISPLAY_THRESHOLD) {
                         // Notification will be blocked because the score is too low.
                         return;
-                    }
-
-                    // Clear out group children of the old notification if the update causes the
-                    // group summary to go away. This happens when the old notification was a
-                    // summary and the new one isn't, or when the old notification was a summary
-                    // and its group key changed.
-                    if (old != null && old.getNotification().isGroupSummary() &&
-                            (!notification.isGroupSummary() ||
-                                    !old.getGroupKey().equals(r.getGroupKey()))) {
-                        cancelGroupChildrenLocked(old, callingUid, callingPid, null);
                     }
 
                     int index = indexOfNotificationLocked(n.getKey());
@@ -1862,6 +1893,90 @@ public class NotificationManagerService extends SystemService {
         });
 
         idOut[0] = id;
+    }
+
+    /**
+     * Ensures that grouped notification receive their special treatment.
+     *
+     * <p>Cancels group children if the new notification causes a group to lose
+     * its summary.</p>
+     *
+     * <p>Updates mSummaryByGroupKey.</p>
+     */
+    private void handleGroupedNotificationLocked(NotificationRecord r, NotificationRecord old,
+            int callingUid, int callingPid) {
+        StatusBarNotification sbn = r.sbn;
+        Notification n = sbn.getNotification();
+        String group = sbn.getGroupKey();
+        boolean isSummary = n.isGroupSummary();
+
+        Notification oldN = old != null ? old.sbn.getNotification() : null;
+        String oldGroup = old != null ? old.sbn.getGroupKey() : null;
+        boolean oldIsSummary = old != null && oldN.isGroupSummary();
+
+        if (oldIsSummary) {
+            NotificationRecord removedSummary = mSummaryByGroupKey.remove(oldGroup);
+            if (removedSummary != old) {
+                String removedKey =
+                        removedSummary != null ? removedSummary.getKey() : "<null>";
+                Slog.w(TAG, "Removed summary didn't match old notification: old=" + old.getKey() +
+                        ", removed=" + removedKey);
+            }
+        }
+        if (isSummary) {
+            mSummaryByGroupKey.put(group, r);
+        }
+
+        // Clear out group children of the old notification if the update
+        // causes the group summary to go away. This happens when the old
+        // notification was a summary and the new one isn't, or when the old
+        // notification was a summary and its group key changed.
+        if (oldIsSummary && (!isSummary || !oldGroup.equals(group))) {
+            cancelGroupChildrenLocked(old, callingUid, callingPid, null,
+                    REASON_GROUP_SUMMARY_CANCELED);
+        }
+    }
+
+    /**
+     * Performs group notification optimizations if SysUI is the only active
+     * notification listener and returns whether the given notification should
+     * be ignored.
+     *
+     * <p>Returns true if the given notification is a child of a group with a
+     * summary, which means that SysUI will never show it, and hence the new
+     * notification can be safely ignored.</p>
+     *
+     * <p>For summaries, cancels all children of that group, as SysUI will
+     * never show them anymore.</p>
+     *
+     * @return true if the given notification can be ignored as an optimization
+     */
+    private boolean removeUnusedGroupedNotificationLocked(NotificationRecord r,
+            int callingUid, int callingPid) {
+        // No optimizations are possible if listeners want groups.
+        if (mListeners.notificationGroupsDesired()) {
+            return false;
+        }
+
+        StatusBarNotification sbn = r.sbn;
+        String group = sbn.getGroupKey();
+        boolean isSummary = sbn.getNotification().isGroupSummary();
+        boolean isChild = sbn.getNotification().isGroupChild();
+
+        NotificationRecord summary = mSummaryByGroupKey.get(group);
+        if (isChild && summary != null) {
+            // Child with an active summary -> ignore
+            if (DBG) {
+                Slog.d(TAG, "Ignoring group child " + sbn.getKey() + " due to existing summary "
+                        + summary.getKey());
+            }
+            return true;
+        } else if (isSummary) {
+            // Summary -> cancel children
+            cancelGroupChildrenLocked(r, callingUid, callingPid, null,
+                    REASON_GROUP_OPTIMIZATION);
+        }
+        return false;
     }
 
     private void buzzBeepBlinkLocked(NotificationRecord record) {
@@ -2386,6 +2501,11 @@ public class NotificationManagerService extends SystemService {
         }
 
         mNotificationsByKey.remove(r.sbn.getKey());
+        String groupKey = r.getGroupKey();
+        NotificationRecord groupSummary = mSummaryByGroupKey.get(groupKey);
+        if (groupSummary != null && groupSummary.getKey().equals(r.getKey())) {
+            mSummaryByGroupKey.remove(groupKey);
+        }
 
         // Save it for users of getHistoricalNotifications()
         mArchive.record(r.sbn);
@@ -2433,7 +2553,8 @@ public class NotificationManagerService extends SystemService {
                         mNotificationList.remove(index);
 
                         cancelNotificationLocked(r, sendDelete, reason);
-                        cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName);
+                        cancelGroupChildrenLocked(r, callingUid, callingPid, listenerName,
+                                REASON_GROUP_SUMMARY_CANCELED);
                         updateLightsLocked();
                     }
                 }
@@ -2512,7 +2633,7 @@ public class NotificationManagerService extends SystemService {
                 final int M = canceledNotifications.size();
                 for (int i = 0; i < M; i++) {
                     cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,
-                            listenerName);
+                            listenerName, REASON_GROUP_SUMMARY_CANCELED);
                 }
             }
             if (canceledNotifications != null) {
@@ -2556,14 +2677,14 @@ public class NotificationManagerService extends SystemService {
         int M = canceledNotifications != null ? canceledNotifications.size() : 0;
         for (int i = 0; i < M; i++) {
             cancelGroupChildrenLocked(canceledNotifications.get(i), callingUid, callingPid,
-                    listenerName);
+                    listenerName, REASON_GROUP_SUMMARY_CANCELED);
         }
         updateLightsLocked();
     }
 
     // Warning: The caller is responsible for invoking updateLightsLocked().
     private void cancelGroupChildrenLocked(NotificationRecord r, int callingUid, int callingPid,
-            String listenerName) {
+            String listenerName, int reason) {
         Notification n = r.getNotification();
         if (!n.isGroupSummary()) {
             return;
@@ -2583,11 +2704,10 @@ public class NotificationManagerService extends SystemService {
             StatusBarNotification childSbn = childR.sbn;
             if (childR.getNotification().isGroupChild() &&
                     childR.getGroupKey().equals(r.getGroupKey())) {
-                EventLogTags.writeNotificationCancel(callingUid, callingPid,
-                        pkg, childSbn.getId(), childSbn.getTag(), userId, 0, 0,
-                        REASON_GROUP_SUMMARY_CANCELED, listenerName);
+                EventLogTags.writeNotificationCancel(callingUid, callingPid, pkg, childSbn.getId(),
+                        childSbn.getTag(), userId, 0, 0, reason, listenerName);
                 mNotificationList.remove(i);
-                cancelNotificationLocked(childR, false, REASON_GROUP_SUMMARY_CANCELED);
+                cancelNotificationLocked(childR, false, reason);
             }
         }
     }
@@ -2783,6 +2903,7 @@ public class NotificationManagerService extends SystemService {
     public class NotificationListeners extends ManagedServices {
 
         private final ArraySet<ManagedServiceInfo> mLightTrimListeners = new ArraySet<>();
+        private boolean mNotificationGroupsDesired;
 
         public NotificationListeners() {
             super(getContext(), mHandler, mNotificationList, mUserProfiles);
@@ -2810,6 +2931,7 @@ public class NotificationManagerService extends SystemService {
             final INotificationListener listener = (INotificationListener) info.service;
             final NotificationRankingUpdate update;
             synchronized (mNotificationList) {
+                updateNotificationGroupsDesiredLocked();
                 update = makeRankingUpdateLocked(info);
             }
             try {
@@ -2825,6 +2947,7 @@ public class NotificationManagerService extends SystemService {
                 updateListenerHintsLocked();
             }
             mLightTrimListeners.remove(removed);
+            updateNotificationGroupsDesiredLocked();
         }
 
         public void setOnNotificationPostedTrimLocked(ManagedServiceInfo info, int trim) {
@@ -3027,6 +3150,31 @@ public class NotificationManagerService extends SystemService {
                 }
             }
             return false;
+        }
+
+        /**
+         * Returns whether any of the currently registered listeners wants to receive notification
+         * groups.
+         *
+         * <p>Currently we assume groups are desired by non-SystemUI listeners.</p>
+         */
+        public boolean notificationGroupsDesired() {
+            return mNotificationGroupsDesired;
+        }
+
+        private void updateNotificationGroupsDesiredLocked() {
+            mNotificationGroupsDesired = true;
+            // No listeners, no groups.
+            if (mServices.isEmpty()) {
+                mNotificationGroupsDesired = false;
+                return;
+            }
+            // One listener: Check whether it's SysUI.
+            if (mServices.size() == 1 &&
+                    mServices.get(0).component.getPackageName().equals("com.android.systemui")) {
+                mNotificationGroupsDesired = false;
+                return;
+            }
         }
     }
 
