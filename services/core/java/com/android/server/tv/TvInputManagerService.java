@@ -19,6 +19,7 @@ package com.android.server.tv;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
+import static android.media.tv.TvInputManager.INPUT_STATE_UNKNOWN;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
@@ -779,6 +780,22 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public int getTvInputState(String inputId, int userId) {
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, "getTvInputState");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    UserState userState = getUserStateLocked(resolvedUserId);
+                    TvInputState state = userState.inputMap.get(inputId);
+                    return state == null ? INPUT_STATE_UNKNOWN : state.state;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public List<TvContentRatingSystemInfo> getTvContentRatingSystemList(int userId) {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
                     Binder.getCallingUid(), userId, "getTvContentRatingSystemList");
@@ -815,10 +832,6 @@ public final class TvInputManagerService extends SystemService {
                         }, 0);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "client process has already died", e);
-                    }
-                    for (TvInputState state : userState.inputMap.values()) {
-                        notifyInputStateChangedLocked(userState, state.info.getId(), state.state,
-                                callback);
                     }
                 }
             } finally {
