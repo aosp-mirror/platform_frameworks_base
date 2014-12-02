@@ -817,7 +817,10 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *             not exist.
      * @see #getDrawableForDensity(int, int, Theme)
+     * @deprecated Use {@link #getDrawableForDensity(int, int, Theme)} instead.
      */
+    @Deprecated
+    @Nullable
     public Drawable getDrawableForDensity(int id, int density) throws NotFoundException {
         return getDrawableForDensity(id, density, null);
     }
@@ -836,6 +839,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *             not exist.
      */
+    @Nullable
     public Drawable getDrawableForDensity(int id, int density, @Nullable Theme theme) {
         TypedValue value;
         synchronized (mAccessLock) {
