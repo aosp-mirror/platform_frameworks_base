@@ -1200,69 +1200,87 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         return degrees;
     }
 
+    boolean mChangedDuringTouch = false;
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if(!mInputEnabled) {
+        if (!mInputEnabled) {
             return true;
         }
 
-        final float eventX = event.getX();
-        final float eventY = event.getY();
+        final int action = event.getActionMasked();
+        if (action == MotionEvent.ACTION_MOVE
+                || action == MotionEvent.ACTION_UP
+                || action == MotionEvent.ACTION_DOWN) {
+            boolean forceSelection = false;
+            boolean autoAdvance = false;
 
-        int degrees;
-        int snapDegrees;
-        boolean result = false;
+            if (action == MotionEvent.ACTION_DOWN) {
+                // This is a new event stream, reset whether the value changed.
+                mChangedDuringTouch = false;
+            } else if (action == MotionEvent.ACTION_UP) {
+                autoAdvance = true;
 
-        switch(event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_MOVE:
-                degrees = getDegreesFromXY(eventX, eventY);
-                if (degrees != -1) {
-                    snapDegrees = (mShowHours ?
-                            snapOnly30s(degrees, 0) : snapPrefer30s(degrees)) % 360;
-                    if (mShowHours) {
-                        mSelectionDegrees[HOURS] = snapDegrees;
-                        mSelectionDegrees[HOURS_INNER] = snapDegrees;
-                    } else {
-                        mSelectionDegrees[MINUTES] = snapDegrees;
-                    }
-                    performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
-                    if (mListener != null) {
-                        if (mShowHours) {
-                            mListener.onValueSelected(HOURS, getCurrentHour(), false);
-                        } else  {
-                            mListener.onValueSelected(MINUTES, getCurrentMinute(), false);
-                        }
-                    }
-                    result = true;
-                    invalidate();
+                // If we saw a down/up pair without the value changing, assume
+                // this is a single-tap selection and force a change.
+                if (!mChangedDuringTouch) {
+                    forceSelection = true;
                 }
-                break;
+            }
 
-            case MotionEvent.ACTION_UP:
-                degrees = getDegreesFromXY(eventX, eventY);
-                if (degrees != -1) {
-                    snapDegrees = (mShowHours ?
-                            snapOnly30s(degrees, 0) : snapPrefer30s(degrees)) % 360;
-                    if (mShowHours) {
-                        mSelectionDegrees[HOURS] = snapDegrees;
-                        mSelectionDegrees[HOURS_INNER] = snapDegrees;
-                    } else {
-                        mSelectionDegrees[MINUTES] = snapDegrees;
-                    }
-                    if (mListener != null) {
-                        if (mShowHours) {
-                            mListener.onValueSelected(HOURS, getCurrentHour(), true);
-                        } else  {
-                            mListener.onValueSelected(MINUTES, getCurrentMinute(), true);
-                        }
-                    }
-                    invalidate();
-                    result = true;
-                }
-                break;
+            mChangedDuringTouch |= handleTouchInput(
+                    event.getX(), event.getY(), forceSelection, autoAdvance);
         }
-        return result;
+
+        return true;
+    }
+
+    private boolean handleTouchInput(
+            float x, float y, boolean forceSelection, boolean autoAdvance) {
+        // Calling getDegreesFromXY has side effects, so cache
+        // whether we used to be on the inner circle.
+        final boolean wasOnInnerCircle = mIsOnInnerCircle;
+        final int degrees = getDegreesFromXY(x, y);
+        if (degrees == -1) {
+            return false;
+        }
+
+        final int[] selectionDegrees = mSelectionDegrees;
+        int type = -1;
+        int newValue = -1;
+
+        if (mShowHours) {
+            final int snapDegrees = snapOnly30s(degrees, 0) % 360;
+            if (forceSelection
+                    || selectionDegrees[HOURS] != snapDegrees
+                    || selectionDegrees[HOURS_INNER] != snapDegrees
+                    || wasOnInnerCircle != mIsOnInnerCircle) {
+                selectionDegrees[HOURS] = snapDegrees;
+                selectionDegrees[HOURS_INNER] = snapDegrees;
+
+                type = HOURS;
+                newValue = getCurrentHour();
+            }
+        } else {
+            final int snapDegrees = snapPrefer30s(degrees) % 360;
+            if (forceSelection || selectionDegrees[MINUTES] != snapDegrees) {
+                selectionDegrees[MINUTES] = snapDegrees;
+
+                type = MINUTES;
+                newValue = getCurrentMinute();
+            }
+        }
+
+        if (newValue != -1) {
+            if (mListener != null) {
+                mListener.onValueSelected(type, newValue, autoAdvance);
+            }
+            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+            invalidate();
+            return true;
+        }
+
+        return false;
     }
 
     @Override
