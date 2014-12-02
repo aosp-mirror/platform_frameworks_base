@@ -32,7 +32,7 @@ import android.os.Message;
  * {@hide}
  */
 interface IImsService {
-    int open(int serviceClass, in PendingIntent incomingCallIntent,
+    int open(int phoneId, int serviceClass, in PendingIntent incomingCallIntent,
             in IImsRegistrationListener listener);
     void close(int serviceId);
     boolean isConnected(int serviceId, int serviceType, int callType);
@@ -53,18 +53,18 @@ interface IImsService {
     /**
      * Config interface to get/set IMS service/capability parameters.
      */
-    IImsConfig getConfigInterface();
+    IImsConfig getConfigInterface(int phoneId);
 
     /**
      * Used for turning on IMS when its in OFF state.
      */
-    void turnOnIms();
+    void turnOnIms(int phoneId);
 
     /**
      * Used for turning off IMS when its in ON state.
      * When IMS is OFF, device will behave as CSFB'ed.
      */
-    void turnOffIms();
+    void turnOffIms(int phoneId);
 
     /**
      * ECBM interface for Emergency Callback mode mechanism.
