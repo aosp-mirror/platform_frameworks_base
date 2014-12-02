@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.DisplayMetrics;
 
 /**
  * A Parcelable class for Subscription Information.
@@ -36,7 +37,7 @@ public class SubscriptionInfo implements Parcelable {
     /**
      * Size of text to render on the icon.
      */
-    private static final int TEXT_SIZE = 22;
+    private static final int TEXT_SIZE = 16;
 
     /**
      * Subscription Identifier, this is a device unique number
@@ -197,10 +198,10 @@ public class SubscriptionInfo implements Parcelable {
     public Bitmap createIconBitmap(Context context) {
         int width = mIconBitmap.getWidth();
         int height = mIconBitmap.getHeight();
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 
         // Create a new bitmap of the same size because it will be modified.
-        Bitmap workingBitmap = Bitmap.createBitmap(context.getResources().getDisplayMetrics(),
-                width, height, mIconBitmap.getConfig());
+        Bitmap workingBitmap = Bitmap.createBitmap(metrics, width, height, mIconBitmap.getConfig());
 
         Canvas canvas = new Canvas(workingBitmap);
         Paint paint = new Paint();
@@ -214,8 +215,10 @@ public class SubscriptionInfo implements Parcelable {
         paint.setAntiAlias(true);
         paint.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
         paint.setColor(Color.WHITE);
-        paint.setTextSize(TEXT_SIZE);
-        final String index = Integer.toString(mSimSlotIndex + 1);
+        // Set text size scaled by density
+        paint.setTextSize(TEXT_SIZE * metrics.density);
+        // Convert sim slot index to localized string
+        final String index = String.format("%d", mSimSlotIndex + 1);
         final Rect textBound = new Rect();
         paint.getTextBounds(index, 0, 1, textBound);
         final float xOffset = (width / 2.f) - textBound.centerX();
