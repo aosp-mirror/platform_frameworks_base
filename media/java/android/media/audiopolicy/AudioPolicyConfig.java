@@ -27,6 +27,7 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * @hide
@@ -38,7 +39,7 @@ public class AudioPolicyConfig implements Parcelable {
 
     protected ArrayList<AudioMix> mMixes;
 
-    protected String mRegistrationId = null;
+    private String mRegistrationId = null;
 
     protected AudioPolicyConfig(AudioPolicyConfig conf) {
         mMixes = conf.mMixes;
@@ -62,6 +63,11 @@ public class AudioPolicyConfig implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(mMixes);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -80,8 +86,7 @@ public class AudioPolicyConfig implements Parcelable {
             final ArrayList<AttributeMatchCriterion> criteria = mix.getRule().getCriteria();
             dest.writeInt(criteria.size());
             for (AttributeMatchCriterion criterion : criteria) {
-                dest.writeInt(criterion.mRule);
-                dest.writeInt(criterion.mAttr.getUsage());
+                criterion.writeToParcel(dest);
             }
         }
     }
@@ -106,17 +111,7 @@ public class AudioPolicyConfig implements Parcelable {
             AudioMixingRule.Builder ruleBuilder = new AudioMixingRule.Builder();
             for (int j = 0 ; j < nbRules ; j++) {
                 // read the matching rules
-                int matchRule = in.readInt();
-                if ((matchRule == AudioMixingRule.RULE_EXCLUDE_ATTRIBUTE_USAGE)
-                    || (matchRule == AudioMixingRule.RULE_MATCH_ATTRIBUTE_USAGE)) {
-                    int usage = in.readInt();
-                    final AudioAttributes attr = new AudioAttributes.Builder()
-                            .setUsage(usage).build();
-                    ruleBuilder.addRule(attr, matchRule);
-                } else {
-                    Log.w(TAG, "Encountered unsupported rule, skipping");
-                    in.readInt();
-                }
+                ruleBuilder.addRuleFromParcel(in);
             }
             mixBuilder.setMixingRule(ruleBuilder.build());
             mMixes.add(mixBuilder.build());
@@ -140,7 +135,7 @@ public class AudioPolicyConfig implements Parcelable {
 
     public String toLogFriendlyString () {
         String textDump = new String("android.media.audiopolicy.AudioPolicyConfig:\n");
-        textDump += mMixes.size() + " AudioMix:\n";
+        textDump += mMixes.size() + " AudioMix: "+ mRegistrationId + "\n";
         for(AudioMix mix : mMixes) {
             // write mix route flags
             textDump += "* route flags=0x" + Integer.toHexString(mix.getRouteFlags()) + "\n";
@@ -161,6 +156,14 @@ public class AudioPolicyConfig implements Parcelable {
                         textDump += "  match usage ";
                         textDump += criterion.mAttr.usageToString();
                         break;
+                    case AudioMixingRule.RULE_EXCLUDE_ATTRIBUTE_CAPTURE_PRESET:
+                        textDump += "  exclude capture preset ";
+                        textDump += criterion.mAttr.getCapturePreset();
+                        break;
+                    case AudioMixingRule.RULE_MATCH_ATTRIBUTE_CAPTURE_PRESET:
+                        textDump += "  match capture preset ";
+                        textDump += criterion.mAttr.getCapturePreset();
+                        break;
                     default:
                         textDump += "invalid rule!";
                 }
@@ -170,12 +173,32 @@ public class AudioPolicyConfig implements Parcelable {
         return textDump;
     }
 
-    public void setRegistration(String regId) {
-        mRegistrationId = regId;
+    protected void setRegistration(String regId) {
+        final boolean currentRegNull = (mRegistrationId == null) || mRegistrationId.isEmpty();
+        final boolean newRegNull = (regId == null) || regId.isEmpty();
+        if (!currentRegNull && !newRegNull && !mRegistrationId.equals(regId)) {
+            Log.e(TAG, "Invalid registration transition from " + mRegistrationId + " to " + regId);
+            return;
+        }
+        mRegistrationId = regId == null ? "" : regId;
         int mixIndex = 0;
         for (AudioMix mix : mMixes) {
-            mix.setRegistration(mRegistrationId + "mix:" + mixIndex++);
+            if (!mRegistrationId.isEmpty()) {
+                mix.setRegistration(mRegistrationId + "mix" + mixTypeId(mix.getMixType()) + ":"
+                        + mixIndex++);
+            } else {
+                mix.setRegistration("");
+            }
         }
     }
 
+    private static String mixTypeId(int type) {
+        if (type == AudioMix.MIX_TYPE_PLAYERS) return "p";
+        else if (type == AudioMix.MIX_TYPE_RECORDERS) return "r";
+        else return "i";
+    }
+
+    protected String getRegistration() {
+        return mRegistrationId;
+    }
 }
