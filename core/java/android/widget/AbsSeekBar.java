@@ -704,19 +704,20 @@ public abstract class AbsSeekBar extends ProgressBar {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (isEnabled()) {
-            int progress = getProgress();
+            int increment = mKeyProgressIncrement;
             switch (keyCode) {
                 case KeyEvent.KEYCODE_DPAD_LEFT:
-                    if (progress <= 0) break;
-                    animateSetProgress(progress - mKeyProgressIncrement);
-                    onKeyChange();
-                    return true;
-
+                    increment = -increment;
+                    // fallthrough
                 case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    if (progress >= getMax()) break;
-                    animateSetProgress(progress + mKeyProgressIncrement);
-                    onKeyChange();
-                    return true;
+                    increment = isLayoutRtl() ? -increment : increment;
+                    int progress = getProgress() + increment;
+                    if (progress > -mKeyProgressIncrement &&
+                        progress < getMax() + mKeyProgressIncrement) {
+                        animateSetProgress(progress);
+                        onKeyChange();
+                        return true;
+                    }
             }
         }
 
