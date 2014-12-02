@@ -851,14 +851,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     }
                 }
             });
-
-            // set up the dynamic hide/show of the label
-            // TODO: uncomment, handle this for the Stack scroller aswell
-//                ((NotificationRowLayout) mStackScroller)
-// .setOnSizeChangedListener(new OnSizeChangedListener() {
-//                @Override
-//                public void onSizeChanged(View view, int w, int h, int oldw, int oldh) {
-//                    updateCarrierLabelVisibility(false);
         }
 
         mFlashlightController = new FlashlightController(mContext);

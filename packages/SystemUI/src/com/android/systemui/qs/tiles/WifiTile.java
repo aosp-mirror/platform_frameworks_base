@@ -217,8 +217,12 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
                 int mobileSignalIconId,
                 String mobileSignalContentDescriptionId, int dataTypeIconId,
                 boolean activityIn, boolean activityOut,
-                String dataTypeContentDescriptionId, String description, boolean noSim,
+                String dataTypeContentDescriptionId, String description,
                 boolean isDataTypeIconWide) {
+            // noop
+        }
+
+        public void onNoSimVisibleChanged(boolean noSims) {
             // noop
         }
 

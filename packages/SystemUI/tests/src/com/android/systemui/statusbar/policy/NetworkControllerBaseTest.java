@@ -11,6 +11,8 @@ import android.net.wifi.WifiManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.AndroidTestCase;
 import android.util.Log;
@@ -25,6 +27,8 @@ import org.mockito.Mockito;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NetworkControllerBaseTest extends AndroidTestCase {
     private static final String TAG = "NetworkControllerBaseTest";
@@ -44,6 +48,7 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
     private ServiceState mServiceState;
     protected ConnectivityManager mMockCm;
     protected WifiManager mMockWm;
+    protected SubscriptionManager mMockSm;
     protected TelephonyManager mMockTm;
     protected Config mConfig;
 
@@ -56,6 +61,7 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
 
         mMockWm = mock(WifiManager.class);
         mMockTm = mock(TelephonyManager.class);
+        mMockSm = mock(SubscriptionManager.class);
         mMockCm = mock(ConnectivityManager.class);
         when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
 
@@ -64,14 +70,22 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
 
         mConfig = new Config();
         mConfig.hspaDataDistinguishable = true;
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm,
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
                 mConfig, mock(AccessPointControllerImpl.class),
                 mock(MobileDataControllerImpl.class));
         setupNetworkController();
     }
 
     protected void setupNetworkController() {
-        mPhoneStateListener = mNetworkController.mMobileSignalController.mPhoneStateListener;
+        // For now just pretend to be the data sim, so we can test that too.
+        final int subId = SubscriptionManager.getDefaultDataSubId();
+        SubscriptionInfo subscription = mock(SubscriptionInfo.class);
+        List<SubscriptionInfo> subs = new ArrayList<SubscriptionInfo>();
+        when(subscription.getSubscriptionId()).thenReturn(subId);
+        subs.add(subscription);
+        mNetworkController.setCurrentSubscriptions(subs);
+        mPhoneStateListener =
+                mNetworkController.mMobileSignalControllers.get(subId).mPhoneStateListener;
         mSignalCluster = mock(SignalCluster.class);
         mNetworkSignalChangedCallback = mock(NetworkSignalChangedCallback.class);
         mNetworkController.addSignalCluster(mSignalCluster);
@@ -182,13 +196,12 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
     }
 
     protected void verifyLastQsMobileDataIndicators(boolean visible, int icon, int typeIcon,
-            boolean dataIn, boolean dataOut, boolean noSim) {
+            boolean dataIn, boolean dataOut) {
         ArgumentCaptor<Integer> iconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> typeIconArg = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Boolean> visibleArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Boolean> dataInArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Boolean> dataOutArg = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Boolean> noSimArg = ArgumentCaptor.forClass(Boolean.class);
 
         Mockito.verify(mNetworkSignalChangedCallback, Mockito.atLeastOnce())
                 .onMobileDataSignalChanged(visibleArg.capture(), iconArg.capture(),
@@ -198,7 +211,6 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
                         dataOutArg.capture(),
                         ArgumentCaptor.forClass(String.class).capture(),
                         ArgumentCaptor.forClass(String.class).capture(),
-                        noSimArg.capture(),
                         ArgumentCaptor.forClass(Boolean.class).capture());
         assertEquals("Visibility in, quick settings", visible, (boolean) visibleArg.getValue());
         assertEquals("Signal icon in, quick settings", icon, (int) iconArg.getValue());
@@ -207,7 +219,6 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
                 (boolean) dataInArg.getValue());
         assertEquals("Data direction out, in quick settings", dataOut,
                 (boolean) dataOutArg.getValue());
-        assertEquals("Sim state in quick settings", noSim, (boolean) noSimArg.getValue());
     }
 
     protected void verifyLastMobileDataIndicators(boolean visible, int icon, int typeIcon) {
@@ -220,7 +231,8 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
                 visibleArg.capture(), iconArg.capture(), typeIconArg.capture(),
                 ArgumentCaptor.forClass(String.class).capture(),
                 ArgumentCaptor.forClass(String.class).capture(),
-                ArgumentCaptor.forClass(Boolean.class).capture());
+                ArgumentCaptor.forClass(Boolean.class).capture(),
+                ArgumentCaptor.forClass(Integer.class).capture());
 
         assertEquals("Signal icon in status bar", icon, (int) iconArg.getValue());
         assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());

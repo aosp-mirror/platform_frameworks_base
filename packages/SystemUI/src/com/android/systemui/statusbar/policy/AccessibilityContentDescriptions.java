@@ -33,5 +33,6 @@ public class AccessibilityContentDescriptions {
         R.string.accessibility_wifi_three_bars,
         R.string.accessibility_wifi_signal_full
     };
+
     static final int WIFI_NO_CONNECTION = R.string.accessibility_no_wifi;
 }
