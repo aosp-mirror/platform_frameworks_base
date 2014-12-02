@@ -28,6 +28,7 @@ public interface DozeHost {
     void pulseWhileDozing(@NonNull PulseCallback callback, int reason);
     void stopDozing();
     boolean isPowerSaveActive();
+    boolean isNotificationLightOn();
 
     public interface Callback {
         void onNewNotifications();
