@@ -241,11 +241,11 @@ public final class AudioAttributes implements Parcelable {
 
     /**
      * @hide
-     * CANDIDATE FOR PUBLIC API
      * Return the capture preset.
      * @return one of the values that can be set in {@link Builder#setCapturePreset(int)} or a
      *    negative value if none has been set.
      */
+    @SystemApi
     public int getCapturePreset() {
         return mSource;
     }
@@ -508,6 +508,7 @@ public final class AudioAttributes implements Parcelable {
          *     {@link MediaRecorder.AudioSource#VOICE_COMMUNICATION}.
          * @return the same Builder instance.
          */
+        @SystemApi
         public Builder setCapturePreset(int preset) {
             switch (preset) {
                 case MediaRecorder.AudioSource.DEFAULT:
