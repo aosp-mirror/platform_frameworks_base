@@ -1208,14 +1208,17 @@ public class Instrumentation {
      * @param intent The new intent being received.
      */
     public void callActivityOnNewIntent(Activity activity, Intent intent) {
+        activity.onNewIntent(intent);
+    }
+
+    /**
+     * @hide
+     */
+    public void callActivityOnNewIntent(Activity activity, ReferrerIntent intent) {
         final String oldReferrer = activity.mReferrer;
         try {
-            try {
-                activity.mReferrer = ((ReferrerIntent)intent).mReferrer;
-            } catch (ClassCastException e) {
-                activity.mReferrer = null;
-            }
-            activity.onNewIntent(intent);
+            activity.mReferrer = intent.mReferrer;
+            callActivityOnNewIntent(activity, new Intent(intent));
         } finally {
             activity.mReferrer = oldReferrer;
         }
