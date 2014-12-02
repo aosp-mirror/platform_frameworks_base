@@ -567,8 +567,9 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     @Override
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
-            mDrawableContainerState = cloneConstantState();
-            mDrawableContainerState.mutate();
+            final DrawableContainerState clone = cloneConstantState();
+            clone.mutate();
+            setConstantState(clone);
             mMutated = true;
         }
         return this;

@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
@@ -57,7 +58,7 @@ import android.util.AttributeSet;
  * @attr ref android.R.styleable#LevelListDrawableItem_drawable
  */
 public class LevelListDrawable extends DrawableContainer {
-    private final LevelListState mLevelListState;
+    private LevelListState mLevelListState;
     private boolean mMutated;
 
     public LevelListDrawable() {
@@ -227,9 +228,17 @@ public class LevelListDrawable extends DrawableContainer {
         }
     }
 
+    @Override
+    protected void setConstantState(@NonNull DrawableContainerState state) {
+        super.setConstantState(state);
+
+        if (state instanceof LevelListState) {
+            mLevelListState = (LevelListState) state;
+        }
+    }
+
     private LevelListDrawable(LevelListState state, Resources res) {
-        LevelListState as = new LevelListState(state, this, res);
-        mLevelListState = as;
+        final LevelListState as = new LevelListState(state, this, res);
         setConstantState(as);
         onLevelChange(getLevel());
     }
