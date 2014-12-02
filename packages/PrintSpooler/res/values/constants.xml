@@ -45,6 +45,6 @@
     <dimen name="preview_page_footer_height">32dip</dimen>
     <dimen name="preview_page_min_width">128dip</dimen>
 
-    <dimen name="preview_destination_spinner_width">192dip</dimen>
+    <dimen name="preview_destination_spinner_width">256dip</dimen>
 
 </resources>
