@@ -390,7 +390,7 @@ public class AccountManagerService
             boolean accountDeleted = false;
             Cursor cursor = db.query(TABLE_ACCOUNTS,
                     new String[]{ACCOUNTS_ID, ACCOUNTS_TYPE, ACCOUNTS_NAME},
-                    null, null, null, null, null);
+                    null, null, null, null, ACCOUNTS_ID);
             try {
                 accounts.accountCache.clear();
                 final HashMap<String, ArrayList<String>> accountNamesByType =
