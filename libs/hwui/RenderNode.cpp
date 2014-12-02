@@ -680,13 +680,32 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
 
     float casterAlpha = properties().getAlpha() * properties().getOutline().getAlpha();
 
-    const SkPath* outlinePath = casterOutlinePath;
-    if (revealClipPath) {
-        // if we can't simply use the caster's path directly, create a temporary one
-        SkPath* frameAllocatedPath = handler.allocPathForFrame();
 
-        // intersect the outline with the convex reveal clip
-        Op(*casterOutlinePath, *revealClipPath, kIntersect_PathOp, frameAllocatedPath);
+    // holds temporary SkPath to store the result of intersections
+    SkPath* frameAllocatedPath = NULL;
+    const SkPath* outlinePath = casterOutlinePath;
+
+    // intersect the outline with the reveal clip, if present
+    if (revealClipPath) {
+        frameAllocatedPath = handler.allocPathForFrame();
+
+        Op(*outlinePath, *revealClipPath, kIntersect_PathOp, frameAllocatedPath);
+        outlinePath = frameAllocatedPath;
+    }
+
+    // intersect the outline with the clipBounds, if present
+    if (properties().getClippingFlags() & CLIP_TO_CLIP_BOUNDS) {
+        if (!frameAllocatedPath) {
+            frameAllocatedPath = handler.allocPathForFrame();
+        }
+
+        Rect clipBounds;
+        properties().getClippingRectForFlags(CLIP_TO_CLIP_BOUNDS, &clipBounds);
+        SkPath clipBoundsPath;
+        clipBoundsPath.addRect(clipBounds.left, clipBounds.top,
+                clipBounds.right, clipBounds.bottom);
+
+        Op(*outlinePath, clipBoundsPath, kIntersect_PathOp, frameAllocatedPath);
         outlinePath = frameAllocatedPath;
     }
 
