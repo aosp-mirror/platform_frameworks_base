@@ -267,36 +267,6 @@ public class AudioManager {
     public static final String EXTRA_ENCODINGS = "android.media.extra.ENCODINGS";
 
     /**
-     * Broadcast Action: An analog audio speaker/headset plugged in or unplugged.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>name</em> - Headset type, human readable string </li>
-     * </ul>
-     * </ul>
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_ANALOG_AUDIO_DOCK_PLUG =
-            "android.media.action.ANALOG_AUDIO_DOCK_PLUG";
-
-    /**
-     * Broadcast Action: A digital audio speaker/headset plugged in or unplugged.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>name</em> - Headset type, human readable string </li>
-     * </ul>
-     * </ul>
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_DIGITAL_AUDIO_DOCK_PLUG =
-            "android.media.action.DIGITAL_AUDIO_DOCK_PLUG";
-
-    /**
      * Broadcast Action: A USB audio accessory was plugged in or unplugged.
      *
      * <p>The intent will have the following extra values:
