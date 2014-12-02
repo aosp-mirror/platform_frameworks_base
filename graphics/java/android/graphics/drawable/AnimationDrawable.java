@@ -23,6 +23,7 @@ import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.NonNull;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
@@ -81,7 +82,7 @@ import android.util.AttributeSet;
  * @attr ref android.R.styleable#AnimationDrawableItem_drawable
  */
 public class AnimationDrawable extends DrawableContainer implements Runnable, Animatable {
-    private final AnimationState mAnimationState;
+    private AnimationState mAnimationState;
 
     /** The current frame, may be -1 when not animating. */
     private int mCurFrame = -1;
@@ -408,9 +409,17 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
         }
     }
 
+    @Override
+    protected void setConstantState(@NonNull DrawableContainerState state) {
+        super.setConstantState(state);
+
+        if (state instanceof AnimationState) {
+            mAnimationState = (AnimationState) state;
+        }
+    }
+
     private AnimationDrawable(AnimationState state, Resources res) {
-        AnimationState as = new AnimationState(state, this, res);
-        mAnimationState = as;
+        final AnimationState as = new AnimationState(state, this, res);
         setConstantState(as);
         if (state != null) {
             setFrame(0, true, false);
