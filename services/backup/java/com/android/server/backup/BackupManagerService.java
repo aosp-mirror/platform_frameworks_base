@@ -7664,7 +7664,7 @@ if (MORE_DEBUG) Slog.v(TAG, "   + got " + nRead + "; now wanting " + (size - soF
 
             // If this was a full-system restore, record the ancestral
             // dataset information
-            if (mIsSystemRestore) {
+            if (mIsSystemRestore && mPmAgent != null) {
                 mAncestralPackages = mPmAgent.getRestoredPackages();
                 mAncestralToken = mToken;
                 writeRestoreTokens();
