@@ -36,8 +36,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:orientation="horizontal"
-            >
+            android:orientation="horizontal" >
 
             <ImageView android:id="@+id/icon"
                        android:layout_width="24dp"
@@ -46,8 +45,7 @@
                        android:layout_marginStart="16dp"
                        android:layout_marginEnd="16dp"
                        android:layout_marginTop="20dp"
-                       android:scaleType="fitCenter"
-                       />
+                       android:scaleType="fitCenter" />
             <TextView android:id="@+id/title"
                       android:layout_width="0dp"
                       android:layout_weight="1"
@@ -55,8 +53,38 @@
                       android:layout_marginStart="16dp"
                       android:textAppearance="?android:attr/textAppearanceMedium"
                       android:gravity="start|center_vertical"
-                      android:paddingEnd="16dp"
-                      />
+                      android:paddingEnd="16dp" />
+            <LinearLayout android:id="@+id/profile_button"
+                          android:layout_width="wrap_content"
+                          android:layout_height="48dp"
+                          android:layout_marginTop="4dp"
+                          android:layout_marginEnd="4dp"
+                          android:paddingStart="8dp"
+                          android:paddingEnd="8dp"
+                          android:paddingTop="4dp"
+                          android:paddingBottom="4dp"
+                          android:focusable="true"
+                          android:visibility="gone"
+                          style="?attr/borderlessButtonStyle">
+                <ImageView android:id="@+id/icon"
+                           android:layout_width="24dp"
+                           android:layout_height="24dp"
+                           android:layout_gravity="start|center_vertical"
+                           android:layout_marginEnd="?attr/listPreferredItemPaddingEnd"
+                           android:layout_marginTop="12dp"
+                           android:layout_marginBottom="12dp"
+                           android:scaleType="fitCenter" />
+                <TextView android:id="@id/text1"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="start|center_vertical"
+                          android:layout_marginEnd="?attr/listPreferredItemPaddingEnd"
+                          android:textAppearance="?attr/textAppearanceButton"
+                          android:textColor="?attr/textColorPrimary"
+                          android:minLines="1"
+                          android:maxLines="1"
+                          android:ellipsize="marquee" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
