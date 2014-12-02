@@ -1481,8 +1481,8 @@ public class DevicePolicyManager {
      * Flag for {@link #wipeData(int)}: also erase the factory reset protection
      * data.
      *
-     * This flag may only be set by device owner admins; if it is set by other
-     * admins a {@link SecurityException} will be thrown.
+     * <p>This flag may only be set by device owner admins; if it is set by
+     * other admins a {@link SecurityException} will be thrown.
      */
     public static final int WIPE_RESET_PROTECTION_DATA = 0x0002;
 
