@@ -186,6 +186,7 @@ final class Constants {
 
     static final int INVALID_PORT_ID = HdmiDeviceInfo.PORT_INVALID;
     static final int INVALID_PHYSICAL_ADDRESS = HdmiDeviceInfo.PATH_INVALID;
+    static final int PATH_INTERNAL = HdmiDeviceInfo.PATH_INTERNAL;
 
     // Send result codes. It should be consistent with hdmi_cec.h's send_message error code.
     static final int SEND_RESULT_SUCCESS = 0;
