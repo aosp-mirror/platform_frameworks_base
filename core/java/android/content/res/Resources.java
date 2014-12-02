@@ -744,7 +744,10 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *         not exist.
      * @see #getDrawable(int, Theme)
+     * @deprecated Use {@link #getDrawable(int, Theme)} instead.
      */
+    @Deprecated
+    @Nullable
     public Drawable getDrawable(int id) throws NotFoundException {
         final Drawable d = getDrawable(id, null);
         if (d != null && d.canApplyTheme()) {
@@ -769,6 +772,7 @@ public class Resources {
      * @throws NotFoundException Throws NotFoundException if the given ID does
      *         not exist.
      */
+    @Nullable
     public Drawable getDrawable(int id, @Nullable Theme theme) throws NotFoundException {
         TypedValue value;
         synchronized (mAccessLock) {
