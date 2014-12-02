@@ -35,6 +35,8 @@ public class HotspotControllerImpl implements HotspotController {
 
     private static final String TAG = "HotspotController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final String TETHER_ENABLE_PACKAGE = "com.android.settings";
+    private static final String TETHER_ENABLE_CLASS = "com.android.settings.EnableWifiTether";
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final Receiver mReceiver = new Receiver();
@@ -91,20 +93,14 @@ public class HotspotControllerImpl implements HotspotController {
     @Override
     public void setHotspotEnabled(boolean enabled) {
         final ContentResolver cr = mContext.getContentResolver();
-        // This needs to be kept up to date with Settings (WifiApEnabler.setSoftapEnabled)
-        // in case it is turned on in settings and off in qs (or vice versa).
-        // Disable Wifi if enabling tethering.
-        int wifiState = mWifiManager.getWifiState();
-        if (enabled && ((wifiState == WifiManager.WIFI_STATE_ENABLING) ||
-                    (wifiState == WifiManager.WIFI_STATE_ENABLED))) {
-            mWifiManager.setWifiEnabled(false);
-            Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 1);
-        }
-
-        mWifiManager.setWifiApEnabled(null, enabled);
-
-        // If needed, restore Wifi on tether disable.
-        if (!enabled) {
+        // Call provisioning app which is called when enabling Tethering from Settings
+        if (enabled) {
+            Intent intent = new Intent();
+            intent.setClassName(TETHER_ENABLE_PACKAGE, TETHER_ENABLE_CLASS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(intent);
+        } else {
+            mWifiManager.setWifiApEnabled(null, false);
             if (Settings.Global.getInt(cr, Settings.Global.WIFI_SAVED_STATE, 0) == 1) {
                 mWifiManager.setWifiEnabled(true);
                 Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 0);
