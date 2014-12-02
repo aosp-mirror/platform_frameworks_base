@@ -30,9 +30,12 @@ the data layer:</p>
   <dd>The <a href="{@docRoot}reference/com/google/android/gms/wearable/MessageApi.html"><code>MessageApi</code></a> class
   can send messages and is good for remote procedure calls (RPC), such as controlling a handheld's
   media player from the wearable or starting an intent on the wearable from the handheld.
-  The system always delivers the message when the handheld and wearable are connected and delivers
-  an error when the devices are disconnected. Messages are great for one-way requests or for a
-  request/response communication model.</dd>
+  Messages are also great for one-way requests or for a request/response communication model.
+  If the handheld and wearable are connected, the system queues the message for delivery and
+  returns a successful result code. If the devices are not connected, an error is returned. A
+  successful result code does not indicate that the message was delivered successfully as the
+  devices may disconnect after receiving the result code.
+</p></dd>
 
   <dt><b>Asset</b></dt>
   <dd><a href="{@docRoot}reference/com/google/android/gms/wearable/Asset.html"><code>Asset</code></a> objects are for
