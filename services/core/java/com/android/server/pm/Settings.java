@@ -3324,6 +3324,18 @@ final class Settings {
             pw.print(",");
             pw.print(ps.installerPackageName != null ? ps.installerPackageName : "?");
             pw.println();
+            if (ps.pkg != null) {
+                pw.print(checkinTag); pw.print("-"); pw.print("splt,");
+                pw.print("base,");
+                pw.println(ps.pkg.baseRevisionCode);
+                if (ps.pkg.splitNames != null) {
+                    for (int i = 0; i < ps.pkg.splitNames.length; i++) {
+                        pw.print(checkinTag); pw.print("-"); pw.print("splt,");
+                        pw.print(ps.pkg.splitNames[i]); pw.print(",");
+                        pw.println(ps.pkg.splitRevisionCodes[i]);
+                    }
+                }
+            }
             for (UserInfo user : users) {
                 pw.print(checkinTag);
                 pw.print("-");
@@ -3374,6 +3386,7 @@ final class Settings {
         pw.println();
         if (ps.pkg != null) {
             pw.print(prefix); pw.print("  versionName="); pw.println(ps.pkg.mVersionName);
+            pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, ps.pkg); pw.println();
             pw.print(prefix); pw.print("  applicationInfo=");
                 pw.println(ps.pkg.applicationInfo.toString());
             pw.print(prefix); pw.print("  flags="); printFlags(pw, ps.pkg.applicationInfo.flags,
@@ -3645,5 +3658,28 @@ final class Settings {
     void dumpReadMessagesLPr(PrintWriter pw, DumpState dumpState) {
         pw.println("Settings parse messages:");
         pw.print(mReadMessages.toString());
+    }
+
+    private static void dumpSplitNames(PrintWriter pw, PackageParser.Package pkg) {
+        if (pkg == null) {
+            pw.print("unknown");
+        } else {
+            // [base:10, config.mdpi, config.xhdpi:12]
+            pw.print("[");
+            pw.print("base");
+            if (pkg.baseRevisionCode != 0) {
+                pw.print(":"); pw.print(pkg.baseRevisionCode);
+            }
+            if (pkg.splitNames != null) {
+                for (int i = 0; i < pkg.splitNames.length; i++) {
+                    pw.print(", ");
+                    pw.print(pkg.splitNames[i]);
+                    if (pkg.splitRevisionCodes[i] != 0) {
+                        pw.print(":"); pw.print(pkg.splitRevisionCodes[i]);
+                    }
+                }
+            }
+            pw.print("]");
+        }
     }
 }
