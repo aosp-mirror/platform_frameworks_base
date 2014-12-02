@@ -1310,12 +1310,16 @@ public abstract class Connection implements IConferenceable {
     }
 
     private static class FailureSignalingConnection extends Connection {
+        private boolean mImmutable = false;
         public FailureSignalingConnection(DisconnectCause disconnectCause) {
             setDisconnected(disconnectCause);
+            mImmutable = true;
         }
 
         public void checkImmutable() {
-            throw new UnsupportedOperationException("Connection is immutable");
+            if (mImmutable) {
+                throw new UnsupportedOperationException("Connection is immutable");
+            }
         }
     }
 
