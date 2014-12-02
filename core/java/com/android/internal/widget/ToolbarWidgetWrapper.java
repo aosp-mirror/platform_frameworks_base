@@ -97,6 +97,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
         mTitle = toolbar.getTitle();
         mSubtitle = toolbar.getSubtitle();
         mTitleSet = mTitle != null;
+        mNavIcon = mToolbar.getNavigationIcon();
         final TypedArray a = toolbar.getContext().obtainStyledAttributes(null,
                 R.styleable.ActionBar, R.attr.actionBarStyle, 0);
         mDefaultNavigationIcon = a.getDrawable(R.styleable.ActionBar_homeAsUpIndicator);
@@ -120,7 +121,7 @@ public class ToolbarWidgetWrapper implements DecorToolbar {
             if (icon != null) {
                 setIcon(icon);
             }
-            if (mDefaultNavigationIcon != null) {
+            if (mNavIcon == null && mDefaultNavigationIcon != null) {
                 setNavigationIcon(mDefaultNavigationIcon);
             }
             setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, 0));
