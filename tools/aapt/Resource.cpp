@@ -2985,6 +2985,8 @@ status_t
 writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
 {
     status_t err;
+    const String8 kTransition("transition");
+    const String8 kTransitionPrefix("transition-");
 
     // tag:attribute pairs that should be checked in layout files.
     KeyedVector<String8, Vector<NamespaceAttributePair> > kLayoutTagAttrPairs;
@@ -2996,6 +2998,10 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
     KeyedVector<String8, Vector<NamespaceAttributePair> > kXmlTagAttrPairs;
     addTagAttrPair(&kXmlTagAttrPairs, "PreferenceScreen", RESOURCES_ANDROID_NAMESPACE, "fragment");
     addTagAttrPair(&kXmlTagAttrPairs, "header", RESOURCES_ANDROID_NAMESPACE, "fragment");
+
+    // tag:attribute pairs that should be checked in transition files.
+    KeyedVector<String8, Vector<NamespaceAttributePair> > kTransitionTagAttrPairs;
+    addTagAttrPair(&kTransitionTagAttrPairs, kTransition.string(), NULL, "class");
 
     const Vector<sp<AaptDir> >& dirs = assets->resDirs();
     const size_t K = dirs.size();
@@ -3014,6 +3020,9 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
         } else if ((dirName == String8("menu")) || (strncmp(dirName.string(), "menu-", 5) == 0)) {
             startTags.add(String8("menu"));
             tagAttrPairs = NULL;
+        } else if (dirName == kTransition || (strncmp(dirName.string(), kTransitionPrefix.string(),
+                        kTransitionPrefix.size()) == 0)) {
+            tagAttrPairs = &kTransitionTagAttrPairs;
         } else {
             continue;
         }
