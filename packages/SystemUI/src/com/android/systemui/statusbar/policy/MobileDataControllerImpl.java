@@ -33,6 +33,7 @@ import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -213,7 +214,8 @@ public class MobileDataControllerImpl implements NetworkController.MobileDataCon
 
     private static String getActiveSubscriberId(Context context) {
         final TelephonyManager tele = TelephonyManager.from(context);
-        final String actualSubscriberId = tele.getSubscriberId();
+        final String actualSubscriberId = tele.getSubscriberId(
+                SubscriptionManager.getDefaultDataSubId());
         return actualSubscriberId;
     }
 
