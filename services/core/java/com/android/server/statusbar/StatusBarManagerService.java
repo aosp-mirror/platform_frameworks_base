@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.util.Slog;
-import android.view.WindowManager;
 
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
@@ -495,16 +494,26 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     /**
-     * The status bar service should call this each time the user brings the panel from
-     * invisible to visible in order to clear the notification light.
+     * @param clearNotificationEffects whether to consider notifications as "shown" and stop
+     *     LED, vibration, and ringing
      */
     @Override
-    public void onPanelRevealed() {
+    public void onPanelRevealed(boolean clearNotificationEffects) {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();
         try {
-            // tell the notification manager to turn off the lights.
-            mNotificationDelegate.onPanelRevealed();
+            mNotificationDelegate.onPanelRevealed(clearNotificationEffects);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void clearNotificationEffects() throws RemoteException {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.clearEffects();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

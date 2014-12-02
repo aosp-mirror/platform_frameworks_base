@@ -56,6 +56,17 @@ public class DozeService extends DreamService {
     private static final String NOTIFICATION_PULSE_ACTION = ACTION_BASE + ".notification_pulse";
     private static final String EXTRA_INSTANCE = "instance";
 
+    /**
+     * Earliest time we pulse due to a notification light after the service started.
+     *
+     * <p>Incoming notification light events during the blackout period are
+     * delayed to the earliest time defined by this constant.</p>
+     *
+     * <p>This delay avoids a pulse immediately after screen off, at which
+     * point the notification light is re-enabled again by NoMan.</p>
+     */
+    private static final int EARLIEST_LIGHT_PULSE_AFTER_START_MS = 10 * 1000;
+
     private final String mTag = String.format(TAG + ".%08x", hashCode());
     private final Context mContext = this;
     private final DozeParameters mDozeParameters = new DozeParameters(mContext);
@@ -77,6 +88,7 @@ public class DozeService extends DreamService {
     private boolean mPowerSaveActive;
     private boolean mCarMode;
     private long mNotificationPulseTime;
+    private long mEarliestPulseDueToLight;
     private int mScheduleResetsRemaining;
 
     public DozeService() {
@@ -161,8 +173,9 @@ public class DozeService extends DreamService {
         }
 
         mDreaming = true;
-        listenForPulseSignals(true);
         rescheduleNotificationPulse(false /*predicate*/);  // cancel any pending pulse alarms
+        mEarliestPulseDueToLight = System.currentTimeMillis() + EARLIEST_LIGHT_PULSE_AFTER_START_MS;
+        listenForPulseSignals(true);
 
         // Ask the host to get things ready to start dozing.
         // Once ready, we call startDozing() at which point the CPU may suspend
@@ -298,6 +311,12 @@ public class DozeService extends DreamService {
         if (listen) {
             resetNotificationResets();
             mHost.addCallback(mHostCallback);
+
+            // Continue to pulse for existing LEDs.
+            mNotificationLightOn = mHost.isNotificationLightOn();
+            if (mNotificationLightOn) {
+                updateNotificationPulseDueToLight();
+            }
         } else {
             mHost.removeCallback(mHostCallback);
         }
@@ -308,21 +327,26 @@ public class DozeService extends DreamService {
         mScheduleResetsRemaining = mDozeParameters.getPulseScheduleResets();
     }
 
-    private void updateNotificationPulse() {
-        if (DEBUG) Log.d(mTag, "updateNotificationPulse");
+    private void updateNotificationPulseDueToLight() {
+        long timeMs = System.currentTimeMillis();
+        timeMs = Math.max(timeMs, mEarliestPulseDueToLight);
+        updateNotificationPulse(timeMs);
+    }
+
+    private void updateNotificationPulse(long notificationTimeMs) {
+        if (DEBUG) Log.d(mTag, "updateNotificationPulse notificationTimeMs=" + notificationTimeMs);
         if (!mDozeParameters.getPulseOnNotifications()) return;
         if (mScheduleResetsRemaining <= 0) {
             if (DEBUG) Log.d(mTag, "No more schedule resets remaining");
             return;
         }
-        final long now = System.currentTimeMillis();
-        if ((now - mNotificationPulseTime) < mDozeParameters.getPulseDuration()) {
+        if ((notificationTimeMs - mNotificationPulseTime) < mDozeParameters.getPulseDuration()) {
             if (DEBUG) Log.d(mTag, "Recently updated, not resetting schedule");
             return;
         }
         mScheduleResetsRemaining--;
         if (DEBUG) Log.d(mTag, "mScheduleResetsRemaining = " + mScheduleResetsRemaining);
-        mNotificationPulseTime = now;
+        mNotificationPulseTime = notificationTimeMs;
         rescheduleNotificationPulse(true /*predicate*/);
     }
 
@@ -404,14 +428,14 @@ public class DozeService extends DreamService {
     private final DozeHost.Callback mHostCallback = new DozeHost.Callback() {
         @Override
         public void onNewNotifications() {
-            if (DEBUG) Log.d(mTag, "onNewNotifications");
+            if (DEBUG) Log.d(mTag, "onNewNotifications (noop)");
             // noop for now
         }
 
         @Override
         public void onBuzzBeepBlinked() {
             if (DEBUG) Log.d(mTag, "onBuzzBeepBlinked");
-            updateNotificationPulse();
+            updateNotificationPulse(System.currentTimeMillis());
         }
 
         @Override
@@ -420,7 +444,7 @@ public class DozeService extends DreamService {
             if (mNotificationLightOn == on) return;
             mNotificationLightOn = on;
             if (mNotificationLightOn) {
-                updateNotificationPulse();
+                updateNotificationPulseDueToLight();
             }
         }
 

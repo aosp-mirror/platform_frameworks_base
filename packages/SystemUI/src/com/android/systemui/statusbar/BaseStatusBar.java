@@ -1648,7 +1648,11 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         try {
             if (visibleToUser) {
-                mBarService.onPanelRevealed();
+                // Only stop blinking, vibrating, ringing when the user went into the shade
+                // manually (SHADE or SHADE_LOCKED).
+                boolean clearNotificationEffects =
+                        (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED);
+                mBarService.onPanelRevealed(clearNotificationEffects);
             } else {
                 mBarService.onPanelHidden();
             }

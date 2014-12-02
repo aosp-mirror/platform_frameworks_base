@@ -26,8 +26,9 @@ public interface NotificationDelegate {
     void onNotificationError(int callingUid, int callingPid,
             String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
-    void onPanelRevealed();
+    void onPanelRevealed(boolean clearEffects);
     void onPanelHidden();
+    void clearEffects();
     void onNotificationVisibilityChanged(
             String[] newlyVisibleKeys, String[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(String key, boolean userAction, boolean expanded);

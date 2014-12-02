@@ -123,7 +123,7 @@ import java.util.Objects;
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
     static final String TAG = "NotificationService";
-    static final boolean DBG = false;
+    static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
 
     static final int MAX_PACKAGE_NOTIFICATIONS = 50;
 
@@ -577,9 +577,23 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public void onPanelRevealed() {
+        public void onPanelRevealed(boolean clearEffects) {
             EventLogTags.writeNotificationPanelRevealed();
+            if (clearEffects) {
+                clearEffects();
+            }
+        }
+
+        @Override
+        public void onPanelHidden() {
+            EventLogTags.writeNotificationPanelHidden();
+        }
+
+        @Override
+        public void clearEffects() {
             synchronized (mNotificationList) {
+                if (DBG) Slog.d(TAG, "clearEffects");
+
                 // sound
                 mSoundNotification = null;
 
@@ -608,11 +622,6 @@ public class NotificationManagerService extends SystemService {
                 mLedNotification = null;
                 updateLightsLocked();
             }
-        }
-
-        @Override
-        public void onPanelHidden() {
-            EventLogTags.writeNotificationPanelHidden();
         }
 
         @Override
@@ -753,8 +762,10 @@ public class NotificationManagerService extends SystemService {
                 // Keep track of screen on/off state, but do not turn off the notification light
                 // until user passes through the lock screen or views the notification.
                 mScreenOn = true;
+                updateNotificationPulse();
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 mScreenOn = false;
+                updateNotificationPulse();
             } else if (action.equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
                 mInCall = TelephonyManager.EXTRA_STATE_OFFHOOK
                         .equals(intent.getStringExtra(TelephonyManager.EXTRA_STATE));
