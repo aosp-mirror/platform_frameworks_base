@@ -1056,6 +1056,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
             return getIcons().mDataContentDescription;
         }
 
+        @VisibleForTesting
+        protected IccCardConstants.State getSimState() {
+            return mSimState;
+        }
+
         public void setAirplaneMode(boolean airplaneMode) {
             mCurrentState.airplaneMode = airplaneMode;
             notifyListenersIfNecessary();
