@@ -4054,10 +4054,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // Remove any previous windows with the same appToken.
                     mAppsToBeHidden.remove(appToken);
                     mAppsThatDismissKeyguard.remove(appToken);
-                    if (mAppsToBeHidden.isEmpty() && mKeyguardSecureIncludingHidden) {
-                        mWinShowWhenLocked = win;
-                        mHideLockScreen = true;
-                        mForceStatusBarFromKeyguard = false;
+                    if (mAppsToBeHidden.isEmpty()) {
+                        if (mKeyguardSecureIncludingHidden) {
+                            mWinShowWhenLocked = win;
+                            mHideLockScreen = true;
+                            mForceStatusBarFromKeyguard = false;
+                        } else if (dismissKeyguard && !mKeyguardSecure) {
+                            mAppsThatDismissKeyguard.add(appToken);
+                        }
                     }
                 } else if (dismissKeyguard) {
                     if (mKeyguardSecure) {
