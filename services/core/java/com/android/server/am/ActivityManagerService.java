@@ -3032,12 +3032,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (app == null) {
             checkTime(startTime, "startProcess: creating new process record");
             app = newProcessRecordLocked(info, processName, isolated, isolatedUid);
-            app.crashHandler = crashHandler;
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
                 return null;
             }
+            app.crashHandler = crashHandler;
             mProcessNames.put(processName, app.uid, app);
             if (isolated) {
                 mIsolatedProcesses.put(app.uid, app);
