@@ -2436,7 +2436,7 @@ public final class ActivityThread {
     private void deliverNewIntents(ActivityClientRecord r, List<ReferrerIntent> intents) {
         final int N = intents.size();
         for (int i=0; i<N; i++) {
-            Intent intent = intents.get(i);
+            ReferrerIntent intent = intents.get(i);
             intent.setExtrasClassLoader(r.activity.getClassLoader());
             intent.prepareToEnterProcess();
             r.activity.mFragments.noteStateNotSaved();
