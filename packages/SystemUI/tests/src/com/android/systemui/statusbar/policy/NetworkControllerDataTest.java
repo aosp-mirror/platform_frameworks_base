@@ -22,7 +22,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 TelephonyIcons.ROAMING_ICON);
         verifyLastQsMobileDataIndicators(true,
                 TelephonyIcons.QS_TELEPHONY_SIGNAL_STRENGTH[1][DEFAULT_LEVEL],
-                TelephonyIcons.QS_DATA_R[1], false, false, false);
+                TelephonyIcons.QS_DATA_R[1], false, false);
     }
 
     public void test2gDataIcon() {
@@ -86,14 +86,14 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, DEFAULT_ICON);
         verifyLastQsMobileDataIndicators(true, DEFAULT_QS_SIGNAL_STRENGTH,
-                DEFAULT_QS_ICON, in, out, false);
+                DEFAULT_QS_ICON, in, out);
 
     }
 
     private void verifyDataIndicators(int dataIcon, int qsDataIcon) {
         verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, dataIcon);
         verifyLastQsMobileDataIndicators(true, DEFAULT_QS_SIGNAL_STRENGTH, qsDataIcon, false,
-                false, false);
+                false);
     }
 
 }

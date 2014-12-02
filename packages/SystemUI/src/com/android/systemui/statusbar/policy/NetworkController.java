@@ -32,8 +32,9 @@ public interface NetworkController {
         void onMobileDataSignalChanged(boolean enabled, int mobileSignalIconId,
                 String mobileSignalContentDescriptionId, int dataTypeIconId,
                 boolean activityIn, boolean activityOut,
-                String dataTypeContentDescriptionId, String description, boolean noSim,
+                String dataTypeContentDescriptionId, String description,
                 boolean isDataTypeIconWide);
+        void onNoSimVisibleChanged(boolean visible);
         void onAirplaneModeChanged(boolean enabled);
         void onMobileDataEnabled(boolean enabled);
     }
