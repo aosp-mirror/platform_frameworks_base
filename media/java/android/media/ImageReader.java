@@ -26,6 +26,7 @@ import android.view.Surface;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.NioUtils;
 
 /**
  * <p>The ImageReader class allows direct application access to image data
@@ -688,6 +689,15 @@ public class ImageReader implements AutoCloseable {
             }
 
             private void clearBuffer() {
+                // Need null check first, as the getBuffer() may not be called before an image
+                // is closed.
+                if (mBuffer == null) {
+                    return;
+                }
+
+                if (mBuffer.isDirect()) {
+                    NioUtils.freeDirectBuffer(mBuffer);
+                }
                 mBuffer = null;
             }
 
