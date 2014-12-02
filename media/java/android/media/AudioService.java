@@ -1124,20 +1124,11 @@ public class AudioService extends IAudioService.Stub {
 
             // Check if volume update should be send to Hdmi system audio.
             int newIndex = mStreamStates[streamType].getIndex(device);
+            if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
+                setSystemAudioVolume(oldIndex, newIndex, getStreamMaxVolume(streamType), flags);
+            }
             if (mHdmiManager != null) {
                 synchronized (mHdmiManager) {
-                    if (mHdmiTvClient != null &&
-                        streamTypeAlias == AudioSystem.STREAM_MUSIC &&
-                        (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
-                        oldIndex != newIndex) {
-                        int maxIndex = getStreamMaxVolume(streamType);
-                        synchronized (mHdmiTvClient) {
-                            if (mHdmiSystemAudioSupported) {
-                                mHdmiTvClient.setSystemAudioVolume(
-                                        (oldIndex + 5) / 10, (newIndex + 5) / 10, maxIndex);
-                            }
-                        }
-                    }
                     // mHdmiCecSink true => mHdmiPlaybackClient != null
                     if (mHdmiCecSink &&
                             streamTypeAlias == AudioSystem.STREAM_MUSIC &&
@@ -1154,6 +1145,23 @@ public class AudioService extends IAudioService.Stub {
         }
         int index = mStreamStates[streamType].getIndex(device);
         sendVolumeUpdate(streamType, oldIndex, index, flags);
+    }
+
+    private void setSystemAudioVolume(int oldVolume, int newVolume, int maxVolume, int flags) {
+        if (mHdmiManager == null
+                || mHdmiTvClient == null
+                || oldVolume == newVolume
+                || (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) != 0) return;
+
+        // Sets the audio volume of AVR when we are in system audio mode. The new volume info
+        // is tranformed to HDMI-CEC commands and passed through CEC bus.
+        synchronized (mHdmiManager) {
+            if (!mHdmiSystemAudioSupported) return;
+            synchronized (mHdmiTvClient) {
+                mHdmiTvClient.setSystemAudioVolume(
+                        (oldVolume + 5) / 10, (newVolume + 5) / 10, maxVolume);
+            }
+        }
     }
 
     /** @see AudioManager#adjustMasterVolume(int, int) */
@@ -1267,21 +1275,8 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
 
-            if (mHdmiManager != null) {
-                synchronized (mHdmiManager) {
-                    if (mHdmiTvClient != null &&
-                        streamTypeAlias == AudioSystem.STREAM_MUSIC &&
-                        (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0 &&
-                        oldIndex != index) {
-                        int maxIndex = getStreamMaxVolume(streamType);
-                        synchronized (mHdmiTvClient) {
-                            if (mHdmiSystemAudioSupported) {
-                                mHdmiTvClient.setSystemAudioVolume(
-                                        (oldIndex + 5) / 10, (index + 5) / 10, maxIndex);
-                            }
-                        }
-                    }
-                }
+            if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
+                setSystemAudioVolume(oldIndex, index, getStreamMaxVolume(streamType), flags);
             }
 
             flags &= ~AudioManager.FLAG_FIXED_VOLUME;
@@ -1422,15 +1417,8 @@ public class AudioService extends IAudioService.Stub {
             streamType = AudioSystem.STREAM_NOTIFICATION;
         }
 
-        // If Hdmi-CEC system audio mode is on, show volume bar
-        // only when TV receives volume notification from Audio Receiver.
-        if (mHdmiTvClient != null && streamType == AudioSystem.STREAM_MUSIC) {
-            synchronized (mHdmiTvClient) {
-                if (mHdmiSystemAudioSupported &&
-                        ((flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0)) {
-                    flags &= ~AudioManager.FLAG_SHOW_UI;
-                }
-            }
+        if (streamType == AudioSystem.STREAM_MUSIC) {
+            flags = updateFlagsForSystemAudio(flags);
         }
         mVolumeController.postVolumeChanged(streamType, flags);
 
@@ -1445,9 +1433,23 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    // If Hdmi-CEC system audio mode is on, we show volume bar only when TV
+    // receives volume notification from Audio Receiver.
+    private int updateFlagsForSystemAudio(int flags) {
+        if (mHdmiTvClient != null) {
+            synchronized (mHdmiTvClient) {
+                if (mHdmiSystemAudioSupported &&
+                        ((flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) == 0)) {
+                    flags &= ~AudioManager.FLAG_SHOW_UI;
+                }
+            }
+        }
+        return flags;
+    }
+
     // UI update and Broadcast Intent
     private void sendMasterVolumeUpdate(int flags, int oldVolume, int newVolume) {
-        mVolumeController.postMasterVolumeChanged(flags);
+        mVolumeController.postMasterVolumeChanged(updateFlagsForSystemAudio(flags));
 
         Intent intent = new Intent(AudioManager.MASTER_VOLUME_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_PREV_MASTER_VOLUME_VALUE, oldVolume);
@@ -1457,7 +1459,7 @@ public class AudioService extends IAudioService.Stub {
 
     // UI update and Broadcast Intent
     private void sendMasterMuteUpdate(boolean muted, int flags) {
-        mVolumeController.postMasterMuteChanged(flags);
+        mVolumeController.postMasterMuteChanged(updateFlagsForSystemAudio(flags));
         broadcastMasterMuteStatus(muted);
     }
 
@@ -1517,18 +1519,26 @@ public class AudioService extends IAudioService.Stub {
         }
 
         if (isStreamAffectedByMute(streamType)) {
-            if (mHdmiManager != null) {
-                synchronized (mHdmiManager) {
-                    if (streamType == AudioSystem.STREAM_MUSIC && mHdmiTvClient != null) {
-                        synchronized (mHdmiTvClient) {
-                            if (mHdmiSystemAudioSupported) {
-                                mHdmiTvClient.setSystemAudioMute(state);
-                            }
-                        }
-                    }
-                }
+            if (streamType == AudioSystem.STREAM_MUSIC) {
+                setSystemAudioMute(state);
             }
             mStreamStates[streamType].mute(cb, state);
+        }
+    }
+
+    private void setSystemAudioMute(boolean state) {
+        if (mHdmiManager == null || mHdmiTvClient == null) return;
+        synchronized (mHdmiManager) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mHdmiTvClient) {
+                    if (mHdmiSystemAudioSupported) {
+                        mHdmiTvClient.setSystemAudioMute(state);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
     }
 
@@ -1649,6 +1659,7 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
         if (state != AudioSystem.getMasterMute()) {
+            setSystemAudioMute(state);
             AudioSystem.setMasterMute(state);
             // Post a persist master volume msg
             sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, SENDMSG_REPLACE, state ? 1
@@ -1729,6 +1740,7 @@ public class AudioService extends IAudioService.Stub {
                 // Post a persist master volume msg
                 sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME, SENDMSG_REPLACE,
                         Math.round(volume * (float)1000.0), 0, null, PERSIST_DELAY);
+                setSystemAudioVolume(oldVolume, newVolume, getMasterMaxVolume(), flags);
             }
             // Send the volume update regardless whether there was a change.
             sendMasterVolumeUpdate(flags, oldVolume, newVolume);
