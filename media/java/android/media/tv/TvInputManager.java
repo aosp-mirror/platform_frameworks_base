@@ -72,6 +72,17 @@ public final class TvInputManager {
     public static final int VIDEO_UNAVAILABLE_REASON_BUFFERING = VIDEO_UNAVAILABLE_REASON_END;
 
     /**
+     * The TV input is in unknown state.
+     * <p>
+     * State for denoting unknown TV input state. The typical use case is when a requested TV
+     * input is removed from the device or it is not registered. Used in
+     * {@code ITvInputManager.getTvInputState()}.
+     * </p>
+     * @hide
+     */
+    public static final int INPUT_STATE_UNKNOWN = -1;
+
+    /**
      * The TV input is connected.
      * <p>
      * State for {@link #getInputState} and {@link
@@ -751,9 +762,19 @@ public final class TvInputManager {
         try {
             if (mService != null) {
                 mService.registerCallback(mManagerCallback, mUserId);
+                List<TvInputInfo> infos = mService.getTvInputList(mUserId);
+                synchronized (mLock) {
+                    for (TvInputInfo info : infos) {
+                        String inputId = info.getId();
+                        int state = mService.getTvInputState(inputId, mUserId);
+                        if (state != INPUT_STATE_UNKNOWN) {
+                            mStateMap.put(inputId, state);
+                        }
+                    }
+                }
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "mService.registerCallback failed: " + e);
+            Log.e(TAG, "TvInputManager initialization failed: " + e);
         }
     }
 
