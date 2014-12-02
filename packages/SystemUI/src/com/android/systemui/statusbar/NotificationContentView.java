@@ -244,6 +244,9 @@ public class NotificationContentView extends FrameLayout {
 
     public void notifyContentUpdated() {
         selectLayout(false /* animate */, true /* force */);
+        if (mContractedChild != null) {
+            mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
+        }
     }
 
     public boolean isContentExpandable() {

@@ -24,19 +24,14 @@ import android.view.View;
  */
 public class NotificationMediaViewWrapper extends NotificationTemplateViewWrapper {
 
-    private boolean mDark;
-
     protected NotificationMediaViewWrapper(Context ctx, View view) {
         super(ctx, view);
     }
 
     @Override
     public void setDark(boolean dark, boolean fade, long delay) {
-        if (mDark != dark) {
-            mDark = dark;
 
-            // Only update the large icon, because the rest is already inverted.
-            setPictureGrayscale(dark, fade, delay);
-        }
+        // Only update the large icon, because the rest is already inverted.
+        setPictureGrayscale(dark, fade, delay);
     }
 }
