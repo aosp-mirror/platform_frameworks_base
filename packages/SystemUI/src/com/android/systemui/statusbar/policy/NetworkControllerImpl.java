@@ -406,8 +406,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         updateNoSims();
     }
 
-    private void updateNoSims() {
-        boolean hasNoSims = mPhone.getPhoneCount() != 0 && mMobileSignalControllers.size() == 0;
+    @VisibleForTesting
+    protected void updateNoSims() {
+        boolean hasNoSims = mHasMobileDataFeature && mMobileSignalControllers.size() == 0;
         if (hasNoSims != mHasNoSims) {
             mHasNoSims = hasNoSims;
             notifyListeners();
