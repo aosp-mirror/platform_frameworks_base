@@ -21,15 +21,16 @@ package android.hardware;
  */
 public interface SensorEventListener2 extends SensorEventListener {
     /**
-     * Called after flush() is completed. All the events in the batch at the point when
-     * the flush was called have been delivered to the applications registered for those
-     * sensor events. Flush Complete Events are sent ONLY to the application that has
-     * explicitly called flush(). If the hardware FIFO is flushed due to some other
-     * application calling flush(), flush complete event is not delivered to this application.
+     * Called after flush() is completed. All the events in the batch at the point when the flush
+     * was called have been delivered to the applications registered for those sensor events. In
+     * {@link android.os.Build.VERSION_CODES#KITKAT}, applications may receive flush complete events
+     * even if some other application has called flush() on the same sensor. Starting with
+     * {@link android.os.Build.VERSION_CODES#LOLLIPOP}, flush Complete events are sent ONLY to the
+     * application that has explicitly called flush(). If the hardware FIFO is flushed due to some
+     * other application calling flush(), flush complete event is not delivered to this application.
      * <p>
      *
      * @param sensor The {@link android.hardware.Sensor Sensor} on which flush was called.
-     *
      * @see android.hardware.SensorManager#flush(SensorEventListener)
      */
     public void onFlushCompleted(Sensor sensor);
