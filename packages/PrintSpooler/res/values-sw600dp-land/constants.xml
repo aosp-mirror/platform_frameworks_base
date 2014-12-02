@@ -20,6 +20,4 @@
 
     <integer name="preview_page_per_row_count">4</integer>
 
-    <dimen name="preview_destination_spinner_width">256dip</dimen>
-
 </resources>
