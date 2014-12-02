@@ -251,11 +251,20 @@
     <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
     <integer name="doze_pickup_vibration_threshold">2000</integer>
 
+    <!-- Doze: can we assume the pickup sensor includes a proximity check? -->
+    <bool name="doze_pickup_performs_proximity_check">false</bool>
+
     <!-- Doze: pulse parameter - how long does it take to fade in? -->
     <integer name="doze_pulse_duration_in">900</integer>
 
-    <!-- Doze: pulse parameter - delay for fading so the screen can wake up before -->
+    <!-- Doze: pulse parameter - how long does it take to fade in after a pickup? -->
+    <integer name="doze_pulse_duration_in_pickup">300</integer>
+
+    <!-- Doze: pulse parameter - delay to wait for the screen to wake up -->
     <integer name="doze_pulse_delay_in">200</integer>
+
+    <!-- Doze: pulse parameter - delay to wait for the screen to wake up after a pickup -->
+    <integer name="doze_pulse_delay_in_pickup">200</integer>
 
     <!-- Doze: pulse parameter - once faded in, how long does it stay visible? -->
     <integer name="doze_pulse_duration_visible">3000</integer>
