@@ -36,9 +36,9 @@ the <code>android-sdk/samples/android-20/wearable/Notifications</code> directory
 <li>Add a <code>WearableListView</code> element to your activity's layout definition.</li>
 <li>Create a custom layout implementation for your list items.</li>
 <li>Use this implementation to create a layout definition file for your list items.</li>
-<div style="float:right;margin-left:25px;width:215px;margin-top:-20px">
+<div style="float:right;margin-left:25px;width:220px;margin-top:-25px">
 <img src="{@docRoot}wear/images/06_uilib.png" width="200" height="200" alt=""/>
-<p class="img-caption" style="text-align:center"><strong>Figure 3:</strong>
+<p class="img-caption" style="text-align:center;margin-left:-10px"><strong>Figure 3:</strong>
 A list view on Android Wear.</p>
 </div>
 <li>Create an adapter to populate the list.</li>

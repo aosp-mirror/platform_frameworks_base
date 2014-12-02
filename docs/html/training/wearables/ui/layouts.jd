@@ -166,7 +166,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <h2 id="same-layout">Use a Shape-Aware Layout</h2>
 
-<div style="float:right;margin-left:25px;width:250px">
+<div style="float:right;margin-left:25px;width:260px">
 <img src="{@docRoot}wear/images/02_uilib.png" width="250" height="250" alt=""/>
 <p class="img-caption"><strong>Figure 2.</strong> Window insets on a round screen.</p>
 </div>
