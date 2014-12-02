@@ -486,7 +486,9 @@ public final class PageContentRepository {
                 protected Void doInBackground(Void... params) {
                     synchronized (mLock) {
                         try {
-                            mRenderer.closeDocument();
+                            if (mRenderer != null) {
+                                mRenderer.closeDocument();
+                            }
                         } catch (RemoteException re) {
                             /* ignore */
                         }
