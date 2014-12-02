@@ -17,17 +17,21 @@
 package android.media.audiopolicy;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
-import android.media.AudioSystem;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.util.Slog;
 
@@ -39,21 +43,20 @@ import java.util.ArrayList;
  * @hide
  * AudioPolicy provides access to the management of audio routing and audio focus.
  */
+@SystemApi
 public class AudioPolicy {
 
     private static final String TAG = "AudioPolicy";
 
     /**
-     * The status of an audio policy that cannot be used because it is invalid.
-     */
-    public static final int POLICY_STATUS_INVALID = 0;
-    /**
      * The status of an audio policy that is valid but cannot be used because it is not registered.
      */
+    @SystemApi
     public static final int POLICY_STATUS_UNREGISTERED = 1;
     /**
      * The status of an audio policy that is valid, successfully registered and thus active.
      */
+    @SystemApi
     public static final int POLICY_STATUS_REGISTERED = 2;
 
     private int mStatus;
@@ -72,22 +75,29 @@ public class AudioPolicy {
     /**
      * The parameter is guaranteed non-null through the Builder
      */
-    private AudioPolicy(AudioPolicyConfig config, Context context) {
+    private AudioPolicy(AudioPolicyConfig config, Context context, Looper looper) {
         mConfig = config;
-        if (mConfig.mMixes.isEmpty()) {
-            mStatus = POLICY_STATUS_INVALID;
-        } else {
-            mStatus = POLICY_STATUS_UNREGISTERED;
-        }
+        mStatus = POLICY_STATUS_UNREGISTERED;
         mContext = context;
+        if (looper == null) {
+            looper = Looper.getMainLooper();
+        }
+        if (looper != null) {
+            mEventHandler = new EventHandler(this, looper);
+        } else {
+            mEventHandler = null;
+            Log.e(TAG, "No event handler due to looper without a thread");
+        }
     }
 
     /**
      * Builder class for {@link AudioPolicy} objects
      */
+    @SystemApi
     public static class Builder {
         private ArrayList<AudioMix> mMixes;
         private Context mContext;
+        private Looper mLooper;
 
         /**
          * Constructs a new Builder with no audio mixes.
@@ -104,7 +114,7 @@ public class AudioPolicy {
          * @return the same Builder instance.
          * @throws IllegalArgumentException
          */
-        public Builder addMix(AudioMix mix) throws IllegalArgumentException {
+        public Builder addMix(@NonNull AudioMix mix) throws IllegalArgumentException {
             if (mix == null) {
                 throw new IllegalArgumentException("Illegal null AudioMix argument");
             }
@@ -112,18 +122,41 @@ public class AudioPolicy {
             return this;
         }
 
+        /**
+         * Sets the {@link Looper} on which to run the event loop.
+         * @param looper a non-null specific Looper.
+         * @return the same Builder instance.
+         * @throws IllegalArgumentException
+         */
+        public Builder setLooper(@NonNull Looper looper) throws IllegalArgumentException {
+            if (looper == null) {
+                throw new IllegalArgumentException("Illegal null Looper argument");
+            }
+            mLooper = looper;
+            return this;
+        }
+
         public AudioPolicy build() {
-            return new AudioPolicy(new AudioPolicyConfig(mMixes), mContext);
+            return new AudioPolicy(new AudioPolicyConfig(mMixes), mContext, mLooper);
         }
     }
 
-    /** @hide */
     public void setRegistration(String regId) {
         mRegistrationId = regId;
         mConfig.setRegistration(regId);
+        if (regId != null) {
+            mStatus = POLICY_STATUS_REGISTERED;
+        } else {
+            mStatus = POLICY_STATUS_UNREGISTERED;
+        }
+        sendMsg(mEventHandler, MSG_POLICY_STATUS_CHANGE);
     }
 
     private boolean policyReadyToUse() {
+        if (mStatus != POLICY_STATUS_REGISTERED) {
+            Log.e(TAG, "Cannot use unregistered AudioPolicy");
+            return false;
+        }
         if (mContext == null) {
             Log.e(TAG, "Cannot use AudioPolicy without context");
             return false;
@@ -155,11 +188,17 @@ public class AudioPolicy {
         {
             throw new IllegalArgumentException("Invalid AudioMix: not defined for loop back");
         }
-        // TODO also check mix is defined for playback or recording, and matches forTrack argument
+        if (forTrack && (mix.getMixType() != AudioMix.MIX_TYPE_RECORDERS)) {
+            throw new IllegalArgumentException(
+                    "Invalid AudioMix: not defined for being a recording source");
+        }
+        if (!forTrack && (mix.getMixType() != AudioMix.MIX_TYPE_PLAYERS)) {
+            throw new IllegalArgumentException(
+                    "Invalid AudioMix: not defined for capturing playback");
+        }
     }
 
     /**
-     * @hide
      * Create an {@link AudioRecord} instance that is associated with the given {@link AudioMix}.
      * Audio buffers recorded through the created instance will contain the mix of the audio
      * streams that fed the given mixer.
@@ -170,6 +209,7 @@ public class AudioPolicy {
      *     with {@link AudioManager#registerAudioPolicy(AudioPolicy)}.
      * @throws IllegalArgumentException
      */
+    @SystemApi
     public AudioRecord createAudioRecordSink(AudioMix mix) throws IllegalArgumentException {
         if (!policyReadyToUse()) {
             Log.e(TAG, "Cannot create AudioRecord sink for AudioMix");
@@ -186,7 +226,7 @@ public class AudioPolicy {
         AudioRecord ar = new AudioRecord(
                 new AudioAttributes.Builder()
                         .setInternalCapturePreset(MediaRecorder.AudioSource.REMOTE_SUBMIX)
-                        .addTag(mix.getRegistration())
+                        .addTag(addressForTag(mix))
                         .build(),
                 mixFormat,
                 AudioRecord.getMinBufferSize(mix.getFormat().getSampleRate(),
@@ -198,17 +238,17 @@ public class AudioPolicy {
     }
 
     /**
-     * @hide
      * Create an {@link AudioTrack} instance that is associated with the given {@link AudioMix}.
      * Audio buffers played through the created instance will be sent to the given mix
      * to be recorded through the recording APIs.
      * @param mix a non-null {@link AudioMix} instance whose routing flags was defined with
      *     {@link AudioMix#ROUTE_FLAG_LOOP_BACK}, previously added to this policy.
-     * @returna new {@link AudioTrack} instance whose data format is the one defined in the
+     * @return a new {@link AudioTrack} instance whose data format is the one defined in the
      *     {@link AudioMix}, or null if this policy was not successfully registered
      *     with {@link AudioManager#registerAudioPolicy(AudioPolicy)}.
      * @throws IllegalArgumentException
      */
+    @SystemApi
     public AudioTrack createAudioTrackSource(AudioMix mix) throws IllegalArgumentException {
         if (!policyReadyToUse()) {
             Log.e(TAG, "Cannot create AudioTrack source for AudioMix");
@@ -219,7 +259,7 @@ public class AudioPolicy {
         AudioTrack at = new AudioTrack(
                 new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_VIRTUAL_SOURCE)
-                        .addTag(mix.getRegistration())
+                        .addTag(addressForTag(mix))
                         .build(),
                 mix.getFormat(),
                 AudioTrack.getMinBufferSize(mix.getFormat().getSampleRate(),
@@ -230,20 +270,63 @@ public class AudioPolicy {
         return at;
     }
 
+    @SystemApi
     public int getStatus() {
         return mStatus;
     }
 
+    @SystemApi
     public static abstract class AudioPolicyStatusListener {
-        void onStatusChange() {}
-        void onMixStateUpdate(AudioMix mix) {}
+        public void onStatusChange() {}
+        public void onMixStateUpdate(AudioMix mix) {}
     }
 
-    void setStatusListener(AudioPolicyStatusListener l) {
+    @SystemApi
+    synchronized public void setAudioPolicyStatusListener(AudioPolicyStatusListener l) {
         mStatusListener = l;
     }
 
-    /** @hide */
+    synchronized private void onPolicyStatusChange() {
+        if (mStatusListener == null) {
+            return;
+        }
+        mStatusListener.onStatusChange();
+    }
+
+    //==================================================
+    // Event handling
+    private final EventHandler mEventHandler;
+    private final static int MSG_POLICY_STATUS_CHANGE = 0;
+
+    private class EventHandler extends Handler {
+        public EventHandler(AudioPolicy ap, Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch(msg.what) {
+                case MSG_POLICY_STATUS_CHANGE:
+                    onPolicyStatusChange();
+                    break;
+                default:
+                    Log.e(TAG, "Unknown event " + msg.what);
+            }
+        }
+    }
+
+    //==========================================================
+    // Utils
+    private static String addressForTag(AudioMix mix) {
+        return "addr=" + mix.getRegistration();
+    }
+
+    private static void sendMsg(Handler handler, int msg) {
+        if (handler != null) {
+            handler.sendEmptyMessage(msg);
+        }
+    }
+
     public String toLogFriendlyString() {
         String textDump = new String("android.media.audiopolicy.AudioPolicy:\n");
         textDump += "config=" + mConfig.toLogFriendlyString();
@@ -252,7 +335,6 @@ public class AudioPolicy {
 
     /** @hide */
     @IntDef({
-        POLICY_STATUS_INVALID,
         POLICY_STATUS_REGISTERED,
         POLICY_STATUS_UNREGISTERED
     })
