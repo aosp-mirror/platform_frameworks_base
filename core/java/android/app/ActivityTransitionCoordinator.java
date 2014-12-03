@@ -641,17 +641,18 @@ abstract class ActivityTransitionCoordinator extends ResultReceiver {
         Matrix tempMatrix = new Matrix();
         for (String name: names) {
             Bundle sharedElementBundle = state.getBundle(name);
+            View snapshot = null;
             if (sharedElementBundle != null) {
                 Parcelable parcelable = sharedElementBundle.getParcelable(KEY_SNAPSHOT);
-                View snapshot = null;
                 if (parcelable != null && mListener != null) {
                     snapshot = mListener.onCreateSnapshotView(context, parcelable);
                 }
                 if (snapshot != null) {
                     setSharedElementState(snapshot, name, state, tempMatrix, null, decorLoc);
                 }
-                snapshots.add(snapshot);
             }
+            // Even null snapshots are added so they remain in the same order as shared elements.
+            snapshots.add(snapshot);
         }
         return snapshots;
     }
