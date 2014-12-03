@@ -1,0 +1,11 @@
+page.title=Admin
+@jd:body
+
+
+<div id="samples" class="admin">
+</div>
+
+
+<script>
+  $(document).ready(showSamples);
+</script>
