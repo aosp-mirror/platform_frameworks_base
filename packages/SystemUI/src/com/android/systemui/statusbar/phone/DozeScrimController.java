@@ -21,10 +21,8 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Handler;
 import android.util.Log;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
@@ -219,11 +217,14 @@ public class DozeScrimController {
     private final Runnable mPulseIn = new Runnable() {
         @Override
         public void run() {
-            if (DEBUG) Log.d(TAG, "Pulse in, mDozing=" + mDozing);
+            if (DEBUG) Log.d(TAG, "Pulse in, mDozing=" + mDozing + " mPulseReason="
+                    + DozeLog.pulseReasonToString(mPulseReason));
             if (!mDozing) return;
             DozeLog.tracePulseStart(mPulseReason);
-            startScrimAnimation(true /* inFront */, 0f, mDozeParameters.getPulseInDuration(),
-                    mPulseInInterpolator, mDozeParameters.getPulseInDelay(), mPulseInFinished);
+            final boolean pickup = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
+            startScrimAnimation(true /* inFront */, 0f, mDozeParameters.getPulseInDuration(pickup),
+                    mPulseInInterpolator, mDozeParameters.getPulseInDelay(pickup),
+                    mPulseInFinished);
 
             // Signal that the pulse is ready to turn the screen on and draw.
             pulseStarted();
