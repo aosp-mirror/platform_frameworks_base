@@ -153,7 +153,7 @@ public class DozeLog {
         sProxStats[pulseReason][near ? 0 : 1].append();
     }
 
-    private static String pulseReasonToString(int pulseReason) {
+    public static String pulseReasonToString(int pulseReason) {
         switch (pulseReason) {
             case PULSE_REASON_INTENT: return "intent";
             case PULSE_REASON_NOTIFICATION: return "notification";
