@@ -30,14 +30,8 @@ public class NetworkState implements Parcelable {
     public final LinkProperties linkProperties;
     public final NetworkCapabilities networkCapabilities;
     public final Network network;
-    /** Currently only used by testing. */
     public final String subscriberId;
     public final String networkId;
-
-    public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
-            NetworkCapabilities networkCapabilities, Network network) {
-        this(networkInfo, linkProperties, networkCapabilities, network, null, null);
-    }
 
     public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
             NetworkCapabilities networkCapabilities, Network network, String subscriberId,
@@ -85,5 +79,4 @@ public class NetworkState implements Parcelable {
             return new NetworkState[size];
         }
     };
-
 }
