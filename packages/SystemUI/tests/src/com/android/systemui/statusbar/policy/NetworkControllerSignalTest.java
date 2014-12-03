@@ -25,6 +25,30 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         verifyLastMobileDataIndicators(false, 0, 0);
     }
 
+    public void testNoSimsIconPresent() {
+        // No Subscriptions.
+        mNetworkController.mMobileSignalControllers.clear();
+        mNetworkController.updateNoSims();
+
+        verifyHasNoSims(true);
+    }
+
+    public void testNoSimlessIconWithoutMobile() {
+        // Turn off mobile network support.
+        Mockito.when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(false);
+        // Create a new NetworkController as this is currently handled in constructor.
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
+                mConfig, mock(AccessPointControllerImpl.class),
+                mock(MobileDataControllerImpl.class));
+        setupNetworkController();
+
+        // No Subscriptions.
+        mNetworkController.mMobileSignalControllers.clear();
+        mNetworkController.updateNoSims();
+
+        verifyHasNoSims(false);
+    }
+
     public void testSignalStrength() {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
                 testStrength <= SignalStrength.SIGNAL_STRENGTH_GREAT; testStrength++) {
