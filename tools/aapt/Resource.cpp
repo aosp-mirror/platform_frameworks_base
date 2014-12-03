@@ -2985,23 +2985,26 @@ status_t
 writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
 {
     status_t err;
+    const char* kClass = "class";
+    const char* kFragment = "fragment";
     const String8 kTransition("transition");
     const String8 kTransitionPrefix("transition-");
 
     // tag:attribute pairs that should be checked in layout files.
     KeyedVector<String8, Vector<NamespaceAttributePair> > kLayoutTagAttrPairs;
-    addTagAttrPair(&kLayoutTagAttrPairs, "view", NULL, "class");
-    addTagAttrPair(&kLayoutTagAttrPairs, "fragment", NULL, "class");
-    addTagAttrPair(&kLayoutTagAttrPairs, "fragment", RESOURCES_ANDROID_NAMESPACE, "name");
+    addTagAttrPair(&kLayoutTagAttrPairs, "view", NULL, kClass);
+    addTagAttrPair(&kLayoutTagAttrPairs, kFragment, NULL, kClass);
+    addTagAttrPair(&kLayoutTagAttrPairs, kFragment, RESOURCES_ANDROID_NAMESPACE, "name");
 
     // tag:attribute pairs that should be checked in xml files.
     KeyedVector<String8, Vector<NamespaceAttributePair> > kXmlTagAttrPairs;
-    addTagAttrPair(&kXmlTagAttrPairs, "PreferenceScreen", RESOURCES_ANDROID_NAMESPACE, "fragment");
-    addTagAttrPair(&kXmlTagAttrPairs, "header", RESOURCES_ANDROID_NAMESPACE, "fragment");
+    addTagAttrPair(&kXmlTagAttrPairs, "PreferenceScreen", RESOURCES_ANDROID_NAMESPACE, kFragment);
+    addTagAttrPair(&kXmlTagAttrPairs, "header", RESOURCES_ANDROID_NAMESPACE, kFragment);
 
     // tag:attribute pairs that should be checked in transition files.
     KeyedVector<String8, Vector<NamespaceAttributePair> > kTransitionTagAttrPairs;
-    addTagAttrPair(&kTransitionTagAttrPairs, kTransition.string(), NULL, "class");
+    addTagAttrPair(&kTransitionTagAttrPairs, kTransition.string(), NULL, kClass);
+    addTagAttrPair(&kTransitionTagAttrPairs, "pathMotion", NULL, kClass);
 
     const Vector<sp<AaptDir> >& dirs = assets->resDirs();
     const size_t K = dirs.size();
