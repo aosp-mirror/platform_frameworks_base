@@ -175,23 +175,6 @@ them.
 </p>
 -->
 
-
-<h3 id="NavigationDrawerSample"><a href="/samples/NavigationDrawer/index.html">NavigationDrawer</a></h3>
-<!--
-<div class="figure" style="width:220px">
-  <img src="" srcset="@2x.png 2x" alt="" height="375" />
-  <p class="img-caption">
-    <strong>Figure n.</strong> Single sentence summarizing the figure.
-  </p>
-</div>
--->
-
-<p>
-This sample illustrates a common usage of the Android support library's
-{@link android.support.v4.widget.DrawerLayout} widget.
-</p>
-
-
 <h3 id="JobSchedulerSample"><a href="/samples/JobScheduler/index.html">JobScheduler</a></h3>
 
 <p>
