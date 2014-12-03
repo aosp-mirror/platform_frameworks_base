@@ -154,9 +154,16 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_NOT_VPN        = 15;
 
+    /**
+     * Indicates that connectivity on this network was successfully validated. For example, for a
+     * network with NET_CAPABILITY_INTERNET, it means that Internet connectivity was successfully
+     * detected.
+     * @hide
+     */
+    public static final int NET_CAPABILITY_VALIDATED      = 16;
 
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_NOT_VPN;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_VALIDATED;
 
     /**
      * Adds the given capability to this {@code NetworkCapability} instance.
