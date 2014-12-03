@@ -258,12 +258,12 @@ nDeviceSetConfig(JNIEnv *_env, jobject _this, jlong dev, jint p, jint value)
 }
 
 static jlong
-nContextCreate(JNIEnv *_env, jobject _this, jlong dev, jint ver, jint sdkVer, jint ct)
+nContextCreate(JNIEnv *_env, jobject _this, jlong dev, jint flags, jint sdkVer, jint contextType)
 {
     if (kLogApi) {
         ALOGD("nContextCreate");
     }
-    return (jlong)(uintptr_t)rsContextCreate((RsDevice)dev, ver, sdkVer, (RsContextType)ct, 0);
+    return (jlong)(uintptr_t)rsContextCreate((RsDevice)dev, 0, sdkVer, (RsContextType)contextType, flags);
 }
 
 static jlong
