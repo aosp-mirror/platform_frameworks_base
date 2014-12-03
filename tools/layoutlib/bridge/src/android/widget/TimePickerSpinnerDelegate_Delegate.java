@@ -30,7 +30,7 @@ public class TimePickerSpinnerDelegate_Delegate {
     private static final int PM = 1;
 
     @LayoutlibDelegate
-    static int getAmOrPmKeyCode(int amOrPm) {
+    static int getAmOrPmKeyCode(TimePickerSpinnerDelegate tpsd, int amOrPm) {
         // We don't care about locales here.
         if (amOrPm == AM) {
             return KeyEvent.KEYCODE_A;
