@@ -37,6 +37,7 @@ import android.app.ApplicationThreadNative;
 import android.app.IActivityContainer;
 import android.app.IActivityContainerCallback;
 import android.app.IAppTask;
+import android.app.ITaskStackListener;
 import android.app.ProfilerInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageEvents;
@@ -292,7 +293,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
     // Maximum number recent bitmaps to keep in memory.
-    static final int MAX_RECENT_BITMAPS = 5;
+    static final int MAX_RECENT_BITMAPS = 3;
 
     // Amount of time after a call to stopAppSwitches() during which we will
     // prevent further untrusted switches from happening.
@@ -370,6 +371,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     static final int LAST_PREBOOT_DELIVERED_FILE_VERSION = 10000;
 
+    // Delay in notifying task stack change listeners (in millis)
+    static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 1000;
+
     /** All system services */
     SystemServiceManager mSystemServiceManager;
 
@@ -377,6 +381,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     /** Run all ActivityStacks through this */
     ActivityStackSupervisor mStackSupervisor;
+
+    /** Task stack change listeners. */
+    private RemoteCallbackList<ITaskStackListener> mTaskStackListeners =
+            new RemoteCallbackList<ITaskStackListener>();
 
     public IntentFirewall mIntentFirewall;
 
@@ -1219,6 +1227,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int START_USER_SWITCH_MSG = 46;
     static final int SEND_LOCALE_TO_MOUNT_DAEMON_MSG = 47;
     static final int DISMISS_DIALOG_MSG = 48;
+    static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 49;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1738,6 +1747,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             case DISMISS_DIALOG_MSG: {
                 final Dialog d = (Dialog) msg.obj;
                 d.dismiss();
+                break;
+            }
+            case NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    int i = mTaskStackListeners.beginBroadcast();
+                    while (i > 0) {
+                        i--;
+                        try {
+                            // Make a one-way callback to the listener
+                            mTaskStackListeners.getBroadcastItem(i).onTaskStackChanged();
+                        } catch (RemoteException e){
+                            // Handled by the RemoteCallbackList
+                        }
+                    }
+                    mTaskStackListeners.finishBroadcast();
+                }
                 break;
             }
             }
@@ -2330,6 +2355,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (r != null) {
                     setFocusedActivityLocked(r);
                 }
+            }
+        }
+    }
+
+    /** Sets the task stack listener that gets callbacks when a task stack changes. */
+    @Override
+    public void registerTaskStackListener(ITaskStackListener listener) throws RemoteException {
+        synchronized (ActivityManagerService.this) {
+            if (listener != null) {
+                mTaskStackListeners.register(listener);
             }
         }
     }
@@ -3645,12 +3680,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if(DEBUG_TASKS) Slog.i(TAG, "remove RecentTask " + tr
                         + " when finishing user" + userId);
                 mRecentTasks.remove(i);
-                tr.removedFromRecents(mTaskPersister);
+                tr.removedFromRecents();
             }
         }
 
         // Remove tasks from persistent storage.
-        mTaskPersister.wakeup(null, true);
+        notifyTaskPersisterLocked(null, true);
     }
 
     // Sort by taskId
@@ -3662,7 +3697,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     };
 
     // Extract the affiliates of the chain containing mRecentTasks[start].
-    private int processNextAffiliateChain(int start) {
+    private int processNextAffiliateChainLocked(int start) {
         final TaskRecord startTask = mRecentTasks.get(start);
         final int affiliateId = startTask.mAffiliatedTaskId;
 
@@ -3697,7 +3732,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (first.mNextAffiliate != null) {
             Slog.w(TAG, "Link error 1 first.next=" + first.mNextAffiliate);
             first.setNextAffiliate(null);
-            mTaskPersister.wakeup(first, false);
+            notifyTaskPersisterLocked(first, false);
         }
         // Everything in the middle is doubly linked from next to prev.
         final int tmpSize = mTmpRecents.size();
@@ -3708,13 +3743,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.w(TAG, "Link error 2 next=" + next + " prev=" + next.mPrevAffiliate +
                         " setting prev=" + prev);
                 next.setPrevAffiliate(prev);
-                mTaskPersister.wakeup(next, false);
+                notifyTaskPersisterLocked(next, false);
             }
             if (prev.mNextAffiliate != next) {
                 Slog.w(TAG, "Link error 3 prev=" + prev + " next=" + prev.mNextAffiliate +
                         " setting next=" + next);
                 prev.setNextAffiliate(next);
-                mTaskPersister.wakeup(prev, false);
+                notifyTaskPersisterLocked(prev, false);
             }
             prev.inRecents = true;
         }
@@ -3723,7 +3758,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (last.mPrevAffiliate != null) {
             Slog.w(TAG, "Link error 4 last.prev=" + last.mPrevAffiliate);
             last.setPrevAffiliate(null);
-            mTaskPersister.wakeup(last, false);
+            notifyTaskPersisterLocked(last, false);
         }
 
         // Insert the group back into mRecentTasks at start.
@@ -3764,7 +3799,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (task.autoRemoveRecents && task.getTopActivity() == null) {
                     // This situation is broken, and we should just get rid of it now.
                     mRecentTasks.remove(i);
-                    task.removedFromRecents(mTaskPersister);
+                    task.removedFromRecents();
                     i--;
                     N--;
                     Slog.w(TAG, "Removing auto-remove without activity: " + task);
@@ -3809,7 +3844,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (app == dummyApp || (app.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
                             // Doesn't exist any more!  Good-bye.
                             mRecentTasks.remove(i);
-                            task.removedFromRecents(mTaskPersister);
+                            task.removedFromRecents();
                             i--;
                             N--;
                             Slog.w(TAG, "Removing no longer valid recent: " + task);
@@ -3845,7 +3880,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Verify the affiliate chain for each task.
-        for (int i = 0; i < N; i = processNextAffiliateChain(i)) {
+        for (int i = 0; i < N; i = processNextAffiliateChainLocked(i)) {
         }
 
         mTmpRecents.clear();
@@ -4011,12 +4046,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (DEBUG_RECENTS) Slog.d(TAG, "addRecent: trimming tasks for " + task);
-        trimRecentsForTask(task, true);
+        trimRecentsForTaskLocked(task, true);
 
         N = mRecentTasks.size();
         while (N >= ActivityManager.getMaxRecentTasksStatic()) {
             final TaskRecord tr = mRecentTasks.remove(N - 1);
-            tr.removedFromRecents(mTaskPersister);
+            tr.removedFromRecents();
             N--;
         }
         task.inRecents = true;
@@ -4081,7 +4116,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * If needed, remove oldest existing entries in recents that are for the same kind
      * of task as the given one.
      */
-    int trimRecentsForTask(TaskRecord task, boolean doTrim) {
+    int trimRecentsForTaskLocked(TaskRecord task, boolean doTrim) {
         int N = mRecentTasks.size();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
@@ -4128,7 +4163,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             tr.disposeThumbnail();
             mRecentTasks.remove(i);
             if (task != tr) {
-                tr.removedFromRecents(mTaskPersister);
+                tr.removedFromRecents();
             }
             i--;
             N--;
@@ -7992,10 +8027,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         return list;
     }
 
-    TaskRecord getMostRecentTask() {
-        return mRecentTasks.get(0);
-    }
-
     /**
      * Creates a new RecentTaskInfo from a TaskRecord.
      */
@@ -8224,7 +8255,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 TaskRecord task = new TaskRecord(this, mStackSupervisor.getNextTaskId(), ainfo,
                         intent, description);
 
-                int trimIdx = trimRecentsForTask(task, false);
+                int trimIdx = trimRecentsForTaskLocked(task, false);
                 if (trimIdx >= 0) {
                     // If this would have caused a trim, then we'll abort because that
                     // means it would be added at the end of the list but then just removed.
@@ -8234,7 +8265,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final int N = mRecentTasks.size();
                 if (N >= (ActivityManager.getMaxRecentTasksStatic()-1)) {
                     final TaskRecord tr = mRecentTasks.remove(N - 1);
-                    tr.removedFromRecents(mTaskPersister);
+                    tr.removedFromRecents();
                 }
 
                 task.inRecents = true;
@@ -8294,7 +8325,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private void cleanUpRemovedTaskLocked(TaskRecord tr, boolean killProcess) {
         mRecentTasks.remove(tr);
-        tr.removedFromRecents(mTaskPersister);
+        tr.removedFromRecents();
         ComponentName component = tr.getBaseIntent().getComponent();
         if (component == null) {
             Slog.w(TAG, "No component for base intent of task: " + tr);
@@ -9983,12 +10014,20 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    /** Pokes the task persister. */
     void notifyTaskPersisterLocked(TaskRecord task, boolean flush) {
         if (task != null && task.stack != null && task.stack.isHomeStack()) {
             // Never persist the home stack.
             return;
         }
         mTaskPersister.wakeup(task, flush);
+    }
+
+    /** Notifies all listeners when the task stack has changed. */
+    void notifyTaskStackChangedLocked() {
+        mHandler.removeMessages(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
+        Message nmsg = mHandler.obtainMessage(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
+        mHandler.sendMessageDelayed(nmsg, NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY);
     }
 
     @Override
@@ -10014,12 +10053,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         mBatteryStatsService.shutdown();
         synchronized (this) {
             mProcessStats.shutdownLocked();
+            notifyTaskPersisterLocked(null, true);
         }
-        notifyTaskPersisterLocked(null, true);
 
         return timedout;
     }
-    
+
     public final void activitySlept(IBinder token) {
         if (localLOGV) Slog.v(TAG, "Activity slept: token=" + token);
 

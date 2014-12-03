@@ -167,10 +167,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHome(false);
-                // Preload the metadata for all tasks in the background
-                RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
-                RecentsTaskLoadPlan plan = loader.createLoadPlan(context);
-                loader.preloadTasks(plan, true /* isTopTaskHome */);
             } else if (action.equals(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED)) {
                 // When the search activity changes, update the Search widget
                 refreshSearchWidget();
@@ -437,22 +433,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
             onEnterAnimationTriggered();
         }
 
-        // Start listening for widget package changes if there is one bound, post it since we don't
-        // want it stalling the startup
-        if (mConfig.searchBarAppWidgetId >= 0) {
-            final WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks> callback =
-                    new WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks>(this);
-            mRecentsView.post(new Runnable() {
-                @Override
-                public void run() {
-                    RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks cb = callback.get();
-                    if (cb != null) {
-                        mAppWidgetHost.startListening(cb);
-                    }
-                }
-            });
-        }
-
         mStatusBar = ((SystemUIApplication) getApplication())
                 .getComponent(PhoneStatusBar.class);
     }
@@ -539,15 +519,29 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         unregisterReceiver(mSystemBroadcastReceiver);
 
         // Stop listening for widget package changes if there was one bound
-        if (mAppWidgetHost.isListening()) {
-            mAppWidgetHost.stopListening();
-        }
+        mAppWidgetHost.stopListening();
     }
 
     public void onEnterAnimationTriggered() {
         // Try and start the enter animation (or restart it on configuration changed)
         ReferenceCountedTrigger t = new ReferenceCountedTrigger(this, null, null, null);
-        mRecentsView.startEnterRecentsAnimation(new ViewAnimation.TaskViewEnterContext(t));
+        ViewAnimation.TaskViewEnterContext ctx = new ViewAnimation.TaskViewEnterContext(t);
+        mRecentsView.startEnterRecentsAnimation(ctx);
+        if (mConfig.searchBarAppWidgetId >= 0) {
+            final WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks> cbRef =
+                    new WeakReference<RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks>(
+                            RecentsActivity.this);
+            ctx.postAnimationTrigger.addLastDecrementRunnable(new Runnable() {
+                @Override
+                public void run() {
+                    // Start listening for widget package changes if there is one bound
+                    RecentsAppWidgetHost.RecentsAppWidgetHostCallbacks cb = cbRef.get();
+                    if (cb != null) {
+                        mAppWidgetHost.startListening(cb);
+                    }
+                }
+            });
+        }
 
         // Animate the SystemUI scrim views
         mScrimViews.startEnterRecentsAnimation();
