@@ -49,6 +49,7 @@ interface IConnectivityManager
     NetworkInfo[] getAllNetworkInfo();
     Network getNetworkForType(int networkType);
     Network[] getAllNetworks();
+    NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId);
 
     NetworkInfo getProvisioningOrActiveNetworkInfo();
 

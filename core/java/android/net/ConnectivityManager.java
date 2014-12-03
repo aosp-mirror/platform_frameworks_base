@@ -723,6 +723,19 @@ public class ConnectivityManager {
     }
 
     /**
+     * Returns an array of of {@link NetworkCapabilities} objects, representing
+     * the Networks that applications run by the given user will use by default.
+     * @hide
+     */
+    public NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId) {
+        try {
+            return mService.getDefaultNetworkCapabilitiesForUser(userId);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Returns details about the Provisioning or currently active default data network. When
      * connected, this network is the default route for outgoing connections.
      * You should always check {@link NetworkInfo#isConnected()} before initiating

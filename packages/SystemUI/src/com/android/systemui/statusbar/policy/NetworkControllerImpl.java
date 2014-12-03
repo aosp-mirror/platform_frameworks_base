@@ -16,12 +16,19 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_BLUETOOTH;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -55,6 +62,7 @@ import com.android.systemui.R;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -98,15 +106,18 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final AccessPointControllerImpl mAccessPoints;
     private final MobileDataControllerImpl mMobileDataController;
 
-    // bluetooth
+    // Network types that replace the carrier label if the device does not support mobile data.
     private boolean mBluetoothTethered = false;
+    private boolean mEthernetConnected = false;
 
-    // data connectivity (regardless of state, can we access the internet?)
-    // state of inet connection - 0 not connected, 100 connected
+    // state of inet connection
     private boolean mConnected = false;
-    private int mConnectedNetworkType = ConnectivityManager.TYPE_NONE;
-    private String mConnectedNetworkTypeName;
     private boolean mInetCondition; // Used for Logging and demo.
+
+    // BitSets indicating which network transport types (e.g., TRANSPORT_WIFI, TRANSPORT_MOBILE) are
+    // connected and validated, respectively.
+    private final BitSet mConnectedTransports = new BitSet();
+    private final BitSet mValidatedTransports = new BitSet();
 
     // States that don't belong to a subcontroller.
     private boolean mAirplaneMode = false;
@@ -124,6 +135,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private ArrayList<NetworkSignalChangedCallback> mSignalsChangedCallbacks =
             new ArrayList<NetworkSignalChangedCallback>();
     private boolean mListening;
+
+    // The current user ID.
+    private int mCurrentUserId;
 
     /**
      * Construct this controller object and register for updates.
@@ -344,6 +358,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     @Override
+    public void onUserSwitched(int newUserId) {
+        mCurrentUserId = newUserId;
+        mAccessPoints.onUserSwitched(newUserId);
+        updateConnectivity();
+        refreshCarrierLabel();
+    }
+
+    @Override
     public void onReceive(Context context, Intent intent) {
         if (CHATTY) {
             Log.d(TAG, "onReceive: intent=" + intent);
@@ -351,7 +373,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         final String action = intent.getAction();
         if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE) ||
                 action.equals(ConnectivityManager.INET_CONDITION_ACTION)) {
-            updateConnectivity(intent);
+            updateConnectivity();
             refreshCarrierLabel();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
             refreshLocale();
@@ -498,14 +520,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     /**
-     * Turns inet condition into a boolean indexing for a specific network.
-     * @return 0 for bad connectivity on this network, 1 for good connectivity
-     */
-    private int inetConditionForNetwork(int networkType, boolean inetCondition) {
-        return (inetCondition && mConnectedNetworkType == networkType) ? 1 : 0;
-    }
-
-    /**
      * Forces update of all callbacks on both SignalClusters and
      * NetworkSignalChangedCallbacks.
      */
@@ -539,41 +553,37 @@ public class NetworkControllerImpl extends BroadcastReceiver
     /**
      * Update the Inet conditions and what network we are connected to.
      */
-    private void updateConnectivity(Intent intent) {
-        final NetworkInfo info = mConnectivityManager.getActiveNetworkInfo();
-
-        // Are we connected at all, by any interface?
-        mConnected = info != null && info.isConnected();
-        if (mConnected) {
-            mConnectedNetworkType = info.getType();
-            mConnectedNetworkTypeName = info.getTypeName();
-        } else {
-            mConnectedNetworkType = ConnectivityManager.TYPE_NONE;
-            mConnectedNetworkTypeName = null;
+    private void updateConnectivity() {
+        mConnectedTransports.clear();
+        mValidatedTransports.clear();
+        for (NetworkCapabilities nc :
+                mConnectivityManager.getDefaultNetworkCapabilitiesForUser(mCurrentUserId)) {
+            for (int transportType : nc.getTransportTypes()) {
+                mConnectedTransports.set(transportType);
+                if (nc.hasCapability(NET_CAPABILITY_VALIDATED)) {
+                    mValidatedTransports.set(transportType);
+                }
+            }
         }
-
-        int connectionStatus = intent.getIntExtra(ConnectivityManager.EXTRA_INET_CONDITION, 0);
 
         if (CHATTY) {
-            Log.d(TAG, "updateConnectivity: networkInfo=" + info);
-            Log.d(TAG, "updateConnectivity: connectionStatus=" + connectionStatus);
+            Log.d(TAG, "updateConnectivity: mConnectedTransports=" + mConnectedTransports);
+            Log.d(TAG, "updateConnectivity: mValidatedTransports=" + mValidatedTransports);
         }
 
-        mInetCondition = connectionStatus > INET_CONDITION_THRESHOLD;
-
-        if (info != null && info.getType() == ConnectivityManager.TYPE_BLUETOOTH) {
-            mBluetoothTethered = info.isConnected();
-        } else {
-            mBluetoothTethered = false;
-        }
+        mConnected = !mConnectedTransports.isEmpty();
+        mInetCondition = !mValidatedTransports.isEmpty();
+        mBluetoothTethered = mConnectedTransports.get(TRANSPORT_BLUETOOTH);
+        mEthernetConnected = mConnectedTransports.get(TRANSPORT_ETHERNET);
 
         // We want to update all the icons, all at once, for any condition change
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
-            mobileSignalController.setInetCondition(mInetCondition ? 1 : 0, inetConditionForNetwork(
-                    mobileSignalController.getNetworkType(), mInetCondition));
+            mobileSignalController.setInetCondition(
+                    mInetCondition ? 1 : 0,
+                    mValidatedTransports.get(mobileSignalController.getTransportType()) ? 1 : 0);
         }
         mWifiSignalController.setInetCondition(
-                inetConditionForNetwork(mWifiSignalController.getNetworkType(), mInetCondition));
+                mValidatedTransports.get(mWifiSignalController.getTransportType()) ? 1 : 0);
     }
 
     /**
@@ -594,9 +604,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             label = mContext.getString(R.string.bluetooth_tethered);
         }
 
-        final boolean ethernetConnected =
-                (mConnectedNetworkType == ConnectivityManager.TYPE_ETHERNET);
-        if (ethernetConnected && !mHasMobileDataFeature) {
+        if (mEthernetConnected && !mHasMobileDataFeature) {
             label = context.getString(R.string.ethernet_label);
         }
 
@@ -612,7 +620,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                  }
             }
         } else if (!isMobileDataConnected() && !wifiState.connected && !mBluetoothTethered &&
-                 !ethernetConnected && !mHasMobileDataFeature) {
+                 !mEthernetConnected && !mHasMobileDataFeature) {
             // Pretty much no connection.
             label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
         }
@@ -633,9 +641,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("NetworkController state:");
-        pw.println(String.format("  %s network type %d (%s)",
-                mConnected ? "CONNECTED" : "DISCONNECTED",
-                mConnectedNetworkType, mConnectedNetworkTypeName));
+
         pw.println("  - telephony ------");
         pw.print("  hasVoiceCallingFeature()=");
         pw.println(hasVoiceCallingFeature());
@@ -645,6 +651,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
         pw.println(mBluetoothTethered);
 
         pw.println("  - connectivity ------");
+        pw.print("  mConnectedTransports=");
+        pw.println(mConnectedTransports);
+        pw.print("  mValidatedTransports=");
+        pw.println(mValidatedTransports);
         pw.print("  mInetCondition=");
         pw.println(mInetCondition);
         pw.print("  mAirplaneMode=");
@@ -795,8 +805,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         public WifiSignalController(Context context, boolean hasMobileData,
                 List<NetworkSignalChangedCallback> signalCallbacks,
                 List<SignalCluster> signalClusters, NetworkControllerImpl networkController) {
-            super("WifiSignalController", context, ConnectivityManager.TYPE_WIFI, signalCallbacks,
-                    signalClusters, networkController);
+            super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
+                    signalCallbacks, signalClusters, networkController);
             mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             mHasMobileData = hasMobileData;
             Handler handler = new WifiHandler();
@@ -989,7 +999,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 List<SignalCluster> signalClusters, NetworkControllerImpl networkController,
                 SubscriptionInfo info) {
             super("MobileSignalController(" + info.getSubscriptionId() + ")", context,
-                    ConnectivityManager.TYPE_MOBILE, signalCallbacks, signalClusters,
+                    NetworkCapabilities.TRANSPORT_CELLULAR, signalCallbacks, signalClusters,
                     networkController);
             mConfig = config;
             mPhone = phone;
@@ -1465,7 +1475,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         protected final String mTag;
         protected final T mCurrentState;
         protected final T mLastState;
-        protected final int mNetworkType;
+        protected final int mTransportType;
         protected final Context mContext;
         // The owner of the SignalController (i.e. NetworkController will maintain the following
         // lists and call notifyListeners whenever the list has changed to ensure everyone
@@ -1484,7 +1494,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 List<SignalCluster> signalClusters, NetworkControllerImpl networkController) {
             mTag = TAG + "." + tag;
             mNetworkController = networkController;
-            mNetworkType = type;
+            mTransportType = type;
             mContext = context;
             mSignalsChangedCallbacks = signalCallbacks;
             mSignalClusters = signalClusters;
@@ -1502,8 +1512,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             return mCurrentState;
         }
 
-        public int getNetworkType() {
-            return mNetworkType;
+        public int getTransportType() {
+            return mTransportType;
         }
 
         public void setInetCondition(int inetCondition) {
