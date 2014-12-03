@@ -383,12 +383,12 @@ final class TaskRecord {
         setNextAffiliate(null);
     }
 
-    void removedFromRecents(TaskPersister persister) {
+    void removedFromRecents() {
         disposeThumbnail();
         closeRecentsChain();
         if (inRecents) {
             inRecents = false;
-            persister.wakeup(this, false);
+            mService.notifyTaskPersisterLocked(this, false);
         }
     }
 

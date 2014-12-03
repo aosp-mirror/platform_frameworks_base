@@ -21,6 +21,7 @@ import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
+import android.app.ITaskStackListener;
 import android.app.SearchManager;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetManager;
@@ -532,6 +533,17 @@ public class SystemServicesProxy {
 
         try {
             mIam.startInPlaceAnimationOnFrontMostApplication(opts);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Registers a task stack listener with the system. */
+    public void registerTaskStackListener(ITaskStackListener listener) {
+        if (mIam == null) return;
+
+        try {
+            mIam.registerTaskStackListener(listener);
         } catch (Exception e) {
             e.printStackTrace();
         }
