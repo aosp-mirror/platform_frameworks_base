@@ -337,8 +337,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * supported by a given camera device. This field lists the
      * valid anti-banding modes that the application may request
      * for this camera device with the
-     * {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode} control. This list
-     * always includes AUTO.</p>
+     * {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode} control.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#CONTROL_AE_ANTIBANDING_MODE android.control.aeAntibandingMode}</p>
      * <p>This key is available on all devices.</p>
