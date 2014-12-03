@@ -65,7 +65,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
@@ -838,7 +837,7 @@ final class ActivityStack {
         clearLaunchTime(prev);
         final ActivityRecord next = mStackSupervisor.topRunningActivityLocked();
         if (mService.mHasRecents && (next == null || next.noDisplay || next.task != prev.task || uiSleeping)) {
-            prev.updateThumbnail(screenshotActivities(prev), null);
+            prev.updateThumbnailLocked(screenshotActivities(prev), null);
         }
         stopFullyDrawnTraceIfNeeded();
 
@@ -950,7 +949,7 @@ final class ActivityStack {
             r.icicle = icicle;
             r.haveState = true;
             r.launchCount = 0;
-            r.updateThumbnail(null, description);
+            r.updateThumbnailLocked(null, description);
         }
         if (!r.stopped) {
             if (DEBUG_STATES) Slog.v(TAG, "Moving to STOPPED: " + r + " (stop complete)");
@@ -1060,6 +1059,9 @@ final class ActivityStack {
             }
             prev.cpuTimeAtResume = 0; // reset it
         }
+
+        // Notfiy when the task stack has changed
+        mService.notifyTaskStackChangedLocked();
     }
 
     /**
@@ -4105,7 +4107,7 @@ final class ActivityStack {
                 // Task creator asked to remove this when done, or this task was a voice
                 // interaction, so it should not remain on the recent tasks list.
                 mService.mRecentTasks.remove(task);
-                task.removedFromRecents(mService.mTaskPersister);
+                task.removedFromRecents();
             }
         }
 
