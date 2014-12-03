@@ -4691,12 +4691,6 @@ public class AudioService extends IAudioService.Stub {
             connType = AudioRoutesInfo.MAIN_HEADPHONES;
             intent.setAction(Intent.ACTION_HEADSET_PLUG);
             intent.putExtra("microphone", 0);
-        } else if (device == AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET) {
-            connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
-            intent.setAction(AudioManager.ACTION_ANALOG_AUDIO_DOCK_PLUG);
-        } else if (device == AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET) {
-            connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
-            intent.setAction(AudioManager.ACTION_DIGITAL_AUDIO_DOCK_PLUG);
         } else if (device == AudioSystem.DEVICE_OUT_HDMI) {
             connType = AudioRoutesInfo.MAIN_HDMI;
             configureHdmiPlugIntent(intent, state);
