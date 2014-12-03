@@ -983,7 +983,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             // This is very efficient since the properties are cached.
             final boolean speakPassword = Settings.Secure.getIntForUser(
                     mContext.getContentResolver(), Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
-                    UserHandle.USER_CURRENT) != 0;
+                    UserHandle.USER_CURRENT_OR_SELF) != 0;
             // Add text only if password announcement is enabled or if headset is
             // used to avoid leaking passwords.
             if (speakPassword || mAudioManager.isBluetoothA2dpOn()

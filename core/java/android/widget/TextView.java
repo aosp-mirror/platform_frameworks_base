@@ -8392,7 +8392,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private boolean shouldSpeakPasswordsForAccessibility() {
         return (Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0, UserHandle.USER_CURRENT) == 1);
+                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD, 0,
+                UserHandle.USER_CURRENT_OR_SELF) == 1);
     }
 
     @Override
