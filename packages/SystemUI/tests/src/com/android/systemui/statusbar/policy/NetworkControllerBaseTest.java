@@ -195,6 +195,18 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         mPhoneStateListener.onDataActivity(dataActivity);
     }
 
+    protected void verifyHasNoSims(boolean hasNoSimsVisible) {
+        ArgumentCaptor<Boolean> hasNoSimsArg = ArgumentCaptor.forClass(Boolean.class);
+
+        Mockito.verify(mSignalCluster, Mockito.atLeastOnce()).setNoSims(hasNoSimsArg.capture());
+        assertEquals("No sims in status bar", hasNoSimsVisible, (boolean) hasNoSimsArg.getValue());
+
+        Mockito.verify(mNetworkSignalChangedCallback, Mockito.atLeastOnce())
+                .onNoSimVisibleChanged(hasNoSimsArg.capture());
+        assertEquals("No sims in quick settings", hasNoSimsVisible,
+                (boolean) hasNoSimsArg.getValue());
+    }
+
     protected void verifyLastQsMobileDataIndicators(boolean visible, int icon, int typeIcon,
             boolean dataIn, boolean dataOut) {
         ArgumentCaptor<Integer> iconArg = ArgumentCaptor.forClass(Integer.class);
