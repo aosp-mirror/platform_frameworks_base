@@ -9764,7 +9764,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     w.mContentChanged = false;
 
                     // Moved from updateWindowsAndWallpaperLocked().
-                    if (w.mHasSurface) {
+                    if (w.mHasSurface && !w.isHiddenFromUserLocked()) {
                         // Take care of the window being ready to display.
                         final boolean committed =
                                 winAnimator.commitFinishDrawingLocked(currentTime);
