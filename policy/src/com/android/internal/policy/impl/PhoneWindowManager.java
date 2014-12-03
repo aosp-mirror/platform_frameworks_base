@@ -4055,12 +4055,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mAppsToBeHidden.remove(appToken);
                     mAppsThatDismissKeyguard.remove(appToken);
                     if (mAppsToBeHidden.isEmpty()) {
-                        if (mKeyguardSecureIncludingHidden) {
+                        if (dismissKeyguard && !mKeyguardSecure) {
+                            mAppsThatDismissKeyguard.add(appToken);
+                        } else {
                             mWinShowWhenLocked = win;
                             mHideLockScreen = true;
                             mForceStatusBarFromKeyguard = false;
-                        } else if (dismissKeyguard && !mKeyguardSecure) {
-                            mAppsThatDismissKeyguard.add(appToken);
                         }
                     }
                 } else if (dismissKeyguard) {
