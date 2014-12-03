@@ -107,6 +107,7 @@ public class KeyguardUserSwitcher {
     public void show(boolean animate) {
         if (mUserSwitcher != null && mUserSwitcherContainer.getVisibility() != View.VISIBLE) {
             cancelAnimations();
+            mAdapter.refresh();
             mUserSwitcherContainer.setVisibility(View.VISIBLE);
             mStatusBarView.setKeyguardUserSwitcherShowing(true, animate);
             if (animate) {
