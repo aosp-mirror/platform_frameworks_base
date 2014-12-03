@@ -1065,6 +1065,72 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return result.toArray(new Network[result.size()]);
     }
 
+    private NetworkCapabilities getNetworkCapabilitiesAndValidation(NetworkAgentInfo nai) {
+        if (nai != null) {
+            synchronized (nai) {
+                if (nai.created) {
+                    NetworkCapabilities nc = new NetworkCapabilities(nai.networkCapabilities);
+                    if (nai.validated) {
+                        nc.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                    } else {
+                        nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+                    }
+                    return nc;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId) {
+        // The basic principle is: if an app's traffic could possibly go over a
+        // network, without the app doing anything multinetwork-specific,
+        // (hence, by "default"), then include that network's capabilities in
+        // the array.
+        //
+        // In the normal case, app traffic only goes over the system's default
+        // network connection, so that's the only network returned.
+        //
+        // With a VPN in force, some app traffic may go into the VPN, and thus
+        // over whatever underlying networks the VPN specifies, while other app
+        // traffic may go over the system default network (e.g.: a split-tunnel
+        // VPN, or an app disallowed by the VPN), so the set of networks
+        // returned includes the VPN's underlying networks and the system
+        // default.
+        enforceAccessPermission();
+
+        HashMap<Network, NetworkCapabilities> result = new HashMap<Network, NetworkCapabilities>();
+
+        NetworkAgentInfo nai = getDefaultNetwork();
+        NetworkCapabilities nc = getNetworkCapabilitiesAndValidation(getDefaultNetwork());
+        if (nc != null) {
+            result.put(nai.network, nc);
+        }
+
+        if (!mLockdownEnabled) {
+            synchronized (mVpns) {
+                Vpn vpn = mVpns.get(userId);
+                if (vpn != null) {
+                    Network[] networks = vpn.getUnderlyingNetworks();
+                    if (networks != null) {
+                        for (Network network : networks) {
+                            nai = getNetworkAgentInfoForNetwork(network);
+                            nc = getNetworkCapabilitiesAndValidation(nai);
+                            if (nc != null) {
+                                result.put(nai.network, nc);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        NetworkCapabilities[] out = new NetworkCapabilities[result.size()];
+        out = result.values().toArray(out);
+        return out;
+    }
+
     @Override
     public boolean isNetworkSupported(int networkType) {
         enforceAccessPermission();
@@ -3544,8 +3610,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // Note: if mDefaultRequest is changed, NetworkMonitor needs to be updated.
     private final NetworkRequest mDefaultRequest;
 
+    private NetworkAgentInfo getDefaultNetwork() {
+        return mNetworkForRequestId.get(mDefaultRequest.requestId);
+    }
+
     private boolean isDefaultNetwork(NetworkAgentInfo nai) {
-        return mNetworkForRequestId.get(mDefaultRequest.requestId) == nai;
+        return nai == getDefaultNetwork();
     }
 
     public void registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
