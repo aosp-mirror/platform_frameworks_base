@@ -19,6 +19,7 @@ package com.android.systemui.recents;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.ITaskStackListener;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.ActivityNotFoundException;
@@ -56,6 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+
 /** A proxy implementation for the recents component */
 public class AlternateRecentsComponent implements ActivityOptions.OnAnimationStartedListener {
 
@@ -79,6 +81,28 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     final static String sRecentsPackage = "com.android.systemui";
     final static String sRecentsActivity = "com.android.systemui.recents.RecentsActivity";
 
+    /**
+     * An implementation of ITaskStackListener, that allows us to listen for changes to the system
+     * task stacks and update recents accordingly.
+     */
+    class TaskStackListenerImpl extends ITaskStackListener.Stub {
+        @Override
+        public void onTaskStackChanged() {
+            RecentsConfiguration config = RecentsConfiguration.getInstance();
+            if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
+                // Load the next task only if we aren't svelte
+                RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+                RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
+                loader.preloadTasks(plan, true /* isTopTaskHome */);
+                RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
+                launchOpts.numVisibleTasks = 1;
+                launchOpts.numVisibleTaskThumbnails = 1;
+                launchOpts.onlyLoadForCache = true;
+                loader.loadTasks(mContext, plan, launchOpts);
+            }
+        }
+    }
+
     static RecentsComponent.Callbacks sRecentsComponentCallbacks;
     static RecentsTaskLoadPlan sInstanceLoadPlan;
 
@@ -86,6 +110,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
     LayoutInflater mInflater;
     SystemServicesProxy mSystemServicesProxy;
     Handler mHandler;
+    TaskStackListenerImpl mTaskStackListener;
     boolean mBootCompleted;
     boolean mStartAnimationTriggered;
     boolean mCanReuseTaskStackViews = true;
@@ -116,6 +141,10 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         mSystemServicesProxy = new SystemServicesProxy(context);
         mHandler = new Handler();
         mTaskStackBounds = new Rect();
+
+        // Register the task stack listener
+        mTaskStackListener = new TaskStackListenerImpl();
+        mSystemServicesProxy.registerTaskStackListener(mTaskStackListener);
     }
 
     public void onStart() {
