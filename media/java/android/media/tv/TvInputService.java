@@ -1210,6 +1210,7 @@ public abstract class TvInputService extends Service {
                 }
                 mServiceHandler.obtainMessage(ServiceHandler.DO_NOTIFY_SESSION_CREATED, args)
                         .sendToTarget();
+                session.tune(TvContract.buildChannelUriForPassthroughInput(getHardwareInputId()));
             }
 
             @Override
