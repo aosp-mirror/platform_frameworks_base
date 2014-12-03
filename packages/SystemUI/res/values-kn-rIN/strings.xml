@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"ನಿಮ್ಮ ಇತ್ತೀಚಿನ ಪರದೆಗಳು ಇಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತವೆ"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"ಇತ್ತೀಚಿನ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ವಜಾಗೊಳಿಸು"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"ಅವಲೋಕನದಲ್ಲಿರುವ 1 ಪರದೆ"</item>
-    <item quantity="other" msgid="5523506463832158203">"ಅವಲೋಕನದಲ್ಲಿರುವ %d ಪರದೆಗಳು"</item>
+    <item quantity="one" msgid="3969335317929254918">"ಸಮಗ್ರ ನೋಟದಲ್ಲಿರುವ 1 ಪರದೆ"</item>
+    <item quantity="other" msgid="5523506463832158203">"ಸಮಗ್ರ ನೋಟದಲ್ಲಿರುವ %d ಪರದೆಗಳು"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ"</string>
@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"ಹಿಂದೆ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"ಮುಖಪುಟ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"ಮೆನು"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"ಅವಲೋಕನ"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"ಸಮಗ್ರ ನೋಟ"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"ಹುಡುಕು"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"ಕ್ಯಾಮರಾ"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ಫೋನ್"</string>
@@ -165,7 +165,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"ಲಾಕ್‌ ಪರದೆ."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ಅವಲೋಕನ."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"ಸಮಗ್ರ ನೋಟ."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"ಬಳಕೆದಾರ <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"ವೈಫೈ ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>

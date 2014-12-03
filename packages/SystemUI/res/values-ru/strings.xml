@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Здесь будут показаны недавние приложения."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Закрыть недавние приложения"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"Показан 1 экран."</item>
-    <item quantity="other" msgid="5523506463832158203">"Показано экранов: %d."</item>
+    <item quantity="one" msgid="3969335317929254918">"В обзоре 1 экран."</item>
+    <item quantity="other" msgid="5523506463832158203">"Экранов в обзоре: %d."</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Нет уведомлений"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Текущие"</string>

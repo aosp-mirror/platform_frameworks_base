@@ -301,7 +301,7 @@
     <string name="phone_hint" msgid="3101468054914424646">"Telefonoa irekitzeko, pasatu hatza eskuinera."</string>
     <string name="camera_hint" msgid="5241441720959174226">"Kamera irekitzeko, pasatu hatza ezkerrera."</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Bat ere ez"</string>
-    <string name="interruption_level_priority" msgid="6517366750688942030">"Lehentasuna"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Lehentas."</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Guztiak"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Kargatzen (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> guztiz kargatu arte)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Aldatu erabiltzailea"</string>

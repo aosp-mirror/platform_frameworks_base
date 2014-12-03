@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ваші останні екрани відображаються тут"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Відхилити останні програми"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"На панелі огляду 1 екран"</item>
-    <item quantity="other" msgid="5523506463832158203">"Екранів на панелі огляду: %d"</item>
+    <item quantity="one" msgid="3969335317929254918">"Показано 1 екран"</item>
+    <item quantity="other" msgid="5523506463832158203">"Показано екранів: %d"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Немає сповіщень"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Поточні"</string>
@@ -165,7 +165,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Швидке налаштування."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Заблокований екран."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Налаштування"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Панель огляду."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Огляд."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Користувач <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi вимкнено."</string>

@@ -1853,4 +1853,20 @@
     <bool name="config_switch_phone_on_voice_reg_state_change">true</bool>
 
     <bool name="config_sms_force_7bit_encoding">false</bool>
+
+    <!-- This config is used to check if the carrier requires converting destination
+         number before sending out a SMS.
+         Formats for this configuration as below:
+         [true or false][;optional gid]
+         The logic to pick up the configuration:
+         (1) If the "config_sms_convert_destination_number_support" array has no gid
+             special item, the last one will be picked
+         (2) If the "config_sms_convert_destination_number_support" array has gid special
+             item and it matches the current sim's gid, it will be picked.
+         (3) If the "config_sms_convert_destination_number_support" array has gid special
+             item but it doesn't match the current sim's gid, the last one without gid
+             will be picked -->
+    <string-array translatable="false" name="config_sms_convert_destination_number_support">
+        <item>false</item>
+    </string-array>
 </resources>

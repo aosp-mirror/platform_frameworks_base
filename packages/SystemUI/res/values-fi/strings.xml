@@ -26,8 +26,8 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Äskettäin käytetyt ruudut näkyvät tässä"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Hylkää viimeaikaiset sovellukset"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="3969335317929254918">"1 näyttö Yleistä-kohdassa"</item>
-    <item quantity="other" msgid="5523506463832158203">"%d näyttöä Yleistä-kohdassa"</item>
+    <item quantity="one" msgid="3969335317929254918">"1 näyttö Viimeisimmät-kohdassa"</item>
+    <item quantity="other" msgid="5523506463832158203">"%d näyttöä Viimeisimmät-kohdassa"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ei ilmoituksia"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Käynnissä olevat"</string>
@@ -80,7 +80,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Takaisin"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Aloituspainike"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Valikko"</string>
-    <string name="accessibility_recent" msgid="5208608566793607626">"Yleistä"</string>
+    <string name="accessibility_recent" msgid="5208608566793607626">"Viimeisimmät"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Haku"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Puhelin"</string>
@@ -165,7 +165,7 @@
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Pika-asetukset."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"Lukitse näyttö."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"Asetukset"</string>
-    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Yleistä."</string>
+    <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"Viimeisimmät."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Käyttäjä: <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"Wi-Fi poistettiin käytöstä."</string>

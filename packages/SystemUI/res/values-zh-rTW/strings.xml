@@ -300,7 +300,7 @@
     <string name="speed_bump_explanation" msgid="1288875699658819755">"較不緊急的通知會顯示在下方"</string>
     <string name="notification_tap_again" msgid="8524949573675922138">"再次輕觸即可開啟"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"向上滑動即可解鎖"</string>
-    <string name="phone_hint" msgid="3101468054914424646">"向左滑動可使用手機功能"</string>
+    <string name="phone_hint" msgid="3101468054914424646">"向右滑動可使用手機功能"</string>
     <string name="camera_hint" msgid="5241441720959174226">"向左滑動可使用相機功能"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"無"</string>
     <string name="interruption_level_priority" msgid="6517366750688942030">"優先"</string>
