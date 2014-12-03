@@ -215,6 +215,8 @@ public class NetworkMonitor extends StateMachine {
     // Default to 5s reevaluation delay.
     private static final int DEFAULT_REEVALUATE_DELAY_MS = 5000;
     private static final int MAX_RETRIES = 10;
+    // Between groups of MAX_RETRIES evaluation attempts, pause 10 mins in hopes ISP outage passes.
+    private static final int REEVALUATE_PAUSE_MS = 10*60*1000;
     private final int mReevaluateDelayMs;
     private int mReevaluateToken = 0;
     private static final int INVALID_UID = -1;
@@ -345,6 +347,7 @@ public class NetworkMonitor extends StateMachine {
         public void enter() {
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
                     NETWORK_TEST_RESULT_INVALID, 0, mNetworkAgentInfo));
+            if (!mUserDoesNotWant) sendMessageDelayed(CMD_FORCE_REEVALUATION, REEVALUATE_PAUSE_MS);
         }
 
         @Override
@@ -359,6 +362,15 @@ public class NetworkMonitor extends StateMachine {
                 default:
                     return NOT_HANDLED;
             }
+        }
+
+        @Override
+        public void exit() {
+             // NOTE: This removes the delayed message posted by enter() but will inadvertently
+             // remove any other CMD_FORCE_REEVALUATION in the message queue.  At the moment this
+             // is harmless.  If in the future this becomes problematic a different message could
+             // be used.
+             removeMessages(CMD_FORCE_REEVALUATION);
         }
     }
 
