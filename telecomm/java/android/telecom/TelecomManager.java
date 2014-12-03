@@ -732,6 +732,26 @@ public class TelecomManager {
     }
 
     /**
+     * Return whether a given phone account has a voicemail number configured.
+     *
+     * @param accountHandle The handle for the account to check for a voicemail number.
+     * @return {@code true} If the given phone account has a voicemail number.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean hasVoiceMailNumber(PhoneAccountHandle accountHandle) {
+        try {
+            if (isServiceConnected()) {
+                return getTelecomService().hasVoiceMailNumber(accountHandle);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException calling isInCall().", e);
+        }
+        return false;
+    }
+
+    /**
      * Returns whether there is an ongoing phone call (can be in dialing, ringing, active or holding
      * states).
      * <p>

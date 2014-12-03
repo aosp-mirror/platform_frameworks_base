@@ -121,6 +121,11 @@ interface ITelecomService {
     boolean isVoiceMailNumber(in PhoneAccountHandle accountHandle, String number);
 
     /**
+     * @see TelecomServiceImpl#hasVoiceMailNumber
+     */
+    boolean hasVoiceMailNumber(in PhoneAccountHandle accountHandle);
+
+    /**
      * @see TelecomServiceImpl#getDefaultPhoneApp
      */
     ComponentName getDefaultPhoneApp();
