@@ -291,16 +291,16 @@ public class VpnService extends Service {
     /**
      * Sets the underlying networks used by the VPN for its upstream connections.
      *
-     * Used by the system to know the actual networks that carry traffic for apps affected by this
-     * VPN in order to present this information to the user (e.g., via status bar icons).
+     * <p>Used by the system to know the actual networks that carry traffic for apps affected by
+     * this VPN in order to present this information to the user (e.g., via status bar icons).
      *
-     * This method only needs to be called if the VPN has explicitly bound its underlying
+     * <p>This method only needs to be called if the VPN has explicitly bound its underlying
      * communications channels &mdash; such as the socket(s) passed to {@link #protect(int)} &mdash;
      * to a {@code Network} using APIs such as {@link Network#bindSocket(Socket)} or
      * {@link Network#bindSocket(DatagramSocket)}. The VPN should call this method every time
      * the set of {@code Network}s it is using changes.
      *
-     * {@code networks} is one of the following:
+     * <p>{@code networks} is one of the following:
      * <ul>
      * <li><strong>a non-empty array</strong>: an array of one or more {@link Network}s, in
      * decreasing preference order. For example, if this VPN uses both wifi and mobile (cellular)
@@ -310,11 +310,11 @@ public class VpnService extends Service {
      * underlying network connection, and thus, app traffic will not be sent or received.</li>
      * <li><strong>null</strong>: (default) signifies that the VPN uses whatever is the system's
      * default network. I.e., it doesn't use the {@code bindSocket} or {@code bindDatagramSocket}
-     * APIs mentioned above to send traffic over specific channels.
+     * APIs mentioned above to send traffic over specific channels.</li>
      * </ul>
      *
-     * This call will succeed only if the VPN is currently established. For setting this value when
-     * the VPN has not yet been established, see {@link Builder#setUnderlyingNetworks}.
+     * <p>This call will succeed only if the VPN is currently established. For setting this value
+     * when the VPN has not yet been established, see {@link Builder#setUnderlyingNetworks}.
      *
      * @param networks An array of networks the VPN uses to tunnel traffic to/from its servers.
      *
