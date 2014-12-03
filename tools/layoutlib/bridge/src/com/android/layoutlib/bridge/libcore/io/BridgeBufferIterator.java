@@ -16,74 +16,61 @@
 
 package com.android.layoutlib.bridge.libcore.io;
 
-import java.nio.MappedByteBuffer;
+import java.nio.ByteBuffer;
 
 import libcore.io.BufferIterator;
 
 /**
- * Provides an implementation of {@link BufferIterator} over a {@link MappedByteBuffer}.
+ * Provides an implementation of {@link BufferIterator} over a {@link ByteBuffer}.
  */
 public class BridgeBufferIterator extends BufferIterator {
 
-    private int mPosition;
     private final long mSize;
-    private final MappedByteBuffer mMappedByteBuffer;
+    private final ByteBuffer mByteBuffer;
 
-    public BridgeBufferIterator(long size, MappedByteBuffer buffer) {
+    public BridgeBufferIterator(long size, ByteBuffer buffer) {
         mSize = size;
-        mMappedByteBuffer = buffer;
+        mByteBuffer = buffer;
     }
 
     @Override
     public void seek(int offset) {
-        assert offset < mSize;
-       mPosition = offset;
+        assert offset <= mSize;
+        mByteBuffer.position(offset);
     }
 
     @Override
     public void skip(int byteCount) {
-        assert mPosition + byteCount <= mSize;
-        mPosition += byteCount;
+        int newPosition = mByteBuffer.position() + byteCount;
+        assert newPosition <= mSize;
+        mByteBuffer.position(newPosition);
     }
 
     @Override
     public void readByteArray(byte[] dst, int dstOffset, int byteCount) {
         assert dst.length >= dstOffset + byteCount;
-        mMappedByteBuffer.position(mPosition);
-        mMappedByteBuffer.get(dst, dstOffset, byteCount);
-        mPosition = mMappedByteBuffer.position();
+        mByteBuffer.get(dst, dstOffset, byteCount);
     }
 
     @Override
     public byte readByte() {
-        mMappedByteBuffer.position(mPosition);
-        byte b = mMappedByteBuffer.get();
-        mPosition = mMappedByteBuffer.position();
-        return b;
+        return mByteBuffer.get();
     }
 
     @Override
     public int readInt() {
-        mMappedByteBuffer.position(mPosition);
-        int i = mMappedByteBuffer.getInt();
-        mPosition = mMappedByteBuffer.position();
-        return i;
+        return mByteBuffer.getInt();
     }
 
     @Override
     public void readIntArray(int[] dst, int dstOffset, int intCount) {
-        mMappedByteBuffer.position(mPosition);
         while (--intCount >= 0) {
-            dst[dstOffset++] = mMappedByteBuffer.getInt();
+            dst[dstOffset++] = mByteBuffer.getInt();
         }
-        mPosition = mMappedByteBuffer.position();
     }
 
     @Override
     public short readShort() {
-        mMappedByteBuffer.position(mPosition);
-        short s = mMappedByteBuffer.getShort();
-        mPosition = mMappedByteBuffer.position();
-        return s;
+        return mByteBuffer.getShort();
     }
 }
