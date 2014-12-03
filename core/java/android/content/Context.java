@@ -146,12 +146,13 @@ public abstract class Context {
     @IntDef(flag = true,
             value = {
                 BIND_AUTO_CREATE,
-                BIND_AUTO_CREATE,
                 BIND_DEBUG_UNBIND,
                 BIND_NOT_FOREGROUND,
                 BIND_ABOVE_CLIENT,
                 BIND_ALLOW_OOM_MANAGEMENT,
-                BIND_WAIVE_PRIORITY
+                BIND_WAIVE_PRIORITY,
+                BIND_IMPORTANT,
+                BIND_ADJUST_WITH_ACTIVITY
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlags {}
