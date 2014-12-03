@@ -31,4 +31,31 @@
     <!-- If this value is true, The mms content-disposition field is supported correctly.
          If false, Content-disposition fragments are ignored -->
     <bool name="config_mms_content_disposition_support">false</bool>
+
+    <!-- An array of CDMA roaming indicators which means international roaming -->
+    <integer-array translatable="false" name="config_cdma_international_roaming_indicators" >
+        <item>2</item>
+        <item>74</item>
+        <item>124</item>
+        <item>125</item>
+        <item>126</item>
+        <item>157</item>
+        <item>158</item>
+        <item>159</item>
+        <item>193</item>
+        <item>194</item>
+        <item>195</item>
+        <item>196</item>
+        <item>197</item>
+        <item>198</item>
+        <item>228</item>
+        <item>229</item>
+        <item>230</item>
+        <item>231</item>
+        <item>232</item>
+        <item>233</item>
+        <item>234</item>
+        <item>235</item>
+    </integer-array>
+
 </resources>
