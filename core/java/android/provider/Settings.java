@@ -6608,6 +6608,14 @@ public final class Settings {
         public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
 
         /**
+         * Global override to disable VoLTE (independent of user setting)
+         * <p>
+         * Type: int (1 for disable VoLTE, 0 to use user configuration)
+         * @hide
+         */
+        public static final String VOLTE_FEATURE_DISABLED = "volte_feature_disabled";
+
+        /**
          * Whether user can enable/disable LTE as a preferred network. A carrier might control
          * this via gservices, OMA-DM, carrier app, etc.
          * <p>
