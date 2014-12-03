@@ -30,6 +30,7 @@ import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
+import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 
 import android.Manifest;
 import android.app.AppOpsManager;
@@ -3905,7 +3906,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + endIndex + " " + cur);
             if (cur == top) {
                 // Verify start of the chain.
-                if (cur.mNextAffiliate != null || cur.mNextAffiliateTaskId != -1) {
+                if (cur.mNextAffiliate != null || cur.mNextAffiliateTaskId != INVALID_TASK_ID) {
                     Slog.wtf(TAG, "Bad chain @" + endIndex
                             + ": first task has next affiliate: " + prev);
                     sane = false;
@@ -3924,7 +3925,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     break;
                 }
             }
-            if (cur.mPrevAffiliateTaskId == -1) {
+            if (cur.mPrevAffiliateTaskId == INVALID_TASK_ID) {
                 // Chain ends here.
                 if (cur.mPrevAffiliate != null) {
                     Slog.wtf(TAG, "Bad chain @" + endIndex
@@ -3989,7 +3990,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void addRecentTaskLocked(TaskRecord task) {
         final boolean isAffiliated = task.mAffiliatedTaskId != task.taskId
-                || task.mNextAffiliateTaskId != -1 || task.mPrevAffiliateTaskId != -1;
+                || task.mNextAffiliateTaskId != INVALID_TASK_ID
+                || task.mPrevAffiliateTaskId != INVALID_TASK_ID;
 
         int N = mRecentTasks.size();
         // Quick case: check if the top-most recent task is the same.
@@ -6219,6 +6221,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
+    public void systemBackupRestored() {
+        synchronized (this) {
+            if (mSystemReady) {
+                mTaskPersister.restoreTasksFromOtherDeviceLocked();
+            } else {
+                Slog.w(TAG, "System backup restored before system is ready");
+            }
+        }
+    }
+
     final void ensureBootCompleted() {
         boolean booting;
         boolean enableScreen;
@@ -8033,7 +8046,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Compose the recent task info
         ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
-        rti.id = tr.getTopActivity() == null ? -1 : tr.taskId;
+        rti.id = tr.getTopActivity() == null ? INVALID_TASK_ID : tr.taskId;
         rti.persistentId = tr.taskId;
         rti.baseIntent = new Intent(tr.getBaseIntent());
         rti.origActivity = tr.origActivity;
@@ -8256,7 +8269,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (trimIdx >= 0) {
                     // If this would have caused a trim, then we'll abort because that
                     // means it would be added at the end of the list but then just removed.
-                    return -1;
+                    return INVALID_TASK_ID;
                 }
 
                 final int N = mRecentTasks.size();
@@ -11143,6 +11156,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             if (mRecentTasks == null) {
                 mRecentTasks = mTaskPersister.restoreTasksLocked();
+                mTaskPersister.restoreTasksFromOtherDeviceLocked();
                 if (!mRecentTasks.isEmpty()) {
                     mStackSupervisor.createStackForRestoredTaskHistory(mRecentTasks);
                 }
@@ -15789,6 +15803,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     }
                                 } else {
                                     removeTasksByRemovedPackageComponentsLocked(ssp, userId);
+                                    if (userId == UserHandle.USER_OWNER) {
+                                        mTaskPersister.addOtherDeviceTasksToRecentsLocked(ssp);
+                                    }
                                 }
                             }
                             break;
@@ -15805,6 +15822,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                         if (replacing) {
                             removeTasksByRemovedPackageComponentsLocked(ssp, userId);
+                        }
+                        if (userId == UserHandle.USER_OWNER) {
+                            mTaskPersister.addOtherDeviceTasksToRecentsLocked(ssp);
                         }
                     }
                     break;
