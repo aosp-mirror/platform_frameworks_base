@@ -9215,9 +9215,9 @@ package android.content.res {
     method public int getDimensionPixelOffset(int) throws android.content.res.Resources.NotFoundException;
     method public int getDimensionPixelSize(int) throws android.content.res.Resources.NotFoundException;
     method public android.util.DisplayMetrics getDisplayMetrics();
-    method public android.graphics.drawable.Drawable getDrawable(int) throws android.content.res.Resources.NotFoundException;
+    method public deprecated android.graphics.drawable.Drawable getDrawable(int) throws android.content.res.Resources.NotFoundException;
     method public android.graphics.drawable.Drawable getDrawable(int, android.content.res.Resources.Theme) throws android.content.res.Resources.NotFoundException;
-    method public android.graphics.drawable.Drawable getDrawableForDensity(int, int) throws android.content.res.Resources.NotFoundException;
+    method public deprecated android.graphics.drawable.Drawable getDrawableForDensity(int, int) throws android.content.res.Resources.NotFoundException;
     method public android.graphics.drawable.Drawable getDrawableForDensity(int, int, android.content.res.Resources.Theme);
     method public float getFraction(int, int, int);
     method public int getIdentifier(java.lang.String, java.lang.String, java.lang.String);
