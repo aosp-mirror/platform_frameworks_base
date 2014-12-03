@@ -25,6 +25,7 @@ import android.system.ErrnoException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteOrder;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel.MapMode;
 import java.util.HashMap;
@@ -59,15 +60,22 @@ public class MemoryMappedFile_Delegate {
         }
         path = path.substring(TARGET_PATH.length());
         try {
-            RandomAccessFile file = new RandomAccessFile(new File(sRootPath, path), "r");
-            long size = file.length();
-            MemoryMappedFile_Delegate newDelegate = new MemoryMappedFile_Delegate(file);
-            long filePointer = file.getFilePointer();
-            MemoryMappedFile mmFile = new MemoryMappedFile(filePointer, size);
-            long delegateIndex = sManager.addNewDelegate(newDelegate);
-            sMemoryMappedFileMap.put(mmFile, delegateIndex);
-            file.close();  // Also closes the channel opened by the delegate constructor.
-            return mmFile;
+            File f = new File(sRootPath, path);
+            if (!f.exists()) {
+                throw new ErrnoException("File not found: " + f.getPath(), 1);
+            }
+            RandomAccessFile file = new RandomAccessFile(f, "r");
+            try {
+                long size = file.length();
+                MemoryMappedFile_Delegate newDelegate = new MemoryMappedFile_Delegate(file);
+                long filePointer = file.getFilePointer();
+                MemoryMappedFile mmFile = new MemoryMappedFile(filePointer, size);
+                long delegateIndex = sManager.addNewDelegate(newDelegate);
+                sMemoryMappedFileMap.put(mmFile, delegateIndex);
+                return mmFile;
+            } finally {
+                file.close();
+            }
         } catch (IOException e) {
             throw new ErrnoException("mmapRO", 1, e);
         }
@@ -85,7 +93,7 @@ public class MemoryMappedFile_Delegate {
     @LayoutlibDelegate
     static BufferIterator bigEndianIterator(MemoryMappedFile file) {
         MemoryMappedFile_Delegate delegate = getDelegate(file);
-        return new BridgeBufferIterator(delegate.mSize, delegate.mMappedByteBuffer);
+        return new BridgeBufferIterator(delegate.mSize, delegate.mMappedByteBuffer.duplicate());
     }
 
     // TODO: implement littleEndianIterator()
@@ -95,6 +103,7 @@ public class MemoryMappedFile_Delegate {
         // It's weird that map() takes size as long, but returns MappedByteBuffer which uses an int
         // to store the marker to the position.
         mMappedByteBuffer = file.getChannel().map(MapMode.READ_ONLY, 0, mSize);
+        assert mMappedByteBuffer.order() == ByteOrder.BIG_ENDIAN;
     }
 
     public static void setDataDir(File path) {
