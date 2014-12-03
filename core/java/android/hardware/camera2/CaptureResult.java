@@ -493,8 +493,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * options for the antibanding mode. The
      * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_ANTIBANDING_MODES android.control.aeAvailableAntibandingModes} key contains
      * the available modes for a given camera device.</p>
-     * <p>The default mode is AUTO, which is supported by all
-     * camera devices.</p>
+     * <p>AUTO mode is the default if it is available on given
+     * camera device. When AUTO mode is not available, the
+     * default will be either 50HZ or 60HZ, and both 50HZ
+     * and 60HZ will be available.</p>
      * <p>If manual exposure control is enabled (by setting
      * {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} or {@link CaptureRequest#CONTROL_MODE android.control.mode} to OFF),
      * then this setting has no effect, and the application must
