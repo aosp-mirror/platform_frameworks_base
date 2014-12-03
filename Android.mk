@@ -732,7 +732,8 @@ samples_dir := development/samples/browseable
 # Whitelist of valid groups, used for default TOC grouping. Each sample must
 # belong to one (and only one) group. Assign samples to groups by setting
 # a sample.group var to one of these groups in the sample's _index.jd.
-sample_groups := -samplegroup Background \
+sample_groups := -samplegroup Admin \
+                 -samplegroup Background \
                  -samplegroup Connectivity \
                  -samplegroup Content \
                  -samplegroup Input \
