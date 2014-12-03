@@ -314,9 +314,11 @@ void RenderThread::postFrameCallback(IFrameCallback* callback) {
     mPendingRegistrationFrameCallbacks.insert(callback);
 }
 
-void RenderThread::removeFrameCallback(IFrameCallback* callback) {
-    mFrameCallbacks.erase(callback);
-    mPendingRegistrationFrameCallbacks.erase(callback);
+bool RenderThread::removeFrameCallback(IFrameCallback* callback) {
+    size_t erased;
+    erased = mFrameCallbacks.erase(callback);
+    erased |= mPendingRegistrationFrameCallbacks.erase(callback);
+    return erased;
 }
 
 void RenderThread::pushBackFrameCallback(IFrameCallback* callback) {

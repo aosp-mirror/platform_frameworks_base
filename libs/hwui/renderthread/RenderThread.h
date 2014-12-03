@@ -80,7 +80,7 @@ public:
 
     // Mimics android.view.Choreographer
     void postFrameCallback(IFrameCallback* callback);
-    void removeFrameCallback(IFrameCallback* callback);
+    bool removeFrameCallback(IFrameCallback* callback);
     // If the callback is currently registered, it will be pushed back until
     // the next vsync. If it is not currently registered this does nothing.
     void pushBackFrameCallback(IFrameCallback* callback);

@@ -155,8 +155,8 @@ public class ThreadedRenderer extends HardwareRenderer {
     }
 
     @Override
-    void pauseSurface(Surface surface) {
-        nPauseSurface(mNativeProxy, surface);
+    boolean pauseSurface(Surface surface) {
+        return nPauseSurface(mNativeProxy, surface);
     }
 
     @Override
@@ -494,7 +494,7 @@ public class ThreadedRenderer extends HardwareRenderer {
 
     private static native boolean nInitialize(long nativeProxy, Surface window);
     private static native void nUpdateSurface(long nativeProxy, Surface window);
-    private static native void nPauseSurface(long nativeProxy, Surface window);
+    private static native boolean nPauseSurface(long nativeProxy, Surface window);
     private static native void nSetup(long nativeProxy, int width, int height,
             float lightX, float lightY, float lightZ, float lightRadius,
             int ambientShadowAlpha, int spotShadowAlpha);
