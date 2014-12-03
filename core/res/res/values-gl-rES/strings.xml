@@ -262,7 +262,7 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Os elementos que toques pronunciaranse en voz alta e a pantalla poderá explorarse mediante xestos."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activar a accesibilidade web mellorada"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"É posible que se instalen scripts para que o contido da aplicación resulte máis accesible."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observa o texto que escribes"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Observar o texto que escribes"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Inclúe datos persoais como números e contrasinais de tarxetas de crédito."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"desactivar ou modificar a barra de estado"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Permite á aplicación desactivar a barra de estado ou engadir e eliminar as iconas do sistema."</string>
@@ -282,8 +282,8 @@
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Permite á aplicación recibir e procesar mensaxes MMS. Isto significa que a aplicación pode supervisar ou eliminar mensaxes enviadas ao teu dispositivo sen mostrarchas."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"recibir difusións de emerxencia"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Permite á aplicación recibir e procesar mensaxes de emisión de emerxencia. Este permiso só está dispoñible para as aplicacións do sistema."</string>
-    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ler mensaxes de difusión de cela"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite á aplicación ler mensaxes de difusión de cela recibidas polo teu dispositivo. As alertas de difusión de cela entréganse nalgunhas situacións para avisar de situacións de emerxencia. É posible que aplicacións maliciosas afecten ao rendemento ou funcionamento do teu dispositivo cando se recibe unha difusión de cela de emerxencia."</string>
+    <string name="permlab_readCellBroadcasts" msgid="1598328843619646166">"ler mensaxes de difusión móbil"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Permite á aplicación ler mensaxes de difusión móbil recibidas polo teu dispositivo. As alertas de difusión móbil entréganse nalgunhas situacións para avisar de situacións de emerxencia. É posible que aplicacións maliciosas afecten ao rendemento ou funcionamento do teu dispositivo cando se recibe unha difusión móbil de emerxencia."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensaxes SMS"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Permite á aplicación enviar mensaxes SMS. É posible que esta acción implique custos inesperados. É posible que as aplicacións maliciosas che custen diñeiro debido ao envío de mensaxes sen a túa confirmación."</string>
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"enviar eventos de resposta mediante mensaxe"</string>
