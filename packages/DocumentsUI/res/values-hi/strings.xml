@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"दस्तावेज़"</string>
     <string name="title_open" msgid="4353228937663917801">"यहां से खोलें"</string>
-    <string name="title_save" msgid="2433679664882857999">"यहां सहेजें"</string>
+    <string name="title_save" msgid="2433679664882857999">"यहां जोड़ें"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"फ़ोल्डर बनाएं"</string>
     <string name="menu_grid" msgid="6878021334497835259">"ग्रिड दृश्य"</string>
     <string name="menu_list" msgid="7279285939892417279">"सूची दृश्य"</string>
@@ -26,13 +26,13 @@
     <string name="menu_search" msgid="3816712084502856974">"खोजें"</string>
     <string name="menu_settings" msgid="6008033148948428823">"सेटिंग"</string>
     <string name="menu_open" msgid="432922957274920903">"खोलें"</string>
-    <string name="menu_save" msgid="2394743337684426338">"सहेजें"</string>
+    <string name="menu_save" msgid="2394743337684426338">"जोड़ें"</string>
     <string name="menu_share" msgid="3075149983979628146">"साझा करें"</string>
     <string name="menu_delete" msgid="8138799623850614177">"हटाएं"</string>
     <string name="menu_select" msgid="8711270657353563424">"\"<xliff:g id="DIRECTORY">^1</xliff:g>\" चुनें"</string>
-    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"आंतरिक संग्रहण दिखाएं"</string>
+    <string name="menu_advanced_show" product="nosdcard" msgid="4693652895715631401">"आंतरिक मेमोरी दिखाएं"</string>
     <string name="menu_advanced_show" product="default" msgid="5792182900084144261">"SD कार्ड दिखाएं"</string>
-    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"आंतरिक संग्रहण छिपाएं"</string>
+    <string name="menu_advanced_hide" product="nosdcard" msgid="4218809952721972589">"आंतरिक मेमोरी छिपाएं"</string>
     <string name="menu_advanced_hide" product="default" msgid="4845869969015718848">"SD कार्ड छिपाएं"</string>
     <string name="menu_file_size_show" msgid="3240323619260823076">"फ़ाइल आकार दिखाएं"</string>
     <string name="menu_file_size_hide" msgid="8881975928502581042">"फ़ाइल आकार छिपाएं"</string>
@@ -46,10 +46,10 @@
     <string name="create_error" msgid="3735649141335444215">"फ़ोल्डर बनाने में विफल"</string>
     <string name="query_error" msgid="1222448261663503501">"दस्तावेजों के लिए क्वेरी करने में विफल रहा"</string>
     <string name="root_recent" msgid="4470053704320518133">"हाल ही के"</string>
-    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> रिक्त"</string>
-    <string name="root_type_service" msgid="2178854894416775409">"संग्रहण सेवाएं"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> खाली"</string>
+    <string name="root_type_service" msgid="2178854894416775409">"मेमोरी सेवाएं"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"शॉर्टकट"</string>
-    <string name="root_type_device" msgid="7121342474653483538">"उपकरण"</string>
+    <string name="root_type_device" msgid="7121342474653483538">"डिवाइस"</string>
     <string name="root_type_apps" msgid="8838065367985945189">"अधिक ऐप्स"</string>
     <string name="empty" msgid="7858882803708117596">"कोई आइटम नहीं"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"फ़ाइल नहीं खोली जा सकती"</string>
