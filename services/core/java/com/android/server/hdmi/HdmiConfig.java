@@ -39,6 +39,10 @@ final class HdmiConfig {
     // Number of retries for polling each device in address allocation mechanism.
     static final int ADDRESS_ALLOCATION_RETRY = 3;
 
+    // Number of retries for sendCommand in actions related to new device discovery.
+    // Number 5 comes from 10 seconds for Chromecast preparation time.
+    static final int TIMEOUT_RETRY = 5;
+
     // CEC spec said that it should try retransmission at least once.
     // The actual number of send request for a single command will be at most
     // RETRANSMISSION_COUNT + 1. Note that it affects only to normal commands
