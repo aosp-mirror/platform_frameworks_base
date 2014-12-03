@@ -91,7 +91,7 @@ public final class AudioState implements Parcelable {
     @Override
     public String toString() {
         return String.format(Locale.US,
-                "[AudioState isMuted: %b, route; %s, supportedRouteMask: %s]",
+                "[AudioState isMuted: %b, route: %s, supportedRouteMask: %s]",
                 isMuted,
                 audioRouteToString(route),
                 audioRouteToString(supportedRouteMask));
