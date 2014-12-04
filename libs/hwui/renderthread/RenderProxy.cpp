@@ -156,15 +156,14 @@ void RenderProxy::updateSurface(const sp<ANativeWindow>& window) {
 }
 
 CREATE_BRIDGE2(pauseSurface, CanvasContext* context, ANativeWindow* window) {
-    args->context->pauseSurface(args->window);
-    return NULL;
+    return (void*) args->context->pauseSurface(args->window);
 }
 
-void RenderProxy::pauseSurface(const sp<ANativeWindow>& window) {
+bool RenderProxy::pauseSurface(const sp<ANativeWindow>& window) {
     SETUP_TASK(pauseSurface);
     args->context = mContext;
     args->window = window.get();
-    postAndWait(task);
+    return (bool) postAndWait(task);
 }
 
 CREATE_BRIDGE7(setup, CanvasContext* context, int width, int height,
