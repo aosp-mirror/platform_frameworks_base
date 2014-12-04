@@ -178,6 +178,9 @@ public class LLand extends FrameLayout {
         setFocusable(true);
         PARAMS = new Params(getResources());
         mTimeOfDay = irand(0, SKIES.length);
+
+        // we assume everything will be laid out left|top
+        setLayoutDirection(LAYOUT_DIRECTION_LTR);
     }
 
     @Override
