@@ -215,6 +215,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private static final int SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE = 0;
 
+    // How long to delay to removal of a pending intent based request.
+    // See Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS
+    private final int mReleasePendingIntentDelayMs;
+
     private PendingIntent mSampleIntervalElapsedIntent;
 
     // Set network sampling interval at 12 minutes, this way, even if the timers get
@@ -644,6 +648,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } catch (IllegalArgumentException e) {
             loge("Error setting defaultDns using " + dns);
         }
+
+        mReleasePendingIntentDelayMs = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS, 5_000);
 
         mContext = checkNotNull(context, "missing Context");
         mNetd = checkNotNull(netManager, "missing INetworkManagementService");
@@ -3376,6 +3383,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final NetworkRequest request;
         final PendingIntent mPendingIntent;
+        boolean mPendingIntentSent;
         private final IBinder mBinder;
         final int mPid;
         final int mUid;
@@ -3495,6 +3503,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_REQUEST_WITH_INTENT,
                 nri));
         return networkRequest;
+    }
+
+    private void releasePendingNetworkRequestWithDelay(PendingIntent operation) {
+        mHandler.sendMessageDelayed(
+                mHandler.obtainMessage(EVENT_RELEASE_NETWORK_REQUEST_WITH_INTENT,
+                getCallingUid(), 0, operation), mReleasePendingIntentDelayMs);
     }
 
     @Override
@@ -3810,10 +3824,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void sendPendingIntentForRequest(NetworkRequestInfo nri, NetworkAgentInfo networkAgent,
             int notificationType) {
-        if (notificationType == ConnectivityManager.CALLBACK_AVAILABLE) {
+        if (notificationType == ConnectivityManager.CALLBACK_AVAILABLE && !nri.mPendingIntentSent) {
             Intent intent = new Intent();
             intent.putExtra(ConnectivityManager.EXTRA_NETWORK, networkAgent.network);
             intent.putExtra(ConnectivityManager.EXTRA_NETWORK_REQUEST, nri.request);
+            nri.mPendingIntentSent = true;
             sendIntent(nri.mPendingIntent, intent);
         }
         // else not handled
@@ -3837,7 +3852,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             String resultData, Bundle resultExtras) {
         if (DBG) log("Finished sending " + pendingIntent);
         mPendingIntentWakeLock.release();
-        releasePendingNetworkRequest(pendingIntent);
+        // Release with a delay so the receiving client has an opportunity to put in its
+        // own request.
+        releasePendingNetworkRequestWithDelay(pendingIntent);
     }
 
     private void callCallbackForRequest(NetworkRequestInfo nri,
