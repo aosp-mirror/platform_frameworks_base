@@ -455,6 +455,14 @@ class WindowStateAnimator {
             }
         }
 
+        if (!isWindowAnimating()) {
+            //TODO (multidisplay): Accessibility is supported only for the default display.
+            if (mService.mAccessibilityController != null
+                    && mWin.getDisplayId() == Display.DEFAULT_DISPLAY) {
+                mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
+            }
+        }
+
         if (!mWin.mExiting) {
             return;
         }
