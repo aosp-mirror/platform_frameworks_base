@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.policy;
 
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,9 +36,6 @@ public class HotspotControllerImpl implements HotspotController {
 
     private static final String TAG = "HotspotController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final String TETHER_ENABLE_PACKAGE = "com.android.settings";
-    private static final String TETHER_ENABLE_CLASS = "com.android.settings.EnableWifiTether";
-
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final Receiver mReceiver = new Receiver();
     private final Context mContext;
@@ -95,10 +93,22 @@ public class HotspotControllerImpl implements HotspotController {
         final ContentResolver cr = mContext.getContentResolver();
         // Call provisioning app which is called when enabling Tethering from Settings
         if (enabled) {
-            Intent intent = new Intent();
-            intent.setClassName(TETHER_ENABLE_PACKAGE, TETHER_ENABLE_CLASS);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(intent);
+            if (isProvisioningNeeded()) {
+                String tetherEnable = mContext.getResources().getString(
+                        com.android.internal.R.string.config_wifi_tether_enable);
+                Intent intent = new Intent();
+                intent.setComponent(ComponentName.unflattenFromString(tetherEnable));
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+            } else {
+                int wifiState = mWifiManager.getWifiState();
+                if ((wifiState == WifiManager.WIFI_STATE_ENABLING) ||
+                        (wifiState == WifiManager.WIFI_STATE_ENABLED)) {
+                    mWifiManager.setWifiEnabled(false);
+                    Settings.Global.putInt(cr, Settings.Global.WIFI_SAVED_STATE, 1);
+                }
+                mWifiManager.setWifiApEnabled(null, true);
+            }
         } else {
             mWifiManager.setWifiApEnabled(null, false);
             if (Settings.Global.getInt(cr, Settings.Global.WIFI_SAVED_STATE, 0) == 1) {
