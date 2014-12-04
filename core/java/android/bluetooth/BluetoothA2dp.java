@@ -199,7 +199,8 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     public void finalize() {
-        close();
+        // The empty finalize needs to be kept or the
+        // cts signature tests would fail.
     }
     /**
      * Initiate connection to a profile of the remote bluetooth device.
