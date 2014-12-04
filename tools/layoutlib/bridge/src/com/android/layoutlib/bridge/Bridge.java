@@ -36,6 +36,7 @@ import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 import com.android.util.Pair;
 import com.ibm.icu.util.ULocale;
+import libcore.io.MemoryMappedFile_Delegate;
 
 import android.content.res.BridgeAssetManager;
 import android.graphics.Bitmap;
@@ -252,6 +253,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
 
         // load the fonts.
         FontFamily_Delegate.setFontLocation(fontLocation.getAbsolutePath());
+        MemoryMappedFile_Delegate.setDataDir(fontLocation.getAbsoluteFile().getParentFile());
 
         // now parse com.android.internal.R (and only this one as android.R is a subset of
         // the internal version), and put the content in the maps.

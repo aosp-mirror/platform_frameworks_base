@@ -282,7 +282,7 @@ public class FontFamily_Delegate {
     @LayoutlibDelegate
     /*package*/ static boolean nAddFontFromAsset(long nativeFamily, AssetManager mgr, String path) {
         Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "FontFamily.addFontFromAsset is not supported.", null, null);
+                "Typeface.createFromAsset is not supported.", null, null);
         return false;
     }
 
