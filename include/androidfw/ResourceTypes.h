@@ -1828,6 +1828,9 @@ private:
         const ResTable_config* config,
         Entry* outEntry) const;
 
+    uint32_t findEntry(const PackageGroup* group, ssize_t typeIndex, const char16_t* name,
+            size_t nameLen, uint32_t* outTypeSpecFlags) const;
+
     status_t parsePackage(
         const ResTable_package* const pkg, const Header* const header);
 

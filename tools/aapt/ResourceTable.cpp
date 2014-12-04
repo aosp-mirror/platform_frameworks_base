@@ -12,12 +12,15 @@
 #include "ResourceIdCache.h"
 #include "SdkConstants.h"
 
+#include <algorithm>
 #include <androidfw/ResourceTypes.h>
 #include <utils/ByteOrder.h>
 #include <utils/TypeHelpers.h>
 #include <stdarg.h>
 
 #define NOISY(x) //x
+
+static const char* kAttrPrivateType = "^attr-private";
 
 status_t compileXmlFile(const Bundle* bundle,
                         const sp<AaptAssets>& assets,
@@ -2131,8 +2134,16 @@ uint32_t ResourceTable::getResId(const String16& package,
     if (p == NULL) return 0;
     sp<Type> t = p->getTypes().valueFor(type);
     if (t == NULL) return 0;
-    sp<ConfigList> c =  t->getConfigs().valueFor(name);
-    if (c == NULL) return 0;
+    sp<ConfigList> c = t->getConfigs().valueFor(name);
+    if (c == NULL) {
+        if (type != String16("attr")) {
+            return 0;
+        }
+        t = p->getTypes().valueFor(String16(kAttrPrivateType));
+        if (t == NULL) return 0;
+        c = t->getConfigs().valueFor(name);
+        if (c == NULL) return 0;
+    }
     int32_t ei = c->getEntryIndex();
     if (ei < 0) return 0;
 
@@ -2266,7 +2277,15 @@ uint32_t ResourceTable::getCustomResource(
     sp<Type> t = p->getTypes().valueFor(type);
     if (t == NULL) return 0;
     sp<ConfigList> c =  t->getConfigs().valueFor(name);
-    if (c == NULL) return 0;
+    if (c == NULL) {
+        if (type != String16("attr")) {
+            return 0;
+        }
+        t = p->getTypes().valueFor(String16(kAttrPrivateType));
+        if (t == NULL) return 0;
+        c = t->getConfigs().valueFor(name);
+        if (c == NULL) return 0;
+    }
     int32_t ei = c->getEntryIndex();
     if (ei < 0) return 0;
     return getResId(p, t, ei);
@@ -2470,6 +2489,10 @@ status_t ResourceTable::assignResourceIds()
             continue;
         }
 
+        if (mPackageType == System) {
+            p->movePrivateAttrs();
+        }
+
         // This has no sense for packages being built as AppFeature (aka with a non-zero offset).
         status_t err = p->applyPublicTypeOrder();
         if (err != NO_ERROR && firstError == NO_ERROR) {
@@ -2540,15 +2563,20 @@ status_t ResourceTable::assignResourceIds()
             }
         }
 
+
         // Assign resource IDs to keys in bags...
         for (size_t ti = 0; ti < typeCount; ti++) {
             sp<Type> t = p->getOrderedTypes().itemAt(ti);
             if (t == NULL) {
                 continue;
             }
+
             const size_t N = t->getOrderedConfigs().size();
             for (size_t ci=0; ci<N; ci++) {
                 sp<ConfigList> c = t->getOrderedConfigs().itemAt(ci);
+                if (c == NULL) {
+                    continue;
+                }
                 //printf("Ordered config #%d: %p\n", ci, c.get());
                 const size_t N = c->getEntries().size();
                 for (size_t ei=0; ei<N; ei++) {
@@ -2586,9 +2614,15 @@ status_t ResourceTable::addSymbols(const sp<AaptSymbols>& outSymbols) {
             if (t == NULL) {
                 continue;
             }
+
             const size_t N = t->getOrderedConfigs().size();
-            sp<AaptSymbols> typeSymbols =
-                    outSymbols->addNestedSymbol(String8(t->getName()), t->getPos());
+            sp<AaptSymbols> typeSymbols;
+            if (t->getName() == String16(kAttrPrivateType)) {
+                typeSymbols = outSymbols->addNestedSymbol(String8("attr"), t->getPos());
+            } else {
+                typeSymbols = outSymbols->addNestedSymbol(String8(t->getName()), t->getPos());
+            }
+
             if (typeSymbols == NULL) {
                 return UNKNOWN_ERROR;
             }
@@ -2954,6 +2988,10 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
 
                 for (size_t ei=0; ei<N; ei++) {
                     sp<ConfigList> cl = t->getOrderedConfigs().itemAt(ei);
+                    if (cl == NULL) {
+                        continue;
+                    }
+
                     if (cl->getPublic()) {
                         typeSpecFlags[ei] |= htodl(ResTable_typeSpec::SPEC_PUBLIC);
                     }
@@ -2984,12 +3022,13 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
 
             // We need to write one type chunk for each configuration for
             // which we have entries in this type.
-            const size_t NC = t->getUniqueConfigs().size();
+            const SortedVector<ConfigDescription> uniqueConfigs(t->getUniqueConfigs());
+            const size_t NC = uniqueConfigs.size();
             
             const size_t typeSize = sizeof(ResTable_type) + sizeof(uint32_t)*N;
             
             for (size_t ci=0; ci<NC; ci++) {
-                ConfigDescription config = t->getUniqueConfigs().itemAt(ci);
+                const ConfigDescription& config = uniqueConfigs[ci];
 
                 NOISY(printf("Writing config %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
                      "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
@@ -3061,7 +3100,10 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                 // Build the entries inside of this type.
                 for (size_t ei=0; ei<N; ei++) {
                     sp<ConfigList> cl = t->getOrderedConfigs().itemAt(ei);
-                    sp<Entry> e = cl->getEntries().valueFor(config);
+                    sp<Entry> e = NULL;
+                    if (cl != NULL) {
+                        e = cl->getEntries().valueFor(config);
+                    }
 
                     // Set the offset for this entry in its type.
                     uint32_t* index = (uint32_t*)
@@ -3096,9 +3138,11 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<const ResourceFilter>& 
                 for (size_t i = 0; i < N; ++i) {
                     if (!validResources[i]) {
                         sp<ConfigList> c = t->getOrderedConfigs().itemAt(i);
-                        fprintf(stderr, "%s: no entries written for %s/%s (0x%08x)\n", log_prefix,
-                                String8(typeName).string(), String8(c->getName()).string(),
-                                Res_MAKEID(p->getAssignedId() - 1, ti, i));
+                        if (c != NULL) {
+                            fprintf(stderr, "%s: no entries written for %s/%s (0x%08x)\n", log_prefix,
+                                    String8(typeName).string(), String8(c->getName()).string(),
+                                    Res_MAKEID(p->getAssignedId() - 1, ti, i));
+                        }
                         missing_entry = true;
                     }
                 }
@@ -3807,9 +3851,43 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
         */
     }
     
-    mUniqueConfigs.add(cdesc);
-    
     return e;
+}
+
+sp<ResourceTable::ConfigList> ResourceTable::Type::removeEntry(const String16& entry) {
+    ssize_t idx = mConfigs.indexOfKey(entry);
+    if (idx < 0) {
+        return NULL;
+    }
+
+    sp<ConfigList> removed = mConfigs.valueAt(idx);
+    mConfigs.removeItemsAt(idx);
+
+    Vector<sp<ConfigList> >::iterator iter = std::find(
+            mOrderedConfigs.begin(), mOrderedConfigs.end(), removed);
+    if (iter != mOrderedConfigs.end()) {
+        mOrderedConfigs.erase(iter);
+    }
+
+    mPublic.removeItem(entry);
+    return removed;
+}
+
+SortedVector<ConfigDescription> ResourceTable::Type::getUniqueConfigs() const {
+    SortedVector<ConfigDescription> unique;
+    const size_t entryCount = mOrderedConfigs.size();
+    for (size_t i = 0; i < entryCount; i++) {
+        if (mOrderedConfigs[i] == NULL) {
+            continue;
+        }
+        const DefaultKeyedVector<ConfigDescription, sp<Entry> >& configs =
+                mOrderedConfigs[i]->getEntries();
+        const size_t configCount = configs.size();
+        for (size_t j = 0; j < configCount; j++) {
+            unique.add(configs.keyAt(j));
+        }
+    }
+    return unique;
 }
 
 status_t ResourceTable::Type::applyPublicEntryOrder()
@@ -3838,11 +3916,10 @@ status_t ResourceTable::Type::applyPublicEntryOrder()
             //printf("#%d: \"%s\"\n", i, String8(e->getName()).string());
             if (e->getName() == name) {
                 if (idx >= (int32_t)mOrderedConfigs.size()) {
-                    p.sourcePos.error("Public entry identifier 0x%x entry index "
-                            "is larger than available symbols (index %d, total symbols %d).\n",
-                            p.ident, idx, mOrderedConfigs.size());
-                    hasError = true;
-                } else if (mOrderedConfigs.itemAt(idx) == NULL) {
+                    mOrderedConfigs.resize(idx + 1);
+                }
+
+                if (mOrderedConfigs.itemAt(idx) == NULL) {
                     e->setPublic(true);
                     e->setPublicSourcePos(p.sourcePos);
                     mOrderedConfigs.replaceAt(e, idx);
@@ -4016,6 +4093,61 @@ status_t ResourceTable::Package::applyPublicTypeOrder()
     }
 
     return NO_ERROR;
+}
+
+void ResourceTable::Package::movePrivateAttrs() {
+    sp<Type> attr = mTypes.valueFor(String16("attr"));
+    if (attr == NULL) {
+        // Nothing to do.
+        return;
+    }
+
+    Vector<sp<ConfigList> > privateAttrs;
+
+    bool hasPublic = false;
+    const Vector<sp<ConfigList> >& configs = attr->getOrderedConfigs();
+    const size_t configCount = configs.size();
+    for (size_t i = 0; i < configCount; i++) {
+        if (configs[i] == NULL) {
+            continue;
+        }
+
+        if (attr->isPublic(configs[i]->getName())) {
+            hasPublic = true;
+        } else {
+            privateAttrs.add(configs[i]);
+        }
+    }
+
+    // Only if we have public attributes do we create a separate type for
+    // private attributes.
+    if (!hasPublic) {
+        return;
+    }
+
+    // Create a new type for private attributes.
+    sp<Type> privateAttrType = getType(String16(kAttrPrivateType), SourcePos());
+
+    const size_t privateAttrCount = privateAttrs.size();
+    for (size_t i = 0; i < privateAttrCount; i++) {
+        const sp<ConfigList>& cl = privateAttrs[i];
+
+        // Remove the private attributes from their current type.
+        attr->removeEntry(cl->getName());
+
+        // Add it to the new type.
+        const DefaultKeyedVector<ConfigDescription, sp<Entry> >& entries = cl->getEntries();
+        const size_t entryCount = entries.size();
+        for (size_t j = 0; j < entryCount; j++) {
+            const sp<Entry>& oldEntry = entries[j];
+            sp<Entry> entry = privateAttrType->getEntry(
+                    cl->getName(), oldEntry->getPos(), &entries.keyAt(j));
+            *entry = *oldEntry;
+        }
+
+        // Move the symbols to the new type.
+
+    }
 }
 
 sp<ResourceTable::Package> ResourceTable::getPackage(const String16& package)
