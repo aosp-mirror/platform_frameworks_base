@@ -162,7 +162,6 @@ public:
     virtual void drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
             float dstRight, float dstBottom, const SkPaint* paint) override;
-    virtual void drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) override;
     virtual void drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
             const float* vertices, const int* colors, const SkPaint* paint) override;
     void drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,

@@ -16,7 +16,6 @@
 
 #define LOG_TAG "OpenGLRenderer"
 
-#include <SkPixelRef.h>
 #include "ResourceCache.h"
 #include "Caches.h"
 
@@ -37,8 +36,8 @@ void ResourceCache::logCache() {
         ResourceReference* ref = mCache->valueAt(i);
         ALOGD("  ResourceCache: mCache(%zu): resource, ref = 0x%p, 0x%p",
                 i, mCache->keyAt(i), mCache->valueAt(i));
-        ALOGD("  ResourceCache: mCache(%zu): refCount, recycled, destroyed, type = %d, %d, %d, %d",
-                i, ref->refCount, ref->recycled, ref->destroyed, ref->resourceType);
+        ALOGD("  ResourceCache: mCache(%zu): refCount, destroyed, type = %d, %d, %d",
+                i, ref->refCount, ref->destroyed, ref->resourceType);
     }
 }
 
@@ -60,13 +59,24 @@ void ResourceCache::unlock() {
     mLock.unlock();
 }
 
+const SkBitmap* ResourceCache::insert(const SkBitmap* bitmapResource) {
+    Mutex::Autolock _l(mLock);
+
+    BitmapKey bitmapKey(bitmapResource);
+    ssize_t index = mBitmapCache.indexOfKey(bitmapKey);
+    if (index == NAME_NOT_FOUND) {
+        SkBitmap* cachedBitmap = new SkBitmap(*bitmapResource);
+        index = mBitmapCache.add(bitmapKey, cachedBitmap);
+        return cachedBitmap;
+    }
+
+    mBitmapCache.keyAt(index).mRefCount++;
+    return mBitmapCache.valueAt(index);
+}
+
 void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType) {
     Mutex::Autolock _l(mLock);
     incrementRefcountLocked(resource, resourceType);
-}
-
-void ResourceCache::incrementRefcount(const SkBitmap* bitmapResource) {
-    incrementRefcount((void*) bitmapResource, kBitmap);
 }
 
 void ResourceCache::incrementRefcount(const SkPath* pathResource) {
@@ -87,25 +97,14 @@ void ResourceCache::incrementRefcountLocked(void* resource, ResourceType resourc
     ref->refCount++;
 }
 
-void ResourceCache::incrementRefcountLocked(const SkBitmap* bitmapResource) {
-    incrementRefcountLocked((void*) bitmapResource, kBitmap);
-}
-
-void ResourceCache::incrementRefcountLocked(const SkPath* pathResource) {
-    incrementRefcountLocked((void*) pathResource, kPath);
-}
-
-void ResourceCache::incrementRefcountLocked(const Res_png_9patch* patchResource) {
-    incrementRefcountLocked((void*) patchResource, kNinePatch);
-}
-
 void ResourceCache::decrementRefcount(void* resource) {
     Mutex::Autolock _l(mLock);
     decrementRefcountLocked(resource);
 }
 
 void ResourceCache::decrementRefcount(const SkBitmap* bitmapResource) {
-    decrementRefcount((void*) bitmapResource);
+    Mutex::Autolock _l(mLock);
+    decrementRefcountLocked(bitmapResource);
 }
 
 void ResourceCache::decrementRefcount(const SkPath* pathResource) {
@@ -130,7 +129,20 @@ void ResourceCache::decrementRefcountLocked(void* resource) {
 }
 
 void ResourceCache::decrementRefcountLocked(const SkBitmap* bitmapResource) {
-    decrementRefcountLocked((void*) bitmapResource);
+    BitmapKey bitmapKey(bitmapResource);
+    ssize_t index = mBitmapCache.indexOfKey(bitmapKey);
+
+    LOG_ALWAYS_FATAL_IF(index == NAME_NOT_FOUND,
+                    "Decrementing the reference of an untracked Bitmap");
+
+    const BitmapKey& cacheEntry = mBitmapCache.keyAt(index);
+    if (cacheEntry.mRefCount == 1) {
+        // delete the bitmap and remove it from the cache
+        delete mBitmapCache.valueAt(index);
+        mBitmapCache.removeItemsAt(index);
+    } else {
+        cacheEntry.mRefCount--;
+    }
 }
 
 void ResourceCache::decrementRefcountLocked(const SkPath* pathResource) {
@@ -156,28 +168,6 @@ void ResourceCache::destructorLocked(SkPath* resource) {
         } else {
             delete resource;
         }
-        return;
-    }
-    ref->destroyed = true;
-    if (ref->refCount == 0) {
-        deleteResourceReferenceLocked(resource, ref);
-    }
-}
-
-void ResourceCache::destructor(const SkBitmap* resource) {
-    Mutex::Autolock _l(mLock);
-    destructorLocked(resource);
-}
-
-void ResourceCache::destructorLocked(const SkBitmap* resource) {
-    ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : nullptr;
-    if (ref == nullptr) {
-        // If we're not tracking this resource, just delete it
-        if (Caches::hasInstance()) {
-            Caches::getInstance().textureCache.releaseTexture(resource);
-        }
-        delete resource;
         return;
     }
     ref->destroyed = true;
@@ -212,64 +202,12 @@ void ResourceCache::destructorLocked(Res_png_9patch* resource) {
 }
 
 /**
- * Return value indicates whether resource was actually recycled, which happens when RefCnt
- * reaches 0.
- */
-bool ResourceCache::recycle(SkBitmap* resource) {
-    Mutex::Autolock _l(mLock);
-    return recycleLocked(resource);
-}
-
-/**
- * Return value indicates whether resource was actually recycled, which happens when RefCnt
- * reaches 0.
- */
-bool ResourceCache::recycleLocked(SkBitmap* resource) {
-    ssize_t index = mCache->indexOfKey(resource);
-    if (index < 0) {
-        if (Caches::hasInstance()) {
-            Caches::getInstance().textureCache.releaseTexture(resource);
-        }
-        // not tracking this resource; just recycle the pixel data
-        resource->setPixels(nullptr, nullptr);
-        return true;
-    }
-    ResourceReference* ref = mCache->valueAt(index);
-    if (ref == nullptr) {
-        // Should not get here - shouldn't get a call to recycle if we're not yet tracking it
-        return true;
-    }
-    ref->recycled = true;
-    if (ref->refCount == 0) {
-        deleteResourceReferenceLocked(resource, ref);
-        return true;
-    }
-    // Still referring to resource, don't recycle yet
-    return false;
-}
-
-/**
  * This method should only be called while the mLock mutex is held (that mutex is grabbed
  * by the various destructor() and recycle() methods which call this method).
  */
 void ResourceCache::deleteResourceReferenceLocked(const void* resource, ResourceReference* ref) {
-    if (ref->recycled && ref->resourceType == kBitmap) {
-        SkBitmap* bitmap = (SkBitmap*) resource;
-        if (Caches::hasInstance()) {
-            Caches::getInstance().textureCache.releaseTexture(bitmap);
-        }
-        bitmap->setPixels(nullptr, nullptr);
-    }
     if (ref->destroyed) {
         switch (ref->resourceType) {
-            case kBitmap: {
-                SkBitmap* bitmap = (SkBitmap*) resource;
-                if (Caches::hasInstance()) {
-                    Caches::getInstance().textureCache.releaseTexture(bitmap);
-                }
-                delete bitmap;
-            }
-            break;
             case kPath: {
                 SkPath* path = (SkPath*) resource;
                 if (Caches::hasInstance()) {
@@ -294,6 +232,39 @@ void ResourceCache::deleteResourceReferenceLocked(const void* resource, Resource
     }
     mCache->removeItem(resource);
     delete ref;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Bitmap Key
+///////////////////////////////////////////////////////////////////////////////
+
+void BitmapKey::operator=(const BitmapKey& other) {
+    this->mRefCount = other.mRefCount;
+    this->mBitmapDimensions = other.mBitmapDimensions;
+    this->mPixelRefOrigin = other.mPixelRefOrigin;
+    this->mPixelRefStableID = other.mPixelRefStableID;
+}
+
+bool BitmapKey::operator==(const BitmapKey& other) const {
+    return mPixelRefStableID == other.mPixelRefStableID &&
+           mPixelRefOrigin == other.mPixelRefOrigin &&
+           mBitmapDimensions == other.mBitmapDimensions;
+}
+
+bool BitmapKey::operator<(const BitmapKey& other) const {
+    if (mPixelRefStableID != other.mPixelRefStableID) {
+        return mPixelRefStableID < other.mPixelRefStableID;
+    }
+    if (mPixelRefOrigin.x() != other.mPixelRefOrigin.x()) {
+        return mPixelRefOrigin.x() < other.mPixelRefOrigin.x();
+    }
+    if (mPixelRefOrigin.y() != other.mPixelRefOrigin.y()) {
+        return mPixelRefOrigin.y() < other.mPixelRefOrigin.y();
+    }
+    if (mBitmapDimensions.width() != other.mBitmapDimensions.width()) {
+        return mBitmapDimensions.width() < other.mBitmapDimensions.width();
+    }
+    return mBitmapDimensions.height() < other.mBitmapDimensions.height();
 }
 
 }; // namespace uirenderer

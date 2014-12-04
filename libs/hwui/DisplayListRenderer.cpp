@@ -266,13 +266,6 @@ void DisplayListRenderer::drawBitmap(const SkBitmap& bitmap, float srcLeft, floa
     }
 }
 
-void DisplayListRenderer::drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) {
-    bitmap = refBitmapData(bitmap);
-    paint = refPaint(paint);
-
-    addDrawOp(new (alloc()) DrawBitmapDataOp(bitmap, paint));
-}
-
 void DisplayListRenderer::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
         const float* vertices, const int* colors, const SkPaint* paint) {
     int vertexCount = (meshWidth + 1) * (meshHeight + 1);

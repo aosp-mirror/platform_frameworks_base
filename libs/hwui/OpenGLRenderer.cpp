@@ -2006,24 +2006,6 @@ void OpenGLRenderer::drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) {
     mDirty = true;
 }
 
-void OpenGLRenderer::drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) {
-    if (quickRejectSetupScissor(0, 0, bitmap->width(), bitmap->height())) {
-        return;
-    }
-
-    mCaches.activeTexture(0);
-    Texture* texture = mCaches.textureCache.getTransient(bitmap);
-    const AutoTexture autoCleanup(texture);
-
-    if (CC_UNLIKELY(bitmap->colorType() == kAlpha_8_SkColorType)) {
-        drawAlphaBitmap(texture, 0, 0, paint);
-    } else {
-        drawTextureRect(0, 0, bitmap->width(), bitmap->height(), texture, paint);
-    }
-
-    mDirty = true;
-}
-
 void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
         const float* vertices, const int* colors, const SkPaint* paint) {
     if (!vertices || mState.currentlyIgnored()) {

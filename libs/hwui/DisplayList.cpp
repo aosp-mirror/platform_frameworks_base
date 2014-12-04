@@ -46,12 +46,6 @@ void DisplayListData::cleanupResources() {
         resourceCache.decrementRefcountLocked(bitmapResources.itemAt(i));
     }
 
-    for (size_t i = 0; i < ownedBitmapResources.size(); i++) {
-        const SkBitmap* bitmap = ownedBitmapResources.itemAt(i);
-        resourceCache.decrementRefcountLocked(bitmap);
-        resourceCache.destructorLocked(bitmap);
-    }
-
     for (size_t i = 0; i < patchResources.size(); i++) {
         resourceCache.decrementRefcountLocked(patchResources.itemAt(i));
     }
@@ -63,7 +57,6 @@ void DisplayListData::cleanupResources() {
     resourceCache.unlock();
 
     bitmapResources.clear();
-    ownedBitmapResources.clear();
     patchResources.clear();
     sourcePaths.clear();
     paints.clear();

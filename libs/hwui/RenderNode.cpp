@@ -338,11 +338,6 @@ void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
     if (subtree) {
         TextureCache& cache = Caches::getInstance().textureCache;
         info.out.hasFunctors |= subtree->functors.size();
-        // TODO: Fix ownedBitmapResources to not require disabling prepareTextures
-        // and thus falling out of async drawing path.
-        if (subtree->ownedBitmapResources.size()) {
-            info.prepareTextures = false;
-        }
         for (size_t i = 0; info.prepareTextures && i < subtree->bitmapResources.size(); i++) {
             info.prepareTextures = cache.prefetchAndMarkInUse(subtree->bitmapResources[i]);
         }

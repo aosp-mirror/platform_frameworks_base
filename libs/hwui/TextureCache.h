@@ -88,10 +88,10 @@ public:
     Texture* getTransient(const SkBitmap* bitmap);
 
     /**
-     * Removes the texture associated with the specified bitmap. This is meant
+     * Removes the texture associated with the specified pixelRef. This is meant
      * to be called from threads that are not the EGL context thread.
      */
-    void releaseTexture(const SkBitmap* bitmap);
+    ANDROID_API void releaseTexture(uint32_t pixelRefStableID);
     /**
      * Process deferred removals.
      */

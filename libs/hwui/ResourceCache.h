@@ -21,6 +21,7 @@
 
 #include <SkBitmap.h>
 #include <SkPath.h>
+#include <SkPixelRef.h>
 
 #include <utils/KeyedVector.h>
 #include <utils/Singleton.h>
@@ -36,7 +37,6 @@ class Layer;
  * Type of Resource being cached
  */
 enum ResourceType {
-    kBitmap,
     kNinePatch,
     kPath
 };
@@ -45,13 +45,43 @@ class ResourceReference {
 public:
 
     ResourceReference(ResourceType type) {
-        refCount = 0; recycled = false; destroyed = false; resourceType = type;
+        refCount = 0; destroyed = false; resourceType = type;
     }
 
     int refCount;
-    bool recycled;
     bool destroyed;
     ResourceType resourceType;
+};
+
+class BitmapKey {
+public:
+    BitmapKey(const SkBitmap* bitmap)
+        : mRefCount(1)
+        , mBitmapDimensions(bitmap->dimensions())
+        , mPixelRefOrigin(bitmap->pixelRefOrigin())
+        , mPixelRefStableID(bitmap->pixelRef()->getStableID()) { }
+
+    void operator=(const BitmapKey& other);
+    bool operator==(const BitmapKey& other) const;
+    bool operator<(const BitmapKey& other) const;
+
+private:
+    // This constructor is only used by the KeyedVector implementation
+    BitmapKey()
+        : mRefCount(-1)
+        , mBitmapDimensions(SkISize::Make(0,0))
+        , mPixelRefOrigin(SkIPoint::Make(0,0))
+        , mPixelRefStableID(0) { }
+
+    // reference count of all HWUI object using this bitmap
+    mutable int mRefCount;
+
+    SkISize mBitmapDimensions;
+    SkIPoint mPixelRefOrigin;
+    uint32_t mPixelRefStableID;
+
+    friend class ResourceCache;
+    friend class android::key_value_pair_t<BitmapKey, SkBitmap*>;
 };
 
 class ANDROID_API ResourceCache: public Singleton<ResourceCache> {
@@ -69,13 +99,14 @@ public:
     void lock();
     void unlock();
 
-    void incrementRefcount(const SkPath* resource);
-    void incrementRefcount(const SkBitmap* resource);
-    void incrementRefcount(const Res_png_9patch* resource);
+    /**
+     * The cache stores a copy of the provided resource or refs an existing resource
+     * if the bitmap has previously been inserted and returns the cached copy.
+     */
+    const SkBitmap* insert(const SkBitmap* resource);
 
-    void incrementRefcountLocked(const SkPath* resource);
-    void incrementRefcountLocked(const SkBitmap* resource);
-    void incrementRefcountLocked(const Res_png_9patch* resource);
+    void incrementRefcount(const SkPath* resource);
+    void incrementRefcount(const Res_png_9patch* resource);
 
     void decrementRefcount(const SkBitmap* resource);
     void decrementRefcount(const SkPath* resource);
@@ -86,15 +117,10 @@ public:
     void decrementRefcountLocked(const Res_png_9patch* resource);
 
     void destructor(SkPath* resource);
-    void destructor(const SkBitmap* resource);
     void destructor(Res_png_9patch* resource);
 
     void destructorLocked(SkPath* resource);
-    void destructorLocked(const SkBitmap* resource);
     void destructorLocked(Res_png_9patch* resource);
-
-    bool recycle(SkBitmap* resource);
-    bool recycleLocked(SkBitmap* resource);
 
 private:
     void deleteResourceReferenceLocked(const void* resource, ResourceReference* ref);
@@ -115,6 +141,7 @@ private:
     mutable Mutex mLock;
 
     KeyedVector<const void*, ResourceReference*>* mCache;
+    KeyedVector<BitmapKey, SkBitmap*> mBitmapCache;
 };
 
 }; // namespace uirenderer

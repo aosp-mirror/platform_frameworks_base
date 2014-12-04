@@ -101,8 +101,6 @@ public:
 
     // Bitmap-based
     void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
-    // TODO: move drawBitmapData() to Canvas.h
-    void drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint);
     // TODO: move drawPatch() to Canvas.h
     void drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
             float left, float top, float right, float bottom, const SkPaint* paint);
@@ -367,15 +365,9 @@ private:
         // correctly, such as creating the bitmap from scratch, drawing with it, changing its
         // contents, and drawing again. The only fix would be to always copy it the first time,
         // which doesn't seem worth the extra cycles for this unlikely case.
-        mDisplayListData->bitmapResources.add(bitmap);
-        mResourceCache.incrementRefcount(bitmap);
-        return bitmap;
-    }
-
-    inline const SkBitmap* refBitmapData(const SkBitmap* bitmap) {
-        mDisplayListData->ownedBitmapResources.add(bitmap);
-        mResourceCache.incrementRefcount(bitmap);
-        return bitmap;
+        const SkBitmap* cachedBitmap = mResourceCache.insert(bitmap);
+        mDisplayListData->bitmapResources.add(cachedBitmap);
+        return cachedBitmap;
     }
 
     inline const Res_png_9patch* refPatch(const Res_png_9patch* patch) {

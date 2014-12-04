@@ -134,7 +134,6 @@ public:
     int projectionReceiveIndex;
 
     Vector<const SkBitmap*> bitmapResources;
-    Vector<const SkBitmap*> ownedBitmapResources;
     Vector<const Res_png_9patch*> patchResources;
 
     std::vector<std::unique_ptr<const SkPaint>> paints;
