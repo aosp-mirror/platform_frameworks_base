@@ -97,7 +97,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     // Callback messages
     private static final int MSG_TIME_UPDATE = 301;
     private static final int MSG_BATTERY_UPDATE = 302;
-    private static final int MSG_CARRIER_INFO_UPDATE = 303;
     private static final int MSG_SIM_STATE_CHANGE = 304;
     private static final int MSG_RINGER_MODE_CHANGED = 305;
     private static final int MSG_PHONE_STATE_CHANGED = 306;
@@ -126,8 +125,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private final Context mContext;
     HashMap<Integer, SimData> mSimDatas = new HashMap<Integer, SimData>();
 
-    private CharSequence mTelephonyPlmn;
-    private CharSequence mTelephonySpn;
     private int mRingMode;
     private int mPhoneState;
     private boolean mKeyguardIsVisible;
@@ -167,9 +164,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_BATTERY_UPDATE:
                     handleBatteryUpdate((BatteryStatus) msg.obj);
-                    break;
-                case MSG_CARRIER_INFO_UPDATE:
-                    handleCarrierInfoUpdate();
                     break;
                 case MSG_SIM_STATE_CHANGE:
                     handleSimStateChange(msg.arg1, msg.arg2, (State) msg.obj);
@@ -290,6 +284,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
                 if (cb != null) {
                     cb.onSimStateChanged(data.subId, data.slotId, data.simState);
+                    cb.onRefreshCarrierInfo();
                 }
             }
         }
@@ -435,10 +430,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     || Intent.ACTION_TIME_CHANGED.equals(action)
                     || Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                 mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
-            } else if (TelephonyIntents.SPN_STRINGS_UPDATED_ACTION.equals(action)) {
-                mTelephonyPlmn = getTelephonyPlmnFrom(intent);
-                mTelephonySpn = getTelephonySpnFrom(intent);
-                mHandler.sendEmptyMessage(MSG_CARRIER_INFO_UPDATE);
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
                 final int status = intent.getIntExtra(EXTRA_STATUS, BATTERY_STATUS_UNKNOWN);
                 final int plugged = intent.getIntExtra(EXTRA_PLUGGED, 0);
@@ -682,7 +673,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         // Take a guess at initial SIM state, battery status and PLMN until we get an update
         mBatteryStatus = new BatteryStatus(BATTERY_STATUS_UNKNOWN, 100, 0, 0);
-        mTelephonyPlmn = getDefaultPlmn();
 
         // Watch for interesting updates
         final IntentFilter filter = new IntentFilter();
@@ -692,7 +682,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
-        filter.addAction(TelephonyIntents.SPN_STRINGS_UPDATED_ACTION);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         context.registerReceiver(mBroadcastReceiver, filter);
@@ -940,21 +929,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
-     * Handle {@link #MSG_CARRIER_INFO_UPDATE}
-     */
-    private void handleCarrierInfoUpdate() {
-        if (DEBUG) Log.d(TAG, "handleCarrierInfoUpdate: plmn = " + mTelephonyPlmn
-            + ", spn = " + mTelephonySpn);
-
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
-            }
-        }
-    }
-
-    /**
      * Handle {@link #MSG_SIM_STATE_CHANGE}
      */
     private void handleSimStateChange(int subId, int slotId, State state) {
@@ -1087,36 +1061,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     /**
-     * @param intent The intent with action {@link TelephonyIntents#SPN_STRINGS_UPDATED_ACTION}
-     * @return The string to use for the plmn, or null if it should not be shown.
-     */
-    private CharSequence getTelephonyPlmnFrom(Intent intent) {
-        if (intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_PLMN, false)) {
-            final String plmn = intent.getStringExtra(TelephonyIntents.EXTRA_PLMN);
-            return (plmn != null) ? plmn : getDefaultPlmn();
-        }
-        return null;
-    }
-
-    /**
      * @return The default plmn (no service)
      */
     private CharSequence getDefaultPlmn() {
         return mContext.getResources().getText(R.string.keyguard_carrier_default);
-    }
-
-    /**
-     * @param intent The intent with action {@link Telephony.Intents#SPN_STRINGS_UPDATED_ACTION}
-     * @return The string to use for the plmn, or null if it should not be shown.
-     */
-    private CharSequence getTelephonySpnFrom(Intent intent) {
-        if (intent.getBooleanExtra(TelephonyIntents.EXTRA_SHOW_SPN, false)) {
-            final String spn = intent.getStringExtra(TelephonyIntents.EXTRA_SPN);
-            if (spn != null) {
-                return spn;
-            }
-        }
-        return null;
     }
 
     /**
@@ -1159,7 +1107,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         callback.onTimeChanged();
         callback.onRingerModeChanged(mRingMode);
         callback.onPhoneStateChanged(mPhoneState);
-        callback.onRefreshCarrierInfo(mTelephonyPlmn, mTelephonySpn);
+        callback.onRefreshCarrierInfo();
         callback.onClockVisibilityChanged();
         for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {
             final SimData state = data.getValue();
@@ -1217,14 +1165,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         } else {
             handleReportEmergencyCallAction();
         }
-    }
-
-    public CharSequence getTelephonyPlmn() {
-        return mTelephonyPlmn;
-    }
-
-    public CharSequence getTelephonySpn() {
-        return mTelephonySpn;
     }
 
     /**
@@ -1289,7 +1229,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         return false;
     }
 
-    private State getSimState(int subId) {
+    public State getSimState(int subId) {
         if (mSimDatas.containsKey(subId)) {
             return mSimDatas.get(subId).simState;
         } else {
