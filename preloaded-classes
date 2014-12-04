@@ -2631,7 +2631,6 @@ javax.microedition.khronos.opengles.GL11Ext
 javax.microedition.khronos.opengles.GL11ExtensionPack
 javax.net.DefaultSocketFactory
 javax.net.SocketFactory
-javax.net.ssl.DefaultHostnameVerifier
 javax.net.ssl.DistinguishedNameParser
 javax.net.ssl.HostnameVerifier
 javax.net.ssl.HttpsURLConnection
