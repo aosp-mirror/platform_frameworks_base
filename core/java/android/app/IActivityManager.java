@@ -469,6 +469,8 @@ public interface IActivityManager extends IInterface {
     public void notifyLaunchTaskBehindComplete(IBinder token) throws RemoteException;
     public void notifyEnterAnimationComplete(IBinder token) throws RemoteException;
 
+    public void systemBackupRestored() throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -790,4 +792,5 @@ public interface IActivityManager extends IInterface {
     int START_IN_PLACE_ANIMATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+240;
     int CHECK_PERMISSION_WITH_TOKEN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+241;
     int REGISTER_TASK_STACK_LISTENER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+242;
+    int SYSTEM_BACKUP_RESTORED = IBinder.FIRST_CALL_TRANSACTION+243;
 }
