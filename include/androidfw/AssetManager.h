@@ -236,9 +236,11 @@ public:
 private:
     struct asset_path
     {
+        asset_path() : path(""), type(kFileTypeRegular), idmap(""), isSystemOverlay(false) {}
         String8 path;
         FileType type;
         String8 idmap;
+        bool isSystemOverlay;
     };
 
     Asset* openInPathLocked(const char* fileName, AccessMode mode,
