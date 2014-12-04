@@ -217,22 +217,30 @@ public class DozeService extends DreamService {
             // Here we need a wakelock to stay awake until the pulse is finished.
             mWakeLock.acquire();
             mPulsing = true;
-            if (!mDozeParameters.getProxCheckBeforePulse() ||
-                    reason == DozeLog.PULSE_REASON_SENSOR_PICKUP
-                    && mDozeParameters.getPickupPerformsProxCheck()) {
+            if (!mDozeParameters.getProxCheckBeforePulse()) {
                 // skip proximity check
                 continuePulsing(reason);
                 return;
             }
-            // perform a proximity check before pulsing
             final long start = SystemClock.uptimeMillis();
+            final boolean nonBlocking = reason == DozeLog.PULSE_REASON_SENSOR_PICKUP
+                    && mDozeParameters.getPickupPerformsProxCheck();
+            if (nonBlocking) {
+                // proximity check is only done to capture statistics, continue pulsing
+                continuePulsing(reason);
+            }
+            // perform a proximity check
             new ProximityCheck() {
                 @Override
                 public void onProximityResult(int result) {
-                    // avoid pulsing in pockets
                     final boolean isNear = result == RESULT_NEAR;
                     final long end = SystemClock.uptimeMillis();
                     DozeLog.traceProximityResult(isNear, end - start, reason);
+                    if (nonBlocking) {
+                        // we already continued
+                        return;
+                    }
+                    // avoid pulsing in pockets
                     if (isNear) {
                         mPulsing = false;
                         mWakeLock.release();
