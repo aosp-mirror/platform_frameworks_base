@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.service.carriermessaging;
+package android.service.carrier;
 
 import android.annotation.NonNull;
 import android.os.Parcel;
