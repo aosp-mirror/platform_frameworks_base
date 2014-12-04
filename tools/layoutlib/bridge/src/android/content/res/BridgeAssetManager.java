@@ -23,7 +23,7 @@ import android.content.res.AssetManager;
 public class BridgeAssetManager extends AssetManager {
 
     /**
-     * This initializes the static field {@link AssetManager#mSystem} which is used
+     * This initializes the static field {@link AssetManager#sSystem} which is used
      * by methods who get a global asset manager using {@link AssetManager#getSystem()}.
      * <p/>
      * They will end up using our bridge asset manager.
