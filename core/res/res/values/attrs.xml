@@ -2950,6 +2950,24 @@
             <flag name="typeViewScrolled" value="0x000001000" />
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED} events. -->
             <flag name="typeViewTextSelectionChanged" value="0x000002000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_ANNOUNCEMENT} events. -->
+            <flag name="typeAnnouncement" value="0x00004000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUSED} events. -->
+            <flag name="typeViewAccessibilityFocused" value="0x00008000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED} events. -->
+            <flag name="typeViewAccessibilityFocusCleared" value="0x00010000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY} events. -->
+            <flag name="typeViewTextTraversedAtMovementGranularity" value="0x00020000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_GESTURE_DETECTION_START} events. -->
+            <flag name="typeGestureDetectionStart" value="0x00040000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_GESTURE_DETECTION_END} events. -->
+            <flag name="typeGestureDetectionEnd" value="0x00080000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_INTERACTION_START} events. -->
+            <flag name="typeTouchInteractionStart" value="0x00100000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_INTERACTION_END} events. -->
+            <flag name="typeTouchInteractionEnd" value="0x00200000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_WINDOWS_CHANGED} events. -->
+            <flag name="typeWindowsChanged" value="0x00400000" />
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPES_ALL_MASK} i.e. all events. -->
             <flag name="typeAllMask" value="0xffffffff" />
         </attr>
