@@ -238,6 +238,51 @@ public final class LensShadingMap {
         return HashCodeHelpers.hashCode(mRows, mColumns, elemsHash);
     }
 
+    /**
+     * Return the LensShadingMap as a string representation.
+     *
+     * <p> {@code "LensShadingMap{R:([%f, %f, ... %f], ... [%f, %f, ... %f]), G_even:([%f, %f, ...
+     *  %f], ... [%f, %f, ... %f]), G_odd:([%f, %f, ... %f], ... [%f, %f, ... %f]), B:([%f, %f, ...
+     *  %f], ... [%f, %f, ... %f])}"},
+     * where each {@code %f} represents one gain factor and each {@code [%f, %f, ... %f]} represents
+     * a row of the lens shading map</p>
+     *
+     * @return string representation of {@link LensShadingMap}
+     */
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("LensShadingMap{");
+
+        final String channelPrefix[] = {"R:(", "G_even:(", "G_odd:(", "B:("};
+
+        for (int ch = 0; ch < COUNT; ch++) {
+            str.append(channelPrefix[ch]);
+
+            for (int r = 0; r < mRows; r++) {
+                str.append("[");
+                for (int c = 0; c < mColumns; c++) {
+                    float gain = getGainFactor(ch, c, r);
+                    str.append(gain);
+                    if (c < mColumns - 1) {
+                        str.append(", ");
+                    }
+                }
+                str.append("]");
+                if (r < mRows - 1) {
+                    str.append(", ");
+                }
+            }
+
+            str.append(")");
+            if (ch < COUNT - 1) {
+                str.append(", ");
+            }
+        }
+
+        str.append("}");
+        return str.toString();
+    }
 
     private final int mRows;
     private final int mColumns;
