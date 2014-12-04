@@ -48,13 +48,8 @@ public final class Bitmap implements Parcelable {
 
     /**
      * Backing buffer for the Bitmap.
-     * Made public for quick access from drawing methods -- do NOT modify
-     * from outside this class
-     *
-     * @hide
      */
-    @SuppressWarnings("UnusedDeclaration") // native code only
-    public byte[] mBuffer;
+    private byte[] mBuffer;
 
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"}) // Keep to finalize native resources
     private final BitmapFinalizer mFinalizer;
