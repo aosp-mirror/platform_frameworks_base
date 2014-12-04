@@ -493,9 +493,11 @@ public abstract class CameraMetadata<TKey> {
      * {@link CameraCharacteristics#SCALER_STREAM_CONFIGURATION_MAP android.scaler.streamConfigurationMap}, the minimum frame
      * duration for that format and size is &lt;= 1/20 s, and
      * the {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} entry
-     * lists at least one FPS range where the minimum FPS
-     * is &gt;= 1 / minimumFrameDuration for the maximum-size
+     * lists at least one FPS range where the minimum FPS is</p>
+     * <blockquote>
+     * <p>= 1 / minimumFrameDuration for the maximum-size
      * YUV_420_888 format.</p>
+     * </blockquote>
      * <p>In addition, the {@link CameraCharacteristics#SYNC_MAX_LATENCY android.sync.maxLatency} field is
      * guaranted to have a value between 0 and 4, inclusive.</p>
      *
@@ -847,7 +849,8 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>The camera device will automatically adapt its
      * antibanding routine to the current illumination
-     * conditions. This is the default.</p>
+     * condition. This is the default mode if AUTO is
+     * available on given camera device.</p>
      * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
      */
     public static final int CONTROL_AE_ANTIBANDING_MODE_AUTO = 3;
