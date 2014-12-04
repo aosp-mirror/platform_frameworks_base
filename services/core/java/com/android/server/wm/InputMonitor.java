@@ -243,6 +243,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         final WindowStateAnimator universeBackground = mService.mAnimator.mUniverseBackground;
         final int aboveUniverseLayer = mService.mAnimator.mAboveUniverseLayer;
         boolean addedUniverse = false;
+        boolean disableWallpaperTouchEvents = false;
 
         // If there's a drag in flight, provide a pseudowindow to catch drag input
         final boolean inDrag = (mService.mDragState != null);
@@ -283,8 +284,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
 
                 final boolean hasFocus = (child == mInputFocus);
                 final boolean isVisible = child.isVisibleLw();
+                if ((privateFlags
+                        & WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS)
+                            != 0) {
+                    disableWallpaperTouchEvents = true;
+                }
                 final boolean hasWallpaper = (child == mService.mWallpaperTarget)
-                        && (privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD) == 0;
+                        && (privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD) == 0
+                        && !disableWallpaperTouchEvents;
                 final boolean onDefaultDisplay = (child.getDisplayId() == Display.DEFAULT_DISPLAY);
 
                 // If there's a drag in progress and 'child' is a potential drop target,
