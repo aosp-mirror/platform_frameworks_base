@@ -38,6 +38,7 @@ public class DozeScrimController {
 
     private final DozeParameters mDozeParameters;
     private final Interpolator mPulseInInterpolator = PhoneStatusBar.ALPHA_OUT;
+    private final Interpolator mPulseInInterpolatorPickup;
     private final Interpolator mPulseOutInterpolator = PhoneStatusBar.ALPHA_IN;
     private final Interpolator mDozeAnimationInterpolator;
     private final Handler mHandler = new Handler();
@@ -54,8 +55,8 @@ public class DozeScrimController {
     public DozeScrimController(ScrimController scrimController, Context context) {
         mScrimController = scrimController;
         mDozeParameters = new DozeParameters(context);
-        mDozeAnimationInterpolator = AnimationUtils.loadInterpolator(context,
-                android.R.interpolator.linear_out_slow_in);
+        mDozeAnimationInterpolator = mPulseInInterpolatorPickup =
+                AnimationUtils.loadInterpolator(context, android.R.interpolator.linear_out_slow_in);
     }
 
     public void setDozing(boolean dozing, boolean animate) {
@@ -222,8 +223,10 @@ public class DozeScrimController {
             if (!mDozing) return;
             DozeLog.tracePulseStart(mPulseReason);
             final boolean pickup = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
-            startScrimAnimation(true /* inFront */, 0f, mDozeParameters.getPulseInDuration(pickup),
-                    mPulseInInterpolator, mDozeParameters.getPulseInDelay(pickup),
+            startScrimAnimation(true /* inFront */, 0f,
+                    mDozeParameters.getPulseInDuration(pickup),
+                    pickup ? mPulseInInterpolatorPickup : mPulseInInterpolator,
+                    mDozeParameters.getPulseInDelay(pickup),
                     mPulseInFinished);
 
             // Signal that the pulse is ready to turn the screen on and draw.
