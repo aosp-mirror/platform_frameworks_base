@@ -993,6 +993,19 @@ public final class HdmiControlService extends SystemService {
                 mHotplugEventListenerRecords.remove(this);
             }
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof HotplugEventListenerRecord)) return false;
+            if (obj == this) return true;
+            HotplugEventListenerRecord other = (HotplugEventListenerRecord) obj;
+            return other.mListener == this.mListener;
+        }
+
+        @Override
+        public int hashCode() {
+            return mListener.hashCode();
+        }
     }
 
     private final class DeviceEventListenerRecord implements IBinder.DeathRecipient {
@@ -1549,8 +1562,8 @@ public final class HdmiControlService extends SystemService {
         source.queryDisplayStatus(callback);
     }
 
-    private void addHotplugEventListener(IHdmiHotplugEventListener listener) {
-        HotplugEventListenerRecord record = new HotplugEventListenerRecord(listener);
+    private void addHotplugEventListener(final IHdmiHotplugEventListener listener) {
+        final HotplugEventListenerRecord record = new HotplugEventListenerRecord(listener);
         try {
             listener.asBinder().linkToDeath(record, 0);
         } catch (RemoteException e) {
@@ -1560,6 +1573,24 @@ public final class HdmiControlService extends SystemService {
         synchronized (mLock) {
             mHotplugEventListenerRecords.add(record);
         }
+
+        // Inform the listener of the initial state of each HDMI port by generating
+        // hotplug events.
+        runOnServiceThread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (mLock) {
+                    if (!mHotplugEventListenerRecords.contains(record)) return;
+                }
+                for (HdmiPortInfo port : mPortInfo) {
+                    HdmiHotplugEvent event = new HdmiHotplugEvent(port.getId(),
+                            mCecController.isConnected(port.getId()));
+                    synchronized (mLock) {
+                        invokeHotplugEventListenerLocked(listener, event);
+                    }
+                }
+            }
+        });
     }
 
     private void removeHotplugEventListener(IHdmiHotplugEventListener listener) {
