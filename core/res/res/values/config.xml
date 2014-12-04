@@ -1952,4 +1952,8 @@
     <dimen name="config_mediaMetadataBitmapMaxSize">320dp</dimen>
 
     <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">false</string>
+
+    <!-- An array of CDMA roaming indicators which means international roaming -->
+    <integer-array translatable="false" name="config_cdma_international_roaming_indicators" />
+
 </resources>
