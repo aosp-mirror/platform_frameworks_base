@@ -154,5 +154,7 @@ interface IWifiManager
     void setAllowScansWithTraffic(int enabled);
 
     WifiConnectionStatistics getConnectionStatistics();
+
+    void disableEphemeralNetwork(String SSID);
 }
 
