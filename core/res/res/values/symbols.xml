@@ -2140,4 +2140,5 @@
   <java-symbol type="dimen" name="fast_scroller_minimum_touch_target" />
   <java-symbol type="array" name="config_cdma_international_roaming_indicators" />
 
+  <java-symbol type="bool" name="config_use_sim_language_file" />
 </resources>
