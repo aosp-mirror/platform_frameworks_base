@@ -1103,5 +1103,35 @@ public class SubscriptionManager {
         return Boolean.parseBoolean(TelephonyManager.getTelephonyProperty(phoneId,
                 TelephonyProperties.PROPERTY_OPERATOR_ISROAMING, null));
     }
+
+    /**
+     * Returns a constant indicating the state of sim for the subscription.
+     *
+     * @param subId
+     *
+     * {@See TelephonyManager#SIM_STATE_UNKNOWN}
+     * {@See TelephonyManager#SIM_STATE_ABSENT}
+     * {@See TelephonyManager#SIM_STATE_PIN_REQUIRED}
+     * {@See TelephonyManager#SIM_STATE_PUK_REQUIRED}
+     * {@See TelephonyManager#SIM_STATE_NETWORK_LOCKED}
+     * {@See TelephonyManager#SIM_STATE_READY}
+     * {@See TelephonyManager#SIM_STATE_NOT_READY}
+     * {@See TelephonyManager#SIM_STATE_PERM_DISABLED}
+     * {@See TelephonyManager#SIM_STATE_CARD_IO_ERROR}
+     *
+     * {@hide}
+     */
+    public static int getSimStateForSubscriber(int subId) {
+        int simState;
+
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            simState = iSub.getSimStateForSubscriber(subId);
+        } catch (RemoteException ex) {
+            simState = TelephonyManager.SIM_STATE_UNKNOWN;
+        }
+        logd("getSimStateForSubscriber: simState=" + simState + " subId=" + subId);
+        return simState;
+    }
 }
 

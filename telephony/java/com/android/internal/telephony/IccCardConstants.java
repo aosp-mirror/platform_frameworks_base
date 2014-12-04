@@ -15,12 +15,14 @@
  */
 package com.android.internal.telephony;
 
+import android.telephony.TelephonyManager;
+
 /**
  * {@hide}
  */
 public class IccCardConstants {
 
-    /* The extra data for broacasting intent INTENT_ICC_STATE_CHANGE */
+    /* The extra data for broadcasting intent INTENT_ICC_STATE_CHANGE */
     public static final String INTENT_KEY_ICC_STATE = "ss";
     /* UNKNOWN means the ICC state is unknown */
     public static final String INTENT_VALUE_ICC_UNKNOWN = "UNKNOWN";
@@ -38,7 +40,7 @@ public class IccCardConstants {
     public static final String INTENT_VALUE_ICC_IMSI = "IMSI";
     /* LOADED means all ICC records, including IMSI, are loaded */
     public static final String INTENT_VALUE_ICC_LOADED = "LOADED";
-    /* The extra data for broacasting intent INTENT_ICC_STATE_CHANGE */
+    /* The extra data for broadcasting intent INTENT_ICC_STATE_CHANGE */
     public static final String INTENT_KEY_LOCKED_REASON = "reason";
     /* PIN means ICC is locked on PIN1 */
     public static final String INTENT_VALUE_LOCKED_ON_PIN = "PIN";
@@ -56,17 +58,19 @@ public class IccCardConstants {
      * UNKNOWN is a transient state, for example, after user inputs ICC pin under
      * PIN_REQUIRED state, the query for ICC status returns UNKNOWN before it
      * turns to READY
+     *
+     * The ordinal values much match {@link TelephonyManager#SIM_STATE_UNKNOWN} ...
      */
     public enum State {
-        UNKNOWN,
-        ABSENT,
-        PIN_REQUIRED,
-        PUK_REQUIRED,
-        NETWORK_LOCKED,
-        READY,
-        NOT_READY,
-        PERM_DISABLED,
-        CARD_IO_ERROR;
+        UNKNOWN,        /** ordinal(0) == {@See TelephonyManager#SIM_STATE_UNKNOWN} */
+        ABSENT,         /** ordinal(1) == {@See TelephonyManager#SIM_STATE_ABSENT} */
+        PIN_REQUIRED,   /** ordinal(2) == {@See TelephonyManager#SIM_STATE_PIN_REQUIRED} */
+        PUK_REQUIRED,   /** ordinal(3) == {@See TelephonyManager#SIM_STATE_PUK_REQUIRED} */
+        NETWORK_LOCKED, /** ordinal(4) == {@See TelephonyManager#SIM_STATE_NETWORK_LOCKED} */
+        READY,          /** ordinal(5) == {@See TelephonyManager#SIM_STATE_READY} */
+        NOT_READY,      /** ordinal(6) == {@See TelephonyManager#SIM_STATE_NOT_READY} */
+        PERM_DISABLED,  /** ordinal(7) == {@See TelephonyManager#SIM_STATE_PERM_DISABLED} */
+        CARD_IO_ERROR;  /** ordinal(8) == {@See TelephonyManager#SIM_STATE_CARD_IO_ERROR} */
 
         public boolean isPinLocked() {
             return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED));
