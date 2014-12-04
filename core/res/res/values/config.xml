@@ -303,6 +303,9 @@
     -->
     </string-array>
 
+    <!-- Activity name to enable wifi tethering after provisioning app succeeds -->
+    <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.EnableWifiTether</string>
+
     <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering -->
     <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
     <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH -->
