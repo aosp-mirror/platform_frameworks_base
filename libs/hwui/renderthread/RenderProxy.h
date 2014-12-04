@@ -69,7 +69,7 @@ public:
 
     ANDROID_API bool initialize(const sp<ANativeWindow>& window);
     ANDROID_API void updateSurface(const sp<ANativeWindow>& window);
-    ANDROID_API void pauseSurface(const sp<ANativeWindow>& window);
+    ANDROID_API bool pauseSurface(const sp<ANativeWindow>& window);
     ANDROID_API void setup(int width, int height, const Vector3& lightCenter, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
     ANDROID_API void setOpaque(bool opaque);

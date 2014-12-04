@@ -123,8 +123,8 @@ void CanvasContext::updateSurface(ANativeWindow* window) {
     setSurface(window);
 }
 
-void CanvasContext::pauseSurface(ANativeWindow* window) {
-    stopDrawing();
+bool CanvasContext::pauseSurface(ANativeWindow* window) {
+    return mRenderThread.removeFrameCallback(this);
 }
 
 // TODO: don't pass viewport size, it's automatic via EGL
