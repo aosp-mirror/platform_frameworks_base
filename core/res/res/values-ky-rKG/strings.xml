@@ -1658,6 +1658,7 @@
     <skip />
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android жаңыртылууда…"</string>
     <string name="android_start_title" msgid="8418054686415318207">"Android жүргүзүлүүдө…"</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Сактагыч ыңгайлаштырылууда."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> ичинен <xliff:g id="NUMBER_0">%1$d</xliff:g> колдонмо ыңгайлаштырылууда."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Колдонмолорду иштетип баштоо"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Жүктөө аякталууда."</string>
