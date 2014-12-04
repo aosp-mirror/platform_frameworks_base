@@ -21,6 +21,7 @@ import com.android.tools.layoutlib.java.AutoCloseable;
 import com.android.tools.layoutlib.java.Charsets;
 import com.android.tools.layoutlib.java.IntegralToString;
 import com.android.tools.layoutlib.java.Objects;
+import com.android.tools.layoutlib.java.System_Delegate;
 import com.android.tools.layoutlib.java.UnsafeByteSequence;
 
 import java.util.Arrays;
@@ -131,6 +132,7 @@ public final class CreateInfo implements ICreateInfo {
             IntegralToString.class,
             UnsafeByteSequence.class,
             Charsets.class,
+            System_Delegate.class,
         };
 
     /**
@@ -170,7 +172,11 @@ public final class CreateInfo implements ICreateInfo {
         "com.android.internal.view.menu.MenuBuilder#createNewMenuItem",
         "com.android.internal.util.XmlUtils#convertValueToInt",
         "com.android.internal.textservice.ITextServicesManager$Stub#asInterface",
-        "dalvik.system.VMRuntime#newUnpaddedArray"
+        "dalvik.system.VMRuntime#newUnpaddedArray",
+        "libcore.io.MemoryMappedFile#mmapRO",
+        "libcore.io.MemoryMappedFile#close",
+        "libcore.io.MemoryMappedFile#bigEndianIterator",
+        "libcore.util.ZoneInfo$WallTime#createGregorianCalendar",
     };
 
     /**
@@ -261,6 +267,7 @@ public final class CreateInfo implements ICreateInfo {
             "java.nio.charset.Charsets",                       "com.android.tools.layoutlib.java.Charsets",
             "java.lang.IntegralToString",                      "com.android.tools.layoutlib.java.IntegralToString",
             "java.lang.UnsafeByteSequence",                    "com.android.tools.layoutlib.java.UnsafeByteSequence",
+            "java.nio.charset.StandardCharsets",               "com.android.tools.layoutlib.java.Charsets",
         };
 
     private final static String[] EXCLUDED_CLASSES =
