@@ -1253,6 +1253,20 @@ public class WifiManager {
     }
 
     /**
+     * Get the EAP Sim info from supplicant and provide to UI
+     * @return WifiEapSimInfo class
+     *         mNoOfSims and an Array list of mSimTypes
+     * @hide
+    */
+    public WifiEapSimInfo getSimInfo() {
+        try {
+            return mService.getSimInfo();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Get the operational frequency band.
      * @return One of
      *     {@link #WIFI_FREQUENCY_BAND_AUTO},
