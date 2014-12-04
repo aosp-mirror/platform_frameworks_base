@@ -124,8 +124,12 @@ public class RecentsConfiguration {
     public boolean launchedWithNoRecentTasks;
     public boolean launchedFromAppWithThumbnail;
     public boolean launchedFromHome;
+    public boolean launchedFromSearchHome;
     public boolean launchedReuseTaskStackViews;
+    public boolean launchedHasConfigurationChanged;
     public int launchedToTaskId;
+    public int launchedNumVisibleTasks;
+    public int launchedNumVisibleThumbnails;
 
     /** Misc **/
     public boolean useHardwareLayers;
@@ -308,12 +312,10 @@ public class RecentsConfiguration {
     /** Called when the configuration has changed, and we want to reset any configuration specific
      * members. */
     public void updateOnConfigurationChange() {
-        launchedWithAltTab = false;
-        launchedWithNoRecentTasks = false;
-        launchedFromAppWithThumbnail = false;
-        launchedFromHome = false;
+        // Reset this flag on configuration change to ensure that we recreate new task views
         launchedReuseTaskStackViews = false;
-        launchedToTaskId = -1;
+        // Set this flag to indicate that the configuration has changed since Recents last launched
+        launchedHasConfigurationChanged = true;
     }
 
     /** Returns whether the search bar app widget exists. */
