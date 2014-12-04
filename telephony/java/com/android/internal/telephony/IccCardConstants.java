@@ -34,6 +34,10 @@ public class IccCardConstants {
     static public final String INTENT_VALUE_ICC_CARD_IO_ERROR = "CARD_IO_ERROR";
     /* LOCKED means ICC is locked by pin or by network */
     public static final String INTENT_VALUE_ICC_LOCKED = "LOCKED";
+    //TODO: we can remove this state in the future if Bug 18489776 analysis
+    //#42's first race condition is resolved
+    /* INTERNAL LOCKED means ICC is locked by pin or by network */
+    public static final String INTENT_VALUE_ICC_INTERNAL_LOCKED = "INTERNAL_LOCKED";
     /* READY means ICC is ready to access */
     public static final String INTENT_VALUE_ICC_READY = "READY";
     /* IMSI means ICC IMSI is ready in property */
@@ -80,6 +84,22 @@ public class IccCardConstants {
             return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED)
                     || (this == NETWORK_LOCKED) || (this == READY)
                     || (this == PERM_DISABLED) || (this == CARD_IO_ERROR));
+        }
+
+        public static State intToState(int state) throws IllegalArgumentException {
+            switch(state) {
+                case 0: return UNKNOWN;
+                case 1: return ABSENT;
+                case 2: return PIN_REQUIRED;
+                case 3: return PUK_REQUIRED;
+                case 4: return NETWORK_LOCKED;
+                case 5: return READY;
+                case 6: return NOT_READY;
+                case 7: return PERM_DISABLED;
+                case 8: return CARD_IO_ERROR;
+                default:
+                    throw new IllegalArgumentException();
+            }
         }
     }
 }
