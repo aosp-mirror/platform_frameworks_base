@@ -42,7 +42,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final String TAG = "TvInputSessionWrapper";
 
     private static final int MESSAGE_HANDLING_DURATION_THRESHOLD_MILLIS = 50;
-    private static final int MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS = 1000;
+    private static final int MESSAGE_TUNE_DURATION_THRESHOLD_MILLIS = 2000;
 
     private static final int DO_RELEASE = 1;
     private static final int DO_SET_MAIN = 2;
