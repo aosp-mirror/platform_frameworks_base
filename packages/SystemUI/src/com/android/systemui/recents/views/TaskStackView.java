@@ -715,14 +715,20 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             mStartEnterAnimationContext = null;
         }
 
-        // When Alt-Tabbing, we scroll to and focus the previous task
+        // When Alt-Tabbing, focus the previous task (but leave the animation until we finish the
+        // enter animation).
         if (mConfig.launchedWithAltTab) {
-            if (mConfig.launchedFromHome) {
-                focusTask(Math.max(0, mStack.getTaskCount() - 1), false, true);
+            if (mConfig.launchedFromAppWithThumbnail) {
+                focusTask(Math.max(0, mStack.getTaskCount() - 2), false,
+                        mConfig.launchedHasConfigurationChanged);
             } else {
-                focusTask(Math.max(0, mStack.getTaskCount() - 2), false, true);
+                focusTask(Math.max(0, mStack.getTaskCount() - 1), false,
+                        mConfig.launchedHasConfigurationChanged);
             }
         }
+
+        // Start dozing
+        mUIDozeTrigger.startDozing();
     }
 
     /** Requests this task stacks to start it's enter-recents animation */
@@ -767,16 +773,27 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 @Override
                 public void run() {
                     mStartEnterAnimationCompleted = true;
-                    // Start dozing
-                    mUIDozeTrigger.startDozing();
-                    // Focus the first view if accessibility is enabled
+                    // Poke the dozer to restart the trigger after the animation completes
+                    mUIDozeTrigger.poke();
+
                     RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
                     SystemServicesProxy ssp = loader.getSystemServicesProxy();
                     int childCount = getChildCount();
-                    if (childCount > 0 && ssp.isTouchExplorationEnabled()) {
-                        TaskView tv = ((TaskView) getChildAt(childCount - 1));
-                        tv.requestAccessibilityFocus();
-                        mPrevAccessibilityFocusedIndex = mStack.indexOfTask(tv.getTask());
+                    if (childCount > 0) {
+                        // Focus the first view if accessibility is enabled
+                        if (ssp.isTouchExplorationEnabled()) {
+                            TaskView tv = ((TaskView) getChildAt(childCount - 1));
+                            tv.requestAccessibilityFocus();
+                            mPrevAccessibilityFocusedIndex = mStack.indexOfTask(tv.getTask());
+                        }
+                    }
+
+                    // Start the focus animation when alt-tabbing
+                    if (mConfig.launchedWithAltTab && !mConfig.launchedHasConfigurationChanged) {
+                        View tv = getChildAt(mFocusedTaskIndex);
+                        if (tv != null) {
+                            ((TaskView) tv).setFocusedTask(true);
+                        }
                     }
                 }
             });

@@ -135,7 +135,6 @@ public class TaskStackViewLayoutAlgorithm {
         // Update the task offsets
         float pAtBackMostCardTop = 0.5f;
         float pAtFrontMostCardTop = pAtBackMostCardTop;
-        float pAtSecondFrontMostCardTop = pAtBackMostCardTop;
         int taskCount = tasks.size();
         for (int i = 0; i < taskCount; i++) {
             Task task = tasks.get(i);
@@ -145,25 +144,19 @@ public class TaskStackViewLayoutAlgorithm {
                 // Increment the peek height
                 float pPeek = task.group.isFrontMostTask(task) ?
                         pBetweenAffiliateOffset : pWithinAffiliateOffset;
-                pAtSecondFrontMostCardTop = pAtFrontMostCardTop;
                 pAtFrontMostCardTop += pPeek;
             }
         }
 
         mMaxScrollP = pAtFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
         mMinScrollP = tasks.size() == 1 ? Math.max(mMaxScrollP, 0f) : 0f;
-        if (launchedWithAltTab) {
-            if (launchedFromHome) {
-                // Center the top most task, since that will be focused first
-                mInitialScrollP = pAtSecondFrontMostCardTop - 0.5f;
-            } else {
-                // Center the second top most task, since that will be focused first
-                mInitialScrollP = pAtSecondFrontMostCardTop - 0.5f;
-            }
+        if (launchedWithAltTab && launchedFromHome) {
+            // Center the top most task, since that will be focused first
+            mInitialScrollP = mMaxScrollP;
         } else {
             mInitialScrollP = pAtFrontMostCardTop - 0.825f;
         }
-        mInitialScrollP = Math.max(0, mInitialScrollP);
+        mInitialScrollP = Math.min(mMaxScrollP, Math.max(0, mInitialScrollP));
     }
 
     /**

@@ -108,8 +108,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         @Override
         public void run() {
-            // Mark Recents as no longer visible
-            onRecentsActivityVisibilityChanged(false);
             // Finish Recents
             if (mLaunchIntent != null) {
                 if (mLaunchOpts != null) {
@@ -133,8 +131,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (action.equals(AlternateRecentsComponent.ACTION_HIDE_RECENTS_ACTIVITY)) {
-                // Mark Recents as no longer visible
-                AlternateRecentsComponent.notifyVisibilityChanged(false);
                 if (intent.getBooleanExtra(AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false)) {
                     // If we are hiding from releasing Alt-Tab, dismiss Recents to the focused app
                     dismissRecentsToFocusedTaskOrHome(false);
@@ -186,24 +182,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     /** Updates the set of recent tasks */
     void updateRecentsTasks(Intent launchIntent) {
-        // Update the configuration based on the launch intent
-        boolean fromSearchHome = launchIntent.getBooleanExtra(
-                AlternateRecentsComponent.EXTRA_FROM_SEARCH_HOME, false);
-        int numVisibleTasks = launchIntent.getIntExtra(
-                AlternateRecentsComponent.EXTRA_NUM_VISIBLE_TASKS, 0);
-        int numVisibleThumbnails = launchIntent.getIntExtra(
-                AlternateRecentsComponent.EXTRA_NUM_VISIBLE_THUMBNAILS, 0);
-        mConfig.launchedFromHome = fromSearchHome || launchIntent.getBooleanExtra(
-                AlternateRecentsComponent.EXTRA_FROM_HOME, false);
-        mConfig.launchedFromAppWithThumbnail = launchIntent.getBooleanExtra(
-                AlternateRecentsComponent.EXTRA_FROM_APP_THUMBNAIL, false);
-        mConfig.launchedToTaskId = launchIntent.getIntExtra(
-                AlternateRecentsComponent.EXTRA_FROM_TASK_ID, -1);
-        mConfig.launchedWithAltTab = launchIntent.getBooleanExtra(
-                AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
-        mConfig.launchedReuseTaskStackViews = launchIntent.getBooleanExtra(
-                AlternateRecentsComponent.EXTRA_REUSE_TASK_STACK_VIEWS, false);
-
         // If AlternateRecentsComponent has preloaded a load plan, then use that to prevent
         // reconstructing the task stack
         RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
@@ -218,8 +196,8 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
         RecentsTaskLoadPlan.Options loadOpts = new RecentsTaskLoadPlan.Options();
         loadOpts.runningTaskId = mConfig.launchedToTaskId;
-        loadOpts.numVisibleTasks = numVisibleTasks;
-        loadOpts.numVisibleTaskThumbnails = numVisibleThumbnails;
+        loadOpts.numVisibleTasks = mConfig.launchedNumVisibleTasks;
+        loadOpts.numVisibleTaskThumbnails = mConfig.launchedNumVisibleThumbnails;
         loader.loadTasks(this, plan, loadOpts);
 
         SpaceNode root = plan.getSpaceNode();
@@ -237,9 +215,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
                 Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         mFinishLaunchHomeRunnable = new FinishRecentsRunnable(homeIntent,
             ActivityOptions.makeCustomAnimation(this,
-                fromSearchHome ? R.anim.recents_to_search_launcher_enter :
+                mConfig.launchedFromSearchHome ? R.anim.recents_to_search_launcher_enter :
                         R.anim.recents_to_launcher_enter,
-                fromSearchHome ? R.anim.recents_to_search_launcher_exit :
+                    mConfig.launchedFromSearchHome ? R.anim.recents_to_search_launcher_exit :
                         R.anim.recents_to_launcher_exit));
 
         // Mark the task that is the launch target
@@ -403,12 +381,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         mEmptyViewStub = (ViewStub) findViewById(R.id.empty_view_stub);
         mDebugOverlayStub = (ViewStub) findViewById(R.id.debug_overlay_stub);
         mScrimViews = new SystemBarScrimViews(this, mConfig);
+        mStatusBar = ((SystemUIApplication) getApplication())
+                .getComponent(PhoneStatusBar.class);
         inflateDebugOverlay();
 
         // Bind the search app widget when we first start up
         bindSearchBarAppWidget();
-        // Update the recent tasks
-        updateRecentsTasks(getIntent());
 
         // Register the broadcast receiver to handle messages when the screen is turned off
         IntentFilter filter = new IntentFilter();
@@ -424,17 +402,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
-
-        // Update if we are getting a configuration change
-        if (savedInstanceState != null) {
-            // Update RecentsConfiguration
-            mConfig.updateOnConfigurationChange();
-            // Trigger the enter animation
-            onEnterAnimationTriggered();
-        }
-
-        mStatusBar = ((SystemUIApplication) getApplication())
-                .getComponent(PhoneStatusBar.class);
     }
 
     /** Inflates the debug overlay if debug mode is enabled. */
@@ -449,14 +416,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         }
     }
 
-    /** Handles changes to the activity visibility. */
-    void onRecentsActivityVisibilityChanged(boolean visible) {
-        if (!visible) {
-            AlternateRecentsComponent.notifyVisibilityChanged(visible);
-        }
-        mVisible = visible;
-    }
-
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -469,14 +428,13 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         if (mDebugOverlay != null) {
             mDebugOverlay.clear();
         }
-
-        // Update the recent tasks
-        updateRecentsTasks(intent);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        mVisible = true;
+        AlternateRecentsComponent.notifyVisibilityChanged(true);
 
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
@@ -487,19 +445,16 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Register any broadcast receivers for the task loader
         RecentsTaskLoader.getInstance().registerReceivers(this, mRecentsView);
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Mark Recents as visible
-        onRecentsActivityVisibilityChanged(true);
+        // Update the recent tasks
+        updateRecentsTasks(getIntent());
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        mVisible = false;
+        AlternateRecentsComponent.notifyVisibilityChanged(false);
 
         // Notify the views that we are no longer visible
         mRecentsView.onRecentsHidden();
@@ -641,8 +596,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
     @Override
     public void onTaskViewClicked() {
-        // Mark recents as no longer visible
-        onRecentsActivityVisibilityChanged(false);
     }
 
     @Override
