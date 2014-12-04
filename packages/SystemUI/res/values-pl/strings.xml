@@ -289,7 +289,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"Przesuń w lewo: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="zen_no_interruptions_with_warning" msgid="4396898053735625287">"Żadnych powiadomień. Nawet alarmów."</string>
     <string name="zen_no_interruptions" msgid="7970973750143632592">"Bez przerw"</string>
-    <string name="zen_important_interruptions" msgid="3477041776609757628">"Tylko przerwy priorytetowe"</string>
+    <string name="zen_important_interruptions" msgid="3477041776609757628">"Tylko dźwięki priorytetowe"</string>
     <string name="zen_alarm_information_time" msgid="5235772206174372272">"Następny alarm o <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_information_day_time" msgid="8422733576255047893">"Następny alarm: <xliff:g id="ALARM_DAY_AND_TIME">%s</xliff:g>"</string>
     <string name="zen_alarm_warning" msgid="6873910860111498041">"Nie usłyszysz alarmu o <xliff:g id="ALARM_TIME">%s</xliff:g>"</string>
@@ -300,7 +300,7 @@
     <string name="phone_hint" msgid="3101468054914424646">"Przesuń w prawo, by przełączyć się na telefon"</string>
     <string name="camera_hint" msgid="5241441720959174226">"Przesuń w lewo, by włączyć aparat"</string>
     <string name="interruption_level_none" msgid="3831278883136066646">"Żadne"</string>
-    <string name="interruption_level_priority" msgid="6517366750688942030">"Priorytet"</string>
+    <string name="interruption_level_priority" msgid="6517366750688942030">"Priorytetowe"</string>
     <string name="interruption_level_all" msgid="1330581184930945764">"Wszystkie"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Ładuje się (pełne naładowanie za <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Przełącz użytkownika"</string>
