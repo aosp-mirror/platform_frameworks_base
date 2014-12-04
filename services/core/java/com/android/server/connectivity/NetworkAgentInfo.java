@@ -96,6 +96,12 @@ public class NetworkAgentInfo {
         networkRequests.put(networkRequest.requestId, networkRequest);
     }
 
+    // Does this network satisfy request?
+    public boolean satisfies(NetworkRequest request) {
+        return created &&
+                request.networkCapabilities.satisfiedByNetworkCapabilities(networkCapabilities);
+    }
+
     public boolean isVPN() {
         return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
     }
