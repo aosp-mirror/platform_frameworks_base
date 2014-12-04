@@ -3528,6 +3528,10 @@ public class PackageParser {
             outError[0] = "<provider> does not include authorities attribute";
             return null;
         }
+        if (cpname.length() <= 0) {
+            outError[0] = "<provider> has empty authorities attribute";
+            return null;
+        }
         p.info.authority = cpname.intern();
 
         if (!parseProviderTags(res, parser, attrs, p, outError)) {
