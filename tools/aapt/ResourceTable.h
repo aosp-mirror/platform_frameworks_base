@@ -470,6 +470,14 @@ public:
                            bool overlay = false,
                            bool autoAddOverlay = false);
 
+        bool isPublic(const String16& entry) const {
+            return mPublic.indexOfKey(entry) >= 0;
+        }
+
+        sp<ConfigList> removeEntry(const String16& entry);
+
+        SortedVector<ConfigDescription> getUniqueConfigs() const;
+
         const SourcePos& getFirstPublicSourcePos() const { return *mFirstPublicSourcePos; }
 
         int32_t getPublicIndex() const { return mPublicIndex; }
@@ -479,19 +487,16 @@ public:
 
         status_t applyPublicEntryOrder();
 
-        const SortedVector<ConfigDescription>& getUniqueConfigs() const { return mUniqueConfigs; }
-        
         const DefaultKeyedVector<String16, sp<ConfigList> >& getConfigs() const { return mConfigs; }
         const Vector<sp<ConfigList> >& getOrderedConfigs() const { return mOrderedConfigs; }
-
         const SortedVector<String16>& getCanAddEntries() const { return mCanAddEntries; }
         
         const SourcePos& getPos() const { return mPos; }
+
     private:
         String16 mName;
         SourcePos* mFirstPublicSourcePos;
         DefaultKeyedVector<String16, Public> mPublic;
-        SortedVector<ConfigDescription> mUniqueConfigs;
         DefaultKeyedVector<String16, sp<ConfigList> > mConfigs;
         Vector<sp<ConfigList> > mOrderedConfigs;
         SortedVector<String16> mCanAddEntries;
@@ -526,6 +531,8 @@ public:
 
         const DefaultKeyedVector<String16, sp<Type> >& getTypes() const { return mTypes; }
         const Vector<sp<Type> >& getOrderedTypes() const { return mOrderedTypes; }
+
+        void movePrivateAttrs();
 
     private:
         status_t setStrings(const sp<AaptFile>& data,
