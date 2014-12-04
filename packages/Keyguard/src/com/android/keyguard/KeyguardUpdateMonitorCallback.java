@@ -49,12 +49,8 @@ public class KeyguardUpdateMonitorCallback {
 
     /**
      * Called when the carrier PLMN or SPN changes.
-     *
-     * @param plmn The operator name of the registered network.  May be null if it shouldn't
-     *   be displayed.
-     * @param spn The service provider name.  May be null if it shouldn't be displayed.
      */
-    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) { }
+    public void onRefreshCarrierInfo() { }
 
     /**
      * Called when the ringer mode changes.
