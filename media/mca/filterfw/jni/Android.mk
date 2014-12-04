@@ -47,7 +47,7 @@ LOCAL_C_INCLUDES += \
 # part of a system image.
 LOCAL_PRELINK_MODULE := false
 
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code -Wno-unused-parameter
 
 include $(BUILD_STATIC_LIBRARY)
 
