@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -218,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -237,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -374,38 +421,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -443,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">SensorRequest</li>
       </ul>
     </div>
@@ -476,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -729,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -744,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -754,12 +777,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
-
-
-
-
-
+  
+   
+  
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -767,14 +790,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 Summary:
 
   <a href="#nestedclasses">Nested Classes</a>
-
+  
 
 
 
 
 
   &#124; <a href="#constants">Constants</a>
-
+  
 
 
 
@@ -783,7 +806,7 @@ Summary:
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -793,9 +816,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -805,26 +828,26 @@ Summary:
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     class
 <h1 itemprop="name">SensorRequest</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
+
+  
+  
+  
 
 
-
-
-
-
-
-
-
-
+    
 
 
 </div><!-- end header -->
@@ -836,18 +859,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.fitness.request.SensorRequest</td>
     </tr>
-
+    
 
 </table>
 
@@ -909,24 +932,24 @@ Summary:
 <table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
 
 
-
+  
     <tr class="alt-color api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         class</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.Builder.html">SensorRequest.Builder</a></td>
       <td class="jd-descrcol" width="100%">
         Builder used to create new SensorRequests.&nbsp;
-
-
+        
+    
 
       </td>
     </tr>
-
-
+    
+    
 
 
 
@@ -944,46 +967,46 @@ Summary:
 <table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
 
 
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#ACCURACY_MODE_DEFAULT">ACCURACY_MODE_DEFAULT</a></td>
         <td class="jd-descrcol" width="100%">
           The default Accuracy Mode that offers a balance between accuracy of data collection and
  battery usage.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#ACCURACY_MODE_HIGH">ACCURACY_MODE_HIGH</a></td>
         <td class="jd-descrcol" width="100%">
           An Accuracy Mode representation that indicates that the application requires high accuracy
  data and expects the extra battery usage.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#ACCURACY_MODE_LOW">ACCURACY_MODE_LOW</a></td>
         <td class="jd-descrcol" width="100%">
           An Accuracy Mode representation that indicates that the application requires low accuracy
  data, improving battery life.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
 
 </table>
 
@@ -1007,212 +1030,212 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#equals(java.lang.Object)">equals</a></span>(Object that)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#fromLocationRequest(com.google.android.gms.fitness.data.DataSource, com.google.android.gms.location.LocationRequest)">fromLocationRequest</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a> dataSource, <a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> locationRequest)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns a SensorRequest for location updates corresponding to the given LocationRequest.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getAccuracyMode()">getAccuracyMode</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the accuracy mode for this request.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getDataSource()">getDataSource</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the specified data source for this request.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getDataType()">getDataType</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the specified data type for this request.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getFastestRate(java.util.concurrent.TimeUnit)">getFastestRate</a></span>(TimeUnit timeUnit)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the fastest rate for this request, in the given time unit.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getMaxDeliveryLatency(java.util.concurrent.TimeUnit)">getMaxDeliveryLatency</a></span>(TimeUnit timeUnit)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the max delivery latency for this request, in the given time unit.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#getSamplingRate(java.util.concurrent.TimeUnit)">getSamplingRate</a></span>(TimeUnit timeUnit)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the sampling rate for this request, in the given time unit.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#hashCode()">hashCode</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html#toString()">toString</a></span>()</nobr>
-
+        
   </td></tr>
 
 
@@ -1247,182 +1270,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -1463,42 +1486,42 @@ From class
 
 <A NAME="ACCURACY_MODE_DEFAULT"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         ACCURACY_MODE_DEFAULT
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The default Accuracy Mode that offers a balance between accuracy of data collection and
  battery usage.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 2
                 (0x00000002)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1506,42 +1529,42 @@ From class
 
 <A NAME="ACCURACY_MODE_HIGH"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         ACCURACY_MODE_HIGH
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>An Accuracy Mode representation that indicates that the application requires high accuracy
  data and expects the extra battery usage.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 3
                 (0x00000003)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1549,42 +1572,42 @@ From class
 
 <A NAME="ACCURACY_MODE_LOW"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         ACCURACY_MODE_LOW
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>An Accuracy Mode representation that indicates that the application requires low accuracy
  data, improving battery life.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 1
                 (0x00000001)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1612,14 +1635,14 @@ From class
 
 <A NAME="equals(java.lang.Object)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">equals</span>
@@ -1627,15 +1650,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1644,14 +1667,14 @@ From class
 
 <A NAME="fromLocationRequest(com.google.android.gms.fitness.data.DataSource, com.google.android.gms.location.LocationRequest)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/request/SensorRequest.html">SensorRequest</a>
       </span>
       <span class="sympad">fromLocationRequest</span>
@@ -1659,15 +1682,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a SensorRequest for location updates corresponding to the given LocationRequest.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1690,14 +1713,14 @@ From class
 
 <A NAME="getAccuracyMode()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getAccuracyMode</span>
@@ -1705,15 +1728,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the accuracy mode for this request.
 </p></div>
 
@@ -1723,14 +1746,14 @@ From class
 
 <A NAME="getDataSource()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataSource.html">DataSource</a>
       </span>
       <span class="sympad">getDataSource</span>
@@ -1738,15 +1761,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the specified data source for this request.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1760,14 +1783,14 @@ From class
 
 <A NAME="getDataType()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataType</a>
       </span>
       <span class="sympad">getDataType</span>
@@ -1775,15 +1798,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the specified data type for this request.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1797,14 +1820,14 @@ From class
 
 <A NAME="getFastestRate(java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
       <span class="sympad">getFastestRate</span>
@@ -1812,15 +1835,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the fastest rate for this request, in the given time unit.
 </p></div>
 
@@ -1830,14 +1853,14 @@ From class
 
 <A NAME="getMaxDeliveryLatency(java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
       <span class="sympad">getMaxDeliveryLatency</span>
@@ -1845,15 +1868,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the max delivery latency for this request, in the given time unit.
 </p></div>
 
@@ -1863,14 +1886,14 @@ From class
 
 <A NAME="getSamplingRate(java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
       <span class="sympad">getSamplingRate</span>
@@ -1878,15 +1901,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the sampling rate for this request, in the given time unit.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1900,14 +1923,14 @@ From class
 
 <A NAME="hashCode()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">hashCode</span>
@@ -1915,15 +1938,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1932,14 +1955,14 @@ From class
 
 <A NAME="toString()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">toString</span>
@@ -1947,15 +1970,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1973,17 +1996,17 @@ From class
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -1991,7 +2014,7 @@ From class
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -2004,7 +2027,7 @@ From class
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -103,14 +104,14 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>PlusClient.OnPeopleLoadedListener | Android Developers</title>
+<title>Action | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,8 +489,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
-        <li class="current">PlusClient.OnPeopleLoadedListener</li>
+        
+        <li class="current">Action</li>
       </ul>
     </div>
   </div>
@@ -754,8 +777,47 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+  
+  
+  
+  
+
+  
+   
+  
+  
+  
+  
+
 
 <div class="sum-details-links">
+
+Summary:
+
+  <a href="#nestedclasses">Nested Classes</a>
+  
+
+
+
+
+
+  &#124; <a href="#constants">Constants</a>
+  
+
+
+
+
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -771,11 +833,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <div id="jd-header">
     public
-    static 
      
+    final 
     
-    interface
-<h1 itemprop="name">PlusClient.OnPeopleLoadedListener</h1>
+    class
+<h1 itemprop="name">Action</h1>
 
 
 
@@ -783,8 +845,18 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
   
 
+  
+    extends <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a><br/>
+  
+  
+  
+
+  
+  
+  
 
 
+    
 
 
 </div><!-- end header -->
@@ -797,7 +869,25 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <tr>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener</td>
+        <td colspan="3" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+    
+
+    <tr>
+        
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+         	
+        <td colspan="2" class="jd-inheritance-class-cell"><a href="/reference/com/google/android/gms/appindexing/Thing.html">com.google.android.gms.appindexing.Thing</a></td>
+    </tr>
+    
+
+    <tr>
+        
+            <td class="jd-inheritance-space">&nbsp;</td>
+        
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.appindexing.Action</td>
     </tr>
     
 
@@ -810,12 +900,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <div class="jd-descr">
-<p>
-  <p class="caution"><strong>
-      This interface is deprecated.</strong><br/>
-    See <code><a href="/reference/com/google/android/gms/plus/People.LoadPeopleResult.html">People.LoadPeopleResult</a></code>.
 
-  </p>
+
+<h2>Class Overview</h2>
+<p itemprop="articleBody">Represents an action performed by a user.
+ <p>
+ To use this API, add the following to your <code><a href="/reference/android/app/Activity.html">Activity</a></code>:
+ <pre>
+ <code>Action action = Action.newAction(actionType, title, objectUrl);
+ AppIndex.AppIndexApi.action(mGoogleApiClient, action);
+ </code>
+</p>
 
 
 
@@ -845,6 +940,28 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
+
+
+  
+    <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
+        class</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></td>
+      <td class="jd-descrcol" width="100%">
+        Create a builder for an <code><a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></code>.&nbsp;
+        
+    
+
+      </td>
+    </tr>
+    
+    
 
 
 
@@ -853,6 +970,102 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+
+
+
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_ADD">TYPE_ADD</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of editing by adding an object to a collection.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_BOOKMARK">TYPE_BOOKMARK</a></td>
+        <td class="jd-descrcol" width="100%">
+          An agent bookmarks/flags/labels/tags/marks an object.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_LIKE">TYPE_LIKE</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of liking an object.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_LISTEN">TYPE_LISTEN</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of consuming audio content.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_VIEW">TYPE_VIEW</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of consuming static visual content.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_WANT">TYPE_WANT</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of expressing a desire about the object.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.html#TYPE_WATCH">TYPE_WATCH</a></td>
+        <td class="jd-descrcol" width="100%">
+          The act of watching an object.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+
+</table>
 
 
 
@@ -877,16 +1090,46 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
+            static
             
-            void</nobr>
+            <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html#onPeopleLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.PersonBuffer, java.lang.String)">onPeopleLoaded</a></span>(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, String nextPageToken)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.html#newAction(java.lang.String, java.lang.String, android.net.Uri, android.net.Uri)">newAction</a></span>(String actionType, String objectName, Uri objectId, Uri objectUrl)</nobr>
         
+        <div class="jd-descrdiv">
+          Creates a new action.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            
+            <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Action.html#newAction(java.lang.String, java.lang.String, android.net.Uri)">newAction</a></span>(String actionType, String objectName, Uri objectUrl)</nobr>
+        
+        <div class="jd-descrdiv">
+          Creates a new action.
+          
+    
+
+        </div>
+  
   </td></tr>
 
 
@@ -897,6 +1140,218 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -919,6 +1374,293 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="TYPE_ADD"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TYPE_ADD
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The act of editing by adding an object to a collection. </p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "http://schema.org/AddAction"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_BOOKMARK"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TYPE_BOOKMARK
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>An agent bookmarks/flags/labels/tags/marks an object. </p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "http://schema.org/BookmarkAction"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_LIKE"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TYPE_LIKE
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The act of liking an object. </p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "http://schema.org/LikeAction"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_LISTEN"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TYPE_LISTEN
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The act of consuming audio content. </p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "http://schema.org/ListenAction"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_VIEW"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TYPE_VIEW
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The act of consuming static visual content. </p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "http://schema.org/ViewAction"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_WANT"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TYPE_WANT
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The act of expressing a desire about the object. </p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "http://schema.org/WantAction"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="TYPE_WATCH"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        TYPE_WATCH
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The act of watching an object. </p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "http://schema.org/WatchAction"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -938,20 +1680,20 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-<A NAME="onPeopleLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.PersonBuffer, java.lang.String)"></A>
+<A NAME="newAction(java.lang.String, java.lang.String, android.net.Uri, android.net.Uri)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
+        static 
          
          
-        abstract 
          
-        void
+        <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a>
       </span>
-      <span class="sympad">onPeopleLoaded</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, String nextPageToken)</span>
+      <span class="sympad">newAction</span>
+      <span class="normal">(String actionType, String objectName, Uri objectId, Uri objectUrl)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -961,22 +1703,81 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Creates a new action.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>status</td>
-          <td>The resulting connection status of the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> or
-            <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople(PlusClient.OnPeopleLoadedListener, int, String)</a></code> request.</td>
+          <th>actionType</td>
+          <td>The schema.org action type (e.g. "http://schema.org/ListenAction").</td>
         </tr>
         <tr>
-          <th>personBuffer</td>
-          <td>The requested collection of people.  The listener must close this
-            object when finished.
+          <th>objectName</td>
+          <td>Name of the content.</td>
+        </tr>
+        <tr>
+          <th>objectId</td>
+          <td>Equivalent web url for the content, if available. See
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a>. Can be null.</td>
+        </tr>
+        <tr>
+          <th>objectUrl</td>
+          <td>The deep link of the content in the
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="newAction(java.lang.String, java.lang.String, android.net.Uri)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a>
+      </span>
+      <span class="sympad">newAction</span>
+      <span class="normal">(String actionType, String objectName, Uri objectUrl)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Creates a new action.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>actionType</td>
+          <td>The schema.org action type (e.g. "http://schema.org/ListenAction").</td>
+        </tr>
+        <tr>
+          <th>objectName</td>
+          <td>Name of the content.</td>
+        </tr>
+        <tr>
+          <th>objectUrl</td>
+          <td>The deep link of the content in the
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.
 </td>
         </tr>
       </table>

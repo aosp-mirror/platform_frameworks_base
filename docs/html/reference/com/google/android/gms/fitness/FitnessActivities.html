@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -218,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -237,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -374,38 +421,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -443,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">FitnessActivities</li>
       </ul>
     </div>
@@ -476,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -729,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -744,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -754,12 +777,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
-
-
-
-
-
+  
+   
+  
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -771,7 +794,7 @@ Summary:
 
 
   <a href="#constants">Constants</a>
-
+  
 
 
 
@@ -780,7 +803,7 @@ Summary:
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -790,9 +813,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -802,26 +825,26 @@ Summary:
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     class
 <h1 itemprop="name">FitnessActivities</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
+
+  
+  
+  
 
 
-
-
-
-
-
-
-
-
+    
 
 
 </div><!-- end header -->
@@ -833,18 +856,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.fitness.FitnessActivities</td>
     </tr>
-
+    
 
 </table>
 
@@ -858,7 +881,7 @@ Summary:
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Constants representing different user activities, such as walking, running, and cycling.
+<p itemprop="articleBody">Constants representing different user activities, such as walking, running, and cycling. 
  Activities are used in <code><a href="/reference/com/google/android/gms/fitness/data/Session.html">Sessions</a></code>, <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html">DataTypes</a></code> and in
  <code><a href="/reference/com/google/android/gms/fitness/request/DataReadRequest.html">read queries</a></code>.
  <p/>
@@ -868,20 +891,20 @@ Summary:
  while <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIKING">biking</a></code>.
  <p/>
  Activities be stored and read using the <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SAMPLE">activity sample</a></code> and
- <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity segment</a></code> data types.  When samples are stored,
+ <code><a href="/reference/com/google/android/gms/fitness/data/DataType.html#TYPE_ACTIVITY_SEGMENT">activity segment</a></code> data types.  When samples are stored, 
  these are automatically converted into segments by the platform's default data source.
  <p/>
  When reading data, the <code><a href="/reference/com/google/android/gms/fitness/data/Bucket.html#TYPE_ACTIVITY_SEGMENT">activity segment</a></code> and
  <code><a href="/reference/com/google/android/gms/fitness/data/Bucket.html#TYPE_ACTIVITY_TYPE">activity type</a></code> bucketing strategies can be used to aggregate
- data by the activities happening at the time data was collected.  This would allow, for instance,
+ data by the activities happening at the time data was collected.  This would allow, for instance, 
  aggregating step counts taken during running and those taken during walking separately,
  or to query the average heart rate during each activity.
  <p/>
  Each activity is represented by its name, which is a string constant.  These constants are also
  used in intents for tracking and visualizing activity data.  Internally, activities are stored as
  integers inside of <code><a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a></code> for efficiency.  You can convert between the
- string and int representations for storage using <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#setValue(com.google.android.gms.fitness.data.DataPoint, java.lang.String)">setValue(DataPoint, String)</a></code> and
- <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getValue(com.google.android.gms.fitness.data.DataPoint)">getValue(DataPoint)</a></code>.
+ string and int representations for storage using <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#setActivity(java.lang.String)">setActivity(String)</a></code> and
+ <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#asActivity()">asActivity()</a></code>.
  <p/>
  A subset of the activities can be detected by
  <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionApi.html">Activity Recognition</a></code> and are
@@ -930,1147 +953,1147 @@ Summary:
 <table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
 
 
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#AEROBICS">AEROBICS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is performing aerobic exercises.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BADMINTON">BADMINTON</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing badminton.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BASEBALL">BASEBALL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing baseball.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BASKETBALL">BASKETBALL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing basketball.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIATHLON">BIATHLON</a></td>
         <td class="jd-descrcol" width="100%">
           The user is practicing biathlon (combination of cross-country skiing and rifle shooting).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIKING">BIKING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is on a bicycle.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIKING_HAND">BIKING_HAND</a></td>
         <td class="jd-descrcol" width="100%">
           The user is handcycling (or handbiking).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIKING_MOUNTAIN">BIKING_MOUNTAIN</a></td>
         <td class="jd-descrcol" width="100%">
           The user is mountain biking.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIKING_ROAD">BIKING_ROAD</a></td>
         <td class="jd-descrcol" width="100%">
           The user is cycling on a road or other smooth surface.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIKING_SPINNING">BIKING_SPINNING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is indoor cycling (spinning) on a specialized stationary bike.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIKING_STATIONARY">BIKING_STATIONARY</a></td>
         <td class="jd-descrcol" width="100%">
           The user is cycling on a stationary bike.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BIKING_UTILITY">BIKING_UTILITY</a></td>
         <td class="jd-descrcol" width="100%">
           The user is cycling as a means of transport.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#BOXING">BOXING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is boxing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#CALISTHENICS">CALISTHENICS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is performing calisthenics exercises.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#CIRCUIT_TRAINING">CIRCUIT_TRAINING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is performing circuit training exercises.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#CRICKET">CRICKET</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing cricket.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#CURLING">CURLING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is practicing curling.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#DANCING">DANCING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is dancing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#DIVING">DIVING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is diving into water, from a platform or spring board.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#ELLIPTICAL">ELLIPTICAL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is using an elliptical trainer or cross-trainer machine.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#ERGOMETER">ERGOMETER</a></td>
         <td class="jd-descrcol" width="100%">
           The user is using an ergometer machine.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#EXTRA_STATUS">EXTRA_STATUS</a></td>
         <td class="jd-descrcol" width="100%">
           Name for the String extra containing the status of an activity.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#FENCING">FENCING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is fencing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#FOOTBALL_AMERICAN">FOOTBALL_AMERICAN</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing American football (known as football in the United States).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#FOOTBALL_AUSTRALIAN">FOOTBALL_AUSTRALIAN</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing Australian-rules football.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#FOOTBALL_SOCCER">FOOTBALL_SOCCER</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing association football (known as soccer in the United States).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#FRISBEE_DISC">FRISBEE_DISC</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing with a Frisbee disc.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#GARDENING">GARDENING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is gardening.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#GOLF">GOLF</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing golf.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#GYMNASTICS">GYMNASTICS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is practicing gymnastics.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#HANDBALL">HANDBALL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing handball.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#HIKING">HIKING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is hiking.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#HOCKEY">HOCKEY</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing hockey.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#HORSEBACK_RIDING">HORSEBACK_RIDING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is horseback riding.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#HOUSEWORK">HOUSEWORK</a></td>
         <td class="jd-descrcol" width="100%">
           The user is doing house work.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#ICE_SKATING">ICE_SKATING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is ice-skating.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#IN_VEHICLE">IN_VEHICLE</a></td>
         <td class="jd-descrcol" width="100%">
           The user is in a vehicle, such as a car.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#JUMP_ROPE">JUMP_ROPE</a></td>
         <td class="jd-descrcol" width="100%">
           The user is jumping rope.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#KAYAKING">KAYAKING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is kayaking.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#KETTLEBELL_TRAINING">KETTLEBELL_TRAINING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is training with a kettlebell.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#KICKBOXING">KICKBOXING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is kickboxing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#KICK_SCOOTER">KICK_SCOOTER</a></td>
         <td class="jd-descrcol" width="100%">
           The user is riding a kick scooter.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#KITESURFING">KITESURFING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is kite-surfing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#MARTIAL_ARTS">MARTIAL_ARTS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is practicing martial arts.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#MEDITATION">MEDITATION</a></td>
         <td class="jd-descrcol" width="100%">
           The user is meditating.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#MIME_TYPE_PREFIX">MIME_TYPE_PREFIX</a></td>
         <td class="jd-descrcol" width="100%">
           The common prefix for activity MIME types.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#MIXED_MARTIAL_ARTS">MIXED_MARTIAL_ARTS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is practicing mixed martial arts (MMA).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#ON_FOOT">ON_FOOT</a></td>
         <td class="jd-descrcol" width="100%">
           The user is on foot, walking or running.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#OTHER">OTHER</a></td>
         <td class="jd-descrcol" width="100%">
           The user is performing a generic fitness activity, which isn't classified.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#P90X">P90X</a></td>
         <td class="jd-descrcol" width="100%">
           The user is performing P90X exercises.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#PARAGLIDING">PARAGLIDING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is paragliding.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#PILATES">PILATES</a></td>
         <td class="jd-descrcol" width="100%">
           The user is performing pilates exercises.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#POLO">POLO</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing polo (team sport on horseback).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#RACQUETBALL">RACQUETBALL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing racquetball.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#ROCK_CLIMBING">ROCK_CLIMBING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is rock climbing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#ROWING">ROWING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is rowing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#ROWING_MACHINE">ROWING_MACHINE</a></td>
         <td class="jd-descrcol" width="100%">
           The user is using a rowing machine.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#RUGBY">RUGBY</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing rugby.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#RUNNING">RUNNING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is running.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#RUNNING_JOGGING">RUNNING_JOGGING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is jogging.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#RUNNING_SAND">RUNNING_SAND</a></td>
         <td class="jd-descrcol" width="100%">
           The user is running on sand.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#RUNNING_TREADMILL">RUNNING_TREADMILL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is running on a treadmill.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SAILING">SAILING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is sailing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SCUBA_DIVING">SCUBA_DIVING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is scuba diving.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKATEBOARDING">SKATEBOARDING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is skateboarding.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKATING">SKATING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is skating.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKATING_CROSS">SKATING_CROSS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is cross skating.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKATING_INDOOR">SKATING_INDOOR</a></td>
         <td class="jd-descrcol" width="100%">
           The user is skating in-doors.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKATING_INLINE">SKATING_INLINE</a></td>
         <td class="jd-descrcol" width="100%">
           The user is inline skating (roller-blading).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKIING">SKIING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is skiing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKIING_BACK_COUNTRY">SKIING_BACK_COUNTRY</a></td>
         <td class="jd-descrcol" width="100%">
           The user is back-country skiing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKIING_CROSS_COUNTRY">SKIING_CROSS_COUNTRY</a></td>
         <td class="jd-descrcol" width="100%">
           The user is cross-country skiing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKIING_DOWNHILL">SKIING_DOWNHILL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is downhill skiing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKIING_KITE">SKIING_KITE</a></td>
         <td class="jd-descrcol" width="100%">
           The user is kite skiing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SKIING_ROLLER">SKIING_ROLLER</a></td>
         <td class="jd-descrcol" width="100%">
           The user is roller skiing (non-snow).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SLEDDING">SLEDDING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is sledding.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SLEEP">SLEEP</a></td>
         <td class="jd-descrcol" width="100%">
           The user is sleeping.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SNOWBOARDING">SNOWBOARDING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is snowboarding.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SNOWMOBILE">SNOWMOBILE</a></td>
         <td class="jd-descrcol" width="100%">
           The user is on a snow mobile.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SNOWSHOEING">SNOWSHOEING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is snow-shoeing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SQUASH">SQUASH</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing Squash.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#STAIR_CLIMBING">STAIR_CLIMBING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is climbing stairs.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#STAIR_CLIMBING_MACHINE">STAIR_CLIMBING_MACHINE</a></td>
         <td class="jd-descrcol" width="100%">
           The user is using a stair-climbing machine.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#STANDUP_PADDLEBOARDING">STANDUP_PADDLEBOARDING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is on a stand-up paddle board.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#STATUS_ACTIVE">STATUS_ACTIVE</a></td>
         <td class="jd-descrcol" width="100%">
           Status indicating the activity has started.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#STATUS_COMPLETED">STATUS_COMPLETED</a></td>
         <td class="jd-descrcol" width="100%">
           Status indicating the activity has ended.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#STILL">STILL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is still (not moving).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#STRENGTH_TRAINING">STRENGTH_TRAINING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is strength training.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SURFING">SURFING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is surfing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SWIMMING">SWIMMING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is swimming.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SWIMMING_OPEN_WATER">SWIMMING_OPEN_WATER</a></td>
         <td class="jd-descrcol" width="100%">
           The user is swimming in open waters.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#SWIMMING_POOL">SWIMMING_POOL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is swimming in a swimming pool.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#TABLE_TENNIS">TABLE_TENNIS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing table tennis (or ping-pong).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#TEAM_SPORTS">TEAM_SPORTS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing a team sport.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#TENNIS">TENNIS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing tennis.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#TILTING">TILTING</a></td>
@@ -2079,205 +2102,205 @@ Summary:
  <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionApi.html">Activity Recognition API</a></code> to
  indicate that the device angle relative to gravity changed significantly between the sample
  immediately before and immediately after the "tilting" sample.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#TREADMILL">TREADMILL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is on a treadmill (either walking or running).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#UNKNOWN">UNKNOWN</a></td>
         <td class="jd-descrcol" width="100%">
           The current activity is not known.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#VOLLEYBALL">VOLLEYBALL</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing volleyball.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#VOLLEYBALL_BEACH">VOLLEYBALL_BEACH</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing beach volleyball.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#VOLLEYBALL_INDOOR">VOLLEYBALL_INDOOR</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing indoor volleyball.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#WAKEBOARDING">WAKEBOARDING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is wake boarding.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#WALKING">WALKING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is walking.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#WALKING_FITNESS">WALKING_FITNESS</a></td>
         <td class="jd-descrcol" width="100%">
           The user is walking at a moderate to high pace, for fitness.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#WALKING_NORDIC">WALKING_NORDIC</a></td>
         <td class="jd-descrcol" width="100%">
           The user is performing Nordic walking (with poles).
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#WALKING_TREADMILL">WALKING_TREADMILL</a></td>
         <td class="jd-descrcol" width="100%">
-          The user is walking on a treadmill
-
-
+          The user is walking on a treadmill 
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#WATER_POLO">WATER_POLO</a></td>
         <td class="jd-descrcol" width="100%">
           The user is playing water polo.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#WEIGHTLIFTING">WEIGHTLIFTING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is weight lifting.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#WHEELCHAIR">WHEELCHAIR</a></td>
         <td class="jd-descrcol" width="100%">
           The user is on a wheel chair.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#WINDSURFING">WINDSURFING</a></td>
         <td class="jd-descrcol" width="100%">
           The user is wind surfing.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#YOGA">YOGA</a></td>
         <td class="jd-descrcol" width="100%">
           The user is performing Yoga poses.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#ZUMBA">ZUMBA</a></td>
         <td class="jd-descrcol" width="100%">
           The users is performing Zumba exercises.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
 
 </table>
 
@@ -2301,74 +2324,86 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getMimeType(java.lang.String)">getMimeType</a></span>(String activity)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the MIME type for a particular activity.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getValue(com.google.android.gms.fitness.data.DataPoint)">getValue</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a> dataPoint)</nobr>
-
+        
         <div class="jd-descrdiv">
-          Reads the value of the <code><a href="/reference/com/google/android/gms/fitness/data/Field.html#FIELD_ACTIVITY">activity</a></code> field of the given data point
- from the storage representation of this activity, and returns the activity name.
-
-
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#asActivity()">asActivity()</a></code> instead.  This method will be removed in
+ an upcoming release.  New usage:
+ <pre>
+     dataPoint.getValue(FIELD_ACTIVITY).asActivity();
+ </pre>
+</em>
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#setValue(com.google.android.gms.fitness.data.DataPoint, java.lang.String)">setValue</a></span>(<a href="/reference/com/google/android/gms/fitness/data/DataPoint.html">DataPoint</a> dataPoint, String activity)</nobr>
-
+        
         <div class="jd-descrdiv">
-          Sets the value of the <code><a href="/reference/com/google/android/gms/fitness/data/Field.html#FIELD_ACTIVITY">activity</a></code> field of the given data point
- to the internal representation of this activity.
-
-
+          <em>
+      This method is deprecated.
+    Use <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#setActivity(java.lang.String)">setActivity(String)</a></code> instead.  This method will be removed in
+ an upcoming release.  New usage:
+ <pre>
+     dataPoint.getValue(FIELD_ACTIVITY).setActivity(activity);
+ </pre>
+</em>
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
@@ -2403,182 +2438,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -2619,39 +2654,39 @@ From class
 
 <A NAME="AEROBICS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         AEROBICS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is performing aerobic exercises. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "aerobics"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2659,39 +2694,39 @@ From class
 
 <A NAME="BADMINTON"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BADMINTON
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing badminton. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "badminton"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2699,39 +2734,39 @@ From class
 
 <A NAME="BASEBALL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BASEBALL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing baseball. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "baseball"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2739,39 +2774,39 @@ From class
 
 <A NAME="BASKETBALL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BASKETBALL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing basketball. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "basketball"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2779,39 +2814,39 @@ From class
 
 <A NAME="BIATHLON"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BIATHLON
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is practicing biathlon (combination of cross-country skiing and rifle shooting). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "biathlon"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2819,39 +2854,39 @@ From class
 
 <A NAME="BIKING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BIKING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is on a bicycle. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "biking"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2859,39 +2894,39 @@ From class
 
 <A NAME="BIKING_HAND"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BIKING_HAND
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is handcycling (or handbiking). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "biking.hand"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2899,39 +2934,39 @@ From class
 
 <A NAME="BIKING_MOUNTAIN"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BIKING_MOUNTAIN
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is mountain biking. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "biking.mountain"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2939,39 +2974,39 @@ From class
 
 <A NAME="BIKING_ROAD"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BIKING_ROAD
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is cycling on a road or other smooth surface. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "biking.road"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2979,39 +3014,39 @@ From class
 
 <A NAME="BIKING_SPINNING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BIKING_SPINNING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is indoor cycling (spinning) on a specialized stationary bike. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "biking.spinning"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3019,39 +3054,39 @@ From class
 
 <A NAME="BIKING_STATIONARY"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BIKING_STATIONARY
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is cycling on a stationary bike. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "biking.stationary"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3059,39 +3094,39 @@ From class
 
 <A NAME="BIKING_UTILITY"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BIKING_UTILITY
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is cycling as a means of transport. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "biking.utility"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3099,39 +3134,39 @@ From class
 
 <A NAME="BOXING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         BOXING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is boxing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "boxing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3139,39 +3174,39 @@ From class
 
 <A NAME="CALISTHENICS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         CALISTHENICS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is performing calisthenics exercises. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "calisthenics"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3179,39 +3214,39 @@ From class
 
 <A NAME="CIRCUIT_TRAINING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         CIRCUIT_TRAINING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is performing circuit training exercises. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "circuit_training"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3219,39 +3254,39 @@ From class
 
 <A NAME="CRICKET"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         CRICKET
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing cricket. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "cricket"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3259,39 +3294,39 @@ From class
 
 <A NAME="CURLING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         CURLING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is practicing curling. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "curling"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3299,39 +3334,39 @@ From class
 
 <A NAME="DANCING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         DANCING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is dancing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "dancing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3339,39 +3374,39 @@ From class
 
 <A NAME="DIVING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         DIVING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is diving into water, from a platform or spring board. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "diving"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3379,39 +3414,39 @@ From class
 
 <A NAME="ELLIPTICAL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ELLIPTICAL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is using an elliptical trainer or cross-trainer machine. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "elliptical"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3419,39 +3454,39 @@ From class
 
 <A NAME="ERGOMETER"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ERGOMETER
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is using an ergometer machine. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "ergometer"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3459,27 +3494,27 @@ From class
 
 <A NAME="EXTRA_STATUS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         EXTRA_STATUS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Name for the String extra containing the status of an activity.  This is a mandatory
  extra for <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_TRACK">ACTION_TRACK</a></code> intents, and holds one of the following values:
  <ul>
@@ -3488,16 +3523,16 @@ From class
  </ul>
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "actionStatus"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3505,39 +3540,39 @@ From class
 
 <A NAME="FENCING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         FENCING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is fencing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "fencing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3545,39 +3580,39 @@ From class
 
 <A NAME="FOOTBALL_AMERICAN"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         FOOTBALL_AMERICAN
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing American football (known as football in the United States). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "football.american"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3585,39 +3620,39 @@ From class
 
 <A NAME="FOOTBALL_AUSTRALIAN"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         FOOTBALL_AUSTRALIAN
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing Australian-rules football. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "football.australian"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3625,39 +3660,39 @@ From class
 
 <A NAME="FOOTBALL_SOCCER"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         FOOTBALL_SOCCER
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing association football (known as soccer in the United States). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "football.soccer"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3665,39 +3700,39 @@ From class
 
 <A NAME="FRISBEE_DISC"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         FRISBEE_DISC
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing with a Frisbee disc. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "frisbee_disc"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3705,39 +3740,39 @@ From class
 
 <A NAME="GARDENING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         GARDENING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is gardening. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "gardening"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3745,39 +3780,39 @@ From class
 
 <A NAME="GOLF"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         GOLF
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing golf. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "golf"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3785,39 +3820,39 @@ From class
 
 <A NAME="GYMNASTICS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         GYMNASTICS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is practicing gymnastics. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "gymnastics"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3825,39 +3860,39 @@ From class
 
 <A NAME="HANDBALL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         HANDBALL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing handball. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "handball"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3865,39 +3900,39 @@ From class
 
 <A NAME="HIKING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         HIKING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is hiking. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "hiking"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3905,39 +3940,39 @@ From class
 
 <A NAME="HOCKEY"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         HOCKEY
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing hockey. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "hockey"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3945,39 +3980,39 @@ From class
 
 <A NAME="HORSEBACK_RIDING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         HORSEBACK_RIDING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is horseback riding. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "horseback_riding"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -3985,39 +4020,39 @@ From class
 
 <A NAME="HOUSEWORK"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         HOUSEWORK
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is doing house work. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "housework"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4025,39 +4060,39 @@ From class
 
 <A NAME="ICE_SKATING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ICE_SKATING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is ice-skating. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "ice_skating"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4065,39 +4100,39 @@ From class
 
 <A NAME="IN_VEHICLE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         IN_VEHICLE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is in a vehicle, such as a car. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "in_vehicle"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4105,39 +4140,39 @@ From class
 
 <A NAME="JUMP_ROPE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         JUMP_ROPE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is jumping rope. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "jump_rope"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4145,39 +4180,39 @@ From class
 
 <A NAME="KAYAKING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         KAYAKING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is kayaking. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "kayaking"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4185,39 +4220,39 @@ From class
 
 <A NAME="KETTLEBELL_TRAINING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         KETTLEBELL_TRAINING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is training with a kettlebell. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "kettlebell_training"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4225,39 +4260,39 @@ From class
 
 <A NAME="KICKBOXING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         KICKBOXING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is kickboxing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "kickboxing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4265,39 +4300,39 @@ From class
 
 <A NAME="KICK_SCOOTER"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         KICK_SCOOTER
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is riding a kick scooter. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "kick_scooter"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4305,39 +4340,39 @@ From class
 
 <A NAME="KITESURFING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         KITESURFING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is kite-surfing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "kitesurfing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4345,39 +4380,39 @@ From class
 
 <A NAME="MARTIAL_ARTS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         MARTIAL_ARTS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is practicing martial arts. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "martial_arts"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4385,39 +4420,39 @@ From class
 
 <A NAME="MEDITATION"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         MEDITATION
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is meditating. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "meditation"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4425,27 +4460,27 @@ From class
 
 <A NAME="MIME_TYPE_PREFIX"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         MIME_TYPE_PREFIX
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The common prefix for activity MIME types.  The MIME type for a particular activity type will
  be this prefix followed by the activity name.  Examples:
  <pre>
@@ -4457,16 +4492,16 @@ From class
  class. The full MIME type can be computed using <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#getMimeType(java.lang.String)">getMimeType(String)</a></code>
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "vnd.google.fitness.activity/"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4474,39 +4509,39 @@ From class
 
 <A NAME="MIXED_MARTIAL_ARTS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         MIXED_MARTIAL_ARTS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is practicing mixed martial arts (MMA). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "martial_arts.mixed"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4514,41 +4549,41 @@ From class
 
 <A NAME="ON_FOOT"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ON_FOOT
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is on foot, walking or running.  It's preferred to use the more specific activity
  when known.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "on_foot"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4556,27 +4591,27 @@ From class
 
 <A NAME="OTHER"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         OTHER
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is performing a generic fitness activity, which isn't classified.
  <p/>
  Unlike <code><a href="/reference/com/google/android/gms/fitness/FitnessActivities.html#UNKNOWN">unknown</a></code>, which gives no indication as to what the user is doing,
@@ -4590,16 +4625,16 @@ From class
  this activity list, as well as an activity not in this list.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "other"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4607,39 +4642,39 @@ From class
 
 <A NAME="P90X"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         P90X
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is performing P90X exercises. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "p90x"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4647,39 +4682,39 @@ From class
 
 <A NAME="PARAGLIDING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         PARAGLIDING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is paragliding. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "paragliding"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4687,39 +4722,39 @@ From class
 
 <A NAME="PILATES"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         PILATES
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is performing pilates exercises. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "pilates"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4727,39 +4762,39 @@ From class
 
 <A NAME="POLO"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         POLO
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing polo (team sport on horseback). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "polo"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4767,39 +4802,39 @@ From class
 
 <A NAME="RACQUETBALL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         RACQUETBALL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing racquetball. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "racquetball"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4807,39 +4842,39 @@ From class
 
 <A NAME="ROCK_CLIMBING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ROCK_CLIMBING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is rock climbing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "rock_climbing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4847,39 +4882,39 @@ From class
 
 <A NAME="ROWING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ROWING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is rowing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "rowing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4887,39 +4922,39 @@ From class
 
 <A NAME="ROWING_MACHINE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ROWING_MACHINE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is using a rowing machine. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "rowing.machine"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4927,39 +4962,39 @@ From class
 
 <A NAME="RUGBY"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         RUGBY
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing rugby. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "rugby"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -4967,39 +5002,39 @@ From class
 
 <A NAME="RUNNING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         RUNNING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is running. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "running"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5007,39 +5042,39 @@ From class
 
 <A NAME="RUNNING_JOGGING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         RUNNING_JOGGING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is jogging. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "running.jogging"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5047,39 +5082,39 @@ From class
 
 <A NAME="RUNNING_SAND"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         RUNNING_SAND
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is running on sand. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "running.sand"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5087,39 +5122,39 @@ From class
 
 <A NAME="RUNNING_TREADMILL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         RUNNING_TREADMILL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is running on a treadmill. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "running.treadmill"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5127,39 +5162,39 @@ From class
 
 <A NAME="SAILING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SAILING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is sailing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "sailing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5167,39 +5202,39 @@ From class
 
 <A NAME="SCUBA_DIVING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SCUBA_DIVING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is scuba diving. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "scuba_diving"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5207,39 +5242,39 @@ From class
 
 <A NAME="SKATEBOARDING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKATEBOARDING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is skateboarding. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skateboarding"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5247,39 +5282,39 @@ From class
 
 <A NAME="SKATING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKATING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is skating. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skating"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5287,39 +5322,39 @@ From class
 
 <A NAME="SKATING_CROSS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKATING_CROSS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is cross skating. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skating.cross"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5327,39 +5362,39 @@ From class
 
 <A NAME="SKATING_INDOOR"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKATING_INDOOR
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is skating in-doors. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skating.indoor"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5367,39 +5402,39 @@ From class
 
 <A NAME="SKATING_INLINE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKATING_INLINE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is inline skating (roller-blading). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skating.inline"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5407,39 +5442,39 @@ From class
 
 <A NAME="SKIING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKIING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is skiing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skiing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5447,39 +5482,39 @@ From class
 
 <A NAME="SKIING_BACK_COUNTRY"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKIING_BACK_COUNTRY
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is back-country skiing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skiing.back_country"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5487,39 +5522,39 @@ From class
 
 <A NAME="SKIING_CROSS_COUNTRY"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKIING_CROSS_COUNTRY
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is cross-country skiing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skiing.cross_country"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5527,39 +5562,39 @@ From class
 
 <A NAME="SKIING_DOWNHILL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKIING_DOWNHILL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is downhill skiing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skiing.downhill"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5567,39 +5602,39 @@ From class
 
 <A NAME="SKIING_KITE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKIING_KITE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is kite skiing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skiing.kite"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5607,39 +5642,39 @@ From class
 
 <A NAME="SKIING_ROLLER"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SKIING_ROLLER
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is roller skiing (non-snow). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "skiing.roller"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5647,39 +5682,39 @@ From class
 
 <A NAME="SLEDDING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SLEDDING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is sledding. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "sledding"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5687,39 +5722,39 @@ From class
 
 <A NAME="SLEEP"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SLEEP
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is sleeping. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "sleep"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5727,39 +5762,39 @@ From class
 
 <A NAME="SNOWBOARDING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SNOWBOARDING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is snowboarding. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "snowboarding"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5767,39 +5802,39 @@ From class
 
 <A NAME="SNOWMOBILE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SNOWMOBILE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is on a snow mobile. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "snowmobile"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5807,39 +5842,39 @@ From class
 
 <A NAME="SNOWSHOEING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SNOWSHOEING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is snow-shoeing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "snowshoeing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5847,39 +5882,39 @@ From class
 
 <A NAME="SQUASH"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SQUASH
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing Squash. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "squash"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5887,39 +5922,39 @@ From class
 
 <A NAME="STAIR_CLIMBING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         STAIR_CLIMBING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is climbing stairs. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "stair_climbing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5927,39 +5962,39 @@ From class
 
 <A NAME="STAIR_CLIMBING_MACHINE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         STAIR_CLIMBING_MACHINE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is using a stair-climbing machine. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "stair_climbing.machine"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -5967,39 +6002,39 @@ From class
 
 <A NAME="STANDUP_PADDLEBOARDING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         STANDUP_PADDLEBOARDING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is on a stand-up paddle board. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "standup_paddleboarding"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6007,39 +6042,39 @@ From class
 
 <A NAME="STATUS_ACTIVE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         STATUS_ACTIVE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Status indicating the activity has started. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "ActiveActionStatus"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6047,39 +6082,39 @@ From class
 
 <A NAME="STATUS_COMPLETED"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         STATUS_COMPLETED
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Status indicating the activity has ended. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "CompletedActionStatus"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6087,39 +6122,39 @@ From class
 
 <A NAME="STILL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         STILL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is still (not moving). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "still"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6127,39 +6162,39 @@ From class
 
 <A NAME="STRENGTH_TRAINING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         STRENGTH_TRAINING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is strength training. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "strength_training"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6167,39 +6202,39 @@ From class
 
 <A NAME="SURFING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SURFING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is surfing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "surfing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6207,39 +6242,39 @@ From class
 
 <A NAME="SWIMMING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SWIMMING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is swimming. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "swimming"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6247,39 +6282,39 @@ From class
 
 <A NAME="SWIMMING_OPEN_WATER"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SWIMMING_OPEN_WATER
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is swimming in open waters. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "swimming.open_water"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6287,39 +6322,39 @@ From class
 
 <A NAME="SWIMMING_POOL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         SWIMMING_POOL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is swimming in a swimming pool. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "swimming.pool"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6327,39 +6362,39 @@ From class
 
 <A NAME="TABLE_TENNIS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         TABLE_TENNIS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing table tennis (or ping-pong). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "table_tennis"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6367,39 +6402,39 @@ From class
 
 <A NAME="TEAM_SPORTS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         TEAM_SPORTS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing a team sport. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "team_sports"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6407,39 +6442,39 @@ From class
 
 <A NAME="TENNIS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         TENNIS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing tennis. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "tennis"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6447,27 +6482,27 @@ From class
 
 <A NAME="TILTING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         TILTING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>This is a synthetic activity used by the
  <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionApi.html">Activity Recognition API</a></code> to
  indicate that the device angle relative to gravity changed significantly between the sample
@@ -6475,16 +6510,16 @@ From class
  device is picked up from a desk or when a user who is sitting stands up.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "tilting"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6492,39 +6527,39 @@ From class
 
 <A NAME="TREADMILL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         TREADMILL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is on a treadmill (either walking or running). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "treadmill"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6532,41 +6567,41 @@ From class
 
 <A NAME="UNKNOWN"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         UNKNOWN
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>The current activity is not known.  In this case, the activity could be any of the
- activities described in this class, or a completely different one.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The current activity is not known.  In this case, the activity could be any of the 
+ activities described in this class, or a completely different one. 
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "unknown"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6574,39 +6609,39 @@ From class
 
 <A NAME="VOLLEYBALL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         VOLLEYBALL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing volleyball. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "volleyball"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6614,39 +6649,39 @@ From class
 
 <A NAME="VOLLEYBALL_BEACH"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         VOLLEYBALL_BEACH
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing beach volleyball. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "volleyball.beach"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6654,39 +6689,39 @@ From class
 
 <A NAME="VOLLEYBALL_INDOOR"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         VOLLEYBALL_INDOOR
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing indoor volleyball. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "volleyball.indoor"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6694,39 +6729,39 @@ From class
 
 <A NAME="WAKEBOARDING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         WAKEBOARDING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is wake boarding. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "wakeboarding"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6734,39 +6769,39 @@ From class
 
 <A NAME="WALKING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         WALKING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is walking. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "walking"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6774,39 +6809,39 @@ From class
 
 <A NAME="WALKING_FITNESS"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         WALKING_FITNESS
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is walking at a moderate to high pace, for fitness. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "walking.fitness"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6814,39 +6849,39 @@ From class
 
 <A NAME="WALKING_NORDIC"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         WALKING_NORDIC
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is performing Nordic walking (with poles). </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "walking.nordic"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6854,39 +6889,39 @@ From class
 
 <A NAME="WALKING_TREADMILL"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         WALKING_TREADMILL
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is walking on a treadmill </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "walking.treadmill"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6894,39 +6929,39 @@ From class
 
 <A NAME="WATER_POLO"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         WATER_POLO
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is playing water polo. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "water_polo"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6934,39 +6969,39 @@ From class
 
 <A NAME="WEIGHTLIFTING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         WEIGHTLIFTING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is weight lifting. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "weightlifting"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -6974,39 +7009,39 @@ From class
 
 <A NAME="WHEELCHAIR"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         WHEELCHAIR
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is on a wheel chair. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "wheelchair"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -7014,39 +7049,39 @@ From class
 
 <A NAME="WINDSURFING"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         WINDSURFING
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is wind surfing. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "windsurfing"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -7054,39 +7089,39 @@ From class
 
 <A NAME="YOGA"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         YOGA
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The user is performing Yoga poses. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "yoga"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -7094,39 +7129,39 @@ From class
 
 <A NAME="ZUMBA"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         ZUMBA
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The users is performing Zumba exercises. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "zumba"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -7154,14 +7189,14 @@ From class
 
 <A NAME="getMimeType(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         String
       </span>
       <span class="sympad">getMimeType</span>
@@ -7169,15 +7204,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the MIME type for a particular activity.  The MIME type is used in intents for
  <code><a href="/reference/com/google/android/gms/fitness/SessionsApi.ViewIntentBuilder.html">viewing a session</a></code> and
  <code><a href="/reference/com/google/android/gms/fitness/Fitness.html#ACTION_TRACK">tracking an activity</a></code>.</p></div>
@@ -7198,14 +7233,14 @@ From class
 
 <A NAME="getValue(com.google.android.gms.fitness.data.DataPoint)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         String
       </span>
       <span class="sympad">getValue</span>
@@ -7213,36 +7248,25 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#asActivity()">asActivity()</a></code> instead.  This method will be removed in
+ an upcoming release.  New usage:
+ <pre>
+     dataPoint.getValue(FIELD_ACTIVITY).asActivity();
+ </pre>
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Reads the value of the <code><a href="/reference/com/google/android/gms/fitness/data/Field.html#FIELD_ACTIVITY">activity</a></code> field of the given data point
- from the storage representation of this activity, and returns the activity name.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>dataPoint</td>
-          <td>a data point which has a field of type <code><a href="/reference/com/google/android/gms/fitness/data/Field.html#FIELD_ACTIVITY">FIELD_ACTIVITY</a></code></td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
-        <tr>
-            <th>IllegalArgumentException</td>
-            <td>if the data point is invalid
-</td>
-        </tr>
-      </table>
-  </div>
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -7250,14 +7274,14 @@ From class
 
 <A NAME="setValue(com.google.android.gms.fitness.data.DataPoint, java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         void
       </span>
       <span class="sympad">setValue</span>
@@ -7265,36 +7289,25 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Use <code><a href="/reference/com/google/android/gms/fitness/data/Value.html#setActivity(java.lang.String)">setActivity(String)</a></code> instead.  This method will be removed in
+ an upcoming release.  New usage:
+ <pre>
+     dataPoint.getValue(FIELD_ACTIVITY).setActivity(activity);
+ </pre>
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the value of the <code><a href="/reference/com/google/android/gms/fitness/data/Field.html#FIELD_ACTIVITY">activity</a></code> field of the given data point
- to the internal representation of this activity.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>dataPoint</td>
-          <td>a data point which has a field of type <code><a href="/reference/com/google/android/gms/fitness/data/Field.html#FIELD_ACTIVITY">FIELD_ACTIVITY</a></code></td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
-        <tr>
-            <th>IllegalArgumentException</td>
-            <td>if the data point is invalid
-</td>
-        </tr>
-      </table>
-  </div>
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -7311,17 +7324,17 @@ From class
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -7329,7 +7342,7 @@ From class
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -7342,7 +7355,7 @@ From class
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 
