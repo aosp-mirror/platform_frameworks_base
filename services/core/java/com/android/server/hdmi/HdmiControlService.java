@@ -379,7 +379,7 @@ public final class HdmiControlService extends SystemService {
         }
         mWakeUpMessageReceived = false;
 
-        if (isTvDevice()) {
+        if (isTvDeviceEnabled()) {
             mCecController.setOption(OPTION_CEC_AUTO_WAKEUP, toInt(tv().getAutoWakeup()));
         }
         int reason = -1;
@@ -430,11 +430,15 @@ public final class HdmiControlService extends SystemService {
                     setControlEnabled(enabled);
                     break;
                 case Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED:
-                    tv().setAutoWakeup(enabled);
+                    if (isTvDeviceEnabled()) {
+                        tv().setAutoWakeup(enabled);
+                    }
                     setCecOption(OPTION_CEC_AUTO_WAKEUP, toInt(enabled));
                     break;
                 case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
-                    tv().setAutoDeviceOff(enabled);
+                    if (isTvDeviceEnabled()) {
+                        tv().setAutoDeviceOff(enabled);
+                    }
                     // No need to propagate to HAL.
                     break;
                 case Global.MHL_INPUT_SWITCHING_ENABLED:
@@ -665,11 +669,7 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     HdmiDeviceInfo getDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();
-        HdmiCecLocalDeviceTv tv = tv();
-        if (tv == null) {
-            return null;
-        }
-        return tv.getCecDeviceInfo(logicalAddress);
+        return tv() == null ? null : tv().getCecDeviceInfo(logicalAddress);
     }
 
     /**
@@ -1418,8 +1418,8 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (!isTvDevice()) {
-                        Slog.w(TAG, "No TV is available.");
+                    if (!isTvDeviceEnabled()) {
+                        Slog.w(TAG, "TV device is not enabled.");
                         return;
                     }
                     tv().startOneTouchRecord(recorderAddress, recordSource);
@@ -1433,8 +1433,8 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (!isTvDevice()) {
-                        Slog.w(TAG, "No TV is available.");
+                    if (!isTvDeviceEnabled()) {
+                        Slog.w(TAG, "TV device is not enabled.");
                         return;
                     }
                     tv().stopOneTouchRecord(recorderAddress);
@@ -1449,8 +1449,8 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (!isTvDevice()) {
-                        Slog.w(TAG, "No TV is available.");
+                    if (!isTvDeviceEnabled()) {
+                        Slog.w(TAG, "TV device is not enabled.");
                         return;
                     }
                     tv().startTimerRecording(recorderAddress, sourceType, recordSource);
@@ -1465,8 +1465,8 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (!isTvDevice()) {
-                        Slog.w(TAG, "No TV is available.");
+                    if (!isTvDeviceEnabled()) {
+                        Slog.w(TAG, "TV device is not enabled.");
                         return;
                     }
                     tv().clearTimerRecording(recorderAddress, sourceType, recordSource);
@@ -1769,6 +1769,10 @@ public final class HdmiControlService extends SystemService {
         return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_TV);
     }
 
+    boolean isTvDeviceEnabled() {
+        return isTvDevice() && tv() != null;
+    }
+
     private HdmiCecLocalDevicePlayback playback() {
         return (HdmiCecLocalDevicePlayback)
                 mCecController.getLocalDevice(HdmiDeviceInfo.DEVICE_PLAYBACK);
@@ -1876,7 +1880,7 @@ public final class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
         mLanguage = language;
 
-        if (isTvDevice()) {
+        if (isTvDeviceEnabled()) {
             tv().broadcastMenuLanguage(language);
         }
     }
@@ -2100,6 +2104,7 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     void changeInputForMhl(int portId, boolean contentOn) {
         assertRunOnServiceThread();
+        if (tv() == null) return;
         final int lastInput = contentOn ? tv().getActivePortId() : Constants.INVALID_PORT_ID;
         tv().doManualPortSwitching(portId, new IHdmiControlCallback.Stub() {
             @Override
