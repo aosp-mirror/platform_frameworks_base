@@ -17,6 +17,7 @@
 package com.android.server.backup;
 
 
+import android.app.ActivityManagerNative;
 import android.app.IWallpaperManager;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
@@ -184,6 +185,15 @@ public class SystemBackupAgent extends BackupAgentHelper {
                 (new File(WALLPAPER_IMAGE)).delete();
                 (new File(WALLPAPER_INFO)).delete();
             }
+        }
+    }
+
+    @Override
+    public void onRestoreFinished() {
+        try {
+            ActivityManagerNative.getDefault().systemBackupRestored();
+        } catch (RemoteException e) {
+            // Not possible since this code is running in the system process.
         }
     }
 }
