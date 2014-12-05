@@ -30,6 +30,7 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.Outline;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -317,7 +318,13 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
 
     @Override
     public int getOpacity() {
-        return mState.mDrawable.getOpacity();
+        final InsetState state = mState;
+        final int opacity = state.mDrawable.getOpacity();
+        if (opacity == PixelFormat.OPAQUE && (state.mInsetLeft > 0 || state.mInsetTop > 0
+                || state.mInsetRight > 0 || state.mInsetBottom > 0)) {
+            return PixelFormat.TRANSLUCENT;
+        }
+        return opacity;
     }
 
     @Override
