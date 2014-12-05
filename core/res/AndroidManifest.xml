@@ -2914,7 +2914,8 @@
          Any service that filters for this intent must be a carrier privileged app. -->
     <permission android:name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"
         android:label="@string/permlab_bindCarrierMessagingService"
-        android:description="@string/permdesc_bindCarrierMessagingService" />
+        android:description="@string/permdesc_bindCarrierMessagingService"
+        android:protectionLevel="signature|system" />
 
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->
