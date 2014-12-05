@@ -138,6 +138,17 @@ public class AudioManager {
     public static final String VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION";
 
     /**
+     * @hide Broadcast intent when a stream mute state changes.
+     * Includes the stream that changed and the new mute state
+     *
+     * @see #EXTRA_VOLUME_STREAM_TYPE
+     * @see #EXTRA_STREAM_VOLUME_MUTED
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String STREAM_MUTE_CHANGED_ACTION =
+        "android.media.STREAM_MUTE_CHANGED_ACTION";
+
+    /**
      * @hide Broadcast intent when the master volume changes.
      * Includes the new volume
      *
@@ -219,6 +230,13 @@ public class AudioManager {
      */
     public static final String EXTRA_MASTER_VOLUME_MUTED =
         "android.media.EXTRA_MASTER_VOLUME_MUTED";
+
+    /**
+     * @hide The new stream volume mute state for the stream mute changed intent.
+     * Value is boolean
+     */
+    public static final String EXTRA_STREAM_VOLUME_MUTED =
+        "android.media.EXTRA_STREAM_VOLUME_MUTED";
 
     /**
      * Broadcast Action: Wired Headset plugged in or unplugged.
@@ -728,11 +746,7 @@ public class AudioManager {
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
                 if (event.getRepeatCount() == 0) {
-                    if (mUseMasterVolume) {
-                        setMasterMute(!isMasterMute());
-                    } else {
-                        // TODO: Actually handle MUTE.
-                    }
+                    MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(event, false);
                 }
                 break;
         }
@@ -762,6 +776,9 @@ public class AudioManager {
                     }
                 }
                 mVolumeKeyUpTime = SystemClock.uptimeMillis();
+                break;
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                MediaSessionLegacyHelper.getHelper(mContext).sendVolumeKeyEvent(event, false);
                 break;
         }
     }

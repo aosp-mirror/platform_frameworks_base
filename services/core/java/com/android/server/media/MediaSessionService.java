@@ -40,6 +40,7 @@ import android.media.session.ISessionCallback;
 import android.media.session.ISessionManager;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -588,6 +589,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 "android.media.AudioService.WAKELOCK_ACQUIRED";
         private static final int WAKELOCK_RELEASE_ON_FINISHED = 1980; // magic number
 
+        private final IBinder mICallback = new Binder();
+
         private boolean mVoiceButtonDown = false;
         private boolean mVoiceButtonHandled = false;
 
@@ -720,8 +723,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         @Override
-        public void dispatchAdjustVolume(int suggestedStream, int delta, int flags)
-                throws RemoteException {
+        public void dispatchAdjustVolume(int suggestedStream, int delta, int flags) {
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -828,11 +830,21 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 try {
                     if (mUseMasterVolume) {
-                        mAudioService.adjustMasterVolume(direction, flags,
-                                getContext().getOpPackageName());
+                        if (direction == MediaSessionManager.DIRECTION_MUTE) {
+                            mAudioService.setMasterMute(!mAudioService.isMasterMute(), flags,
+                                    getContext().getOpPackageName(), mICallback);
+                        } else {
+                            mAudioService.adjustMasterVolume(direction, flags,
+                                    getContext().getOpPackageName());
+                        }
                     } else {
-                        mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream, flags,
-                                getContext().getOpPackageName());
+                        if (direction == MediaSessionManager.DIRECTION_MUTE) {
+                            mAudioService.setStreamMute(suggestedStream,
+                                    !mAudioService.isStreamMute(suggestedStream), mICallback);
+                        } else {
+                            mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
+                                    flags, getContext().getOpPackageName());
+                        }
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error adjusting default volume.", e);
@@ -841,7 +853,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                 session.adjustVolume(direction, flags, getContext().getPackageName(),
                         UserHandle.myUserId(), true);
                 if (session.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE
-                        && mRvc != null) {
+                        && mRvc != null && direction != MediaSessionManager.DIRECTION_MUTE) {
                     try {
                         mRvc.remoteVolumeChanged(session.getControllerBinder(), flags);
                     } catch (Exception e) {

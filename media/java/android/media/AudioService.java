@@ -1517,12 +1517,20 @@ public class AudioService extends IAudioService.Stub {
         if (mUseFixedVolume) {
             return;
         }
+        if (streamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+            streamType = getActiveStreamType(streamType);
+        }
 
         if (isStreamAffectedByMute(streamType)) {
             if (streamType == AudioSystem.STREAM_MUSIC) {
                 setSystemAudioMute(state);
             }
             mStreamStates[streamType].mute(cb, state);
+
+            Intent intent = new Intent(AudioManager.STREAM_MUTE_CHANGED_ACTION);
+            intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, streamType);
+            intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, state);
+            sendBroadcastToAll(intent);
         }
     }
 
@@ -1544,6 +1552,9 @@ public class AudioService extends IAudioService.Stub {
 
     /** get stream mute state. */
     public boolean isStreamMute(int streamType) {
+        if (streamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
+            streamType = getActiveStreamType(streamType);
+        }
         synchronized (VolumeStreamState.class) {
             return mStreamStates[streamType].isMuted_syncVSS();
         }
@@ -1651,11 +1662,16 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#setMasterMute(boolean, int) */
     public void setMasterMute(boolean state, int flags, String callingPackage, IBinder cb) {
+        setMasterMuteInternal(state, flags, callingPackage, cb, Binder.getCallingUid());
+    }
+
+    private void setMasterMuteInternal(boolean state, int flags, String callingPackage, IBinder cb,
+            int uid) {
         if (mUseFixedVolume) {
             return;
         }
-        if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, Binder.getCallingUid(),
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+        if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, uid, callingPackage)
+                != AppOpsManager.MODE_ALLOWED) {
             return;
         }
         if (state != AudioSystem.getMasterMute()) {
@@ -1665,6 +1681,10 @@ public class AudioService extends IAudioService.Stub {
             sendMsg(mAudioHandler, MSG_PERSIST_MASTER_VOLUME_MUTE, SENDMSG_REPLACE, state ? 1
                     : 0, UserHandle.getCallingUserId(), null, PERSIST_DELAY);
             sendMasterMuteUpdate(state, flags);
+
+            Intent intent = new Intent(AudioManager.MASTER_MUTE_CHANGED_ACTION);
+            intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_MUTED, state);
+            sendBroadcastToAll(intent);
         }
     }
 
@@ -5780,6 +5800,12 @@ public class AudioService extends IAudioService.Stub {
         @Override
         public void setRingerModeInternal(int ringerMode, String caller) {
             AudioService.this.setRingerModeInternal(ringerMode, caller);
+        }
+
+        @Override
+        public void setMasterMuteForUid(boolean state, int flags, String callingPackage, IBinder cb,
+                int uid) {
+            setMasterMuteInternal(state, flags, callingPackage, cb, uid);
         }
     }
 
