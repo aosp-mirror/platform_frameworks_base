@@ -504,6 +504,22 @@ public class DevicePolicyManager {
         }
         return false;
     }
+    /**
+     * Return true if the given administrator component is currently being removed
+     * for the user.
+     * @hide
+     */
+    public boolean isRemovingAdmin(ComponentName who, int userId) {
+        if (mService != null) {
+            try {
+                return mService.isRemovingAdmin(who, userId);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Return a list of all currently active device administrator's component
