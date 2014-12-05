@@ -17,7 +17,7 @@
  */
 -->
 <resources>
-    <drawable name="notification_number_text_color">#ffffffff</drawable>
+    <drawable name="notification_number_text_color">#ff000000</drawable>
     <drawable name="ticker_background_color">#ff1d1d1d</drawable>
     <drawable name="system_bar_background">@color/system_bar_background_opaque</drawable>
     <color name="system_bar_background_opaque">#ff000000</color>
