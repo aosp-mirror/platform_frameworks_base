@@ -10,7 +10,6 @@ page.title=Debugging with Android Studio
     <ol>
       <li><a href="#attachDebug">Attach the debugger to a running process</a></li>
     </ol>
-  </li>
   <li><a href="#systemLog">Use the System Log</a>
     <ol>
       <li><a href="#systemLogWrite">Write log messages in your code</a></li>
@@ -29,7 +28,7 @@ page.title=Debugging with Android Studio
 </ol>
 <h2>See also</h2>
 <ul>
-<li><a href="{@docRoot}sdk/installing/studio-tips.html">
+<li><a href="{@docRoot}tools/basics/index.html">
 Android Studio Tips and Tricks</a></li>
 <li><a href="{@docRoot}tools/debugging/index.html">Debugging</a></li>
 <li><a href="{@docRoot}tools/help/monitor.html">Device Monitor</a></li>
@@ -113,7 +112,6 @@ debugger to.</li>
 <img src="{@docRoot}images/tools/as-debugwindowbutton.png"
 alt="" style="vertical-align:bottom;margin:0;height:20px"/>.</li>
 </ol>
-
 
 <h2 id="systemLog">Use the System Log</h2>
 
