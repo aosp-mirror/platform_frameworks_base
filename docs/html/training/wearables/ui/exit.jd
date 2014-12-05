@@ -67,7 +67,7 @@ For example:</p>
         android:id="@+id/dismiss_overlay"
         android:layout_height="match_parent"
         android:layout_width="match_parent"/>
-&lt;/FrameLayout>
+&lt;FrameLayout>
 </pre>
 
 <p>In your activity, obtain the <code>DismissOverlayView</code> element and set some introductory
@@ -100,8 +100,8 @@ public class WearActivity extends Activity {
 
     // Capture long presses
     &#64;Override
-    public boolean dispatchTouchEvent(MotionEvent e) {
-        return mDetector.onTouchEvent(e) || super.dispatchTouchEvent(e);
+    public boolean onTouchEvent(MotionEvent ev) {
+        return mDetector.onTouchEvent(ev) || super.onTouchEvent(ev);
     }
 }
 </pre>
