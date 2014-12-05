@@ -32,8 +32,10 @@ p.paging-links {
 the Android Studio IDE (powered by IntelliJ) and guides you to install
 the Android SDK tools to streamline your Android app development.</p>
 
-<p>If you didn't download Android Studio, go <a href="{@docRoot}sdk/installing/studio.html"
-><b>download Android Studio now</b></a>.</p>
+<p>If you didn't download Android Studio, go <a href="{@docRoot}sdk/index.html"
+><b>download Android Studio now</b></a>, or switch to the
+<a href="{@docRoot}sdk/installing/index.html?pkg=tools">stand-alone SDK Tools
+install</a> instructions.</p>
 
 
 <p>Before you set up Android Studio, be sure you have installed
@@ -151,7 +153,7 @@ Continue: Adding SDK Packages</a></p>
 It includes only the core SDK tools, which you can access from a command line or with a plugin
 for your favorite IDE (if available).</p>
 
-<p>If you didn't download the SDK tools, go <a href="{@docRoot}sdk/index.html"
+<p>If you didn't download the SDK tools, go <a href="{@docRoot}sdk/index.html#Other"
 ><b>download the SDK now</b></a>,
 or switch to the <a href="{@docRoot}sdk/installing/index.html?pkg=adt">Eclipse ADT
 install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
@@ -281,7 +283,7 @@ Continue: Adding SDK Packages</a></p>
 the Android SDK tools and a version of the Eclipse IDE with built-in ADT
 (Android Developer Tools) to streamline your Android app development.</p>
 
-<p>If you didn't download the Eclipse ADT bundle, go <a href="{@docRoot}sdk/index.html"
+<p>If you didn't download the Eclipse ADT bundle, go <a href="{@docRoot}tools/eclipse/index.html"
 ><b>download the Eclipse ADT bundle now</b></a>, or switch to the
 <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
 install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=tools">stand-alone SDK Tools
@@ -349,10 +351,6 @@ Stand-alone SDK Tools
 
 <div>
 <p></p>
-<p>If you are still using Eclipse ADT, you can still <a href="{@docRoot}sdk/index.html">download</a>
-and <a href="{@docRoot}sdk/installing/index.html?pkg=adt">install </a> the current release.
-However, <a href="{@docRoot}tools/eclipse/migrate-adt.html">consider migrating to Android Studio</a>
-as the Eclipse ADT plugin is no longer in active development.</p>
 
 </div>
 
