@@ -289,14 +289,15 @@ class="en">Platforms</span></a></li>
   <li class="nav-section">
     <div class="nav-section-header">
     <a href="<?cs var:toroot ?>tools/eclipse/index.html">
-      <span class="en">Eclipse ADT</span></a>
+      <span class="en">Eclipse with ADT</span></a>
     </div>
     <ul>
-    <li><a href="<?cs var:toroot ?>tools/eclipse/migrate-adt.html">Migrating to Android Studio</a></li>
-    <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Projects From Eclipse with ADT</a></li>
-    <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building From Eclipse with ADT</a></li>
-    <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html">Debugging From Eclipse with ADT</a></li>
-    <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">Testing From Eclipse</a></li>
+    <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">Migrating to Android Studio</a></li>
+    <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">Installing</a></li>
+    <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Setting Up Projects</a></li>
+    <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building</a></li>
+    <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html">Debugging</a></li>
+    <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">Testing</a></li>
     </ul>
   </li><!-- end of Eclipse  -->
 
