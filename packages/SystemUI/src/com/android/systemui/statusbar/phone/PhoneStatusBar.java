@@ -3795,14 +3795,19 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * @param state The {@link StatusBarState} to set.
      */
     public void setBarState(int state) {
-        // If we're visible and switched to SHADE_LOCKED (the user dragged down
-        // on the lockscreen), clear notification LED, vibration, ringing.
-        // Other transitions are covered in handleVisibleToUserChanged().
-        if (mVisible && mState != state && state == StatusBarState.SHADE_LOCKED) {
-            try {
-                mBarService.clearNotificationEffects();
-            } catch (RemoteException e) {
-                // Ignore.
+        if (state != mState) {
+            EventLogTags.writeSysuiStatusBarState(state);
+
+            // If we're visible and switched to SHADE_LOCKED (the user dragged
+            // down on the lockscreen), clear notification LED, vibration,
+            // ringing.
+            // Other transitions are covered in handleVisibleToUserChanged().
+            if (mVisible && state == StatusBarState.SHADE_LOCKED) {
+                try {
+                    mBarService.clearNotificationEffects();
+                } catch (RemoteException e) {
+                    // Ignore.
+                }
             }
         }
         mState = state;

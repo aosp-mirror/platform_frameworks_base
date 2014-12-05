@@ -9,6 +9,7 @@ option java_package com.android.systemui;
 36001 sysui_heads_up_status (key|3),(visible|1)
 36002 sysui_fullscreen_notification (key|3)
 36003 sysui_heads_up_escalation (key|3)
+36004 sysui_status_bar_state (state|1)
 
 # ---------------------------
 # PhoneStatusBarView.java
