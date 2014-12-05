@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">AdRequest</li>
       </ul>
     </div>
@@ -827,7 +850,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -915,8 +938,8 @@ Summary:
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html">AdRequest.Builder</a></td>
       <td class="jd-descrcol" width="100%">
         Builds an <code><a href="/reference/com/google/android/gms/ads/AdRequest.html">AdRequest</a></code>.&nbsp;
-
-
+        
+    
 
       </td>
     </tr>
@@ -946,8 +969,8 @@ Summary:
         <td class="jd-descrcol" width="100%">
           Something happened internally; for instance, an invalid response was received from the ad
  server.
-
-
+          
+    
 
         </td>
     </tr>
@@ -958,8 +981,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdRequest.html#ERROR_CODE_INVALID_REQUEST">ERROR_CODE_INVALID_REQUEST</a></td>
         <td class="jd-descrcol" width="100%">
           The ad request was invalid; for instance, the ad unit ID was incorrect.
-
-
+          
+    
 
         </td>
     </tr>
@@ -970,8 +993,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdRequest.html#ERROR_CODE_NETWORK_ERROR">ERROR_CODE_NETWORK_ERROR</a></td>
         <td class="jd-descrcol" width="100%">
           The ad request was unsuccessful due to network connectivity.
-
-
+          
+    
 
         </td>
     </tr>
@@ -982,8 +1005,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdRequest.html#ERROR_CODE_NO_FILL">ERROR_CODE_NO_FILL</a></td>
         <td class="jd-descrcol" width="100%">
           The ad request was successful, but no ad was returned due to lack of ad inventory.
-
-
+          
+    
 
         </td>
     </tr>
@@ -994,8 +1017,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdRequest.html#GENDER_FEMALE">GENDER_FEMALE</a></td>
         <td class="jd-descrcol" width="100%">
           Female gender.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1006,8 +1029,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdRequest.html#GENDER_MALE">GENDER_MALE</a></td>
         <td class="jd-descrcol" width="100%">
           Male gender.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1018,8 +1041,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdRequest.html#GENDER_UNKNOWN">GENDER_UNKNOWN</a></td>
         <td class="jd-descrcol" width="100%">
           Unknown gender.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1030,13 +1053,13 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/ads/AdRequest.html#MAX_CONTENT_URL_LENGTH">MAX_CONTENT_URL_LENGTH</a></td>
         <td class="jd-descrcol" width="100%">
           The maximum content URL length.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
 
 </table>
 
@@ -1061,8 +1084,8 @@ Summary:
           <td class="jd-descrcol" width="100%">
             The <code>deviceId</code> for emulators to be used with
  <code><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice(String)</a></code>.
-
-
+            
+    
 
           </td>
       </tr>
@@ -1101,8 +1124,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Returns the user's birthday targeting information.
-
-
+          
+    
 
         </div>
   
@@ -1121,48 +1144,48 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.html#getContentUrl()">getContentUrl</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the content URL targeting information.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
+            
+            
+            
+            
             &lt;T&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/ads/mediation/customevent/CustomEvent.html">CustomEvent</a>&gt;
             Bundle</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.html#getCustomEventExtrasBundle(java.lang.Class<T>)">getCustomEventExtrasBundle</a></span>(Class&lt;T&gt; adapterClass)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns extra parameters to pass to a specific custom event adapter.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1170,8 +1193,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Returns the user's gender targeting information.
-
-
+          
+    
 
         </div>
   
@@ -1193,8 +1216,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Returns targeting information keywords.
-
-
+          
+    
 
         </div>
   
@@ -1216,8 +1239,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Returns the user's location targeting information.
-
-
+          
+    
 
         </div>
   
@@ -1239,8 +1262,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Returns extra parameters to pass to a specific ad network adapter.
-
-
+          
+    
 
         </div>
   
@@ -1250,27 +1273,27 @@ Summary:
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
+            
+            
+            
+            
             &lt;T&nbsp;extends&nbsp;<a href="/reference/com/google/android/gms/ads/mediation/MediationAdapter.html">MediationAdapter</a>&gt;
             Bundle</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/ads/AdRequest.html#getNetworkExtrasBundle(java.lang.Class<T>)">getNetworkExtrasBundle</a></span>(Class&lt;T&gt; adapterClass)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns extra parameters to pass to a specific ad network adapter.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -1285,8 +1308,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Returns <code>true</code> if this device will receive test ads.
-
-
+          
+    
 
         </div>
   
@@ -1558,9 +1581,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Something happened internally; for instance, an invalid response was received from the ad
  server.
 </p></div>
@@ -1601,9 +1624,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The ad request was invalid; for instance, the ad unit ID was incorrect.
 </p></div>
 
@@ -1643,9 +1666,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The ad request was unsuccessful due to network connectivity.
 </p></div>
 
@@ -1685,9 +1708,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The ad request was successful, but no ad was returned due to lack of ad inventory.
 </p></div>
 
@@ -1727,9 +1750,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Female gender. </p></div>
 
     
@@ -1768,9 +1791,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Male gender. </p></div>
 
     
@@ -1809,9 +1832,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Unknown gender. </p></div>
 
     
@@ -1832,40 +1855,40 @@ From class
 
 <A NAME="MAX_CONTENT_URL_LENGTH"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         int
       </span>
         MAX_CONTENT_URL_LENGTH
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The maximum content URL length. </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 512
                 (0x00000200)
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1901,9 +1924,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The <code>deviceId</code> for emulators to be used with
  <code><a href="/reference/com/google/android/gms/ads/AdRequest.Builder.html#addTestDevice(java.lang.String)">addTestDevice(String)</a></code>.
 </p></div>
@@ -1954,9 +1977,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the user's birthday targeting information. Returns <code>null</code> if the birthday was
  not set.
 </p></div>
@@ -1967,14 +1990,14 @@ From class
 
 <A NAME="getContentUrl()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getContentUrl</span>
@@ -1982,15 +2005,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the content URL targeting information. Returns <code>null</code> if the contentUrl was
  not set.
 </p></div>
@@ -2001,14 +2024,14 @@ From class
 
 <A NAME="getCustomEventExtrasBundle(java.lang.Class<T>)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Bundle
       </span>
       <span class="sympad">getCustomEventExtrasBundle</span>
@@ -2016,15 +2039,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns extra parameters to pass to a specific custom event adapter. Returns <code>null</code> if
  no custom event extras of the provided type were set.
 </p></div>
@@ -2056,9 +2079,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the user's gender targeting information. Returns <code>-1</code> if the gender was not
  set.
 </p></div>
@@ -2090,9 +2113,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns targeting information keywords. Returns an empty <code><a href="/reference/java/util/Set.html">Set</a></code> if no
  keywords were added.
 </p></div>
@@ -2124,9 +2147,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the user's location targeting information. Returns <code>null</code> if the location was
  not set.
 </p></div>
@@ -2158,9 +2181,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns extra parameters to pass to a specific ad network adapter. Ad network adapters
  provide a <code><a href="/reference/com/google/android/gms/ads/mediation/NetworkExtras.html">NetworkExtras</a></code> class. Returns <code>null</code> if no network extras of the
  provided type were set.
@@ -2172,14 +2195,14 @@ From class
 
 <A NAME="getNetworkExtrasBundle(java.lang.Class<T>)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Bundle
       </span>
       <span class="sympad">getNetworkExtrasBundle</span>
@@ -2187,15 +2210,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns extra parameters to pass to a specific ad network adapter. Returns <code>null</code> if no
  network extras of the provided type were set.
 </p></div>
@@ -2227,9 +2250,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns <code>true</code> if this device will receive test ads.
 </p></div>
 

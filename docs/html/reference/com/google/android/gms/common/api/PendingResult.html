@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">PendingResult</li>
       </ul>
     </div>
@@ -770,7 +793,7 @@ Summary:
 
 
   <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -803,7 +826,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -837,31 +860,31 @@ Summary:
   <div id="subclasses-indirect">
       <div id="subclasses-indirect-list"
               class="jd-inheritedlinks"
-
+              
               >
-
-
+          
+            
               <a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a>
-
-
+            
+          
       </div>
       <div id="subclasses-indirect-summary"
               style="display: none;"
               >
-
+  
   <table class="jd-sumtable-expando">
-
+    
       <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a></td>
         <td class="jd-descrcol" width="100%">
           Handles a batch of <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> items.&nbsp;
-
-
+          
+    
 
         </td>
       </tr>
-
-
+      
+    
   </table>
 
       </div>
@@ -960,8 +983,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Blocks until the task is completed.
-
-
+          
+    
 
         </div>
   
@@ -983,8 +1006,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Blocks until the task is completed or has timed out waiting for the result.
-
-
+          
+    
 
         </div>
   
@@ -1003,74 +1026,74 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Requests that the PendingResult be canceled.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/PendingResult.html#isCanceled()">isCanceled</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Indicates whether the pending result has been canceled either due to calling
  {GoogleApiClient#disconnect} or calling <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code> directly on the pending result or an
  enclosing <code><a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a></code>.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/PendingResult.html#setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)">setResultCallback</a></span>(<a href="/reference/com/google/android/gms/common/api/ResultCallback.html">ResultCallback</a>&lt;R&gt; callback, long time, TimeUnit units)</nobr>
-
+        
         <div class="jd-descrdiv">
           Set the callback here if you want the result to be delivered via a callback when the result
  is ready or has timed out waiting for the result.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1079,8 +1102,8 @@ Summary:
         <div class="jd-descrdiv">
           Set the callback here if you want the result to be delivered via a callback when the
  result is ready.
-
-
+          
+    
 
         </div>
   
@@ -1158,9 +1181,9 @@ Summary:
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Blocks until the task is completed.  This is not allowed on the UI thread.  The returned
  result object can have an additional failure mode of <code><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INTERRUPTED">INTERRUPTED</a></code>.
 </p></div>
@@ -1192,9 +1215,9 @@ Summary:
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Blocks until the task is completed or has timed out waiting for the result.  This is not
  allowed on the UI thread.  The returned result object can have an additional failure mode of
  either <code><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INTERRUPTED">INTERRUPTED</a></code> or <code><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#TIMEOUT">TIMEOUT</a></code>.
@@ -1206,14 +1229,14 @@ Summary:
 
 <A NAME="cancel()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">cancel</span>
@@ -1221,15 +1244,15 @@ Summary:
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Requests that the PendingResult be canceled.
  If the result is available, but not consumed it will be released.
  If the result is set after cancelation was requested it is immediately released.
@@ -1244,14 +1267,14 @@ Summary:
 
 <A NAME="isCanceled()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         boolean
       </span>
       <span class="sympad">isCanceled</span>
@@ -1259,15 +1282,15 @@ Summary:
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the pending result has been canceled either due to calling
  {GoogleApiClient#disconnect} or calling <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code> directly on the pending result or an
  enclosing <code><a href="/reference/com/google/android/gms/common/api/Batch.html">Batch</a></code>.
@@ -1279,14 +1302,14 @@ Summary:
 
 <A NAME="setResultCallback(com.google.android.gms.common.api.ResultCallback<R>, long, java.util.concurrent.TimeUnit)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         void
       </span>
       <span class="sympad">setResultCallback</span>
@@ -1294,15 +1317,15 @@ Summary:
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the callback here if you want the result to be delivered via a callback when the result
  is ready or has timed out waiting for the result. The returned result object can have an
  additional failure mode of <code><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#TIMEOUT">TIMEOUT</a></code>.
@@ -1335,9 +1358,9 @@ Summary:
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the callback here if you want the result to be delivered via a callback when the
  result is ready.
 </p></div>

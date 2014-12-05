@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">CastMediaControlIntent</li>
       </ul>
     </div>
@@ -821,7 +844,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -913,8 +936,8 @@ Summary:
         <td class="jd-descrcol" width="100%">
           A Cast extension action for requesting the current media status when the current item ID is
  not known to the client application.
-
-
+          
+    
 
         </td>
     </tr>
@@ -928,8 +951,8 @@ Summary:
       This constant is deprecated.
     use <code><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#categoryForCast(java.lang.String)">categoryForCast(String)</a></code> instead.
 </em>
-
-
+          
+    
 
         </td>
     </tr>
@@ -940,8 +963,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#DEFAULT_MEDIA_RECEIVER_APPLICATION_ID">DEFAULT_MEDIA_RECEIVER_APPLICATION_ID</a></td>
         <td class="jd-descrcol" width="100%">
           The application ID for the Cast Default Media Receiver.
-
-
+          
+    
 
         </td>
     </tr>
@@ -952,8 +975,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#ERROR_CODE_REQUEST_FAILED">ERROR_CODE_REQUEST_FAILED</a></td>
         <td class="jd-descrcol" width="100%">
           An error code indicating that a Cast request has failed.
-
-
+          
+    
 
         </td>
     </tr>
@@ -965,8 +988,8 @@ Summary:
         <td class="jd-descrcol" width="100%">
           An error code indicating that the request could not be processed because the session could
  not be started.
-
-
+          
+    
 
         </td>
     </tr>
@@ -978,8 +1001,8 @@ Summary:
         <td class="jd-descrcol" width="100%">
           An error code indicating that the connection to the Cast device has been lost, but the system
  is actively trying to re-establish the connection.
-
-
+          
+    
 
         </td>
     </tr>
@@ -992,8 +1015,8 @@ Summary:
           The extra that contains the ID of the application to launch for an
  <code><a href="https://developer.android.com/reference/android/support/v7/media/MediaControlIntent.html#ACTION_START_SESSION">ACTION_START_SESSION</a></code>
  request.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1004,13 +1027,13 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#EXTRA_CAST_LANGUAGE_CODE">EXTRA_CAST_LANGUAGE_CODE</a></td>
         <td class="jd-descrcol" width="100%">
           The extra that indicates the language to be used by the receiver application.
-
-
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#EXTRA_CAST_RELAUNCH_APPLICATION">EXTRA_CAST_RELAUNCH_APPLICATION</a></td>
@@ -1018,8 +1041,8 @@ Summary:
           The extra that indicates whether the application should be relaunched if it is already
  running (the default behavior) or whether an attempt should be made to join the application
  first.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1031,8 +1054,8 @@ Summary:
         <td class="jd-descrcol" width="100%">
           The extra that indicates that the receiver application should be stopped when the session
  ends.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1043,8 +1066,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#EXTRA_CUSTOM_DATA">EXTRA_CUSTOM_DATA</a></td>
         <td class="jd-descrcol" width="100%">
           The extra that contains a compact JSON string of custom data to pass with a media request.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1055,8 +1078,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#EXTRA_DEBUG_LOGGING_ENABLED">EXTRA_DEBUG_LOGGING_ENABLED</a></td>
         <td class="jd-descrcol" width="100%">
           The extra that indicates whether debug logging should be enabled for the Cast session.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1067,8 +1090,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#EXTRA_ERROR_CODE">EXTRA_ERROR_CODE</a></td>
         <td class="jd-descrcol" width="100%">
           An error bundle extra for the error code.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1113,8 +1136,8 @@ Summary:
         <div class="jd-descrdiv">
           Returns a custom control category for discovering Cast devices that support running the
  specified app, independent of whether the app is running or not.
-
-
+          
+    
 
         </div>
   
@@ -1137,8 +1160,8 @@ Summary:
         <div class="jd-descrdiv">
           Returns a custom control category for discovering Cast devices meeting <em>both</em>
  application ID and namespace restrictions.
-
-
+          
+    
 
         </div>
   
@@ -1161,8 +1184,8 @@ Summary:
         <div class="jd-descrdiv">
           Returns a custom control category for discovering Cast devices currently running an
  application which supports the specified namespaces.
-
-
+          
+    
 
         </div>
   
@@ -1185,8 +1208,8 @@ Summary:
         <div class="jd-descrdiv">
           Returns a custom control category for discovering Cast devices which support the default
  Android remote playback actions using the specified Cast player.
-
-
+          
+    
 
         </div>
   
@@ -1209,34 +1232,34 @@ Summary:
         <div class="jd-descrdiv">
           Returns a custom control category for discovering Cast devices which support the Default
  Media Receiver.
-
-
+          
+    
 
         </div>
   
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#languageTagForLocale(java.util.Locale)">languageTagForLocale</a></span>(Locale locale)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns an RFC-5646 language tag string fo the given locale.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
@@ -1505,9 +1528,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>A Cast extension action for requesting the current media status when the current item ID is
  not known to the client application.
  <p>
@@ -1560,8 +1583,8 @@ From class
 
       </div>
     <div class="jd-details-descr">
-
-
+      
+    
 
       <p>
   <p class="caution"><strong>
@@ -1608,9 +1631,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The application ID for the Cast Default Media Receiver.
 </p></div>
 
@@ -1649,9 +1672,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>An error code indicating that a Cast request has failed.
 </p></div>
 
@@ -1691,9 +1714,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>An error code indicating that the request could not be processed because the session could
  not be started.
 </p></div>
@@ -1734,9 +1757,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>An error code indicating that the connection to the Cast device has been lost, but the system
  is actively trying to re-establish the connection.
 </p></div>
@@ -1777,9 +1800,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The extra that contains the ID of the application to launch for an
  <code><a href="https://developer.android.com/reference/android/support/v7/media/MediaControlIntent.html#ACTION_START_SESSION">ACTION_START_SESSION</a></code>
  request. The value is expected to be a String.
@@ -1802,27 +1825,27 @@ From class
 
 <A NAME="EXTRA_CAST_LANGUAGE_CODE"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         EXTRA_CAST_LANGUAGE_CODE
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The extra that indicates the language to be used by the receiver application. May be
  included in an
  <code><a href="https://developer.android.com/reference/android/support/v7/media/MediaControlIntent.html#ACTION_START_SESSION">ACTION_START_SESSION</a></code>
@@ -1831,16 +1854,16 @@ From class
  <code><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#languageTagForLocale(java.util.Locale)">languageTagForLocale(Locale)</a></code>.
 </p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "com.google.android.gms.cast.EXTRA_CAST_LANGUAGE_CODE"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -1866,9 +1889,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The extra that indicates whether the application should be relaunched if it is already
  running (the default behavior) or whether an attempt should be made to join the application
  first. May be included in an
@@ -1911,9 +1934,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The extra that indicates that the receiver application should be stopped when the session
  ends. May be included in an
  <code><a href="https://developer.android.com/reference/android/support/v7/media/MediaControlIntent.html#ACTION_START_SESSION">ACTION_START_SESSION</a></code>
@@ -1955,9 +1978,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The extra that contains a compact JSON string of custom data to pass with a media request.
 </p></div>
 
@@ -1996,9 +2019,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The extra that indicates whether debug logging should be enabled for the Cast session. The
  value is expected to be a boolean.
 </p></div>
@@ -2038,9 +2061,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>An error bundle extra for the error code. The value is an integer, and will be one of the
  <code>ERROR_CODE_*</code> constants declared in this class.
 </p></div>
@@ -2103,9 +2126,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a custom control category for discovering Cast devices that support running the
  specified app, independent of whether the app is running or not.</p></div>
   <div class="jd-tagdata">
@@ -2155,9 +2178,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a custom control category for discovering Cast devices meeting <em>both</em>
  application ID and namespace restrictions. See <code><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#categoryForCast(java.util.Collection<java.lang.String>)">categoryForCast(Collection)</a></code> and
  <code><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#categoryForCast(java.lang.String)">categoryForCast(String)</a></code> for more details.</p></div>
@@ -2199,9 +2222,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a custom control category for discovering Cast devices currently running an
  application which supports the specified namespaces. Apps supporting additional namespaces
  beyond those specified here are still considered supported.</p></div>
@@ -2243,9 +2266,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a custom control category for discovering Cast devices which support the default
  Android remote playback actions using the specified Cast player. If the Default Media
  Receiver is desired, use <code><a href="/reference/com/google/android/gms/cast/CastMediaControlIntent.html#DEFAULT_MEDIA_RECEIVER_APPLICATION_ID">DEFAULT_MEDIA_RECEIVER_APPLICATION_ID</a></code> as the
@@ -2297,9 +2320,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a custom control category for discovering Cast devices which support the Default
  Media Receiver.
 </p></div>
@@ -2310,14 +2333,14 @@ From class
 
 <A NAME="languageTagForLocale(java.util.Locale)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         String
       </span>
       <span class="sympad">languageTagForLocale</span>
@@ -2325,15 +2348,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns an RFC-5646 language tag string fo the given locale.
 </p></div>
 

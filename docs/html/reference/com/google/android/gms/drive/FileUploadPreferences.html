@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -103,14 +104,14 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>PlusClient.Builder | Android Developers</title>
+<title>FileUploadPreferences | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,8 +489,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
-        <li class="current">PlusClient.Builder</li>
+        
+        <li class="current">FileUploadPreferences</li>
       </ul>
     </div>
   </div>
@@ -754,39 +777,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-  
-   
-  
-  
-  
-  
-
 
 <div class="sum-details-links">
-
-Summary:
-
-
-
-
-
-
-
-
-
-  <a href="#pubctors">Ctors</a>
-  
-
-
-
-  &#124; <a href="#pubmethods">Methods</a>
-  
-
-
-
-  &#124; <a href="#inhmethods">Inherited Methods</a>
-
-&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -802,26 +794,20 @@ Summary:
 
 <div id="jd-header">
     public
-    static 
+     
      
     
-    class
-<h1 itemprop="name">PlusClient.Builder</h1>
+    interface
+<h1 itemprop="name">FileUploadPreferences</h1>
 
 
-
-  
-    extends Object<br/>
-  
-  
-  
 
   
   
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -834,15 +820,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
-    </tr>
-    
-
-    <tr>
-        
-            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-         	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.plus.PlusClient.Builder</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.FileUploadPreferences</td>
     </tr>
     
 
@@ -855,12 +833,19 @@ Summary:
 
 
 <div class="jd-descr">
-<p>
-  <p class="caution"><strong>
-      This class is deprecated.</strong><br/>
-    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></code>.
 
-  </p>
+
+<h2>Class Overview</h2>
+<p itemprop="articleBody">Represents the file upload preferences associated with the current account. The preferences set
+ by these APIs are applied only to the current user account and the calling application.
+
+ <p>
+ For example, the preference values for the file upload operations of the calling
+ application can be fetched using <code><a href="/reference/com/google/android/gms/drive/DrivePreferencesApi.html#getFileUploadPreferences(com.google.android.gms.common.api.GoogleApiClient)">getFileUploadPreferences(GoogleApiClient)</a></code>. These
+ preference values can be modified using <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#setNetworkTypePreference(int)">setNetworkTypePreference(int)</a></code>,
+ <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#setRoamingAllowed(boolean)">setRoamingAllowed(boolean)</a></code> or <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#setBatteryUsagePreference(int)">setBatteryUsagePreference(int)</a></code> and then saved by executing the
+ <code><a href="/reference/com/google/android/gms/drive/DrivePreferencesApi.html#setFileUploadPreferences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.FileUploadPreferences)">setFileUploadPreferences(GoogleApiClient, FileUploadPreferences)</a></code> method.
+</p>
 
 
 
@@ -900,46 +885,87 @@ Summary:
 
 
 
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
 
 
-
-
-
-
-
-
-
-
-<!-- ======== CONSTRUCTOR SUMMARY ======== -->
-<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
-
-
-
-	 
+    
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            </nobr>
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#BATTERY_USAGE_CHARGING_ONLY">BATTERY_USAGE_CHARGING_ONLY</a></td>
+        <td class="jd-descrcol" width="100%">
+          This value signifies that the operations by the calling application are allowed only when the
+ device is plugged into a power source.
+          
+    
+
         </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#PlusClient.Builder(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">PlusClient.Builder</a></span>(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Builder to help construct the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object.
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#BATTERY_USAGE_UNRESTRICTED">BATTERY_USAGE_UNRESTRICTED</a></td>
+        <td class="jd-descrcol" width="100%">
+          This value signifies that the operations by the calling application are allowed immediately
+ without being restricted on the current battery status of the device.
+          
+    
 
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#NETWORK_TYPE_ANY">NETWORK_TYPE_ANY</a></td>
+        <td class="jd-descrcol" width="100%">
+          This value signifies that the operations by the calling application are not restricted to any
+ specific network type and can be applied over any available network connection (i.e.
+          
+    
 
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#NETWORK_TYPE_WIFI_ONLY">NETWORK_TYPE_WIFI_ONLY</a></td>
+        <td class="jd-descrcol" width="100%">
+          This value signifies that the operations by the calling application are allowed only over a
+ WIFI network connection.
+          
+    
 
-        </div>
-  
-  </td></tr>
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#PREFERENCE_VALUE_UNKNOWN">PREFERENCE_VALUE_UNKNOWN</a></td>
+        <td class="jd-descrcol" width="100%">
+          This value signifies that the preference value is unknown to the calling application.
+          
+    
 
-
+        </td>
+    </tr>
+    
+    
 
 </table>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -954,220 +980,7 @@ Summary:
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#build()">build</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">
-          Builds a new <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object for communicating with the Google+ APIs.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#clearScopes()">clearScopes</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">
-          Removes all OAuth 2.0 scopes requested by your app.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setAccountName(java.lang.String)">setAccountName</a></span>(String accountName)</nobr>
-        
-        <div class="jd-descrdiv">
-          Specify an account name on the device that should be used.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setActions(java.lang.String...)">setActions</a></span>(String... actions)</nobr>
-        
-        <div class="jd-descrdiv">
-          Specify which user's app activity types can be written to Google.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a></nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html#setScopes(java.lang.String...)">setScopes</a></span>(String... scopes)</nobr>
-        
-        <div class="jd-descrdiv">
-          Specify the OAuth 2.0 scopes requested by your app.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-
-</table>
-
-
-
-
-
-
-
-<!-- ========== METHOD SUMMARY =========== -->
-<table id="inhmethods" class="jd-sumtable"><tr><th>
-  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
-  <div style="clear:left;">Inherited Methods</div></th></tr>
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-java.lang.Object-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>
-From class
-
-  java.lang.Object
-
-<div id="inherited-methods-java.lang.Object">
-  <div id="inherited-methods-java.lang.Object-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-    
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            Object</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">clone</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(Object arg0)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">finalize</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
-            
-            
-            Class&lt;?&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">getClass</span>()</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
+            abstract
             
             
             
@@ -1175,114 +988,143 @@ From class
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">hashCode</span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#getBatteryUsagePreference()">getBatteryUsagePreference</a></span>()</nobr>
         
+        <div class="jd-descrdiv">
+          Returns the current battery usage preference value.
+          
+    
+
+        </div>
+  
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
             
             
-            final
             
             
-            void</nobr>
+            int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notify</span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#getNetworkTypePreference()">getNetworkTypePreference</a></span>()</nobr>
         
+        <div class="jd-descrdiv">
+          Returns the current network type preference value.
+          
+    
+
+        </div>
+  
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
             
             
-            final
             
             
-            void</nobr>
+            boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">notifyAll</span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#isRoamingAllowed()">isRoamingAllowed</a></span>()</nobr>
         
+        <div class="jd-descrdiv">
+          Returns the current roaming preference value.
+          
+    
+
+        </div>
+  
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
             
             
             
             
-            
-            String</nobr>
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">toString</span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#setBatteryUsagePreference(int)">setBatteryUsagePreference</a></span>(int batteryUsagePreference)</nobr>
         
+        <div class="jd-descrdiv">
+          Sets the battery usage preference to be applied on operations performed by the calling
+ application.
+          
+    
+
+        </div>
+  
   </td></tr>
 
 
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
             
             
-            final
             
             
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#setNetworkTypePreference(int)">setNetworkTypePreference</a></span>(int networkTypePreference)</nobr>
         
+        <div class="jd-descrdiv">
+          Sets the network type preference to be applied on operations performed by the calling
+ application.
+          
+    
+
+        </div>
+  
   </td></tr>
 
 
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
+            abstract
             
             
-            final
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-        
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            final
             
             
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">wait</span>(long arg0)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#setRoamingAllowed(boolean)">setRoamingAllowed</a></span>(boolean allowRoaming)</nobr>
         
+        <div class="jd-descrdiv">
+          Sets whether the operations by the calling application are allowed while the device is on
+ roaming.
+          
+    
+
+        </div>
+  
   </td></tr>
+
 
 
 </table>
-  </div>
-</div>
-</td></tr>
 
 
-</table>
+
+
+
 
 
 </div><!-- jd-descr (summary) -->
@@ -1305,69 +1147,243 @@ From class
 <!-- Constants -->
 
 
-<!-- Fields -->
-
-
-<!-- Public ctors -->
-
-
-<!-- ========= CONSTRUCTOR DETAIL ======== -->
-<h2>Public Constructors</h2>
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
 
 
 
-<A NAME="PlusClient.Builder(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
+
+<A NAME="BATTERY_USAGE_CHARGING_ONLY"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-         
-         
-         
-         
-        
+        static 
+        final 
+        int
       </span>
-      <span class="sympad">PlusClient.Builder</span>
-      <span class="normal">(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectionCallbacks, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</span>
+        BATTERY_USAGE_CHARGING_ONLY
     </h4>
       <div class="api-level">
-        <div></div>
+        
         
   
 
       </div>
     <div class="jd-details-descr">
       
+    
 
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This value signifies that the operations by the calling application are allowed only when the
+ device is plugged into a power source.
+ Note that this restriction is applied in addition to the network type preferences,
+ see <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#getNetworkTypePreference()">getNetworkTypePreference()</a></code>.
+</p></div>
 
-
-  <div class="jd-tagdata jd-tagdescr"><p>Builder to help construct the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>The context to use for the connection.</td>
-        </tr>
-        <tr>
-          <th>connectionCallbacks</td>
-          <td>The listener where the results of the
-            asynchronous <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#connect()">connect()</a></code> call are delivered.</td>
-        </tr>
-        <tr>
-          <th>connectionFailedListener</td>
-          <td>The listener which will be notified if
-            the connection attempt fails.
-</td>
-        </tr>
-      </table>
-  </div>
-
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                257
+                (0x00000101)
+            
+        </span>
+        </div>
+    
     </div>
 </div>
 
 
+
+<A NAME="BATTERY_USAGE_UNRESTRICTED"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        BATTERY_USAGE_UNRESTRICTED
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This value signifies that the operations by the calling application are allowed immediately
+ without being restricted on the current battery status of the device.
+ Note that this restriction is applied in addition to the network type preferences,
+ see <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#getNetworkTypePreference()">getNetworkTypePreference()</a></code>.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                256
+                (0x00000100)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="NETWORK_TYPE_ANY"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        NETWORK_TYPE_ANY
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This value signifies that the operations by the calling application are not restricted to any
+ specific network type and can be applied over any available network connection (i.e. WIFI,
+ mobile data etc).
+ Note that this restriction is applied in addition to the battery usage preferences,
+ see <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#getBatteryUsagePreference()">getBatteryUsagePreference()</a></code>.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                1
+                (0x00000001)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="NETWORK_TYPE_WIFI_ONLY"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        NETWORK_TYPE_WIFI_ONLY
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This value signifies that the operations by the calling application are allowed only over a
+ WIFI network connection.
+ Note that this restriction is applied in addition to the battery usage preferences,
+ see <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#getBatteryUsagePreference()">getBatteryUsagePreference()</a></code>.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                2
+                (0x00000002)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="PREFERENCE_VALUE_UNKNOWN"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        PREFERENCE_VALUE_UNKNOWN
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>This value signifies that the preference value is unknown to the calling application. This
+ value is returned only in the case when the preference is set to a value not available in
+ this version of the API but is added in a newer version of the API. It is advised to update
+ to the latest version of the API to get an appropriate preference value.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                0
+                (0x00000000)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
 
 
 
@@ -1383,7 +1399,7 @@ From class
 
 
 
-<A NAME="build()"></A>
+<A NAME="getBatteryUsagePreference()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1391,11 +1407,11 @@ From class
         public 
          
          
+        abstract 
          
-         
-        <a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a>
+        int
       </span>
-      <span class="sympad">build</span>
+      <span class="sympad">getBatteryUsagePreference</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
@@ -1406,54 +1422,28 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Builds a new <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object for communicating with the Google+ APIs.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code> object.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="clearScopes()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a>
-      </span>
-      <span class="sympad">clearScopes</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
       
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Removes all OAuth 2.0 scopes requested by your app.
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the current battery usage preference value. This value can be one of the following:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#BATTERY_USAGE_UNRESTRICTED">BATTERY_USAGE_UNRESTRICTED</a></code></li>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#BATTERY_USAGE_CHARGING_ONLY">BATTERY_USAGE_CHARGING_ONLY</a></code></li>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#PREFERENCE_VALUE_UNKNOWN">PREFERENCE_VALUE_UNKNOWN</a></code></li>
+ </ul>
+ The default value for this preference is <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#BATTERY_USAGE_UNRESTRICTED">BATTERY_USAGE_UNRESTRICTED</a></code>.
+ <p>
+ Note: The value <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#PREFERENCE_VALUE_UNKNOWN">PREFERENCE_VALUE_UNKNOWN</a></code> will be returned only in the case when the
+ preference is set to a value not available in this version of the API but is added in a newer
+ version of the API. It is advised to update to the latest version of the API to get an
+ appropriate preference value.
 </p></div>
 
     </div>
 </div>
 
 
-<A NAME="setAccountName(java.lang.String)"></A>
+<A NAME="getNetworkTypePreference()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1461,12 +1451,12 @@ From class
         public 
          
          
+        abstract 
          
-         
-        <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a>
+        int
       </span>
-      <span class="sympad">setAccountName</span>
-      <span class="normal">(String accountName)</span>
+      <span class="sympad">getNetworkTypePreference</span>
+      <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1476,81 +1466,28 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Specify an account name on the device that should be used. If this is never called, the
- client will use the current default account for Google Play services for this
- application.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>accountName</td>
-          <td>The account name on the device that should be used by
-            <code><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></code>.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="setActions(java.lang.String...)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a>
-      </span>
-      <span class="sympad">setActions</span>
-      <span class="normal">(String... actions)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
       
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Specify which user's app activity types can be written to Google.
- This must be used with the <code><a href="/reference/com/google/android/gms/common/Scopes.html#PLUS_LOGIN">PLUS_LOGIN</a></code> OAuth 2.0 scope.
-
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the current network type preference value. This value can be one of the following:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#NETWORK_TYPE_ANY">NETWORK_TYPE_ANY</a></code></li>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#NETWORK_TYPE_WIFI_ONLY">NETWORK_TYPE_WIFI_ONLY</a></code></li>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#PREFERENCE_VALUE_UNKNOWN">PREFERENCE_VALUE_UNKNOWN</a></code></li>
+ </ul>
+ The default value for this preference is <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#NETWORK_TYPE_ANY">NETWORK_TYPE_ANY</a></code>.
  <p>
- See <a href="https://developers.google.com/+/api/moment-types">Types of app
- activity</a> for the full list of valid app activity types. Example usage:
- <pre>
-      plusClientBuilder.setActions(
-          "http://schemas.google.com/AddActivity",
-          "http://schemas.google.com/BuyActivity");
- </pre></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>actions</td>
-          <td>The user's app activity types that can be written to Google.
-</td>
-        </tr>
-      </table>
-  </div>
+ Note: The value <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#PREFERENCE_VALUE_UNKNOWN">PREFERENCE_VALUE_UNKNOWN</a></code> will be returned only in the case when the
+ preference is set to a value not available in this version of the API but is added in a newer
+ version of the API. It is advised to update to the latest version of the API to get an
+ appropriate preference value.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="setScopes(java.lang.String...)"></A>
+<A NAME="isRoamingAllowed()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1558,12 +1495,12 @@ From class
         public 
          
          
+        abstract 
          
-         
-        <a href="/reference/com/google/android/gms/plus/PlusClient.Builder.html">PlusClient.Builder</a>
+        boolean
       </span>
-      <span class="sympad">setScopes</span>
-      <span class="normal">(String... scopes)</span>
+      <span class="sympad">isRoamingAllowed</span>
+      <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1573,25 +1510,159 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the current roaming preference value. If <code>true</code>, operations performed by the
+ calling application are allowed while the device is on data roaming, otherwise not. The
+ default value for this preference is <code>true</code>.
+</p></div>
+
+    </div>
+</div>
 
 
+<A NAME="setBatteryUsagePreference(int)"></A>
 
-  <div class="jd-tagdata jd-tagdescr"><p>Specify the OAuth 2.0 scopes requested by your app. See <code><a href="/reference/com/google/android/gms/common/Scopes.html">Scopes</a></code> for the valid
- OAuth 2.0 scopes.</p></div>
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">setBatteryUsagePreference</span>
+      <span class="normal">(int batteryUsagePreference)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the battery usage preference to be applied on operations performed by the calling
+ application. The following battery usage preference values are allowed:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#BATTERY_USAGE_UNRESTRICTED">BATTERY_USAGE_UNRESTRICTED</a></code></li>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#BATTERY_USAGE_CHARGING_ONLY">BATTERY_USAGE_CHARGING_ONLY</a></code></li>
+ </ul>
+ The preference value is only saved when <code><a href="/reference/com/google/android/gms/drive/DrivePreferencesApi.html#setFileUploadPreferences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.FileUploadPreferences)">setFileUploadPreferences(GoogleApiClient, FileUploadPreferences)</a></code>
+ is called.</p></div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
         <tr>
-          <th>scopes</td>
-          <td>The OAuth 2.0 scopes requested by your app.</td>
+            <th>IllegalArgumentException</td>
+            <td>if the input is an invalid preference value.
+</td>
         </tr>
       </table>
   </div>
+
+    </div>
+</div>
+
+
+<A NAME="setNetworkTypePreference(int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">setNetworkTypePreference</span>
+      <span class="normal">(int networkTypePreference)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the network type preference to be applied on operations performed by the calling
+ application. The following network type preference values are allowed:
+ <ul>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#NETWORK_TYPE_ANY">NETWORK_TYPE_ANY</a></code></li>
+     <li><code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#NETWORK_TYPE_WIFI_ONLY">NETWORK_TYPE_WIFI_ONLY</a></code></li>
+ </ul>
+ The preference value is only saved when <code><a href="/reference/com/google/android/gms/drive/DrivePreferencesApi.html#setFileUploadPreferences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.FileUploadPreferences)">setFileUploadPreferences(GoogleApiClient, FileUploadPreferences)</a></code>
+ is called.
+ <p>
+ Note that this value does not override the system level data usage preferences
+ (https://support.google.com/nexus/answer/2819524) that the user might have set on their
+ devices, i.e. if mobile data is disabled in the system settings, the file uploads will not
+ happen on mobile network connection even if the file upload preference is set to
+ <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html#NETWORK_TYPE_ANY">NETWORK_TYPE_ANY</a></code>. However, if mobile data is enabled the value set in this
+ preference will be respected.</p></div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/Scopes.html">Scopes</a></code></li>
-      </ul>
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th>IllegalArgumentException</td>
+            <td>if the input is an invalid preference value.
+</td>
+        </tr>
+      </table>
   </div>
+
+    </div>
+</div>
+
+
+<A NAME="setRoamingAllowed(boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">setRoamingAllowed</span>
+      <span class="normal">(boolean allowRoaming)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets whether the operations by the calling application are allowed while the device is on
+ roaming. The preference value is only saved when
+ <code><a href="/reference/com/google/android/gms/drive/DrivePreferencesApi.html#setFileUploadPreferences(com.google.android.gms.common.api.GoogleApiClient, com.google.android.gms.drive.FileUploadPreferences)">setFileUploadPreferences(GoogleApiClient, FileUploadPreferences)</a></code> is called.
+ <p>
+ Note that this value does not override the system level data usage preferences
+ (https://support.google.com/nexus/answer/2819524) that the user might have set on their
+ devices, i.e. if data roaming is disabled in the system setting, the file uploads will not be
+ allowed in roaming even if this preference is set to true. However if roaming is enabled,
+ this preference will be respected.
+</p></div>
 
     </div>
 </div>

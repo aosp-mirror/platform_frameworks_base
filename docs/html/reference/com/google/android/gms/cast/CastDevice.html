@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">CastDevice</li>
       </ul>
     </div>
@@ -771,13 +794,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
-
-
-
-
-
-
-
 <div class="sum-details-links">
 
 Summary:
@@ -839,13 +855,13 @@ Summary:
   
       implements 
       
-        SafeParcelable
+        Parcelable 
       
   
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -955,9 +971,9 @@ android.os.Parcelable
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -967,50 +983,14 @@ android.os.Parcelable
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
     
     
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-com.google.android.gms.common.internal.safeparcel.SafeParcelable
-<div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable">
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%">
-
-
-
-
-        </td>
-    </tr>
-
-
 </table>
   </div>
 </div>
@@ -1035,9 +1015,9 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           Creator&lt;<a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a>&gt;</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/cast/CastDevice.html#CREATOR">CREATOR</a></td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -1108,8 +1088,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Gets the unique ID for the device.
-
-
+          
+    
 
         </div>
   
@@ -1131,8 +1111,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Gets the device's version.
-
-
+          
+    
 
         </div>
   
@@ -1154,8 +1134,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Gets the friendly name for the device.
-
-
+          
+    
 
         </div>
   
@@ -1177,8 +1157,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Returns the CastDevice from <code>extras</code>, otherwise <code>null</code>.
-
-
+          
+    
 
         </div>
   
@@ -1200,8 +1180,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Returns a best-fit icon for the requested icon size.
-
-
+          
+    
 
         </div>
   
@@ -1223,8 +1203,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Returns a list of all of the device's icons.
-
-
+          
+    
 
         </div>
   
@@ -1246,8 +1226,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Gets the IPv4 address of the device.
-
-
+          
+    
 
         </div>
   
@@ -1269,8 +1249,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Gets the model name for the device.
-
-
+          
+    
 
         </div>
   
@@ -1292,8 +1272,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Gets the device's service port.
-
-
+          
+    
 
         </div>
   
@@ -1315,8 +1295,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Checks if the device has any icons.
-
-
+          
+    
 
         </div>
   
@@ -1338,8 +1318,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Overridden to return a hashcode of the device ID.
-
-
+          
+    
 
         </div>
   
@@ -1357,12 +1337,12 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/cast/CastDevice.html#isSameDevice(com.google.android.gms.cast.CastDevice)">isSameDevice</a></span>(<a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a> castDevice)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/cast/CastDevice.html#isOnLocalNetwork()">isOnLocalNetwork</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Tests if this device refers to the same physical Cast device as <code>castDevice</code>.
-
-
+          Returns <code>true</code> if this <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code> is on the local network.
+          
+    
 
         </div>
   
@@ -1377,15 +1357,15 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             
             
             
-            void</nobr>
+            boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/cast/CastDevice.html#putInBundle(android.os.Bundle)">putInBundle</a></span>(Bundle bundle)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/cast/CastDevice.html#isSameDevice(com.google.android.gms.cast.CastDevice)">isSameDevice</a></span>(<a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a> castDevice)</nobr>
         
         <div class="jd-descrdiv">
-          Writes the CastDevice to <code>bundle</code>.
-
-
+          Tests if this device refers to the same physical Cast device as <code>castDevice</code>.
+          
+    
 
         </div>
   
@@ -1400,15 +1380,15 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
             
             
             
-            String</nobr>
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/cast/CastDevice.html#toString()">toString</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/cast/CastDevice.html#putInBundle(android.os.Bundle)">putInBundle</a></span>(Bundle bundle)</nobr>
         
         <div class="jd-descrdiv">
-          Returns a string representation of the device.
-
-
+          Writes the CastDevice to <code>bundle</code>.
+          
+    
 
         </div>
   
@@ -1417,6 +1397,29 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/cast/CastDevice.html#toString()">toString</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns a string representation of the device.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1705,8 +1708,6 @@ From interface
 </td></tr>
 
 
-
-
 </table>
 
 
@@ -1759,9 +1760,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -1810,9 +1811,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1842,9 +1843,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -1874,9 +1875,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the unique ID for the device.
 </p></div>
 
@@ -1907,9 +1908,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the device's version.
 </p></div>
 
@@ -1940,9 +1941,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the friendly name for the device.
 </p></div>
 
@@ -1973,9 +1974,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the CastDevice from <code>extras</code>, otherwise <code>null</code>.
 </p></div>
 
@@ -2006,9 +2007,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a best-fit icon for the requested icon size.
 </p></div>
 
@@ -2039,9 +2040,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a list of all of the device's icons. If there are no images, returns an empty list.
 </p></div>
 
@@ -2072,9 +2073,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the IPv4 address of the device.
 </p></div>
 
@@ -2105,9 +2106,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the model name for the device.
 </p></div>
 
@@ -2138,9 +2139,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets the device's service port.
 </p></div>
 
@@ -2171,9 +2172,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Checks if the device has any icons.
 </p></div>
 
@@ -2204,10 +2205,43 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Overridden to return a hashcode of the device ID.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="isOnLocalNetwork()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isOnLocalNetwork</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns <code>true</code> if this <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code> is on the local network.
 </p></div>
 
     </div>
@@ -2237,9 +2271,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Tests if this device refers to the same physical Cast device as <code>castDevice</code>. Two
  <code><a href="/reference/com/google/android/gms/cast/CastDevice.html">CastDevice</a></code>s are considered to refer to the same physical device if they have the same
  device ID.</p></div>
@@ -2285,9 +2319,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Writes the CastDevice to <code>bundle</code>.
 </p></div>
 
@@ -2318,9 +2352,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a string representation of the device.
 </p></div>
 
@@ -2351,9 +2385,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>

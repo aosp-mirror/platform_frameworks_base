@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">LeaderboardVariant</li>
       </ul>
     </div>
@@ -820,7 +843,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -901,8 +924,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#COLLECTION_PUBLIC">COLLECTION_PUBLIC</a></td>
         <td class="jd-descrcol" width="100%">
           Collection constant for public leaderboards.
-
-
+          
+    
 
         </td>
     </tr>
@@ -913,8 +936,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#COLLECTION_SOCIAL">COLLECTION_SOCIAL</a></td>
         <td class="jd-descrcol" width="100%">
           Collection constant for social leaderboards.
-
-
+          
+    
 
         </td>
     </tr>
@@ -925,8 +948,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#NUM_SCORES_UNKNOWN">NUM_SCORES_UNKNOWN</a></td>
         <td class="jd-descrcol" width="100%">
           Constant returned when the total number of scores for this variant is unknown.
-
-
+          
+    
 
         </td>
     </tr>
@@ -937,8 +960,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#NUM_TIME_SPANS">NUM_TIME_SPANS</a></td>
         <td class="jd-descrcol" width="100%">
           Number of time spans that exist.
-
-
+          
+    
 
         </td>
     </tr>
@@ -949,8 +972,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#PLAYER_RANK_UNKNOWN">PLAYER_RANK_UNKNOWN</a></td>
         <td class="jd-descrcol" width="100%">
           Constant returned when a player's rank for this variant is unknown.
-
-
+          
+    
 
         </td>
     </tr>
@@ -961,8 +984,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#PLAYER_SCORE_UNKNOWN">PLAYER_SCORE_UNKNOWN</a></td>
         <td class="jd-descrcol" width="100%">
           Constant returned when a player's score for this variant is unknown.
-
-
+          
+    
 
         </td>
     </tr>
@@ -973,8 +996,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_ALL_TIME">TIME_SPAN_ALL_TIME</a></td>
         <td class="jd-descrcol" width="100%">
           Scores are never reset.
-
-
+          
+    
 
         </td>
     </tr>
@@ -985,8 +1008,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_DAILY">TIME_SPAN_DAILY</a></td>
         <td class="jd-descrcol" width="100%">
           Scores are reset every day.
-
-
+          
+    
 
         </td>
     </tr>
@@ -997,8 +1020,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_WEEKLY">TIME_SPAN_WEEKLY</a></td>
         <td class="jd-descrcol" width="100%">
           Scores are reset once per week.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1042,8 +1065,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Retrieves the collection of scores contained by this variant.
-
-
+          
+    
 
         </div>
   
@@ -1065,8 +1088,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Retrieves the viewing player's formatted rank for this variant, if any.
-
-
+          
+    
 
         </div>
   
@@ -1088,8 +1111,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Retrieves the viewing player's score for this variant, if any.
-
-
+          
+    
 
         </div>
   
@@ -1111,8 +1134,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Retrieves the total number of scores for this variant.
-
-
+          
+    
 
         </div>
   
@@ -1134,8 +1157,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Retrieves the viewing player's rank for this variant, if any.
-
-
+          
+    
 
         </div>
   
@@ -1157,8 +1180,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Retrieves the viewing player's score tag for this variant, if any.
-
-
+          
+    
 
         </div>
   
@@ -1180,8 +1203,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Retrieves the viewing player's score for this variant, if any.
-
-
+          
+    
 
         </div>
   
@@ -1203,8 +1226,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Retrieves the time span that the scores for this variant are drawn from.
-
-
+          
+    
 
         </div>
   
@@ -1226,8 +1249,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Get whether or not this variant contains score information for the viewing player or not.
-
-
+          
+    
 
         </div>
   
@@ -1283,8 +1306,8 @@ From interface
         
         <div class="jd-descrdiv">
           Freeze a volatile representation into an immutable representation.
-
-
+          
+    
 
         </div>
   
@@ -1306,8 +1329,8 @@ From interface
         
         <div class="jd-descrdiv">
           Check to see if this object is valid for use.
-
-
+          
+    
 
         </div>
   
@@ -1369,9 +1392,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Collection constant for public leaderboards. Public leaderboards contain the scores of
  players who are sharing their gameplay activity publicly.
 </p></div>
@@ -1412,9 +1435,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Collection constant for social leaderboards. Social leaderboards contain the scores of
  players in the viewing player's circles.
 </p></div>
@@ -1455,9 +1478,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned when the total number of scores for this variant is unknown.
 </p></div>
 
@@ -1497,9 +1520,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Number of time spans that exist. Needs to be updated if we ever have more.
 </p></div>
 
@@ -1539,9 +1562,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned when a player's rank for this variant is unknown.
 </p></div>
 
@@ -1581,9 +1604,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constant returned when a player's score for this variant is unknown.
 </p></div>
 
@@ -1623,9 +1646,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Scores are never reset.
 </p></div>
 
@@ -1665,9 +1688,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Scores are reset every day. The reset occurs at 11:59PM PST.
 </p></div>
 
@@ -1707,9 +1730,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Scores are reset once per week. The reset occurs at 11:59PM PST on Sunday.
 </p></div>
 
@@ -1772,9 +1795,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the collection of scores contained by this variant. Possible values are
  <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#COLLECTION_PUBLIC">COLLECTION_PUBLIC</a></code> or <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#COLLECTION_SOCIAL">COLLECTION_SOCIAL</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -1810,9 +1833,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the viewing player's formatted rank for this variant, if any. Note that this value
  is only accurate if <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#hasPlayerInfo()">hasPlayerInfo()</a></code> returns true.</p></div>
   <div class="jd-tagdata">
@@ -1849,9 +1872,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the viewing player's score for this variant, if any. Note that this value is only
  accurate if <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#hasPlayerInfo()">hasPlayerInfo()</a></code> returns true.</p></div>
   <div class="jd-tagdata">
@@ -1888,9 +1911,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the total number of scores for this variant. Not all of these scores will always
  be present on the local device. Note that if scores for this variant have not been loaded,
  this method will return <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#NUM_SCORES_UNKNOWN">NUM_SCORES_UNKNOWN</a></code>.</p></div>
@@ -1927,9 +1950,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the viewing player's rank for this variant, if any. Note that this value is only
  accurate if <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#hasPlayerInfo()">hasPlayerInfo()</a></code> returns true.</p></div>
   <div class="jd-tagdata">
@@ -1966,9 +1989,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the viewing player's score tag for this variant, if any. Note that this value is
  only accurate if <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#hasPlayerInfo()">hasPlayerInfo()</a></code> returns true.</p></div>
   <div class="jd-tagdata">
@@ -2005,9 +2028,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the viewing player's score for this variant, if any. Note that this value is only
  accurate if <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#hasPlayerInfo()">hasPlayerInfo()</a></code> returns true.</p></div>
   <div class="jd-tagdata">
@@ -2044,9 +2067,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the time span that the scores for this variant are drawn from. Possible values are
  <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_ALL_TIME">TIME_SPAN_ALL_TIME</a></code>, <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_WEEKLY">TIME_SPAN_WEEKLY</a></code>, or <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_DAILY">TIME_SPAN_DAILY</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -2082,9 +2105,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get whether or not this variant contains score information for the viewing player or not.
  There are several possible reasons why this might be false. If the scores for this variant
  have never been loaded, we won't know if the player has a score or not. Similarly, if the

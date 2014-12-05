@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">CircleOptions</li>
       </ul>
     </div>
@@ -771,13 +794,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
-
-
-
-
-
-
-
 <div class="sum-details-links">
 
 Summary:
@@ -839,13 +855,13 @@ Summary:
   
       implements 
       
-        SafeParcelable
+        Parcelable 
       
   
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -961,9 +977,9 @@ android.os.Parcelable
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -973,50 +989,14 @@ android.os.Parcelable
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
     
     
-</table>
-  </div>
-</div>
-</td></tr>
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-com.google.android.gms.common.internal.safeparcel.SafeParcelable
-<div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable">
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%">
-
-
-
-
-        </td>
-    </tr>
-
-
 </table>
   </div>
 </div>
@@ -1053,8 +1033,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Creates circle options.
-
-
+          
+    
 
         </div>
   
@@ -1089,8 +1069,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Sets the center using a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
-
-
+          
+    
 
         </div>
   
@@ -1112,8 +1092,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Sets the fill color.
-
-
+          
+    
 
         </div>
   
@@ -1135,8 +1115,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Returns the center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
-
-
+          
+    
 
         </div>
   
@@ -1158,8 +1138,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Returns the fill color.
-
-
+          
+    
 
         </div>
   
@@ -1181,8 +1161,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Returns the circle's radius, in meters.
-
-
+          
+    
 
         </div>
   
@@ -1204,8 +1184,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Returns the stroke color.
-
-
+          
+    
 
         </div>
   
@@ -1227,8 +1207,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Returns the stroke width.
-
-
+          
+    
 
         </div>
   
@@ -1250,8 +1230,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Returns the zIndex.
-
-
+          
+    
 
         </div>
   
@@ -1273,8 +1253,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Checks whether the circle is visible.
-
-
+          
+    
 
         </div>
   
@@ -1296,8 +1276,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Sets the radius in meters.
-
-
+          
+    
 
         </div>
   
@@ -1319,8 +1299,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Sets the stroke color.
-
-
+          
+    
 
         </div>
   
@@ -1342,8 +1322,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Sets the stroke width.
-
-
+          
+    
 
         </div>
   
@@ -1365,8 +1345,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Sets the visibility.
-
-
+          
+    
 
         </div>
   
@@ -1388,8 +1368,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Sets the zIndex.
-
-
+          
+    
 
         </div>
   
@@ -1670,8 +1650,6 @@ From interface
 </td></tr>
 
 
-
-
 </table>
 
 
@@ -1729,9 +1707,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Creates circle options.
 </p></div>
 
@@ -1777,9 +1755,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the center using a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.
 
  <p>The center must not be null.</p>
@@ -1827,9 +1805,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the fill color.
 
  <p>The fill color is the color inside the circle, in the integer
@@ -1879,9 +1857,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the center as a <code><a href="/reference/com/google/android/gms/maps/model/LatLng.html">LatLng</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1916,9 +1894,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the fill color.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1953,9 +1931,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the circle's radius, in meters.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1990,9 +1968,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the stroke color.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2027,9 +2005,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the stroke width.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2064,9 +2042,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the zIndex.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2101,9 +2079,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Checks whether the circle is visible.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2138,9 +2116,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the radius in meters.
 
  <p>The radius must be zero or greater. The default radius is zero.</p></p></div>
@@ -2186,9 +2164,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the stroke color.
 
  <p>The stroke color is the color of this circle's outline, in the integer
@@ -2238,9 +2216,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the stroke width.
 
  <p>The stroke width is the width (in screen pixels) of the circle's
@@ -2290,9 +2268,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the visibility.
 
  <p>If this circle is not visible then it is not drawn, but all other
@@ -2339,9 +2317,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the zIndex.
 
  <p>Overlays (such as circles) with higher zIndices are drawn above

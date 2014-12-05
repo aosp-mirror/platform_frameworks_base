@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -103,14 +104,14 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>GooglePlayServicesClient | Android Developers</title>
+<title>GeofencingRequest.Builder | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,8 +489,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
-        <li class="current">GooglePlayServicesClient</li>
+        
+        <li class="current">GeofencingRequest.Builder</li>
       </ul>
     </div>
   </div>
@@ -754,21 +777,28 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+  
+   
+  
+  
+  
+  
+
 
 <div class="sum-details-links">
 
 Summary:
 
-  <a href="#nestedclasses">Nested Classes</a>
+
+
+
+
+
+
+
+
+  <a href="#pubctors">Ctors</a>
   
-
-
-
-
-
-
-
-
 
 
 
@@ -776,6 +806,8 @@ Summary:
   
 
 
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
 
 &#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
@@ -793,20 +825,26 @@ Summary:
 
 <div id="jd-header">
     public
-     
-     
+    static 
+    final 
     
-    interface
-<h1 itemprop="name">GooglePlayServicesClient</h1>
+    class
+<h1 itemprop="name">GeofencingRequest.Builder</h1>
 
 
+
+  
+    extends Object<br/>
+  
+  
+  
 
   
   
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -819,7 +857,15 @@ Summary:
 
     <tr>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.GooglePlayServicesClient</td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+    
+
+    <tr>
+        
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.location.GeofencingRequest.Builder</td>
     </tr>
     
 
@@ -830,93 +876,13 @@ Summary:
 
 
 
-<table class="jd-sumtable jd-sumtable-subclasses"><tr><td colspan="12" style="border:none;margin:0;padding:0;">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-indirect" class="jd-expando-trigger closed"
-          ><img id="subclasses-indirect-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>Known Indirect Subclasses
-
-  <div id="subclasses-indirect">
-      <div id="subclasses-indirect-list"
-              class="jd-inheritedlinks"
-              
-              >
-          
-            
-              <a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html">ActivityRecognitionClient</a>,
-            
-              <a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a>,
-            
-              <a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a>
-            
-          
-      </div>
-      <div id="subclasses-indirect-summary"
-              style="display: none;"
-              >
-
-  <table class="jd-sumtable-expando">
-
-      <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html">ActivityRecognitionClient</a></td>
-        <td class="jd-descrcol" width="100%">
-          <em>
-      This class is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/location/ActivityRecognition.html">ActivityRecognition</a></code>.
-</em>&nbsp;
-
-
-
-        </td>
-      </tr>
-
-
-      <tr class=" api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></td>
-        <td class="jd-descrcol" width="100%">
-          <em>
-      This class is deprecated.
-    Use <code><a href="/reference/com/google/android/gms/location/LocationServices.html">LocationServices</a></code>.
-</em>&nbsp;
-
-
-
-        </td>
-      </tr>
-
-
-      <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusClient.html">PlusClient</a></td>
-        <td class="jd-descrcol" width="100%">
-          <em>
-      This class is deprecated.
-    See <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>.
-</em>&nbsp;
-
-
-
-        </td>
-      </tr>
-
-
-  </table>
-
-      </div>
-  </div>
-</td></tr></table>
-
 
 <div class="jd-descr">
-<p>
-  <p class="caution"><strong>
-      This interface is deprecated.</strong><br/>
-    replaced with <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code>
 
-  </p>
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Base class for clients that connect with Google Play services.</p>
+<p itemprop="articleBody">A builder that builds <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.html">GeofencingRequest</a></code>.
+</p>
 
 
 
@@ -946,74 +912,49 @@ Summary:
 
 
 
-<!-- ======== NESTED CLASS SUMMARY ======== -->
-<table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
 
 
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+	 
     <tr class="alt-color api apilevel-" >
-      <td class="jd-typecol"><nobr>
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html#GeofencingRequest.Builder()">GeofencingRequest.Builder</a></span>()</nobr>
         
-         
-         
-        
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a></td>
-      <td class="jd-descrcol" width="100%">
-        <em>
-      This interface is deprecated.
-    replaced with
-     <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.ConnectionCallbacks.html">GoogleApiClient.ConnectionCallbacks</a></code>
-</em>&nbsp;
+  </td></tr>
 
 
 
-      </td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-        
-         
-         
-        
-        interface</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a></td>
-      <td class="jd-descrcol" width="100%">
-        <em>
-      This interface is deprecated.
-    replaced with
-     <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a></code>
-</em>&nbsp;
-
-
-
-      </td>
-    </tr>
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+</table>
 
 
 
@@ -1028,20 +969,20 @@ Summary:
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            void</nobr>
+            
+            <a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html">GeofencingRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html#addGeofence(com.google.android.gms.location.Geofence)">addGeofence</a></span>(<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a> geofence)</nobr>
         
         <div class="jd-descrdiv">
-          Connects the client to Google Play services.
-
-
+          Adds a geofence to be monitored by geofencing service.
+          
+    
 
         </div>
   
@@ -1051,20 +992,20 @@ Summary:
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            void</nobr>
+            
+            <a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html">GeofencingRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#disconnect()">disconnect</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html#addGeofences(java.util.List<com.google.android.gms.location.Geofence>)">addGeofences</a></span>(List&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt; geofences)</nobr>
         
         <div class="jd-descrdiv">
-          Closes the connection to Google Play services.
-
-
+          Adds all the geofences in the given list to be monitored by geofencing service.
+          
+    
 
         </div>
   
@@ -1074,21 +1015,20 @@ Summary:
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            boolean</nobr>
+            
+            <a href="/reference/com/google/android/gms/location/GeofencingRequest.html">GeofencingRequest</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnected()">isConnected</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html#build()">build</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Checks if the client is currently connected to the service, so that
- requests to other methods will succeed.
-
-
+          Builds the <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.html">GeofencingRequest</a></code> object.
+          
+    
 
         </div>
   
@@ -1098,161 +1038,20 @@ Summary:
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            boolean</nobr>
+            
+            <a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html">GeofencingRequest.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnecting()">isConnecting</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html#setInitialTrigger(int)">setInitialTrigger</a></span>(int initialTrigger)</nobr>
         
         <div class="jd-descrdiv">
-          Checks if the client is attempting to connect to the service.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Returns true if the specified listener is currently registered to
- receive connection events.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Returns true if the specified listener is currently registered to
- receive connection failed events.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Removes a connection listener from this <code>GooglePlayServicesClient</code>.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
-
-
+          Sets the geofence notification behavior at the moment when the geofences are added.
+          
+    
 
         </div>
   
@@ -1266,6 +1065,216 @@ Summary:
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -1294,6 +1303,45 @@ Summary:
 <!-- Public ctors -->
 
 
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
+
+
+
+<A NAME="GeofencingRequest.Builder()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">GeofencingRequest.Builder</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+
+
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
@@ -1307,7 +1355,7 @@ Summary:
 
 
 
-<A NAME="connect()"></A>
+<A NAME="addGeofence(com.google.android.gms.location.Geofence)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1315,12 +1363,12 @@ Summary:
         public 
          
          
-        abstract 
          
-        void
+         
+        <a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html">GeofencingRequest.Builder</a>
       </span>
-      <span class="sympad">connect</span>
-      <span class="normal">()</span>
+      <span class="sympad">addGeofence</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a> geofence)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1330,58 +1378,45 @@ Summary:
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services. This method returns immediately, and connects to
- the service in the background. If the connection is successful,
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code> is called. On a
- failure, <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code> is called.
-</p></div>
-
-    </div>
-</div>
-
-
-<A NAME="disconnect()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        void
-      </span>
-      <span class="sympad">disconnect</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
       
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Closes the connection to Google Play services. No calls can be made on this object
- after calling this method.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Adds a geofence to be monitored by geofencing service.</p></div>
   <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect()</a></code></li>
-      </ul>
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>geofence</td>
+          <td>the geofence to be monitored. The geofence must be built with
+            <code><a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a></code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the builder object itself for method chaining</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th>IllegalArgumentException</td>
+            <td>if the geofence is not built with
+             <code><a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a></code>.</td>
+        </tr>  
+        <tr>
+            <th>NullPointerException</td>
+            <td>if the given geofence is null
+</td>
+        </tr>
+      </table>
   </div>
 
     </div>
 </div>
 
 
-<A NAME="isConnected()"></A>
+<A NAME="addGeofences(java.util.List<com.google.android.gms.location.Geofence>)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1389,11 +1424,68 @@ Summary:
         public 
          
          
-        abstract 
          
-        boolean
+         
+        <a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html">GeofencingRequest.Builder</a>
       </span>
-      <span class="sympad">isConnected</span>
+      <span class="sympad">addGeofences</span>
+      <span class="normal">(List&lt;<a href="/reference/com/google/android/gms/location/Geofence.html">Geofence</a>&gt; geofences)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Adds all the geofences in the given list to be monitored by geofencing service.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>geofences</td>
+          <td>the geofences to be monitored. The geofences in the list must be built
+            with <code><a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a></code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the builder object itself for method chaining</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th>IllegalArgumentException</td>
+            <td>if the geofence is not built with
+             <code><a href="/reference/com/google/android/gms/location/Geofence.Builder.html">Geofence.Builder</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="build()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/location/GeofencingRequest.html">GeofencingRequest</a>
+      </span>
+      <span class="sympad">build</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
@@ -1404,359 +1496,74 @@ Summary:
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is currently connected to the service, so that
- requests to other methods will succeed.  Applications should guard
- client actions caused by the user with a call to this method.</p></div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Builds the <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.html">GeofencingRequest</a></code> object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the client is connected to the service.
+      <ul class="nolist"><li>a <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.html">GeofencingRequest</a></code> object</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th>IllegalArgumentException</td>
+            <td>if no geofence has been added to this list
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setInitialTrigger(int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/location/GeofencingRequest.Builder.html">GeofencingRequest.Builder</a>
+      </span>
+      <span class="sympad">setInitialTrigger</span>
+      <span class="normal">(int initialTrigger)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the geofence notification behavior at the moment when the geofences are added. The
+ default behavior is <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.html#INITIAL_TRIGGER_ENTER">INITIAL_TRIGGER_ENTER</a></code> and
+ <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.html#INITIAL_TRIGGER_DWELL">INITIAL_TRIGGER_DWELL</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>initialTrigger</td>
+          <td>the notification behavior. It's a bit-wise of
+            <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.html#INITIAL_TRIGGER_ENTER">INITIAL_TRIGGER_ENTER</a></code> and/or
+            <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.html#INITIAL_TRIGGER_EXIT">INITIAL_TRIGGER_EXIT</a></code> and/or
+            <code><a href="/reference/com/google/android/gms/location/GeofencingRequest.html#INITIAL_TRIGGER_DWELL">INITIAL_TRIGGER_DWELL</a></code>.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>the builder object itself for method chaining
 </li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="isConnecting()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        boolean
-      </span>
-      <span class="sympad">isConnecting</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is attempting to connect to the service.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the client is attempting to connect to the service.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        boolean
-      </span>
-      <span class="sympad">isConnectionCallbacksRegistered</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
- receive connection events.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The listener to check for.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the specified listener is currently registered to receive connection
-             events.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks(ConnectionCallbacks)</a></code></li><li><code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks(ConnectionCallbacks)</a></code></li>
-      </ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        boolean
-      </span>
-      <span class="sympad">isConnectionFailedListenerRegistered</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
- receive connection failed events.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The listener to check for.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the specified listener is currently registered to receive connection
-             failed events.</li></ul>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener(OnConnectionFailedListener)</a></code></li><li><code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener(OnConnectionFailedListener)</a></code></li>
-      </ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        void
-      </span>
-      <span class="sympad">registerConnectionCallbacks</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
- If the service is already connected, the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
- method will be called immediately.  Applications should balance calls to this method with
- calls to <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks(ConnectionCallbacks)</a></code> to avoid leaking
- resources.
- <p>
- If the specified listener is already registered to receive connection events, this
- method will not add a duplicate entry for the same listener, but <strong>will</strong>
- still call the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code> method if currently
- connected.
- <p>
- Note that the order of messages received here may not be stable, so clients should not rely
- on the order that multiple listeners receive events in.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>the listener where the results of the asynchronous <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect()</a></code> call are
-            delivered.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        void
-      </span>
-      <span class="sympad">registerConnectionFailedListener</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>. Unlike <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks(GooglePlayServicesClient.ConnectionCallbacks)</a></code>, if the service
- is not already connected, the listener's
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code> method will not be called immediately.
- Applications should balance calls to this method with calls to
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener(OnConnectionFailedListener)</a></code> to avoid leaking
- resources.
- <p>
- If the specified listener is already registered to receive connection failed events, this
- method will not add a duplicate entry for the same listener.
- <p>
- Note that the order of messages received here may not be stable, so clients should not rely
- on the order that multiple listeners receive events in.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>the listener where the results of the asynchronous <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect()</a></code> call are
-            delivered.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        void
-      </span>
-      <span class="sympad">unregisterConnectionCallbacks</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Removes a connection listener from this <code>GooglePlayServicesClient</code>. Note that removing
- a listener does not generate any callbacks.
- <p>
- If the specified listener is not currently registered to receive connection events, this
- method will have no effect.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>the listener to unregister.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        void
-      </span>
-      <span class="sympad">unregisterConnectionFailedListener</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
- Note that removing a listener does not generate any callbacks.
- <p>
- If the specified listener is not currently registered to receive connection failed events,
- this method will have no effect.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>the listener to unregister.
-</td>
-        </tr>
-      </table>
   </div>
 
     </div>
