@@ -54,19 +54,20 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     private DrawableContainerState mDrawableContainerState;
     private Rect mHotspotBounds;
     private Drawable mCurrDrawable;
+    private Drawable mLastDrawable;
     private int mAlpha = 0xFF;
 
     /** Whether setAlpha() has been called at least once. */
     private boolean mHasAlpha;
 
     private int mCurIndex = -1;
+    private int mLastIndex = -1;
     private boolean mMutated;
 
     // Animations.
     private Runnable mAnimationRunnable;
     private long mEnterAnimationEnd;
     private long mExitAnimationEnd;
-    private Drawable mLastDrawable;
 
     // overrides from Drawable
 
@@ -255,6 +256,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         if (mLastDrawable != null) {
             mLastDrawable.jumpToCurrentState();
             mLastDrawable = null;
+            mLastIndex = -1;
             changed = true;
         }
         if (mCurrDrawable != null) {
@@ -426,9 +428,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             }
             if (mCurrDrawable != null) {
                 mLastDrawable = mCurrDrawable;
+                mLastIndex = mCurIndex;
                 mExitAnimationEnd = now + mDrawableContainerState.mExitFadeDuration;
             } else {
                 mLastDrawable = null;
+                mLastIndex = -1;
                 mExitAnimationEnd = 0;
             }
         } else if (mCurrDrawable != null) {
@@ -522,6 +526,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 if (mExitAnimationEnd <= now) {
                     mLastDrawable.setVisible(false, false);
                     mLastDrawable = null;
+                    mLastIndex = -1;
                     mExitAnimationEnd = 0;
                 } else {
                     int animAlpha = (int)((mExitAnimationEnd-now)*255)
@@ -1103,5 +1108,13 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
     protected void setConstantState(DrawableContainerState state) {
         mDrawableContainerState = state;
+
+        // The locally cached drawables may have changed.
+        if (mCurIndex >= 0) {
+            mCurrDrawable = state.getChild(mCurIndex);
+        }
+        if (mLastIndex >= 0) {
+            mLastDrawable = state.getChild(mLastIndex);
+        }
     }
 }

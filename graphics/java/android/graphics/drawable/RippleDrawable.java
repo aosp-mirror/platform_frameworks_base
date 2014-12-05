@@ -832,6 +832,10 @@ public class RippleDrawable extends LayerDrawable {
         // LayerDrawable creates a new state using createConstantState, so
         // this should always be a safe cast.
         mState = (RippleState) mLayerState;
+
+        // The locally cached drawable may have changed.
+        mMask = findDrawableByLayerId(R.id.mask);
+
         return this;
     }
 
