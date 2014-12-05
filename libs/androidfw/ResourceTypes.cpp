@@ -4316,6 +4316,9 @@ nope:
                 String8(package, packageLen).string());
     }
 
+    const String16 attr("attr");
+    const String16 attrPrivate("^attr-private");
+
     const size_t NG = mPackageGroups.size();
     for (size_t ig=0; ig<NG; ig++) {
         const PackageGroup* group = mPackageGroups[ig];
@@ -4330,66 +4333,72 @@ nope:
 
         const size_t packageCount = group->packages.size();
         for (size_t pi = 0; pi < packageCount; pi++) {
-            ssize_t ti = group->packages[pi]->typeStrings.indexOfString(type, typeLen);
-            if (ti < 0) {
-                continue;
-            }
+            const char16_t* targetType = type;
+            size_t targetTypeLen = typeLen;
 
-            ti += group->packages[pi]->typeIdOffset;
-
-            const TypeList& typeList = group->types[ti];
-            if (typeList.isEmpty()) {
-                if (kDebugTableNoisy) {
-                    ALOGI("Expected type structure not found in package %s for index %zd\n",
-                            String8(group->name).string(), ti);
-                }
-                continue;
-            }
-
-            const size_t typeCount = typeList.size();
-            for (size_t i = 0; i < typeCount; i++) {
-                const Type* t = typeList[i];
-                const ssize_t ei = t->package->keyStrings.indexOfString(name, nameLen);
-                if (ei < 0) {
+            do {
+                ssize_t ti = group->packages[pi]->typeStrings.indexOfString(
+                        targetType, targetTypeLen);
+                if (ti < 0) {
                     continue;
                 }
 
-                const size_t configCount = t->configs.size();
-                for (size_t j = 0; j < configCount; j++) {
-                    const TypeVariant tv(t->configs[j]);
-                    for (TypeVariant::iterator iter = tv.beginEntries();
-                         iter != tv.endEntries();
-                         iter++) {
-                        const ResTable_entry* entry = *iter;
-                        if (entry == NULL) {
-                            continue;
-                        }
+                ti += group->packages[pi]->typeIdOffset;
 
-                        if (dtohl(entry->key.index) == (size_t) ei) {
-                            uint32_t resId = Res_MAKEID(group->id - 1, ti, iter.index());
-                            if (outTypeSpecFlags) {
-                                Entry result;
-                                if (getEntry(group, ti, iter.index(), NULL, &result) != NO_ERROR) {
-                                    ALOGW("Failed to find spec flags for %s:%s/%s (0x%08x)",
-                                            String8(group->name).string(),
-                                            String8(String16(type, typeLen)).string(),
-                                            String8(String16(name, nameLen)).string(),
-                                            resId);
-                                    return 0;
-                                }
-                                *outTypeSpecFlags = result.specFlags;
-
-                                if (fakePublic) {
-                                    *outTypeSpecFlags |= ResTable_typeSpec::SPEC_PUBLIC;
-                                }
-                            }
-                            return resId;
-                        }
+                const uint32_t identifier = findEntry(group, ti, name, nameLen,
+                        outTypeSpecFlags);
+                if (identifier != 0) {
+                    if (fakePublic && outTypeSpecFlags) {
+                        *outTypeSpecFlags |= ResTable_typeSpec::SPEC_PUBLIC;
                     }
+                    return identifier;
+                }
+            } while (strzcmp16(attr.string(), attr.size(), targetType, targetTypeLen) == 0
+                    && (targetType = attrPrivate.string())
+                    && (targetTypeLen = attrPrivate.size())
+            );
+        }
+        break;
+    }
+    return 0;
+}
+
+uint32_t ResTable::findEntry(const PackageGroup* group, ssize_t typeIndex, const char16_t* name,
+        size_t nameLen, uint32_t* outTypeSpecFlags) const {
+    const TypeList& typeList = group->types[typeIndex];
+    const size_t typeCount = typeList.size();
+    for (size_t i = 0; i < typeCount; i++) {
+        const Type* t = typeList[i];
+        const ssize_t ei = t->package->keyStrings.indexOfString(name, nameLen);
+        if (ei < 0) {
+            continue;
+        }
+
+        const size_t configCount = t->configs.size();
+        for (size_t j = 0; j < configCount; j++) {
+            const TypeVariant tv(t->configs[j]);
+            for (TypeVariant::iterator iter = tv.beginEntries();
+                 iter != tv.endEntries();
+                 iter++) {
+                const ResTable_entry* entry = *iter;
+                if (entry == NULL) {
+                    continue;
+                }
+
+                if (dtohl(entry->key.index) == (size_t) ei) {
+                    uint32_t resId = Res_MAKEID(group->id - 1, typeIndex, iter.index());
+                    if (outTypeSpecFlags) {
+                        Entry result;
+                        if (getEntry(group, typeIndex, iter.index(), NULL, &result) != NO_ERROR) {
+                            ALOGW("Failed to find spec flags for 0x%08x", resId);
+                            return 0;
+                        }
+                        *outTypeSpecFlags = result.specFlags;
+                    }
+                    return resId;
                 }
             }
         }
-        break;
     }
     return 0;
 }
