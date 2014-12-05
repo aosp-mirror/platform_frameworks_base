@@ -559,7 +559,7 @@ public class ValueAnimator extends Animator {
      * set to this fraction; it will simply set the fraction to this value and perform any
      * appropriate actions based on that fraction. If the animation is already running, then
      * setCurrentFraction() will set the current fraction to this value and continue
-     * playing from that point. {@link AnimatorListener} events are not called
+     * playing from that point. {@link Animator.AnimatorListener} events are not called
      * due to changing the fraction; those events are only processed while the animation
      * is running.
      *
