@@ -2076,6 +2076,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    // Cancel any lingering so the linger timeout doesn't teardown a network.
+    // This should be called when a network begins satisfying a NetworkRequest.
+    // Note: depending on what state the NetworkMonitor is in (e.g.,
+    // if it's awaiting captive portal login, or if validation failed), this
+    // may trigger a re-evaluation of the network.
+    private void unlinger(NetworkAgentInfo nai) {
+        if (VDBG) log("Canceling linger of " + nai.name());
+        nai.networkLingered.clear();
+        nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
+    }
+
     private void handleAsyncChannelHalfConnect(Message msg) {
         AsyncChannel ac = (AsyncChannel) msg.obj;
         if (mNetworkFactoryInfos.containsKey(msg.replyTo)) {
@@ -2111,6 +2122,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
     }
+
     private void handleAsyncChannelDisconnected(Message msg) {
         NetworkAgentInfo nai = mNetworkAgentInfos.get(msg.replyTo);
         if (nai != null) {
@@ -2160,11 +2172,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     mNetworkForRequestId.remove(request.requestId);
                     sendUpdatedScoreToFactories(request, 0);
                     NetworkAgentInfo alternative = null;
-                    for (Map.Entry entry : mNetworkAgentInfos.entrySet()) {
-                        NetworkAgentInfo existing = (NetworkAgentInfo)entry.getValue();
-                        if (existing.networkInfo.isConnected() &&
-                                request.networkCapabilities.satisfiedByNetworkCapabilities(
-                                existing.networkCapabilities) &&
+                    for (NetworkAgentInfo existing : mNetworkAgentInfos.values()) {
+                        if (existing.satisfies(request) &&
                                 (alternative == null ||
                                  alternative.getCurrentScore() < existing.getCurrentScore())) {
                             alternative = existing;
@@ -2184,8 +2193,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 requestNetworkTransitionWakelock(nai.name());
             }
             for (NetworkAgentInfo networkToActivate : toActivate) {
-                networkToActivate.networkLingered.clear();
-                networkToActivate.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
+                unlinger(networkToActivate);
                 rematchNetworkAndRequests(networkToActivate, false);
             }
         }
@@ -2220,44 +2228,35 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void handleRegisterNetworkRequest(Message msg) {
         final NetworkRequestInfo nri = (NetworkRequestInfo) (msg.obj);
-        final NetworkCapabilities newCap = nri.request.networkCapabilities;
-        int score = 0;
 
         mNetworkRequests.put(nri.request, nri);
+
+        // TODO: This logic may be better replaced with a call to rematchNetworkAndRequests
 
         // Check for the best currently alive network that satisfies this request
         NetworkAgentInfo bestNetwork = null;
         for (NetworkAgentInfo network : mNetworkAgentInfos.values()) {
             if (DBG) log("handleRegisterNetworkRequest checking " + network.name());
-            if (newCap.satisfiedByNetworkCapabilities(network.networkCapabilities)) {
+            if (network.satisfies(nri.request)) {
                 if (DBG) log("apparently satisfied.  currentScore=" + network.getCurrentScore());
-                if ((bestNetwork == null) ||
+                if (!nri.isRequest) {
+                    // Not setting bestNetwork here as a listening NetworkRequest may be
+                    // satisfied by multiple Networks.  Instead the request is added to
+                    // each satisfying Network and notified about each.
+                    network.addRequest(nri.request);
+                    notifyNetworkCallback(network, nri);
+                } else if (bestNetwork == null ||
                         bestNetwork.getCurrentScore() < network.getCurrentScore()) {
-                    if (!nri.isRequest) {
-                        // Not setting bestNetwork here as a listening NetworkRequest may be
-                        // satisfied by multiple Networks.  Instead the request is added to
-                        // each satisfying Network and notified about each.
-                        network.addRequest(nri.request);
-                        notifyNetworkCallback(network, nri);
-                    } else {
-                        bestNetwork = network;
-                    }
+                    bestNetwork = network;
                 }
             }
         }
         if (bestNetwork != null) {
             if (DBG) log("using " + bestNetwork.name());
-            if (bestNetwork.networkInfo.isConnected()) {
-                // Cancel any lingering so the linger timeout doesn't teardown this network
-                // even though we have a request for it.
-                bestNetwork.networkLingered.clear();
-                bestNetwork.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
-            }
-            // TODO: This logic may be better replaced with a call to rematchNetworkAndRequests
+            unlinger(bestNetwork);
             bestNetwork.addRequest(nri.request);
             mNetworkForRequestId.put(nri.request.requestId, bestNetwork);
             notifyNetworkCallback(bestNetwork, nri);
-            score = bestNetwork.getCurrentScore();
             if (nri.request.legacyType != TYPE_NONE) {
                 mLegacyTypeTracker.add(nri.request.legacyType, bestNetwork);
             }
@@ -2265,6 +2264,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (nri.isRequest) {
             if (DBG) log("sending new NetworkRequest to factories");
+            final int score = bestNetwork == null ? 0 : bestNetwork.getCurrentScore();
             for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
                 nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score,
                         0, nri.request);
@@ -3966,8 +3966,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             // check if it satisfies the NetworkCapabilities
             if (VDBG) log("  checking if request is satisfied: " + nri.request);
-            if (nri.request.networkCapabilities.satisfiedByNetworkCapabilities(
-                    newNetwork.networkCapabilities)) {
+            if (newNetwork.satisfies(nri.request)) {
                 if (!nri.isRequest) {
                     // This is not a request, it's a callback listener.
                     // Add it to newNetwork regardless of score.
@@ -4047,12 +4046,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_LINGER);
                 notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOSING);
             } else {
-                // not going to linger, so kill the list of linger networks..  only
-                // notify them of linger if it happens as the result of gaining another,
-                // but if they transition and old network stays up, don't tell them of linger
-                // or very delayed loss
-                nai.networkLingered.clear();
-                if (VDBG) log("Lingered for " + nai.name() + " cleared");
+                unlinger(nai);
             }
         }
         if (keep) {
