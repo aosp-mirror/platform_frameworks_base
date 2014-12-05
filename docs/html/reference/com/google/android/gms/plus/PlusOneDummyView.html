@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">PlusOneDummyView</li>
       </ul>
     </div>
@@ -901,7 +924,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -1025,9 +1048,9 @@ Summary:
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/plus/PlusOneDummyView.html#TAG">TAG</a></td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1069,9 +1092,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CLIP_TO_PADDING_MASK</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1081,9 +1104,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUS_AFTER_DESCENDANTS</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1093,9 +1116,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUS_BEFORE_DESCENDANTS</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1105,9 +1128,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUS_BLOCK_DESCENDANTS</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1117,9 +1140,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">LAYOUT_MODE_CLIP_BOUNDS</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1129,9 +1152,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">LAYOUT_MODE_OPTICAL_BOUNDS</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1141,9 +1164,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PERSISTENT_ALL_CACHES</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1153,9 +1176,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PERSISTENT_ANIMATION_CACHE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1165,9 +1188,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PERSISTENT_NO_CACHE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1177,9 +1200,9 @@ android.view.ViewGroup
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PERSISTENT_SCROLLING_CACHE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1213,9 +1236,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">ACCESSIBILITY_LIVE_REGION_ASSERTIVE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1225,9 +1248,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">ACCESSIBILITY_LIVE_REGION_NONE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1237,9 +1260,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">ACCESSIBILITY_LIVE_REGION_POLITE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1249,9 +1272,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">DRAWING_CACHE_QUALITY_AUTO</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1261,9 +1284,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">DRAWING_CACHE_QUALITY_HIGH</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1273,9 +1296,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">DRAWING_CACHE_QUALITY_LOW</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1285,9 +1308,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FIND_VIEWS_WITH_CONTENT_DESCRIPTION</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1297,9 +1320,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FIND_VIEWS_WITH_TEXT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1309,9 +1332,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUSABLES_ALL</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1321,9 +1344,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUSABLES_TOUCH_MODE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1333,9 +1356,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUS_BACKWARD</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1345,9 +1368,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUS_DOWN</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1357,9 +1380,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUS_FORWARD</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1369,9 +1392,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUS_LEFT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1381,9 +1404,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUS_RIGHT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1393,9 +1416,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">FOCUS_UP</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1405,9 +1428,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">GONE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1417,9 +1440,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">HAPTIC_FEEDBACK_ENABLED</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1429,9 +1452,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">IMPORTANT_FOR_ACCESSIBILITY_AUTO</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1441,9 +1464,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">IMPORTANT_FOR_ACCESSIBILITY_NO</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1453,9 +1476,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1465,9 +1488,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">IMPORTANT_FOR_ACCESSIBILITY_YES</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1477,9 +1500,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">INVISIBLE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1489,9 +1512,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">KEEP_SCREEN_ON</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1501,9 +1524,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">LAYER_TYPE_HARDWARE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1513,9 +1536,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">LAYER_TYPE_NONE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1525,9 +1548,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">LAYER_TYPE_SOFTWARE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1537,9 +1560,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">LAYOUT_DIRECTION_INHERIT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1549,9 +1572,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">LAYOUT_DIRECTION_LOCALE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1561,9 +1584,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">LAYOUT_DIRECTION_LTR</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1573,9 +1596,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">LAYOUT_DIRECTION_RTL</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1585,9 +1608,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MEASURED_HEIGHT_STATE_SHIFT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1597,9 +1620,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MEASURED_SIZE_MASK</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1609,9 +1632,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MEASURED_STATE_MASK</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1621,9 +1644,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">MEASURED_STATE_TOO_SMALL</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1633,9 +1656,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">NO_ID</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1645,9 +1668,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">OVER_SCROLL_ALWAYS</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1657,9 +1680,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">OVER_SCROLL_IF_CONTENT_SCROLLS</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1669,9 +1692,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">OVER_SCROLL_NEVER</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1681,9 +1704,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCREEN_STATE_OFF</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1693,9 +1716,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCREEN_STATE_ON</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1705,9 +1728,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLLBARS_INSIDE_INSET</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1717,9 +1740,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLLBARS_INSIDE_OVERLAY</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1729,9 +1752,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLLBARS_OUTSIDE_INSET</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1741,9 +1764,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLLBARS_OUTSIDE_OVERLAY</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1753,9 +1776,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLLBAR_POSITION_DEFAULT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1765,9 +1788,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLLBAR_POSITION_LEFT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1777,9 +1800,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLLBAR_POSITION_RIGHT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1789,9 +1812,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLL_AXIS_HORIZONTAL</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1801,9 +1824,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLL_AXIS_NONE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1813,9 +1836,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SCROLL_AXIS_VERTICAL</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1825,9 +1848,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SOUND_EFFECTS_ENABLED</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1837,9 +1860,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">STATUS_BAR_HIDDEN</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1849,9 +1872,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">STATUS_BAR_VISIBLE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1861,9 +1884,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_FULLSCREEN</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1873,9 +1896,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_HIDE_NAVIGATION</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1885,9 +1908,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_IMMERSIVE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1897,9 +1920,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_IMMERSIVE_STICKY</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1909,9 +1932,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1921,9 +1944,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1933,9 +1956,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_LAYOUT_STABLE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1945,9 +1968,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_LOW_PROFILE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1957,9 +1980,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_FLAG_VISIBLE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1969,9 +1992,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">SYSTEM_UI_LAYOUT_FLAGS</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1981,9 +2004,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_CENTER</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1993,9 +2016,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_GRAVITY</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2005,9 +2028,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_INHERIT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2017,9 +2040,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_TEXT_END</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2029,9 +2052,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_TEXT_START</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2041,9 +2064,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_VIEW_END</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2053,9 +2076,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_ALIGNMENT_VIEW_START</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2065,9 +2088,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_ANY_RTL</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2077,9 +2100,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_FIRST_STRONG</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2089,33 +2112,33 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_INHERIT</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_LOCALE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_LTR</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2125,21 +2148,21 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">TEXT_DIRECTION_RTL</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol">VIEW_LOG_TAG</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2149,9 +2172,9 @@ android.view.View
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">VISIBLE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -2218,9 +2241,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">ALPHA</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2234,9 +2257,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">EMPTY_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2250,9 +2273,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">ENABLED_FOCUSED_SELECTED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2266,9 +2289,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2282,9 +2305,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">ENABLED_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2298,9 +2321,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2314,9 +2337,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">ENABLED_SELECTED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2330,9 +2353,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2346,9 +2369,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">ENABLED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2362,9 +2385,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">ENABLED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2378,9 +2401,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">FOCUSED_SELECTED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2394,9 +2417,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2410,9 +2433,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2426,9 +2449,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">FOCUSED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2442,9 +2465,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_ENABLED_FOCUSED_SELECTED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2458,9 +2481,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2474,9 +2497,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_ENABLED_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2490,9 +2513,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2506,9 +2529,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_ENABLED_SELECTED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2522,9 +2545,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2538,9 +2561,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_ENABLED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2554,9 +2577,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_ENABLED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2570,9 +2593,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_FOCUSED_SELECTED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2586,9 +2609,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2602,9 +2625,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2618,9 +2641,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_FOCUSED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2634,9 +2657,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_SELECTED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2650,9 +2673,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2666,9 +2689,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2682,9 +2705,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">PRESSED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2698,9 +2721,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">ROTATION</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2714,9 +2737,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">ROTATION_X</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2730,9 +2753,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">ROTATION_Y</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2746,9 +2769,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">SCALE_X</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2762,9 +2785,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">SCALE_Y</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2778,9 +2801,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">SELECTED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2794,9 +2817,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">SELECTED_WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2810,9 +2833,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">TRANSLATION_X</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2826,9 +2849,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">TRANSLATION_Y</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2842,14 +2865,14 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">TRANSLATION_Z</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
           <td class="jd-typecol"><nobr>
           protected
@@ -2858,9 +2881,9 @@ android.view.View
           int[]</nobr></td>
           <td class="jd-linkcol">WINDOW_FOCUSED_STATE_SET</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2874,9 +2897,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">X</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2890,9 +2913,9 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">Y</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -2906,14 +2929,14 @@ android.view.View
           Property&lt;View,&nbsp;Float&gt;</nobr></td>
           <td class="jd-linkcol">Z</td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
-
-
+      
+    
 </table>
   </div>
 </div>
@@ -3056,18 +3079,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">drawableStateChanged</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -3175,20 +3198,20 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             ColorStateList</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getForegroundTintList</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -3200,18 +3223,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getForegroundTintMode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -3351,20 +3374,20 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setForegroundTintList</span>(ColorStateList arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -3392,34 +3415,34 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setMeasureAllChildren</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setVisibility</span>(int arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -4202,18 +4225,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">dispatchThawSelfOnly</span>(SparseArray&lt;Parcelable&gt; arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -4337,20 +4360,20 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">drawableHotspotChanged</span>(float arg0, float arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -4581,7 +4604,7 @@ From class
             
             
             
-
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -4746,18 +4769,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getNestedScrollAxes</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             ViewOverlay</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -4785,20 +4808,20 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getTouchscreenBlocksFocus</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -4995,7 +5018,7 @@ From class
         <td class="jd-typecol"><nobr>
             
             
-
+            
             
             
             void</nobr>
@@ -5075,7 +5098,7 @@ From class
         <td class="jd-typecol"><nobr>
             
             
-
+            
             
             
             void</nobr>
@@ -5221,7 +5244,7 @@ From class
             
             
             
-
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -5674,130 +5697,130 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setAlwaysDrawnWithCacheEnabled</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setAnimationCacheEnabled</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setChildrenDrawingCacheEnabled</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setChildrenDrawingOrderEnabled</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setChildrenDrawnWithCacheEnabled</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setClipChildren</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setClipToPadding</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setDescendantFocusability</span>(int arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -5930,34 +5953,34 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setTouchscreenBlocksFocus</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setTransitionGroup</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -6580,18 +6603,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">computeSystemWindowInsets</span>(WindowInsets arg0, Rect arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -6692,18 +6715,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">dispatchApplyWindowInsets</span>(WindowInsets arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -6875,20 +6898,20 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">dispatchNestedFling</span>(float arg0, float arg1, boolean arg2)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -6916,50 +6939,50 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">dispatchNestedPreScroll</span>(int arg0, int arg1, int[] arg2, int[] arg3)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">dispatchNestedScroll</span>(int arg0, int arg1, int arg2, int arg3, int[] arg4)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">dispatchPopulateAccessibilityEvent</span>(AccessibilityEvent arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -7179,20 +7202,20 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">drawableHotspotChanged</span>(float arg0, float arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -7332,34 +7355,34 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">generateViewId</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getAccessibilityLiveRegion</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             AccessibilityNodeProvider</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -7566,21 +7589,21 @@ From class
             
             
             final
-
-
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClipToOutline</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             
             
             
@@ -7771,20 +7794,20 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getElevation</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -8420,18 +8443,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getOutlineProvider</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -8891,20 +8914,20 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             StateListAnimator</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getStateListAnimator</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -9108,18 +9131,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getTransitionName</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -9147,20 +9170,20 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getTranslationZ</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -9419,20 +9442,20 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hasFocusable</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -9503,7 +9526,7 @@ From class
             
             
             
-
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -9572,18 +9595,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">invalidate</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -9972,18 +9995,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">isLayoutRequested</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -9995,20 +10018,20 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">isNestedScrollingEnabled</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -10388,18 +10411,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onApplyWindowInsets</span>(WindowInsets arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -11067,116 +11090,116 @@ From class
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onWindowFocusChanged</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onWindowSystemUiVisibilityChanged</span>(int arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onWindowVisibilityChanged</span>(int arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">overScrollBy</span>(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, boolean arg8)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">performAccessibilityAction</span>(int arg0, Bundle arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">performClick</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">performHapticFeedback</span>(int arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -11695,7 +11718,7 @@ From class
             
             
             
-
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -11711,7 +11734,7 @@ From class
             
             
             
-
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -11981,7 +12004,7 @@ From class
         <td class="jd-typecol"><nobr>
             
             
-
+            
             
             
             void</nobr>
@@ -12429,7 +12452,7 @@ From class
         <td class="jd-typecol"><nobr>
             
             
-
+            
             
             
             void</nobr>
@@ -12461,7 +12484,7 @@ From class
         <td class="jd-typecol"><nobr>
             
             
-
+            
             
             
             void</nobr>
@@ -12596,18 +12619,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setOnApplyWindowInsetsListener</span>(View.OnApplyWindowInsetsListener arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -12619,20 +12642,20 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setOnCreateContextMenuListener</span>(View.OnCreateContextMenuListener arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -13245,22 +13268,22 @@ From class
         <td class="jd-typecol"><nobr>
             
             
-
-
-
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setTextDirection</span>(int arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
             
             
@@ -13291,20 +13314,20 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setTransitionName</span>(String arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -13460,18 +13483,18 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setX</span>(float arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -13483,20 +13506,20 @@ From class
 	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">setZ</span>(float arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
@@ -13572,34 +13595,34 @@ From class
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">startNestedScroll</span>(int arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">stopNestedScroll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -14534,34 +14557,34 @@ From interface
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onNestedFling</span>(View arg0, float arg1, float arg2, boolean arg3)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onNestedPreFling</span>(View arg0, float arg1, float arg2)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -14598,34 +14621,34 @@ From interface
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onNestedScrollAccepted</span>(View arg0, View arg1, int arg2)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">onStartNestedScroll</span>(View arg0, View arg1, int arg2)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -14678,34 +14701,34 @@ From interface
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">requestChildRectangleOnScreen</span>(View arg0, Rect arg1, boolean arg2)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">requestDisallowInterceptTouchEvent</span>(boolean arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -14726,18 +14749,18 @@ From interface
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">requestLayout</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -14907,9 +14930,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -14962,9 +14985,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>

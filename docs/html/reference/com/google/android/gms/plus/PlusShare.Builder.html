@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">PlusShare.Builder</li>
       </ul>
     </div>
@@ -821,7 +844,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -925,8 +948,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Create a new Builder for launching a sharing action from the given context.
-
-
+          
+    
 
         </div>
   
@@ -948,8 +971,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Create a new Builder for launching a sharing action from launchingActivity.
-
-
+          
+    
 
         </div>
   
@@ -975,8 +998,8 @@ Summary:
     Please migrate to <code><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#PlusShare.Builder(android.app.Activity)">PlusShare.Builder(Activity)</a></code>,
  the PlusClient is optional.
 </em>
-
-
+          
+    
 
         </div>
   
@@ -1011,8 +1034,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Adds a call-to-action button for an interactive post.
-
-
+          
+    
 
         </div>
   
@@ -1034,8 +1057,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Add a stream URI to the data that should be shared.
-
-
+          
+    
 
         </div>
   
@@ -1057,8 +1080,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Retrieve the Intent as configured so far by the Builder.
-
-
+          
+    
 
         </div>
   
@@ -1080,8 +1103,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Include a deep-link ID to a resource to share on Google+.
-
-
+          
+    
 
         </div>
   
@@ -1103,8 +1126,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Include a deep-link URI of a resource to share on Google+.
-
-
+          
+    
 
         </div>
   
@@ -1126,8 +1149,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Sets a URL to link to from the content on the web.
-
-
+          
+    
 
         </div>
   
@@ -1150,8 +1173,8 @@ Summary:
         <div class="jd-descrdiv">
           Deprecated, use the constructor <code><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#PlusShare.Builder(android.app.Activity)">PlusShare.Builder(Activity)</a></code> and call
  <code><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setRecipients(com.google.android.gms.plus.model.people.Person, java.util.List<com.google.android.gms.plus.model.people.Person>)">setRecipients(Person, List<Person>)</a></code>.
-
-
+          
+    
 
         </div>
   
@@ -1173,8 +1196,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Sets a list of people to send the interactive post to.
-
-
+          
+    
 
         </div>
   
@@ -1196,8 +1219,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Set a stream URI to the data that should be shared.
-
-
+          
+    
 
         </div>
   
@@ -1219,8 +1242,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Set a pre-filled message to be sent as part of the share.
-
-
+          
+    
 
         </div>
   
@@ -1242,8 +1265,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Set the type of data being shared.
-
-
+          
+    
 
         </div>
   
@@ -1523,9 +1546,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Create a new Builder for launching a sharing action from the given context.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1565,9 +1588,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Create a new Builder for launching a sharing action from launchingActivity.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1606,8 +1629,8 @@ From class
 
       </div>
     <div class="jd-details-descr">
-
-
+      
+    
 
       <p>
   <p class="caution"><strong>
@@ -1660,9 +1683,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Adds a call-to-action button for an interactive post.  To use this method, you must have
  passed a signed-in PlusClient to the
  Builder.Builder(Activity, PlusClient) constructor or an
@@ -1717,9 +1740,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Add a stream URI to the data that should be shared. If this is not the first
  stream URI added the final intent constructed will become an ACTION_SEND_MULTIPLE
  intent. Not all apps will handle both ACTION_SEND and ACTION_SEND_MULTIPLE.</p></div>
@@ -1769,9 +1792,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieve the Intent as configured so far by the Builder.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1806,9 +1829,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Include a deep-link ID to a resource to share on Google+.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1868,9 +1891,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Include a deep-link URI of a resource to share on Google+.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1915,9 +1938,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets a URL to link to from the content on the web.  The content URL is required when
  used in conjunction with <code><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#addCallToAction(java.lang.String, android.net.Uri, java.lang.String)">addCallToAction(String, Uri, String)</a></code> to build an
  interactive post, and to provide the user context for the call-to-action button.</p></div>
@@ -1963,9 +1986,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Deprecated, use the constructor <code><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#PlusShare.Builder(android.app.Activity)">PlusShare.Builder(Activity)</a></code> and call
  <code><a href="/reference/com/google/android/gms/plus/PlusShare.Builder.html#setRecipients(com.google.android.gms.plus.model.people.Person, java.util.List<com.google.android.gms.plus.model.people.Person>)">setRecipients(Person, List<Person>)</a></code>. Sets a list of people
  to send the interactive post to.
@@ -1977,7 +2000,7 @@ From class
       <table class="jd-tagtable">
         <tr>
           <th>recipientList</td>
-          <td>A list of recipients.  See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> and
+          <td>A list of recipients.  See loadPeople(PlusClient.OnPeopleLoadedListener, String...) and
          <code><a href="/reference/com/google/android/gms/plus/PlusShare.html#createPerson(java.lang.String, java.lang.String)">createPerson(String, String)</a></code>.</td>
         </tr>
       </table>
@@ -2015,9 +2038,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets a list of people to send the interactive post to.
 
  <p>This sets the initial people to share with, but the user can change who the post
@@ -2032,7 +2055,7 @@ From class
         </tr>
         <tr>
           <th>recipientList</td>
-          <td>A list of recipients.  See <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, java.lang.String...)">loadPeople(PlusClient.OnPeopleLoadedListener, String...)</a></code> and
+          <td>A list of recipients.  See loadPeople(PlusClient.OnPeopleLoadedListener, String...) and
          <code><a href="/reference/com/google/android/gms/plus/PlusShare.html#createPerson(java.lang.String, java.lang.String)">createPerson(String, String)</a></code>.</td>
         </tr>
       </table>
@@ -2070,9 +2093,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set a stream URI to the data that should be shared.
 
  <p>This replaces all currently set stream URIs and will produce a single-stream
@@ -2123,9 +2146,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set a pre-filled message to be sent as part of the share.
  This may be a styled CharSequence.</p></div>
   <div class="jd-tagdata">
@@ -2174,9 +2197,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Set the type of data being shared.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>

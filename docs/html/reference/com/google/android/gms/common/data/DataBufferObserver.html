@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -103,14 +104,14 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>com.google.android.gms.auth.api | Android Developers</title>
+<title>DataBufferObserver | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -140,20 +141,65 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 </head>
 
-
 <body class="gc-documentation google
-  develop reference">
+  develop reference" itemscope itemtype="http://schema.org/Article">
   <div id="doc-api-level" class="" style="display:none"></div>
   <a name="top"></a>
 
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -197,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -219,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -229,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -238,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -353,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -375,38 +421,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -444,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -467,8 +489,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
-        <li class="current">com.google.android.gms.auth.api</li>
+        
+        <li class="current">DataBufferObserver</li>
       </ul>
     </div>
   </div>
@@ -477,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -730,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -745,184 +767,581 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
+     
 
 
 
-
-<div class="col-12" id="doc-col">
+<div class="col-12"  id="doc-col">
 
 <div id="api-info-block">
+
+
+
+
+<div class="sum-details-links">
+
+Summary:
+
+  <a href="#nestedclasses">Nested Classes</a>
+  
+
+
+
+
+
+
+
+
+
+
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
+
+
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
+
+</div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
-</div>
+</div><!-- end api-info-block -->
+
+
+<!-- ======== START OF CLASS DATA ======== -->
 
 <div id="jd-header">
-  package
-  <h1>com.google.android.gms.auth.api</h1>
+    public
+     
+     
+    
+    interface
+<h1 itemprop="name">DataBufferObserver</h1>
+
+
+
+  
+  
+  
+
+
+    
+
+
 </div><!-- end header -->
 
 <div id="naMessage"></div>
 
 <div id="jd-content" class="api apilevel-">
+<table class="jd-inheritance-table">
+
+
+    <tr>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.data.DataBufferObserver</td>
+    </tr>
+    
+
+</table>
 
 
 
 
 
 
+<table class="jd-sumtable jd-sumtable-subclasses"><tr><td colspan="12" style="border:none;margin:0;padding:0;">
 
+  <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-indirect" class="jd-expando-trigger closed"
+          ><img id="subclasses-indirect-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>Known Indirect Subclasses
 
-
-
-    <h2>Interfaces</h2>
-    <div class="jd-sumtable">
-
-
+  <div id="subclasses-indirect">
+      <div id="subclasses-indirect-list"
+              class="jd-inheritedlinks"
+              
+              >
+          
+            
+              <a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html">DataBufferObserverSet</a>
+            
+          
+      </div>
+      <div id="subclasses-indirect-summary"
+              style="display: none;"
+              >
+  
   <table class="jd-sumtable-expando">
-
+    
       <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/api/IGoogleAuthApiCallbacks.html">IGoogleAuthApiCallbacks</a></td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html">DataBufferObserverSet</a></td>
         <td class="jd-descrcol" width="100%">
-          &nbsp;
-
-
+          Utility class for managing a set of observers and distributing their notifications.&nbsp;
+          
+    
 
         </td>
       </tr>
-
-
-      <tr class=" api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/api/IGoogleAuthService.html">IGoogleAuthService</a></td>
-        <td class="jd-descrcol" width="100%">
-          &nbsp;
-
-
-
-        </td>
-      </tr>
-
-
+      
+    
   </table>
 
+      </div>
+  </div>
+</td></tr></table>
+
+
+<div class="jd-descr">
+
+
+<h2>Class Overview</h2>
+<p itemprop="articleBody">An interface for notifying an observer about changes to a DataBuffer.
+
+ To support adding multiple observers, see <code><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html">DataBufferObserverSet</a></code>.  It allows you to
+ delegate addObserver and removeObserver to it and it will handle distributing all the
+ notifications to all registered observers.</p>
+
+
+
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/data/DataBuffer.html">DataBuffer</a></code></li>
+      </ul>
+  </div>
+
+
+</div><!-- jd-descr -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="jd-descr">
+
+
+<h2>Summary</h2>
+
+
+
+<!-- ======== NESTED CLASS SUMMARY ======== -->
+<table id="nestedclasses" class="jd-sumtable"><tr><th colspan="12">Nested Classes</th></tr>
+
+
+  
+    <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.Observable.html">DataBufferObserver.Observable</a></td>
+      <td class="jd-descrcol" width="100%">
+        Interface a data buffer can implement to expose the fact that it supports observation.&nbsp;
+        
+    
+
+      </td>
+    </tr>
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataChanged()">onDataChanged</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Called when the overall data changes.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataRangeChanged(int, int)">onDataRangeChanged</a></span>(int position, int count)</nobr>
+        
+        <div class="jd-descrdiv">
+          Called when a range of items changes.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataRangeInserted(int, int)">onDataRangeInserted</a></span>(int position, int count)</nobr>
+        
+        <div class="jd-descrdiv">
+          Called when a range of items is inserted.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataRangeMoved(int, int, int)">onDataRangeMoved</a></span>(int fromPosition, int toPosition, int count)</nobr>
+        
+        <div class="jd-descrdiv">
+          Called when a range of items is moved.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataRangeRemoved(int, int)">onDataRangeRemoved</a></span>(int position, int count)</nobr>
+        
+        <div class="jd-descrdiv">
+          Called when a range of items is removed.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="onDataChanged()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">onDataChanged</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the overall data changes.
+</p></div>
+
     </div>
+</div>
 
 
+<A NAME="onDataRangeChanged(int, int)"></A>
 
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">onDataRangeChanged</span>
+      <span class="normal">(int position, int count)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
 
-    <h2>Classes</h2>
-    <div class="jd-sumtable">
+      </div>
+    <div class="jd-details-descr">
+      
+    
 
-
-  <table class="jd-sumtable-expando">
-
-      <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/api/GoogleAuthApiClientImpl.html">GoogleAuthApiClientImpl</a></td>
-        <td class="jd-descrcol" width="100%">
-          Main public API entry point for the google auth api client.&nbsp;
-
-
-
-        </td>
-      </tr>
-
-
-      <tr class=" api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/api/GoogleAuthApiRequest.html">GoogleAuthApiRequest</a></td>
-        <td class="jd-descrcol" width="100%">
-          A request to be performed against Apiary.&nbsp;
-
-
-
-        </td>
-      </tr>
-
-
-      <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/api/GoogleAuthApiResponse.html">GoogleAuthApiResponse</a></td>
-        <td class="jd-descrcol" width="100%">
-          A response obtained by Apiary.&nbsp;
-
-
-
-        </td>
-      </tr>
-
-
-      <tr class=" api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/api/IGoogleAuthApiCallbacks.Stub.html">IGoogleAuthApiCallbacks.Stub</a></td>
-        <td class="jd-descrcol" width="100%">
-          Local-side IPC implementation stub class.&nbsp;
-
-
-
-        </td>
-      </tr>
-
-
-      <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/api/IGoogleAuthService.Stub.html">IGoogleAuthService.Stub</a></td>
-        <td class="jd-descrcol" width="100%">
-          Local-side IPC implementation stub class.&nbsp;
-
-
-
-        </td>
-      </tr>
-
-
-  </table>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a range of items changes.
+</p></div>
 
     </div>
+</div>
 
 
+<A NAME="onDataRangeInserted(int, int)"></A>
 
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">onDataRangeInserted</span>
+      <span class="normal">(int position, int count)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
 
+      </div>
+    <div class="jd-details-descr">
+      
+    
 
-
-
-    <h2>Exceptions</h2>
-    <div class="jd-sumtable">
-
-
-  <table class="jd-sumtable-expando">
-
-      <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/auth/api/GoogleAuthApiException.html">GoogleAuthApiException</a></td>
-        <td class="jd-descrcol" width="100%">
-          Exception encapsulating an error when attempting to use GoogleAuthApi to connect to
- Apiary.&nbsp;
-
-
-
-        </td>
-      </tr>
-
-
-  </table>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a range of items is inserted.
+</p></div>
 
     </div>
+</div>
+
+
+<A NAME="onDataRangeMoved(int, int, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">onDataRangeMoved</span>
+      <span class="normal">(int fromPosition, int toPosition, int count)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a range of items is moved.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="onDataRangeRemoved(int, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        void
+      </span>
+      <span class="sympad">onDataRangeRemoved</span>
+      <span class="normal">(int position, int count)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a range of items is removed.
+</p></div>
+
+    </div>
+</div>
 
 
 
 
 
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+<!-- ========= END OF CLASS DATA ========= -->
+<A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -930,7 +1349,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -939,10 +1358,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   </div>
 
 </div> <!-- end footer -->
-</div><!-- end jd-content -->
-</div><!-- doc-content -->
+</div> <!-- jd-content -->
 
-</div> <!-- end body-content -->
+</div><!-- end doc-content -->
+
+</div> <!-- end body-content --> 
 
 
 

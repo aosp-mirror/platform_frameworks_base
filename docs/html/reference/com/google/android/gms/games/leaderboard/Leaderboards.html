@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Leaderboards</li>
       </ul>
     </div>
@@ -784,7 +807,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -859,8 +882,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LeaderboardMetadataResult.html">Leaderboards.LeaderboardMetadataResult</a></td>
       <td class="jd-descrcol" width="100%">
         Result delivered when leaderboard metadata has been loaded.&nbsp;
-
-
+        
+    
 
       </td>
     </tr>
@@ -876,8 +899,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadPlayerScoreResult.html">Leaderboards.LoadPlayerScoreResult</a></td>
       <td class="jd-descrcol" width="100%">
         Result delivered when a player's leaderboard score has been loaded.&nbsp;
-
-
+        
+    
 
       </td>
     </tr>
@@ -893,8 +916,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.LoadScoresResult.html">Leaderboards.LoadScoresResult</a></td>
       <td class="jd-descrcol" width="100%">
         Result delivered when leaderboard scores have been loaded.&nbsp;
-
-
+        
+    
 
       </td>
     </tr>
@@ -910,8 +933,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.SubmitScoreResult.html">Leaderboards.SubmitScoreResult</a></td>
       <td class="jd-descrcol" width="100%">
         Result delivered when a leaderboard score has been submitted.&nbsp;
-
-
+        
+    
 
       </td>
     </tr>
@@ -964,8 +987,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Gets an intent to show the list of leaderboards for a game.
-
-
+          
+    
 
         </div>
   
@@ -987,8 +1010,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Gets an intent to show a leaderboard for a game.
-
-
+          
+    
 
         </div>
   
@@ -997,6 +1020,29 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            Intent</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.html#getLeaderboardIntent(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, int)">getLeaderboardIntent</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String leaderboardId, int timeSpan)</nobr>
+        
+        <div class="jd-descrdiv">
+          Gets an intent to show a leaderboard for a game.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1010,8 +1056,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Asynchronously load the currently signed in player's score for a given leaderboard.
-
-
+          
+    
 
         </div>
   
@@ -1019,7 +1065,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1033,8 +1079,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Asynchronously load a specific leaderboard's metadata for this game.
-
-
+          
+    
 
         </div>
   
@@ -1042,7 +1088,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1056,8 +1102,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Asynchronously load the list of leaderboard metadata for this game.
-
-
+          
+    
 
         </div>
   
@@ -1065,7 +1111,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1079,8 +1125,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Asynchronously loads an additional page of score data for the given score buffer.
-
-
+          
+    
 
         </div>
   
@@ -1088,7 +1134,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1102,8 +1148,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Asynchronously load the player-centered page of scores for a given leaderboard.
-
-
+          
+    
 
         </div>
   
@@ -1111,7 +1157,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1125,8 +1171,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Asynchronously load the player-centered page of scores for a given leaderboard.
-
-
+          
+    
 
         </div>
   
@@ -1134,7 +1180,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1148,8 +1194,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Asynchronously load the top page of scores for a given leaderboard.
-
-
+          
+    
 
         </div>
   
@@ -1157,7 +1203,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1171,8 +1217,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Asynchronously load the top page of scores for a given leaderboard.
-
-
+          
+    
 
         </div>
   
@@ -1180,7 +1226,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
             
@@ -1194,8 +1240,31 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Submit a score to a leaderboard for the currently signed in player.
+          
+    
+
+        </div>
+  
+  </td></tr>
 
 
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.html#submitScore(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, long)">submitScore</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String leaderboardId, long score)</nobr>
+        
+        <div class="jd-descrdiv">
+          Submit a score to a leaderboard for the currently signed in player.
+          
+    
 
         </div>
   
@@ -1210,15 +1279,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             
             
             
-            void</nobr>
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.SubmitScoreResult.html">Leaderboards.SubmitScoreResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.html#submitScore(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, long)">submitScore</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String leaderboardId, long score)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.html#submitScoreImmediate(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, long)">submitScoreImmediate</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String leaderboardId, long score)</nobr>
         
         <div class="jd-descrdiv">
           Submit a score to a leaderboard for the currently signed in player.
-
-
+          
+    
 
         </div>
   
@@ -1236,35 +1305,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.SubmitScoreResult.html">Leaderboards.SubmitScoreResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.html#submitScoreImmediate(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, long)">submitScoreImmediate</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String leaderboardId, long score)</nobr>
-        
-        <div class="jd-descrdiv">
-          Submit a score to a leaderboard for the currently signed in player.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.SubmitScoreResult.html">Leaderboards.SubmitScoreResult</a>&gt;</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/leaderboard/Leaderboards.html#submitScoreImmediate(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, long, java.lang.String)">submitScoreImmediate</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String leaderboardId, long score, String scoreTag)</nobr>
         
         <div class="jd-descrdiv">
           Submit a score to a leaderboard for the currently signed in player.
-
-
+          
+    
 
         </div>
   
@@ -1342,9 +1388,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets an intent to show the list of leaderboards for a game. Note that this must be invoked
  with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the
  calling package can be established.
@@ -1397,9 +1443,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gets an intent to show a leaderboard for a game. Note that this must be invoked with
  <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the calling
  package can be established.
@@ -1420,6 +1466,72 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <tr>
           <th>leaderboardId</td>
           <td>The ID of the leaderboard to view.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>An <code><a href="/reference/android/content/Intent.html">Intent</a></code> that can be started to view the specified leaderboard.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getLeaderboardIntent(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, int)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        Intent
+      </span>
+      <span class="sympad">getLeaderboardIntent</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String leaderboardId, int timeSpan)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Gets an intent to show a leaderboard for a game. Note that this must be invoked with
+ <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so that the identity of the calling
+ package can be established.
+ <p>
+ A <code><a href="/reference/com/google/android/gms/games/GamesActivityResultCodes.html#RESULT_RECONNECT_REQUIRED">RESULT_RECONNECT_REQUIRED</a></code> may be returned as the
+ resultCode in <code><a href="/reference/android/app/Activity.html#onActivityResult(int, int, android.content.Intent)">onActivityResult(int, int, Intent)</a></code> if the GoogleApiClient ends up in an
+ inconsistent state.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>leaderboardId</td>
+          <td>The ID of the leaderboard to view.</td>
+        </tr>
+        <tr>
+          <th>timeSpan</td>
+          <td>Time span to retrieve data for. Valid values are
+            <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_DAILY">TIME_SPAN_DAILY</a></code>,
+            <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_WEEKLY">TIME_SPAN_WEEKLY</a></code>, or
+            <code><a href="/reference/com/google/android/gms/games/leaderboard/LeaderboardVariant.html#TIME_SPAN_ALL_TIME">TIME_SPAN_ALL_TIME</a></code>.</td>
         </tr>
       </table>
   </div>
@@ -1456,9 +1568,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the currently signed in player's score for a given leaderboard.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1522,9 +1634,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load a specific leaderboard's metadata for this game.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1582,9 +1694,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of leaderboard metadata for this game.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1638,9 +1750,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously loads an additional page of score data for the given score buffer. A new score
  buffer will be delivered that replaces the given buffer.
  <p>
@@ -1704,9 +1816,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the player-centered page of scores for a given leaderboard. If the player
  does not have a score on this leaderboard, this call will return the top page instead.
  <p>
@@ -1775,9 +1887,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the player-centered page of scores for a given leaderboard. If the player
  does not have a score on this leaderboard, this call will return the top page instead.
  <p>
@@ -1853,9 +1965,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the top page of scores for a given leaderboard.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1930,9 +2042,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the top page of scores for a given leaderboard.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -2000,9 +2112,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Submit a score to a leaderboard for the currently signed in player. The score is ignored if
  it is worse (as defined by the leaderboard configuration) than a previously submitted score
  for the same player.
@@ -2080,9 +2192,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Submit a score to a leaderboard for the currently signed in player. The score is ignored if
  it is worse (as defined by the leaderboard configuration) than a previously submitted score
  for the same player.
@@ -2155,9 +2267,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Submit a score to a leaderboard for the currently signed in player. The score is ignored if
  it is worse (as defined by the leaderboard configuration) than a previously submitted score
  for the same player.
@@ -2233,9 +2345,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Submit a score to a leaderboard for the currently signed in player. The score is ignored if
  it is worse (as defined by the leaderboard configuration) than a previously submitted score
  for the same player.

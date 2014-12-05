@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">MetadataChangeSet</li>
       </ul>
     </div>
@@ -773,6 +796,9 @@ Summary:
 
 
 
+  &#124; <a href="#constants">Constants</a>
+  
+
 
 
 
@@ -821,7 +847,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -904,8 +930,8 @@ Summary:
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.Builder.html">MetadataChangeSet.Builder</a></td>
       <td class="jd-descrcol" width="100%">
         A builder for creating a new MetadataChangeSet.&nbsp;
-
-
+        
+    
 
       </td>
     </tr>
@@ -922,6 +948,76 @@ Summary:
 
 
 
+
+
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#CUSTOM_PROPERTY_SIZE_LIMIT_BYTES">CUSTOM_PROPERTY_SIZE_LIMIT_BYTES</a></td>
+        <td class="jd-descrcol" width="100%">
+          The limit on the total number of bytes (in UTF-8 encoding) of the key string and the value
+ string together.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#INDEXABLE_TEXT_SIZE_LIMIT_BYTES">INDEXABLE_TEXT_SIZE_LIMIT_BYTES</a></td>
+        <td class="jd-descrcol" width="100%">
+          The limit on the indexable text size in bytes (for UTF-8 encoding).
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#MAX_PRIVATE_PROPERTIES_PER_RESOURCE_PER_APP">MAX_PRIVATE_PROPERTIES_PER_RESOURCE_PER_APP</a></td>
+        <td class="jd-descrcol" width="100%">
+          The maximum number of private properties an application can have on a Drive resource.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#MAX_PUBLIC_PROPERTIES_PER_RESOURCE">MAX_PUBLIC_PROPERTIES_PER_RESOURCE</a></td>
+        <td class="jd-descrcol" width="100%">
+          The maximum number of public properties allowed on a Drive resource.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#MAX_TOTAL_PROPERTIES_PER_RESOURCE">MAX_TOTAL_PROPERTIES_PER_RESOURCE</a></td>
+        <td class="jd-descrcol" width="100%">
+          The maximum number of properties allowed on a Drive resource.
+          
+    
+
+        </td>
+    </tr>
+    
+    
+
+</table>
 
 
 
@@ -951,92 +1047,116 @@ Summary:
             
             
             
+            Map&lt;<a href="/reference/com/google/android/gms/drive/metadata/CustomPropertyKey.html">CustomPropertyKey</a>,&nbsp;String&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#getCustomPropertyChangeMap()">getCustomPropertyChangeMap</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns a map that defines the custom property changes for the resource.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#getDescription()">getDescription</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
-          Returns the new description for the resource.
-
-
+          Returns the new description for the resource or <code>null</code> if unchanged.
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
-    <tr class=" api apilevel-" >
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#getIndexableText()">getIndexableText</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
-          Returns the new text to be indexed for the resource.
-
-
+          Returns the new text to be indexed for the resource or <code>null</code> if unchanged.
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
-    <tr class="alt-color api apilevel-" >
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Date</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#getLastViewedByMeDate()">getLastViewedByMeDate</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
-          Returns the date which will be recorded as when the user most recently viewed the resource.
-
-
+          Returns the date which will be recorded as when the user most recently viewed the resource or
+ <code>null</code> if unchanged.
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
-    <tr class=" api apilevel-" >
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#getMimeType()">getMimeType</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Returns the new MIME type for the resource.
-
-
+          Returns the new MIME type for the resource or <code>null</code> if unchanged.
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
 	 
-    <tr class="alt-color api apilevel-" >
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1049,12 +1169,35 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#getTitle()">getTitle</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Returns the new title for the resource.
-
-
+          Returns the new title for the resource or <code>null</code> if unchanged.
+          
+    
 
         </div>
+  
+  </td></tr>
 
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#isPinned()">isPinned</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">
+          Returns the new pinned state for the resource or <code>null</code> if unchanged.
+          
+    
+
+        </div>
+  
   </td></tr>
 
 
@@ -1069,61 +1212,38 @@ Summary:
             Boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#isPinned()">isPinned</a></span>()</nobr>
-
-        <div class="jd-descrdiv">
-          Returns the new pinned state for the resource.
-
-
-
-        </div>
-
-  </td></tr>
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-
-
-
-
-
-            Boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#isStarred()">isStarred</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Returns the new starred state for the resource.
-
-
+          Returns the new starred state for the resource or <code>null</code> if unchanged.
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
-    <tr class=" api apilevel-" >
+	 
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/drive/MetadataChangeSet.html#isViewed()">isViewed</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
-          Returns the new viewed state for the resource.
-
-
+          Returns the new viewed state for the resource or <code>null</code> if unchanged.
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
@@ -1366,6 +1486,227 @@ From class
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="CUSTOM_PROPERTY_SIZE_LIMIT_BYTES"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        CUSTOM_PROPERTY_SIZE_LIMIT_BYTES
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The limit on the total number of bytes (in UTF-8 encoding) of the key string and the value
+ string together.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                124
+                (0x0000007c)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="INDEXABLE_TEXT_SIZE_LIMIT_BYTES"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        INDEXABLE_TEXT_SIZE_LIMIT_BYTES
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The limit on the indexable text size in bytes (for UTF-8 encoding).
+ See: https://developers.google.com/drive/web/file
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                131072
+                (0x00020000)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="MAX_PRIVATE_PROPERTIES_PER_RESOURCE_PER_APP"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        MAX_PRIVATE_PROPERTIES_PER_RESOURCE_PER_APP
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The maximum number of private properties an application can have on a Drive resource.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                30
+                (0x0000001e)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="MAX_PUBLIC_PROPERTIES_PER_RESOURCE"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        MAX_PUBLIC_PROPERTIES_PER_RESOURCE
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The maximum number of public properties allowed on a Drive resource.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                30
+                (0x0000001e)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="MAX_TOTAL_PROPERTIES_PER_RESOURCE"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        int
+      </span>
+        MAX_TOTAL_PROPERTIES_PER_RESOURCE
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The maximum number of properties allowed on a Drive resource. This includes the public
+ properties on the resource as well as the private properties from all the applications having
+ access to this Drive resource.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                100
+                (0x00000064)
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -1385,16 +1726,51 @@ From class
 
 
 
-<A NAME="getDescription()"></A>
+<A NAME="getCustomPropertyChangeMap()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
+        public 
+         
+         
+         
+         
+        Map&lt;<a href="/reference/com/google/android/gms/drive/metadata/CustomPropertyKey.html">CustomPropertyKey</a>,&nbsp;String&gt;
+      </span>
+      <span class="sympad">getCustomPropertyChangeMap</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns a map that defines the custom property changes for the resource. The map is from the
+ property keys to the new or updated values. Null values correspond to properties that are
+ going to be deleted.
+</p></div>
+
+    </div>
+</div>
 
 
+<A NAME="getDescription()"></A>
 
-
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getDescription</span>
@@ -1402,16 +1778,16 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the new description for the resource.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the new description for the resource or <code>null</code> if unchanged.
 </p></div>
 
     </div>
@@ -1420,14 +1796,14 @@ From class
 
 <A NAME="getIndexableText()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getIndexableText</span>
@@ -1435,16 +1811,16 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the new text to be indexed for the resource.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the new text to be indexed for the resource or <code>null</code> if unchanged.
 </p></div>
 
     </div>
@@ -1453,14 +1829,14 @@ From class
 
 <A NAME="getLastViewedByMeDate()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Date
       </span>
       <span class="sympad">getLastViewedByMeDate</span>
@@ -1468,16 +1844,17 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the date which will be recorded as when the user most recently viewed the resource.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the date which will be recorded as when the user most recently viewed the resource or
+ <code>null</code> if unchanged.
 </p></div>
 
     </div>
@@ -1507,10 +1884,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the new MIME type for the resource.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the new MIME type for the resource or <code>null</code> if unchanged.
 </p></div>
 
     </div>
@@ -1540,10 +1917,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the new title for the resource.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the new title for the resource or <code>null</code> if unchanged.
 </p></div>
 
     </div>
@@ -1552,14 +1929,14 @@ From class
 
 <A NAME="isPinned()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Boolean
       </span>
       <span class="sympad">isPinned</span>
@@ -1567,16 +1944,16 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the new pinned state for the resource.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the new pinned state for the resource or <code>null</code> if unchanged.
 </p></div>
 
     </div>
@@ -1606,10 +1983,10 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the new starred state for the resource.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the new starred state for the resource or <code>null</code> if unchanged.
 </p></div>
 
     </div>
@@ -1618,14 +1995,14 @@ From class
 
 <A NAME="isViewed()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Boolean
       </span>
       <span class="sympad">isViewed</span>
@@ -1633,16 +2010,16 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the new viewed state for the resource.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the new viewed state for the resource or <code>null</code> if unchanged.
 </p></div>
 
     </div>
