@@ -2147,4 +2147,5 @@
   <java-symbol type="string" name="kg_text_message_separator" />
 
   <java-symbol type="bool" name="config_use_sim_language_file" />
+  <java-symbol type="bool" name="config_LTE_eri_for_network_name" />
 </resources>
