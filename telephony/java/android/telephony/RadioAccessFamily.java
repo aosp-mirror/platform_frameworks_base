@@ -19,6 +19,8 @@ package android.telephony;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.telephony.RILConstants;
+
 /**
  * Object to indicate the phone radio type and access technology.
  *
@@ -107,6 +109,7 @@ public class RadioAccessFamily implements Parcelable {
      * @param outParcel The Parcel in which the object should be written.
      * @param flags Additional flags about how the object should be written.
      */
+    @Override
     public void writeToParcel(Parcel outParcel, int flags) {
         outParcel.writeInt(mPhoneId);
         outParcel.writeInt(mRadioAccessFamily);
@@ -131,5 +134,18 @@ public class RadioAccessFamily implements Parcelable {
             return new RadioAccessFamily[size];
         }
     };
+
+    public static int getRafFromNetworkType(int type) {
+        // TODO map from RILConstants.NETWORK_TYPE_* to RAF_*
+        switch (type) {
+            case RILConstants.NETWORK_MODE_WCDMA_PREF:
+            case RILConstants.NETWORK_MODE_GSM_UMTS:
+                return RAF_UMTS | RAF_GSM;
+            case RILConstants.NETWORK_MODE_GSM_ONLY:
+                return RAF_GSM;
+            default:
+                return RAF_UNKNOWN;
+        }
+    }
 }
 
