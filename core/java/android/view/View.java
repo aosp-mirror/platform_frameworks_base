@@ -5938,9 +5938,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * layer.
      *
      * @param outRects List to which to add clickable areas.
+     *
+     * @hide
      */
-    void addClickableRectsForAccessibility(List<RectF> outRects) {
-        if (isClickable() || isLongClickable()) {
+    public void addClickableRectsForAccessibility(List<RectF> outRects) {
+        if (isClickable() || isLongClickable()
+                || (mListenerInfo != null && mListenerInfo.mOnTouchListener != null)) {
             RectF bounds = new RectF();
             bounds.set(0, 0, getWidth(), getHeight());
             outRects.add(bounds);
