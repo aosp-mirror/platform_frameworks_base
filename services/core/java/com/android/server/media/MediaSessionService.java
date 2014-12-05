@@ -443,7 +443,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         synchronized (mLock) {
             List<MediaSessionRecord> records = mPriorityStack.getActiveSessions(userId);
             int size = records.size();
-            if (size > 0) {
+            if (size > 0 && records.get(0).isPlaybackActive(false)) {
                 rememberMediaButtonReceiverLocked(records.get(0));
             }
             ArrayList<MediaSession.Token> tokens = new ArrayList<MediaSession.Token>();
@@ -702,8 +702,12 @@ public class MediaSessionService extends SystemService implements Monitor {
 
             try {
                 synchronized (mLock) {
+                    // If we don't have a media button receiver to fall back on
+                    // include non-playing sessions for dispatching
+                    boolean useNotPlayingSessions = mUserRecords.get(
+                            ActivityManager.getCurrentUser()).mLastMediaButtonReceiver == null;
                     MediaSessionRecord session = mPriorityStack
-                            .getDefaultMediaButtonSession(mCurrentUserId);
+                            .getDefaultMediaButtonSession(mCurrentUserId, useNotPlayingSessions);
                     if (isVoiceKey(keyEvent.getKeyCode())) {
                         handleVoiceKeyEventLocked(keyEvent, needWakeLock, session);
                     } else {
