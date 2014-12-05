@@ -552,7 +552,7 @@ class GLES20Canvas extends HardwareCanvas {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
         final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
-        nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, patch.mNativeChunk,
+        nDrawPatch(mRenderer, bitmap.mNativeBitmap, patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
@@ -561,32 +561,31 @@ class GLES20Canvas extends HardwareCanvas {
         Bitmap bitmap = patch.getBitmap();
         throwIfCannotDraw(bitmap);
         final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
-        nDrawPatch(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, patch.mNativeChunk,
+        nDrawPatch(mRenderer, bitmap.mNativeBitmap, patch.mNativeChunk,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
-    private static native void nDrawPatch(long renderer, long bitmap, byte[] buffer, long chunk,
+    private static native void nDrawPatch(long renderer, long bitmap, long chunk,
             float left, float top, float right, float bottom, long paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         throwIfCannotDraw(bitmap);
         final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, nativePaint);
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, nativePaint);
     }
 
-    private static native void nDrawBitmap(long renderer, long bitmap, byte[] buffer,
-            float left, float top, long paint);
+    private static native void nDrawBitmap(long renderer, long bitmap, float left,
+            float top, long paint);
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
         throwIfCannotDraw(bitmap);
         final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer,
-                matrix.native_instance, nativePaint);
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, matrix.native_instance, nativePaint);
     }
 
-    private static native void nDrawBitmap(long renderer, long bitmap, byte[] buffer,
+    private static native void nDrawBitmap(long renderer, long bitmap,
             long matrix, long paint);
 
     @Override
@@ -606,7 +605,7 @@ class GLES20Canvas extends HardwareCanvas {
             bottom = src.bottom;
         }
 
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, right, bottom,
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, right, bottom,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
@@ -627,11 +626,11 @@ class GLES20Canvas extends HardwareCanvas {
             bottom = src.bottom;
         }
 
-        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, left, top, right, bottom,
+        nDrawBitmap(mRenderer, bitmap.mNativeBitmap, left, top, right, bottom,
                 dst.left, dst.top, dst.right, dst.bottom, nativePaint);
     }
 
-    private static native void nDrawBitmap(long renderer, long bitmap, byte[] buffer,
+    private static native void nDrawBitmap(long renderer, long bitmap,
             float srcLeft, float srcTop, float srcRight, float srcBottom,
             float left, float top, float right, float bottom, long paint);
 
@@ -692,11 +691,11 @@ class GLES20Canvas extends HardwareCanvas {
         }
 
         final long nativePaint = paint == null ? 0 : paint.getNativeInstance();
-        nDrawBitmapMesh(mRenderer, bitmap.mNativeBitmap, bitmap.mBuffer, meshWidth, meshHeight,
+        nDrawBitmapMesh(mRenderer, bitmap.mNativeBitmap, meshWidth, meshHeight,
                 verts, vertOffset, colors, colorOffset, nativePaint);
     }
 
-    private static native void nDrawBitmapMesh(long renderer, long bitmap, byte[] buffer,
+    private static native void nDrawBitmapMesh(long renderer, long bitmap,
             int meshWidth, int meshHeight, float[] verts, int vertOffset,
             int[] colors, int colorOffset, long paint);
 
