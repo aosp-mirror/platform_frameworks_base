@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -103,14 +104,14 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>ActivityRecognitionClient | Android Developers</title>
+<title>DataBufferObserverSet | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,8 +489,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
-        <li class="current">ActivityRecognitionClient</li>
+        
+        <li class="current">DataBufferObserverSet</li>
       </ul>
     </div>
   </div>
@@ -768,6 +791,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
   
 
+  
+   
+  
+  
+  
+  
+
 
 <div class="sum-details-links">
 
@@ -810,10 +840,10 @@ Summary:
 <div id="jd-header">
     public
      
-     
+    final 
     
     class
-<h1 itemprop="name">ActivityRecognitionClient</h1>
+<h1 itemprop="name">DataBufferObserverSet</h1>
 
 
 
@@ -827,13 +857,15 @@ Summary:
   
       implements 
       
-        <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html">GooglePlayServicesClient</a> 
+        <a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html">DataBufferObserver</a> 
+      
+        <a href="/reference/com/google/android/gms/common/data/DataBufferObserver.Observable.html">DataBufferObserver.Observable</a> 
       
   
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -854,7 +886,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.location.ActivityRecognitionClient</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.data.DataBufferObserverSet</td>
     </tr>
     
 
@@ -867,56 +899,18 @@ Summary:
 
 
 <div class="jd-descr">
-<p>
-  <p class="caution"><strong>
-      This class is deprecated.</strong><br/>
-    Use <code><a href="/reference/com/google/android/gms/location/ActivityRecognition.html">ActivityRecognition</a></code>.
 
-  </p>
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The main entry point for activity recognition integration.
- <p>
- The activity recognition service is a low power mechanism that allows
- application to receive periodic updates of detected user activities. For
- example, it can detect if the user is currently on foot, in a car, on a
- bicycle or still.
- <p>
- The activities are detected by periodically waking up the device and reading
- short bursts of sensor data. It only makes use of low power sensors in order
- to keep the power usage to a minimum.
- <p>
- To request activity recognition, do the following in a class that implements
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a></code> and
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a></code>:
- <pre class="prettyprint">
-  // Connect to the ActivityRecognitionService
- ActivityRecognitionClient mActivityRecognitionClient =
-         new ActivityRecognitionClient(this, this, this);
- mActivityRecognitionClient.connect();
-
-  // Called when a connection to the ActivityRecognitionService has been established.
- public void onConnected(Bundle connectionHint) {
-     Intent intent = new Intent(this, MyIntentService.class);
-     PendingIntent callbackIntent = PendingIntent.getService(this, 0, intent,
-             PendingIntent.FLAG_UPDATE_CURRENT);
-     mActivityRecognitionClient.requestActivityUpdates(30000, callbackIntent);
- }
- </pre>
- To receive activity detections, put the following in a class that extends <code><a href="/reference/android/app/IntentService.html">IntentService</a></code>:
- <pre class="prettyprint">
- protected void onHandleIntent(Intent intent) {
-     if (ActivityRecognitionResult.hasResult(intent)) {
-         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
-         // Put your application specific logic here (i.e. result.getMostProbableActivity())
-     }
- }</pre>
- <p>
- Use of the <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html">ActivityRecognitionClient</a></code> requires the
- com.google.android.gms.permission.ACTIVITY_RECOGNITION permission.</p>
+<p itemprop="articleBody">Utility class for managing a set of observers and distributing their notifications.</p>
 
 
 
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html">DataBufferObserver</a></code></li>
+      </ul>
+  </div>
 
 
 </div><!-- jd-descr -->
@@ -979,15 +973,8 @@ Summary:
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#ActivityRecognitionClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">ActivityRecognitionClient</a></span>(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectedListener, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#DataBufferObserverSet()">DataBufferObserverSet</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Creates a <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html">ActivityRecognitionClient</a></code>.
-
-
-
-        </div>
-  
   </td></tr>
 
 
@@ -1015,12 +1002,12 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#connect()">connect</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#addObserver(com.google.android.gms.common.data.DataBufferObserver)">addObserver</a></span>(<a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html">DataBufferObserver</a> observer)</nobr>
         
         <div class="jd-descrdiv">
-          Connects the client to Google Play services.
-
-
+          Register the given observer for receiving change notifications.
+          
+    
 
         </div>
   
@@ -1038,12 +1025,12 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#disconnect()">disconnect</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#clear()">clear</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Closes the connection to Google Play services.
-
-
+          Clears the set of observers.
+          
+    
 
         </div>
   
@@ -1061,13 +1048,12 @@ Summary:
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#isConnected()">isConnected</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#hasObservers()">hasObservers</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Checks if the client is currently connected to the service, so that
- requests to other methods will succeed.
-
-
+          Returns true if this has any registered observers.
+          
+    
 
         </div>
   
@@ -1082,63 +1068,15 @@ Summary:
             
             
             
-            boolean</nobr>
+            void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#isConnecting()">isConnecting</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#onDataChanged()">onDataChanged</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Checks if the client is attempting to connect to the service.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Returns true if the specified listener is currently registered to
- receive connection events.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Returns true if the specified listener is currently registered to
- receive connection failed events.
-
-
+          Called when the overall data changes.
+          
+    
 
         </div>
   
@@ -1156,12 +1094,12 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#onDataRangeChanged(int, int)">onDataRangeChanged</a></span>(int position, int count)</nobr>
         
         <div class="jd-descrdiv">
-          Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
-
-
+          Called when a range of items changes.
+          
+    
 
         </div>
   
@@ -1179,13 +1117,12 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#onDataRangeInserted(int, int)">onDataRangeInserted</a></span>(int position, int count)</nobr>
         
         <div class="jd-descrdiv">
-          Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>.
-
-
+          Called when a range of items is inserted.
+          
+    
 
         </div>
   
@@ -1203,12 +1140,12 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#removeActivityUpdates(android.app.PendingIntent)">removeActivityUpdates</a></span>(PendingIntent callbackIntent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#onDataRangeMoved(int, int, int)">onDataRangeMoved</a></span>(int fromPosition, int toPosition, int count)</nobr>
         
         <div class="jd-descrdiv">
-          Removes all activity updates for the specified PendingIntent.
-
-
+          Called when a range of items is moved.
+          
+    
 
         </div>
   
@@ -1226,12 +1163,12 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#requestActivityUpdates(long, android.app.PendingIntent)">requestActivityUpdates</a></span>(long detectionIntervalMillis, PendingIntent callbackIntent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#onDataRangeRemoved(int, int)">onDataRangeRemoved</a></span>(int position, int count)</nobr>
         
         <div class="jd-descrdiv">
-          Register for activity recognition updates.
-
-
+          Called when a range of items is removed.
+          
+    
 
         </div>
   
@@ -1249,35 +1186,12 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserverSet.html#removeObserver(com.google.android.gms.common.data.DataBufferObserver)">removeObserver</a></span>(<a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html">DataBufferObserver</a> observer)</nobr>
         
         <div class="jd-descrdiv">
-          Removes a connection listener from this <code>GooglePlayServicesClient</code>.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
-
-
+          Unregister the given observer from receiving change notifications.
+          
+    
 
         </div>
   
@@ -1503,19 +1417,19 @@ From class
 
 <tr class="api apilevel-" >
 <td colspan="12">
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.GooglePlayServicesClient" class="jd-expando-trigger closed"
-          ><img id="inherited-methods-com.google.android.gms.common.GooglePlayServicesClient-trigger"
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver-trigger"
           src="/assets/images/triangle-closed.png"
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html">com.google.android.gms.common.GooglePlayServicesClient</a>
+  <a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html">com.google.android.gms.common.data.DataBufferObserver</a>
 
-<div id="inherited-methods-com.google.android.gms.common.GooglePlayServicesClient">
-  <div id="inherited-methods-com.google.android.gms.common.GooglePlayServicesClient-list"
+<div id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver">
+  <div id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver-list"
         class="jd-inheritedlinks">
   </div>
-  <div id="inherited-methods-com.google.android.gms.common.GooglePlayServicesClient-summary" style="display: none;">
+  <div id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver-summary" style="display: none;">
     <table class="jd-sumtable-expando">
     
 
@@ -1531,12 +1445,12 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataChanged()">onDataChanged</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Connects the client to Google Play services.
-
-
+          Called when the overall data changes.
+          
+    
 
         </div>
   
@@ -1554,107 +1468,12 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#disconnect()">disconnect</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataRangeChanged(int, int)">onDataRangeChanged</a></span>(int position, int count)</nobr>
         
         <div class="jd-descrdiv">
-          Closes the connection to Google Play services.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnected()">isConnected</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">
-          Checks if the client is currently connected to the service, so that
- requests to other methods will succeed.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnecting()">isConnecting</a></span>()</nobr>
-        
-        <div class="jd-descrdiv">
-          Checks if the client is attempting to connect to the service.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">isConnectionCallbacksRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Returns true if the specified listener is currently registered to
- receive connection events.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            boolean</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">isConnectionFailedListenerRegistered</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
-        
-        <div class="jd-descrdiv">
-          Returns true if the specified listener is currently registered to
- receive connection failed events.
-
-
+          Called when a range of items changes.
+          
+    
 
         </div>
   
@@ -1672,12 +1491,12 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataRangeInserted(int, int)">onDataRangeInserted</a></span>(int position, int count)</nobr>
         
         <div class="jd-descrdiv">
-          Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
-
-
+          Called when a range of items is inserted.
+          
+    
 
         </div>
   
@@ -1695,13 +1514,12 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">registerConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataRangeMoved(int, int, int)">onDataRangeMoved</a></span>(int fromPosition, int toPosition, int count)</nobr>
         
         <div class="jd-descrdiv">
-          Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>.
-
-
+          Called when a range of items is moved.
+          
+    
 
         </div>
   
@@ -1719,12 +1537,61 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html#onDataRangeRemoved(int, int)">onDataRangeRemoved</a></span>(int position, int count)</nobr>
         
         <div class="jd-descrdiv">
-          Removes a connection listener from this <code>GooglePlayServicesClient</code>.
+          Called when a range of items is removed.
+          
+    
+
+        </div>
+  
+  </td></tr>
 
 
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver.Observable" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver.Observable-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/common/data/DataBufferObserver.Observable.html">com.google.android.gms.common.data.DataBufferObserver.Observable</a>
+
+<div id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver.Observable">
+  <div id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver.Observable-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.common.data.DataBufferObserver.Observable-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.Observable.html#addObserver(com.google.android.gms.common.data.DataBufferObserver)">addObserver</a></span>(<a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html">DataBufferObserver</a> observer)</nobr>
+        
+        <div class="jd-descrdiv">
+          Register the given observer for receiving change notifications.
+          
+    
 
         </div>
   
@@ -1742,12 +1609,12 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener</a></span>(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/DataBufferObserver.Observable.html#removeObserver(com.google.android.gms.common.data.DataBufferObserver)">removeObserver</a></span>(<a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html">DataBufferObserver</a> observer)</nobr>
         
         <div class="jd-descrdiv">
-          Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
-
-
+          Unregister the given observer from receiving change notifications.
+          
+    
 
         </div>
   
@@ -1794,7 +1661,7 @@ From interface
 
 
 
-<A NAME="ActivityRecognitionClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
+<A NAME="DataBufferObserverSet()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1806,8 +1673,8 @@ From interface
          
         
       </span>
-      <span class="sympad">ActivityRecognitionClient</span>
-      <span class="normal">(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectedListener, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</span>
+      <span class="sympad">DataBufferObserverSet</span>
+      <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1817,30 +1684,10 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html">ActivityRecognitionClient</a></code>.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>context</td>
-          <td>The context to use for the connection.</td>
-        </tr>
-        <tr>
-          <th>connectedListener</td>
-          <td>The callbacks invoked when the client is
-            connected.</td>
-        </tr>
-        <tr>
-          <th>connectionFailedListener</td>
-          <td>The listener which will be notified if
-            the connection attempt fails.
-</td>
-        </tr>
-      </table>
-  </div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1861,7 +1708,7 @@ From interface
 
 
 
-<A NAME="connect()"></A>
+<A NAME="addObserver(com.google.android.gms.common.data.DataBufferObserver)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1873,8 +1720,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">connect</span>
-      <span class="normal">()</span>
+      <span class="sympad">addObserver</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html">DataBufferObserver</a> observer)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1884,20 +1731,17 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Connects the client to Google Play services. This method returns immediately, and connects to
- the service in the background. If the connection is successful,
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code> is called. On a
- failure, <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code> is called.
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Register the given observer for receiving change notifications.
 </p></div>
 
     </div>
 </div>
 
 
-<A NAME="disconnect()"></A>
+<A NAME="clear()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1909,7 +1753,7 @@ From interface
          
         void
       </span>
-      <span class="sympad">disconnect</span>
+      <span class="sympad">clear</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
@@ -1920,17 +1764,17 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Closes the connection to Google Play services. No calls can be made on this object
- after calling this method.</p></div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Clears the set of observers.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="isConnected()"></A>
+<A NAME="hasObservers()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1942,7 +1786,7 @@ From interface
          
         boolean
       </span>
-      <span class="sympad">isConnected</span>
+      <span class="sympad">hasObservers</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
@@ -1953,23 +1797,17 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is currently connected to the service, so that
- requests to other methods will succeed.  Applications should guard
- client actions caused by the user with a call to this method.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the client is connected to the service.
-</li></ul>
-  </div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Returns true if this has any registered observers.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="isConnecting()"></A>
+<A NAME="onDataChanged()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1979,9 +1817,9 @@ From interface
          
          
          
-        boolean
+        void
       </span>
-      <span class="sympad">isConnecting</span>
+      <span class="sympad">onDataChanged</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
@@ -1992,115 +1830,17 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Checks if the client is attempting to connect to the service.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the client is attempting to connect to the service.
-</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="isConnectionCallbacksRegistered(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        boolean
-      </span>
-      <span class="sympad">isConnectionCallbacksRegistered</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
       
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
- receive connection events.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The listener to check for.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the specified listener is currently registered to receive connection
-             events.</li></ul>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Called when the overall data changes.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="isConnectionFailedListenerRegistered(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        boolean
-      </span>
-      <span class="sympad">isConnectionFailedListenerRegistered</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Returns true if the specified listener is currently registered to
- receive connection failed events.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>The listener to check for.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the specified listener is currently registered to receive connection
-             failed events.</li></ul>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)"></A>
+<A NAME="onDataRangeChanged(int, int)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -2112,8 +1852,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">registerConnectionCallbacks</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</span>
+      <span class="sympad">onDataRangeChanged</span>
+      <span class="normal">(int position, int count)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2123,39 +1863,17 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection events from this <code>GooglePlayServicesClient</code>.
- If the service is already connected, the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code>
- method will be called immediately.  Applications should balance calls to this method with
- calls to <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">unregisterConnectionCallbacks(ConnectionCallbacks)</a></code> to avoid leaking
- resources.
- <p>
- If the specified listener is already registered to receive connection events, this
- method will not add a duplicate entry for the same listener, but <strong>will</strong>
- still call the listener's <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html#onConnected(android.os.Bundle)">onConnected(Bundle)</a></code> method if currently
- connected.
- <p>
- Note that the order of messages received here may not be stable, so clients should not rely
- on the order that multiple listeners receive events in.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>the listener where the results of the asynchronous <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#connect()">connect()</a></code> call are
-            delivered.
-</td>
-        </tr>
-      </table>
-  </div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a range of items changes.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="registerConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
+<A NAME="onDataRangeInserted(int, int)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -2167,8 +1885,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">registerConnectionFailedListener</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</span>
+      <span class="sympad">onDataRangeInserted</span>
+      <span class="normal">(int position, int count)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2178,39 +1896,17 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection failed events from this
- <code>GooglePlayServicesClient</code>. Unlike <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#registerConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)">registerConnectionCallbacks(GooglePlayServicesClient.ConnectionCallbacks)</a></code>, if the service
- is not already connected, the listener's
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed(ConnectionResult)</a></code> method will not be called immediately.
- Applications should balance calls to this method with calls to
- <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">unregisterConnectionFailedListener(OnConnectionFailedListener)</a></code> to avoid leaking
- resources.
- <p>
- If the specified listener is already registered to receive connection failed events, this
- method will not add a duplicate entry for the same listener.
- <p>
- Note that the order of messages received here may not be stable, so clients should not rely
- on the order that multiple listeners receive events in.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>the listener where the results of the asynchronous <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#connect()">connect()</a></code> call are
-            delivered.
-</td>
-        </tr>
-      </table>
-  </div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a range of items is inserted.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="removeActivityUpdates(android.app.PendingIntent)"></A>
+<A NAME="onDataRangeMoved(int, int, int)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -2222,8 +1918,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">removeActivityUpdates</span>
-      <span class="normal">(PendingIntent callbackIntent)</span>
+      <span class="sympad">onDataRangeMoved</span>
+      <span class="normal">(int fromPosition, int toPosition, int count)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2233,41 +1929,17 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Removes all activity updates for the specified PendingIntent.
- <p>
- Calling this function requires the
- com.google.android.gms.permission.ACTIVITY_RECOGNITION permission.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>callbackIntent</td>
-          <td>pending intent object that no longer needs activity
-            detection updates</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th>IllegalStateException</td>
-            <td>if this method was called at an
-             inappropriate time, such as before the LocationServiceClient
-             has bound to the remote service.
-</td>
-        </tr>
-      </table>
-  </div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a range of items is moved.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="requestActivityUpdates(long, android.app.PendingIntent)"></A>
+<A NAME="onDataRangeRemoved(int, int)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -2279,8 +1951,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">requestActivityUpdates</span>
-      <span class="normal">(long detectionIntervalMillis, PendingIntent callbackIntent)</span>
+      <span class="sympad">onDataRangeRemoved</span>
+      <span class="normal">(int position, int count)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2290,91 +1962,17 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Register for activity recognition updates.
- <p>
- The activities are detected by periodically waking up the device and
- reading short bursts of sensor data. It only makes use of low power
- sensors in order to keep the power usage to a minimum. For example, it
- can detect if the user is currently on foot, in a car, on a bicycle or
- still. See <code><a href="/reference/com/google/android/gms/location/DetectedActivity.html">DetectedActivity</a></code> for more details.
- <p>
- The activity detection update interval can be controlled with the
- detectionIntervalMillis parameter. Larger values will result in fewer
- activity detections while improving battery life. Smaller values will
- result in more frequent activity detections but will consume more power
- since the device must be woken up more frequently.
- <p>
- Activities may be received more frequently than the
- detectionIntervalMillis parameter if another application has also
- requested activity updates at a faster rate. It may also receive updates
- faster when the activity detection service receives a signal that the
- current activity may change, such as if the device has been still for a
- long period of time and is then unplugged from a phone charger.
- <p>
- Activities may arrive several seconds after the requested
- detectionIntervalMillis if the activity detection service requires more
- samples to make a more accurate prediction.
- <p>
- To conserve battery, activity reporting may stop when the device is
- 'STILL' for an extended period of time. It will resume once the device
- moves again. This only happens on devices that support the
- Sensor.TYPE_SIGNIFICANT_MOTION hardware.
- <p>
- Beginning in API 21, activities may be received less frequently than the
- detectionIntervalMillis parameter if the device is in power save mode
- and the screen is off.
- <p>
- A common use case is that an application wants to monitor activities in
- the background and perform an action when a specific activity is
- detected. To do this without needing a service that is always on in the
- background consuming resources, detected activities are delivered via an
- intent. The application specifies a PendingIntent callback (typically an
- IntentService) which will be called when activities are detected. See the
- documentation of <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code> for more details.
- <p>
- Applications can call this function several times in a row with the same
- callbackIntent to change the desired activity detection interval.
- <p>
- Calling this function requires the
- com.google.android.gms.permission.ACTIVITY_RECOGNITION permission.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>detectionIntervalMillis</td>
-          <td>the desired time between activity
-            detections. Larger values will result in fewer activity
-            detections while improving battery life. A value of 0 will
-            result in activity detections at the fastest possible rate.</td>
-        </tr>
-        <tr>
-          <th>callbackIntent</td>
-          <td>a PendingIntent to be sent for each activity
-            detection.</td>
-        </tr>
-      </table>
-  </div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th>IllegalStateException</td>
-            <td>if this method was called at an
-             inappropriate time, such as before the LocationServiceClient
-             has bound to the remote service.
-</td>
-        </tr>
-      </table>
-  </div>
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Called when a range of items is removed.
+</p></div>
 
     </div>
 </div>
 
 
-<A NAME="unregisterConnectionCallbacks(com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks)"></A>
+<A NAME="removeObserver(com.google.android.gms.common.data.DataBufferObserver)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -2386,8 +1984,8 @@ From interface
          
         void
       </span>
-      <span class="sympad">unregisterConnectionCallbacks</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> listener)</span>
+      <span class="sympad">removeObserver</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/data/DataBufferObserver.html">DataBufferObserver</a> observer)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2397,70 +1995,11 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Removes a connection listener from this <code>GooglePlayServicesClient</code>. Note that removing
- a listener does not generate any callbacks.
- <p>
- If the specified listener is not currently registered to receive connection events, this
- method will have no effect.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>the listener to unregister.
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="unregisterConnectionFailedListener(com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        void
-      </span>
-      <span class="sympad">unregisterConnectionFailedListener</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> listener)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
       
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Removes a connection failed listener from the <code>GooglePlayServicesClient</code>.
- Note that removing a listener does not generate any callbacks.
- <p>
- If the specified listener is not currently registered to receive connection failed events,
- this method will have no effect.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>listener</td>
-          <td>the listener to unregister.
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p>Unregister the given observer from receiving change notifications.
+</p></div>
 
     </div>
 </div>
