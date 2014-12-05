@@ -1102,6 +1102,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_KEYGUARD = 0x00000400;
 
         /**
+         * Flag that prevents the wallpaper behind the current window from receiving touch events.
+         *
+         * {@hide}
+         */
+        public static final int PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS = 0x00000800;
+
+        /**
          * Control flags that are private to the platform.
          * @hide
          */
