@@ -31,9 +31,11 @@ import android.os.SystemProperties;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
 import android.text.Editable;
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.telephony.Rlog;
+import android.text.style.TtsSpan;
 import android.util.SparseIntArray;
 
 import static com.android.internal.telephony.PhoneConstants.SUBSCRIPTION_KEY;
@@ -2305,6 +2307,59 @@ public class PhoneNumberUtils
             } while (!TextUtils.isEmpty(postDialStr) && !TextUtils.isEmpty(tempDialStr));
         }
         return retStr;
+    }
+
+    /**
+     * Wrap the supplied {@code CharSequence} with a {@code TtsSpan}, annotating it as
+     * containing a phone number in its entirety.
+     *
+     * @param phoneNumber A {@code CharSequence} the entirety of which represents a phone number.
+     * @return A {@code CharSequence} with appropriate annotations.
+     *
+     * @hide
+     */
+    public static CharSequence ttsSpanAsPhoneNumber(CharSequence phoneNumber) {
+        if (phoneNumber == null) {
+            return null;
+        }
+        Spannable spannable = Spannable.Factory.getInstance().newSpannable(phoneNumber);
+        PhoneNumberUtils.ttsSpanAsPhoneNumber(spannable, 0, spannable.length());
+        return spannable;
+    }
+
+    /**
+     * Attach a {@link TtsSpan} to the supplied {@code Spannable} at the indicated location,
+     * annotating that location as containing a phone number.
+     *
+     * @param s A {@code Spannable} to annotate.
+     * @param start The starting character position of the phone number in {@code s}.
+     * @param end The ending character position of the phone number in {@code s}.
+     *
+     * @hide
+     */
+    public static void ttsSpanAsPhoneNumber(Spannable s, int start, int end) {
+        s.setSpan(
+                new TtsSpan.TelephoneBuilder()
+                        .setNumberParts(splitAtNonNumerics(s.subSequence(start, end)))
+                        .build(),
+                start,
+                end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    // Split a phone number like "+20(123)-456#" using spaces, ignoring anything that is not
+    // a digit, to produce a result like "20 123 456".
+    private static String splitAtNonNumerics(CharSequence number) {
+        StringBuilder sb = new StringBuilder(number.length());
+        for (int i = 0; i < number.length(); i++) {
+            sb.append(PhoneNumberUtils.isISODigit(number.charAt(i))
+                    ? number.charAt(i)
+                    : " ");
+        }
+        // It is very important to remove extra spaces. At time of writing, any leading or trailing
+        // spaces, or any sequence of more than one space, will confuse TalkBack and cause the TTS
+        // span to be non-functional!
+        return sb.toString().replaceAll(" +", " ").trim();
     }
 
     private static String getCurrentIdp(boolean useNanp) {
