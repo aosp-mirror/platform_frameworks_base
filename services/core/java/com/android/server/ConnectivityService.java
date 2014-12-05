@@ -1524,6 +1524,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
 
             final long ident = Binder.clearCallingIdentity();
+            if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+                final IBatteryStats bs = BatteryStatsService.getService();
+                try {
+                    NetworkInfo ni = intent.getParcelableExtra(
+                            ConnectivityManager.EXTRA_NETWORK_INFO);
+                    bs.noteConnectivityChanged(intent.getIntExtra(
+                            ConnectivityManager.EXTRA_NETWORK_TYPE, ConnectivityManager.TYPE_NONE),
+                            ni != null ? ni.getState().toString() : "?");
+                } catch (RemoteException e) {
+                }
+            }
             try {
                 mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
             } finally {
