@@ -2958,6 +2958,7 @@ public class NotificationManagerService extends SystemService {
         protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
             if (mListenersDisablingEffects.remove(removed)) {
                 updateListenerHintsLocked();
+                updateEffectsSuppressorLocked();
             }
             mLightTrimListeners.remove(removed);
             updateNotificationGroupsDesiredLocked();
