@@ -44,6 +44,8 @@ import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.Callback, ExpandHelper.Callback,
@@ -440,6 +442,27 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     public void setUser(int user) {
         mUser = user;
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("HeadsUpNotificationView state:");
+        pw.print("  mTouchSensitivityDelay="); pw.println(mTouchSensitivityDelay);
+        pw.print("  mSnoozeLengthMs="); pw.println(mSnoozeLengthMs);
+        pw.print("  mMostRecentPackageName="); pw.println(mMostRecentPackageName);
+        pw.print("  mStartTouchTime="); pw.println(mStartTouchTime);
+        pw.print("  now="); pw.println(SystemClock.elapsedRealtime());
+        pw.print("  mUser="); pw.println(mUser);
+        if (mHeadsUp == null) {
+            pw.println("  mHeadsUp=null");
+        } else {
+            pw.print("  mHeadsUp="); pw.println(mHeadsUp.notification.getKey());
+        }
+        int N = mSnoozedPackages.size();
+        pw.println("  snoozed packages: " + N);
+        for (int i = 0; i < N; i++) {
+            pw.print("    "); pw.print(mSnoozedPackages.valueAt(i));
+            pw.print(", "); pw.println(mSnoozedPackages.keyAt(i));
+        }
     }
 
     private class EdgeSwipeHelper implements Gefingerpoken {
