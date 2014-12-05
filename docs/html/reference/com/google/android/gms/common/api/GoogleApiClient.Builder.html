@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">GoogleApiClient.Builder</li>
       </ul>
     </div>
@@ -821,7 +844,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -939,8 +962,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.
-
-
+          
+    
 
         </div>
   
@@ -962,8 +985,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.
-
-
+          
+    
 
         </div>
   
@@ -998,8 +1021,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Specify which Apis are requested by your app.
-
-
+          
+    
 
         </div>
   
@@ -1021,8 +1044,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Specify which Apis are requested by your app.
-
-
+          
+    
 
         </div>
   
@@ -1044,8 +1067,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Registers a listener to receive connection events from this <code>GoogleApiClient</code>.
-
-
+          
+    
 
         </div>
   
@@ -1068,8 +1091,8 @@ Summary:
         <div class="jd-descrdiv">
           Adds a listener to register to receive connection failed events from this
  <code>GoogleApiClient</code>.
-
-
+          
+    
 
         </div>
   
@@ -1091,8 +1114,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Specify the OAuth 2.0 scopes requested by your app.
-
-
+          
+    
 
         </div>
   
@@ -1115,8 +1138,8 @@ Summary:
         <div class="jd-descrdiv">
           Builds a new <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object for communicating with the Google
  APIs.
-
-
+          
+    
 
         </div>
   
@@ -1135,26 +1158,26 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#enableAutoManage(android.support.v4.app.FragmentActivity, int, com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">enableAutoManage</a></span>(FragmentActivity fragmentActivity, int clientId, <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a> unresolvedConnectionFailedListener)</nobr>
-
+        
         <div class="jd-descrdiv">
           Enables automatic lifecycle management in a support library <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code> that
  connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1162,8 +1185,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Specify an account name on the device that should be used.
-
-
+          
+    
 
         </div>
   
@@ -1186,8 +1209,8 @@ Summary:
         <div class="jd-descrdiv">
           Specifies the part of the screen at which games service popups (for example, "welcome
  back" or "achievement unlocked" popups) will be displayed using gravity.
-
-
+          
+    
 
         </div>
   
@@ -1206,25 +1229,25 @@ Summary:
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html#setHandler(android.os.Handler)">setHandler</a></span>(Handler handler)</nobr>
-
+        
         <div class="jd-descrdiv">
           Sets a <code><a href="/reference/android/os/Handler.html">Handler</a></code> to indicate which thread to use when invoking callbacks.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1232,8 +1255,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Sets the <code><a href="/reference/android/view/View.html">View</a></code> to use as a content view for popups.
-
-
+          
+    
 
         </div>
   
@@ -1255,8 +1278,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Specify that the default account should be used when connecting to services.
-
-
+          
+    
 
         </div>
   
@@ -1536,9 +1559,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1578,9 +1601,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Builder to help construct the <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1645,9 +1668,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specify which Apis are requested by your app. See <code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code> for more information.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1695,9 +1718,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specify which Apis are requested by your app. See <code><a href="/reference/com/google/android/gms/common/api/Api.html">Api</a></code> for more information.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -1741,9 +1764,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Registers a listener to receive connection events from this <code>GoogleApiClient</code>.
  Applications should balance calls to this method with calls to
  <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionCallbacks(com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks)">unregisterConnectionCallbacks(ConnectionCallbacks)</a></code> to avoid leaking resources.
@@ -1792,9 +1815,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Adds a listener to register to receive connection failed events from this
  <code>GoogleApiClient</code>. Applications should balance calls to this method with calls to
  <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html#unregisterConnectionFailedListener(com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)">unregisterConnectionFailedListener(OnConnectionFailedListener)</a></code> to avoid leaking
@@ -1844,9 +1867,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specify the OAuth 2.0 scopes requested by your app. See <code><a href="/reference/com/google/android/gms/common/Scopes.html">Scopes</a></code> for more
  information.</p></div>
   <div class="jd-tagdata">
@@ -1891,9 +1914,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Builds a new <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> object for communicating with the Google
  APIs.</p></div>
   <div class="jd-tagdata">
@@ -1908,14 +1931,14 @@ From class
 
 <A NAME="enableAutoManage(android.support.v4.app.FragmentActivity, int, com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a>
       </span>
       <span class="sympad">enableAutoManage</span>
@@ -1923,15 +1946,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Enables automatic lifecycle management in a support library <code><a href="/reference/android/support/v4/app/FragmentActivity.html">FragmentActivity</a></code> that
  connects the client in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStart()">onStart()</a></code> and disconnects it in <code><a href="/reference/android/support/v4/app/FragmentActivity.html#onStop()">onStop()</a></code>.
  <p/>
@@ -1962,15 +1985,15 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">
+      <table class="jd-tagtable">  
         <tr>
             <th>NullPointerException</td>
             <td>if fragmentActivity is null</td>
-        </tr>
+        </tr>  
         <tr>
             <th>IllegalArgumentException</td>
             <td>if clientId is negative.</td>
-        </tr>
+        </tr>  
         <tr>
             <th>IllegalStateException</td>
             <td>if clientId is already being auto-managed.
@@ -2006,9 +2029,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specify an account name on the device that should be used. If this is never called, the
  client will use the current default account for Google Play services for this
  application.</p></div>
@@ -2051,9 +2074,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specifies the part of the screen at which games service popups (for example, "welcome
  back" or "achievement unlocked" popups) will be displayed using gravity.
  <p>
@@ -2075,14 +2098,14 @@ From class
 
 <A NAME="setHandler(android.os.Handler)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.Builder.html">GoogleApiClient.Builder</a>
       </span>
       <span class="sympad">setHandler</span>
@@ -2090,15 +2113,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets a <code><a href="/reference/android/os/Handler.html">Handler</a></code> to indicate which thread to use when invoking callbacks. Will not
  be used directly to handle callbacks. If this is not called then the application's main
  thread will be used.
@@ -2131,9 +2154,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Sets the <code><a href="/reference/android/view/View.html">View</a></code> to use as a content view for popups.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2173,9 +2196,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Specify that the default account should be used when connecting to services.
 </p></div>
 

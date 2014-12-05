@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">Players</li>
       </ul>
     </div>
@@ -784,7 +807,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -859,8 +882,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a></td>
       <td class="jd-descrcol" width="100%">
         Result delivered when player data has been loaded.&nbsp;
-
-
+        
+    
 
       </td>
     </tr>
@@ -868,21 +891,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     
     <tr class=" api apilevel-" >
       <td class="jd-typecol"><nobr>
-
-
-
-
+        
+         
+         
+        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.LoadProfileSettingsResult.html">Players.LoadProfileSettingsResult</a></td>
       <td class="jd-descrcol" width="100%">
         Result delivered when the profile settings of the signed-in player have been loaded.&nbsp;
-
-
+        
+    
 
       </td>
     </tr>
-
-
+    
+    
 
 
 
@@ -906,8 +929,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/Players.html#EXTRA_PLAYER_SEARCH_RESULTS">EXTRA_PLAYER_SEARCH_RESULTS</a></td>
         <td class="jd-descrcol" width="100%">
           Used by the Player Search UI to return a list of parceled Player objects.
-
-
+          
+    
 
         </td>
     </tr>
@@ -951,8 +974,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Get the current signed in player, if available.
-
-
+          
+    
 
         </div>
   
@@ -974,8 +997,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Get the current signed in player ID, if available.
-
-
+          
+    
 
         </div>
   
@@ -997,8 +1020,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Returns an intent that will display a screen where the user can search for people on Google+.
-
-
+          
+    
 
         </div>
   
@@ -1017,26 +1040,26 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Players.html#loadConnectedPlayers(com.google.android.gms.common.api.GoogleApiClient, boolean)">loadConnectedPlayers</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, boolean forceReload)</nobr>
-
+        
         <div class="jd-descrdiv">
           Asynchronously loads a list of players that have connected to this game (and that
  the user has permission to know about).
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1045,8 +1068,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <div class="jd-descrdiv">
           Load the initial page of players the currently signed-in player can invite to a multiplayer
  game, sorted alphabetically by name.
-
-
+          
+    
 
         </div>
   
@@ -1068,8 +1091,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         
         <div class="jd-descrdiv">
           Asynchronously loads an additional page of invitable players.
-
-
+          
+    
 
         </div>
   
@@ -1092,8 +1115,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <div class="jd-descrdiv">
           Asynchronously loads an additional page of players that the signed-in player has played
  multiplayer games with recently.
-
-
+          
+    
 
         </div>
   
@@ -1111,12 +1134,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/Players.html#loadPlayer(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">loadPlayer</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String playerId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Players.html#loadPlayer(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean)">loadPlayer</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String playerId, boolean forceReload)</nobr>
         
         <div class="jd-descrdiv">
           Loads the profile for the requested player ID.
-
-
+          
+    
 
         </div>
   
@@ -1134,13 +1157,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/Players.html#loadPlayer(com.google.android.gms.common.api.GoogleApiClient, java.lang.String)">loadPlayer</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String playerId)</nobr>
+        
+        <div class="jd-descrdiv">
+          Loads the profile for the requested player ID.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a>&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/Players.html#loadRecentlyPlayedWithPlayers(com.google.android.gms.common.api.GoogleApiClient, int, boolean)">loadRecentlyPlayedWithPlayers</a></span>(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, int pageSize, boolean forceReload)</nobr>
         
         <div class="jd-descrdiv">
           Load the initial page of players the currently signed-in player has played multiplayer games
  with recently, starting with the most recent.
-
-
+          
+    
 
         </div>
   
@@ -1202,9 +1248,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Used by the Player Search UI to return a list of parceled Player objects. Retrieve with
  <code><a href="/reference/android/content/Intent.html#getParcelableArrayListExtra(java.lang.String)">getParcelableArrayListExtra(String)</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -1271,9 +1317,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the current signed in player, if available.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1321,9 +1367,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the current signed in player ID, if available.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1371,9 +1417,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns an intent that will display a screen where the user can search for people on Google+.
  Note that this must be invoked with <code><a href="/reference/android/app/Activity.html#startActivityForResult(android.content.Intent, int)">startActivityForResult(Intent, int)</a></code>, so
  that the identity of the calling package can be established.
@@ -1410,14 +1456,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <A NAME="loadConnectedPlayers(com.google.android.gms.common.api.GoogleApiClient, boolean)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-        abstract
-
+        public 
+         
+         
+        abstract 
+         
         <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a>&gt;
       </span>
       <span class="sympad">loadConnectedPlayers</span>
@@ -1425,15 +1471,15 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously loads a list of players that have connected to this game (and that
  the user has permission to know about).
  <p>
@@ -1484,9 +1530,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Load the initial page of players the currently signed-in player can invite to a multiplayer
  game, sorted alphabetically by name.
  <p>
@@ -1548,9 +1594,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously loads an additional page of invitable players. A new player buffer will be
  delivered that includes an extra page of results.
  <p>
@@ -1603,9 +1649,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously loads an additional page of players that the signed-in player has played
  multiplayer games with recently. A new player buffer will be delivered that includes an extra
  page of results.
@@ -1623,6 +1669,66 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           <th>pageSize</td>
           <td>The number of additional entries to request. This must be a value between 1
             and 25.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a></code> to access the data when available.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadPlayer(com.google.android.gms.common.api.GoogleApiClient, java.lang.String, boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="/reference/com/google/android/gms/common/api/PendingResult.html">PendingResult</a>&lt;<a href="/reference/com/google/android/gms/games/Players.LoadPlayersResult.html">Players.LoadPlayersResult</a>&gt;
+      </span>
+      <span class="sympad">loadPlayer</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a> apiClient, String playerId, boolean forceReload)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Loads the profile for the requested player ID.
+ <p>
+ Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
+ Required Scopes: <code><a href="/reference/com/google/android/gms/games/Games.html#SCOPE_GAMES">SCOPE_GAMES</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>apiClient</td>
+          <td>The <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.html">GoogleApiClient</a></code> to service the call.</td>
+        </tr>
+        <tr>
+          <th>playerId</td>
+          <td>The player ID to get full profile data for.</td>
+        </tr>
+        <tr>
+          <th>forceReload</td>
+          <td>If true, this call will clear any locally cached data and attempt to fetch
+      the latest data from the server. This would commonly be used for something like a
+      user-initiated refresh. Normally, this should be set to false to gain advantages
+      of data caching.</td>
         </tr>
       </table>
   </div>
@@ -1659,9 +1765,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Loads the profile for the requested player ID.
  <p>
  Required API: <code><a href="/reference/com/google/android/gms/games/Games.html#API">API</a></code><br>
@@ -1712,9 +1818,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Load the initial page of players the currently signed-in player has played multiplayer games
  with recently, starting with the most recent.
  <p>

@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -103,14 +104,14 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>GooglePlayServicesClient.OnConnectionFailedListener | Android Developers</title>
+<title>Thing.Builder | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,8 +489,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
-        <li class="current">GooglePlayServicesClient.OnConnectionFailedListener</li>
+        
+        <li class="current">Thing.Builder</li>
       </ul>
     </div>
   </div>
@@ -754,6 +777,13 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+  
+   
+  
+  
+  
+  
+
 
 <div class="sum-details-links">
 
@@ -767,12 +797,17 @@ Summary:
 
 
 
-
-
-  <a href="#pubmethods">Methods</a>
+  <a href="#pubctors">Ctors</a>
   
 
 
+
+  &#124; <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
 
 &#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
@@ -793,17 +828,23 @@ Summary:
     static 
      
     
-    interface
-<h1 itemprop="name">GooglePlayServicesClient.OnConnectionFailedListener</h1>
+    class
+<h1 itemprop="name">Thing.Builder</h1>
 
 
+
+  
+    extends Object<br/>
+  
+  
+  
 
   
   
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -816,7 +857,15 @@ Summary:
 
     <tr>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener</td>
+        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+    </tr>
+    
+
+    <tr>
+        
+            <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
+         	
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.appindexing.Thing.Builder</td>
     </tr>
     
 
@@ -825,44 +874,41 @@ Summary:
 
 
 
-
-
 <table class="jd-sumtable jd-sumtable-subclasses"><tr><td colspan="12" style="border:none;margin:0;padding:0;">
 
-  <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-indirect" class="jd-expando-trigger closed"
-          ><img id="subclasses-indirect-trigger"
+  <a href="#" onclick="return toggleInherited(this, null)" id="subclasses-direct" class="jd-expando-trigger closed"
+          ><img id="subclasses-direct-trigger"
           src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>Known Indirect Subclasses
+          class="jd-expando-trigger-img" /></a>Known Direct Subclasses
 
-  <div id="subclasses-indirect">
-      <div id="subclasses-indirect-list"
+  <div id="subclasses-direct">
+      <div id="subclasses-direct-list"
               class="jd-inheritedlinks"
               
               >
           
             
-              <a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a>
+              <a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a>
             
           
       </div>
-      <div id="subclasses-indirect-summary"
+      <div id="subclasses-direct-summary"
               style="display: none;"
               >
-
+  
   <table class="jd-sumtable-expando">
-
+    
       <tr class="alt-color api apilevel-" >
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a></td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/appindexing/Action.Builder.html">Action.Builder</a></td>
         <td class="jd-descrcol" width="100%">
-          Provides callbacks for scenarios that result in a failed attempt to
- connect the client to the service.&nbsp;
-
-
+          Create a builder for an <code><a href="/reference/com/google/android/gms/appindexing/Action.html">Action</a></code>.&nbsp;
+          
+    
 
         </td>
       </tr>
-
-
+      
+    
   </table>
 
       </div>
@@ -870,19 +916,14 @@ Summary:
 </td></tr></table>
 
 
-<div class="jd-descr">
-<p>
-  <p class="caution"><strong>
-      This interface is deprecated.</strong><br/>
-    replaced with
-     <code><a href="/reference/com/google/android/gms/common/api/GoogleApiClient.OnConnectionFailedListener.html">GoogleApiClient.OnConnectionFailedListener</a></code>
 
-  </p>
+
+<div class="jd-descr">
+
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Provides callbacks for scenarios that result in a failed attempt to
- connect the client to the service.  See <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code>
- for a list of error codes and suggestions for resolution.</p>
+<p itemprop="articleBody">Create a builder for a <code><a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a></code>.
+</p>
 
 
 
@@ -932,6 +973,31 @@ Summary:
 
 
 
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#Thing.Builder()">Thing.Builder</a></span>()</nobr>
+        
+  </td></tr>
+
+
+
+</table>
+
+
 
 
 
@@ -944,20 +1010,181 @@ Summary:
 	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-            abstract
             
             
             
             
-            void</nobr>
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html#onConnectionFailed(com.google.android.gms.common.ConnectionResult)">onConnectionFailed</a></span>(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> result)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#build()">build</a></span>()</nobr>
         
         <div class="jd-descrdiv">
-          Called when there was an error connecting the client to the service.
+          Build the <code><a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a></code> object.
+          
+    
+
+        </div>
+  
+  </td></tr>
 
 
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#put(java.lang.String, com.google.android.gms.appindexing.Thing)">put</a></span>(String key, <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify optional properties of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#put(java.lang.String, java.lang.String)">put</a></span>(String key, String value)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify optional properties of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setDescription(java.lang.String)">setDescription</a></span>(String description)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify the optional description of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setId(java.lang.String)">setId</a></span>(String id)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify the optional web URL of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setName(java.lang.String)">setName</a></span>(String name)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify the name of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setType(java.lang.String)">setType</a></span>(String type)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify optional schema.org type of the content.
+          
+    
+
+        </div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html#setUrl(android.net.Uri)">setUrl</a></span>(Uri url)</nobr>
+        
+        <div class="jd-descrdiv">
+          Specify the native app URL of the content.
+          
+    
 
         </div>
   
@@ -971,6 +1198,216 @@ Summary:
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -999,6 +1436,45 @@ Summary:
 <!-- Public ctors -->
 
 
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
+
+
+
+<A NAME="Thing.Builder()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        
+      </span>
+      <span class="sympad">Thing.Builder</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+
+
 
 <!-- ========= CONSTRUCTOR DETAIL ======== -->
 <!-- Protected ctors -->
@@ -1012,7 +1488,7 @@ Summary:
 
 
 
-<A NAME="onConnectionFailed(com.google.android.gms.common.ConnectionResult)"></A>
+<A NAME="build()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -1020,12 +1496,12 @@ Summary:
         public 
          
          
-        abstract 
          
-        void
+         
+        <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a>
       </span>
-      <span class="sympad">onConnectionFailed</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> result)</span>
+      <span class="sympad">build</span>
+      <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1035,23 +1511,313 @@ Summary:
       </div>
     <div class="jd-details-descr">
       
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Build the <code><a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a></code> object.
+</p></div>
+
+    </div>
+</div>
 
 
+<A NAME="put(java.lang.String, com.google.android.gms.appindexing.Thing)"></A>
 
-  <div class="jd-tagdata jd-tagdescr"><p>Called when there was an error connecting the client to the service.</p></div>
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a>
+      </span>
+      <span class="sympad">put</span>
+      <span class="normal">(String key, <a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a> value)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify optional properties of the content.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>result</td>
-          <td>A <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a></code> that can be used for resolving the
-            error, and deciding what sort of error occurred.  To resolve the error,
-            the resolution must be started from an activity
-            with a non-negative <code>requestCode</code> passed to
-            <code><a href="/reference/com/google/android/gms/common/ConnectionResult.html#startResolutionForResult(android.app.Activity, int)">startResolutionForResult(android.app.Activity, int)</a></code>.
-            Applications should implement onActivityResult in their Activity to
-            call <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.html#connect()">connect()</a></code> again if the user has
-            resolved the issue (resultCode is <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>).
+          <th>key</td>
+          <td>The schema.org property. Must not be null.</td>
+        </tr>
+        <tr>
+          <th>value</td>
+          <td>The value of the schema.org property represented as a <code><a href="/reference/com/google/android/gms/appindexing/Thing.html">Thing</a></code>.
+              If null, the value will be ignored.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="put(java.lang.String, java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a>
+      </span>
+      <span class="sympad">put</span>
+      <span class="normal">(String key, String value)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify optional properties of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>key</td>
+          <td>The schema.org property. Must not be null.</td>
+        </tr>
+        <tr>
+          <th>value</td>
+          <td>The value of the schema.org property.
+              If null, the value will be ignored.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setDescription(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a>
+      </span>
+      <span class="sympad">setDescription</span>
+      <span class="normal">(String description)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the optional description of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>description</td>
+          <td>Description of the content.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setId(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a>
+      </span>
+      <span class="sympad">setId</span>
+      <span class="normal">(String id)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the optional web URL of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>id</td>
+          <td>Set the equivalent web url for the content. See
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a>.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setName(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a>
+      </span>
+      <span class="sympad">setName</span>
+      <span class="normal">(String name)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the name of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>name</td>
+          <td>Name of the content.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setType(java.lang.String)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a>
+      </span>
+      <span class="sympad">setType</span>
+      <span class="normal">(String type)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify optional schema.org type of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>type</td>
+          <td>The schema.org type.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setUrl(android.net.Uri)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gms/appindexing/Thing.Builder.html">Thing.Builder</a>
+      </span>
+      <span class="sympad">setUrl</span>
+      <span class="normal">(Uri url)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+    
+
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Specify the native app URL of the content.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>url</td>
+          <td>Set the deep-link in the
+ <a href="https://developers.google.com/app-indexing/">App Indexing</a> format.
 </td>
         </tr>
       </table>

@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -103,14 +104,14 @@
 <meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>LocationClient.OnRemoveGeofencesResultListener | Android Developers</title>
+<title>DrivePreferencesApi.FileUploadPreferencesResult | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,8 +489,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
-        <li class="current">LocationClient.OnRemoveGeofencesResultListener</li>
+        
+        <li class="current">DrivePreferencesApi.FileUploadPreferencesResult</li>
       </ul>
     </div>
   </div>
@@ -754,8 +777,36 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+  
+   
+  
+  
+  
+  
+
 
 <div class="sum-details-links">
+
+Summary:
+
+
+
+
+
+
+
+
+
+
+
+  <a href="#pubmethods">Methods</a>
+  
+
+
+
+  &#124; <a href="#inhmethods">Inherited Methods</a>
+
+&#124; <a href="#" onclick="return toggleAllClassInherited()" id="toggleAllClassInherited">[Expand All]</a>
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
@@ -775,16 +826,21 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
      
     
     interface
-<h1 itemprop="name">LocationClient.OnRemoveGeofencesResultListener</h1>
+<h1 itemprop="name">DrivePreferencesApi.FileUploadPreferencesResult</h1>
 
 
 
   
   
+      implements 
+      
+        <a href="/reference/com/google/android/gms/common/api/Result.html">Result</a> 
+      
+  
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -797,7 +853,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
     <tr>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.drive.DrivePreferencesApi.FileUploadPreferencesResult</td>
     </tr>
     
 
@@ -813,8 +869,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">The listener for receiving callbacks when the operation to remove
- geofences completes.
+<p itemprop="articleBody">Result that contains a <code><a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html">FileUploadPreferences</a></code> reference.
 </p>
 
 
@@ -882,43 +937,11 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
             
             
             
-            void</nobr>
+            <a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html">FileUploadPreferences</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html#onRemoveGeofencesByPendingIntentResult(int, android.app.PendingIntent)">onRemoveGeofencesByPendingIntentResult</a></span>(int statusCode, PendingIntent pendingIntent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/drive/DrivePreferencesApi.FileUploadPreferencesResult.html#getFileUploadPreferences()">getFileUploadPreferences</a></span>()</nobr>
         
-        <div class="jd-descrdiv">
-          Called when the <code><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences(PendingIntent, OnRemoveGeofencesResultListener)</a></code> operation completes successfully or
- unsuccessfully.
-
-
-
-        </div>
-  
-  </td></tr>
-
-
-	 
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol"><nobr>
-            abstract
-            
-            
-            
-            
-            void</nobr>
-        </td>
-        <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.OnRemoveGeofencesResultListener.html#onRemoveGeofencesByRequestIdsResult(int, java.lang.String[])">onRemoveGeofencesByRequestIdsResult</a></span>(int statusCode, String[] geofenceRequestIds)</nobr>
-        
-        <div class="jd-descrdiv">
-          Called when the <code><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(java.util.List<java.lang.String>, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences(List, OnRemoveGeofencesResultListener)</a></code> operation completes successfully or
- unsuccessfully.
-
-
-
-        </div>
-  
   </td></tr>
 
 
@@ -929,6 +952,56 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api apilevel-" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.google.android.gms.common.api.Result" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-com.google.android.gms.common.api.Result-trigger"
+          src="/assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From interface
+
+  <a href="/reference/com/google/android/gms/common/api/Result.html">com.google.android.gms.common.api.Result</a>
+
+<div id="inherited-methods-com.google.android.gms.common.api.Result">
+  <div id="inherited-methods-com.google.android.gms.common.api.Result-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-com.google.android.gms.common.api.Result-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+    
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gms/common/api/Status.html">Status</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/api/Result.html#getStatus()">getStatus</a></span>()</nobr>
+        
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
 
 
 </div><!-- jd-descr (summary) -->
@@ -970,7 +1043,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-<A NAME="onRemoveGeofencesByPendingIntentResult(int, android.app.PendingIntent)"></A>
+<A NAME="getFileUploadPreferences()"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -980,10 +1053,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
          
         abstract 
          
-        void
+        <a href="/reference/com/google/android/gms/drive/FileUploadPreferences.html">FileUploadPreferences</a>
       </span>
-      <span class="sympad">onRemoveGeofencesByPendingIntentResult</span>
-      <span class="normal">(int statusCode, PendingIntent pendingIntent)</span>
+      <span class="sympad">getFileUploadPreferences</span>
+      <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -993,82 +1066,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Called when the <code><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences(PendingIntent, OnRemoveGeofencesResultListener)</a></code> operation completes successfully or
- unsuccessfully.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>statusCode</td>
-          <td>the status code of the removeGeofences operation.
-            Possible status code
-            <code><a href="/reference/com/google/android/gms/location/LocationStatusCodes.html#SUCCESS">SUCCESS</a></code>,
-            <code><a href="/reference/com/google/android/gms/location/LocationStatusCodes.html#GEOFENCE_NOT_AVAILABLE">GEOFENCE_NOT_AVAILABLE</a></code>
-            and <code><a href="/reference/com/google/android/gms/location/LocationStatusCodes.html#ERROR">ERROR</a></code>.</td>
-        </tr>
-        <tr>
-          <th>pendingIntent</td>
-          <td>the PendingIntent provided to the original
-            <code><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(android.app.PendingIntent, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences(PendingIntent, OnRemoveGeofencesResultListener)</a></code> call
-</td>
-        </tr>
-      </table>
-  </div>
-
-    </div>
-</div>
-
-
-<A NAME="onRemoveGeofencesByRequestIdsResult(int, java.lang.String[])"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-        abstract 
-         
-        void
-      </span>
-      <span class="sympad">onRemoveGeofencesByRequestIdsResult</span>
-      <span class="normal">(int statusCode, String[] geofenceRequestIds)</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
       
-
-
-
-  <div class="jd-tagdata jd-tagdescr"><p>Called when the <code><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(java.util.List<java.lang.String>, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences(List, OnRemoveGeofencesResultListener)</a></code> operation completes successfully or
- unsuccessfully.</p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">Parameters</h5>
-      <table class="jd-tagtable">
-        <tr>
-          <th>statusCode</td>
-          <td>the status code of the removeGeofences operation.
-            Possible status code
-            <code><a href="/reference/com/google/android/gms/location/LocationStatusCodes.html#SUCCESS">SUCCESS</a></code>,
-            <code><a href="/reference/com/google/android/gms/location/LocationStatusCodes.html#GEOFENCE_NOT_AVAILABLE">GEOFENCE_NOT_AVAILABLE</a></code>
-            and <code><a href="/reference/com/google/android/gms/location/LocationStatusCodes.html#ERROR">ERROR</a></code>.</td>
-        </tr>
-        <tr>
-          <th>geofenceRequestIds</td>
-          <td>the geofence request IDs provided to the
-            original <code><a href="/reference/com/google/android/gms/location/LocationClient.html#removeGeofences(java.util.List<java.lang.String>, com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener)">removeGeofences(List, OnRemoveGeofencesResultListener)</a></code> call
-</td>
-        </tr>
-      </table>
-  </div>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>

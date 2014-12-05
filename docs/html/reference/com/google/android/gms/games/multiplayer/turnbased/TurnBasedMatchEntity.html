@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">TurnBasedMatchEntity</li>
       </ul>
     </div>
@@ -778,13 +801,6 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   
 
   
-
-
-
-
-
-
-
    
   
   
@@ -867,7 +883,7 @@ Summary:
   
       implements 
       
-        SafeParcelable
+        Parcelable 
       
         <a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html">TurnBasedMatch</a> 
       
@@ -875,7 +891,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -988,9 +1004,9 @@ android.os.Parcelable
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">CONTENTS_FILE_DESCRIPTOR</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1000,9 +1016,9 @@ android.os.Parcelable
         <td class="jd-typecol">int</td>
         <td class="jd-linkcol">PARCELABLE_WRITE_RETURN_VALUE</td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
@@ -1014,42 +1030,6 @@ android.os.Parcelable
 </td></tr>
 
 
-
-
-
-<tr class="api apilevel-" >
-<td colspan="12">
-
-  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable" class="jd-expando-trigger closed"
-          ><img id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-trigger"
-          src="/assets/images/triangle-closed.png"
-          class="jd-expando-trigger-img" /></a>From interface
-com.google.android.gms.common.internal.safeparcel.SafeParcelable
-<div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable">
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-list"
-        class="jd-inheritedlinks">
-  </div>
-  <div id="inherited-constants-com.google.android.gms.common.internal.safeparcel.SafeParcelable-summary" style="display: none;">
-    <table class="jd-sumtable-expando">
-
-
-
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol">NULL</td>
-        <td class="jd-descrcol" width="100%">
-
-
-
-
-        </td>
-    </tr>
-
-
-</table>
-  </div>
-</div>
-</td></tr>
 
 
 
@@ -1077,8 +1057,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_ACTIVE">MATCH_STATUS_ACTIVE</a></td>
         <td class="jd-descrcol" width="100%">
           Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that the match has started.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1090,8 +1070,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-descrcol" width="100%">
           Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that one or more slots are waiting to be
  filled by auto-matching.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1103,8 +1083,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-descrcol" width="100%">
           Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that the match was canceled by one of
  the participants.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1115,8 +1095,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_COMPLETE">MATCH_STATUS_COMPLETE</a></td>
         <td class="jd-descrcol" width="100%">
           Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that the match has finished.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1127,8 +1107,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_STATUS_EXPIRED">MATCH_STATUS_EXPIRED</a></td>
         <td class="jd-descrcol" width="100%">
           Constant returned by <code><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getStatus()">getStatus()</a></code> indicating that the match expired.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1139,8 +1119,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_COMPLETE">MATCH_TURN_STATUS_COMPLETE</a></td>
         <td class="jd-descrcol" width="100%">
           Turn status constant for matches which have been completed.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1151,8 +1131,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_INVITED">MATCH_TURN_STATUS_INVITED</a></td>
         <td class="jd-descrcol" width="100%">
           Turn status constant for matches which the current player has been invited to.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1163,8 +1143,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_MY_TURN">MATCH_TURN_STATUS_MY_TURN</a></td>
         <td class="jd-descrcol" width="100%">
           Turn status constant for matches where it is the current player's turn.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1175,8 +1155,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_THEIR_TURN">MATCH_TURN_STATUS_THEIR_TURN</a></td>
         <td class="jd-descrcol" width="100%">
           Turn status constant for matches where it is not the current player's turn.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1187,8 +1167,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_VARIANT_DEFAULT">MATCH_VARIANT_DEFAULT</a></td>
         <td class="jd-descrcol" width="100%">
           Constant used to indicate that the variant for a match is unspecified.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1218,9 +1198,9 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           TurnBasedMatchEntityCreator</nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#CREATOR">CREATOR</a></td>
           <td class="jd-descrcol" width="100%">
-
-
-
+            
+            
+    
 
           </td>
       </tr>
@@ -1237,8 +1217,6 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
 <table id="inhfields" class="jd-sumtable"><tr><th>
   <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
   <div style="clear:left;">Inherited Fields</div></th></tr>
-
-
 
 
 
@@ -1275,8 +1253,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#MATCH_TURN_STATUS_ALL">MATCH_TURN_STATUS_ALL</a></td>
           <td class="jd-descrcol" width="100%">
             Array of all the turn status constants.
-
-
+            
+    
 
           </td>
       </tr>
@@ -1317,8 +1295,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return whether or not this match can be rematched.
-
-
+          
+    
 
         </div>
   
@@ -1372,8 +1350,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Freeze a volatile representation into an immutable representation.
-
-
+          
+    
 
         </div>
   
@@ -1395,8 +1373,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Retrieves the automatch criteria used to create or join this match, if any.
-
-
+          
+    
 
         </div>
   
@@ -1418,8 +1396,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return the maximum number of available automatch slots for this match.
-
-
+          
+    
 
         </div>
   
@@ -1473,8 +1451,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return the current (game-specific) data for this match.
-
-
+          
+    
 
         </div>
   
@@ -1493,88 +1471,88 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getDescription()">getDescription</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(CharArrayBuffer dataOut)</nobr>
-
+        
         <div class="jd-descrdiv">
           Loads the match description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getDescriptionParticipant()">getDescriptionParticipant</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Get the participant representing the primary opponent in the match.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatchEntity.html#getDescriptionParticipantId()">getDescriptionParticipantId</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Get the ID of another participant in the match that can be used when describing the
  participants the user is playing with.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/Game.html">Game</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -1598,8 +1576,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return the timestamp at which the match was last modified.
-
-
+          
+    
 
         </div>
   
@@ -1621,8 +1599,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return the ID of the participant who updated the match most recently.
-
-
+          
+    
 
         </div>
   
@@ -1660,8 +1638,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return the match sequence number for this match.
-
-
+          
+    
 
         </div>
   
@@ -1683,8 +1661,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Get a participant in a match by its ID.
-
-
+          
+    
 
         </div>
   
@@ -1706,8 +1684,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Get the participant ID for a given player.
-
-
+          
+    
 
         </div>
   
@@ -1729,8 +1707,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Get the IDs of the participants of the given match.
-
-
+          
+    
 
         </div>
   
@@ -1752,8 +1730,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Get the status of a participant in a match.
-
-
+          
+    
 
         </div>
   
@@ -1775,8 +1753,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code>s for this object.
-
-
+          
+    
 
         </div>
   
@@ -1798,8 +1776,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return the ID of the participant that is considered pending.
-
-
+          
+    
 
         </div>
   
@@ -1821,8 +1799,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return the match data from the previous match, if available.
-
-
+          
+    
 
         </div>
   
@@ -1844,8 +1822,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return the match ID of the rematch that was created from this match, if any.
-
-
+          
+    
 
         </div>
   
@@ -1915,8 +1893,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return the current version of the match.
-
-
+          
+    
 
         </div>
   
@@ -1954,8 +1932,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Check to see if this object is valid for use.
-
-
+          
+    
 
         </div>
   
@@ -1977,8 +1955,8 @@ com.google.android.gms.common.internal.safeparcel.SafeParcelable
         
         <div class="jd-descrdiv">
           Return whether or not this match has been locally modified.
-
-
+          
+    
 
         </div>
   
@@ -2326,8 +2304,8 @@ From interface
         
         <div class="jd-descrdiv">
           Freeze a volatile representation into an immutable representation.
-
-
+          
+    
 
         </div>
   
@@ -2349,8 +2327,8 @@ From interface
         
         <div class="jd-descrdiv">
           Check to see if this object is valid for use.
-
-
+          
+    
 
         </div>
   
@@ -2361,8 +2339,6 @@ From interface
   </div>
 </div>
 </td></tr>
-
-
 
 
 
@@ -2400,8 +2376,8 @@ From interface
         
         <div class="jd-descrdiv">
           Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code>s for this object.
-
-
+          
+    
 
         </div>
   
@@ -2449,8 +2425,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return whether or not this match can be rematched.
-
-
+          
+    
 
         </div>
   
@@ -2472,8 +2448,8 @@ From interface
         
         <div class="jd-descrdiv">
           Retrieves the automatch criteria used to create or join this match, if any.
-
-
+          
+    
 
         </div>
   
@@ -2495,8 +2471,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return the maximum number of available automatch slots for this match.
-
-
+          
+    
 
         </div>
   
@@ -2550,8 +2526,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return the current (game-specific) data for this match.
-
-
+          
+    
 
         </div>
   
@@ -2570,88 +2546,88 @@ From interface
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getDescription()">getDescription</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getDescription(android.database.CharArrayBuffer)">getDescription</a></span>(CharArrayBuffer dataOut)</nobr>
-
+        
         <div class="jd-descrdiv">
           Loads the match description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getDescriptionParticipant()">getDescriptionParticipant</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Get the participant representing the primary opponent in the match.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/turnbased/TurnBasedMatch.html#getDescriptionParticipantId()">getDescriptionParticipantId</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Get the ID of another participant in the match that can be used when describing the
  participants the user is playing with.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             abstract
-
-
-
-
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/games/Game.html">Game</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
@@ -2675,8 +2651,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return the timestamp at which the match was last modified.
-
-
+          
+    
 
         </div>
   
@@ -2698,8 +2674,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return the ID of the participant who updated the match most recently.
-
-
+          
+    
 
         </div>
   
@@ -2737,8 +2713,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return the match sequence number for this match.
-
-
+          
+    
 
         </div>
   
@@ -2760,8 +2736,8 @@ From interface
         
         <div class="jd-descrdiv">
           Get a participant in a match by its ID.
-
-
+          
+    
 
         </div>
   
@@ -2783,8 +2759,8 @@ From interface
         
         <div class="jd-descrdiv">
           Get the participant ID for a given player.
-
-
+          
+    
 
         </div>
   
@@ -2806,8 +2782,8 @@ From interface
         
         <div class="jd-descrdiv">
           Get the IDs of the participants of the given match.
-
-
+          
+    
 
         </div>
   
@@ -2829,8 +2805,8 @@ From interface
         
         <div class="jd-descrdiv">
           Get the status of a participant in a match.
-
-
+          
+    
 
         </div>
   
@@ -2852,8 +2828,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return the ID of the participant that is considered pending.
-
-
+          
+    
 
         </div>
   
@@ -2875,8 +2851,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return the match data from the previous match, if available.
-
-
+          
+    
 
         </div>
   
@@ -2898,8 +2874,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return the match ID of the rematch that was created from this match, if any.
-
-
+          
+    
 
         </div>
   
@@ -2969,8 +2945,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return the current version of the match.
-
-
+          
+    
 
         </div>
   
@@ -2992,8 +2968,8 @@ From interface
         
         <div class="jd-descrdiv">
           Return whether or not this match has been locally modified.
-
-
+          
+    
 
         </div>
   
@@ -3058,9 +3034,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     
@@ -3109,9 +3085,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return whether or not this match can be rematched. This will return true when the match has
  complete and has not already been rematched.</p></div>
   <div class="jd-tagdata">
@@ -3147,9 +3123,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3179,9 +3155,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3211,9 +3187,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Freeze a volatile representation into an immutable representation. Objects returned from this
  call are safe to cache.
  <p>
@@ -3261,9 +3237,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieves the automatch criteria used to create or join this match, if any. May be null if
  the match has no automatch properties.</p></div>
   <div class="jd-tagdata">
@@ -3299,9 +3275,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the maximum number of available automatch slots for this match. If automatch criteria
  were not specified during match creation, or if all slots have been filled, this will return
  0.</p></div>
@@ -3338,9 +3314,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3370,9 +3346,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3402,9 +3378,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the current (game-specific) data for this match.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -3418,14 +3394,14 @@ From interface
 
 <A NAME="getDescription()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getDescription</span>
@@ -3433,15 +3409,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3450,14 +3426,14 @@ From interface
 
 <A NAME="getDescription(android.database.CharArrayBuffer)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">getDescription</span>
@@ -3465,15 +3441,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Loads the match description into the given <code><a href="/reference/android/database/CharArrayBuffer.html">CharArrayBuffer</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -3492,14 +3468,14 @@ From interface
 
 <A NAME="getDescriptionParticipant()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>
       </span>
       <span class="sympad">getDescriptionParticipant</span>
@@ -3507,15 +3483,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the participant representing the primary opponent in the match.
  <p>
  Note that this will return <code>null</code> if there is no primary opponent. This could happen if
@@ -3532,14 +3508,14 @@ From interface
 
 <A NAME="getDescriptionParticipantId()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getDescriptionParticipantId</span>
@@ -3547,15 +3523,15 @@ From interface
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the ID of another participant in the match that can be used when describing the
  participants the user is playing with. For example, in a four player match this might be used
  to state "Martha (and 2 others)".
@@ -3595,9 +3571,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3627,9 +3603,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the timestamp at which the match was last modified.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -3664,9 +3640,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the ID of the participant who updated the match most recently.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -3701,9 +3677,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -3733,9 +3709,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the match sequence number for this match. This number starts at 1, and increases every
  time a rematch is created.</p></div>
   <div class="jd-tagdata">
@@ -3771,9 +3747,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get a participant in a match by its ID. Note that the participant ID must correspond to a
  participant in this match, or this method will throw an exception.</p></div>
   <div class="jd-tagdata">
@@ -3817,9 +3793,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the participant ID for a given player. This will only return a non-null ID if the player
  is actually a participant in the match and that player's identity is visible to the current
  player. Note that this will always return non-null for the current player.
@@ -3867,9 +3843,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the IDs of the participants of the given match.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -3905,9 +3881,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Get the status of a participant in a match. Note that the participant ID must correspond to a
  participant in this match, or this method will throw an exception.</p></div>
   <div class="jd-tagdata">
@@ -3954,9 +3930,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code>s for this object. This is a list of all Participants
  applicable to the given object.</p></div>
   <div class="jd-tagdata">
@@ -3992,9 +3968,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the ID of the participant that is considered pending. If no participant is considered
  pending (ie, the match is over, etc), this function will return null.</p></div>
   <div class="jd-tagdata">
@@ -4031,9 +4007,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the match data from the previous match, if available. Note that this is only provided
  on the first turn of a rematched match.</p></div>
   <div class="jd-tagdata">
@@ -4069,9 +4045,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the match ID of the rematch that was created from this match, if any. This will only
  be non-null if a rematch has been created.</p></div>
   <div class="jd-tagdata">
@@ -4107,9 +4083,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -4139,9 +4115,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -4171,9 +4147,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -4203,9 +4179,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return the current version of the match.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -4240,9 +4216,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -4272,9 +4248,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Check to see if this object is valid for use. If the object is still volatile, this method
  will indicate whether or not the object can be safely used. The output of a call to
  <code><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze()</a></code> will always be valid.</p></div>
@@ -4311,9 +4287,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Return whether or not this match has been locally modified. If this is true, the local device
  has match state which has not successfully synced to the server yet. In this state, further
  mutations to the match will fail with a status of
@@ -4351,9 +4327,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -4383,9 +4359,9 @@ From interface
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
