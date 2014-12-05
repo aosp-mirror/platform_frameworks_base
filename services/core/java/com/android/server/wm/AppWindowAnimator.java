@@ -308,13 +308,9 @@ public class AppWindowAnimator {
 
         transformation.clear();
 
-        final int N = mAllAppWinAnimators.size();
-        for (int i=0; i<N; i++) {
-            final WindowStateAnimator winAnim = mAllAppWinAnimators.get(i);
-            if (mAppToken.mLaunchTaskBehind) {
-                winAnim.mWin.mExiting = true;
-            }
-            winAnim.finishExit();
+        final int numAllAppWinAnimators = mAllAppWinAnimators.size();
+        for (int i = 0; i < numAllAppWinAnimators; i++) {
+            mAllAppWinAnimators.get(i).finishExit();
         }
         if (mAppToken.mLaunchTaskBehind) {
             try {
