@@ -37,6 +37,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -1283,9 +1284,15 @@ public class ConnectivityManager {
         if (b != null) {
             try {
                 ITelephony it = ITelephony.Stub.asInterface(b);
-                return it.getDataEnabled();
+                int subId = SubscriptionManager.getDefaultDataSubId();
+                Log.d("ConnectivityManager", "getMobileDataEnabled()+ subId=" + subId);
+                boolean retVal = it.getDataEnabled(subId);
+                Log.d("ConnectivityManager", "getMobileDataEnabled()- subId=" + subId
+                        + " retVal=" + retVal);
+                return retVal;
             } catch (RemoteException e) { }
         }
+        Log.d("ConnectivityManager", "getMobileDataEnabled()- remote exception retVal=false");
         return false;
     }
 
