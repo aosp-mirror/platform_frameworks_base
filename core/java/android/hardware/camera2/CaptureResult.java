@@ -1910,6 +1910,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #CONTROL_SCENE_MODE_CANDLELIGHT CANDLELIGHT}</li>
      *   <li>{@link #CONTROL_SCENE_MODE_BARCODE BARCODE}</li>
      *   <li>{@link #CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO HIGH_SPEED_VIDEO}</li>
+     *   <li>{@link #CONTROL_SCENE_MODE_HDR HDR}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}</p>
@@ -1938,6 +1939,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #CONTROL_SCENE_MODE_CANDLELIGHT
      * @see #CONTROL_SCENE_MODE_BARCODE
      * @see #CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO
+     * @see #CONTROL_SCENE_MODE_HDR
      */
     @PublicKey
     public static final Key<Integer> CONTROL_SCENE_MODE =
