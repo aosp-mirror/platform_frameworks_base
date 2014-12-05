@@ -77,6 +77,7 @@ interface IBatteryStats {
     void noteScreenBrightness(int brightness);
     void noteUserActivity(int uid, int event);
     void noteInteractive(boolean interactive);
+    void noteConnectivityChanged(int type, String extra);
     void noteMobileRadioPowerState(int powerState, long timestampNs);
     void notePhoneOn();
     void notePhoneOff();
