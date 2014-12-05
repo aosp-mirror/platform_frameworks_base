@@ -16,6 +16,10 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.TaskPersister.DEBUG_PERSISTER;
+import static com.android.server.am.TaskPersister.DEBUG_RESTORER;
+import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+
 import android.app.ActivityManager.TaskDescription;
 import android.os.PersistableBundle;
 import android.os.Trace;
@@ -1052,12 +1056,12 @@ final class ActivityRecord {
     static int getTaskForActivityLocked(IBinder token, boolean onlyRoot) {
         final ActivityRecord r = ActivityRecord.forToken(token);
         if (r == null) {
-            return -1;
+            return INVALID_TASK_ID;
         }
         final TaskRecord task = r.task;
         final int activityNdx = task.mActivities.indexOf(r);
         if (activityNdx < 0 || (onlyRoot && activityNdx > task.findEffectiveRootIndex())) {
-            return -1;
+            return INVALID_TASK_ID;
         }
         return task.taskId;
     }
@@ -1139,7 +1143,7 @@ final class ActivityRecord {
         }
     }
 
-    static ActivityRecord restoreFromXml(XmlPullParser in, int taskId,
+    static ActivityRecord restoreFromXml(XmlPullParser in,
             ActivityStackSupervisor stackSupervisor) throws IOException, XmlPullParserException {
         Intent intent = null;
         PersistableBundle persistentState = null;
@@ -1155,8 +1159,8 @@ final class ActivityRecord {
         for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
             final String attrName = in.getAttributeName(attrNdx);
             final String attrValue = in.getAttributeValue(attrNdx);
-            if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "ActivityRecord: attribute name=" +
-                    attrName + " value=" + attrValue);
+            if (DEBUG_PERSISTER || DEBUG_RESTORER) Slog.d(TaskPersister.TAG,
+                        "ActivityRecord: attribute name=" + attrName + " value=" + attrValue);
             if (ATTR_ID.equals(attrName)) {
                 createTime = Long.valueOf(attrValue);
             } else if (ATTR_LAUNCHEDFROMUID.equals(attrName)) {
@@ -1181,15 +1185,15 @@ final class ActivityRecord {
                 (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
             if (event == XmlPullParser.START_TAG) {
                 final String name = in.getName();
-                if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG,
-                        "ActivityRecord: START_TAG name=" + name);
+                if (DEBUG_PERSISTER || DEBUG_RESTORER)
+                        Slog.d(TaskPersister.TAG, "ActivityRecord: START_TAG name=" + name);
                 if (TAG_INTENT.equals(name)) {
                     intent = Intent.restoreFromXml(in);
-                    if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG,
-                            "ActivityRecord: intent=" + intent);
+                    if (DEBUG_PERSISTER || DEBUG_RESTORER)
+                            Slog.d(TaskPersister.TAG, "ActivityRecord: intent=" + intent);
                 } else if (TAG_PERSISTABLEBUNDLE.equals(name)) {
                     persistentState = PersistableBundle.restoreFromXml(in);
-                    if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG,
+                    if (DEBUG_PERSISTER || DEBUG_RESTORER) Slog.d(TaskPersister.TAG,
                             "ActivityRecord: persistentState=" + persistentState);
                 } else {
                     Slog.w(TAG, "restoreActivity: unexpected name=" + name);
@@ -1232,7 +1236,7 @@ final class ActivityRecord {
     @Override
     public String toString() {
         if (stringName != null) {
-            return stringName + " t" + (task == null ? -1 : task.taskId) +
+            return stringName + " t" + (task == null ? INVALID_TASK_ID : task.taskId) +
                     (finishing ? " f}" : "}");
         }
         StringBuilder sb = new StringBuilder(128);
