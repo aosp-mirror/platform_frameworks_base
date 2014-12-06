@@ -56,7 +56,7 @@
         </ul>
       </li>
       <li class="nav-section">
-        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/projects/index.html"><span class="en">Setting Up Projects</span></a></div>
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/projects/index.html"><span class="en">Managing Projects</span></a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html"><span class="en">From Eclipse with ADT</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/projects/projects-cmdline.html"><span class="en">From the Command Line</span></a></li>
