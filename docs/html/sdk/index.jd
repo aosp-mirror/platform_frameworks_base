@@ -264,24 +264,29 @@ This is the Android Software Development Kit License Agreement
 
 
 
+
+
+
 <div id="landing">
 
 <div class="col-13">&nbsp;</div><!-- provides top margin for content -->
 
 <img src="{@docRoot}images/tools/studio-hero.png"
 srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x"
-width="760" height="380" alt="" style="margin-bottom:60px" />
+width="760" height="400" alt="" style="margin-bottom:60px" />
 
 <div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
 
-<h1 class="studio-logo" style="margin:0 0 30px !important">Android Studio</h1>
+<h1 class="studio-logo" style="margin:0 0 35px !important">Android Studio</h1>
+
 <p style="font-size: 16px; color:#bbb; position: absolute;left: 297px; top: 5px; display: block;
 width: 400px;text-align: center;">The official Android IDE</p>
 
 <ul style="font-size:12px">
-<li>IntelliJ IDE Community Edition + Android Studio plugin</li>
+<li>Android Studio IDE</li>
 <li>Android SDK tools</li>
 <li>Android 5.0 (Lollipop) Platform</li>
+<li>Android 5.0 emulator system image with Google APIs</li>
 </ul>
 
 <a class="online landing-button green download-bundle-button" style="margin-top:30px;"
@@ -293,13 +298,31 @@ To get Android Studio or stand-alone SDK tools, visit <a
 href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a>
 </p>
 
-<ul style="margin-top:70px;color:#444">
+<ul style="margin-top:50px;color:#444">
   <li><a href="#Requirements">System Requirements</a></li>
-  <li><a href="#Other">Other SDK Downloads</a></li>
+  <li><a href="#Other">Other Download Options</a></li>
   <li><a href="{@docRoot}sdk/installing/migrate.html">Migrate from Eclipse</a></li>
 </ul>
 
 </div>
+
+
+
+
+<h2 class="feature norule" >Intelligent code editor</h2>
+
+<div class="col-9" style="margin:0 20px 0 0">
+  <img src="{@docRoot}images/tools/studio-hero-code.png"
+srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tools/studio-hero-code.png 1x" width="520" />
+</div><!-- end col-9 (left column) -->
+
+<div class="col-4 feature-blurb">
+  <p>At the core of Android Studio is an intelligent code editor capable of advanced
+  code completion, refactoring, and code analysis.</p>
+  <p>The powerful code editor helps you be a more productive Android app developer.</p>
+</div>
+
+
 
 
 <h2 class="feature norule">
@@ -318,7 +341,8 @@ srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/to
 
 
 
-<h2 class="feature norule">Build apps for all screen types</h2>
+
+<h2 class="feature norule">Multi-screen app development</h2>
 
 <div class="col-9" style="margin:0 20px 0 0">
   <img src="{@docRoot}images/tools/studio-hero-screens.png"
@@ -333,7 +357,9 @@ srcset="{@docRoot}images/tools/studio-hero-screens_2x.png 2x, {@docRoot}images/t
 </div>
 
 
-<h2 class="feature norule">Target and test against key devices</h2>
+
+
+<h2 class="feature norule">Virtual devices for all shapes and sizes</h2>
 
 <div class="col-9" style="margin:0 20px 0 0">
   <img src="{@docRoot}images/tools/studio-hero-avds.png"
@@ -348,7 +374,9 @@ srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tool
 
 
 
-<h2 class="feature norule">Import code from GitHub</h2>
+
+
+<h2 class="feature norule">Code templates and GitHub integration</h2>
 
 <div class="col-9" style="margin:0 20px 0 0">
   <img src="{@docRoot}images/tools/studio-hero-import.png"
@@ -358,7 +386,7 @@ srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/to
 <div class="col-4 feature-blurb">
   <p>New project wizards make it easier than ever to start a new project.</p>
 
-  <p>Start with common app patterns such as navigation drawer or view pagers,
+  <p>Start projects using template code for patterns such as navigation drawer and view pagers,
   and even import Google code samples from GitHub.</p>
 </div>
 
@@ -373,7 +401,7 @@ style="margin:0 0 40px 60px;float:right"
 href="" >Download Android Studio</a>
 
   <ul>
-  <li>Built on IntelliJ IDEA Community Edition, the popular Java IDE by JetBrains</li>
+  <li>Built on IntelliJ IDEA Community Edition, the popular Java IDE by JetBrains.</li>
   <li>Flexible Gradle-based build system.</li>
   <li>Build variants and multiple APK generation.</li>
   <li>Expanded template support for Google Services and various device types.</li>
@@ -452,6 +480,6 @@ rendering. You can then configure your project to use Java Development Kit (JDK)
 
 
 
-<h2 id="Other" style="clear:left">Other SDK Downloads</h2>
+<h2 id="Other" style="clear:left">Other Download Options</h2>
 
 <!-- alternative SDK options follows -->
