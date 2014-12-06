@@ -18,9 +18,9 @@
 <!-- Android Studio menu-->
 
  <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot?>tools/basics/index.html"><span class="en">Android Studio</span></a></div>
+    <div class="nav-section-header"><a href="<?cs var:toroot?>tools/studio/index.html"><span class="en">Android Studio</span></a></div>
        <ul>
-         <li><a href="<?cs var:toroot ?>tools/basics/studio-tips.html">Tips and Tricks</a> </li>
+         <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">Tips and Tricks</a> </li>
        </ul>
 
  </li><!-- End of Android Studio Basics -->
