@@ -678,7 +678,8 @@ public class NetworkMonitor extends StateMachine {
                 httpResponseCode = 204;
             }
 
-            sendNetworkConditionsBroadcast(true /* response received */, httpResponseCode == 204,
+            sendNetworkConditionsBroadcast(true /* response received */,
+                    httpResponseCode != 204 /* isCaptivePortal */,
                     requestTimestamp, responseTimestamp);
         } catch (IOException e) {
             if (DBG) log("Probably not a portal: exception " + e);
