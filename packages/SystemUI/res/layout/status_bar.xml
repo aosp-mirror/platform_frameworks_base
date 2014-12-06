@@ -62,6 +62,13 @@
             android:orientation="horizontal"
             >
 
+            <com.android.systemui.statusbar.policy.NetworkTraffic
+                android:id="@+id/networkTraffic"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:singleLine="false"
+                android:gravity="right|center_vertical"/>
+
             <include layout="@layout/system_icons" />
 
             <com.android.systemui.statusbar.policy.Clock
