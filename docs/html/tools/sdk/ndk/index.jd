@@ -2,30 +2,29 @@ ndk=true
 page.template=sdk
 
 
-ndk.mac64_download=android-ndk-r10c-darwin-x86_64.bin
+ndk.mac64_download=android-ndk-r10d-darwin-x86_64.bin
 ndk.mac64_bytes=442691567
 ndk.mac64_checksum=cb101e1e62d56ea75b215f6bc6c27fae
 
-ndk.mac32_download=android-ndk-r10c-darwin-x86.bin
+ndk.mac32_download=android-ndk-r10d-darwin-x86.bin
 ndk.mac32_bytes=441545213
 ndk.mac32_checksum=0aeb3dc062dc457a4cd01e72eadb2379
 
-ndk.linux64_download=android-ndk-r10c-linux-x86_64.bin
+ndk.linux64_download=android-ndk-r10d-linux-x86_64.bin
 ndk.linux64_bytes=459151600
 ndk.linux64_checksum=263b83071e6bca15f67898548d8d236e
 
-ndk.linux32_download=android-ndk-r10c-linux-x86.bin
+ndk.linux32_download=android-ndk-r10d-linux-x86.bin
 ndk.linux32_bytes=449997190
 ndk.linux32_checksum=70ed6d8c34e7e620c145b791e8eeef89
 
-ndk.win64_download=android-ndk-r10c-windows-x86_64.exe
+ndk.win64_download=android-ndk-r10d-windows-x86_64.exe
 ndk.win64_bytes=472613732
 ndk.win64_checksum=9a33f96da58a7e0b70e47d27b4a880b4
 
-ndk.win32_download=android-ndk-r10c-windows-x86.exe
+ndk.win32_download=android-ndk-r10d-windows-x86.exe
 ndk.win32_bytes=455427281
 ndk.win32_checksum=c0930abfae0c990c4d191cc4ebd46b68
-
 
 
 
