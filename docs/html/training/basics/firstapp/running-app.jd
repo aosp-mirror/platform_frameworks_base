@@ -70,7 +70,7 @@ line tools.</p>
 
 <h3>Run the app from Android Studio</h3>
 <ol>
-  <li>Open one of your project's files and click
+  <li>Select one of your project's files and click
 <strong>Run</strong> <img
 src="{@docRoot}images/tools/as-run.png" style="vertical-align:baseline;margin:0; max-height:1em" />
 from the toolbar.</li>
