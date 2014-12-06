@@ -118,7 +118,7 @@ android create project \
 
   <h2 id="UpdatingAProject">Updating a Project</h2>
 
-  <p>If you're upgrading a project from an older version of the Android SDK or want to create a new
+  <p>If you're up grading a project from an older version of the Android SDK or want to create a new
   project from existing code, use the <code>android update project</code> command to update the
   project to the new development environment. You can also use this command to revise the build
   target of an existing project (with the <code>--target</code> option) and the project name (with
@@ -288,7 +288,7 @@ android.library.reference.1=path/to/library_projectC
   <h3 id="depAppBuild">Building a dependent application</h3>
 
   <p>To build an application project that depends on one or more library projects, you can use the
-  standard Ant build commands and compile modes, as described in <a href=
+  standard Gradle build commands and compile modes, as described in <a href=
   "{@docRoot}tools/building/index.html">Building and Running</a>. The tools
 compile and merge all libraries referenced by the application as part of
   compiling the dependent application project. No additional commands or steps are necessary.</p>
