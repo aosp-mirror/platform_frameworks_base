@@ -51,6 +51,7 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
+import android.media.audiopolicy.IAudioPolicyCallback;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
@@ -5098,7 +5099,7 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
-            IBinder policyToken) {
+            IAudioPolicyCallback pcb) {
         // permission checks
         if ((flags & AudioManager.AUDIOFOCUS_FLAG_LOCK) == AudioManager.AUDIOFOCUS_FLAG_LOCK) {
             if (mMediaFocusControl.IN_VOICE_COMM_FOCUS_ID.equals(clientId)) {
@@ -5110,9 +5111,8 @@ public class AudioService extends IAudioService.Stub {
             } else {
                 // only a registered audio policy can be used to lock focus
                 synchronized (mAudioPolicies) {
-                    if (!mAudioPolicies.containsKey(policyToken)) {
-                        Log.e(TAG, "Invalid unregistered AudioPolicy to (un)lock audio focus",
-                                new Exception());
+                    if (!mAudioPolicies.containsKey(pcb.asBinder())) {
+                        Log.e(TAG, "Invalid unregistered AudioPolicy to (un)lock audio focus");
                         return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
                     }
                 }
@@ -5812,30 +5812,34 @@ public class AudioService extends IAudioService.Stub {
     //==========================================================================================
     // Audio policy management
     //==========================================================================================
-    public String registerAudioPolicy(AudioPolicyConfig policyConfig, IBinder cb) {
-        //Log.v(TAG, "registerAudioPolicy for " + cb + " got policy:" + policyConfig);
+    public String registerAudioPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb,
+            boolean hasFocusListener) {
+        if (DEBUG_AP) Log.d(TAG, "registerAudioPolicy for " + pcb.asBinder()
+                + " with config:" + policyConfig);
         String regId = null;
+        // error handling
         boolean hasPermissionForPolicy =
-                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingOrSelfPermission(
+                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
                         android.Manifest.permission.MODIFY_AUDIO_ROUTING));
         if (!hasPermissionForPolicy) {
             Slog.w(TAG, "Can't register audio policy for pid " + Binder.getCallingPid() + " / uid "
                     + Binder.getCallingUid() + ", need MODIFY_AUDIO_ROUTING");
             return null;
         }
+
         synchronized (mAudioPolicies) {
             try {
-                if (mAudioPolicies.containsKey(cb)) {
+                if (mAudioPolicies.containsKey(pcb.asBinder())) {
                     Slog.e(TAG, "Cannot re-register policy");
                     return null;
                 }
-                AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, cb);
-                cb.linkToDeath(app, 0/*flags*/);
-                regId = app.connectMixes();
-                mAudioPolicies.put(cb, app);
+                AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, pcb, hasFocusListener);
+                pcb.asBinder().linkToDeath(app, 0/*flags*/);
+                regId = app.getRegistrationId();
+                mAudioPolicies.put(pcb.asBinder(), app);
             } catch (RemoteException e) {
                 // audio policy owner has already died!
-                Slog.w(TAG, "Audio policy registration failed, could not link to " + cb +
+                Slog.w(TAG, "Audio policy registration failed, could not link to " + pcb +
                         " binder death", e);
                 return null;
             }
@@ -5843,19 +5847,56 @@ public class AudioService extends IAudioService.Stub {
         return regId;
     }
 
-    public void unregisterAudioPolicyAsync(IBinder cb) {
+    public void unregisterAudioPolicyAsync(IAudioPolicyCallback pcb) {
+        if (DEBUG_AP) Log.d(TAG, "unregisterAudioPolicyAsync for " + pcb.asBinder());
         synchronized (mAudioPolicies) {
-            AudioPolicyProxy app = mAudioPolicies.remove(cb);
+            AudioPolicyProxy app = mAudioPolicies.remove(pcb.asBinder());
             if (app == null) {
                 Slog.w(TAG, "Trying to unregister unknown audio policy for pid "
                         + Binder.getCallingPid() + " / uid " + Binder.getCallingUid());
                 return;
             } else {
-                cb.unlinkToDeath(app, 0/*flags*/);
+                pcb.asBinder().unlinkToDeath(app, 0/*flags*/);
             }
-            app.disconnectMixes();
+            app.release();
         }
         // TODO implement clearing mix attribute matching info in native audio policy
+    }
+
+    public int setFocusPropertiesForPolicy(int duckingBehavior, IAudioPolicyCallback pcb) {
+        if (DEBUG_AP) Log.d(TAG, "setFocusPropertiesForPolicy() duck behavior=" + duckingBehavior
+                + " policy " +  pcb.asBinder());
+        // error handling
+        boolean hasPermissionForPolicy =
+                (PackageManager.PERMISSION_GRANTED == mContext.checkCallingPermission(
+                        android.Manifest.permission.MODIFY_AUDIO_ROUTING));
+        if (!hasPermissionForPolicy) {
+            Slog.w(TAG, "Cannot change audio policy ducking handling for pid " +
+                    + Binder.getCallingPid() + " / uid "
+                    + Binder.getCallingUid() + ", need MODIFY_AUDIO_ROUTING");
+            return AudioManager.ERROR;
+        }
+
+        synchronized (mAudioPolicies) {
+            if (!mAudioPolicies.containsKey(pcb.asBinder())) {
+                Slog.e(TAG, "Cannot change audio policy focus properties, unregistered policy");
+                return AudioManager.ERROR;
+            }
+            final AudioPolicyProxy app = mAudioPolicies.get(pcb.asBinder());
+            if (duckingBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY) {
+                // is there already one policy managing ducking?
+                for(AudioPolicyProxy policy : mAudioPolicies.values()) {
+                    if (policy.mFocusDuckBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY) {
+                        Slog.e(TAG, "Cannot change audio policy ducking behavior, already handled");
+                        return AudioManager.ERROR;
+                    }
+                }
+            }
+            app.mFocusDuckBehavior = duckingBehavior;
+            mMediaFocusControl.setDuckingInExtPolicyAvailable(
+                    duckingBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY);
+        }
+        return AudioManager.SUCCESS;
     }
 
     private void dumpAudioPolicies(PrintWriter pw) {
@@ -5877,27 +5918,48 @@ public class AudioService extends IAudioService.Stub {
     public class AudioPolicyProxy extends AudioPolicyConfig implements IBinder.DeathRecipient {
         private static final String TAG = "AudioPolicyProxy";
         AudioPolicyConfig mConfig;
-        IBinder mToken;
-        AudioPolicyProxy(AudioPolicyConfig config, IBinder token) {
+        IAudioPolicyCallback mPolicyToken;
+        boolean mHasFocusListener;
+        /**
+         * Audio focus ducking behavior for an audio policy.
+         * This variable reflects the value that was successfully set in
+         * {@link AudioService#setFocusPropertiesForPolicy(int, IAudioPolicyCallback)}. This
+         * implies that a value of FOCUS_POLICY_DUCKING_IN_POLICY means the corresponding policy
+         * is handling ducking for audio focus.
+         */
+        int mFocusDuckBehavior = AudioPolicy.FOCUS_POLICY_DUCKING_DEFAULT;
+
+        AudioPolicyProxy(AudioPolicyConfig config, IAudioPolicyCallback token,
+                boolean hasFocusListener) {
             super(config);
             setRegistration(new String(config.hashCode() + ":ap:" + mAudioPolicyCounter++));
-            mToken = token;
+            mPolicyToken = token;
+            mHasFocusListener = hasFocusListener;
+            if (mHasFocusListener) {
+                mMediaFocusControl.addFocusFollower(mPolicyToken);
+            }
+            updateMixes(AudioSystem.DEVICE_STATE_AVAILABLE);
         }
 
         public void binderDied() {
             synchronized (mAudioPolicies) {
-                Log.i(TAG, "audio policy " + mToken + " died");
-                disconnectMixes();
-                mAudioPolicies.remove(mToken);
+                Log.i(TAG, "audio policy " + mPolicyToken + " died");
+                release();
+                mAudioPolicies.remove(mPolicyToken.asBinder());
             }
         }
 
-        String connectMixes() {
-            updateMixes(AudioSystem.DEVICE_STATE_AVAILABLE);
+        String getRegistrationId() {
             return getRegistration();
         }
 
-        void disconnectMixes() {
+        void release() {
+            if (mFocusDuckBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY) {
+                mMediaFocusControl.setDuckingInExtPolicyAvailable(false);
+            }
+            if (mHasFocusListener) {
+                mMediaFocusControl.removeFocusFollower(mPolicyToken);
+            }
             updateMixes(AudioSystem.DEVICE_STATE_UNAVAILABLE);
         }
 

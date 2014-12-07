@@ -38,6 +38,7 @@ public class AudioPolicyConfig implements Parcelable {
     private static final String TAG = "AudioPolicyConfig";
 
     protected ArrayList<AudioMix> mMixes;
+    protected int mDuckingPolicy = AudioPolicy.FOCUS_POLICY_DUCKING_IN_APP;
 
     private String mRegistrationId = null;
 
