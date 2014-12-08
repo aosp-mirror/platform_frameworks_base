@@ -3110,11 +3110,12 @@ public class AudioService extends IAudioService.Stub {
                 break;
             }
             if ((direction == AudioManager.ADJUST_LOWER)) {
-                if (VOLUME_SETS_RINGER_MODE_SILENT
-                        && mPrevVolDirection != AudioManager.ADJUST_LOWER) {
-                    ringerMode = RINGER_MODE_SILENT;
-                } else {
-                    result |= AudioManager.FLAG_SHOW_VIBRATE_HINT;
+                if (mPrevVolDirection != AudioManager.ADJUST_LOWER) {
+                    if (VOLUME_SETS_RINGER_MODE_SILENT) {
+                        ringerMode = RINGER_MODE_SILENT;
+                    } else {
+                        result |= AudioManager.FLAG_SHOW_VIBRATE_HINT;
+                    }
                 }
             } else if (direction == AudioManager.ADJUST_RAISE) {
                 ringerMode = RINGER_MODE_NORMAL;
