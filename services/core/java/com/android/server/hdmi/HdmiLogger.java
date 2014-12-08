@@ -83,7 +83,7 @@ final class HdmiLogger {
     }
 
     private void debugInternal(String logMessage) {
-        if (IS_USER_BUILD) {
+        if (true || IS_USER_BUILD) {
             return;
         }
         Slog.d(TAG, logMessage);
