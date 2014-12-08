@@ -1023,7 +1023,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         info.setDetailedState(DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(iface);
-        return new NetworkState(info, prop, null, null);
+        return new NetworkState(info, prop, null, null, null, null);
     }
 
     private NetworkStats buildEmptyStats() {
