@@ -315,7 +315,6 @@ public class StaticLayout extends Layout {
             float[] lineWidths = lineBreaks.widths;
             boolean[] flags = lineBreaks.flags;
 
-
             // here is the offset of the starting character of the line we are currently measuring
             int here = paraStart;
 
@@ -609,7 +608,7 @@ public class StaticLayout extends Layout {
                 int left = 0, right = len;
 
                 float ravail = (avail - ellipsisWidth) / 2;
-                for (right = len; right >= 0; right--) {
+                for (right = len; right > 0; right--) {
                     float w = widths[right - 1 + lineStart - widthStart];
 
                     if (w + rsum > ravail) {
