@@ -1246,37 +1246,40 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
         }
 
         final int[] selectionDegrees = mSelectionDegrees;
-        int type = -1;
-        int newValue = -1;
+        final int type;
+        final int newValue;
+        final boolean valueChanged;
 
         if (mShowHours) {
             final int snapDegrees = snapOnly30s(degrees, 0) % 360;
-            if (forceSelection
-                    || selectionDegrees[HOURS] != snapDegrees
+            valueChanged = selectionDegrees[HOURS] != snapDegrees
                     || selectionDegrees[HOURS_INNER] != snapDegrees
-                    || wasOnInnerCircle != mIsOnInnerCircle) {
-                selectionDegrees[HOURS] = snapDegrees;
-                selectionDegrees[HOURS_INNER] = snapDegrees;
+                    || wasOnInnerCircle != mIsOnInnerCircle;
 
-                type = HOURS;
-                newValue = getCurrentHour();
-            }
+            selectionDegrees[HOURS] = snapDegrees;
+            selectionDegrees[HOURS_INNER] = snapDegrees;
+            type = HOURS;
+            newValue = getCurrentHour();
         } else {
             final int snapDegrees = snapPrefer30s(degrees) % 360;
-            if (forceSelection || selectionDegrees[MINUTES] != snapDegrees) {
-                selectionDegrees[MINUTES] = snapDegrees;
+            valueChanged = selectionDegrees[MINUTES] != snapDegrees;
 
-                type = MINUTES;
-                newValue = getCurrentMinute();
-            }
+            selectionDegrees[MINUTES] = snapDegrees;
+            type = MINUTES;
+            newValue = getCurrentMinute();
         }
 
-        if (newValue != -1) {
+        if (valueChanged || forceSelection || autoAdvance) {
+            // Fire the listener even if we just need to auto-advance.
             if (mListener != null) {
                 mListener.onValueSelected(type, newValue, autoAdvance);
             }
-            performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
-            invalidate();
+
+            // Only provide feedback if the value actually changed.
+            if (valueChanged || forceSelection) {
+                performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
+                invalidate();
+            }
             return true;
         }
 
