@@ -323,7 +323,9 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
                     item.icon = ap.iconId;
                     item.line1 = ap.ssid;
                     if (ap.isConnected) {
-                        item.line2 = mContext.getString(R.string.quick_settings_connected);
+                        item.line2 = mContext.getString(ap.isConfigured ?
+                                R.string.quick_settings_connected :
+                                R.string.quick_settings_connected_via_wfa);
                     }
                     items[i] = item;
                 }
