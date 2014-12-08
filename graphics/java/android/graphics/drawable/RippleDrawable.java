@@ -27,15 +27,19 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 
@@ -56,7 +60,7 @@ import java.util.Arrays;
  * &ltripple android:color="#ffff0000">
  *   &ltitem android:id="@android:id/mask"
  *         android:drawable="@android:color/white" />
- * &ltripple /></code>
+ * &lt/ripple></code>
  * </pre>
  * <p>
  * If a mask layer is set, the ripple effect will be masked against that layer
@@ -65,15 +69,15 @@ import java.util.Arrays;
  * If no mask layer is set, the ripple effect is masked against the composite
  * of the child layers.
  * <pre>
- * <code>&lt!-- A blue ripple drawn atop a black rectangle. --/>
+ * <code>&lt!-- A green ripple drawn atop a black rectangle. --/>
  * &ltripple android:color="#ff00ff00">
  *   &ltitem android:drawable="@android:color/black" />
- * &ltripple />
+ * &lt/ripple>
  *
- * &lt!-- A red ripple drawn atop a drawable resource. --/>
- * &ltripple android:color="#ff00ff00">
+ * &lt!-- A blue ripple drawn atop a drawable resource. --/>
+ * &ltripple android:color="#ff0000ff">
  *   &ltitem android:drawable="@drawable/my_drawable" />
- * &ltripple /></code>
+ * &lt/ripple></code>
  * </pre>
  * <p>
  * If no child layers or mask is specified and the ripple is set as a View
@@ -81,16 +85,17 @@ import java.util.Arrays;
  * background within the View's hierarchy. In this case, the drawing region
  * may extend outside of the Drawable bounds.
  * <pre>
- * <code>&lt!-- An unbounded green ripple. --/>
- * &ltripple android:color="#ff0000ff" /></code>
+ * <code>&lt!-- An unbounded red ripple. --/>
+ * &ltripple android:color="#ffff0000" /></code>
  * </pre>
  *
  * @attr ref android.R.styleable#RippleDrawable_color
  */
 public class RippleDrawable extends LayerDrawable {
-    private static final PorterDuffXfermode DST_IN = new PorterDuffXfermode(Mode.DST_IN);
-    private static final PorterDuffXfermode SRC_ATOP = new PorterDuffXfermode(Mode.SRC_ATOP);
-    private static final PorterDuffXfermode SRC_OVER = new PorterDuffXfermode(Mode.SRC_OVER);
+    private static final int MASK_UNKNOWN = -1;
+    private static final int MASK_NONE = 0;
+    private static final int MASK_CONTENT = 1;
+    private static final int MASK_EXPLICIT = 2;
 
     /**
      * Constant for automatically determining the maximum ripple radius.
@@ -123,6 +128,13 @@ public class RippleDrawable extends LayerDrawable {
     /** The current background. May be actively animating or pending entry. */
     private RippleBackground mBackground;
 
+    private Bitmap mMaskBuffer;
+    private BitmapShader mMaskShader;
+    private Canvas mMaskCanvas;
+    private Matrix mMaskMatrix;
+    private PorterDuffColorFilter mMaskColorFilter;
+    private boolean mHasValidMask;
+
     /** Whether we expect to draw a background when visible. */
     private boolean mBackgroundActive;
 
@@ -146,9 +158,6 @@ public class RippleDrawable extends LayerDrawable {
 
     /** Paint used to control appearance of ripples. */
     private Paint mRipplePaint;
-
-    /** Paint used to control reveal layer masking. */
-    private Paint mMaskingPaint;
 
     /** Target density of the display into which ripples are drawn. */
     private float mDensity = 1.0f;
@@ -615,37 +624,116 @@ public class RippleDrawable extends LayerDrawable {
      */
     @Override
     public void draw(@NonNull Canvas canvas) {
-        final boolean hasMask = mMask != null;
-        final boolean hasRipples = mRipple != null || mExitingRipplesCount > 0
-                || (mBackground != null && mBackground.shouldDraw());
-
         // Clip to the dirty bounds, which will be the drawable bounds if we
         // have a mask or content and the ripple bounds if we're projecting.
         final Rect bounds = getDirtyBounds();
         final int saveCount = canvas.save(Canvas.CLIP_SAVE_FLAG);
         canvas.clipRect(bounds);
 
-        // If we have content, draw it first. If we have ripples and no mask,
-        // we'll draw it into a SRC_OVER layer so that we can mask ripples
-        // against it using SRC_IN.
-        final boolean hasContentLayer = drawContent(canvas, bounds, hasRipples, hasMask);
+        drawContent(canvas);
+        drawBackgroundAndRipples(canvas);
 
-        // Next, try to draw the ripples. If we have a non-opaque mask, we'll
-        // draw the ripples into a SRC_OVER layer, draw the mask into a DST_IN
-        // layer, and blend.
-        if (hasRipples) {
-            final boolean hasNonOpaqueMask = hasMask && mMask.getOpacity() != PixelFormat.OPAQUE;
-            final boolean hasRippleLayer = drawBackgroundAndRipples(canvas, bounds,
-                    hasNonOpaqueMask, hasContentLayer);
+        canvas.restoreToCount(saveCount);
+    }
 
-            // If drawing ripples created a layer, we have a non-opaque mask
-            // that needs to be blended on top of the ripples with DST_IN.
-            if (hasRippleLayer) {
-                drawMaskingLayer(canvas, bounds, DST_IN);
+    @Override
+    public void invalidateSelf() {
+        super.invalidateSelf();
+
+        // Force the mask to update on the next draw().
+        mHasValidMask = false;
+    }
+
+    /**
+     * @return whether we need to use a mask
+     */
+    private void updateMaskShaderIfNeeded() {
+        if (mHasValidMask) {
+            return;
+        }
+
+        final int maskType = getMaskType();
+        if (maskType == MASK_UNKNOWN) {
+            return;
+        }
+
+        mHasValidMask = true;
+
+        if (maskType == MASK_NONE) {
+            if (mMaskBuffer != null) {
+                mMaskBuffer.recycle();
+                mMaskBuffer = null;
+                mMaskShader = null;
+                mMaskCanvas = null;
+            }
+            mMaskMatrix = null;
+            mMaskColorFilter = null;
+            return;
+        }
+
+        // Ensure we have a correctly-sized buffer.
+        final Rect bounds = getBounds();
+        if (mMaskBuffer == null
+                || mMaskBuffer.getWidth() != bounds.width()
+                || mMaskBuffer.getHeight() != bounds.height()) {
+            if (mMaskBuffer != null) {
+                mMaskBuffer.recycle();
+            }
+
+            mMaskBuffer = Bitmap.createBitmap(
+                    bounds.width(), bounds.height(), Bitmap.Config.ALPHA_8);
+            mMaskShader = new BitmapShader(mMaskBuffer,
+                    Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            mMaskCanvas = new Canvas(mMaskBuffer);
+        } else {
+            mMaskBuffer.eraseColor(Color.TRANSPARENT);
+        }
+
+        if (mMaskMatrix == null) {
+            mMaskMatrix = new Matrix();
+        } else {
+            mMaskMatrix.reset();
+        }
+
+        if (mMaskColorFilter == null) {
+            mMaskColorFilter = new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_IN);
+        }
+
+        // Draw the appropriate mask.
+        if (maskType == MASK_EXPLICIT) {
+            drawMask(mMaskCanvas);
+        } else if (maskType == MASK_CONTENT) {
+            drawContent(mMaskCanvas);
+        }
+    }
+
+    private int getMaskType() {
+        if (mRipple == null && mExitingRipplesCount <= 0
+                && (mBackground == null || !mBackground.shouldDraw())) {
+            // We might need a mask later.
+            return MASK_UNKNOWN;
+        }
+
+        if (mMask != null) {
+            if (mMask.getOpacity() == PixelFormat.OPAQUE) {
+                // Clipping handles opaque explicit masks.
+                return MASK_NONE;
+            } else {
+                return MASK_EXPLICIT;
             }
         }
 
-        canvas.restoreToCount(saveCount);
+        // Check for non-opaque, non-mask content.
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int count = mLayerState.mNum;
+        for (int i = 0; i < count; i++) {
+            if (array[i].mDrawable.getOpacity() != PixelFormat.OPAQUE) {
+                return MASK_CONTENT;
+            }
+        }
+
+        // Clipping handles opaque content.
+        return MASK_NONE;
     }
 
     /**
@@ -678,65 +766,65 @@ public class RippleDrawable extends LayerDrawable {
         return -1;
     }
 
-    private boolean drawContent(Canvas canvas, Rect bounds, boolean hasRipples, boolean hasMask) {
+    private void drawContent(Canvas canvas) {
+        // Draw everything except the mask.
         final ChildDrawable[] array = mLayerState.mChildren;
         final int count = mLayerState.mNum;
-
-        boolean needsLayer = false;
-
-        if (hasRipples && !hasMask) {
-            // If we only have opaque content, we don't really need a layer
-            // because the ripples will be clipped to the drawable bounds.
-            for (int i = 0; i < count; i++) {
-                if (array[i].mDrawable.getOpacity() != PixelFormat.OPAQUE) {
-                    needsLayer = true;
-                    break;
-                }
-            }
-        }
-
-        if (needsLayer) {
-            canvas.saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom,
-                    getMaskingPaint(SRC_OVER));
-        }
-
-        // Draw everything except the mask.
         for (int i = 0; i < count; i++) {
             if (array[i].mId != R.id.mask) {
                 array[i].mDrawable.draw(canvas);
             }
         }
-
-        return needsLayer;
     }
 
-    private boolean drawBackgroundAndRipples(
-            Canvas canvas, Rect bounds, boolean hasNonOpaqueMask, boolean hasContentLayer) {
-        if (hasNonOpaqueMask) {
-            final Paint p = getMaskingPaint(SRC_OVER);
-            canvas.saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, p);
+    private void drawBackgroundAndRipples(Canvas canvas) {
+        final Ripple active = mRipple;
+        final RippleBackground background = mBackground;
+        final int count = mExitingRipplesCount;
+        if (active == null && count <= 0 && (background == null || !background.shouldDraw())) {
+            // Move along, nothing to draw here.
+            return;
         }
 
-        final PorterDuffXfermode mode = hasContentLayer ? SRC_ATOP : SRC_OVER;
         final float x = mHotspotBounds.exactCenterX();
         final float y = mHotspotBounds.exactCenterY();
         canvas.translate(x, y);
 
-        final Paint p = getRipplePaint();
-        p.setXfermode(mode);
+        updateMaskShaderIfNeeded();
+
+        // Position the shader to account for canvas translation.
+        if (mMaskShader != null) {
+            mMaskMatrix.setTranslate(-x, -y);
+            mMaskShader.setLocalMatrix(mMaskMatrix);
+        }
 
         // Grab the color for the current state and cut the alpha channel in
         // half so that the ripple and background together yield full alpha.
         final int color = mState.mColor.getColorForState(getState(), Color.BLACK);
-        final int alpha = (Color.alpha(color) / 2) << 24;
-        p.setColor(color & 0xFFFFFF | alpha);
+        final int halfAlpha = (Color.alpha(color) / 2) << 24;
+        final Paint p = getRipplePaint();
 
-        final RippleBackground background = mBackground;
+        if (mMaskColorFilter != null) {
+            // The ripple timing depends on the paint's alpha value, so we need
+            // to push just the alpha channel into the paint and let the filter
+            // handle the full-alpha color.
+            final int fullAlphaColor = color | (0xFF << 24);
+            mMaskColorFilter.setColor(fullAlphaColor);
+
+            p.setColor(halfAlpha);
+            p.setColorFilter(mMaskColorFilter);
+            p.setShader(mMaskShader);
+        } else {
+            final int halfAlphaColor = (color & 0xFFFFFF) | halfAlpha;
+            p.setColor(halfAlphaColor);
+            p.setColorFilter(null);
+            p.setShader(null);
+        }
+
         if (background != null && background.shouldDraw()) {
             background.draw(canvas, p);
         }
 
-        final int count = mExitingRipplesCount;
         if (count > 0) {
             final Ripple[] ripples = mExitingRipples;
             for (int i = 0; i < count; i++) {
@@ -744,27 +832,15 @@ public class RippleDrawable extends LayerDrawable {
             }
         }
 
-        final Ripple active = mRipple;
         if (active != null) {
             active.draw(canvas, p);
         }
 
         canvas.translate(-x, -y);
-
-        // Returns true if a layer was created.
-        return hasNonOpaqueMask;
     }
 
-    private int drawMaskingLayer(Canvas canvas, Rect bounds, PorterDuffXfermode mode) {
-        final int restoreToCount = canvas.saveLayer(bounds.left, bounds.top,
-                bounds.right, bounds.bottom, getMaskingPaint(mode));
-
-        // Ensure that DST_IN blends using the entire layer.
-        canvas.drawColor(Color.TRANSPARENT);
-
+    private void drawMask(Canvas canvas) {
         mMask.draw(canvas);
-
-        return restoreToCount;
     }
 
     private Paint getRipplePaint() {
@@ -774,15 +850,6 @@ public class RippleDrawable extends LayerDrawable {
             mRipplePaint.setStyle(Paint.Style.FILL);
         }
         return mRipplePaint;
-    }
-
-    private Paint getMaskingPaint(PorterDuffXfermode xfermode) {
-        if (mMaskingPaint == null) {
-            mMaskingPaint = new Paint();
-        }
-        mMaskingPaint.setXfermode(xfermode);
-        mMaskingPaint.setAlpha(0xFF);
-        return mMaskingPaint;
     }
 
     @Override
