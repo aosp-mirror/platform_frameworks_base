@@ -74,6 +74,7 @@ import com.android.server.lights.LightsService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.MediaSessionService;
 import com.android.server.media.projection.MediaProjectionManagerService;
+import com.android.server.midi.MidiService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
@@ -410,6 +411,7 @@ public final class SystemServer {
         AudioService audioService = null;
         MmsServiceBroker mmsService = null;
         EntropyMixer entropyMixer = null;
+        MidiService midiService = null;
 
         boolean disableStorage = SystemProperties.getBoolean("config.disable_storage", false);
         boolean disableMedia = SystemProperties.getBoolean("config.disable_media", false);
@@ -521,6 +523,7 @@ public final class SystemServer {
         LockSettingsService lockSettings = null;
         AssetAtlasService atlas = null;
         MediaRouterService mediaRouter = null;
+        MidiService midi = null;
 
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
@@ -824,6 +827,16 @@ public final class SystemServer {
                     ServiceManager.addService(Context.SERIAL_SERVICE, serial);
                 } catch (Throwable e) {
                     Slog.e(TAG, "Failure starting SerialService", e);
+                }
+            }
+
+            if (!disableNonCoreServices) {
+                try {
+                    Slog.i(TAG, "MIDI Service");
+                    ServiceManager.addService(Context.MIDI_SERVICE,
+                            new MidiService(context));
+                } catch (Throwable e) {
+                    reportWtf("starting MIDI Service", e);
                 }
             }
 

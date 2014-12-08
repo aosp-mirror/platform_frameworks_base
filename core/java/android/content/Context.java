@@ -2143,6 +2143,7 @@ public abstract class Context {
             MEDIA_SESSION_SERVICE,
             BATTERY_SERVICE,
             JOB_SCHEDULER_SERVICE,
+            MIDI_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -2914,6 +2915,15 @@ public abstract class Context {
      * @see android.media.projection.ProjectionManager
      */
     public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.midi.MidiManager} for accessing the MIDI service.
+     *
+     * @see #getSystemService
+     * @hide
+     */
+    public static final String MIDI_SERVICE = "midi";
 
     /**
      * Determine whether the given permission is allowed for a particular
