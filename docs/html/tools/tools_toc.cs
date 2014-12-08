@@ -13,27 +13,21 @@
   </li>
 
 
-  <li class="nav-section">
+<!-- Android Studio menu-->
+
+ <li class="nav-section">
     <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>sdk/installing/studio.html">Android Studio</a>
+      <a href="<?cs var:toroot?>tools/studio/index.html">Android Studio</a>
     </div>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">
-          Migrating from Eclipse</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/create-project.html">
-          Creating a Project</a></li>
       <li><a href="<?cs var:toroot ?>sdk/installing/studio-tips.html">
           Tips and Tricks</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/studio-androidview.html">
-          Using the Android Project View</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/studio-layout.html">
-          Using the Layout Editor</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/studio-build.html">
-          Building Your Project with Gradle</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/installing/studio-debug.html">
-          Debugging with Android Studio</a></li>
-      </ul>
-  </li>
+    </ul>
+
+ </li><!-- End of Android Studio menu -->
+
+
+<!-- Workflow menu-->
 
   <li class="nav-section">
     <div class="nav-section-header">
