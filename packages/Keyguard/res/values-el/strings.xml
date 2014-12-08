@@ -66,6 +66,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Ξεκλείδωμα κωδικού πρόσβασης."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Περιοχή μοτίβου."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Περιοχή ολίσθησης"</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Κουμπί προηγούμενου κομματιού"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Κουμπί επόμενου κομματιού"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Κουμπί παύσης"</string>
@@ -144,7 +150,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Δοκιμάσατε να ξεκλειδώσετε το τηλέφωνο <xliff:g id="NUMBER">%d</xliff:g> φορές χωρίς επιτυχία. Το προφίλ εργασίας θα καταργηθεί, και έτσι θα διαγραφούν όλα τα δεδομένα προφίλ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το tablet σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε να συνδεθείτε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Κατάργηση"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Εσφαλμένος κωδικός PIN κάρτας SIM. Θα πρέπει να επικοινωνήσετε με τον πάροχο κινητής τηλεφωνίας σας για να ξεκλειδώσετε τη συσκευή σας."</string>
   <plurals name="kg_password_wrong_pin_code">

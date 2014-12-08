@@ -66,6 +66,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"การปลดล็อกด้วยรหัสผ่าน"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"พื้นที่สำหรับรูปแบบ"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"พื้นที่สำหรับการเลื่อน"</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"ปุ่มแทร็กก่อนหน้า"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"ปุ่มแทร็กถัดไป"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"ปุ่มหยุดชั่วคราว"</string>
@@ -144,7 +150,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"คุณปลดล็อกโทรศัพท์ไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ระบบจะนำโปรไฟล์งานออก ซึ่งจะเป็นการลบข้อมูลโปรไฟล์ทั้งหมด"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ลบ"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"รหัส PIN ของซิมไม่ถูกต้อง ตอนนี้คุณต้องติดต่อผู้ให้บริการเพื่อปลดล็อกอุปกรณ์ของคุณ"</string>
   <plurals name="kg_password_wrong_pin_code">

@@ -66,6 +66,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Autorizācija ar paroli."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Kombinācijas ievades apgabals."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Apgabals, kur vilkt ar pirkstu."</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Iepriekšējā ieraksta poga"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Nākamā ieraksta poga"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pārtraukšanas poga"</string>
@@ -144,7 +150,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Jūs <xliff:g id="NUMBER">%d</xliff:g> reizes nesekmīgi mēģinājāt atbloķēt tālruni. Darba profils tiks noņemts, kā arī visi profila dati tiks dzēsti."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem planšetdators būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%d</xliff:g> sekundēm."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">"  — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Noņemt"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Nepareizs SIM kartes PIN kods. Lai atbloķētu ierīci, sazinieties ar mobilo sakaru operatoru."</string>
   <plurals name="kg_password_wrong_pin_code">

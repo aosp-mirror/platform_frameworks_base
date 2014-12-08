@@ -66,6 +66,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"비밀번호를 사용하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"패턴을 그리는 부분입니다."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"슬라이드하는 부분입니다."</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"이전 트랙 버튼"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"다음 트랙 버튼"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"일시중지 버튼"</string>
@@ -144,7 +150,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필이 삭제되며 모든 프로필 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"삭제"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN 코드가 잘못되었습니다. 이동통신사에 문의하여 기기를 잠금 해제해야 합니다."</string>
   <plurals name="kg_password_wrong_pin_code">

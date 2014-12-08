@@ -66,6 +66,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Opnun með aðgangsorði."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Svæði mynsturs."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Stroksvæði."</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Hnappur fyrir fyrra lag"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Hnappur fyrir næsta lag"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Hnappur til að gera hlé"</string>
@@ -144,7 +150,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Þú hefur gert <xliff:g id="NUMBER">%d</xliff:g> árangurslausar tilraunir til að opna símann. Vinnusniðið verður fjarlægt, með þeim afleiðingum að öllum gögnum þess verður eytt."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%d</xliff:g> árangurslausar tilraunir í viðbót verður þú beðin(n) um að opna spjaldtölvuna með tölvupóstreikningi.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%d</xliff:g> sekúndur."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%d</xliff:g> árangurslausar tilraunir í viðbót verður þú beðin(n) um að opna símann með tölvupóstreikningi.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%d</xliff:g> sekúndur."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Fjarlægja"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Rangt PIN-númer SIM-korts. Þú þarft núna að hafa samband við símafyrirtækið þitt til að taka tækið úr lás."</string>
   <plurals name="kg_password_wrong_pin_code">

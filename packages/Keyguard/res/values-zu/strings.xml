@@ -66,6 +66,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Ukuvula ngephasiwedi."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Indawo yephethini."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Indawo yokushelelisa."</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Inkinombo yethrekhi yangaphambilini"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Inkinobho yethrekhi elandelayo"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Inkinobho yokumiswa isikhashana"</string>
@@ -144,7 +150,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Uzame ngokungalungile ukuvula ifoni izikhathi ezingu-<xliff:g id="NUMBER">%d</xliff:g>. Iphrofayela yomsebenzi izosuswa, okuzosusa yonke idatha yephrofayela."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Udwebe ngokungalungile iphathini yakho yokuvula izikhathi ezingu-<xliff:g id="NUMBER_0">%d</xliff:g>. Emva <xliff:g id="NUMBER_1">%d</xliff:g> kweminye imizamo engaphumelelanga, uzocelwa ukuvula ithebhulethi yakho usebenzisa ukungena ngemvume kwi-Google.\n\n Sicela uzame futhi emuva kwamasekhondi angu-<xliff:g id="NUMBER_2">%d</xliff:g>"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Ukulayisha ungenisa iphathini yakho yokuvula ngendlela engalungile izikhathi ezi-<xliff:g id="NUMBER_0">%d</xliff:g> Emva kweminye imizamo engu-<xliff:g id="NUMBER_1">%d</xliff:g>, uzocelwa ukuvula ifoni yakho usebenzisa ukungena ngemvume ku-Google\n\n Zame futhi emumva kwengu- <xliff:g id="NUMBER_2">%d</xliff:g> amasekhondi."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Susa"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Ikhodi yephinikhodi ye-SIM engalungile manje kumele uxhumane nenkampini yenethiwekhi yakho ukuvula idivayisi yakho."</string>
   <plurals name="kg_password_wrong_pin_code">

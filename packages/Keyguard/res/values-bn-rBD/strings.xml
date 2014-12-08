@@ -66,6 +66,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"পাসওয়ার্ড দিয়ে আনলক৷"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"প্যাটার্ন এলাকা৷"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"স্লাইড করার এলাকা৷"</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"পূর্ববর্তী ট্র্যাকে যাওয়ার বোতাম"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"পরবর্তী ট্র্যাকে যাওয়ার বোতাম"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"বিরাম বোতাম"</string>
@@ -144,7 +150,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"আপনি <xliff:g id="NUMBER">%d</xliff:g> বার ভুল করে ফোনটি আনলক করার চেষ্টা করেছেন৷ কাজের প্রোফাইল সরানো হবে যা সমস্ত প্রোফাইল ডেটা মুছে ফেলবে৷"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"আপনি আপনার আনলকের প্যাটার্ন আঁকার ক্ষেত্রে <xliff:g id="NUMBER_0">%d</xliff:g> বার ভুল করেছেন৷ আর <xliff:g id="NUMBER_1">%d</xliff:g> বার অসফল প্রচেষ্টা করা হলে আপনাকে একটি ইমেল অ্যাকাউন্ট মারফত আপনার ট্যাবলেট আনলক করতে বলা হবে৷\n\n <xliff:g id="NUMBER_2">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"আপনি আপনার আনলকের প্যাটার্ন আঁকার ক্ষেত্রে <xliff:g id="NUMBER_0">%d</xliff:g> বার ভুল করেছেন৷ আর <xliff:g id="NUMBER_1">%d</xliff:g> বার অসফল প্রচেষ্টা করা হলে আপনাকে একটি ইমেল অ্যাকাউন্ট মারফত আপনার ফোন আনলক করতে বলা হবে৷\n\n <xliff:g id="NUMBER_2">%d</xliff:g> সেকেন্ডের মধ্যে আবার চেষ্টা করুন৷"</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"সরান"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ভুল সিম PIN কোড, আপনার ডিভাইসটি আনলক করতে এখন আপনাকে অবশ্যই আপনার ক্যারিয়ারের সাথে যোগাযোগ করতে হবে৷"</string>
   <plurals name="kg_password_wrong_pin_code">
