@@ -229,6 +229,12 @@
     </family>
     <family>
         <fileset>
+            <file>NotoSansCham-Regular.ttf</file>
+            <file>NotoSansCham-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>NotoSansBalinese-Regular.ttf</file>
         </fileset>
     </family>
@@ -259,12 +265,27 @@
     </family>
     <family>
         <fileset>
+            <file>NotoSansCoptic-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansGlagolitic-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>NotoSansHanunoo-Regular.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
             <file>NotoSansJavanese-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansKayahLi-Regular.ttf</file>
         </fileset>
     </family>
     <family>
@@ -310,6 +331,26 @@
     <family>
         <fileset>
             <file>NotoSansTagbanwa-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansTaiLe-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansTaiTham-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansTaiViet-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>NotoSansTifinagh-Regular.ttf</file>
         </fileset>
     </family>
     <family>
