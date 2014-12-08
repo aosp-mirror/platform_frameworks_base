@@ -1324,12 +1324,16 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     final void addCecDevice(HdmiDeviceInfo info) {
         assertRunOnServiceThread();
-        addDeviceInfo(info);
+        HdmiDeviceInfo old = addDeviceInfo(info);
         if (info.getLogicalAddress() == mAddress) {
             // The addition of TV device itself should not be notified.
             return;
         }
-        invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        if (old == null) {
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        } else if (!old.equals(info)) {
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+        }
     }
 
     /**
