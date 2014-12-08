@@ -6,6 +6,7 @@ page.title=Migrating to Android Studio
 <div id="qv">
 <h2>See also</h2>
 <ul>
+  <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
  <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/Working+in+Eclipse+Compatibility+Mode" class="external-link"
  >Eclipse Compatibility Mode</a></li>
  <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA" class="external-link"
@@ -15,23 +16,9 @@ page.title=Migrating to Android Studio
 </div>
 
 <p>If you're currently using Eclipse with ADT, we recommend you migrate to
-<a href="{@docRoot}tools/studio/index.html">Android Studio</a>, a new Android
-development environment powered by IntelliJ IDEA. On top of the capabilities you expect from
-IntelliJ, Android Studio offers:</p>
+<a href="{@docRoot}tools/studio/index.html">Android Studio</a> as soon as possible, because
+the ADT plugin for Eclipse is no longer in active development.</p>
 
-<ul>
-  <li>Flexible Gradle-based build system.</li>
-  <li>Build variants and multiple APK generation.</li>
-  <li>Expanded template support for Google services and various device types.</li>
-  <li>Rich layout editor with support for theme editing.</li>
-  <li>Lint tools to catch performance, usability, version compatibility, and other problems.</li>
-  <li>ProGuard and app-signing capabilities.</li>
-  <li>Built-in support for <a
-  href="https://developers.google.com/cloud/devtools/android_studio_templates/"
-  class="external-link">Google Cloud Platform</a>, making it easy to integrate Google Cloud
-  Messaging and App Engine.</li>
-  <li>And <a href="{@docRoot}tools/studio/index.html">much more</a>.</li>
-</ul>
 
 <p>To migrate existing Android projects from Eclipse,
 you should export your projects from Eclipse in order to generate
@@ -60,11 +47,9 @@ Gradle build files:</p>
 
 <p>It's possible to import an existing Android project to Android Studio even if you
 don't generate a Gradle build file from Eclipse&mdash;Android Studio will successfully build and
-run projects using an existing Ant build file.</p>
-
-<p>However, in order to take advantage of build
+run projects using an existing Ant build file. However, in order to take advantage of build
 variants and other advanced features in the future,
-we strongly suggest that you generate a Gradle build file using
-the ADT plugin or write your own Gradle build file for use with Android Studio.
-For more information about the build system, see the
-<a href="{@docRoot}sdk/installing/studio-build.html">Build System</a> guide.</p>
+you should generate a Gradle build file using
+the ADT plugin or write your own Gradle build file for use with Android Studio.</p>
+
+<p><a href="{@docRoot}tools/studio/index.html">Learn more about Android Studio</a>.</p>
