@@ -17,38 +17,23 @@ page.title=Android Studio
 
   <h2>See also</h2>
   <ol>
-    <li><a href="{@docRoot}tools/sdk/index.html">Download Android Studio</a></li>
-    <li><a href="http://wiki.jetbrains.net/intellij/Android">IntelliJ IDEA Android Tutorials</a></li>
     <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
-    <li><a href="{@docRoot}tools/buildsystem/index.html">Build System</a></li>
   </ol>
 
 </div>
 </div>
 
 
-<a class="notice-developers-video"
-href="http://developers.google.com/events/io/sessions/324603352">
-<div>
-    <h3>Video</h3>
-    <p>What's New in Android Developer Tools</p>
-</div>
-</a
-
-
-<div style="position:relative;height:0">
-<div style="position:absolute;width:420px">
-</div>
-</div>
-
-<p>Android Studio is a new Android development environment based on IntelliJ IDEA. It is the official
-Android IDE. On top of the capabilities you expect from IntelliJ, Android Studio offers:</p>
+<p>Android Studio is the official IDE for Android application development,
+based on <a href="https://www.jetbrains.com/idea/" class="external-link"
+target="_blank">IntelliJ IDEA</a>.
+On top of the capabilities you expect from IntelliJ,
+Android Studio offers:</p>
 
 <ul>
   <li>Flexible Gradle-based build system</li>
   <li>Build variants and multiple <code>apk</code> file generation</li>
-  <li>Updated AVD Manager with support for custom device skins</li>
-  <li>Expanded template support for Google Services and new device types</li>
+  <li>Code templates to help you build common app features</li>
   <li>Rich layout editor with support for drag and drop theme editing</li>
   <li>Lint tools to catch performance, usability, version compatibility, and other problems</li>
   <li>ProGuard and app-signing capabilities</li>
@@ -56,19 +41,21 @@ Android IDE. On top of the capabilities you expect from IntelliJ, Android Studio
   href="http://developers.google.com/cloud/devtools/android_studio_templates/"
   class="external-link">Google Cloud Platform</a>, making it easy to integrate Google Cloud
   Messaging and App Engine</li>
-  <li>And much more ...</li>
+  <li>And much more</li>
 </ul>
 
-<p>If you're ready, go here to get started with
-<a href="{@docRoot}training/basics/firstapp/index.html">Building Your First App</a>. </p>
+<p><b><a href="{@docRoot}tools/sdk/index.html">Download Android Studio now</a></b>. </p>
 
-<p>If you're unfamiliar with the Android Studio or the IntelliJ IDEA interface, or just wondering
-about what's new, you might be interested in exploring some common tasks before building your app.
-</p>
+<p>If you're new to Android Studio or the IntelliJ IDEA interface, this
+page provides an introduction to some key Android
+Studio features.</p>
 
-<p>For starters, Android Studio installs with a basic <em>hello world</em> app to introduce you to
-the basic Android Studio project structure and navigation. This section highlights the Android
-Studio features. </p>
+<p>For specific Android Studio how-to documentation, see the pages in the <a href=
+"{@docRoot}tools/workflow/index.html">Workflow</a> section, such as <a href=
+"{@docRoot}tools/projects/projects-studio.html">Managing Projects from Android Studio</a> and
+<a href="{@docRoot}tools/building/building-studio.html">Building and Running from Android
+Studio</a>.</p>
+
 
 
 
@@ -91,9 +78,9 @@ The Android project view:</p>
 </ul>
 
      <img src="{@docRoot}images/tools/projectview01.png" />
-     <p class="img-caption"><strong>Figure 1:</strong> Show the Android project view.</p>
+     <p class="img-caption"><strong>Figure 1.</strong> Show the Android project view.</p>
      <img src="{@docRoot}images/tools/studio-projectview_scripts.png"  />
-     <p class="img-caption"><strong>Figure 2:</strong> Project Build Files.</p>
+     <p class="img-caption"><strong>Figure 2.</strong> Project Build Files.</p>
 
 <p>The <em>Android</em> project view shows all the build files at the top level of the project
 hierarchy under <strong>Gradle Scripts</strong>. Each project module appears as a folder at the
@@ -262,7 +249,7 @@ memory the connected device is using. With your app running on a device or emula
 <strong>Memory Monitor</strong> tab in the lower right corner to launch the memory monitor. </p>
 
     <img src="{@docRoot}images/tools/studio-memory-monitor.png" />
-    <p class="img-caption"><strong>Figure 5.</strong> Memory Monitor</p>
+    <p class="img-caption"><strong>Figure 4.</strong> Memory Monitor</p>
 
 
 
@@ -307,17 +294,17 @@ build.gradle file.  </p>
 <p>Android Studio allows you to work with layouts in both a <em>Design View</em> </p>
 <p><img src="{@docRoot}images/tools/studio-helloworld-design.png" alt="" />
 </p>
-    <p class="img-caption"><strong>Figure 6.</strong> Hello World App with Design View</p>
+    <p class="img-caption"><strong>Figure 5.</strong> Hello World App with Design View</p>
 
 <p>and a <em>Text View</em>. </p>
 
     <p><img src="{@docRoot}images/tools/studio-helloworld-text.png" alt="" />
-    <pclass="img-caption"><strong>Figure 7.</strong> Hello World App with Text View</p>
+    <pclass="img-caption"><strong>Figure 6.</strong> Hello World App with Text View</p>
 
 <p>Easily select and preview layout changes for different device images, display
 densities, UI modes, locales, and Android versions (multi-API version rendering).
     <p><img src="{@docRoot}images/tools/studio-api-version-rendering.png" /></p>
-    <p class="img-caption"><strong>Figure 11.</strong> API Version Rendering</p>
+    <p class="img-caption"><strong>Figure 7.</strong> API Version Rendering</p>
 
 
 <p>From the Design View, you can drag and drop elements from the Palette to the Preview or
@@ -354,7 +341,7 @@ the wizard updates your system image and emulation requirements, such GPU, and t
 an optimized default Android Virtual Device (AVD) based on Android 5 (Lollipop) for speedie and
 reliable emulation. </p>
 <p><img src="{@docRoot}images/tools/studio-setup-wizard.png" /></p>
-<p class="img-caption"><strong>Figure 10.</strong> Setup Wizard</p>
+<p class="img-caption"><strong>Figure 8.</strong> Setup Wizard</p>
 
 
 <h3>Expanded template and form factor support</h3>
@@ -365,7 +352,7 @@ types. </p>
     <p>For easy cross-platform development, the Project Wizard provides new templates for
     creating your apps for Android Wear and TV. </p>
     <p><img src="{@docRoot}images/tools/studio-tvwearsupport.png"  />
-      <p class="img-caption"><strong>Figure 8.</strong> New Form Factors</p>
+      <p class="img-caption"><strong>Figure 9.</strong> New Form Factors</p>
     <p>During app creation, the Project Wizard also displays an API Level dialog to help you choose
     the best <em>minSdkVersion</em> for your project.</p>
 
@@ -375,7 +362,7 @@ types. </p>
     and create a cloud end-point is as easy as selecting <em>File > New Module > App Engine Java
     Servlet Module</em> and specifying the module, package, and client names. </p>
     <p><img src="{@docRoot}images/tools/studio-cloudmodule.png" /></p>
-    <p class="img-caption"><strong>Figure 9.</strong> Setup Wizard</p>
+    <p class="img-caption"><strong>Figure 10.</strong> Setup Wizard</p>
 
 
 
@@ -412,7 +399,7 @@ into your project. </p>
 <strong>Open Editor</strong> link.  </p>
 
     <img src="{@docRoot}images/tools/studio-translationeditoropen.png" />
-    <p class="img-caption"><strong>Figure 4.</strong> Translation Editor</p>
+    <p class="img-caption"><strong>Figure 11.</strong> Translation Editor</p>
 
 
 <h3> Editor support for the latest Android APIs</h3>
