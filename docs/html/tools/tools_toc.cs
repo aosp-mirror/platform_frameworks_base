@@ -297,7 +297,7 @@ class="en">Support Library</span></a></div>
       <span class="en">Eclipse with ADT</span></a>
     </div>
     <ul>
-    <li><a href="<?cs var:toroot ?>tools/sdk/installing/migrate.html">Migrating to Android Studio</a></li>
+    <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">Migrating to Android Studio</a></li>
     <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Managing Projects</a></li>
     <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building and Running</a></li>
     <li><a href="<?cs var:toroot ?>tools/building/building-cmdline-ant.html">Building with Ant</a></li>
