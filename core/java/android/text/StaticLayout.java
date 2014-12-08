@@ -416,7 +416,11 @@ public class StaticLayout extends Layout {
                             currentTextWidth = widths[here - paraStart];
                         }
 
-                        v = out(source, here, endPos,
+                        int ellipseEnd = endPos;
+                        if (mMaximumVisibleLineCount == 1 && ellipsize == TextUtils.TruncateAt.MIDDLE) {
+                            ellipseEnd = paraEnd;
+                        }
+                        v = out(source, here, ellipseEnd,
                                 above, below, top, bottom,
                                 v, spacingmult, spacingadd, chooseHt,chooseHtv, fm, hasTabOrEmoji,
                                 needMultiply, chdirs, dir, easy, bufEnd, includepad, trackpad,
@@ -704,7 +708,7 @@ public class StaticLayout extends Layout {
                 int left = 0, right = len;
 
                 float ravail = (avail - ellipsisWidth) / 2;
-                for (right = len; right >= 0; right--) {
+                for (right = len; right > 0; right--) {
                     float w = widths[right - 1 + lineStart - widthStart];
 
                     if (w + rsum > ravail) {
