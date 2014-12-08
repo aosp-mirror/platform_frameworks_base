@@ -797,6 +797,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         throw new IllegalStateException("No free netIds");
     }
 
+    private int getConnectivityChangeDelay() {
+        final ContentResolver cr = mContext.getContentResolver();
+
+        /** Check system properties for the default value then use secure settings value, if any. */
+        int defaultDelay = SystemProperties.getInt(
+                "conn." + Settings.Global.CONNECTIVITY_CHANGE_DELAY,
+                ConnectivityManager.CONNECTIVITY_CHANGE_DELAY_DEFAULT);
+        return Settings.Global.getInt(cr, Settings.Global.CONNECTIVITY_CHANGE_DELAY,
+                defaultDelay);
+    }
+
     private boolean teardown(NetworkStateTracker netTracker) {
         if (netTracker.teardown()) {
             netTracker.setTeardownRequested(true);
@@ -1468,6 +1479,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         sendGeneralBroadcast(info, CONNECTIVITY_ACTION);
     }
 
+    private void sendConnectedBroadcastDelayed(NetworkInfo info, int delayMs) {
+        sendGeneralBroadcast(info, CONNECTIVITY_ACTION_IMMEDIATE);
+        sendGeneralBroadcastDelayed(info, CONNECTIVITY_ACTION, delayMs);
+    }
+
     private void sendInetConditionBroadcast(NetworkInfo info) {
         sendGeneralBroadcast(info, ConnectivityManager.INET_CONDITION_ACTION);
     }
@@ -1497,6 +1513,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void sendGeneralBroadcast(NetworkInfo info, String bcastType) {
         sendStickyBroadcast(makeGeneralIntent(info, bcastType));
+    }
+
+    private void sendGeneralBroadcastDelayed(NetworkInfo info, String bcastType, int delayMs) {
+        sendStickyBroadcastDelayed(makeGeneralIntent(info, bcastType), delayMs);
     }
 
     private void sendDataActivityBroadcast(int deviceType, boolean active, long tsNanos) {
@@ -1529,6 +1549,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    private void sendStickyBroadcastDelayed(Intent intent, int delayMs) {
+        if (delayMs <= 0) {
+            sendStickyBroadcast(intent);
+        } else {
+            if (VDBG) {
+                log("sendStickyBroadcastDelayed: delayMs=" + delayMs + ", action="
+                        + intent.getAction());
+            }
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                    EVENT_SEND_STICKY_BROADCAST_INTENT, intent), delayMs);
         }
     }
 
@@ -4268,7 +4301,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         info.setType(type);
         if (connected) {
             info.setDetailedState(DetailedState.CONNECTED, null, info.getExtraInfo());
-            sendConnectedBroadcast(info);
+            sendConnectedBroadcastDelayed(info, getConnectivityChangeDelay());
         } else {
             info.setDetailedState(DetailedState.DISCONNECTED, null, info.getExtraInfo());
             Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -4299,9 +4332,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final Intent immediateIntent = new Intent(intent);
             immediateIntent.setAction(CONNECTIVITY_ACTION_IMMEDIATE);
             sendStickyBroadcast(immediateIntent);
-            sendStickyBroadcast(intent);
+            sendStickyBroadcastDelayed(intent, getConnectivityChangeDelay());
             if (newDefaultAgent != null) {
-                sendConnectedBroadcast(newDefaultAgent.networkInfo);
+                sendConnectedBroadcastDelayed(newDefaultAgent.networkInfo,
+                getConnectivityChangeDelay());
             }
         }
     }
