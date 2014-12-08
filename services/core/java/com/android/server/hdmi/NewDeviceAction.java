@@ -51,6 +51,7 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
 
     private int mVendorId;
     private String mDisplayName;
+    private int mTimeoutRetry;
 
     /**
      * Constructor.
@@ -71,15 +72,22 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
 
     @Override
     public boolean start() {
+        requestOsdName(true);
+        return true;
+    }
+
+    private void requestOsdName(boolean firstTry) {
+        if (firstTry) {
+            mTimeoutRetry = 0;
+        }
         mState = STATE_WAITING_FOR_SET_OSD_NAME;
         if (mayProcessCommandIfCached(mDeviceLogicalAddress, Constants.MESSAGE_SET_OSD_NAME)) {
-            return true;
+            return;
         }
 
         sendCommand(HdmiCecMessageBuilder.buildGiveOsdNameCommand(getSourceAddress(),
                 mDeviceLogicalAddress));
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
-        return true;
     }
 
     @Override
@@ -103,12 +111,12 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
                 } catch (UnsupportedEncodingException e) {
                     Slog.e(TAG, "Failed to get OSD name: " + e.getMessage());
                 }
-                requestVendorId();
+                requestVendorId(true);
                 return true;
             } else if (opcode == Constants.MESSAGE_FEATURE_ABORT) {
                 int requestOpcode = params[0] & 0xFF;
                 if (requestOpcode == Constants.MESSAGE_GIVE_OSD_NAME) {
-                    requestVendorId();
+                    requestVendorId(true);
                     return true;
                 }
             }
@@ -138,7 +146,10 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
         return false;
     }
 
-    private void requestVendorId() {
+    private void requestVendorId(boolean firstTry) {
+        if (firstTry) {
+            mTimeoutRetry = 0;
+        }
         // At first, transit to waiting status for <Device Vendor Id>.
         mState = STATE_WAITING_FOR_DEVICE_VENDOR_ID;
         // If the message is already in cache, process it.
@@ -176,9 +187,17 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
             return;
         }
         if (state == STATE_WAITING_FOR_SET_OSD_NAME) {
+            if (++mTimeoutRetry < HdmiConfig.TIMEOUT_RETRY) {
+                requestOsdName(false);
+                return;
+            }
             // Osd name request timed out. Try vendor id
-            requestVendorId();
+            requestVendorId(true);
         } else if (state == STATE_WAITING_FOR_DEVICE_VENDOR_ID) {
+            if (++mTimeoutRetry < HdmiConfig.TIMEOUT_RETRY) {
+                requestVendorId(false);
+                return;
+            }
             // vendor id timed out. Go ahead creating the device info what we've got so far.
             addDeviceInfo();
             finish();
