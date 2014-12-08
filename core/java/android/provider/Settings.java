@@ -4349,6 +4349,16 @@ public final class Settings {
                 Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS;
 
         /**
+         * The number of milliseconds to hold on to a PendingIntent based request. This delay gives
+         * the receivers of the PendingIntent an opportunity to make a new network request before
+         * the Network satisfying the request is potentially removed.
+         *
+         * @hide
+         */
+        public static final String CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS =
+                "connectivity_release_pending_intent_delay_ms";
+
+        /**
          * Whether background data usage is allowed.
          *
          * @deprecated As of {@link VERSION_CODES#ICE_CREAM_SANDWICH},
