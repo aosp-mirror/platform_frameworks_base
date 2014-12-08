@@ -68,9 +68,6 @@ interface IConnectivityManager
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
 
-    /** Policy control over specific {@link NetworkStateTracker}. */
-    void setPolicyDataEnable(int networkType, boolean enabled);
-
     int tether(String iface);
 
     int untether(String iface);
