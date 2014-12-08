@@ -172,7 +172,8 @@ public class MidiService extends IMidiManager.Stub {
         return device.getFileDescriptor();
     }
 
-    public MidiDevice registerVirtualDevice(IBinder token, Bundle properties) {
+    public MidiDevice registerVirtualDevice(IBinder token, int numInputPorts, int numOutputPorts,
+            Bundle properties) {
         VirtualMidiDevice device;
         Client client = getClient(token);
         if (client == null) return null;
@@ -180,7 +181,7 @@ public class MidiService extends IMidiManager.Stub {
         synchronized (mDevices) {
             int id = mNextDeviceId++;
             MidiDeviceInfo deviceInfo = new MidiDeviceInfo(MidiDeviceInfo.TYPE_VIRTUAL, id,
-                    properties);
+                    numInputPorts, numOutputPorts, properties);
 
             device = new VirtualMidiDevice(deviceInfo);
             if (!device.open()) {
@@ -238,7 +239,12 @@ public class MidiService extends IMidiManager.Stub {
                     usbDevice.getSerialNumber());
             properties.putParcelable(MidiDeviceInfo.PROPERTY_USB_DEVICE, usbDevice);
 
-            deviceInfo = new MidiDeviceInfo(MidiDeviceInfo.TYPE_USB, id, properties, card, device);
+            // FIXME - multiple ports not supported yet
+            int inputPorts = 1;
+            int outputPorts = 1;
+
+            deviceInfo = new MidiDeviceInfo(MidiDeviceInfo.TYPE_USB, id, inputPorts, outputPorts,
+                    properties, card, device);
             UsbMidiDevice midiDevice = new UsbMidiDevice(deviceInfo);
             mDevices.put(id, midiDevice);
             mUsbDevices.put(usbDevice, midiDevice);

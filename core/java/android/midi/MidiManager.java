@@ -132,9 +132,11 @@ public class MidiManager {
 
     // Use this if you want to register and implement a virtual device.
     // The MidiDevice returned by this method is the proxy you use to implement the device.
-    public MidiDevice createVirtualDevice(Bundle properties) {
+    public MidiDevice createVirtualDevice(int numInputPorts, int numOutputPorts,
+            Bundle properties) {
         try {
-            MidiDevice device = mService.registerVirtualDevice(mToken, properties);
+            MidiDevice device = mService.registerVirtualDevice(mToken,
+                    numInputPorts, numOutputPorts, properties);
             if (device != null && !device.open()) {
                 device = null;
             }
