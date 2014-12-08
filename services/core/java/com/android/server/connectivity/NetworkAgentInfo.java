@@ -106,9 +106,7 @@ public class NetworkAgentInfo {
         return networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN);
     }
 
-    // Get the current score for this Network.  This may be modified from what the
-    // NetworkAgent sent, as it has modifiers applied to it.
-    public int getCurrentScore() {
+    private int getCurrentScore(boolean pretendValidated) {
         // TODO: We may want to refactor this into a NetworkScore class that takes a base score from
         // the NetworkAgent and signals from the NetworkAgent and uses those signals to modify the
         // score.  The NetworkScore class would provide a nice place to centralize score constants
@@ -116,12 +114,24 @@ public class NetworkAgentInfo {
 
         int score = currentScore;
 
-        if (!validated) score -= UNVALIDATED_SCORE_PENALTY;
+        if (!validated && !pretendValidated) score -= UNVALIDATED_SCORE_PENALTY;
         if (score < 0) score = 0;
 
         if (networkMisc.explicitlySelected) score = EXPLICITLY_SELECTED_NETWORK_SCORE;
 
         return score;
+    }
+
+    // Get the current score for this Network.  This may be modified from what the
+    // NetworkAgent sent, as it has modifiers applied to it.
+    public int getCurrentScore() {
+        return getCurrentScore(false);
+    }
+
+    // Get the current score for this Network as if it was validated.  This may be modified from
+    // what the NetworkAgent sent, as it has modifiers applied to it.
+    public int getCurrentScoreAsValidated() {
+        return getCurrentScore(true);
     }
 
     public void setCurrentScore(int newScore) {
