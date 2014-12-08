@@ -556,11 +556,13 @@ public class RippleDrawable extends LayerDrawable {
         if (mRipple != null) {
             mRipple.cancel();
             mRipple = null;
+            mRippleActive = false;
         }
 
         if (mBackground != null) {
             mBackground.cancel();
             mBackground = null;
+            mBackgroundActive = false;
         }
 
         cancelExitingRipples();
