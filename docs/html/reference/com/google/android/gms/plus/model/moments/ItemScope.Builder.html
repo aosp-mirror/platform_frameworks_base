@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">ItemScope.Builder</li>
       </ul>
     </div>
@@ -821,7 +844,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -925,8 +948,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Constructs a new Builder.
-
-
+          
+    
 
         </div>
   
@@ -961,8 +984,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Constructs a ItemScope with the current properties.
-
-
+          
+    
 
         </div>
   
@@ -984,8 +1007,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The subject matter of the content.
-
-
+          
+    
 
         </div>
   
@@ -1007,8 +1030,8 @@ Summary:
         
         <div class="jd-descrdiv">
           An additional name for a Person, can be used for a middle name.
-
-
+          
+    
 
         </div>
   
@@ -1030,8 +1053,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Postal address.
-
-
+          
+    
 
         </div>
   
@@ -1053,8 +1076,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Address country.
-
-
+          
+    
 
         </div>
   
@@ -1076,8 +1099,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Address locality.
-
-
+          
+    
 
         </div>
   
@@ -1099,8 +1122,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Address region.
-
-
+          
+    
 
         </div>
   
@@ -1122,8 +1145,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The encoding.
-
-
+          
+    
 
         </div>
   
@@ -1145,8 +1168,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Number of attendees.
-
-
+          
+    
 
         </div>
   
@@ -1168,8 +1191,8 @@ Summary:
         
         <div class="jd-descrdiv">
           A person attending the event.
-
-
+          
+    
 
         </div>
   
@@ -1191,8 +1214,8 @@ Summary:
         
         <div class="jd-descrdiv">
           From http://schema.org/MusicRecording, the audio file.
-
-
+          
+    
 
         </div>
   
@@ -1214,8 +1237,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The person or persons who created this result.
-
-
+          
+    
 
         </div>
   
@@ -1237,8 +1260,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Best possible rating value that a result might obtain.
-
-
+          
+    
 
         </div>
   
@@ -1260,8 +1283,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Date of birth.
-
-
+          
+    
 
         </div>
   
@@ -1283,8 +1306,8 @@ Summary:
         
         <div class="jd-descrdiv">
           From http://schema.org/MusicRecording, the artist that performed this recording.
-
-
+          
+    
 
         </div>
   
@@ -1306,8 +1329,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The caption for this object.
-
-
+          
+    
 
         </div>
   
@@ -1329,8 +1352,8 @@ Summary:
         
         <div class="jd-descrdiv">
           File size in (mega/kilo) bytes.
-
-
+          
+    
 
         </div>
   
@@ -1352,8 +1375,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Actual bytes of the media object, for example the image file or video file.
-
-
+          
+    
 
         </div>
   
@@ -1375,8 +1398,8 @@ Summary:
         
         <div class="jd-descrdiv">
           A list of contributors to this result.
-
-
+          
+    
 
         </div>
   
@@ -1398,8 +1421,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The date the result was created such as the date that a review was first created.
-
-
+          
+    
 
         </div>
   
@@ -1421,8 +1444,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The date the result was last modified such as the date that a review was last edited.
-
-
+          
+    
 
         </div>
   
@@ -1444,8 +1467,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The initial date that the result was published.
-
-
+          
+    
 
         </div>
   
@@ -1467,8 +1490,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The string that describes the content of the result.
-
-
+          
+    
 
         </div>
   
@@ -1490,8 +1513,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The duration of the item (movie, audio recording, event, etc.) in ISO 8601 date format.
-
-
+          
+    
 
         </div>
   
@@ -1513,8 +1536,8 @@ Summary:
         
         <div class="jd-descrdiv">
           A URL pointing to a player for a specific video.
-
-
+          
+    
 
         </div>
   
@@ -1536,8 +1559,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The end date and time of the event (in ISO 8601 date format).
-
-
+          
+    
 
         </div>
   
@@ -1559,8 +1582,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Family name.
-
-
+          
+    
 
         </div>
   
@@ -1582,8 +1605,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Gender of the person.
-
-
+          
+    
 
         </div>
   
@@ -1605,8 +1628,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Geo coordinates.
-
-
+          
+    
 
         </div>
   
@@ -1628,8 +1651,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Given name.
-
-
+          
+    
 
         </div>
   
@@ -1651,8 +1674,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The height of the media object.
-
-
+          
+    
 
         </div>
   
@@ -1674,8 +1697,8 @@ Summary:
         
         <div class="jd-descrdiv">
           An identifier for the target.
-
-
+          
+    
 
         </div>
   
@@ -1697,8 +1720,8 @@ Summary:
         
         <div class="jd-descrdiv">
           A URL to the image that represents this result.
-
-
+          
+    
 
         </div>
   
@@ -1720,8 +1743,8 @@ Summary:
         
         <div class="jd-descrdiv">
           From http://schema.org/MusicRecording, which album a song is in.
-
-
+          
+    
 
         </div>
   
@@ -1743,8 +1766,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Latitude.
-
-
+          
+    
 
         </div>
   
@@ -1766,8 +1789,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The location of the event or organization.
-
-
+          
+    
 
         </div>
   
@@ -1789,8 +1812,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Longitude.
-
-
+          
+    
 
         </div>
   
@@ -1812,8 +1835,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The name of the result.
-
-
+          
+    
 
         </div>
   
@@ -1835,8 +1858,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Property of http://schema.org/TVEpisode indicating which series the episode belongs to.
-
-
+          
+    
 
         </div>
   
@@ -1859,8 +1882,8 @@ Summary:
         <div class="jd-descrdiv">
           The main performer or performers of the event-for example, a presenter, musician, or
  actor.
-
-
+          
+    
 
         </div>
   
@@ -1882,8 +1905,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Player type that is required.
-
-
+          
+    
 
         </div>
   
@@ -1905,8 +1928,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Post office box number.
-
-
+          
+    
 
         </div>
   
@@ -1928,8 +1951,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Postal code.
-
-
+          
+    
 
         </div>
   
@@ -1951,8 +1974,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Rating value.
-
-
+          
+    
 
         </div>
   
@@ -1974,8 +1997,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Review rating.
-
-
+          
+    
 
         </div>
   
@@ -1997,8 +2020,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The start date and time of the event (in ISO 8601 date format).
-
-
+          
+    
 
         </div>
   
@@ -2020,8 +2043,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Street address.
-
-
+          
+    
 
         </div>
   
@@ -2043,8 +2066,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The text that is the result of the app activity.
-
-
+          
+    
 
         </div>
   
@@ -2066,8 +2089,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Thumbnail image for an image or video.
-
-
+          
+    
 
         </div>
   
@@ -2089,8 +2112,8 @@ Summary:
         
         <div class="jd-descrdiv">
           A URL to a thumbnail image that represents this result.
-
-
+          
+    
 
         </div>
   
@@ -2112,8 +2135,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The exchange traded instrument associated with a Corporation object.
-
-
+          
+    
 
         </div>
   
@@ -2136,8 +2159,8 @@ Summary:
         <div class="jd-descrdiv">
           The schema.org URL that best describes the referenced target and matches the type of
  moment.
-
-
+          
+    
 
         </div>
   
@@ -2159,8 +2182,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The URL that points to the result object.
-
-
+          
+    
 
         </div>
   
@@ -2182,8 +2205,8 @@ Summary:
         
         <div class="jd-descrdiv">
           The width of the media object.
-
-
+          
+    
 
         </div>
   
@@ -2205,8 +2228,8 @@ Summary:
         
         <div class="jd-descrdiv">
           Worst possible rating value that a result might obtain.
-
-
+          
+    
 
         </div>
   
@@ -2486,9 +2509,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a new Builder.
 </p></div>
 
@@ -2534,9 +2557,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Constructs a ItemScope with the current properties.
 </p></div>
 
@@ -2567,9 +2590,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The subject matter of the content.
 </p></div>
 
@@ -2600,9 +2623,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>An additional name for a Person, can be used for a middle name.
 </p></div>
 
@@ -2633,9 +2656,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Postal address.
 </p></div>
 
@@ -2666,9 +2689,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Address country.
 </p></div>
 
@@ -2699,9 +2722,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Address locality.
 </p></div>
 
@@ -2732,9 +2755,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Address region.
 </p></div>
 
@@ -2765,9 +2788,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The encoding.
 </p></div>
 
@@ -2798,9 +2821,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Number of attendees.
 </p></div>
 
@@ -2831,9 +2854,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>A person attending the event.
 </p></div>
 
@@ -2864,9 +2887,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>From http://schema.org/MusicRecording, the audio file.
 </p></div>
 
@@ -2897,9 +2920,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The person or persons who created this result. In the example of restaurant reviews, this
  might be the reviewer's name.
 </p></div>
@@ -2931,9 +2954,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Best possible rating value that a result might obtain. This property defines the upper
  bound for the ratingValue. For example, you might have a 5 star rating scale, you would
  provide 5 as the value for this property.
@@ -2966,9 +2989,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Date of birth.
 </p></div>
 
@@ -2999,9 +3022,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>From http://schema.org/MusicRecording, the artist that performed this recording.
 </p></div>
 
@@ -3032,9 +3055,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The caption for this object.
 </p></div>
 
@@ -3065,9 +3088,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>File size in (mega/kilo) bytes.
 </p></div>
 
@@ -3098,9 +3121,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Actual bytes of the media object, for example the image file or video file.
 </p></div>
 
@@ -3131,9 +3154,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>A list of contributors to this result.
 </p></div>
 
@@ -3164,9 +3187,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The date the result was created such as the date that a review was first created.
 </p></div>
 
@@ -3197,9 +3220,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The date the result was last modified such as the date that a review was last edited.
 </p></div>
 
@@ -3230,9 +3253,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The initial date that the result was published. For example, a user writes a comment on a
  blog, which has a result.dateCreated of when they submit it. If the blog users comment
  moderation, the result.datePublished value would match the date when the owner approved
@@ -3266,9 +3289,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The string that describes the content of the result.
 </p></div>
 
@@ -3299,9 +3322,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The duration of the item (movie, audio recording, event, etc.) in ISO 8601 date format.
 </p></div>
 
@@ -3332,9 +3355,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>A URL pointing to a player for a specific video. In general, this is the information in
  the src element of an embed tag and should not be the same as the content of the loc tag.
 </p></div>
@@ -3366,9 +3389,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The end date and time of the event (in ISO 8601 date format).
 </p></div>
 
@@ -3399,9 +3422,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Family name. This property can be used with givenName instead of the name property.
 </p></div>
 
@@ -3432,9 +3455,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Gender of the person.
 </p></div>
 
@@ -3465,9 +3488,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Geo coordinates.
 </p></div>
 
@@ -3498,9 +3521,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Given name. This property can be used with familyName instead of the name property.
 </p></div>
 
@@ -3531,9 +3554,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The height of the media object.
 </p></div>
 
@@ -3564,9 +3587,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>An identifier for the target. Your app can choose how to identify targets. The target.id
  is required if you are writing an activity that does not have a corresponding web page or
  target.url property.
@@ -3599,9 +3622,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>A URL to the image that represents this result. For example, if a user writes a review of
  a restaurant and attaches a photo of their meal, you might use that photo as the
  result.image.
@@ -3634,9 +3657,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>From http://schema.org/MusicRecording, which album a song is in.
 </p></div>
 
@@ -3667,9 +3690,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Latitude.
 </p></div>
 
@@ -3700,9 +3723,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The location of the event or organization.
 </p></div>
 
@@ -3733,9 +3756,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Longitude.
 </p></div>
 
@@ -3766,9 +3789,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The name of the result. In the example of a restaurant review, this might be the summary
  the user gave their review such as "Great ambiance, but overpriced."
 </p></div>
@@ -3800,9 +3823,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Property of http://schema.org/TVEpisode indicating which series the episode belongs to.
 </p></div>
 
@@ -3833,9 +3856,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The main performer or performers of the event-for example, a presenter, musician, or
  actor.
 </p></div>
@@ -3867,9 +3890,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Player type that is required. For example: Flash or Silverlight.
 </p></div>
 
@@ -3900,9 +3923,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Post office box number.
 </p></div>
 
@@ -3933,9 +3956,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Postal code.
 </p></div>
 
@@ -3966,9 +3989,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Rating value.
 </p></div>
 
@@ -3999,9 +4022,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Review rating.
 </p></div>
 
@@ -4032,9 +4055,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The start date and time of the event (in ISO 8601 date format).
 </p></div>
 
@@ -4065,9 +4088,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Street address.
 </p></div>
 
@@ -4098,9 +4121,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The text that is the result of the app activity. For example, if a user leaves a review
  of a restaurant, this might be the text of the review.
 </p></div>
@@ -4132,9 +4155,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Thumbnail image for an image or video.
 </p></div>
 
@@ -4165,9 +4188,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>A URL to a thumbnail image that represents this result.
 </p></div>
 
@@ -4198,9 +4221,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The exchange traded instrument associated with a Corporation object. The tickerSymbol is
  expressed as an exchange and an instrument name separated by a space character. For the
  exchange component of the tickerSymbol attribute, we reccommend using the controlled
@@ -4234,9 +4257,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The schema.org URL that best describes the referenced target and matches the type of
  moment.
 </p></div>
@@ -4268,9 +4291,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The URL that points to the result object. For example, a permalink directly to a
  restaurant reviewer's comment.
 </p></div>
@@ -4302,9 +4325,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The width of the media object.
 </p></div>
 
@@ -4335,9 +4358,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Worst possible rating value that a result might obtain. This property defines the lower
  bound for the ratingValue.
 </p></div>
