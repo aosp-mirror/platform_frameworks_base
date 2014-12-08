@@ -541,19 +541,19 @@
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"asenna sijainnintarjoaja"</string>
     <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"Luo imitoituja sijaintilähteitä testaustarkoituksessa tai asenna uusi sijaintipalvelu. Sovellus voi ohittaa muiden sijaintilähteiden kuten GPS:n ja sijaintipalveluiden palauttaman sijainnin ja/tai tilan."</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"tarkka sijainti (GPS- ja verkkopohjainen)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Antaa sovelluksen käyttää tarkkaa sijaintiasi, joka määritetään GPS:n tai verkon sijaintilähteiden kuten radiomastojen ja wifi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla sijaintisi ja lisätä akun käyttöä."</string>
+    <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"Antaa sovelluksen käyttää tarkkaa sijaintiasi, joka määritetään GPS:n tai verkon sijaintilähteiden kuten radiomastojen ja Wi-Fi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla sijaintisi ja lisätä akun käyttöä."</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"likimääräinen sijainti (verkkopohjainen)"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Antaa sovelluksen käyttää likimääräistä sijaintiasi. Sijainnin määrittävät sijaintipalvelut verkon sijaintilähteiden kuten radiomastojen ja wifi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla likimääräisen sijaintisi."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="2538200184373302295">"Antaa sovelluksen käyttää likimääräistä sijaintiasi. Sijainnin määrittävät sijaintipalvelut verkon sijaintilähteiden kuten radiomastojen ja Wi-Fi-verkkojen avulla. Sijaintipalveluiden täytyy olla käytössä ja laitteesi saatavilla, jotta sovellus voi käyttää niitä. Sovellus voi määrittää tämän luvan avulla likimääräisen sijaintisi."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"käytä SurfaceFlinger-sovellusta"</string>
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Antaa sovelluksen käyttää SurfaceFlingerin matalan tason ominaisuuksia."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lue kehyspuskuria"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Antaa sovelluksen lukea kehyspuskurin sisältöä."</string>
     <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlingerin käyttäminen"</string>
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Antaa sovelluksen käyttää InputFlingerin matalan tason ominaisuuksia."</string>
-    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"määritä wifi-näyttöjen asetukset"</string>
-    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Antaa sovelluksen määrittää wifi-näyttöjä ja muodostaa yhteyden niihin."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"hallitse wifi-näyttöjä"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Antaa sovelluksen hallita wifi-näyttöjen matalan tason ominaisuuksia."</string>
+    <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"määritä Wi-Fi-näyttöjen asetukset"</string>
+    <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Antaa sovelluksen määrittää Wi-Fi-näyttöjä ja muodostaa yhteyden niihin."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"hallitse Wi-Fi-näyttöjä"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Antaa sovelluksen hallita Wi-Fi-näyttöjen matalan tason ominaisuuksia."</string>
     <string name="permlab_controlVpn" msgid="2618442789397588200">"Hallita virtuaalisia yksityisverkkoja."</string>
     <string name="permdesc_controlVpn" msgid="762852603315861214">"Sallii sovelluksen hallita virtuaalisten yksityisverkkojen alempien tasojen ominaisuuksia."</string>
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"äänentoiston kaappaus"</string>
@@ -698,14 +698,14 @@
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Antaa sovelluksen muuttaa internetyhteyden jakamisen tilaa."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"muuta taustatietojen käyttöasetuksia"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="5347729578468744379">"Antaa sovelluksen muuttaa taustatietojen käyttöasetuksia."</string>
-    <string name="permlab_accessWifiState" msgid="5202012949247040011">"näytä wifi-yhteydet"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Antaa sovelluksen tarkastella wifi-verkkoja koskevia tietoja, kuten onko wifi käytössä ja mihin wifi-laitteisiin on muodostettu yhteys."</string>
-    <string name="permlab_changeWifiState" msgid="6550641188749128035">"muodosta ja katkaise wifi-yhteys"</string>
-    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Antaa sovelluksen yhdistää wifi-tukiasemiin tai katkaista yhteyden sekä tehdä muutoksia määritettyihin wifi-verkkoihin."</string>
-    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"anna ottaa vastaan wifi-ryhmälähetyksiä"</string>
-    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Antaa sovelluksen vastaanottaa kaikille laitteille, ei vain tablet-laitteellesi, wifi-verkon kautta monilähetystilassa lähetettyjä paketteja. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
+    <string name="permlab_accessWifiState" msgid="5202012949247040011">"näytä Wi-Fi-yhteydet"</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Antaa sovelluksen tarkastella Wi-Fi-verkkoja koskevia tietoja, kuten onko Wi-Fi käytössä ja mihin Wi-Fi-laitteisiin on muodostettu yhteys."</string>
+    <string name="permlab_changeWifiState" msgid="6550641188749128035">"muodosta ja katkaise Wi-Fi-yhteys"</string>
+    <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Antaa sovelluksen yhdistää Wi-Fi-tukiasemiin tai katkaista yhteyden sekä tehdä muutoksia määritettyihin Wi-Fi-verkkoihin."</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"anna ottaa vastaan Wi-Fi-ryhmälähetyksiä"</string>
+    <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Antaa sovelluksen vastaanottaa kaikille laitteille, ei vain tablet-laitteellesi, Wi-Fi-verkon kautta monilähetystilassa lähetettyjä paketteja. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Antaa sovelluksen vastaanottaa paketteja, jotka on lähetetty television lisäksi kaikille laitteille Wi-Fi-verkon kautta monilähetystilassa. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
-    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Antaa sovelluksen vastaanottaa kaikille laitteille, ei vain puhelimellesi, wifi-verkon kautta monilähetystilassa lähetettyjä paketteja. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
+    <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Antaa sovelluksen vastaanottaa kaikille laitteille, ei vain puhelimellesi, Wi-Fi-verkon kautta monilähetystilassa lähetettyjä paketteja. Tämä käyttää enemmän virtaa kuin tavallinen lähetystila."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"käytä Bluetooth-asetuksia"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Antaa sovelluksen määrittää paikallisen Bluetooth-tabletin asetukset sekä tunnistaa muita laitteita ja muodostaa niiden kanssa laitepareja."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Antaa sovelluksen määrittää television Bluetooth-asetukset, etsiä laitteita ja muodostaa laitepareja."</string>
@@ -1337,10 +1337,10 @@
     <item quantity="other" msgid="4192424489168397386">"Wi-Fi-verkkoja käytettävissä"</item>
   </plurals>
   <plurals name="wifi_available_detailed">
-    <item quantity="one" msgid="1634101450343277345">"Avoin wifi-verkko käytettävissä"</item>
-    <item quantity="other" msgid="7915895323644292768">"Avoimia wifi-verkkoja käytettävissä"</item>
+    <item quantity="one" msgid="1634101450343277345">"Avoin Wi-Fi-verkko käytettävissä"</item>
+    <item quantity="other" msgid="7915895323644292768">"Avoimia Wi-Fi-verkkoja käytettävissä"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Kirjaudu wifi-verkkoon"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Kirjaudu Wi-Fi-verkkoon"</string>
     <string name="network_available_sign_in" msgid="8495155593358054676">"Kirjaudu verkkoon"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
@@ -1349,9 +1349,9 @@
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Sallitaanko yhteys?"</string>
     <string name="wifi_connect_alert_message" msgid="8930084523889618078">"%1$s haluaa yhdistää kohteeseen %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Sovellus"</string>
-    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Suora wifi-yhteys"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käynnistä suora wifi-yhteys. Wi-Fi-asiakas/-hotspot poistetaan käytöstä."</string>
-    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Suoran wifi-yhteyden käynnistäminen epäonnistui."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Suora Wi-Fi-yhteys"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2909250942299627244">"Käynnistä suora Wi-Fi-yhteys. Wi-Fi-asiakas/-hotspot poistetaan käytöstä."</string>
+    <string name="wifi_p2p_failed_message" msgid="3763669677935623084">"Suoran Wi-Fi-yhteyden käynnistäminen epäonnistui."</string>
     <string name="wifi_p2p_enabled_notification_title" msgid="2068321881673734886">"Wi-Fi Direct on käytössä"</string>
     <string name="wifi_p2p_enabled_notification_message" msgid="1638949953993894335">"Tarkastele asetuksia koskettamalla"</string>
     <string name="accept" msgid="1645267259272829559">"Hyväksy"</string>
@@ -1362,9 +1362,9 @@
     <string name="wifi_p2p_to_message" msgid="248968974522044099">"Kohde:"</string>
     <string name="wifi_p2p_enter_pin_message" msgid="5920929550367828970">"Kirjoita pyydetty PIN-koodi:"</string>
     <string name="wifi_p2p_show_pin_message" msgid="8530563323880921094">"PIN-koodi:"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tablet-laitteen yhteys wifi-verkkoon katkaistaan väliaikaisesti tabletin ollessa yhdistettynä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="tablet" msgid="8012981257742232475">"Tablet-laitteen yhteys Wi-Fi-verkkoon katkaistaan väliaikaisesti tabletin ollessa yhdistettynä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="wifi_p2p_frequency_conflict_message" product="tv" msgid="3087858235069421128">"Television Wi-Fi-yhteys katkeaa tilapäisesti, kun siihen on yhdistetty <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
-    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Puhelimen yhteys wifi-verkkoon katkaistaan väliaikaisesti puhelimen ollessa yhdistettynä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"Puhelimen yhteys Wi-Fi-verkkoon katkaistaan väliaikaisesti puhelimen ollessa yhdistettynä laitteeseen <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Lisää merkki"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Tekstiviestien lähettäminen"</string>
     <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; lähettää suuria määriä tekstiviestejä. Annetaanko tämän sovelluksen jatkaa tekstiviestien lähettämistä?"</string>
