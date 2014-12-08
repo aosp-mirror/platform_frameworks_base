@@ -159,11 +159,15 @@ final class AccessibilityController {
         }
     }
 
-    public void onWindowFocusChangedLocked() {
+    public void onWindowFocusChangedNotLocked() {
         // Not relevant for the display magnifier.
 
-        if (mWindowsForAccessibilityObserver != null) {
-            mWindowsForAccessibilityObserver.scheduleComputeChangedWindowsLocked();
+        WindowsForAccessibilityObserver observer = null;
+        synchronized (mWindowManagerService) {
+            observer = mWindowsForAccessibilityObserver;
+        }
+        if (observer != null) {
+            observer.performComputeChangedWindowsNotLocked();
         }
     }
 
@@ -937,14 +941,13 @@ final class AccessibilityController {
             computeChangedWindows();
         }
 
+        public void performComputeChangedWindowsNotLocked() {
+            mHandler.removeMessages(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS);
+            computeChangedWindows();
+        }
+
         public void scheduleComputeChangedWindowsLocked() {
-            // If focus changed, compute changed windows immediately as the focused window
-            // is used by the accessibility manager service to determine the active window.
-            if (mWindowManagerService.mCurrentFocus != null
-                    && mWindowManagerService.mCurrentFocus != mWindowManagerService.mLastFocus) {
-                mHandler.removeMessages(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS);
-                computeChangedWindows();
-            } else if (!mHandler.hasMessages(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS)) {
+            if (!mHandler.hasMessages(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS)) {
                 mHandler.sendEmptyMessageDelayed(MyHandler.MESSAGE_COMPUTE_CHANGED_WINDOWS,
                         mRecurringAccessibilityEventsIntervalMillis);
             }
@@ -954,6 +957,9 @@ final class AccessibilityController {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "computeChangedWindows()");
             }
+
+            boolean windowsChanged = false;
+            List<WindowInfo> windows = new ArrayList<WindowInfo>();
 
             synchronized (mWindowManagerService.mWindowMap) {
                 // Do not send the windows if there is no current focus as
@@ -974,8 +980,6 @@ final class AccessibilityController {
 
                 SparseArray<WindowState> visibleWindows = mTempWindowStates;
                 populateVisibleWindowsOnScreenLocked(visibleWindows);
-
-                List<WindowInfo> windows = new ArrayList<WindowInfo>();
 
                 Set<IBinder> addedWindows = mTempBinderSet;
                 addedWindows.clear();
@@ -1074,7 +1078,6 @@ final class AccessibilityController {
                 addedWindows.clear();
 
                 // We computed the windows and if they changed notify the client.
-                boolean windowsChanged = false;
                 if (mOldWindows.size() != windows.size()) {
                     // Different size means something changed.
                     windowsChanged = true;
@@ -1096,22 +1099,24 @@ final class AccessibilityController {
                 }
 
                 if (windowsChanged) {
-                    if (DEBUG) {
-                        Log.i(LOG_TAG, "Windows changed:" + windows);
-                    }
-                    // Remember the old windows to detect changes.
                     cacheWindows(windows);
-                    // Announce the change.
-                    mHandler.obtainMessage(MyHandler.MESSAGE_NOTIFY_WINDOWS_CHANGED,
-                            windows).sendToTarget();
-                } else {
-                    if (DEBUG) {
-                        Log.i(LOG_TAG, "No windows changed.");
-                    }
-                    // Recycle the nodes as we do not need them.
-                    clearAndRecycleWindows(windows);
                 }
             }
+
+            // Now we do not hold the lock, so send the windows over.
+            if (windowsChanged) {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "Windows changed:" + windows);
+                }
+                mCallback.onWindowsForAccessibilityChanged(windows);
+            } else {
+                if (DEBUG) {
+                    Log.i(LOG_TAG, "No windows changed.");
+                }
+            }
+
+            // Recycle the windows as we do not need them.
+            clearAndRecycleWindows(windows);
         }
 
         private void computeWindowBoundsInScreen(WindowState windowState, Rect outBounds) {
@@ -1217,7 +1222,7 @@ final class AccessibilityController {
             return false;
         }
 
-        private void clearAndRecycleWindows(List<WindowInfo> windows) {
+        private static void clearAndRecycleWindows(List<WindowInfo> windows) {
             final int windowCount = windows.size();
             for (int i = windowCount - 1; i >= 0; i--) {
                 windows.remove(i).recycle();
@@ -1254,7 +1259,6 @@ final class AccessibilityController {
 
         private class MyHandler extends Handler {
             public static final int MESSAGE_COMPUTE_CHANGED_WINDOWS = 1;
-            public static final int MESSAGE_NOTIFY_WINDOWS_CHANGED = 2;
 
             public MyHandler(Looper looper) {
                 super(looper, null, false);
@@ -1266,12 +1270,6 @@ final class AccessibilityController {
                 switch (message.what) {
                     case MESSAGE_COMPUTE_CHANGED_WINDOWS: {
                         computeChangedWindows();
-                    } break;
-
-                    case MESSAGE_NOTIFY_WINDOWS_CHANGED: {
-                        List<WindowInfo> windows = (List<WindowInfo>) message.obj;
-                        mCallback.onWindowsForAccessibilityChanged(windows);
-                        clearAndRecycleWindows(windows);
                     } break;
                 }
             }
