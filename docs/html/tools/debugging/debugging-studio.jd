@@ -28,7 +28,7 @@ page.title=Debugging with Android Studio
 </ol>
 <h2>See also</h2>
 <ul>
-<li><a href="{@docRoot}tools/basics/index.html">
+<li><a href="{@docRoot}sdk/installing/studio-tips.html">
 Android Studio Tips and Tricks</a></li>
 <li><a href="{@docRoot}tools/debugging/index.html">Debugging</a></li>
 <li><a href="{@docRoot}tools/help/monitor.html">Device Monitor</a></li>

@@ -155,8 +155,7 @@ for your favorite IDE (if available).</p>
 
 <p>If you didn't download the SDK tools, go <a href="{@docRoot}sdk/index.html#Other"
 ><b>download the SDK now</b></a>,
-or switch to the <a href="{@docRoot}sdk/installing/index.html?pkg=adt">Eclipse ADT
-install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
+or switch to the <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
 install</a> instructions.</p>
 
 

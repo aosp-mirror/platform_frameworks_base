@@ -15,7 +15,7 @@ page.title=Migrating to Android Studio
 </div>
 
 <p>If you're currently using Eclipse with ADT, we recommend you migrate to
-<a href="{@docRoot}tools/basics/index.html">Android Studio</a>, a new Android
+<a href="{@docRoot}tools/studio/index.html">Android Studio</a>, a new Android
 development environment powered by IntelliJ IDEA. On top of the capabilities you expect from
 IntelliJ, Android Studio offers:</p>
 
