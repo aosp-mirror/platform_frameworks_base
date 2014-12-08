@@ -105,8 +105,8 @@
     <dimen name="control_corner_material">2dp</dimen>
 
     <dimen name="edit_text_inset_horizontal_material">4dp</dimen>
-    <dimen name="edit_text_inset_top_material">4dp</dimen>
-    <dimen name="edit_text_inset_bottom_material">8dp</dimen>
+    <dimen name="edit_text_inset_top_material">10dp</dimen>
+    <dimen name="edit_text_inset_bottom_material">7dp</dimen>
 
     <dimen name="dialog_padding_material">24dp</dimen>
     <dimen name="dialog_padding_top_material">18dp</dimen>
