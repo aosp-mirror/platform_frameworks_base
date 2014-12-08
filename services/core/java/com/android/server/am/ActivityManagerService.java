@@ -5024,6 +5024,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
 
         synchronized (this) {
+            mBatteryStatsService.noteProcessAnr(app.processName, app.uid);
+
             if (!showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID) {
                 app.kill("bg anr", true);
                 return;
@@ -10928,6 +10930,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                             && proc.setProcState <= ActivityManager.PROCESS_STATE_SERVICE) {
                         if (doKilling && proc.initialIdlePss != 0
                                 && proc.lastPss > ((proc.initialIdlePss*3)/2)) {
+                            sb = new StringBuilder(128);
+                            sb.append("Kill");
+                            sb.append(proc.processName);
+                            sb.append(" in idle maint: pss=");
+                            sb.append(proc.lastPss);
+                            sb.append(", initialPss=");
+                            sb.append(proc.initialIdlePss);
+                            sb.append(", period=");
+                            TimeUtils.formatDuration(timeSinceLastIdle, sb);
+                            sb.append(", lowRamPeriod=");
+                            TimeUtils.formatDuration(lowRamSinceLastIdle, sb);
+                            Slog.wtfQuiet(TAG, sb.toString());
                             proc.kill("idle maint (pss " + proc.lastPss
                                     + " from " + proc.initialIdlePss + ")", true);
                         }
@@ -12034,6 +12048,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                 finishInstrumentationLocked(r, Activity.RESULT_CANCELED, info);
                 Binder.restoreCallingIdentity(origId);
                 return;
+            }
+
+            // Log crash in battery stats.
+            if (r != null) {
+                mBatteryStatsService.noteProcessCrash(r.processName, r.uid);
             }
 
             // If we can't identify the process or it's already exceeded its crash quota,
