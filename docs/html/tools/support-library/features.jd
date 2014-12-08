@@ -137,13 +137,16 @@ page.title=Support Library Features
   <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">Adding libraries without
   resources</a>.</p>
 
+<p class="caution"><strong>Caution:</strong> Using dynamic dependencies, especially for higher version
+numbers, can cause unexpected version updates and regression incompatibilities.</p>
+
 <p>The Gradle build script dependency identifier for this library is as follows:</p>
 
 <pre>
 com.android.support:support-v4:21.0.+
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
 
 
 <h2 id="multidex">Multidex Support Library</h2>
@@ -171,7 +174,7 @@ com.android.support:support-v4:21.0.+
 com.android.support:multidex:1.0.+
 </pre>
 
-<p>This dependency notation specifies the release version 1.0.0 or higher.</p>
+<p>This dependency notation specifies the latest release version with the 1.0 prefix.</p>
 
 
 <h2 id="v7">v7 Support Libraries</h2>
@@ -226,7 +229,8 @@ com.android.support:multidex:1.0.+
 com.android.support:appcompat-v7:21.0.+
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
+
 
 <h3 id="v7-cardview">v7 cardview library</h3>
 
@@ -248,7 +252,8 @@ libraries with resources</a>.</p>
 com.android.support:cardview-v7:21.0.+
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
+
 
 <h3 id="v7-gridlayout">v7 gridlayout library</h3>
 
@@ -269,7 +274,7 @@ com.android.support:cardview-v7:21.0.+
 com.android.support:gridlayout-v7:21.0.+
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
 
 
 <h3 id="v7-mediarouter">v7 mediarouter library</h3>
@@ -333,7 +338,9 @@ title card.</p>
 com.android.support:palette-v7:21.0.+
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
+
+
 
 <h3 id="v7-recyclerview">v7 recyclerview library</h3>
 
@@ -356,7 +363,9 @@ libraries with resources</a>.</p>
 com.android.support:recyclerview-v7:21.0.+
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
+
+
 
 <h2 id="v8">v8 Support Library</h2>
 
@@ -399,7 +408,9 @@ com.android.support:recyclerview-v7:21.0.+
 com.android.support:support-v13:18.0.+
 </pre>
 
-<p>This dependency notation specifies the release version 18.0.0 or higher.</p>
+<p>This dependency notation specifies the latest release version with the 18.0 prefix.</p>
+
+
 
 <h2 id="v17-leanback">v17 Leanback Library</h2>
 
@@ -440,4 +451,6 @@ with resources</a>. </p>
 com.android.support:leanback-v17:21.0.+
 </pre>
 
-<p>This dependency notation specifies the release version 21.0.0 or higher.</p>
+<p>This dependency notation specifies the latest release version with the 21.0 prefix.</p>
+
+
