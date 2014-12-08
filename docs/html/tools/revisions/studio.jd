@@ -26,8 +26,8 @@ everything you need to begin developing Android apps:</p>
 <li>A version of the Android system image for the emulator</li>
 </ul>
 
-<p>For an introduction to Android Studio, make sure to read
-<a href="{@docRoot}tools/studio/basics.html">Android Studio Basics</a>.</p>
+<p>For an introduction to Android Studio, make sure to read the
+<a href="{@docRoot}tools/studio/index.html">Android Studio</a> guide.</p>
 
 <p>Periodic updates are pushed to Android Studio without requiring you to update from here. To
 manually check for updates, select <strong>Help > Check for updates</strong> (on Mac, select
@@ -39,10 +39,21 @@ manually check for updates, select <strong>Help > Check for updates</strong> (on
 <p>The sections below provide notes about successive releases of
 Android Studio, as denoted by revision number. </p>
 
-
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.0</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>Initial release of Android Studio.</p>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v0.8.14</a> <em>(October 2014)</em>
   </p>
 
