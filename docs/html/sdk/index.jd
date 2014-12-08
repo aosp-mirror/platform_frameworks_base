@@ -281,7 +281,7 @@ This is the Android Software Development Kit License Agreement
 
 <img src="{@docRoot}images/tools/studio-hero.png"
 srcset="{@docRoot}images/tools/studio-hero_2x.png 2x, {@docRoot}images/tools/studio-hero.png 1x"
-width="760" height="400" alt="" style="margin-bottom:60px" />
+width="760" height="400" alt="" style="margin-bottom:80px" />
 
 <div style="color: #fff; width:226px; height:0; overflow:visible; position:absolute; top:40px; left:25px">
 
@@ -311,6 +311,8 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
   <li><a href="#Requirements">System Requirements</a></li>
   <li><a href="#Other">Other Download Options</a></li>
   <li><a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android Studio</a></li>
+  <li><a href="https://docs.google.com/a/google.com/forms/d/1mjsyfzv3HAnDY-_Kfj-3QJKdpuksyMFs9e73CRwmT6Q/viewform"
+target="_blank">Take a Survey</a></li>
 </ul>
 
 </div>
