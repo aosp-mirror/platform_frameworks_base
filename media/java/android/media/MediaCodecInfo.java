@@ -648,7 +648,7 @@ public final class MediaCodecInfo {
                 maxChannels = 48;
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_VORBIS)) {
                 bitRates = Range.create(32000, 500000);
-                sampleRates = new int[] { 8000, 12000, 16000, 24000, 48000, 192000 };
+                sampleRateRange = Range.create(8000, 192000);
                 maxChannels = 255;
             } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_OPUS)) {
                 bitRates = Range.create(6000, 510000);
