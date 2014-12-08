@@ -231,6 +231,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static ConnectivityService sServiceInstance;
 
     private INetworkManagementService mNetd;
+    private INetworkStatsService mStatsService;
     private INetworkPolicyManager mPolicyManager;
 
     private String mCurrentTcpBufferSizes;
@@ -630,6 +631,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         mContext = checkNotNull(context, "missing Context");
         mNetd = checkNotNull(netManager, "missing INetworkManagementService");
+        mStatsService = checkNotNull(statsService, "missing INetworkStatsService");
         mPolicyManager = checkNotNull(policyManager, "missing INetworkPolicyManager");
         mKeyStore = KeyStore.getInstance();
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
@@ -2166,6 +2168,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (isDefaultNetwork(nai)) {
                 mDefaultInetConditionPublished = 0;
             }
+            notifyIfacesChanged();
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOST);
             nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_DISCONNECTED);
             mNetworkAgentInfos.remove(msg.replyTo);
@@ -3660,6 +3663,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (isDefaultNetwork(networkAgent)) handleApplyDefaultProxy(newLp.getHttpProxy());
         // TODO - move this check to cover the whole function
         if (!Objects.equals(newLp, oldLp)) {
+            notifyIfacesChanged();
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_IP_CHANGED);
         }
     }
@@ -4250,6 +4254,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             networkAgent.created = true;
             updateLinkProperties(networkAgent, null);
+            notifyIfacesChanged();
             notifyNetworkCallbacks(networkAgent, ConnectivityManager.CALLBACK_PRECHECK);
             networkAgent.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
             if (networkAgent.isVPN()) {
@@ -4391,6 +4396,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             case ConnectivityManager.CALLBACK_RELEASED:    return "RELEASED";
         }
         return "UNKNOWN";
+    }
+
+    /**
+     * Notify other system services that set of active ifaces has changed.
+     */
+    private void notifyIfacesChanged() {
+        try {
+            mStatsService.forceUpdateIfaces();
+        } catch (Exception ignored) {
+        }
     }
 
     @Override

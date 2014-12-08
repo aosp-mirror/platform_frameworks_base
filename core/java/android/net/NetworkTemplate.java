@@ -49,7 +49,9 @@ import java.util.Objects;
 public class NetworkTemplate implements Parcelable {
 
     public static final int MATCH_MOBILE_ALL = 1;
+    @Deprecated
     public static final int MATCH_MOBILE_3G_LOWER = 2;
+    @Deprecated
     public static final int MATCH_MOBILE_4G = 3;
     public static final int MATCH_WIFI = 4;
     public static final int MATCH_ETHERNET = 5;
@@ -293,6 +295,7 @@ public class NetworkTemplate implements Parcelable {
     /**
      * Check if mobile network classified 3G or lower with matching IMSI.
      */
+    @Deprecated
     private boolean matchesMobile3gLower(NetworkIdentity ident) {
         ensureSubtypeAvailable();
         if (ident.mType == TYPE_WIMAX) {
@@ -311,6 +314,7 @@ public class NetworkTemplate implements Parcelable {
     /**
      * Check if mobile network classified 4G with matching IMSI.
      */
+    @Deprecated
     private boolean matchesMobile4g(NetworkIdentity ident) {
         ensureSubtypeAvailable();
         if (ident.mType == TYPE_WIMAX) {
