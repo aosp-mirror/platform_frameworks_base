@@ -219,6 +219,38 @@ class="en">MonkeyRunner</span></a></li>
     </ul>
   </li>
 
+  </li><!-- end of tools help -->
+
+
+<!-- Build System menu-->
+
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>tools/gradle/index.html">Build System</a>
+    </div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/gradle/studio-build.html">
+          Building Your Project with Gradle</a></li>
+      <li><a href="<?cs var:toroot ?>tools/gradle/gradle-ref.html">
+          Gradle for Android Reference</a></li>
+      </ul>
+  </li><!-- end of build system -->
+
+
+<!-- Support Library menu-->
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/support-library/index.html"><span
+class="en">Support Library</span></a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/support-library/features.html">Features</a></li>
+      <li><a href="<?cs var:toroot ?>tools/support-library/setup.html">Setup</a></li>
+    </ul>
+  </li><!-- end of support library -->
+
+
+<!-- Revision menu-->
+
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot
 ?>tools/revisions/index.html"><span class="en">Revisions</span></a></div>
@@ -265,12 +297,12 @@ class="en">MonkeyRunner</span></a></li>
       <span class="en">Eclipse with ADT</span></a>
     </div>
     <ul>
-    <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">Migrating to Android Studio</a></li>
-    <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">Installing</a></li>
-    <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Setting Up Projects</a></li>
-    <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building</a></li>
-    <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html">Debugging</a></li>
+    <li><a href="<?cs var:toroot ?>tools/eclipse/migrate-adt.html">Migrating to Android Studio</a></li>
+    <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Managing Projects</a></li>
+    <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building and Running</a></li>
     <li><a href="<?cs var:toroot ?>tools/testing/testing_eclipse.html">Testing</a></li>
+    <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html">Debugging</a></li>
+    <li><a href="<?cs var:toroot ?>tools/publishing/app-signing-eclipse.html">Signing Your Apps</a></li>
     </ul>
   </li><!-- end of Eclipse  -->
 
