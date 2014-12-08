@@ -18,7 +18,6 @@ page.title=Android Studio
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}tools/sdk/index.html">Download Android Studio</a></li>
-    <li><a href="{@docRoot}tools/basics/index.html">Android Studio</a></li>
     <li><a href="http://wiki.jetbrains.net/intellij/Android">IntelliJ IDEA Android Tutorials</a></li>
     <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
     <li><a href="{@docRoot}tools/buildsystem/index.html">Build System</a></li>
@@ -165,7 +164,7 @@ the features of the build system to:</p>
 modifying your app's core source files. To build an Android Studio project, see
 <a href="{@docRoot}tools/building/building-studio.html">Building and Running from Android Studio</a>.
 To configure custom build settings in an Android Studio project, see
-<a href="{@docRoot}tools/gradle/configuring-studio-builds.html">Configure Android Studio Builds</a>.</p>
+<a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.</p>
 
 
 <h3>Application ID for Package Identification </h3>
