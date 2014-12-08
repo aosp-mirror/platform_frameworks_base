@@ -124,8 +124,7 @@ public class VolumePanel extends Handler implements DemoMode {
     private static final int MSG_ZEN_MODE_AVAILABLE_CHANGED = 13;
     private static final int MSG_USER_ACTIVITY = 14;
     private static final int MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED = 15;
-    private static final int MSG_ZEN_MODE_CHANGED = 16;
-    private static final int MSG_INTERNAL_RINGER_MODE_CHANGED = 17;
+    private static final int MSG_INTERNAL_RINGER_MODE_CHANGED = 16;
 
     // Pseudo stream type for master volume
     private static final int STREAM_MASTER = -100;
@@ -511,6 +510,9 @@ public class VolumePanel extends Handler implements DemoMode {
                 pw.println();
             }
         }
+        if (mZenPanel != null) {
+            mZenPanel.dump(fd, pw, args);
+        }
     }
 
     private void initZenModePanel() {
@@ -723,7 +725,7 @@ public class VolumePanel extends Handler implements DemoMode {
             mSliderPanel.addView(active.group);
             mActiveStreamType = activeStreamType;
             active.group.setVisibility(View.VISIBLE);
-            updateSlider(active);
+            updateSlider(active, true /*forceReloadIcon*/);
             updateTimeoutDelay();
             updateZenPanelVisible();
         }
@@ -799,11 +801,12 @@ public class VolumePanel extends Handler implements DemoMode {
     }
 
     /** Update the mute and progress state of a slider */
-    private void updateSlider(StreamControl sc) {
+    private void updateSlider(StreamControl sc, boolean forceReloadIcon) {
         updateSliderProgress(sc, -1);
         final boolean muted = isMuted(sc.streamType);
-        // Force reloading the image resource
-        sc.icon.setImageDrawable(null);
+        if (forceReloadIcon) {
+            sc.icon.setImageDrawable(null);
+        }
         updateSliderIcon(sc, muted);
         updateSliderEnabled(sc, muted, false);
         updateSliderSuppressor(sc);
@@ -907,11 +910,18 @@ public class VolumePanel extends Handler implements DemoMode {
         }
     }
 
-    public void updateStates() {
+    private void updateStates() {
         final int count = mSliderPanel.getChildCount();
         for (int i = 0; i < count; i++) {
             StreamControl sc = (StreamControl) mSliderPanel.getChildAt(i).getTag();
-            updateSlider(sc);
+            updateSlider(sc, true /*forceReloadIcon*/);
+        }
+    }
+
+    private void updateActiveSlider() {
+        final StreamControl active = mStreamControls.get(mActiveStreamType);
+        if (active != null) {
+            updateSlider(active, false /*forceReloadIcon*/);
         }
     }
 
@@ -1449,12 +1459,11 @@ public class VolumePanel extends Handler implements DemoMode {
                 break;
             }
 
-            case MSG_ZEN_MODE_CHANGED:
             case MSG_RINGER_MODE_CHANGED:
             case MSG_INTERNAL_RINGER_MODE_CHANGED:
             case MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED: {
                 if (isShowing()) {
-                    updateStates();
+                    updateActiveSlider();
                 }
                 break;
             }
@@ -1563,10 +1572,6 @@ public class VolumePanel extends Handler implements DemoMode {
             mNotificationEffectsSuppressor = mZenController.getEffectsSuppressor();
             sendEmptyMessage(MSG_NOTIFICATION_EFFECTS_SUPPRESSOR_CHANGED);
         }
-
-        public void onZenChanged(int zen) {
-            sendEmptyMessage(MSG_ZEN_MODE_CHANGED);
-        }
     };
 
     private final MediaController.Callback mMediaControllerCb = new MediaController.Callback() {
@@ -1591,6 +1596,7 @@ public class VolumePanel extends Handler implements DemoMode {
 
         public void start(StreamControl sc) {
             if (sc == null) throw new IllegalArgumentException();
+            if (LOGD) Log.d(mTag, "Secondary icon animation start");
             if (mTarget != null) {
                 cancel();
             }
@@ -1643,6 +1649,7 @@ public class VolumePanel extends Handler implements DemoMode {
         @Override
         public void run() {
             if (mTarget == null) return;
+            if (LOGD) Log.d(mTag, "Secondary icon animation complete, show notification slider");
             mAudioManager.forceVolumeControlStream(StreamResources.NotificationStream.streamType);
             mAudioManager.adjustStreamVolume(StreamResources.NotificationStream.streamType,
                     AudioManager.ADJUST_SAME, AudioManager.FLAG_SHOW_UI);

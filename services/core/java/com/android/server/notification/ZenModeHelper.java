@@ -108,6 +108,10 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         mCallbacks.add(callback);
     }
 
+    public void removeCallback(Callback callback) {
+        mCallbacks.remove(callback);
+    }
+
     public void onSystemReady() {
         mAudioManager = LocalServices.getService(AudioManagerInternal.class);
         if (mAudioManager != null) {
@@ -208,9 +212,9 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         return mZenMode;
     }
 
-    public void setZenMode(int zenModeValue, String reason) {
-        ZenLog.traceSetZenMode(zenModeValue, reason);
-        Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zenModeValue);
+    public void setZenMode(int zenMode, String reason) {
+        ZenLog.traceSetZenMode(zenMode, reason);
+        Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zenMode);
     }
 
     public void updateZenMode() {
