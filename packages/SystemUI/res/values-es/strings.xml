@@ -318,7 +318,7 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"¿Quieres continuar con la sesión?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Volver a empezar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Sí, continuar"</string>
-    <string name="user_add_user_title" msgid="4553596395824132638">"¿Añadir usuario nuevo?"</string>
+    <string name="user_add_user_title" msgid="4553596395824132638">"¿Añadir nuevo usuario?"</string>
     <string name="user_add_user_message_short" msgid="2161624834066214559">"Al añadir un usuario nuevo, este debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de usuarios."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Ahorro de batería activado"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce el rendimiento y el envío de datos en segundo plano"</string>
