@@ -28,11 +28,11 @@ parent.link=index.html
   following topics show you how to run an application, which will automatically build your
   application as well.</p>
 
-  <p>To distribute your application, however, you must build your application in release mode and sign the
-  <code>.apk</code> file with your own private key.</p>
-  
-   <p>This document shows you how to run your application on an emulator or a real device 
-   from Eclipse&mdash;all of which is done using the debug version of your application. 
+  <p>To distribute your application, however, you must build your application in release mode and
+  sign the <code>.apk</code> file with your own private key.</p>
+
+   <p>This document shows you how to run your application on an emulator or a real device
+   from Eclipse&mdash;all of which is done using the debug version of your application.
    For more information about how to sign your application with a private key for release, see <a href=
   "{@docRoot}tools/publishing/app-signing.html#ExportWizard">Signing Your Applications</a></p>
 
@@ -159,9 +159,10 @@ parent.link=index.html
     of the build target, a "device chooser" is shown to let you select which device to use.</li>
 
     <li>If there are no devices or emulators running that meet the requirements of the build
-    target, ADT looks at the available AVDs. If there is an AVD that matches the build target of the project,
-    ADT chooses that AVD. If the AVD versions are newer than the build target of the project, ADT chooses
-    the oldest possible version of an AVD that meets the project's build target requirement.</li>
+    target, ADT looks at the available AVDs. If there is an AVD that matches the build target of the
+    project, ADT chooses that AVD. If the AVD versions are newer than the build target of the project,
+    ADT chooses the oldest possible version of an AVD that meets the project's build target
+    requirement.</li>
 
     <li>If there are no suitable AVDs, the application is not installed a console error warning tells
     you that there is no existing AVD that meets the build target requirements.</li>
