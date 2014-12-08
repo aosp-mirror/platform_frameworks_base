@@ -1,4 +1,4 @@
-page.title=Android Studio Revisions
+page.title=Android Studio Release Notes
 
 @jd:body
 
@@ -26,7 +26,7 @@ everything you need to begin developing Android apps:</p>
 <li>A version of the Android system image for the emulator</li>
 </ul>
 
-<p>For an introduction to Android Studio, make sure to read the
+<p>For an introduction to Android Studio, read the
 <a href="{@docRoot}tools/studio/index.html">Android Studio</a> guide.</p>
 
 <p>Periodic updates are pushed to Android Studio without requiring you to update from here. To
