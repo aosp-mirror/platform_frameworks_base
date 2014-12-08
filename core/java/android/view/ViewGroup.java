@@ -161,6 +161,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // Used during drag dispatch
     private PointF mLocalPoint;
 
+    // Lazily-created holder for point computations.
+    private float[] mTempPoint;
+
     // Layout animation
     private LayoutAnimationController mLayoutAnimationController;
     private Animation.AnimationListener mAnimationListener;
@@ -2442,6 +2445,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 || child.getAnimation() != null;
     }
 
+    private float[] getTempPoint() {
+        if (mTempPoint == null) {
+            mTempPoint = new float[2];
+        }
+        return mTempPoint;
+    }
+
     /**
      * Returns true if a child view contains the specified point when transformed
      * into its coordinate space.
@@ -2450,21 +2460,27 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     protected boolean isTransformedTouchPointInView(float x, float y, View child,
             PointF outLocalPoint) {
-        float localX = x + mScrollX - child.mLeft;
-        float localY = y + mScrollY - child.mTop;
-        if (! child.hasIdentityMatrix() && mAttachInfo != null) {
-            final float[] localXY = mAttachInfo.mTmpTransformLocation;
-            localXY[0] = localX;
-            localXY[1] = localY;
-            child.getInverseMatrix().mapPoints(localXY);
-            localX = localXY[0];
-            localY = localXY[1];
-        }
-        final boolean isInView = child.pointInView(localX, localY);
+        final float[] point = getTempPoint();
+        point[0] = x;
+        point[1] = y;
+        transformPointToViewLocal(point, child);
+        final boolean isInView = child.pointInView(point[0], point[1]);
         if (isInView && outLocalPoint != null) {
-            outLocalPoint.set(localX, localY);
+            outLocalPoint.set(point[0], point[1]);
         }
         return isInView;
+    }
+
+    /**
+     * @hide
+     */
+    public void transformPointToViewLocal(float[] point, View child) {
+        point[0] += mScrollX - child.mLeft;
+        point[1] += mScrollY - child.mTop;
+
+        if (!child.hasIdentityMatrix()) {
+            child.getInverseMatrix().mapPoints(point);
+        }
     }
 
     /**
@@ -3602,6 +3618,44 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // Clearing a pressed state always propagates.
             if (!pressed || (!child.isClickable() && !child.isLongClickable())) {
                 child.setPressed(pressed);
+            }
+        }
+    }
+
+    /**
+     * Dispatches drawable hotspot changes to child views that meet at least
+     * one of the following criteria:
+     * <ul>
+     *     <li>Returns {@code false} from both {@link View#isClickable()} and
+     *     {@link View#isLongClickable()}</li>
+     *     <li>Requests duplication of parent state via
+     *     {@link View#setDuplicateParentStateEnabled(boolean)}</li>
+     * </ul>
+     *
+     * @param x hotspot x coordinate
+     * @param y hotspot y coordinate
+     * @see #drawableHotspotChanged(float, float)
+     */
+    @Override
+    public void dispatchDrawableHotspotChanged(float x, float y) {
+        final int count = mChildrenCount;
+        if (count == 0) {
+            return;
+        }
+
+        final View[] children = mChildren;
+        for (int i = 0; i < count; i++) {
+            final View child = children[i];
+            // Children that are clickable on their own should not
+            // receive hotspots when their parent view does.
+            final boolean nonActionable = !child.isClickable() && !child.isLongClickable();
+            final boolean duplicatesState = (child.mViewFlags & DUPLICATE_PARENT_STATE) != 0;
+            if (nonActionable || duplicatesState) {
+                final float[] point = getTempPoint();
+                point[0] = x;
+                point[1] = y;
+                transformPointToViewLocal(point, child);
+                child.drawableHotspotChanged(point[0], point[1]);
             }
         }
     }
@@ -5957,28 +6011,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int count = mChildrenCount;
         for (int i = 0; i < count; i++) {
             children[i].jumpDrawablesToCurrentState();
-        }
-    }
-
-    @Override
-    public void drawableHotspotChanged(float x, float y) {
-        super.drawableHotspotChanged(x, y);
-
-        if ((mGroupFlags & FLAG_NOTIFY_CHILDREN_ON_DRAWABLE_STATE_CHANGE) != 0) {
-            if ((mGroupFlags & FLAG_ADD_STATES_FROM_CHILDREN) != 0) {
-                throw new IllegalStateException("addStateFromChildren cannot be enabled if a"
-                        + " child has duplicateParentState set to true");
-            }
-
-            final View[] children = mChildren;
-            final int count = mChildrenCount;
-
-            for (int i = 0; i < count; i++) {
-                final View child = children[i];
-                if ((child.mViewFlags & DUPLICATE_PARENT_STATE) != 0) {
-                    child.drawableHotspotChanged(x, y);
-                }
-            }
         }
     }
 
