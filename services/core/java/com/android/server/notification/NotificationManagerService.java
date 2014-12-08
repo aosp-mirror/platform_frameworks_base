@@ -1551,6 +1551,12 @@ public class NotificationManagerService extends SystemService {
                     MATCHES_CALL_FILTER_CONTACTS_TIMEOUT_MS,
                     MATCHES_CALL_FILTER_TIMEOUT_AFFINITY);
         }
+
+        @Override
+        public boolean isSystemConditionProviderEnabled(String path) {
+            enforceSystemOrSystemUI("INotificationManager.isSystemConditionProviderEnabled");
+            return mConditionProviders.isSystemConditionProviderEnabled(path);
+        }
     };
 
     private String[] getActiveNotificationKeys(INotificationListener token) {

@@ -64,7 +64,7 @@ public class ZenModeConfig implements Parcelable {
     public static final int[] MINUTE_BUCKETS = new int[] { 15, 30, 45, 60, 120, 180, 240, 480 };
     private static final int SECONDS_MS = 1000;
     private static final int MINUTES_MS = 60 * SECONDS_MS;
-    private static final int ZERO_VALUE_MS = 20 * SECONDS_MS;
+    private static final int ZERO_VALUE_MS = 10 * SECONDS_MS;
 
     private static final boolean DEFAULT_ALLOW_EVENTS = true;
 
@@ -471,6 +471,8 @@ public class ZenModeConfig implements Parcelable {
         downtime.startMinute = sleepStartMinute;
         downtime.endHour = sleepEndHour;
         downtime.endMinute = sleepEndMinute;
+        downtime.mode = sleepMode;
+        downtime.none = sleepNone;
         return downtime;
     }
 
@@ -510,7 +512,7 @@ public class ZenModeConfig implements Parcelable {
     public static final String SYSTEM_AUTHORITY = "android";
 
     // Built-in countdown conditions, e.g. condition://android/countdown/1399917958951
-    private static final String COUNTDOWN_PATH = "countdown";
+    public static final String COUNTDOWN_PATH = "countdown";
 
     public static Uri toCountdownConditionId(long time) {
         return new Uri.Builder().scheme(Condition.SCHEME)
@@ -536,8 +538,9 @@ public class ZenModeConfig implements Parcelable {
         return tryParseCountdownConditionId(conditionId) != 0;
     }
 
-    // Built-in downtime conditions, e.g. condition://android/downtime?start=10.00&end=7.00
-    private static final String DOWNTIME_PATH = "downtime";
+    // Built-in downtime conditions
+    // e.g. condition://android/downtime?start=10.00&end=7.00&mode=days%3A5%2C6&none=false
+    public static final String DOWNTIME_PATH = "downtime";
 
     public static Uri toDowntimeConditionId(DowntimeInfo downtime) {
         return new Uri.Builder().scheme(Condition.SCHEME)
@@ -545,6 +548,8 @@ public class ZenModeConfig implements Parcelable {
                 .appendPath(DOWNTIME_PATH)
                 .appendQueryParameter("start", downtime.startHour + "." + downtime.startMinute)
                 .appendQueryParameter("end", downtime.endHour + "." + downtime.endMinute)
+                .appendQueryParameter("mode", downtime.mode)
+                .appendQueryParameter("none", Boolean.toString(downtime.none))
                 .build();
     }
 
@@ -562,6 +567,8 @@ public class ZenModeConfig implements Parcelable {
         downtime.startMinute = start[1];
         downtime.endHour = end[0];
         downtime.endMinute = end[1];
+        downtime.mode = conditionId.getQueryParameter("mode");
+        downtime.none = Boolean.toString(true).equals(conditionId.getQueryParameter("none"));
         return downtime;
     }
 
@@ -583,6 +590,8 @@ public class ZenModeConfig implements Parcelable {
         public int startMinute; // 0-59
         public int endHour;
         public int endMinute;
+        public String mode;
+        public boolean none;
 
         @Override
         public int hashCode() {
@@ -596,7 +605,12 @@ public class ZenModeConfig implements Parcelable {
             return startHour == other.startHour
                     && startMinute == other.startMinute
                     && endHour == other.endHour
-                    && endMinute == other.endMinute;
+                    && endMinute == other.endMinute
+                    && Objects.equals(mode, other.mode)
+                    && none == other.none;
         }
     }
+
+    // built-in next alarm conditions
+    public static final String NEXT_ALARM_PATH = "next_alarm";
 }

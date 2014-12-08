@@ -2017,7 +2017,9 @@
   <java-symbol type="string" name="zen_mode_until" />
   <java-symbol type="string" name="zen_mode_next_alarm_summary" />
   <java-symbol type="string" name="zen_mode_next_alarm_line_one" />
+  <java-symbol type="array" name="config_system_condition_providers" />
   <java-symbol type="integer" name="config_next_alarm_condition_lookahead_threshold_hrs" />
+  <java-symbol type="integer" name="config_downtime_condition_lookahead_threshold_hrs" />
   <java-symbol type="string" name="muted_by" />
 
   <java-symbol type="string" name="item_is_selected" />
