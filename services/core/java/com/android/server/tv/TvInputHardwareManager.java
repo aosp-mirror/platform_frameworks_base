@@ -19,7 +19,10 @@ package com.android.server.tv;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_DISCONNECTED;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiHotplugEvent;
@@ -74,6 +77,7 @@ import java.util.Map;
 class TvInputHardwareManager implements TvInputHal.Callback {
     private static final String TAG = TvInputHardwareManager.class.getSimpleName();
 
+    private final Context mContext;
     private final Listener mListener;
     private final TvInputHal mHal = new TvInputHal(this);
     private final SparseArray<Connection> mConnections = new SparseArray<>();
@@ -92,6 +96,15 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final IHdmiDeviceEventListener mHdmiDeviceEventListener = new HdmiDeviceEventListener();
     private final IHdmiSystemAudioModeChangeListener mHdmiSystemAudioModeChangeListener =
             new HdmiSystemAudioModeChangeListener();
+    private final BroadcastReceiver mVolumeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            handleVolumeChange(context, intent);
+        }
+    };
+    private int mCurrentIndex = 0;
+    private int mCurrentMaxIndex = 0;
+    private final boolean mUseMasterVolume;
 
     // TODO: Should handle STANDBY case.
     private final SparseBooleanArray mHdmiStateMap = new SparseBooleanArray();
@@ -103,8 +116,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final Object mLock = new Object();
 
     public TvInputHardwareManager(Context context, Listener listener) {
+        mContext = context;
         mListener = listener;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        mUseMasterVolume = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_useMasterVolume);
         mHal.init();
     }
 
@@ -125,6 +141,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             } else {
                 Slog.w(TAG, "HdmiControlService is not available");
             }
+            if (!mUseMasterVolume) {
+                final IntentFilter filter = new IntentFilter();
+                filter.addAction(AudioManager.VOLUME_CHANGED_ACTION);
+                filter.addAction(AudioManager.STREAM_MUTE_CHANGED_ACTION);
+                mContext.registerReceiver(mVolumeReceiver, filter);
+            }
+            updateVolume();
         }
     }
 
@@ -483,6 +506,47 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         }
     }
 
+    private void updateVolume() {
+        mCurrentMaxIndex = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        mCurrentIndex = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+    }
+
+    private void handleVolumeChange(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (action.equals(AudioManager.VOLUME_CHANGED_ACTION)) {
+            int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+            if (streamType != AudioManager.STREAM_MUSIC) {
+                return;
+            }
+            int index = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_VALUE, 0);
+            if (index == mCurrentIndex) {
+                return;
+            }
+            mCurrentIndex = index;
+        } else if (action.equals(AudioManager.STREAM_MUTE_CHANGED_ACTION)) {
+            int streamType = intent.getIntExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, -1);
+            if (streamType != AudioManager.STREAM_MUSIC) {
+                return;
+            }
+            // volume index will be updated at onMediaStreamVolumeChanged() through updateVolume().
+        } else {
+            Slog.w(TAG, "Unrecognized intent: " + intent);
+            return;
+        }
+        synchronized (mLock) {
+            for (int i = 0; i < mConnections.size(); ++i) {
+                TvInputHardwareImpl hardwareImpl = mConnections.valueAt(i).getHardwareImplLocked();
+                if (hardwareImpl != null) {
+                    hardwareImpl.onMediaStreamVolumeChanged();
+                }
+            }
+        }
+    }
+
+    private float getMediaStreamVolume() {
+        return mUseMasterVolume ? 1.0f : ((float) mCurrentIndex / (float) mCurrentMaxIndex);
+    }
+
     private class Connection implements IBinder.DeathRecipient {
         private final TvInputHardwareInfo mHardwareInfo;
         private TvInputInfo mInfo;
@@ -611,7 +675,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private AudioDevicePort mAudioSink;
         private AudioPatch mAudioPatch = null;
         private float mCommittedVolume = 0.0f;
-        private float mVolume = 0.0f;
+        private float mSourceVolume = 0.0f;
 
         private TvStreamConfig mActiveConfig = null;
 
@@ -733,8 +797,10 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 return;
             }
 
+            updateVolume();
+            float volume = mSourceVolume * getMediaStreamVolume();
             AudioGainConfig sourceGainConfig = null;
-            if (mAudioSource.gains().length > 0 && mVolume != mCommittedVolume) {
+            if (mAudioSource.gains().length > 0 && volume != mCommittedVolume) {
                 AudioGain sourceGain = null;
                 for (AudioGain gain : mAudioSource.gains()) {
                     if ((gain.mode() & AudioGain.MODE_JOINT) != 0) {
@@ -747,17 +813,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     int steps = (sourceGain.maxValue() - sourceGain.minValue())
                             / sourceGain.stepValue();
                     int gainValue = sourceGain.minValue();
-                    if (mVolume < 1.0f) {
-                        gainValue += sourceGain.stepValue() * (int) (mVolume * steps + 0.5);
+                    if (volume < 1.0f) {
+                        gainValue += sourceGain.stepValue() * (int) (volume * steps + 0.5);
                     } else {
                         gainValue = sourceGain.maxValue();
                     }
-                    int numChannels = 0;
-                    for (int mask = sourceGain.channelMask(); mask > 0; mask >>= 1) {
-                        numChannels += (mask & 1);
-                    }
-                    int[] gainValues = new int[numChannels];
-                    Arrays.fill(gainValues, gainValue);
+                    // size of gain values is 1 in MODE_JOINT
+                    int[] gainValues = new int[] { gainValue };
                     sourceGainConfig = sourceGain.buildConfig(AudioGain.MODE_JOINT,
                             sourceGain.channelMask(), gainValues, 0);
                 } else {
@@ -830,7 +892,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 shouldRecreateAudioPatch = true;
             }
             if (shouldRecreateAudioPatch) {
-                mCommittedVolume = mVolume;
+                mCommittedVolume = volume;
                 mAudioManager.createAudioPatch(
                         audioPatchArray,
                         new AudioPortConfig[] { sourceConfig },
@@ -848,7 +910,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 if (mReleased) {
                     throw new IllegalStateException("Device already released.");
                 }
-                mVolume = volume;
+                mSourceVolume = volume;
                 updateAudioConfigLocked();
             }
         }
@@ -942,6 +1004,12 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 mDesiredChannelMask = channelMask;
                 mDesiredFormat = format;
 
+                updateAudioConfigLocked();
+            }
+        }
+
+        public void onMediaStreamVolumeChanged() {
+            synchronized (mImplLock) {
                 updateAudioConfigLocked();
             }
         }
