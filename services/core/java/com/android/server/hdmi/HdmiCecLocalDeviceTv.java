@@ -1332,7 +1332,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (old == null) {
             invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
         } else if (!old.equals(info)) {
-            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+            invokeDeviceEventListener(old, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
         }
     }
 
