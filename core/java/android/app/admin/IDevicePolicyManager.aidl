@@ -196,4 +196,6 @@ interface IDevicePolicyManager {
 
     void setAutoTimeRequired(in ComponentName who, int userHandle, boolean required);
     boolean getAutoTimeRequired();
+
+    boolean isRemovingAdmin(in ComponentName adminReceiver, int userHandle);
 }
