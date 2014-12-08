@@ -206,7 +206,8 @@ more than one), and enter the required information.</p>
 </ol>
 
 <p>You can also specify your signing settings in Gradle configuration files. For more information,
-see <a href="{@docRoot}tools/gradle/studio-build.html#configureSigning">Signing settings</a>.</p>
+see <a href="{@docRoot}tools/building/configuring-gradle.html#configureSigning">Configuring Gradle
+Builds</a>.</p>
 
 
 

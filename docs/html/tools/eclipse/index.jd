@@ -7,7 +7,7 @@ page.title=Eclipse ADT
   <h2>See also</h2>
   <ol>
     <li><a href="{@docRoot}tools/sdk/index.html">Downloading Android Studio</a></li>
-    <li><a href="{@docRoot}tools/basics/index.html">Android Studio Basics</a></li>
+    <li><a href="{@docRoot}tools/studio/index.html">Android Studio</a></li>
     <li><a href="{@docRoot}tools/eclipse/migrate-adt.html">Migrating to Android Studio</a></li>
   </ol>
 </div>
@@ -26,8 +26,8 @@ to Android Studio</a> as the Eclipse ADT is no longer in active development.
 with an Android plugin for <em>Gradle</em>. <a href="http://www.gradle.org/">Gradle</a> is an
 advanced build toolkit that manages dependencies and allows you to define custom build logic. Android
 Studio also adds support for Maven-based build dependencies, build variants, advanced code
-completion and refactoring. For more details about Android Studio, see
-<a href="{@docRoot}tools/studio/basics.html">Android Studio basics.</a>
+completion and refactoring. For more details about Android Studio, see the
+<a href="{@docRoot}tools/studio/index.html">Android Studio</a> guide.
 
 <p>If you still wish to get started with the ADT plugin,
 <a href="{@docRoot}tools/eclipse/installing-adt.html">download and install the Eclipse ADT plugin.</a>
