@@ -727,6 +727,7 @@ public class Vpn {
                 if (interfaze.equals(mInterface) && jniCheck(interfaze) == 0) {
                     mStatusIntent = null;
                     mVpnUsers = null;
+                    mConfig = null;
                     mInterface = null;
                     if (mConnection != null) {
                         mContext.unbindService(mConnection);
