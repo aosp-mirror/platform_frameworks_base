@@ -68,6 +68,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"මුරපද අගුළු ඇරීම."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"රටා ප්‍රදේශය."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"සර්පණ ප්‍රදේශය."</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"පෙර ගීත බොත්තම"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"ඉදිරි ගීත බොත්තම"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"විරාම බොත්තම"</string>
@@ -146,7 +152,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"ඔබ ඔබගේ දුරකථනය අගුළු හැරීමට <xliff:g id="NUMBER">%d</xliff:g> වරක් වැරදි වශයෙන් උත්සාහ කර ඇත. සියලුම පැතිකඩ දත්ත මකා දමමින්, කාර්යාල පැතිකඩ මකා දැමෙනු ඇත."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ඔබ අගුළු ඇරිමේ රටාව <xliff:g id="NUMBER_0">%d</xliff:g> වතාවක් වැරදියට ඇඳ ඇත. තවත් අසාර්ථක උත්සාහ <xliff:g id="NUMBER_1">%d</xliff:g> කින් පසුව, ඊ-තැපැල් ගිණුම භාවිතා කරමින් ඔබගේ ටැබ්ලටයේ අගුළු ඇරීමට ඔබට පවසනු ඇත.\n\n නැවත තත්පර <xliff:g id="NUMBER_2">%d</xliff:g> කින් උත්සාහ කරන්න."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ඔබ වැරදියට <xliff:g id="NUMBER_0">%d</xliff:g> වතාවක් ඔබගේ අගුළු හැරීමේ රටාව ඇඳ ඇත. අසාර්ථක උත්සහ කිරීම් <xliff:g id="NUMBER_1">%d</xliff:g> න් පසුව, ඔබගේ ඊ-තැපැල් ලිපිනය භාවිතයෙන් ඔබගේ දුරකථනය අගුළු හැරීමට ඔබගෙන් අසයි.\n\n තත්පර <xliff:g id="NUMBER_2">%d</xliff:g> න් පසුව නැවත උත්සහ කරන්න."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ඉවත් කරන්න"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"වැරදී SIM PIN කේතයකි, ඔබගේ දුරකතනයේ අඟුල හැරීමට ඔබගේ වාහකයා ඔබ දැන් සම්බන්ධ කරගත යුතුය."</string>
   <plurals name="kg_password_wrong_pin_code">

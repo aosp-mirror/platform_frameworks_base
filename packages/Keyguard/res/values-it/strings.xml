@@ -66,6 +66,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Sblocco con password."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Area sequenza."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Area di scorrimento."</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Pulsante traccia precedente"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Pulsante traccia successiva"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pulsante Pausa"</string>
@@ -144,7 +150,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Hai tentato di sbloccare il telefono senza riuscirci per <xliff:g id="NUMBER">%d</xliff:g> volte. Il profilo di lavoro verrà rimosso e verranno quindi eliminati tutti i dati associati."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il tablet con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%d</xliff:g> secondi."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Rimuovi"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Codice PIN della SIM errato. Devi contattare l\'operatore per sbloccare il dispositivo."</string>
   <plurals name="kg_password_wrong_pin_code">

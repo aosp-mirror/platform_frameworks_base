@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Отключване с парола."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Област на фигурата."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Област на плъзгане."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Област за ПИН кода"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Област за ПИН кода на SIM картата"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Област за PUK кода на SIM картата"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Бутон за предишния запис"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Бутон за следващия запис"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Бутон за пауза"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Неправилно опитахте да отключите телефона <xliff:g id="NUMBER">%d</xliff:g> пъти. Служебният потребителски профил ще бъде премахнат, при което ще се изтрият всички данни за него."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите таблета посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%d</xliff:g> секунди."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Премахване"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Неправилен ПИН код за SIM картата – сега трябва да се свържете с оператора си, за да отключите устройството."</string>
   <plurals name="kg_password_wrong_pin_code">

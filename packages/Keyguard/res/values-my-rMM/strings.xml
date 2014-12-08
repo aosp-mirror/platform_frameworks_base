@@ -66,6 +66,12 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"စကားဝှက်ဖြင့် သော့ဖွင့်ခြင်း"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ပုံစံနေရာ"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ဘေးတိုက်ပွတ်ဆွဲရန် နေရာ"</string>
+    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
+    <skip />
+    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
+    <skip />
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"ပြီးခဲ့သော အပုဒ်အတွက် ခလုတ်"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"နောက်တစ်ပုဒ် ခလုတ်"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"ခဏရပ်ရန် ခလုတ်"</string>
@@ -144,7 +150,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"ဖုန်းအား သော့ဖွင့်ရန် သင် <xliff:g id="NUMBER">%d</xliff:g> ကြိမ် ကြိုးစားရာ မမှန်ကန်ခဲ့ပါ။ အလုပ်ပရိုဖိုင် ဖယ်ထုတ်ခံရမည်ဖြစ်ပြီး၊ ပရိုဖိုင်ဒေတာအားလုံး ပျက်သွားမည်ဖြစ်သည်။"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"သင် ပုံဖော်၍သော့ဖွင့်ခြင်းကို  <xliff:g id="NUMBER_0">%d</xliff:g> အကြိမ် မှန်ကန်စွာ မပြုလုပ်နိုင်ပါ။  နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မမှန်ကန်ပါက သင့်တက်ဘလက်အား အီးမေးလ်အသုံးပြု၍ သော့ဖွင့်ရန် တောင်းဆိုပါလိမ့်မည်။ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"သင် ပုံဖော်၍သော့ဖွင့်ခြင်းကို <xliff:g id="NUMBER_0">%d</xliff:g> အကြိမ် မှန်ကန်စွာ မပြုလုပ်နိုင်ပါ။ နောက်ထပ် <xliff:g id="NUMBER_1">%d</xliff:g> အကြိမ် မမှန်ကန်ပါက သင့်ဖုန်းအား အီးမေးလ်အသုံးပြု၍ သော့ဖွင့်ရန် တောင်းဆိုပါလိမ့်မည်။ \n\n <xliff:g id="NUMBER_2">%d</xliff:g> စက္ကန့်အကြာတွင် ပြန်လည် ကြိုးစားပါ"</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ဖယ်ရှားရန်"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ဆင်းကဒ် လျှို့ဝှက် အမှတ် မှားယွင်းပါသည်, ဖုန်းလိုင်းဌာနကို ဆက်သွယ်ရမည် ဖြစ်ပါတယ်"</string>
   <plurals name="kg_password_wrong_pin_code">
