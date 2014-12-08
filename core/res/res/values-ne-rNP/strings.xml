@@ -1275,9 +1275,7 @@
     <!-- no translation found for whichEditApplicationNamed (1775815530156447790) -->
     <skip />
     <string name="whichSendApplication" msgid="6902512414057341668">"साझेदारी गर्नुहोस्..."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichSendApplicationNamed (2799370240005424391) -->
-    <skip />
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"%1$s सँग साझेदारी गर्नुहोस्"</string>
     <string name="whichHomeApplication" msgid="4307587691506919691">"गृह अनुप्रयोग चयन गर्नुहोस्"</string>
     <string name="whichHomeApplicationNamed" msgid="4493438593214760979">"%1$s लाई गृहको रूपमा प्रयोग गर्नुहोस्"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"यस कार्यको लागि पूर्वनिर्धारितबाट प्रयोग गर्नुहोस्।"</string>
@@ -1651,7 +1649,7 @@
     <string name="SetupCallDefault" msgid="5834948469253758575">"कल स्वीकार गर्नुहुन्छ?"</string>
     <string name="activity_resolver_use_always" msgid="8017770747801494933">"सधैँ"</string>
     <string name="activity_resolver_use_once" msgid="2404644797149173758">"एउटा मात्र"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%%१$ को कार्य प्रोफाइल समर्थन गर्दैन"</string>
+    <string name="activity_resolver_work_profiles_support" msgid="185598180676883455">"%1$s  कार्य प्रोफाइल समर्थन गर्दैन"</string>
     <string name="default_audio_route_name" product="tablet" msgid="4617053898167127471">"ट्याब्लेट"</string>
     <string name="default_audio_route_name" product="tv" msgid="9158088547603019321">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="4239291273420140123">"फोन"</string>
