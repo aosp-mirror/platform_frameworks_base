@@ -33331,6 +33331,7 @@ package android.view {
     method public void dispatchDisplayHint(int);
     method public boolean dispatchDragEvent(android.view.DragEvent);
     method protected void dispatchDraw(android.graphics.Canvas);
+    method public void dispatchDrawableHotspotChanged(float, float);
     method protected boolean dispatchGenericFocusedEvent(android.view.MotionEvent);
     method public boolean dispatchGenericMotionEvent(android.view.MotionEvent);
     method protected boolean dispatchGenericPointerEvent(android.view.MotionEvent);

@@ -16059,7 +16059,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * This function is called whenever the view hotspot changes and needs to
-     * be propagated to drawables managed by the view.
+     * be propagated to drawables or child views managed by the view.
+     * <p>
+     * Dispatching to child views is handled by
+     * {@link #dispatchDrawableHotspotChanged(float, float)}.
      * <p>
      * Be sure to call through to the superclass when overriding this function.
      *
@@ -16070,6 +16073,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackground != null) {
             mBackground.setHotspot(x, y);
         }
+
+        dispatchDrawableHotspotChanged(x, y);
+    }
+
+    /**
+     * Dispatches drawableHotspotChanged to all of this View's children.
+     *
+     * @param x hotspot x coordinate
+     * @param y hotspot y coordinate
+     * @see #drawableHotspotChanged(float, float)
+     */
+    public void dispatchDrawableHotspotChanged(float x, float y) {
     }
 
     /**
