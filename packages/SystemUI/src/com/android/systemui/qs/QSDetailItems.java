@@ -18,13 +18,13 @@ package com.android.systemui.qs;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -162,6 +162,12 @@ public class QSDetailItems extends FrameLayout {
         view.setVisibility(mItemsVisible ? VISIBLE : INVISIBLE);
         final ImageView iv = (ImageView) view.findViewById(android.R.id.icon);
         iv.setImageResource(item.icon);
+        iv.getOverlay().clear();
+        if (item.overlay != null) {
+            item.overlay.setBounds(0, 0, item.overlay.getIntrinsicWidth(),
+                    item.overlay.getIntrinsicHeight());
+            iv.getOverlay().add(item.overlay);
+        }
         final TextView title = (TextView) view.findViewById(android.R.id.title);
         title.setText(item.line1);
         final TextView summary = (TextView) view.findViewById(android.R.id.summary);
@@ -213,6 +219,7 @@ public class QSDetailItems extends FrameLayout {
 
     public static class Item {
         public int icon;
+        public Drawable overlay;
         public String line1;
         public String line2;
         public Object tag;
