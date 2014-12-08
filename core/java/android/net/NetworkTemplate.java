@@ -22,7 +22,6 @@ import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIFI_P2P;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkIdentity.COMBINE_SUBTYPE_ENABLED;
-import static android.net.NetworkIdentity.scrubSubscriberId;
 import static android.net.wifi.WifiInfo.removeDoubleQuotes;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_2_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
@@ -36,7 +35,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -146,17 +147,35 @@ public class NetworkTemplate implements Parcelable {
 
     private final int mMatchRule;
     private final String mSubscriberId;
+
+    /**
+     * Ugh, templates are designed to target a single subscriber, but we might
+     * need to match several "merged" subscribers. These are the subscribers
+     * that should be considered to match this template.
+     * <p>
+     * Since the merge set is dynamic, it should <em>not</em> be persisted or
+     * used for determining equality.
+     */
+    private final String[] mMatchSubscriberIds;
+
     private final String mNetworkId;
 
     public NetworkTemplate(int matchRule, String subscriberId, String networkId) {
+        this(matchRule, subscriberId, new String[] { subscriberId }, networkId);
+    }
+
+    public NetworkTemplate(int matchRule, String subscriberId, String[] matchSubscriberIds,
+            String networkId) {
         mMatchRule = matchRule;
         mSubscriberId = subscriberId;
+        mMatchSubscriberIds = matchSubscriberIds;
         mNetworkId = networkId;
     }
 
     private NetworkTemplate(Parcel in) {
         mMatchRule = in.readInt();
         mSubscriberId = in.readString();
+        mMatchSubscriberIds = in.createStringArray();
         mNetworkId = in.readString();
     }
 
@@ -164,6 +183,7 @@ public class NetworkTemplate implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mMatchRule);
         dest.writeString(mSubscriberId);
+        dest.writeStringArray(mMatchSubscriberIds);
         dest.writeString(mNetworkId);
     }
 
@@ -177,7 +197,12 @@ public class NetworkTemplate implements Parcelable {
         final StringBuilder builder = new StringBuilder("NetworkTemplate: ");
         builder.append("matchRule=").append(getMatchRuleName(mMatchRule));
         if (mSubscriberId != null) {
-            builder.append(", subscriberId=").append(scrubSubscriberId(mSubscriberId));
+            builder.append(", subscriberId=").append(
+                    NetworkIdentity.scrubSubscriberId(mSubscriberId));
+        }
+        if (mMatchSubscriberIds != null) {
+            builder.append(", matchSubscriberIds=").append(
+                    Arrays.toString(NetworkIdentity.scrubSubscriberId(mMatchSubscriberIds)));
         }
         if (mNetworkId != null) {
             builder.append(", networkId=").append(mNetworkId);
@@ -199,6 +224,18 @@ public class NetworkTemplate implements Parcelable {
                     && Objects.equals(mNetworkId, other.mNetworkId);
         }
         return false;
+    }
+
+    public boolean isMatchRuleMobile() {
+        switch (mMatchRule) {
+            case MATCH_MOBILE_3G_LOWER:
+            case MATCH_MOBILE_4G:
+            case MATCH_MOBILE_ALL:
+            case MATCH_MOBILE_WILDCARD:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public int getMatchRule() {
@@ -247,8 +284,9 @@ public class NetworkTemplate implements Parcelable {
             // TODO: consider matching against WiMAX subscriber identity
             return true;
         } else {
-            return ((sForceAllNetworkTypes || contains(DATA_USAGE_NETWORK_TYPES, ident.mType))
-                    && Objects.equals(mSubscriberId, ident.mSubscriberId));
+            final boolean matchesType = (sForceAllNetworkTypes
+                    || contains(DATA_USAGE_NETWORK_TYPES, ident.mType));
+            return matchesType && ArrayUtils.contains(mMatchSubscriberIds, ident.mSubscriberId);
         }
     }
 
@@ -365,6 +403,27 @@ public class NetworkTemplate implements Parcelable {
         if (COMBINE_SUBTYPE_ENABLED) {
             throw new IllegalArgumentException(
                     "Unable to enforce 3G_LOWER template on combined data.");
+        }
+    }
+
+    /**
+     * Examine the given template and normalize if it refers to a "merged"
+     * mobile subscriber. We pick the "lowest" merged subscriber as the primary
+     * for key purposes, and expand the template to match all other merged
+     * subscribers.
+     * <p>
+     * For example, given an incoming template matching B, and the currently
+     * active merge set [A,B], we'd return a new template that primarily matches
+     * A, but also matches B.
+     */
+    public static NetworkTemplate normalize(NetworkTemplate template, String[] merged) {
+        if (template.isMatchRuleMobile() && ArrayUtils.contains(merged, template.mSubscriberId)) {
+            // Requested template subscriber is part of the merge group; return
+            // a template that matches all merged subscribers.
+            return new NetworkTemplate(template.mMatchRule, merged[0], merged,
+                    template.mNetworkId);
+        } else {
+            return template;
         }
     }
 

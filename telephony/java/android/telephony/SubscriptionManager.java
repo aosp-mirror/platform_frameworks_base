@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
@@ -1064,7 +1065,7 @@ public class SubscriptionManager {
      *         is never null but the length maybe 0.
      * @hide
      */
-    public int[] getActiveSubscriptionIdList() {
+    public @NonNull int[] getActiveSubscriptionIdList() {
         int[] subId = null;
 
         try {

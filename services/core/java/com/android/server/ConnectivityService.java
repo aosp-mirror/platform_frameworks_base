@@ -20,22 +20,8 @@ import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.RECEIVE_DATA_ACTIVITY_CHANGE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
-import static android.net.ConnectivityManager.TYPE_BLUETOOTH;
-import static android.net.ConnectivityManager.TYPE_DUMMY;
-import static android.net.ConnectivityManager.TYPE_MOBILE;
-import static android.net.ConnectivityManager.TYPE_MOBILE_CBS;
-import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
-import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
-import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
-import static android.net.ConnectivityManager.TYPE_MOBILE_IA;
-import static android.net.ConnectivityManager.TYPE_MOBILE_IMS;
-import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
-import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
 import static android.net.ConnectivityManager.TYPE_NONE;
-import static android.net.ConnectivityManager.TYPE_PROXY;
 import static android.net.ConnectivityManager.TYPE_VPN;
-import static android.net.ConnectivityManager.TYPE_WIFI;
-import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
@@ -45,11 +31,9 @@ import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -62,7 +46,6 @@ import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
-import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.LinkProperties.CompareResult;
 import android.net.MobileDataStateTracker;
@@ -72,7 +55,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkFactory;
 import android.net.NetworkMisc;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
@@ -80,16 +62,12 @@ import android.net.NetworkState;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.Proxy;
-import android.net.ProxyDataTracker;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.SamplingDataTracker;
 import android.net.UidRange;
 import android.net.Uri;
-import android.net.wimax.WimaxManagerConstants;
-import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -103,7 +81,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -126,9 +103,6 @@ import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.telephony.DctConstants;
-import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneConstants;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
@@ -146,8 +120,6 @@ import com.android.server.net.LockdownVpnTracker;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
 
-import dalvik.system.DexClassLoader;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -157,30 +129,19 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
-import java.net.HttpURLConnection;
 import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 
 /**
  * @hide
@@ -326,12 +287,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * used internally to send a sticky broadcast delayed.
      */
     private static final int EVENT_SEND_STICKY_BROADCAST_INTENT = 11;
-
-    /**
-     * Used internally to
-     * {@link NetworkStateTracker#setPolicyDataEnable(boolean)}.
-     */
-    private static final int EVENT_SET_POLICY_DATA_ENABLE = 12;
 
     /**
      * Used internally to disable fail fast of mobile data
@@ -850,6 +805,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         LinkProperties lp = null;
         NetworkCapabilities nc = null;
         Network network = null;
+        String subscriberId = null;
 
         if (mLegacyTypeTracker.isTypeSupported(networkType)) {
             NetworkAgentInfo nai = mLegacyTypeTracker.getNetworkForType(networkType);
@@ -859,6 +815,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     lp = new LinkProperties(nai.linkProperties);
                     nc = new NetworkCapabilities(nai.networkCapabilities);
                     network = new Network(nai.network);
+                    subscriberId = (nai.networkMisc != null) ? nai.networkMisc.subscriberId : null;
                 }
                 info.setType(networkType);
             } else {
@@ -872,7 +829,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             info = getFilteredNetworkInfo(info, lp, uid);
         }
 
-        return new NetworkState(info, lp, nc, network);
+        return new NetworkState(info, lp, nc, network, subscriberId, null);
     }
 
     private NetworkAgentInfo getNetworkAgentInfoForNetwork(Network network) {
@@ -889,6 +846,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         LinkProperties lp = null;
         NetworkCapabilities nc = null;
         Network network = null;
+        String subscriberId = null;
 
         NetworkAgentInfo nai = mNetworkForRequestId.get(mDefaultRequest.requestId);
 
@@ -920,10 +878,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 lp = new LinkProperties(nai.linkProperties);
                 nc = new NetworkCapabilities(nai.networkCapabilities);
                 network = new Network(nai.network);
+                subscriberId = (nai.networkMisc != null) ? nai.networkMisc.subscriberId : null;
             }
         }
 
-        return new NetworkState(info, lp, nc, network);
+        return new NetworkState(info, lp, nc, network, subscriberId, null);
     }
 
     /**
@@ -1220,14 +1179,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public NetworkState[] getAllNetworkState() {
-        enforceAccessPermission();
-        final int uid = Binder.getCallingUid();
+        // Require internal since we're handing out IMSI details
+        enforceConnectivityInternalPermission();
+
         final ArrayList<NetworkState> result = Lists.newArrayList();
-        for (int networkType = 0; networkType <= ConnectivityManager.MAX_NETWORK_TYPE;
-                networkType++) {
-            NetworkState state = getFilteredNetworkState(networkType, uid);
-            if (state.networkInfo != null) {
-                result.add(state);
+        for (Network network : getAllNetworks()) {
+            final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
+            if (nai != null) {
+                synchronized (nai) {
+                    final String subscriberId = (nai.networkMisc != null)
+                            ? nai.networkMisc.subscriberId : null;
+                    result.add(new NetworkState(nai.networkInfo, nai.linkProperties,
+                            nai.networkCapabilities, network, subscriberId, null));
+                }
             }
         }
         return result.toArray(new NetworkState[result.size()]);
@@ -1451,25 +1415,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // }
         }
     };
-
-    @Override
-    public void setPolicyDataEnable(int networkType, boolean enabled) {
-        // only someone like NPMS should only be calling us
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-
-        mHandler.sendMessage(mHandler.obtainMessage(
-                EVENT_SET_POLICY_DATA_ENABLE, networkType, (enabled ? ENABLED : DISABLED)));
-    }
-
-    private void handleSetPolicyDataEnable(int networkType, boolean enabled) {
-   // TODO - handle this passing to factories
-//        if (isNetworkTypeValid(networkType)) {
-//            final NetworkStateTracker tracker = mNetTrackers[networkType];
-//            if (tracker != null) {
-//                tracker.setPolicyDataEnable(enabled);
-//            }
-//        }
-    }
 
     private void enforceInternetPermission() {
         mContext.enforceCallingOrSelfPermission(
@@ -2455,12 +2400,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case EVENT_SEND_STICKY_BROADCAST_INTENT: {
                     Intent intent = (Intent)msg.obj;
                     sendStickyBroadcast(intent);
-                    break;
-                }
-                case EVENT_SET_POLICY_DATA_ENABLE: {
-                    final int networkType = msg.arg1;
-                    final boolean enabled = msg.arg2 == ENABLED;
-                    handleSetPolicyDataEnable(networkType, enabled);
                     break;
                 }
                 case EVENT_ENABLE_FAIL_FAST_MOBILE_DATA: {
@@ -3857,7 +3796,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         mNumDnsEntries = last;
     }
-
 
     private void updateCapabilities(NetworkAgentInfo networkAgent,
             NetworkCapabilities networkCapabilities) {

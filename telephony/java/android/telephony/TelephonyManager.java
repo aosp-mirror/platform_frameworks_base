@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -40,6 +41,7 @@ import com.android.internal.telephony.TelephonyProperties;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1879,6 +1881,23 @@ public class TelephonyManager {
     }
 
     /**
+     * Return the set of subscriber IDs that should be considered as "merged
+     * together" for data usage purposes. This is commonly {@code null} to
+     * indicate no merging is required. Any returned subscribers are sorted in a
+     * deterministic order.
+     *
+     * @hide
+     */
+    public @Nullable String[] getMergedSubscriberIds() {
+        try {
+            return getITelephony().getMergedSubscriberIds();
+        } catch (RemoteException ex) {
+        } catch (NullPointerException ex) {
+        }
+        return null;
+    }
+
+    /**
      * Returns the MSISDN string.
      * for a GSM phone. Return null if it is unavailable.
      * <p>
@@ -3593,5 +3612,3 @@ public class TelephonyManager {
         }
     }
 }
-
-
