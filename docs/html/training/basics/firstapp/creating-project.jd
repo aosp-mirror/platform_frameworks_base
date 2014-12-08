@@ -24,8 +24,6 @@ next.link=running-app.html
 <h2>You should also read</h2>
 
 <ul>
-  <li><a href="{@docRoot}sdk/installing/index.html">Installing the
-SDK</a></li>
   <li><a href="{@docRoot}tools/projects/index.html">Managing Projects</a></li>
 </ul>
 
@@ -34,8 +32,7 @@ SDK</a></li>
 </div>
 
 <p>An Android project contains all the files that comprise the source code for your Android
-app. The Android SDK tools make it easy to start a new Android project with a set of
-default project directories and files.</p>
+app.</p>
 
 <p>This lesson
 shows how to create a new project either using Android Studio or using the
