@@ -67,11 +67,13 @@ tasks:</p>
     <a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a>
     element. You may also have to configure several other settings to meet Google Play
     requirements or accomodate whatever method you're using to release your application.</p>
+    <p>If you are using Gradle build files, you can use the <em>release</em> build type to set
+    your build settings for the published version of your app.  </p>
   </li>
   <li>Building and signing a release version of your application.
-    <p>The Android Development Tools (ADT) plugin and the Ant build script that are provided
-    with the Android SDK tools provide everything you need to build and sign a release version of
-    your application.</p>
+    <p>You can use the Gradle build files with the <em>release</em> build type to build and sign a
+    release version of your application. See
+    <a href="{@docRoot}tools/gradle/studio-build.html">Building Your Project with Gradle</a>.</p>
   </li>
   <li>Testing the release version of your application.
     <p>Before you distribute your application, you should thoroughly test the release version on at
