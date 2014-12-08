@@ -339,7 +339,7 @@
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"habilitar depuración de aplicación"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"Permite que la aplicación active la depuración de otra aplicación. Las aplicaciones malintencionadas pueden usar este permiso para interrumpir la ejecución de otras aplicaciones."</string>
     <string name="permlab_changeConfiguration" msgid="4162092185124234480">"modificar ajustes de visualización del sistema"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Permite que la aplicación cambie la configuración actual como, por ejemplo, la configuración local o el tamaño de fuente general."</string>
+    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"Permite que la aplicación cambie la configuración actual como, por ejemplo, la configuración local o el tamaño de la fuente general."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"habilitar modo coche"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Permite que la aplicación habilite el modo coche."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"cerrar otras aplicaciones"</string>

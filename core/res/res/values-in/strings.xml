@@ -1304,7 +1304,7 @@
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Menyelesaikan boot."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>
     <string name="heavy_weight_notification_detail" msgid="1721681741617898865">"Sentuh untuk beralih ke apl"</string>
-    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Beralih apl?"</string>
+    <string name="heavy_weight_switcher_title" msgid="7153167085403298169">"Beralih aplikasi?"</string>
     <string name="heavy_weight_switcher_text" msgid="7022631924534406403">"Apl lain sudah berjalan dan harus dihentikan agar Anda dapat memulai yang baru."</string>
     <string name="old_app_action" msgid="493129172238566282">"Kembali ke<xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
     <string name="old_app_description" msgid="2082094275580358049">"Jangan memulai aplikasi baru."</string>

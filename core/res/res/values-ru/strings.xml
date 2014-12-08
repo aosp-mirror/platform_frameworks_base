@@ -272,7 +272,7 @@
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Специальные возможности, которые можно запрашивать"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Читать содержимое окна."</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Распознавать содержимое окна, в котором вы находитесь."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать изучение касанием."</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать аудиоподсказки."</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Озвучивать нажимаемые элементы и разрешать управление устройством с помощью жестов."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Включать дополнительные возможности для работы в Интернете."</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"При необходимости устанавливать скрипты, чтобы получить больше специальных возможностей."</string>
@@ -1122,9 +1122,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"Удалить запрос"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Отправить запрос"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Голосовой поиск"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Включить \"Изучение касанием\"?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хочет включить функцию \"Изучение касанием\". Она позволяет прослушивать или просматривать описание элементов, которых вы касаетесь, и управлять планшетным ПК с помощью жестов."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хочет включить функцию \"Изучение касанием\". Она позволяет прослушивать или просматривать описание элементов, которых вы касаетесь, и управлять телефоном с помощью жестов."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Включить аудиоподсказки?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хочет включить функцию \"Аудиоподсказки\". Она позволяет прослушивать или просматривать описание элементов, которых вы касаетесь, и управлять планшетным ПК с помощью жестов."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хочет включить функцию \"Аудиоподсказки\". Она позволяет прослушивать или просматривать описание элементов, которых вы касаетесь, и управлять телефоном с помощью жестов."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 месяц назад"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Более месяца назад"</string>
   <plurals name="num_seconds_ago">
