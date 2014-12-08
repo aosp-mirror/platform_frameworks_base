@@ -40,6 +40,12 @@ For example, if you add a button to the layout without specifying the <em>width<
 add all missing attributs</em>. Clicking the message adds the missing attributes to the layout.</p>
 
 
+<h2>Output window message filtering</h2>
+<p>When checking build results, you can filter messages by <em>message type</em> to quickly
+locate messages of interest.</p>
+<img src="{@docRoot}images/tools/studio-outputwindowmsgfiltering.png" style="width:200px"style="width:200px" />
+<p class="img-caption"><strong>Figure 14.</strong> Filter Build Messages</p>
+
 <h3> Bitmap rendering in the debugger</h3>
 <p>While debugging, you can now right-click on bitmap variables in your app and invoke
 <em>View Bitmap</em>. This fetches the associated data from the debugged process and renders
@@ -91,6 +97,10 @@ practices you should consider using when creating Android Studio apps. </p>
 is based), refer to the
 <a href="http://www.jetbrains.com/idea/documentation/index.jsp">IntelliJ IDEA documentation</a>.</p>
 
+<h3>External annotations</h3>
+<p>Specify annotations within the code or from an external annotation file. The Android Studio
+IDE keeps track of the restrictions and validates compliance, for example setting the data type
+of a string as not null.</p>
 
 
 <h3><em>Alt + Enter</em> key binding</h3>
@@ -115,12 +125,10 @@ individual classes. </p>
 you can set a scope to identify all code related to a specific action bar.   </p>
 
 
-
 <h3>External annotations</h3>
 <p>Specify annotations within the code or from an external annotation file. The Android Studio
 IDE keeps track of the restrictions and validates compliance, for example setting the data type
 of a string as not null.</p>
-
 
 
 <h3>Injecting languages</h3>
@@ -142,7 +150,6 @@ updates. </p>
 (in actual size at different densities) in the code margin to help you verify the image or icon
 reference.  Pressing {@code F1} with the preview image or icon selected displays resource asset
 details, such as the <em>dp</em> settings.   </p>
-
 
 <h3>Quick F1 documentation</h3>
 <p>You can now inspect theme attributes using <strong>View > Quick Documentation</strong>
