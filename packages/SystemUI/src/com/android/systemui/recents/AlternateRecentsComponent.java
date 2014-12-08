@@ -61,15 +61,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /** A proxy implementation for the recents component */
 public class AlternateRecentsComponent implements ActivityOptions.OnAnimationStartedListener {
 
-    final public static String EXTRA_FROM_HOME = "recents.triggeredOverHome";
-    final public static String EXTRA_FROM_SEARCH_HOME = "recents.triggeredOverSearchHome";
-    final public static String EXTRA_FROM_APP_THUMBNAIL = "recents.animatingWithThumbnail";
-    final public static String EXTRA_FROM_TASK_ID = "recents.activeTaskId";
     final public static String EXTRA_TRIGGERED_FROM_ALT_TAB = "recents.triggeredFromAltTab";
     final public static String EXTRA_TRIGGERED_FROM_HOME_KEY = "recents.triggeredFromHomeKey";
-    final public static String EXTRA_REUSE_TASK_STACK_VIEWS = "recents.reuseTaskStackViews";
-    final public static String EXTRA_NUM_VISIBLE_TASKS = "recents.numVisibleTasks";
-    final public static String EXTRA_NUM_VISIBLE_THUMBNAILS = "recents.numVisibleThumbnails";
 
     final public static String ACTION_START_ENTER_ANIMATION = "action_start_enter_animation";
     final public static String ACTION_TOGGLE_RECENTS_ACTIVITY = "action_toggle_recents_activity";
@@ -550,7 +543,8 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             ActivityOptions opts = getThumbnailTransitionActivityOptions(topTask, stack,
                     mDummyStackView);
             if (opts != null) {
-                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_APP_THUMBNAIL, stackVr);
+                startAlternateRecentsActivity(topTask, opts, false /* fromHome */,
+                        false /* fromSearchHome */, true /* fromThumbnail */, stackVr);
             } else {
                 // Fall through below to the non-thumbnail transition
                 useThumbnailTransition = false;
@@ -583,12 +577,13 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
                 }
 
                 ActivityOptions opts = getHomeTransitionActivityOptions(fromSearchHome);
-                startAlternateRecentsActivity(topTask, opts,
-                        fromSearchHome ? EXTRA_FROM_SEARCH_HOME : EXTRA_FROM_HOME, stackVr);
+                startAlternateRecentsActivity(topTask, opts, true /* fromHome */, fromSearchHome,
+                        false /* fromThumbnail */, stackVr);
             } else {
                 // Otherwise we do the normal fade from an unknown source
                 ActivityOptions opts = getUnknownTransitionActivityOptions();
-                startAlternateRecentsActivity(topTask, opts, EXTRA_FROM_HOME, stackVr);
+                startAlternateRecentsActivity(topTask, opts, true /* fromHome */,
+                        false /* fromSearchHome */, false /* fromThumbnail */, stackVr);
             }
         }
         mLastToggleTime = SystemClock.elapsedRealtime();
@@ -596,21 +591,24 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     /** Starts the recents activity */
     void startAlternateRecentsActivity(ActivityManager.RunningTaskInfo topTask,
-            ActivityOptions opts, String extraFlag,
+            ActivityOptions opts, boolean fromHome, boolean fromSearchHome, boolean fromThumbnail,
             TaskStackViewLayoutAlgorithm.VisibilityReport vr) {
+        // Update the configuration based on the launch options
+        mConfig.launchedFromHome = fromSearchHome || fromHome;
+        mConfig.launchedFromSearchHome = fromSearchHome;
+        mConfig.launchedFromAppWithThumbnail = fromThumbnail;
+        mConfig.launchedToTaskId = (topTask != null) ? topTask.id : -1;
+        mConfig.launchedWithAltTab = mTriggeredFromAltTab;
+        mConfig.launchedReuseTaskStackViews = mCanReuseTaskStackViews;
+        mConfig.launchedNumVisibleTasks = vr.numVisibleTasks;
+        mConfig.launchedNumVisibleThumbnails = vr.numVisibleThumbnails;
+        mConfig.launchedHasConfigurationChanged = false;
+
         Intent intent = new Intent(sToggleRecentsAction);
         intent.setClassName(sRecentsPackage, sRecentsActivity);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS
                 | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-        if (extraFlag != null) {
-            intent.putExtra(extraFlag, true);
-        }
-        intent.putExtra(EXTRA_TRIGGERED_FROM_ALT_TAB, mTriggeredFromAltTab);
-        intent.putExtra(EXTRA_FROM_TASK_ID, (topTask != null) ? topTask.id : -1);
-        intent.putExtra(EXTRA_REUSE_TASK_STACK_VIEWS, mCanReuseTaskStackViews);
-        intent.putExtra(EXTRA_NUM_VISIBLE_TASKS, vr.numVisibleTasks);
-        intent.putExtra(EXTRA_NUM_VISIBLE_THUMBNAILS, vr.numVisibleThumbnails);
         if (opts != null) {
             mContext.startActivityAsUser(intent, opts.toBundle(), UserHandle.CURRENT);
         } else {
