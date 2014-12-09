@@ -235,7 +235,9 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     void prepareEnterRecentsAnimation(boolean isTaskViewLaunchTargetTask,
                                              boolean occludesLaunchTarget, int offscreenY) {
         int initialDim = getDim();
-        if (mConfig.launchedFromAppWithThumbnail) {
+        if (mConfig.launchedHasConfigurationChanged) {
+            // Just load the views as-is
+        } else if (mConfig.launchedFromAppWithThumbnail) {
             if (isTaskViewLaunchTargetTask) {
                 // Set the dim to 0 so we can animate it in
                 initialDim = 0;
