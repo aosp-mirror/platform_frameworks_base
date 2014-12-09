@@ -121,7 +121,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -266,6 +265,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 = new HashMap<ComponentName, ActiveAdmin>();
         final ArrayList<ActiveAdmin> mAdminList
                 = new ArrayList<ActiveAdmin>();
+        final ArrayList<ComponentName> mRemovingAdmins
+                = new ArrayList<ComponentName>();
 
         // This is the list of component allowed to start lock task mode.
         final List<String> mLockTaskPackages = new ArrayList<String>();
@@ -1213,6 +1214,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     void removeActiveAdminLocked(final ComponentName adminReceiver, int userHandle) {
         final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
         if (admin != null) {
+            synchronized (this) {
+                getUserData(userHandle).mRemovingAdmins.add(adminReceiver);
+            }
             sendAdminCommandLocked(admin,
                     DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED,
                     new BroadcastReceiver() {
@@ -1232,9 +1236,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 }
                                 saveSettingsLocked(userHandle);
                                 updateMaximumTimeToLockLocked(policy);
+                                policy.mRemovingAdmins.remove(adminReceiver);
                             }
                         }
-            });
+                    });
         }
     }
 
@@ -1796,6 +1801,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         enforceCrossUserPermission(userHandle);
         synchronized (this) {
             return getActiveAdminUncheckedLocked(adminReceiver, userHandle) != null;
+        }
+    }
+
+    @Override
+    public boolean isRemovingAdmin(ComponentName adminReceiver, int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
+        enforceCrossUserPermission(userHandle);
+        synchronized (this) {
+            DevicePolicyData policyData = getUserData(userHandle);
+            return policyData.mRemovingAdmins.contains(adminReceiver);
         }
     }
 
@@ -4101,6 +4118,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 pw.println(":");
                         ap.dump("    ", pw);
                     }
+                }
+                if (!policy.mRemovingAdmins.isEmpty()) {
+                    p.println("  Removing Device Admins (User " + policy.mUserHandle + "): "
+                            + policy.mRemovingAdmins);
                 }
 
                 pw.println(" ");
