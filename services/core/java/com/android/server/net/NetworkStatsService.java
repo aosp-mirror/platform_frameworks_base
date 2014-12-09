@@ -26,9 +26,7 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
-import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_IMMEDIATE;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
-import static android.net.NetworkIdentity.COMBINE_SUBTYPE_ENABLED;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
@@ -55,8 +53,6 @@ import static android.provider.Settings.Global.NETSTATS_UID_TAG_BUCKET_DURATION;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_DELETE_AGE;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE;
-import static android.telephony.PhoneStateListener.LISTEN_DATA_CONNECTION_STATE;
-import static android.telephony.PhoneStateListener.LISTEN_NONE;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -102,7 +98,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -308,10 +303,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             bootstrapStatsLocked();
         }
 
-        // watch for network interfaces to be claimed
-        final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION_IMMEDIATE);
-        mContext.registerReceiver(mConnReceiver, connFilter, CONNECTIVITY_INTERNAL, mHandler);
-
         // watch for tethering changes
         final IntentFilter tetherFilter = new IntentFilter(ACTION_TETHER_STATE_CHANGED);
         mContext.registerReceiver(mTetherReceiver, tetherFilter, null, mHandler);
@@ -338,12 +329,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // ignored; service lives in system_server
         }
 
-        // watch for networkType changes that aren't broadcast through
-        // CONNECTIVITY_ACTION_IMMEDIATE above.
-        if (!COMBINE_SUBTYPE_ENABLED) {
-            mTeleManager.listen(mPhoneListener, LISTEN_DATA_CONNECTION_STATE);
-        }
-
         registerPollAlarmLocked();
         registerGlobalAlert();
     }
@@ -358,15 +343,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private void shutdownLocked() {
-        mContext.unregisterReceiver(mConnReceiver);
         mContext.unregisterReceiver(mTetherReceiver);
         mContext.unregisterReceiver(mPollReceiver);
         mContext.unregisterReceiver(mRemovedReceiver);
         mContext.unregisterReceiver(mShutdownReceiver);
-
-        if (!COMBINE_SUBTYPE_ENABLED) {
-            mTeleManager.listen(mPhoneListener, LISTEN_NONE);
-        }
 
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
@@ -620,6 +600,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
+    public void forceUpdateIfaces() {
+        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+        assertBandwidthControlEnabled();
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            updateIfaces();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
     public void forceUpdate() {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
         assertBandwidthControlEnabled();
@@ -674,20 +667,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mUidTagRecorder.setPersistThreshold(mSettings.getUidTagPersistBytes(mPersistThreshold));
         mGlobalAlertBytes = mSettings.getGlobalAlertBytes(mPersistThreshold);
     }
-
-    /**
-     * Receiver that watches for {@link IConnectivityManager} to claim network
-     * interfaces. Used to associate {@link TelephonyManager#getSubscriberId()}
-     * with mobile interfaces.
-     */
-    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and verified CONNECTIVITY_INTERNAL
-            // permission above.
-            updateIfaces();
-        }
-    };
 
     /**
      * Receiver that watches for {@link Tethering} to claim interface pairs.
@@ -781,35 +760,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // re-arm global alert for next update
                 mHandler.obtainMessage(MSG_REGISTER_GLOBAL_ALERT).sendToTarget();
             }
-        }
-    };
-
-    private int mLastPhoneState = TelephonyManager.DATA_UNKNOWN;
-    private int mLastPhoneNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-
-    /**
-     * Receiver that watches for {@link TelephonyManager} changes, such as
-     * transitioning between network types.
-     */
-    private PhoneStateListener mPhoneListener = new PhoneStateListener() {
-        @Override
-        public void onDataConnectionStateChanged(int state, int networkType) {
-            final boolean stateChanged = state != mLastPhoneState;
-            final boolean networkTypeChanged = networkType != mLastPhoneNetworkType;
-
-            if (networkTypeChanged && !stateChanged) {
-                // networkType changed without a state change, which means we
-                // need to roll our own update. delay long enough for
-                // ConnectivityManager to process.
-                // TODO: add direct event to ConnectivityService instead of
-                // relying on this delay.
-                if (LOGV) Slog.v(TAG, "triggering delayed updateIfaces()");
-                mHandler.sendMessageDelayed(
-                        mHandler.obtainMessage(MSG_UPDATE_IFACES), SECOND_IN_MILLIS);
-            }
-
-            mLastPhoneState = state;
-            mLastPhoneNetworkType = networkType;
         }
     };
 
