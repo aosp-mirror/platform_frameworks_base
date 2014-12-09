@@ -354,7 +354,7 @@ public class UsbDeviceManager {
                     SystemProperties.set("sys.usb.config", mDefaultFunctions);
                 }
 
-                mCurrentFunctions = mDefaultFunctions;
+                mCurrentFunctions = getDefaultFunctions();
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
                 mAdbEnabled = containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ADB);
@@ -460,8 +460,10 @@ public class UsbDeviceManager {
             if (enable != mAdbEnabled) {
                 mAdbEnabled = enable;
                 // Due to the persist.sys.usb.config property trigger, changing adb state requires
-                // switching to default function
+                // persisting default function
                 setEnabledFunctions(mDefaultFunctions, true);
+                // After persisting them use the lock-down aware function set
+                setEnabledFunctions(getDefaultFunctions(), false);
                 updateAdbNotification();
             }
             if (mDebuggingManager != null) {
@@ -557,7 +559,7 @@ public class UsbDeviceManager {
                 // make sure accessory mode is off
                 // and restore default functions
                 Slog.d(TAG, "exited USB accessory mode");
-                setEnabledFunctions(mDefaultFunctions, false);
+                setEnabledFunctions(getDefaultFunctions(), false);
 
                 if (mCurrentAccessory != null) {
                     if (mBootCompleted) {
@@ -631,7 +633,7 @@ public class UsbDeviceManager {
                         updateCurrentAccessory();
                     } else if (!mConnected) {
                         // restore defaults when USB is disconnected
-                        setEnabledFunctions(mDefaultFunctions, false);
+                        setEnabledFunctions(getDefaultFunctions(), false);
                     }
                     if (mBootCompleted) {
                         updateUsbState();
@@ -664,9 +666,11 @@ public class UsbDeviceManager {
                 case MSG_USER_SWITCHED: {
                     UserManager userManager =
                             (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-                    if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
-                        Slog.v(TAG, "Switched to user with DISALLOW_USB_FILE_TRANSFER restriction;"
-                                + " disabling USB.");
+                    UserHandle userHandle = new UserHandle(msg.arg1);
+                    if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER,
+                            userHandle)) {
+                        Slog.v(TAG, "Switched to user " + msg.arg1 +
+                                " with DISALLOW_USB_FILE_TRANSFER restriction; disabling USB.");
                         setUsbConfig("none");
                         mCurrentUser = msg.arg1;
                         break;
@@ -788,6 +792,15 @@ public class UsbDeviceManager {
                 mAdbNotificationShown = false;
                 mNotificationManager.cancelAsUser(null, id, UserHandle.ALL);
             }
+        }
+
+        private String getDefaultFunctions() {
+            UserManager userManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+            if (userManager.hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER,
+                    new UserHandle(mCurrentUser))) {
+                return "none";
+            }
+            return mDefaultFunctions;
         }
 
         public void dump(FileDescriptor fd, PrintWriter pw) {
