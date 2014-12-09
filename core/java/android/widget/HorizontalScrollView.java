@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -757,8 +758,20 @@ public class HorizontalScrollView extends FrameLayout {
         } else {
             super.scrollTo(scrollX, scrollY);
         }
-        
+
         awakenScrollBars();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void addClickableRectsForAccessibility(List<RectF> outRects) {
+        // This class always consumes touch events, therefore if it
+        // covers a view we do not want to send a click over it.
+        RectF bounds = new RectF();
+        bounds.set(0, 0, getWidth(), getHeight());
+        outRects.add(bounds);
     }
 
     @Override
