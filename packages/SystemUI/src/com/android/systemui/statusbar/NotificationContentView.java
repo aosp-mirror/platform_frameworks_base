@@ -124,6 +124,7 @@ public class NotificationContentView extends FrameLayout {
         mContractedChild = child;
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child);
         selectLayout(false /* animate */, true /* force */);
+        mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
     }
 
     public void setExpandedChild(View child) {
