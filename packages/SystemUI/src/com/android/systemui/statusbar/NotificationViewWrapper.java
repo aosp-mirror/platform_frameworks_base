@@ -53,4 +53,9 @@ public abstract class NotificationViewWrapper {
      * @param delay if fading, the delay of the animation
      */
     public abstract void setDark(boolean dark, boolean fade, long delay);
+
+    /**
+     * Notifies this wrapper that the content of the view might have changed.
+     */
+    public void notifyContentUpdated() {}
 }
