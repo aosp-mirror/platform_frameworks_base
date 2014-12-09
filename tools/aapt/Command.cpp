@@ -517,12 +517,10 @@ static void printFeatureGroup(const FeatureGroup& grp,
 
     const size_t numFeatures = grp.features.size();
     for (size_t i = 0; i < numFeatures; i++) {
-        if (!grp.features[i]) {
-            continue;
-        }
+        const bool required = grp.features[i];
 
         const String8& featureName = grp.features.keyAt(i);
-        printf("  uses-feature: name='%s'\n",
+        printf("  uses-feature%s: name='%s'\n", (required ? "" : "-not-required"),
                 ResTable::normalizeForOutput(featureName.string()).string());
     }
 
@@ -1842,7 +1840,7 @@ int doDump(Bundle* bundle)
                         }
                     }
 
-                   if (!grp.features.isEmpty()) {
+                    if (!grp.features.isEmpty()) {
                         printFeatureGroup(grp);
                     }
                 }
