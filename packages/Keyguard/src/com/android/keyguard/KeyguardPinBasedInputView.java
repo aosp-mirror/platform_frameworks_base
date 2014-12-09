@@ -17,7 +17,11 @@
 package com.android.keyguard;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
@@ -28,19 +32,39 @@ import android.view.View;
 public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
         implements View.OnKeyListener {
 
+    private final android.database.ContentObserver mSpeakPasswordObserver
+            = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
+            // Ensure that it's not called too early
+            if (mButton0 != null) {
+                mButton0.updateContentDescription();
+                mButton1.updateContentDescription();
+                mButton2.updateContentDescription();
+                mButton3.updateContentDescription();
+                mButton4.updateContentDescription();
+                mButton5.updateContentDescription();
+                mButton6.updateContentDescription();
+                mButton7.updateContentDescription();
+                mButton8.updateContentDescription();
+                mButton9.updateContentDescription();
+            }
+        }
+    };
     protected PasswordTextView mPasswordEntry;
     private View mOkButton;
     private View mDeleteButton;
-    private View mButton0;
-    private View mButton1;
-    private View mButton2;
-    private View mButton3;
-    private View mButton4;
-    private View mButton5;
-    private View mButton6;
-    private View mButton7;
-    private View mButton8;
-    private View mButton9;
+    private NumPadKey mButton0;
+    private NumPadKey mButton1;
+    private NumPadKey mButton2;
+    private NumPadKey mButton3;
+    private NumPadKey mButton4;
+    private NumPadKey mButton5;
+    private NumPadKey mButton6;
+    private NumPadKey mButton7;
+    private NumPadKey mButton8;
+    private NumPadKey mButton9;
 
     public KeyguardPinBasedInputView(Context context) {
         this(context, null);
@@ -48,6 +72,9 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
 
     public KeyguardPinBasedInputView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        context.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD), true,
+                mSpeakPasswordObserver, UserHandle.USER_ALL);
     }
 
     @Override
@@ -188,16 +215,16 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
             }
         });
 
-        mButton0 = findViewById(R.id.key0);
-        mButton1 = findViewById(R.id.key1);
-        mButton2 = findViewById(R.id.key2);
-        mButton3 = findViewById(R.id.key3);
-        mButton4 = findViewById(R.id.key4);
-        mButton5 = findViewById(R.id.key5);
-        mButton6 = findViewById(R.id.key6);
-        mButton7 = findViewById(R.id.key7);
-        mButton8 = findViewById(R.id.key8);
-        mButton9 = findViewById(R.id.key9);
+        mButton0 = (NumPadKey) findViewById(R.id.key0);
+        mButton1 = (NumPadKey) findViewById(R.id.key1);
+        mButton2 = (NumPadKey) findViewById(R.id.key2);
+        mButton3 = (NumPadKey) findViewById(R.id.key3);
+        mButton4 = (NumPadKey) findViewById(R.id.key4);
+        mButton5 = (NumPadKey) findViewById(R.id.key5);
+        mButton6 = (NumPadKey) findViewById(R.id.key6);
+        mButton7 = (NumPadKey) findViewById(R.id.key7);
+        mButton8 = (NumPadKey) findViewById(R.id.key8);
+        mButton9 = (NumPadKey) findViewById(R.id.key9);
 
         mPasswordEntry.requestFocus();
         super.onFinishInflate();
