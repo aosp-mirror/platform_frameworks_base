@@ -272,7 +272,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (mMobileSignalControllers.containsKey(dataSubId)) {
             return mMobileSignalControllers.get(dataSubId);
         }
-        Log.e(TAG, "Cannot find controller for data sub: " + dataSubId);
+        if (DEBUG) Log.e(TAG, "Cannot find controller for data sub: " + dataSubId);
         return mDefaultSignalController;
     }
 
@@ -293,7 +293,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         if (mMobileSignalControllers.containsKey(voiceSubId)) {
             return mMobileSignalControllers.get(voiceSubId).isEmergencyOnly();
         }
-        Log.e(TAG, "Cannot find controller for voice sub: " + voiceSubId);
+        if (DEBUG) Log.e(TAG, "Cannot find controller for voice sub: " + voiceSubId);
         // Something is wrong, better assume we can't make calls...
         return true;
     }
