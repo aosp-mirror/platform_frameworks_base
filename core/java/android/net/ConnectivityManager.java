@@ -100,7 +100,7 @@ public class ConnectivityManager {
 
     /**
      * Identical to {@link #CONNECTIVITY_ACTION} broadcast, but sent without any
-     * historic {@link Settings.Global#CONNECTIVITY_CHANGE_DELAY}.
+     * applicable {@link Settings.Global#CONNECTIVITY_CHANGE_DELAY}.
      *
      * @hide
      */
@@ -426,6 +426,18 @@ public class ConnectivityManager {
      */
     @Deprecated
     public static final int DEFAULT_NETWORK_PREFERENCE = TYPE_WIFI;
+
+    /**
+     * Default value for {@link Settings.Global#CONNECTIVITY_CHANGE_DELAY} in
+     * milliseconds.  This was introduced because IPv6 routes seem to take a
+     * moment to settle - trying network activity before the routes are adjusted
+     * can lead to packets using the wrong interface or having the wrong IP address.
+     * This delay is a bit crude, but in the future hopefully we will have kernel
+     * notifications letting us know when it's safe to use the new network.
+     *
+     * @hide
+     */
+    public static final int CONNECTIVITY_CHANGE_DELAY_DEFAULT = 3000;
 
     /**
      * @hide
