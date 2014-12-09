@@ -3505,8 +3505,15 @@ public class TelephonyManager {
     /** @hide */
     @SystemApi
     public void setDataEnabled(boolean enable) {
+        setDataEnabled(SubscriptionManager.getDefaultDataSubId(), enable);
+    }
+
+    /** @hide */
+    @SystemApi
+    public void setDataEnabled(int subId, boolean enable) {
         try {
-            getITelephony().setDataEnabled(enable);
+            Log.d(TAG, "setDataEnabled: enabled=" + enable);
+            getITelephony().setDataEnabled(subId, enable);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#setDataEnabled", e);
         }
@@ -3515,12 +3522,21 @@ public class TelephonyManager {
     /** @hide */
     @SystemApi
     public boolean getDataEnabled() {
+        return getDataEnabled(SubscriptionManager.getDefaultDataSubId());
+    }
+
+    /** @hide */
+    @SystemApi
+    public boolean getDataEnabled(int subId) {
+        boolean retVal;
         try {
-            return getITelephony().getDataEnabled();
+            retVal = getITelephony().getDataEnabled(subId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling ITelephony#getDataEnabled", e);
+            retVal = false;
         }
-        return false;
+        Log.d(TAG, "getDataEnabled: retVal=" + retVal);
+        return retVal;
     }
 
     /**
