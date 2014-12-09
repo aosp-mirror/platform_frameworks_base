@@ -19,6 +19,7 @@ package android.graphics.drawable;
 import com.android.internal.R;
 
 import android.annotation.NonNull;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -26,16 +27,19 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.Resources.Theme;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.Drawable.ConstantState;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * A Drawable that insets another Drawable by a specified distance.
@@ -471,6 +475,15 @@ public class InsetDrawable extends Drawable implements Drawable.Callback {
             }
 
             return mCanConstantState;
+        }
+
+        @Override
+        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
+            final ConstantState state = mDrawable.getConstantState();
+            if (state != null) {
+                return state.addAtlasableBitmaps(atlasList);
+            }
+            return 0;
         }
     }
 
