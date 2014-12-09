@@ -1074,9 +1074,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     /**
      * Retrieves the PSS memory used by the process as given by the
      * smaps.  Optionally supply a long array of 1 entry to also
-     * receive the uss of the process.  @hide
+     * receive the uss of the process, and another array to also
+     * retrieve the separate memtrack size.  @hide
      */
-    public static native long getPss(int pid, long[] outUss);
+    public static native long getPss(int pid, long[] outUss, long[] outMemtrack);
 
     /** @hide */
     public static final int MEMINFO_TOTAL = 0;
