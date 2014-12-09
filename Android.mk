@@ -332,6 +332,7 @@ LOCAL_SRC_FILES += \
 	media/java/android/media/IRemoteVolumeObserver.aidl \
 	media/java/android/media/IRingtonePlayer.aidl \
 	media/java/android/media/IVolumeController.aidl \
+        media/java/android/media/audiopolicy/IAudioPolicyCallback.aidl \
 	media/java/android/media/projection/IMediaProjection.aidl \
 	media/java/android/media/projection/IMediaProjectionCallback.aidl \
 	media/java/android/media/projection/IMediaProjectionManager.aidl \
@@ -450,6 +451,7 @@ aidl_files := \
 	frameworks/base/media/java/android/media/routing/MediaRouteSelector.aidl \
 	frameworks/base/media/java/android/media/Rating.aidl \
 	frameworks/base/media/java/android/media/AudioAttributes.aidl \
+	frameworks/base/media/java/android/media/AudioFocusInfo.aidl \
 	frameworks/base/media/java/android/media/session/PlaybackState.aidl \
 	frameworks/base/media/java/android/media/session/MediaSession.aidl \
 	frameworks/base/media/java/android/media/tv/TvInputInfo.aidl \

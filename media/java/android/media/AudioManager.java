@@ -2355,17 +2355,42 @@ public class AudioManager {
     }
 
     // when adding new flags, add them to the relevant AUDIOFOCUS_FLAGS_APPS or SYSTEM masks
-    /** @hide */
+    /**
+     * @hide
+     * Use this flag when requesting audio focus to indicate it is ok for the requester to not be
+     * granted audio focus immediately (as indicated by {@link #AUDIOFOCUS_REQUEST_DELAYED}) when
+     * the system is in a state where focus cannot change, but be granted focus later when
+     * this condition ends.
+     */
     @SystemApi
     public static final int AUDIOFOCUS_FLAG_DELAY_OK = 0x1 << 0;
-    /** @hide */
+    /**
+     * @hide
+     * Use this flag when requesting audio focus to indicate that the requester
+     * will pause its media playback (if applicable) when losing audio focus with
+     * {@link #AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK}, rather than ducking.
+     * <br>On some platforms, the ducking may be handled without the application being aware of it
+     * (i.e. it will not transiently lose focus). For applications that for instance play spoken
+     * content, such as audio book or podcast players, ducking may never be acceptable, and will
+     * thus always pause. This flag enables them to be declared as such whenever they request focus.
+     */
     @SystemApi
-    public static final int AUDIOFOCUS_FLAG_LOCK     = 0x1 << 1;
+    public static final int AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS = 0x1 << 1;
+    /**
+     * @hide
+     * Use this flag to lock audio focus so granting is temporarily disabled.
+     * <br>This flag can only be used by owners of a registered
+     * {@link android.media.audiopolicy.AudioPolicy} in
+     * {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int, AudioPolicy)}
+     */
+    @SystemApi
+    public static final int AUDIOFOCUS_FLAG_LOCK     = 0x1 << 2;
     /** @hide */
-    public static final int AUDIOFOCUS_FLAGS_APPS = AUDIOFOCUS_FLAG_DELAY_OK;
+    public static final int AUDIOFOCUS_FLAGS_APPS = AUDIOFOCUS_FLAG_DELAY_OK
+            | AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS;
     /** @hide */
     public static final int AUDIOFOCUS_FLAGS_SYSTEM = AUDIOFOCUS_FLAG_DELAY_OK
-            | AUDIOFOCUS_FLAG_LOCK;
+            | AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS | AUDIOFOCUS_FLAG_LOCK;
 
     /**
      * @hide
@@ -2387,15 +2412,12 @@ public class AudioManager {
      *      usecases such as voice memo recording, or speech recognition.
      *      Use {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
      *      as the playback of a song or a video.
-     * @param flags 0 or {link #AUDIOFOCUS_FLAG_DELAY_OK}.
+     * @param flags 0 or a combination of {link #AUDIOFOCUS_FLAG_DELAY_OK}
+     *     and {@link #AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS}.
      *     <br>Use 0 when not using any flags for the request, which behaves like
      *     {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, where either audio
      *     focus is granted immediately, or the grant request fails because the system is in a
      *     state where focus cannot change (e.g. a phone call).
-     *     <br>Use {link #AUDIOFOCUS_FLAG_DELAY_OK} if it is ok for the requester to not be granted
-     *     audio focus immediately (as indicated by {@link #AUDIOFOCUS_REQUEST_DELAYED}) when
-     *     the system is in a state where focus cannot change, but be granted focus later when
-     *     this condition ends.
      * @return {@link #AUDIOFOCUS_REQUEST_FAILED}, {@link #AUDIOFOCUS_REQUEST_GRANTED}
      *     or {@link #AUDIOFOCUS_REQUEST_DELAYED}.
      *     The return value is never {@link #AUDIOFOCUS_REQUEST_DELAYED} when focus is requested
@@ -2429,17 +2451,11 @@ public class AudioManager {
      * @param durationHint see the description of the same parameter in
      *     {@link #requestAudioFocus(OnAudioFocusChangeListener, AudioAttributes, int, int)}
      * @param flags 0 or a combination of {link #AUDIOFOCUS_FLAG_DELAY_OK},
-     *     {@link #AUDIOFOCUS_FLAG_LOCK}
+     *     {@link #AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS}, and {@link #AUDIOFOCUS_FLAG_LOCK}.
      *     <br>Use 0 when not using any flags for the request, which behaves like
      *     {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, where either audio
      *     focus is granted immediately, or the grant request fails because the system is in a
      *     state where focus cannot change (e.g. a phone call).
-     *     <br>Use {link #AUDIOFOCUS_FLAG_DELAY_OK} if it is ok for the requester to not be granted
-     *     audio focus immediately (as indicated by {@link #AUDIOFOCUS_REQUEST_DELAYED}) when
-     *     the system is in a state where focus cannot change, but be granted focus later when
-     *     this condition ends.
-     *     <br>Use {@link #AUDIOFOCUS_FLAG_LOCK} when locking audio focus so granting is
-     *     temporarily disabled.
      * @param ap a registered {@link android.media.audiopolicy.AudioPolicy} instance when locking
      *     focus, or null.
      * @return see the description of the same return value in
@@ -2480,7 +2496,7 @@ public class AudioManager {
             status = service.requestAudioFocus(requestAttributes, durationHint, mICallBack,
                     mAudioFocusDispatcher, getIdForAudioFocusListener(l),
                     mContext.getOpPackageName() /* package name */, flags,
-                    ap != null ? ap.token() : null);
+                    ap != null ? ap.cb() : null);
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call requestAudioFocus() on AudioService:", e);
         }
@@ -2857,7 +2873,8 @@ public class AudioManager {
         }
         IAudioService service = getService();
         try {
-            String regId = service.registerAudioPolicy(policy.getConfig(), policy.token());
+            String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
+                    policy.hasFocusListener());
             if (regId == null) {
                 return ERROR;
             } else {
@@ -2882,7 +2899,7 @@ public class AudioManager {
         }
         IAudioService service = getService();
         try {
-            service.unregisterAudioPolicyAsync(policy.token());
+            service.unregisterAudioPolicyAsync(policy.cb());
             policy.setRegistration(null);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterAudioPolicyAsync()", e);

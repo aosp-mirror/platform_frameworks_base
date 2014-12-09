@@ -30,6 +30,7 @@ import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.Rating;
 import android.media.audiopolicy.AudioPolicyConfig;
+import android.media.audiopolicy.IAudioPolicyCallback;
 import android.net.Uri;
 import android.view.KeyEvent;
 
@@ -123,7 +124,7 @@ interface IAudioService {
 
     int requestAudioFocus(in AudioAttributes aa, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
-            IBinder policyToken);
+            IAudioPolicyCallback pcb);
 
     int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, in AudioAttributes aa);
 
@@ -213,6 +214,9 @@ interface IAudioService {
 
     boolean isHdmiSystemAudioSupported();
 
-           String registerAudioPolicy(in AudioPolicyConfig policyConfig, IBinder cb);
-    oneway void unregisterAudioPolicyAsync(in IBinder cb);
+           String registerAudioPolicy(in AudioPolicyConfig policyConfig,
+                    in IAudioPolicyCallback pcb, boolean hasFocusListener);
+    oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
+
+           int setFocusPropertiesForPolicy(int duckingBehavior, in IAudioPolicyCallback pcb);
 }
