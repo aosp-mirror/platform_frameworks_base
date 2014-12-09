@@ -683,15 +683,12 @@ public abstract class BaseStatusBar extends SystemUI implements
             Log.v(TAG, String.format("%s: current userid: %d, notification userid: %d",
                     n, thisUserId, notificationUserId));
         }
-        synchronized (mCurrentProfiles) {
-            return notificationUserId == UserHandle.USER_ALL
-                    || mCurrentProfiles.get(notificationUserId) != null;
-        }
+        return isCurrentProfile(notificationUserId);
     }
 
     protected boolean isCurrentProfile(int userId) {
         synchronized (mCurrentProfiles) {
-            return mCurrentProfiles.get(userId) != null;
+            return userId == UserHandle.USER_ALL || mCurrentProfiles.get(userId) != null;
         }
     }
 
