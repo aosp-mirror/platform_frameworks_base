@@ -301,7 +301,7 @@ href="http://developer.android.com/sdk/index.html">developer.android.com/sdk/</a
 <ul style="margin-top:50px;color:#444">
   <li><a href="#Requirements">System Requirements</a></li>
   <li><a href="#Other">Other Download Options</a></li>
-  <li><a href="{@docRoot}sdk/installing/migrate.html">Migrating to Android Studio</a></li>
+  <li><a href="{@docRoot}sdk/installing/migrate.html">Migrate from Eclipse</a></li>
 </ul>
 
 </div>
