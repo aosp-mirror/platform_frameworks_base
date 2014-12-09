@@ -679,14 +679,14 @@ interface ITelephony {
      *
      * @param enable true to turn on, else false
      */
-    void setDataEnabled(boolean enable);
+    void setDataEnabled(int subId, boolean enable);
 
     /**
      * Get the user enabled state of Mobile Data.
      *
      * @return true on enabled
      */
-    boolean getDataEnabled();
+    boolean getDataEnabled(int subId);
 
     /**
      * Get P-CSCF address from PCO after data connection is established or modified.
