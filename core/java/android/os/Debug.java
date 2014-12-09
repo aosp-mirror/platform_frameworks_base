@@ -168,7 +168,7 @@ public final class Debug
         public static final int NUM_OTHER_STATS = 16;
 
         /** @hide */
-        public static final int NUM_DVK_STATS = 5;
+        public static final int NUM_DVK_STATS = 8;
 
         /** @hide */
         public static final int NUM_CATEGORIES = 7;
@@ -313,6 +313,9 @@ public final class Debug
                 case 18: return ".LinearAlloc";
                 case 19: return ".GC";
                 case 20: return ".JITCache";
+                case 21: return ".Zygote";
+                case 22: return ".NonMoving";
+                case 23: return ".IndirectRef";
                 default: return "????";
             }
         }
