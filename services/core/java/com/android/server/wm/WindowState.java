@@ -617,8 +617,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
         mOverscanInsets.set(Math.max(mOverscanFrame.left - mFrame.left, 0),
                 Math.max(mOverscanFrame.top - mFrame.top, 0),
-                Math.min(mFrame.right - mOverscanFrame.right, 0),
-                Math.min(mFrame.bottom - mOverscanFrame.bottom, 0));
+                Math.max(mFrame.right - mOverscanFrame.right, 0),
+                Math.max(mFrame.bottom - mOverscanFrame.bottom, 0));
 
         mContentInsets.set(mContentFrame.left - mFrame.left,
                 mContentFrame.top - mFrame.top,
