@@ -719,8 +719,9 @@ public:
                 pureTranslate, bounds, mPaint);
     }
 
-    virtual void output(int level, uint32_t /* logFlags */) const {
-        OP_LOG("Draw bitmap %p at %f %f", mBitmap, mLocalBounds.left, mLocalBounds.top);
+    virtual void output(int level, uint32_t logFlags) const {
+        OP_LOG("Draw bitmap %p at %f %f%s", mBitmap, mLocalBounds.left, mLocalBounds.top,
+                mEntry ? " using AssetAtlas" : "");
     }
 
     virtual const char* name() { return "DrawBitmap"; }
@@ -953,8 +954,9 @@ public:
                 getPaint(renderer));
     }
 
-    virtual void output(int level, uint32_t /* logFlags */) const {
-        OP_LOG("Draw patch " RECT_STRING, RECT_ARGS(mLocalBounds));
+    virtual void output(int level, uint32_t logFlags) const {
+        OP_LOG("Draw patch " RECT_STRING "%s", RECT_ARGS(mLocalBounds),
+                mEntry ? " with AssetAtlas" : "");
     }
 
     virtual const char* name() { return "DrawPatch"; }

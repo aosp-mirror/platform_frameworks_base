@@ -48,6 +48,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 
 /**
  *
@@ -289,7 +290,7 @@ public class NinePatchDrawable extends Drawable {
         if (bounds.isEmpty()) return;
 
         if (mNinePatchState != null) {
-            NinePatch.InsetStruct insets = mNinePatchState.getBitmap().getNinePatchInsets();
+            NinePatch.InsetStruct insets = mNinePatchState.mNinePatch.getBitmap().getNinePatchInsets();
             if (insets != null) {
                 final Rect outlineInsets = insets.outlineRect;
                 outline.setRoundRect(bounds.left + outlineInsets.left,
@@ -648,8 +649,12 @@ public class NinePatchDrawable extends Drawable {
         }
 
         @Override
-        public Bitmap getBitmap() {
-            return mNinePatch.getBitmap();
+        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
+            final Bitmap bitmap = mNinePatch.getBitmap();
+            if (isAtlasable(bitmap) && atlasList.add(bitmap)) {
+                return bitmap.getWidth() * bitmap.getHeight();
+            }
+            return 0;
         }
 
         @Override

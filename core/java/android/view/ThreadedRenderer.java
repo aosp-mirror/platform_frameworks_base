@@ -37,6 +37,7 @@ import android.view.View.AttachInfo;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -465,11 +466,13 @@ public class ThreadedRenderer extends HardwareRenderer {
             final LongSparseArray<Drawable.ConstantState> drawables = resources.getPreloadedDrawables();
 
             final int count = drawables.size();
+            ArrayList<Bitmap> tmpList = new ArrayList<Bitmap>();
             for (int i = 0; i < count; i++) {
-                final Bitmap bitmap = drawables.valueAt(i).getBitmap();
-                if (bitmap != null && bitmap.getConfig() == Bitmap.Config.ARGB_8888) {
-                    preloadedPointers.add(bitmap.mNativeBitmap);
+                drawables.valueAt(i).addAtlasableBitmaps(tmpList);
+                for (int j = 0; j < tmpList.size(); j++) {
+                    preloadedPointers.add(tmpList.get(j).mNativeBitmap);
                 }
+                tmpList.clear();
             }
 
             for (int i = 0; i < map.length; i += 4) {
