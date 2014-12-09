@@ -6,7 +6,8 @@ page.title=Migrating to Android Studio
 <div id="qv">
 <h2>See also</h2>
 <ul>
-  <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
+  <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA"
+  class="external-link">IntelliJ FAQ on migrating to IntelliJ IDEA</a></li>
  <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/Working+in+Eclipse+Compatibility+Mode" class="external-link"
  >Eclipse Compatibility Mode</a></li>
  <li><a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA" class="external-link"
@@ -17,23 +18,11 @@ page.title=Migrating to Android Studio
 
 <p>If you're currently using Eclipse with ADT, we recommend you migrate to
 <a href="{@docRoot}tools/studio/index.html">Android Studio</a> as soon as possible, because
-the ADT plugin for Eclipse is no longer in active development.</p>
+the <a href="{@docRoot}tools/help/adt.html">ADT plugin</a>
+for Eclipse is no longer in active development.</p>
 
 
-<p>To migrate existing Android projects from Eclipse,
-you should export your projects from Eclipse in order to generate
-Gradle build files:</p>
-
-<ol>
-  <li>In Eclipse, select <strong>File &gt; Export</strong>.</li>
-  <li>Select <strong>Generate Gradle build files</strong> inside the Android folder, then click
-  <strong>Next</strong>.</li>
-  <li>Click <strong>Browse</strong> to find your project to export.</li>
-  <li>Select your project from the list, click <strong>OK</strong>, then <strong>Finish</strong>.</li>
-</ol>
-
-
-<p>You can then import the project into Android Studio:</p>
+<p>To migrate existing Android projects, simply import them using Android Studio:</p>
 
 <ol>
   <li>In Android Studio, close any projects currently open. You should see the
@@ -45,11 +34,10 @@ Gradle build files:</p>
   <strong>OK</strong>. (You do not need to specify the Gradle home.)</li>
 </ol>
 
-<p>It's possible to import an existing Android project to Android Studio even if you
-don't generate a Gradle build file from Eclipse&mdash;Android Studio will successfully build and
-run projects using an existing Ant build file. However, in order to take advantage of build
-variants and other advanced features in the future,
-you should generate a Gradle build file using
-the ADT plugin or write your own Gradle build file for use with Android Studio.</p>
+<p>Android Studio properly updates the project structure and creates the appropriate
+Gradle build file.</p>
 
-<p><a href="{@docRoot}tools/studio/index.html">Learn more about Android Studio</a>.</p>
+<p>For more help getting started with Android Studio and the IntelliJ user experience,
+<a href="{@docRoot}tools/studio/index.html">learn more about Android Studio</a> and
+read <a href="http://confluence.jetbrains.com/display/IntelliJIDEA/FAQ+on+Migrating+to+IntelliJ+IDEA"
+  class="external-link">FAQ on Migrating to IntelliJ IDEA</a>.</p>
