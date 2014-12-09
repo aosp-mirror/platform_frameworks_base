@@ -26,6 +26,7 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -40,16 +41,17 @@ import com.android.systemui.statusbar.phone.NotificationPanelView;
  */
 public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
 
-    private final ViewInvertHelper mInvertHelper;
-    private final ImageView mIcon;
-    protected final ImageView mPicture;
     private final ColorMatrix mGrayscaleColorMatrix = new ColorMatrix();
     private final PorterDuffColorFilter mIconColorFilter = new PorterDuffColorFilter(
             0, PorterDuff.Mode.SRC_ATOP);
     private final int mIconDarkAlpha;
-    private final int mIconBackgroundColor;
     private final int mIconBackgroundDarkColor;
     private final Interpolator mLinearOutSlowInInterpolator;
+
+    private int mIconBackgroundColor;
+    private ViewInvertHelper mInvertHelper;
+    private ImageView mIcon;
+    protected ImageView mPicture;
 
     protected NotificationTemplateViewWrapper(Context ctx, View view) {
         super(view);
@@ -58,12 +60,16 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
                 ctx.getResources().getColor(R.color.doze_small_icon_background_color);
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(ctx,
                 android.R.interpolator.linear_out_slow_in);
-        View mainColumn = view.findViewById(com.android.internal.R.id.notification_main_column);
+        resolveViews();
+    }
+
+    private void resolveViews() {
+        View mainColumn = mView.findViewById(com.android.internal.R.id.notification_main_column);
         mInvertHelper = mainColumn != null
                 ? new ViewInvertHelper(mainColumn, NotificationPanelView.DOZE_ANIMATION_DURATION)
                 : null;
-        ImageView largeIcon = (ImageView) view.findViewById(com.android.internal.R.id.icon);
-        ImageView rightIcon = (ImageView) view.findViewById(com.android.internal.R.id.right_icon);
+        ImageView largeIcon = (ImageView) mView.findViewById(com.android.internal.R.id.icon);
+        ImageView rightIcon = (ImageView) mView.findViewById(com.android.internal.R.id.right_icon);
         mIcon = resolveIcon(largeIcon, rightIcon);
         mPicture = resolvePicture(largeIcon);
         mIconBackgroundColor = resolveBackgroundColor(mIcon);
@@ -89,6 +95,14 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
             }
         }
         return 0;
+    }
+
+    @Override
+    public void notifyContentUpdated() {
+        super.notifyContentUpdated();
+
+        // Reinspect the notification.
+        resolveViews();
     }
 
     @Override
@@ -180,7 +194,13 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     private void updateIconColorFilter(ImageView target, float intensity) {
         int color = interpolateColor(mIconBackgroundColor, mIconBackgroundDarkColor, intensity);
         mIconColorFilter.setColor(color);
-        target.getBackground().mutate().setColorFilter(mIconColorFilter);
+        Drawable background = target.getBackground();
+
+        // The notification might have been modified during the animation, so background might be
+        // null here.
+        if (background != null) {
+            background.mutate().setColorFilter(mIconColorFilter);
+        }
     }
 
     private void updateIconAlpha(ImageView target, boolean dark) {
