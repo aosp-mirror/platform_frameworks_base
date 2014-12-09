@@ -3421,7 +3421,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 return false;
             }
 
-            // Windows are ordered in z order so start from the botton and find
+            // Windows are ordered in z order so start from the bottom and find
             // the window of interest. After that all windows that cover it should
             // be subtracted from the resulting region. Note that for accessibility
             // we are returning only interactive windows.
@@ -3439,7 +3439,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                         windowInteractiveRegion = outRegion;
                         continue;
                     }
-                } else {
+                } else if (currentWindow.getType()
+                        != AccessibilityWindowInfo.TYPE_ACCESSIBILITY_OVERLAY) {
                     Rect currentWindowBounds = mTempRect;
                     currentWindow.getBoundsInScreen(currentWindowBounds);
                     if (windowInteractiveRegion.op(currentWindowBounds, Region.Op.DIFFERENCE)) {
