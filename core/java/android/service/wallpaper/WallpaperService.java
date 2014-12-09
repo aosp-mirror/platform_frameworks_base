@@ -691,8 +691,8 @@ public abstract class WallpaperService extends Service {
                     if (DEBUG) Log.v(TAG, "New surface: " + mSurfaceHolder.mSurface
                             + ", frame=" + mWinFrame);
                     
-                    int w = mWinFrame.width() + mOverscanInsets.left + mOverscanInsets.right;
-                    int h = mWinFrame.height() + mOverscanInsets.top + mOverscanInsets.bottom;
+                    int w = mWinFrame.width();
+                    int h = mWinFrame.height();
 
                     if (!fixedSize) {
                         final Rect padding = mIWallpaperEngine.mDisplayPadding;
