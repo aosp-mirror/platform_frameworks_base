@@ -72,6 +72,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
 
@@ -1217,7 +1218,12 @@ public class KeyguardViewMediator extends SystemUI {
         synchronized (this) {
             if (mBootCompleted) {
                 final UserHandle currentUser = new UserHandle(mLockPatternUtils.getCurrentUser());
-                mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, currentUser);
+                final UserManager um = (UserManager) mContext.getSystemService(
+                        Context.USER_SERVICE);
+                List <UserInfo> userHandles = um.getProfiles(currentUser.getIdentifier());
+                for (UserInfo ui : userHandles) {
+                    mContext.sendBroadcastAsUser(USER_PRESENT_INTENT, ui.getUserHandle());
+                }
             } else {
                 mBootSendUserPresent = true;
             }
