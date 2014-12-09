@@ -27752,6 +27752,7 @@ package android.speech.tts {
     method public abstract deprecated void onError(java.lang.String);
     method public void onError(java.lang.String, int);
     method public abstract void onStart(java.lang.String);
+    method public void onStop(java.lang.String, boolean);
   }
 
   public class Voice implements android.os.Parcelable {

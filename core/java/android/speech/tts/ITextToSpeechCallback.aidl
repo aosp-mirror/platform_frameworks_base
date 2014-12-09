@@ -40,7 +40,7 @@ oneway interface ITextToSpeechCallback {
      *
      * @param utteranceId Unique id identifying synthesis request.
      */
-    void onStop(String utteranceId);
+    void onStop(String utteranceId, boolean isStarted);
 
     /**
      * Tells the client that the synthesis has failed.
