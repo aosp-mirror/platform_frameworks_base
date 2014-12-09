@@ -277,9 +277,13 @@ public class SignalClusterView
                     mWifiStrengthId));
 
         boolean anyMobileVisible = false;
+        int firstMobileTypeId = 0;
         for (PhoneState state : mPhoneStates) {
             if (state.apply(anyMobileVisible)) {
-                anyMobileVisible = true;
+                if (!anyMobileVisible) {
+                    firstMobileTypeId = state.mMobileTypeId;
+                    anyMobileVisible = true;
+                }
             }
         }
 
@@ -298,7 +302,7 @@ public class SignalClusterView
             mWifiAirplaneSpacer.setVisibility(View.GONE);
         }
 
-        if ((anyMobileVisible || mNoSimsVisible) && mWifiVisible) {
+        if (((anyMobileVisible && firstMobileTypeId != 0) || mNoSimsVisible) && mWifiVisible) {
             mWifiSignalSpacer.setVisibility(View.VISIBLE);
         } else {
             mWifiSignalSpacer.setVisibility(View.GONE);
