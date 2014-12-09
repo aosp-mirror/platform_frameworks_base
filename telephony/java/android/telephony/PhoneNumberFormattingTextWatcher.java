@@ -117,6 +117,7 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
             }
             mSelfChange = false;
         }
+        PhoneNumberUtils.ttsSpanAsPhoneNumber(s, 0, s.length());
     }
 
     /**
