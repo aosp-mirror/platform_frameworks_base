@@ -62,6 +62,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginRight="72dp"
                     androidprv:scaledTextSize="28"
+                    android:contentDescription="@string/keyguard_accessibility_sim_puk_area"
                     />
             <ImageButton
                     android:id="@+id/delete_button"
