@@ -883,8 +883,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return true;
     }
 
+    /**
+     * @hide
+     */
     @Override
-    void addClickableRectsForAccessibility(List<RectF> outRects) {
+    public void addClickableRectsForAccessibility(List<RectF> outRects) {
         int sizeBefore = outRects.size();
 
         super.addClickableRectsForAccessibility(outRects);
