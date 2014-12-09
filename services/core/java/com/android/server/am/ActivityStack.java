@@ -222,13 +222,6 @@ final class ActivityStack {
     long mLaunchStartTime = 0;
     long mFullyDrawnStartTime = 0;
 
-    /**
-     * Save the most recent screenshot for reuse. This keeps Recents from taking two identical
-     * screenshots, one for the Recents thumbnail and one for the pauseActivity thumbnail.
-     */
-    private ActivityRecord mLastScreenshotActivity = null;
-    private Bitmap mLastScreenshotBitmap = null;
-
     int mCurrentUser;
 
     final int mStackId;
@@ -741,18 +734,6 @@ final class ActivityStack {
         }
     }
 
-    /**
-     * This resets the saved state from the last screenshot, forcing a new screenshot to be taken
-     * again when requested.
-     */
-    private void invalidateLastScreenshot() {
-        mLastScreenshotActivity = null;
-        if (mLastScreenshotBitmap != null) {
-            mLastScreenshotBitmap.recycle();
-        }
-        mLastScreenshotBitmap = null;
-    }
-
     public final Bitmap screenshotActivities(ActivityRecord who) {
         if (DEBUG_SCREENSHOTS) Slog.d(TAG, "screenshotActivities: " + who);
         if (who.noDisplay) {
@@ -762,30 +743,17 @@ final class ActivityStack {
 
         if (isHomeStack()) {
             // This is an optimization -- since we never show Home or Recents within Recents itself,
-            // we can just go ahead and skip taking the screenshot if this is the home stack.  In
-            // the case where the most recent task is not the task that was supplied, then the stack
-            // has changed, so invalidate the last screenshot().
-            invalidateLastScreenshot();
-            if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tIs Home stack? " + isHomeStack());
+            // we can just go ahead and skip taking the screenshot if this is the home stack.
+            if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tHome stack");
             return null;
         }
 
         int w = mService.mThumbnailWidth;
         int h = mService.mThumbnailHeight;
         if (w > 0) {
-            if (who != mLastScreenshotActivity || mLastScreenshotBitmap == null
-                    || mLastScreenshotActivity.state == ActivityState.RESUMED
-                    || mLastScreenshotBitmap.getWidth() != w
-                    || mLastScreenshotBitmap.getHeight() != h) {
-                if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tUpdating screenshot");
-                mLastScreenshotActivity = who;
-                mLastScreenshotBitmap = mWindowManager.screenshotApplications(
-                        who.appToken, Display.DEFAULT_DISPLAY, w, h, SCREENSHOT_FORCE_565);
-            }
-            if (mLastScreenshotBitmap != null) {
-                if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tReusing last screenshot");
-                return mLastScreenshotBitmap.copy(mLastScreenshotBitmap.getConfig(), true);
-            }
+            if (DEBUG_SCREENSHOTS) Slog.d(TAG, "\tTaking screenshot");
+            return mWindowManager.screenshotApplications(who.appToken, Display.DEFAULT_DISPLAY,
+                    w, h, SCREENSHOT_FORCE_565);
         }
         Slog.e(TAG, "Invalid thumbnail dimensions: " + w + "x" + h);
         return null;
@@ -1103,11 +1071,6 @@ final class ActivityStack {
             next.cpuTimeAtResume = 0; // Couldn't get the cpu time of process
         }
 
-        // If we are resuming the activity that we had last screenshotted, then we know it will be
-        // updated, so invalidate the last screenshot to ensure we take a fresh one when requested
-        if (next == mLastScreenshotActivity) {
-            invalidateLastScreenshot();
-        }
         next.returningOptions = null;
 
         if (mActivityContainer.mActivityDisplay.mVisibleBehindActivity == next) {
@@ -1823,9 +1786,6 @@ final class ActivityStack {
                 if (nextNext != next) {
                     // Do over!
                     mStackSupervisor.scheduleResumeTopActivities();
-                }
-                if (next == mLastScreenshotActivity) {
-                    invalidateLastScreenshot();
                 }
                 if (mStackSupervisor.reportResumedActivityLocked(next)) {
                     mNoAnimActivities.clear();
