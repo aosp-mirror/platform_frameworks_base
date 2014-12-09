@@ -37,7 +37,7 @@ Gradle build files:</p>
 <ol>
   <li>In Android Studio, close any projects currently open. You should see the
   <strong>Welcome to Android Studio</strong> window.</li>
-  <li>Click <strong>Import Project</strong>.</li>
+  <li>Click <strong>Import Non-Android Studio project</strong>.</li>
   <li>Locate the project you exported from Eclipse, expand it, select the
   <strong>build.gradle</strong> file and click <strong>OK</strong>.</li>
   <li>In the following dialog, leave <strong>Use gradle wrapper</strong> selected and click
