@@ -364,7 +364,7 @@ public abstract class Window {
         /**
          * This hook is called whenever the window focus changes.  See
          * {@link View#onWindowFocusChanged(boolean)
-         * View.onWindowFocusChanged(boolean)} for more information.
+         * View.onWindowFocusChangedNotLocked(boolean)} for more information.
          *
          * @param hasFocus Whether the window now has focus.
          */

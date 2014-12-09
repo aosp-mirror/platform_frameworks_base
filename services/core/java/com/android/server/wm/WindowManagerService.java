@@ -7635,7 +7635,15 @@ public class WindowManagerService extends IWindowManager.Stub
                     WindowState lastFocus;
                     WindowState newFocus;
 
+                    AccessibilityController accessibilityController = null;
+
                     synchronized(mWindowMap) {
+                        // TODO(multidisplay): Accessibility supported only of default desiplay.
+                        if (mAccessibilityController != null && getDefaultDisplayContentLocked()
+                                .getDisplayId() == Display.DEFAULT_DISPLAY) {
+                            accessibilityController = mAccessibilityController;
+                        }
+
                         lastFocus = mLastFocus;
                         newFocus = mCurrentFocus;
                         if (lastFocus == newFocus) {
@@ -7651,6 +7659,12 @@ public class WindowManagerService extends IWindowManager.Stub
                             mLosingFocus.add(lastFocus);
                             lastFocus = null;
                         }
+                    }
+
+                    // First notify the accessibility manager for the change so it has
+                    // the windows before the newly focused one starts firing eventgs.
+                    if (accessibilityController != null) {
+                        accessibilityController.onWindowFocusChangedNotLocked();
                     }
 
                     //System.out.println("Changing focus from " + lastFocus
@@ -10425,12 +10439,6 @@ public class WindowManagerService extends IWindowManager.Stub
             final WindowState oldFocus = mCurrentFocus;
             mCurrentFocus = newFocus;
             mLosingFocus.remove(newFocus);
-
-            // TODO(multidisplay): Accessibilty supported only of default desiplay.
-            if (mAccessibilityController != null
-                    && displayContent.getDisplayId() == Display.DEFAULT_DISPLAY) {
-                mAccessibilityController.onWindowFocusChangedLocked();
-            }
 
             int focusChanged = mPolicy.focusChangedLw(oldFocus, newFocus);
 
