@@ -375,7 +375,7 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
                 mOneShot = orig.mOneShot;
             } else {
                 mDurations = new int[getCapacity()];
-                mOneShot = true;
+                mOneShot = false;
             }
         }
 
