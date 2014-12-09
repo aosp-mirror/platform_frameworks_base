@@ -1654,7 +1654,6 @@ public class WifiManager {
     /** @hide */
     public static final int RSSI_PKTCNT_FETCH_FAILED        = BASE + 22;
 
-
     /**
      * Passed with {@link ActionListener#onFailure}.
      * Indicates that the operation failed due to an internal error.
@@ -2001,6 +2000,20 @@ public class WifiManager {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         validateChannel();
         sAsyncChannel.sendMessage(DISABLE_NETWORK, netId, putListener(listener));
+    }
+
+    /**
+     * Disable ephemeral Network
+     *
+     * @param SSID, in the format of WifiConfiguration's SSID.
+     * @hide
+     */
+    public void disableEphemeralNetwork(String SSID) {
+        if (SSID == null) throw new IllegalArgumentException("SSID cannot be null");
+        try {
+            mService.disableEphemeralNetwork(SSID);
+        } catch (RemoteException e) {
+        }
     }
 
     /**
