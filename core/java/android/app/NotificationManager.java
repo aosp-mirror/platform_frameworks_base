@@ -264,5 +264,17 @@ public class NotificationManager
         }
     }
 
+    /**
+     * @hide
+     */
+    public boolean isSystemConditionProviderEnabled(String path) {
+        INotificationManager service = getService();
+        try {
+            return service.isSystemConditionProviderEnabled(path);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     private Context mContext;
 }
