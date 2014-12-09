@@ -16,11 +16,10 @@ page.title=Migrating to Android Studio
 </div>
 </div>
 
-<p>If you're currently using Eclipse with ADT, we recommend you migrate to
-<a href="{@docRoot}tools/studio/index.html">Android Studio</a> as soon as possible, because
-the <a href="{@docRoot}tools/help/adt.html">ADT plugin</a>
-for Eclipse is no longer in active development.</p>
 
+<p>If you have been using <a href="{@docRoot}tools/help/adt.html">Eclipse with ADT</a>, be aware
+that <a href="{@docRoot}tools/studio/index.html">Android Studio</a> is now the official IDE for
+Android, so you should migrate to Android Studio to receive all the latest IDE updates.</p>
 
 <p>To migrate existing Android projects, simply import them using Android Studio:</p>
 
