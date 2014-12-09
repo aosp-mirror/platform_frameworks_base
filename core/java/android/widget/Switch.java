@@ -689,6 +689,10 @@ public class Switch extends CompoundButton {
      * @return true if (x, y) is within the target area of the switch thumb
      */
     private boolean hitThumb(float x, float y) {
+        if (mThumbDrawable == null) {
+            return false;
+        }
+
         // Relies on mTempRect, MUST be called first!
         final int thumbOffset = getThumbOffset();
 
