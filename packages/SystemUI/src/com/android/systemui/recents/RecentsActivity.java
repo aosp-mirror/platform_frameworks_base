@@ -434,7 +434,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     protected void onStart() {
         super.onStart();
         mVisible = true;
-        AlternateRecentsComponent.notifyVisibilityChanged(true);
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        SystemServicesProxy ssp = loader.getSystemServicesProxy();
+        AlternateRecentsComponent.notifyVisibilityChanged(this, ssp, true);
 
         // Register the broadcast receiver to handle messages from our service
         IntentFilter filter = new IntentFilter();
@@ -444,7 +446,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         registerReceiver(mServiceBroadcastReceiver, filter);
 
         // Register any broadcast receivers for the task loader
-        RecentsTaskLoader.getInstance().registerReceivers(this, mRecentsView);
+        loader.registerReceivers(this, mRecentsView);
 
         // Update the recent tasks
         updateRecentsTasks(getIntent());
@@ -454,7 +456,9 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     protected void onStop() {
         super.onStop();
         mVisible = false;
-        AlternateRecentsComponent.notifyVisibilityChanged(false);
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        SystemServicesProxy ssp = loader.getSystemServicesProxy();
+        AlternateRecentsComponent.notifyVisibilityChanged(this, ssp, false);
 
         // Notify the views that we are no longer visible
         mRecentsView.onRecentsHidden();
@@ -463,7 +467,7 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         unregisterReceiver(mServiceBroadcastReceiver);
 
         // Unregister any broadcast receivers for the task loader
-        RecentsTaskLoader.getInstance().unregisterReceivers();
+        loader.unregisterReceivers();
     }
 
     @Override
