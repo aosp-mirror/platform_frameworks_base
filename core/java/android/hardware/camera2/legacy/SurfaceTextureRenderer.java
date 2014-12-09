@@ -397,16 +397,9 @@ public class SurfaceTextureRenderer {
                 EGL14.EGL_NONE
         };
         for (EGLSurfaceHolder holder : surfaces) {
-            try {
-                Size size = LegacyCameraDevice.getSurfaceSize(holder.surface);
-                holder.width = size.getWidth();
-                holder.height = size.getHeight();
-                holder.eglSurface = EGL14.eglCreateWindowSurface(mEGLDisplay, mConfigs,
-                        holder.surface, surfaceAttribs, /*offset*/ 0);
-                checkEglError("eglCreateWindowSurface");
-            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
-                Log.w(TAG, "Surface abandoned, skipping...", e);
-            }
+            holder.eglSurface = EGL14.eglCreateWindowSurface(mEGLDisplay, mConfigs,
+                    holder.surface, surfaceAttribs, /*offset*/ 0);
+            checkEglError("eglCreateWindowSurface");
         }
     }
 
@@ -417,24 +410,17 @@ public class SurfaceTextureRenderer {
 
         int maxLength = 0;
         for (EGLSurfaceHolder holder : surfaces) {
-            try {
-                Size size = LegacyCameraDevice.getSurfaceSize(holder.surface);
-                int length = size.getWidth() * size.getHeight();
-                // Find max surface size, ensure PBuffer can hold this many pixels
-                maxLength = (length > maxLength) ? length : maxLength;
-                int[] surfaceAttribs = {
-                        EGL14.EGL_WIDTH, size.getWidth(),
-                        EGL14.EGL_HEIGHT, size.getHeight(),
-                        EGL14.EGL_NONE
-                };
-                holder.width = size.getWidth();
-                holder.height = size.getHeight();
-                holder.eglSurface =
-                        EGL14.eglCreatePbufferSurface(mEGLDisplay, mConfigs, surfaceAttribs, 0);
-                checkEglError("eglCreatePbufferSurface");
-            } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
-                Log.w(TAG, "Surface abandoned, skipping...", e);
-            }
+            int length = holder.width * holder.height;
+            // Find max surface size, ensure PBuffer can hold this many pixels
+            maxLength = (length > maxLength) ? length : maxLength;
+            int[] surfaceAttribs = {
+                    EGL14.EGL_WIDTH, holder.width,
+                    EGL14.EGL_HEIGHT, holder.height,
+                    EGL14.EGL_NONE
+            };
+            holder.eglSurface =
+                    EGL14.eglCreatePbufferSurface(mEGLDisplay, mConfigs, surfaceAttribs, 0);
+            checkEglError("eglCreatePbufferSurface");
         }
         mPBufferPixels = ByteBuffer.allocateDirect(maxLength * PBUFFER_PIXEL_BYTES)
                 .order(ByteOrder.nativeOrder());
@@ -569,7 +555,7 @@ public class SurfaceTextureRenderer {
      *
      * @param surfaces a {@link Collection} of surfaces.
      */
-    public void configureSurfaces(Collection<Surface> surfaces) {
+    public void configureSurfaces(Collection<Pair<Surface, Size>> surfaces) {
         releaseEGLContext();
 
         if (surfaces == null || surfaces.size() == 0) {
@@ -577,18 +563,20 @@ public class SurfaceTextureRenderer {
             return;
         }
 
-        for (Surface s : surfaces) {
+        for (Pair<Surface, Size> p : surfaces) {
+            Surface s = p.first;
+            Size surfaceSize = p.second;
             // If pixel conversions aren't handled by egl, use a pbuffer
             try {
+                EGLSurfaceHolder holder = new EGLSurfaceHolder();
+                holder.surface = s;
+                holder.width = surfaceSize.getWidth();
+                holder.height = surfaceSize.getHeight();
                 if (LegacyCameraDevice.needsConversion(s)) {
                     // Always override to YV12 output for YUV surface formats.
                     LegacyCameraDevice.setSurfaceFormat(s, ImageFormat.YV12);
-                    EGLSurfaceHolder holder = new EGLSurfaceHolder();
-                    holder.surface = s;
                     mConversionSurfaces.add(holder);
                 } else {
-                    EGLSurfaceHolder holder = new EGLSurfaceHolder();
-                    holder.surface = s;
                     mSurfaces.add(holder);
                 }
             } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
@@ -672,10 +660,11 @@ public class SurfaceTextureRenderer {
         List<Long> targetSurfaceIds = LegacyCameraDevice.getSurfaceIds(targetSurfaces);
         for (EGLSurfaceHolder holder : mSurfaces) {
             if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
-                makeCurrent(holder.eglSurface);
-                try {
+                try{
                     LegacyCameraDevice.setSurfaceDimens(holder.surface, holder.width,
                             holder.height);
+                    makeCurrent(holder.eglSurface);
+
                     LegacyCameraDevice.setNextTimestamp(holder.surface, captureHolder.second);
                     drawFrame(mSurfaceTexture, holder.width, holder.height);
                     swapBuffers(holder.eglSurface);
@@ -695,10 +684,11 @@ public class SurfaceTextureRenderer {
 
                 try {
                     int format = LegacyCameraDevice.detectSurfaceType(holder.surface);
+                    LegacyCameraDevice.setSurfaceDimens(holder.surface, holder.width,
+                            holder.height);
                     LegacyCameraDevice.setNextTimestamp(holder.surface, captureHolder.second);
                     LegacyCameraDevice.produceFrame(holder.surface, mPBufferPixels.array(),
                             holder.width, holder.height, format);
-                    swapBuffers(holder.eglSurface);
                 } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
                     Log.w(TAG, "Surface abandoned, dropping frame. ", e);
                 }
