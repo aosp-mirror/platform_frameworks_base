@@ -148,6 +148,10 @@ public class RenderNodeAnimator extends Animator {
         if (mState != STATE_PREPARE) {
             throw new IllegalStateException("Animator has already started, cannot change it now!");
         }
+        if (mNativePtr == null) {
+            throw new IllegalStateException("Animator's target has been destroyed "
+                    + "(trying to modify an animation after activity destroy?)");
+        }
     }
 
     static boolean isNativeInterpolator(TimeInterpolator interpolator) {
@@ -180,7 +184,10 @@ public class RenderNodeAnimator extends Animator {
         mState = STATE_DELAYED;
         applyInterpolator();
 
-        if (mStartDelay <= 0 || !mUiThreadHandlesDelay) {
+        if (mNativePtr == null) {
+            // It's dead, immediately cancel
+            cancel();
+        } else if (mStartDelay <= 0 || !mUiThreadHandlesDelay) {
             nSetStartDelay(mNativePtr.get(), mStartDelay);
             doStart();
         } else {
@@ -208,7 +215,9 @@ public class RenderNodeAnimator extends Animator {
 
     private void moveToRunningState() {
         mState = STATE_RUNNING;
-        nStart(mNativePtr.get(), this);
+        if (mNativePtr != null) {
+            nStart(mNativePtr.get());
+        }
         notifyStartListeners();
     }
 
@@ -227,7 +236,6 @@ public class RenderNodeAnimator extends Animator {
                 getHelper().removeDelayedAnimation(this);
                 moveToRunningState();
             }
-            nEnd(mNativePtr.get());
 
             final ArrayList<AnimatorListener> listeners = cloneListeners();
             final int numListeners = listeners == null ? 0 : listeners.size();
@@ -235,10 +243,7 @@ public class RenderNodeAnimator extends Animator {
                 listeners.get(i).onAnimationCancel(this);
             }
 
-            if (mViewTarget != null) {
-                // Kick off a frame to flush the state change
-                mViewTarget.invalidateViewProperty(true, false);
-            }
+            end();
         }
     }
 
@@ -249,10 +254,15 @@ public class RenderNodeAnimator extends Animator {
                 getHelper().removeDelayedAnimation(this);
                 doStart();
             }
-            nEnd(mNativePtr.get());
-            if (mViewTarget != null) {
-                // Kick off a frame to flush the state change
-                mViewTarget.invalidateViewProperty(true, false);
+            if (mNativePtr != null) {
+                nEnd(mNativePtr.get());
+                if (mViewTarget != null) {
+                    // Kick off a frame to flush the state change
+                    mViewTarget.invalidateViewProperty(true, false);
+                }
+            } else {
+                // It's already dead, jump to onFinish
+                onFinished();
             }
         }
     }
@@ -281,9 +291,11 @@ public class RenderNodeAnimator extends Animator {
     }
 
     private void setTarget(RenderNode node) {
+        checkMutable();
         if (mTarget != null) {
             throw new IllegalStateException("Target already set!");
         }
+        nSetListener(mNativePtr.get(), this);
         mTarget = node;
         mTarget.addAnimator(this);
     }
@@ -346,6 +358,12 @@ public class RenderNodeAnimator extends Animator {
     }
 
     protected void onFinished() {
+        if (mState == STATE_PREPARE) {
+            // Unlikely but possible, the native side has been destroyed
+            // before we have started.
+            releaseNativePtr();
+            return;
+        }
         if (mState == STATE_DELAYED) {
             getHelper().removeDelayedAnimation(this);
             notifyStartListeners();
@@ -361,8 +379,14 @@ public class RenderNodeAnimator extends Animator {
         // Release the native object, as it has a global reference to us. This
         // breaks the cyclic reference chain, and allows this object to be
         // GC'd
-        mNativePtr.release();
-        mNativePtr = null;
+        releaseNativePtr();
+    }
+
+    private void releaseNativePtr() {
+        if (mNativePtr != null) {
+            mNativePtr.release();
+            mNativePtr = null;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -484,7 +508,8 @@ public class RenderNodeAnimator extends Animator {
     private static native void nSetStartDelay(long nativePtr, long startDelay);
     private static native void nSetInterpolator(long animPtr, long interpolatorPtr);
     private static native void nSetAllowRunningAsync(long animPtr, boolean mayRunAsync);
+    private static native void nSetListener(long animPtr, RenderNodeAnimator listener);
 
-    private static native void nStart(long animPtr, RenderNodeAnimator finishListener);
+    private static native void nStart(long animPtr);
     private static native void nEnd(long animPtr);
 }
