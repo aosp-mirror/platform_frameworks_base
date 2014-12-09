@@ -14842,6 +14842,7 @@ package android.media {
     method public byte[] getPropertyByteArray(java.lang.String);
     method public java.lang.String getPropertyString(java.lang.String);
     method public android.media.MediaDrm.ProvisionRequest getProvisionRequest();
+    method public byte[] getSecureStop(byte[]);
     method public java.util.List<byte[]> getSecureStops();
     method public static final boolean isCryptoSchemeSupported(java.util.UUID);
     method public static final boolean isCryptoSchemeSupported(java.util.UUID, java.lang.String);
@@ -14850,6 +14851,7 @@ package android.media {
     method public void provideProvisionResponse(byte[]) throws android.media.DeniedByServerException;
     method public java.util.HashMap<java.lang.String, java.lang.String> queryKeyStatus(byte[]);
     method public final void release();
+    method public void releaseAllSecureStops();
     method public void releaseSecureStops(byte[]);
     method public void removeKeys(byte[]);
     method public void restoreKeys(byte[], byte[]);
