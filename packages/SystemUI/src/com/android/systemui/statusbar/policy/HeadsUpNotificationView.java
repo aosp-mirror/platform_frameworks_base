@@ -73,6 +73,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     private NotificationData.Entry mHeadsUp;
     private int mUser;
+    private String mMostRecentPackageName;
 
     public HeadsUpNotificationView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -117,6 +118,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         }
 
         if (mHeadsUp != null) {
+            mMostRecentPackageName = mHeadsUp.notification.getPackageName();
             mHeadsUp.row.setSystemExpanded(true);
             mHeadsUp.row.setSensitive(false);
             mHeadsUp.row.setHeadsUp(true);
@@ -198,8 +200,10 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
     }
 
     private void snooze() {
-        mSnoozedPackages.put(snoozeKey(mHeadsUp.notification.getPackageName(), mUser),
-                SystemClock.elapsedRealtime() + mSnoozeLengthMs);
+        if (mMostRecentPackageName != null) {
+            mSnoozedPackages.put(snoozeKey(mMostRecentPackageName, mUser),
+                    SystemClock.elapsedRealtime() + mSnoozeLengthMs);
+        }
         releaseAndClose();
     }
 
