@@ -304,8 +304,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 removeUserData(userHandle);
             } else if (Intent.ACTION_USER_STARTED.equals(action)
-                    || Intent.ACTION_PACKAGE_CHANGED.equals(action)
-                    || Intent.ACTION_PACKAGE_REMOVED.equals(action)
                     || Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
 
                 if (Intent.ACTION_USER_STARTED.equals(action)) {
@@ -314,8 +312,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         mUserData.remove(userHandle);
                     }
                 }
-
-                handlePackagesChanged(userHandle);
+                handlePackagesChanged(null /* check all admins */, userHandle);
+            } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)
+                    || (Intent.ACTION_PACKAGE_ADDED.equals(action)
+                            && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))) {
+                handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
+            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
+                    && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
             }
         }
     };
@@ -900,7 +904,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    private void handlePackagesChanged(int userHandle) {
+    private void handlePackagesChanged(String packageName, int userHandle) {
         boolean removed = false;
         if (DBG) Slog.d(LOG_TAG, "Handling package changes for user " + userHandle);
         DevicePolicyData policy = getUserData(userHandle);
@@ -909,11 +913,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             for (int i = policy.mAdminList.size() - 1; i >= 0; i--) {
                 ActiveAdmin aa = policy.mAdminList.get(i);
                 try {
-                    if (pm.getPackageInfo(aa.info.getPackageName(), 0, userHandle) == null
-                            || pm.getReceiverInfo(aa.info.getComponent(), 0, userHandle) == null) {
-                        removed = true;
-                        policy.mAdminList.remove(i);
-                        policy.mAdminMap.remove(aa.info.getComponent());
+                    // If we're checking all packages or if the specific one we're checking matches,
+                    // then check if the package and receiver still exist.
+                    final String adminPackage = aa.info.getPackageName();
+                    if (packageName == null || packageName.equals(adminPackage)) {
+                        if (pm.getPackageInfo(adminPackage, 0, userHandle) == null
+                                || pm.getReceiverInfo(aa.info.getComponent(), 0, userHandle)
+                                    == null) {
+                            removed = true;
+                            policy.mAdminList.remove(i);
+                            policy.mAdminMap.remove(aa.info.getComponent());
+                        }
                     }
                 } catch (RemoteException re) {
                     // Shouldn't happen
