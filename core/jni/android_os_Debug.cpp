@@ -486,11 +486,13 @@ static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject o
     android_os_Debug_getDirtyPagesPid(env, clazz, getpid(), object);
 }
 
-static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jlongArray outUss)
+static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jlongArray outUss,
+        jlongArray outMemtrack)
 {
     char line[1024];
     jlong pss = 0;
     jlong uss = 0;
+    jlong memtrack = 0;
     unsigned temp;
 
     char tmp[128];
@@ -498,7 +500,7 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jl
 
     struct graphics_memory_pss graphics_mem;
     if (read_memtrack_memory(pid, &graphics_mem) == 0) {
-        pss = uss = graphics_mem.graphics + graphics_mem.gl + graphics_mem.other;
+        pss = uss = memtrack = graphics_mem.graphics + graphics_mem.gl + graphics_mem.other;
     }
 
     sprintf(tmp, "/proc/%d/smaps", pid);
@@ -541,12 +543,22 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jl
         }
     }
 
+    if (outMemtrack != NULL) {
+        if (env->GetArrayLength(outMemtrack) >= 1) {
+            jlong* outMemtrackArray = env->GetLongArrayElements(outMemtrack, 0);
+            if (outMemtrackArray != NULL) {
+                outMemtrackArray[0] = memtrack;
+            }
+            env->ReleaseLongArrayElements(outMemtrack, outMemtrackArray, 0);
+        }
+    }
+
     return pss;
 }
 
 static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
 {
-    return android_os_Debug_getPssPid(env, clazz, getpid(), NULL);
+    return android_os_Debug_getPssPid(env, clazz, getpid(), NULL, NULL);
 }
 
 enum {
@@ -954,7 +966,7 @@ static JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getDirtyPagesPid },
     { "getPss",                 "()J",
             (void*) android_os_Debug_getPss },
-    { "getPss",                 "(I[J)J",
+    { "getPss",                 "(I[J[J)J",
             (void*) android_os_Debug_getPssPid },
     { "getMemInfo",             "([J)V",
             (void*) android_os_Debug_getMemInfo },
