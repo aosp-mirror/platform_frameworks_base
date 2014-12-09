@@ -100,13 +100,16 @@ class UsbMidiDevice extends MidiDeviceBase {
                 return -1;
             }
         }
-        return MidiDevice.packMessage(mBuffer, 0, dataSize + 1, System.nanoTime(), buffer);
+        return MidiDevice.packMessage(mBuffer, 0, dataSize + 1, System.nanoTime(),
+            0, // FIXME - multiple ports not supported yet
+            buffer);
     }
 
     // writes a message to the ALSA driver
     void writeMessage(byte[] buffer, int count) throws IOException {
         int offset = MidiDevice.getMessageOffset(buffer, count);
         int size = MidiDevice.getMessageSize(buffer, count);
+        // FIXME - multiple ports not supported yet
         mOutputStream.write(buffer, offset, count);
     }
 }

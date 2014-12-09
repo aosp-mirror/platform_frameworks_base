@@ -37,7 +37,8 @@ interface IMidiManager
     ParcelFileDescriptor openDevice(IBinder token, in MidiDeviceInfo device);
 
     // for implementing virtual MIDI devices
-    MidiDevice registerVirtualDevice(IBinder token, in Bundle properties);
+    MidiDevice registerVirtualDevice(IBinder token, int numInputPorts, int numOutputPorts,
+            in Bundle properties);
     void unregisterVirtualDevice(IBinder token, in MidiDeviceInfo device);
 
     // for use by UsbAudioManager

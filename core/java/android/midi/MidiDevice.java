@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * This class is used for sending and receiving data to and from an midi device
+ * This class is used for sending and receiving data to and from an MIDI device
  * Instances of this class are created by {@link MidiManager#openDevice}.
  * This class can also be used to provide the implementation for a virtual device.
  *
@@ -44,21 +44,29 @@ public final class MidiDevice implements Parcelable {
     private ParcelFileDescriptor mParcelFileDescriptor;
     private FileInputStream mInputStream;
     private FileOutputStream mOutputStream;
-    private final ArrayList<MidiReceiver> mReceivers = new ArrayList<MidiReceiver>();
+
+    // lazily populated lists of ports
+    private final MidiInputPort[] mInputPorts;
+    private final MidiOutputPort[] mOutputPorts;
+
+    // array of receiver lists, indexed by port number
+    private final ArrayList<MidiReceiver>[] mReceivers;
+
+    private int mReceiverCount; // total number of receivers for all ports
 
     /**
      * Minimum size of packed message as sent through our ParcelFileDescriptor
-     * 8 bytes for timestamp and 1 to 3 bytes for message
+     * 8 bytes for timestamp, 1 byte for port number and 1 to 3 bytes for message
      * @hide
      */
-    public static final int MIN_PACKED_MESSAGE_SIZE = 9;
+    public static final int MIN_PACKED_MESSAGE_SIZE = 10;
 
     /**
      * Maximum size of packed message as sent through our ParcelFileDescriptor
-     * 8 bytes for timestamp and 1 to 3 bytes for message
+     * 8 bytes for timestamp, 1 byte for port number and 1 to 3 bytes for message
      * @hide
      */
-    public static final int MAX_PACKED_MESSAGE_SIZE = 11;
+    public static final int MAX_PACKED_MESSAGE_SIZE = 12;
 
     // This thread reads MIDI events from a socket and distributes them to the list of
     // MidiReceivers attached to this device.
@@ -80,64 +88,40 @@ public final class MidiDevice implements Parcelable {
                     int offset = getMessageOffset(buffer, count);
                     int size = getMessageSize(buffer, count);
                     long timestamp = getMessageTimeStamp(buffer, count);
+                    int port = getMessagePortNumber(buffer, count);
 
                     synchronized (mReceivers) {
-                        for (int i = 0; i < mReceivers.size(); i++) {
-                            MidiReceiver receiver = mReceivers.get(i);
-                            try {
-                                mReceivers.get(i).onPost(buffer, offset, size, timestamp);
-                            } catch (IOException e) {
-                                Log.e(TAG, "post failed");
-                                deadReceivers.add(receiver);
+                        ArrayList<MidiReceiver> receivers = mReceivers[port];
+                        if (receivers != null) {
+                            for (int i = 0; i < receivers.size(); i++) {
+                                MidiReceiver receiver = receivers.get(i);
+                                try {
+                                    receivers.get(i).onPost(buffer, offset, size, timestamp);
+                                } catch (IOException e) {
+                                    Log.e(TAG, "post failed");
+                                    deadReceivers.add(receiver);
+                                }
                             }
-                        }
-                        // remove any receivers that failed
-                        if (deadReceivers.size() > 0) {
-                            for (MidiReceiver receiver: deadReceivers) {
-                                mReceivers.remove(receiver);
+                            // remove any receivers that failed
+                            if (deadReceivers.size() > 0) {
+                                for (MidiReceiver receiver: deadReceivers) {
+                                    receivers.remove(receiver);
+                                    mReceiverCount--;
+                                }
+                                deadReceivers.clear();
                             }
-                            deadReceivers.clear();
-                        }
-                        // exit if we have no receivers left
-                        if (mReceivers.size() == 0) {
-                            break;
+                            if (receivers.size() == 0) {
+                                mReceivers[port] = null;
+                            }
+                            // exit if we have no receivers left
+                            if (mReceiverCount == 0) {
+                                break;
+                            }
                         }
                     }
                 }
             } catch (IOException e) {
                 Log.e(TAG, "read failed");
-            }
-        }
-    };
-
-    // This is the receiver that clients use for sending events to this device.
-    private final MidiReceiver mReceiver = new MidiReceiver() {
-        private final byte[] mBuffer = new byte[MAX_PACKED_MESSAGE_SIZE];
-        public void onPost(byte[] msg, int offset, int count, long timestamp) throws IOException {
-            synchronized (mBuffer) {
-                int length = packMessage(msg, offset, count, timestamp, mBuffer);
-                mOutputStream.write(mBuffer, 0, length);
-            }
-        }
-    };
-
-    // Our MidiSender object, to which clients can attach MidiReceivers.
-    private final MidiSender mSender = new MidiSender() {
-        public void connect(MidiReceiver receiver) {
-            synchronized (mReceivers) {
-                if (mReceivers.size() == 0) {
-                    mThread.start();
-                }
-                mReceivers.add(receiver);
-            }
-        }
-
-        public void disconnect(MidiReceiver receiver) {
-            synchronized (mReceivers) {
-                mReceivers.remove(receiver);
-                if (mReceivers.size() == 0) {
-                    // ???
-                }
             }
         }
     };
@@ -149,9 +133,59 @@ public final class MidiDevice implements Parcelable {
     public MidiDevice(MidiDeviceInfo deviceInfo, ParcelFileDescriptor pfd) {
         mDeviceInfo = deviceInfo;
         mParcelFileDescriptor = pfd;
+        int inputPorts = deviceInfo.getInputPortCount();
+        int outputPorts = deviceInfo.getOutputPortCount();
+        mInputPorts = new MidiInputPort[inputPorts];
+        mOutputPorts = new MidiOutputPort[outputPorts];
+        mReceivers = new ArrayList[outputPorts];
     }
 
-    public boolean open() {
+    public MidiInputPort openInputPort(int portNumber) {
+        if (portNumber < 0 || portNumber >= mDeviceInfo.getInputPortCount()) {
+            throw new IllegalArgumentException("input port number out of range");
+        }
+        synchronized (mInputPorts) {
+            if (mInputPorts[portNumber] == null) {
+                mInputPorts[portNumber] = new MidiInputPort(mOutputStream, portNumber);
+            }
+            return mInputPorts[portNumber];
+        }
+    }
+
+    public MidiOutputPort openOutputPort(int portNumber) {
+        if (portNumber < 0 || portNumber >= mDeviceInfo.getOutputPortCount()) {
+            throw new IllegalArgumentException("output port number out of range");
+        }
+        synchronized (mOutputPorts) {
+            if (mOutputPorts[portNumber] == null) {
+                mOutputPorts[portNumber] = new MidiOutputPort(this, portNumber);
+            }
+            return mOutputPorts[portNumber];
+        }
+    }
+
+    /* package */ void connect(MidiReceiver receiver, int portNumber) {
+        synchronized (mReceivers) {
+            if (mReceivers[portNumber] == null) {
+                mReceivers[portNumber] = new  ArrayList<MidiReceiver>();
+            }
+            mReceivers[portNumber].add(receiver);
+            if (mReceiverCount++ == 0) {
+                mThread.start();
+            }
+        }
+    }
+
+    /* package */ void disconnect(MidiReceiver receiver, int portNumber) {
+        synchronized (mReceivers) {
+            ArrayList<MidiReceiver> receivers = mReceivers[portNumber];
+            if (receivers != null && receivers.remove(receiver)) {
+                mReceiverCount--;
+            }
+        }
+    }
+
+    /* package */ boolean open() {
         FileDescriptor fd = mParcelFileDescriptor.getFileDescriptor();
         try {
             mInputStream = new FileInputStream(fd);
@@ -185,16 +219,6 @@ public final class MidiDevice implements Parcelable {
     // returns our MidiDeviceInfo object, which describes this device
     public MidiDeviceInfo getInfo() {
         return mDeviceInfo;
-    }
-
-    // returns our MidiReceiver, which clients can use for sending events to this device.
-    public MidiReceiver getReceiver() {
-        return mReceiver;
-    }
-
-    // Returns our MidiSender object, to which clients can attach MidiReceivers.
-    public MidiSender getSender() {
-        return mSender;
     }
 
     @Override
@@ -236,7 +260,7 @@ public final class MidiDevice implements Parcelable {
      * @hide
      */
     public static int packMessage(byte[] message, int offset, int size, long timestamp,
-            byte[] dest) {
+            int portNumber, byte[] dest) {
         // pack variable length message first
         System.arraycopy(message, offset, dest, 0, size);
         int destOffset = size;
@@ -245,6 +269,9 @@ public final class MidiDevice implements Parcelable {
             dest[destOffset++] = (byte)timestamp;
             timestamp >>= 8;
         }
+        // portNumber is last
+        dest[destOffset++] = (byte)portNumber;
+
         return destOffset;
     }
 
@@ -266,8 +293,8 @@ public final class MidiDevice implements Parcelable {
      * @hide
      */
     public static int getMessageSize(byte[] buffer, int bufferLength) {
-        // message length is total buffer length minus size of the timestamp
-        return bufferLength - 8;
+        // message length is total buffer length minus size of the timestamp and port number
+        return bufferLength - 9 /* (sizeof(timestamp) + sizeof(portNumber)) */;
     }
 
     /**
@@ -288,5 +315,17 @@ public final class MidiDevice implements Parcelable {
             timestamp = (timestamp << 8) | b;
         }
         return timestamp;
+     }
+
+    /**
+     * Utility function for unpacking a MIDI message to be sent through our ParcelFileDescriptor
+     * unpacks port number from packed buffer
+     *
+     * @hide
+     */
+    public static int getMessagePortNumber(byte[] buffer, int bufferLength) {
+        // timestamp follows variable length message data and timestamp
+        int dataLength = getMessageSize(buffer, bufferLength);
+        return buffer[dataLength + 8 /* sizeof(timestamp) */];
      }
 }
