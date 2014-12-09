@@ -68,6 +68,9 @@ enum {
     HEAP_DALVIK_LINEARALLOC,
     HEAP_DALVIK_ACCOUNTING,
     HEAP_DALVIK_CODE_CACHE,
+    HEAP_DALVIK_ZYGOTE,
+    HEAP_DALVIK_NON_MOVING,
+    HEAP_DALVIK_INDIRECT_REFERENCE_TABLE,
 
     _NUM_HEAP,
     _NUM_EXCLUSIVE_HEAP = HEAP_OTHER_MEMTRACK+1,
@@ -271,15 +274,21 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                     if (strstr(name, "/dev/ashmem/dalvik-LinearAlloc") == name) {
                         subHeap = HEAP_DALVIK_LINEARALLOC;
                     } else if ((strstr(name, "/dev/ashmem/dalvik-alloc space") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-main space") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-zygote space") == name) ||
-                               (strstr(name, "/dev/ashmem/dalvik-non moving space") == name)) {
+                               (strstr(name, "/dev/ashmem/dalvik-main space") == name)) {
                         // This is the regular Dalvik heap.
                         whichHeap = HEAP_DALVIK;
                         subHeap = HEAP_DALVIK_NORMAL;
                     } else if (strstr(name, "/dev/ashmem/dalvik-large object space") == name) {
                         whichHeap = HEAP_DALVIK;
                         subHeap = HEAP_DALVIK_LARGE;
+                    } else if (strstr(name, "/dev/ashmem/dalvik-non moving space") == name) {
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_NON_MOVING;
+                    } else if (strstr(name, "/dev/ashmem/dalvik-zygote space") == name) {
+                        whichHeap = HEAP_DALVIK;
+                        subHeap = HEAP_DALVIK_ZYGOTE;
+                    } else if (strstr(name, "/dev/ashmem/dalvik-indirect ref") == name) {
+                        subHeap = HEAP_DALVIK_INDIRECT_REFERENCE_TABLE;
                     } else if (strstr(name, "/dev/ashmem/dalvik-jit-code-cache") == name) {
                         subHeap = HEAP_DALVIK_CODE_CACHE;
                     } else {
