@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -218,8 +265,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         <li><a href="http://source.android.com">Android Open Source Project</a></li>
       </ul>
 
-
-
+      
+      
         <div class="header">Language</div>
           <div id="language" class="locales">
             <select name="language" onChange="changeLangPref(this.value, true)">
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -237,8 +284,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
           loadLangPref();
             //-->
         </script>
-
-
+      
+      
       <br class="clearfix" />
     </div><!-- end 'mid' -->
     <div class="bottom"></div>
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -374,38 +421,14 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       </div><!-- end header-wrap.wrap -->
     </div><!-- end header -->
 
-
+  
     <!-- Secondary x-nav -->
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -443,17 +466,17 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
-
+                
                   <li class="samples"><a href="/samples/index.html"
                     >Samples</a>
                   </li>
-
+                
             </ul>
         </div>
     </div>
     <!-- /Sendondary x-nav DEVELOP -->
 
-
+  
 
     <div id="searchResults" class="wrap" style="display:none;">
       <h2 id="searchTitle">Results</h2>
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">DataMap</li>
       </ul>
     </div>
@@ -476,7 +499,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
+  
   <div class="wrap clearfix" id="body-content">
     <div class="col-4" id="side-nav" itemscope itemtype="http://schema.org/SiteNavigationElement">
       <div id="devdoc-nav" class="scroll-pane">
@@ -729,12 +752,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 </script>
 
 
-
+        
 
       </div>
       <script type="text/javascript">
        showGoogleRefTree();
-
+    
       </script>
     </div> <!-- end side-nav -->
     <script>
@@ -744,7 +767,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     </script>
 
 
-
+     
 
 
 
@@ -754,12 +777,12 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 
 
-
-
-
-
-
-
+  
+   
+  
+  
+  
+  
 
 
 <div class="sum-details-links">
@@ -771,19 +794,19 @@ Summary:
 
 
   <a href="#constants">Constants</a>
-
+  
 
 
 
 
 
   &#124; <a href="#pubctors">Ctors</a>
-
+  
 
 
 
   &#124; <a href="#pubmethods">Methods</a>
-
+  
 
 
 
@@ -793,9 +816,9 @@ Summary:
 
 </div><!-- end sum-details-links -->
 <div class="api-level">
-
-
-
+  
+  
+  
 
 </div>
 </div><!-- end api-info-block -->
@@ -805,26 +828,26 @@ Summary:
 
 <div id="jd-header">
     public
-
-
-
+     
+     
+    
     class
 <h1 itemprop="name">DataMap</h1>
 
 
 
-
+  
     extends Object<br/>
+  
+  
+  
+
+  
+  
+  
 
 
-
-
-
-
-
-
-
-
+    
 
 
 </div><!-- end header -->
@@ -836,18 +859,18 @@ Summary:
 
 
     <tr>
-
+         	
         <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
     </tr>
-
+    
 
     <tr>
-
+        
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
-
+         	
         <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gms.wearable.DataMap</td>
     </tr>
-
+    
 
 </table>
 
@@ -909,19 +932,19 @@ Summary:
 <table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
 
 
-
+    
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/DataMap.html#TAG">TAG</a></td>
         <td class="jd-descrcol" width="100%">
-
-
-
+          
+          
+    
 
         </td>
     </tr>
-
-
+    
+    
 
 </table>
 
@@ -941,19 +964,19 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#DataMap()">DataMap</a></span>()</nobr>
-
+        
   </td></tr>
 
 
@@ -970,1305 +993,1305 @@ Summary:
 
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             ArrayList&lt;<a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#arrayListFromBundleArrayList(java.util.ArrayList<android.os.Bundle>)">arrayListFromBundleArrayList</a></span>(ArrayList&lt;Bundle&gt; bundleArrayList)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns an ArrayList of DataMaps from an ArrayList of Bundles.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#clear()">clear</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Removes all elements from the mapping of this DataMap.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#containsKey(java.lang.String)">containsKey</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns true if the given key is contained in the mapping
  of this DataMap.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#equals(java.lang.Object)">equals</a></span>(Object o)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns true if the given Object is a DataMap equivalent to
  this one.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             <a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#fromBundle(android.os.Bundle)">fromBundle</a></span>(Bundle bundle)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns a DataMap from a Bundle.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
+            
+            
+            
             static
-
+            
             <a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#fromByteArray(byte[])">fromByteArray</a></span>(byte[] bytes)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns a DataMap from a byte[].
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
+            
+            
+            
+            
             &lt;T&gt;
             T</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#get(java.lang.String)">get</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the entry with the given key as an object.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getAsset(java.lang.String)">getAsset</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getBoolean(java.lang.String)">getBoolean</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or false if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getBoolean(java.lang.String, boolean)">getBoolean</a></span>(String key, boolean defaultValue)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             byte</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getByte(java.lang.String)">getByte</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or (byte) 0 if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             byte</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getByte(java.lang.String, byte)">getByte</a></span>(String key, byte defaultValue)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             byte[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getByteArray(java.lang.String)">getByteArray</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             <a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getDataMap(java.lang.String)">getDataMap</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             ArrayList&lt;<a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getDataMapArrayList(java.lang.String)">getDataMapArrayList</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             double</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getDouble(java.lang.String)">getDouble</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or 0.0 if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             double</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getDouble(java.lang.String, double)">getDouble</a></span>(String key, double defaultValue)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getFloat(java.lang.String)">getFloat</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or 0.0f if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             float</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getFloat(java.lang.String, float)">getFloat</a></span>(String key, float defaultValue)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             float[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getFloatArray(java.lang.String)">getFloatArray</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getInt(java.lang.String, int)">getInt</a></span>(String key, int defaultValue)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getInt(java.lang.String)">getInt</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or 0 if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             ArrayList&lt;Integer&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getIntegerArrayList(java.lang.String)">getIntegerArrayList</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getLong(java.lang.String)">getLong</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or 0L if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getLong(java.lang.String, long)">getLong</a></span>(String key, long defaultValue)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             long[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getLongArray(java.lang.String)">getLongArray</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getString(java.lang.String, java.lang.String)">getString</a></span>(String key, String defaultValue)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getString(java.lang.String)">getString</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getStringArray(java.lang.String)">getStringArray</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             ArrayList&lt;String&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#getStringArrayList(java.lang.String)">getStringArrayList</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#hashCode()">hashCode</a></span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#isEmpty()">isEmpty</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns true if the mapping of this DataMap is empty, false otherwise.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Set&lt;String&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#keySet()">keySet</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns a Set containing the Strings used as keys in this DataMap.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putAll(com.google.android.gms.wearable.DataMap)">putAll</a></span>(<a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a> dataMap)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts all mappings from the given DataMap into this DataMap.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putAsset(java.lang.String, com.google.android.gms.wearable.Asset)">putAsset</a></span>(String key, <a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a> value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts an Asset into the mapping of this DataMap, replacing
  any existing Asset for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putBoolean(java.lang.String, boolean)">putBoolean</a></span>(String key, boolean value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a Boolean value into the mapping of this DataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putByte(java.lang.String, byte)">putByte</a></span>(String key, byte value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a byte value into the mapping of this DataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putByteArray(java.lang.String, byte[])">putByteArray</a></span>(String key, byte[] value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a byte array value into the mapping of this dataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putDataMap(java.lang.String, com.google.android.gms.wearable.DataMap)">putDataMap</a></span>(String key, <a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a> value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a DataMap into the mapping of this DataMap, replacing
  any existing DataMap for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putDataMapArrayList(java.lang.String, java.util.ArrayList<com.google.android.gms.wearable.DataMap>)">putDataMapArrayList</a></span>(String key, ArrayList&lt;<a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a>&gt; value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts an ArrayList<DataMap> value into the mapping of this DataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putDouble(java.lang.String, double)">putDouble</a></span>(String key, double value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a double value into the mapping of this DataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putFloat(java.lang.String, float)">putFloat</a></span>(String key, float value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a float value into the mapping of this dataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putFloatArray(java.lang.String, float[])">putFloatArray</a></span>(String key, float[] value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a float array value into the mapping of this dataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putInt(java.lang.String, int)">putInt</a></span>(String key, int value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts an int value into the mapping of this DataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putIntegerArrayList(java.lang.String, java.util.ArrayList<java.lang.Integer>)">putIntegerArrayList</a></span>(String key, ArrayList&lt;Integer&gt; value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts an ArrayList<Integer> value into the mapping of this dataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putLong(java.lang.String, long)">putLong</a></span>(String key, long value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a long value into the mapping of this DataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putLongArray(java.lang.String, long[])">putLongArray</a></span>(String key, long[] value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a long array value into the mapping of this dataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putString(java.lang.String, java.lang.String)">putString</a></span>(String key, String value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a String value into the mapping of this DataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putStringArray(java.lang.String, java.lang.String[])">putStringArray</a></span>(String key, String[] value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts a String array value into the mapping of this dataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#putStringArrayList(java.lang.String, java.util.ArrayList<java.lang.String>)">putStringArrayList</a></span>(String key, ArrayList&lt;String&gt; value)</nobr>
-
+        
         <div class="jd-descrdiv">
           Inserts an ArrayList<String> value into the mapping of this dataMap, replacing
  any existing value for the given key.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#remove(java.lang.String)">remove</a></span>(String key)</nobr>
-
+        
         <div class="jd-descrdiv">
           Removes any entry with the given key from the mapping of this dataMap.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#size()">size</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns the number of key-value pairs in this map.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Bundle</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#toBundle()">toBundle</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns a Bundle containing all the elements on this DataMap.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             byte[]</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#toByteArray()">toByteArray</a></span>()</nobr>
-
+        
         <div class="jd-descrdiv">
           Returns a serialized <code>byte[]</code> representing this DataMap.
-
-
+          
+    
 
         </div>
-
+  
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/wearable/DataMap.html#toString()">toString</a></span>()</nobr>
-
+        
   </td></tr>
 
 
@@ -2303,182 +2326,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
+    
 
 
-
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             Object</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">equals</span>(Object arg0)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">finalize</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             Class&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">hashCode</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notify</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">notifyAll</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
-
-
-
+            
+            
+            
+            
+            
             String</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>()</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
-
+        
   </td></tr>
 
 
-
+	 
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
-
-
+            
+            
             final
-
-
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">wait</span>(long arg0)</nobr>
-
+        
   </td></tr>
 
 
@@ -2519,39 +2542,39 @@ From class
 
 <A NAME="TAG"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-        final
+        public 
+        static 
+        final 
         String
       </span>
         TAG
     </h4>
       <div class="api-level">
-
-
-
+        
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
-
+    
         <div class="jd-tagdata">
         <span class="jd-tagtitle">Constant Value: </span>
         <span>
-
+            
                 "DataMap"
-
+            
         </span>
         </div>
-
+    
     </div>
 </div>
 
@@ -2571,30 +2594,30 @@ From class
 
 <A NAME="DataMap()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
-
+        public 
+         
+         
+         
+         
+        
       </span>
       <span class="sympad">DataMap</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2618,14 +2641,14 @@ From class
 
 <A NAME="arrayListFromBundleArrayList(java.util.ArrayList<android.os.Bundle>)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         ArrayList&lt;<a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a>&gt;
       </span>
       <span class="sympad">arrayListFromBundleArrayList</span>
@@ -2633,15 +2656,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns an ArrayList of DataMaps from an ArrayList of Bundles.
  Any elements in the Bundles not supported by DataMap will be dropped.</p></div>
   <div class="jd-tagdata">
@@ -2656,14 +2679,14 @@ From class
 
 <A NAME="clear()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">clear</span>
@@ -2671,15 +2694,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Removes all elements from the mapping of this DataMap.
 </p></div>
 
@@ -2689,14 +2712,14 @@ From class
 
 <A NAME="containsKey(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">containsKey</span>
@@ -2704,15 +2727,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the given key is contained in the mapping
  of this DataMap.</p></div>
   <div class="jd-tagdata">
@@ -2736,14 +2759,14 @@ From class
 
 <A NAME="equals(java.lang.Object)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">equals</span>
@@ -2751,15 +2774,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the given Object is a DataMap equivalent to
  this one.
 </p></div>
@@ -2770,14 +2793,14 @@ From class
 
 <A NAME="fromBundle(android.os.Bundle)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         <a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a>
       </span>
       <span class="sympad">fromBundle</span>
@@ -2785,15 +2808,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a DataMap from a Bundle. The input Bundle is expected to contain
  only elements supported by DataMap. Any elements in the Bundle not
  supported by DataMap will be dropped.</p></div>
@@ -2809,14 +2832,14 @@ From class
 
 <A NAME="fromByteArray(byte[])"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-        static
-
-
-
+        public 
+        static 
+         
+         
+         
         <a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a>
       </span>
       <span class="sympad">fromByteArray</span>
@@ -2824,15 +2847,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a DataMap from a byte[].</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2855,14 +2878,14 @@ From class
 
 <A NAME="get(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         T
       </span>
       <span class="sympad">get</span>
@@ -2870,15 +2893,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the entry with the given key as an object.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -2901,14 +2924,14 @@ From class
 
 <A NAME="getAsset(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wearable/Asset.html">Asset</a>
       </span>
       <span class="sympad">getAsset</span>
@@ -2916,15 +2939,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -2949,14 +2972,14 @@ From class
 
 <A NAME="getBoolean(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">getBoolean</span>
@@ -2964,15 +2987,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or false if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -2996,14 +3019,14 @@ From class
 
 <A NAME="getBoolean(java.lang.String, boolean)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">getBoolean</span>
@@ -3011,15 +3034,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3047,14 +3070,14 @@ From class
 
 <A NAME="getByte(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         byte
       </span>
       <span class="sympad">getByte</span>
@@ -3062,15 +3085,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or (byte) 0 if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3094,14 +3117,14 @@ From class
 
 <A NAME="getByte(java.lang.String, byte)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         byte
       </span>
       <span class="sympad">getByte</span>
@@ -3109,15 +3132,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3145,14 +3168,14 @@ From class
 
 <A NAME="getByteArray(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         byte[]
       </span>
       <span class="sympad">getByteArray</span>
@@ -3160,15 +3183,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3193,14 +3216,14 @@ From class
 
 <A NAME="getDataMap(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         <a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a>
       </span>
       <span class="sympad">getDataMap</span>
@@ -3208,15 +3231,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3241,14 +3264,14 @@ From class
 
 <A NAME="getDataMapArrayList(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         ArrayList&lt;<a href="/reference/com/google/android/gms/wearable/DataMap.html">DataMap</a>&gt;
       </span>
       <span class="sympad">getDataMapArrayList</span>
@@ -3256,15 +3279,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3289,14 +3312,14 @@ From class
 
 <A NAME="getDouble(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         double
       </span>
       <span class="sympad">getDouble</span>
@@ -3304,15 +3327,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or 0.0 if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3336,14 +3359,14 @@ From class
 
 <A NAME="getDouble(java.lang.String, double)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         double
       </span>
       <span class="sympad">getDouble</span>
@@ -3351,15 +3374,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3387,14 +3410,14 @@ From class
 
 <A NAME="getFloat(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         float
       </span>
       <span class="sympad">getFloat</span>
@@ -3402,15 +3425,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or 0.0f if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3434,14 +3457,14 @@ From class
 
 <A NAME="getFloat(java.lang.String, float)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         float
       </span>
       <span class="sympad">getFloat</span>
@@ -3449,15 +3472,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3485,14 +3508,14 @@ From class
 
 <A NAME="getFloatArray(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         float[]
       </span>
       <span class="sympad">getFloatArray</span>
@@ -3500,15 +3523,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3533,14 +3556,14 @@ From class
 
 <A NAME="getInt(java.lang.String, int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getInt</span>
@@ -3548,15 +3571,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3584,14 +3607,14 @@ From class
 
 <A NAME="getInt(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">getInt</span>
@@ -3599,15 +3622,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or 0 if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3631,14 +3654,14 @@ From class
 
 <A NAME="getIntegerArrayList(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         ArrayList&lt;Integer&gt;
       </span>
       <span class="sympad">getIntegerArrayList</span>
@@ -3646,15 +3669,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3679,14 +3702,14 @@ From class
 
 <A NAME="getLong(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
       <span class="sympad">getLong</span>
@@ -3694,15 +3717,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or 0L if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3726,14 +3749,14 @@ From class
 
 <A NAME="getLong(java.lang.String, long)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long
       </span>
       <span class="sympad">getLong</span>
@@ -3741,15 +3764,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3777,14 +3800,14 @@ From class
 
 <A NAME="getLongArray(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         long[]
       </span>
       <span class="sympad">getLongArray</span>
@@ -3792,15 +3815,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3825,14 +3848,14 @@ From class
 
 <A NAME="getString(java.lang.String, java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getString</span>
@@ -3840,15 +3863,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or defaultValue if
  no mapping of the desired type exists for the given key.</p></div>
   <div class="jd-tagdata">
@@ -3877,14 +3900,14 @@ From class
 
 <A NAME="getString(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">getString</span>
@@ -3892,15 +3915,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3925,14 +3948,14 @@ From class
 
 <A NAME="getStringArray(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String[]
       </span>
       <span class="sympad">getStringArray</span>
@@ -3940,15 +3963,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -3973,14 +3996,14 @@ From class
 
 <A NAME="getStringArrayList(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         ArrayList&lt;String&gt;
       </span>
       <span class="sympad">getStringArrayList</span>
@@ -3988,15 +4011,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the value associated with the given key, or null if
  no mapping of the desired type exists for the given key or a null
  value is explicitly associated with the key.</p></div>
@@ -4021,14 +4044,14 @@ From class
 
 <A NAME="hashCode()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">hashCode</span>
@@ -4036,15 +4059,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -4053,14 +4076,14 @@ From class
 
 <A NAME="isEmpty()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         boolean
       </span>
       <span class="sympad">isEmpty</span>
@@ -4068,15 +4091,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns true if the mapping of this DataMap is empty, false otherwise.
 </p></div>
 
@@ -4086,14 +4109,14 @@ From class
 
 <A NAME="keySet()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Set&lt;String&gt;
       </span>
       <span class="sympad">keySet</span>
@@ -4101,15 +4124,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a Set containing the Strings used as keys in this DataMap.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -4123,14 +4146,14 @@ From class
 
 <A NAME="putAll(com.google.android.gms.wearable.DataMap)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putAll</span>
@@ -4138,15 +4161,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts all mappings from the given DataMap into this DataMap.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -4165,14 +4188,14 @@ From class
 
 <A NAME="putAsset(java.lang.String, com.google.android.gms.wearable.Asset)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putAsset</span>
@@ -4180,15 +4203,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an Asset into the mapping of this DataMap, replacing
  any existing Asset for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4212,14 +4235,14 @@ From class
 
 <A NAME="putBoolean(java.lang.String, boolean)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putBoolean</span>
@@ -4227,15 +4250,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a Boolean value into the mapping of this DataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4259,14 +4282,14 @@ From class
 
 <A NAME="putByte(java.lang.String, byte)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putByte</span>
@@ -4274,15 +4297,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a byte value into the mapping of this DataMap, replacing
  any existing value for the given key.</p></div>
   <div class="jd-tagdata">
@@ -4306,14 +4329,14 @@ From class
 
 <A NAME="putByteArray(java.lang.String, byte[])"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putByteArray</span>
@@ -4321,15 +4344,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a byte array value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4353,14 +4376,14 @@ From class
 
 <A NAME="putDataMap(java.lang.String, com.google.android.gms.wearable.DataMap)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putDataMap</span>
@@ -4368,15 +4391,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a DataMap into the mapping of this DataMap, replacing
  any existing DataMap for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4400,14 +4423,14 @@ From class
 
 <A NAME="putDataMapArrayList(java.lang.String, java.util.ArrayList<com.google.android.gms.wearable.DataMap>)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putDataMapArrayList</span>
@@ -4415,15 +4438,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an ArrayList<DataMap> value into the mapping of this DataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4447,14 +4470,14 @@ From class
 
 <A NAME="putDouble(java.lang.String, double)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putDouble</span>
@@ -4462,15 +4485,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a double value into the mapping of this DataMap, replacing
  any existing value for the given key.</p></div>
   <div class="jd-tagdata">
@@ -4494,14 +4517,14 @@ From class
 
 <A NAME="putFloat(java.lang.String, float)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putFloat</span>
@@ -4509,15 +4532,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a float value into the mapping of this dataMap, replacing
  any existing value for the given key.</p></div>
   <div class="jd-tagdata">
@@ -4541,14 +4564,14 @@ From class
 
 <A NAME="putFloatArray(java.lang.String, float[])"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putFloatArray</span>
@@ -4556,15 +4579,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a float array value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4588,14 +4611,14 @@ From class
 
 <A NAME="putInt(java.lang.String, int)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putInt</span>
@@ -4603,15 +4626,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an int value into the mapping of this DataMap, replacing
  any existing value for the given key.</p></div>
   <div class="jd-tagdata">
@@ -4635,14 +4658,14 @@ From class
 
 <A NAME="putIntegerArrayList(java.lang.String, java.util.ArrayList<java.lang.Integer>)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putIntegerArrayList</span>
@@ -4650,15 +4673,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an ArrayList<Integer> value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4682,14 +4705,14 @@ From class
 
 <A NAME="putLong(java.lang.String, long)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putLong</span>
@@ -4697,15 +4720,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a long value into the mapping of this DataMap, replacing
  any existing value for the given key.</p></div>
   <div class="jd-tagdata">
@@ -4729,14 +4752,14 @@ From class
 
 <A NAME="putLongArray(java.lang.String, long[])"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putLongArray</span>
@@ -4744,15 +4767,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a long array value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4776,14 +4799,14 @@ From class
 
 <A NAME="putString(java.lang.String, java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putString</span>
@@ -4791,15 +4814,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a String value into the mapping of this DataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4823,14 +4846,14 @@ From class
 
 <A NAME="putStringArray(java.lang.String, java.lang.String[])"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putStringArray</span>
@@ -4838,15 +4861,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts a String array value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4870,14 +4893,14 @@ From class
 
 <A NAME="putStringArrayList(java.lang.String, java.util.ArrayList<java.lang.String>)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         void
       </span>
       <span class="sympad">putStringArrayList</span>
@@ -4885,15 +4908,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Inserts an ArrayList<String> value into the mapping of this dataMap, replacing
  any existing value for the given key.  Either key or value may be null.</p></div>
   <div class="jd-tagdata">
@@ -4917,14 +4940,14 @@ From class
 
 <A NAME="remove(java.lang.String)"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Object
       </span>
       <span class="sympad">remove</span>
@@ -4932,15 +4955,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Removes any entry with the given key from the mapping of this dataMap.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
@@ -4959,14 +4982,14 @@ From class
 
 <A NAME="size()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         int
       </span>
       <span class="sympad">size</span>
@@ -4974,15 +4997,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns the number of key-value pairs in this map.
 </p></div>
 
@@ -4992,14 +5015,14 @@ From class
 
 <A NAME="toBundle()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         Bundle
       </span>
       <span class="sympad">toBundle</span>
@@ -5007,15 +5030,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a Bundle containing all the elements on this DataMap. A data map converted in this
  way should only be read after converting it with <code><a href="/reference/com/google/android/gms/wearable/DataMap.html#fromBundle(android.os.Bundle)">fromBundle(Bundle)</a></code>.</p></div>
   <div class="jd-tagdata">
@@ -5030,14 +5053,14 @@ From class
 
 <A NAME="toByteArray()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         byte[]
       </span>
       <span class="sympad">toByteArray</span>
@@ -5045,15 +5068,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Returns a serialized <code>byte[]</code> representing this DataMap.
 </p></div>
 
@@ -5063,14 +5086,14 @@ From class
 
 <A NAME="toString()"></A>
 
-<div class="jd-details api apilevel-">
+<div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
-        public
-
-
-
-
+        public 
+         
+         
+         
+         
         String
       </span>
       <span class="sympad">toString</span>
@@ -5078,15 +5101,15 @@ From class
     </h4>
       <div class="api-level">
         <div></div>
-
-
+        
+  
 
       </div>
     <div class="jd-details-descr">
+      
+    
 
-
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -5104,17 +5127,17 @@ From class
 <A NAME="navbar_top"></A>
 
 <div id="footer" class="wrap" >
-
+        
 
   <div id="copyright">
-
+    
   Except as noted, this content is licensed under <a
-  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>.
+  href="http://www.apache.org/licenses/LICENSE-2.0">Apache 2.0</a>. 
   For details and restrictions, see the <a href="/license.html">
   Content License</a>.
   </div>
   <div id="build_info">
-
+    
 <script src="/timestamp.js" type="text/javascript"></script>
 <script>document.write(BUILD_TIMESTAMP)</script>
 
@@ -5122,7 +5145,7 @@ From class
 
 
   <div id="footerlinks">
-
+    
   <p>
     <a href="/about/index.html">About Android</a>&nbsp;&nbsp;|&nbsp;
     <a href="/legal.html">Legal</a>&nbsp;&nbsp;|&nbsp;
@@ -5135,7 +5158,7 @@ From class
 
 </div><!-- end doc-content -->
 
-</div> <!-- end body-content -->
+</div> <!-- end body-content --> 
 
 
 

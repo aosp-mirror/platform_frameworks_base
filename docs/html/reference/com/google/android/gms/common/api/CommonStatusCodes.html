@@ -95,6 +95,7 @@
 
 
 
+
 <html>
 <head>
 
@@ -110,7 +111,7 @@
 href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:light,regular,medium,thin,italic,mediumitalic,bold"
   title="roboto">
-<link href="/assets/css/default.css?v=2" rel="stylesheet" type="text/css">
+<link href="/assets/css/default.css?v=4" rel="stylesheet" type="text/css">
 
 
 
@@ -122,7 +123,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
   var metaTags = [];
   var devsite = false;
 </script>
-<script src="/assets/js/docs.js?v=2" type="text/javascript"></script>
+<script src="/assets/js/docs.js?v=3" type="text/javascript"></script>
 
 
 
@@ -148,11 +149,57 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
 
 <a name="top"></a>
 
+<!-- dialog to prompt lang pref change when loaded from hardcoded URL 
+<div id="langMessage" style="display:none">
+  <div>
+    <div class="lang en">
+      <p>You requested a page in English, would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang es">
+      <p>You requested a page in Spanish (Español), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ja">
+      <p>You requested a page in Japanese (日本語), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ko">
+      <p>You requested a page in Korean (한국어), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang ru">
+      <p>You requested a page in Russian (Русский), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-cn">
+      <p>You requested a page in Simplified Chinese (简体中文), would you like to proceed with this language setting?</p>
+    </div>
+    <div class="lang zh-tw">
+      <p>You requested a page in Traditional Chinese (繁體中文), would you like to proceed with this language setting?</p>
+    </div>
+    <a href="#" class="button yes" onclick="return false;">
+      <span class="lang en">Yes</span>
+      <span class="lang es">Sí</span>
+      <span class="lang ja">Yes</span>
+      <span class="lang ko">Yes</span>
+      <span class="lang ru">Yes</span>
+      <span class="lang zh-cn">是的</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+    <a href="#" class="button" onclick="$('#langMessage').hide();return false;">
+      <span class="lang en">No</span>
+      <span class="lang es">No</span>
+      <span class="lang ja">No</span>
+      <span class="lang ko">No</span>
+      <span class="lang ru">No</span>
+      <span class="lang zh-cn">没有</span>
+      <span class="lang zh-tw">没有</span>
+    </a>
+  </div>
+</div> -->
+
+
   <!-- Header -->
   <div id="header-wrapper">
     <div id="header">
 
-
+    
 
 
       <div class="wrap" id="header-wrap">
@@ -196,8 +243,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
         </ul>
 
 
-
-
+        
+        
 <div class="menu-container">
   <div class="moremenu">
     <div id="more-btn"></div>
@@ -228,8 +275,8 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 <option value="ja">日本語</option>
                 <option value="ko">한국어</option>
                 <option value="ru">Русский</option>
-                <option value="zh-cn">中文 (中国)</option>
-                <option value="zh-tw">中文 (台灣)</option>
+                <option value="zh-cn">中文（简体)</option>
+                <option value="zh-tw">中文（繁體)</option>
             </select>
           </div>
         <script type="text/javascript">
@@ -352,10 +399,10 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
                 </li>
                 <li><a href="/google/index.html">Google Services</a>
                 </li>
-
+                
                   <li><a href="/samples/index.html">Samples</a>
                   </li>
-
+                
               </ul>
             </li>
             <li class="distribute last">
@@ -379,33 +426,9 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
     <div id="nav-x">
         <div class="wrap" style="position:relative;z-index:1">
 
-
-            <a id="helpoutsLink" class="resource resource-card resource-card-6x2x3 resource-card-6x2 helpouts-card"
-              href="http://helpouts.google.com/partner/landing/provider/googledevelopers" target="_blank">
-              <div class="card-bg helpouts-card-bg"></div>
-              <div class="card-info">
-                <div class="helpouts-description">
-                  <div class="text">Help developers solve problems<br/>
-                    <span id="helpoutsLinkText" class="link-color" style="display:block;padding-top:5px;text-align:right">Learn more</span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            <script>
-              var textA = "LEARN MORE";
-              var linkA = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner1&utm_medium=banner&utm_campaign=android_provider_banner1";
-              var textB = "SIGN UP NOW";
-              var linkB = "http://helpouts.google.com/partner/landing/provider/googledevelopers?utm_source=android_banner2&utm_medium=banner&utm_campaign=android_provider_banner2";
-
-              if (Math.floor(1/Math.random()) > 1) {
-                $("a#helpoutsLink").attr('href', linkA);
-                $("span#helpoutsLinkText").text(textA);
-              } else {
-                $("a#helpoutsLink").attr('href', linkB);
-                $("span#helpoutsLinkText").text(textB);
-              }
-            </script>
-
+        
+        
+        
 
             <ul class="nav-x col-9 develop" style="width:100%">
                 <li class="training"><a href="/training/index.html"
@@ -466,7 +489,7 @@ href="//fonts.googleapis.com/css?family=Roboto+Condensed">
       <a class="logo" href="#top"></a>
       <a class="top" href="#top"></a>
       <ul class="breadcrumb">
-
+        
         <li class="current">CommonStatusCodes</li>
       </ul>
     </div>
@@ -824,7 +847,7 @@ Summary:
   
 
 
-
+    
 
 
 </div><!-- end header -->
@@ -871,9 +894,9 @@ Summary:
               <a href="/reference/com/google/android/gms/drive/DriveStatusCodes.html">DriveStatusCodes</a>,
             
               <a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html">FitnessStatusCodes</a>,
-
+            
               <a href="/reference/com/google/android/gms/location/GeofenceStatusCodes.html">GeofenceStatusCodes</a>,
-
+            
               <a href="/reference/com/google/android/gms/wearable/WearableStatusCodes.html">WearableStatusCodes</a>
             
           
@@ -881,55 +904,55 @@ Summary:
       <div id="subclasses-direct-summary"
               style="display: none;"
               >
-
+  
   <table class="jd-sumtable-expando">
-
+    
       <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/drive/DriveStatusCodes.html">DriveStatusCodes</a></td>
         <td class="jd-descrcol" width="100%">
           Drive specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>.&nbsp;
-
-
+          
+    
 
         </td>
       </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/fitness/FitnessStatusCodes.html">FitnessStatusCodes</a></td>
         <td class="jd-descrcol" width="100%">
           Google Fit specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
 &nbsp;
-
-
+          
+    
 
         </td>
       </tr>
-
-
+      
+    
       <tr class="alt-color api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/GeofenceStatusCodes.html">GeofenceStatusCodes</a></td>
         <td class="jd-descrcol" width="100%">
           Geofence specific status codes, for use in <code><a href="/reference/com/google/android/gms/common/api/Status.html#getStatusCode()">getStatusCode()</a></code>
 &nbsp;
-
-
+          
+    
 
         </td>
       </tr>
-
-
+      
+    
       <tr class=" api apilevel-" >
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/wearable/WearableStatusCodes.html">WearableStatusCodes</a></td>
         <td class="jd-descrcol" width="100%">
           Error codes for wearable API failures.&nbsp;
-
-
+          
+    
 
         </td>
       </tr>
-
-
+      
+    
   </table>
 
       </div>
@@ -994,8 +1017,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#CANCELED">CANCELED</a></td>
         <td class="jd-descrcol" width="100%">
           The result was canceled either due to client disconnect or <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code>.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1006,8 +1029,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#DEVELOPER_ERROR">DEVELOPER_ERROR</a></td>
         <td class="jd-descrcol" width="100%">
           The application is misconfigured.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1018,8 +1041,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#ERROR">ERROR</a></td>
         <td class="jd-descrcol" width="100%">
           The operation failed with no more detailed information.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1030,8 +1053,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INTERNAL_ERROR">INTERNAL_ERROR</a></td>
         <td class="jd-descrcol" width="100%">
           An internal error occurred.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1042,8 +1065,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INTERRUPTED">INTERRUPTED</a></td>
         <td class="jd-descrcol" width="100%">
           A blocking call was interrupted while waiting and did not run to completion.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1054,8 +1077,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#INVALID_ACCOUNT">INVALID_ACCOUNT</a></td>
         <td class="jd-descrcol" width="100%">
           The client attempted to connect to the service with an invalid account name specified.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1066,8 +1089,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#LICENSE_CHECK_FAILED">LICENSE_CHECK_FAILED</a></td>
         <td class="jd-descrcol" width="100%">
           The application is not licensed to the user.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1078,8 +1101,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#NETWORK_ERROR">NETWORK_ERROR</a></td>
         <td class="jd-descrcol" width="100%">
           A network error occurred.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1090,8 +1113,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#RESOLUTION_REQUIRED">RESOLUTION_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">
           Completing the connection requires some form of resolution.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1102,8 +1125,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SERVICE_DISABLED">SERVICE_DISABLED</a></td>
         <td class="jd-descrcol" width="100%">
           The installed version of Google Play services has been disabled on this device.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1114,8 +1137,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SERVICE_INVALID">SERVICE_INVALID</a></td>
         <td class="jd-descrcol" width="100%">
           The version of the Google Play services installed on this device is not authentic.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1126,8 +1149,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SERVICE_MISSING">SERVICE_MISSING</a></td>
         <td class="jd-descrcol" width="100%">
           Google Play services is missing on this device.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1138,8 +1161,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SERVICE_VERSION_UPDATE_REQUIRED">SERVICE_VERSION_UPDATE_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">
           The installed version of Google Play services is out of date.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1150,8 +1173,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SIGN_IN_REQUIRED">SIGN_IN_REQUIRED</a></td>
         <td class="jd-descrcol" width="100%">
           The client attempted to connect to the service but the user is not signed in.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1162,8 +1185,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SUCCESS">SUCCESS</a></td>
         <td class="jd-descrcol" width="100%">
           The operation was successful.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1174,8 +1197,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#SUCCESS_CACHE">SUCCESS_CACHE</a></td>
         <td class="jd-descrcol" width="100%">
           The operation was successful, but was used the device's cache.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1186,8 +1209,8 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/api/CommonStatusCodes.html#TIMEOUT">TIMEOUT</a></td>
         <td class="jd-descrcol" width="100%">
           Timed out while awaiting the result.
-
-
+          
+    
 
         </td>
     </tr>
@@ -1522,9 +1545,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The result was canceled either due to client disconnect or <code><a href="/reference/com/google/android/gms/common/api/PendingResult.html#cancel()">cancel()</a></code>.
 </p></div>
 
@@ -1564,9 +1587,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The application is misconfigured. This error is not recoverable and will be treated as fatal.
  The developer should look at the logs after this to determine more actionable information.
 </p></div>
@@ -1607,9 +1630,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The operation failed with no more detailed information.
 </p></div>
 
@@ -1649,9 +1672,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>An internal error occurred. Retrying should resolve the problem.
 </p></div>
 
@@ -1691,9 +1714,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>A blocking call was interrupted while waiting and did not run to completion.
 </p></div>
 
@@ -1733,9 +1756,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The client attempted to connect to the service with an invalid account name specified.
 </p></div>
 
@@ -1775,9 +1798,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The application is not licensed to the user. This error is not recoverable and will be
  treated as fatal.
 </p></div>
@@ -1818,9 +1841,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>A network error occurred. Retrying should resolve the problem.
 </p></div>
 
@@ -1860,9 +1883,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Completing the connection requires some form of resolution.  A resolution will be available
  to be started with <code><a href="/reference/com/google/android/gms/common/api/Status.html#startResolutionForResult(android.app.Activity, int)">startResolutionForResult(Activity, int)</a></code>. If the result
  returned is <code><a href="/reference/android/app/Activity.html#RESULT_OK">RESULT_OK</a></code>, then further attempts to connect should either
@@ -1905,9 +1928,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The installed version of Google Play services has been disabled on this device. The calling
  activity should pass this error code to <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> to get
  a localized error dialog that will resolve the error when shown.
@@ -1949,9 +1972,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The version of the Google Play services installed on this device is not authentic. </p></div>
 
     
@@ -1990,9 +2013,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Google Play services is missing on this device. The calling activity should pass this error
  code to <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> to get a localized error dialog that
  will resolve the error when shown.
@@ -2034,9 +2057,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The installed version of Google Play services is out of date. The calling activity should
  pass this error code to <code><a href="/reference/com/google/android/gms/common/GooglePlayServicesUtil.html#getErrorDialog(int, android.app.Activity, int)">getErrorDialog(int, Activity, int)</a></code> to get a localized
  error dialog that will resolve the error when shown.
@@ -2078,9 +2101,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The client attempted to connect to the service but the user is not signed in. The client may
  choose to continue without using the API or it may call
  <code><a href="/reference/com/google/android/gms/common/api/Status.html#startResolutionForResult(android.app.Activity, int)">startResolutionForResult(Activity, int)</a></code> to prompt the user to sign in. After the sign in
@@ -2123,9 +2146,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The operation was successful. </p></div>
 
     
@@ -2164,9 +2187,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>The operation was successful, but was used the device's cache. If this is a write, the data
  will be written when the device is online; errors will be written to the logs.  If this is a
  read, the data was read from a device cache and may be stale.
@@ -2208,9 +2231,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p>Timed out while awaiting the result.
 </p></div>
 
@@ -2265,9 +2288,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
@@ -2312,9 +2335,9 @@ From class
       </div>
     <div class="jd-details-descr">
       
+    
 
-
-
+      
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
