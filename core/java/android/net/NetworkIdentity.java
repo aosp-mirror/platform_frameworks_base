@@ -41,7 +41,11 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     /**
      * When enabled, combine all {@link #mSubType} together under
      * {@link #SUBTYPE_COMBINED}.
+     *
+     * @deprecated we no longer offer to collect statistics on a per-subtype
+     *             basis; this is always disabled.
      */
+    @Deprecated
     public static final boolean COMBINE_SUBTYPE_ENABLED = true;
 
     public static final int SUBTYPE_COMBINED = -1;
