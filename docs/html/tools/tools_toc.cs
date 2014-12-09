@@ -255,10 +255,10 @@ class="en">Support Library</span></a></div>
         <span class="en">SDK Tools</span>
       </a></li>
       <li><a href="<?cs var:toroot ?>tools/revisions/build-tools.html">
-        <span class="en">Build Tools</span>
+        <span class="en">SDK Build Tools</span>
       </a></li>
       <li><a href="<?cs var:toroot ?>tools/revisions/platforms.html">
-        <span class="en">Platforms</span></a></li>
+        <span class="en">SDK Platforms</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/sdk/eclipse-adt.html">
         <span class="en">ADT Plugin</span></a></li>
     </ul>
