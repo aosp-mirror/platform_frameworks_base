@@ -614,6 +614,24 @@ static jint Image_imageGetRowStride(JNIEnv* env, CpuConsumer::LockedBuffer* buff
     return rowStride;
 }
 
+static int Image_getBufferWidth(CpuConsumer::LockedBuffer* buffer) {
+    if (buffer == NULL) return -1;
+
+    if (!buffer->crop.isEmpty()) {
+        return buffer->crop.getWidth();
+    }
+    return buffer->width;
+}
+
+static int Image_getBufferHeight(CpuConsumer::LockedBuffer* buffer) {
+    if (buffer == NULL) return -1;
+
+    if (!buffer->crop.isEmpty()) {
+        return buffer->crop.getHeight();
+    }
+    return buffer->height;
+}
+
 // ----------------------------------------------------------------------------
 
 static void ImageReader_classInit(JNIEnv* env, jclass clazz)
@@ -794,33 +812,16 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     }
 
     // Check if the producer buffer configurations match what ImageReader configured.
-    // We want to fail for the very first image because this case is too bad.
-    int outputWidth = buffer->width;
-    int outputHeight = buffer->height;
-
-    // Correct width/height when crop is set.
-    if (!buffer->crop.isEmpty()) {
-        outputWidth = buffer->crop.getWidth();
-        outputHeight = buffer->crop.getHeight();
-    }
+    int outputWidth = Image_getBufferWidth(buffer);
+    int outputHeight = Image_getBufferHeight(buffer);
 
     int imgReaderFmt = ctx->getBufferFormat();
     int imageReaderWidth = ctx->getBufferWidth();
     int imageReaderHeight = ctx->getBufferHeight();
     if ((buffer->format != HAL_PIXEL_FORMAT_BLOB) && (imgReaderFmt != HAL_PIXEL_FORMAT_BLOB) &&
-            (imageReaderWidth != outputWidth || imageReaderHeight > outputHeight)) {
-        /**
-         * For video decoder, the buffer height is actually the vertical stride,
-         * which is always >= actual image height. For future, decoder need provide
-         * right crop rectangle to CpuConsumer to indicate the actual image height,
-         * see bug 9563986. After this bug is fixed, we can enforce the height equal
-         * check. Right now, only make sure buffer height is no less than ImageReader
-         * height.
-         */
-        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
-                "Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
-                outputWidth, outputHeight, imageReaderWidth, imageReaderHeight);
-        return -1;
+            (imageReaderWidth != outputWidth || imageReaderHeight != outputHeight)) {
+        ALOGV("%s: Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
+                __FUNCTION__, outputWidth, outputHeight, imageReaderWidth, imageReaderHeight);
     }
 
     int bufFmt = buffer->format;
@@ -933,6 +934,19 @@ static jobject Image_getByteBuffer(JNIEnv* env, jobject thiz, int idx, int reade
     return byteBuffer;
 }
 
+static jint Image_getWidth(JNIEnv* env, jobject thiz)
+{
+    CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
+    return Image_getBufferWidth(buffer);
+}
+
+static jint Image_getHeight(JNIEnv* env, jobject thiz)
+{
+    CpuConsumer::LockedBuffer* buffer = Image_getLockedBuffer(env, thiz);
+    return Image_getBufferHeight(buffer);
+}
+
+
 } // extern "C"
 
 // ----------------------------------------------------------------------------
@@ -942,14 +956,16 @@ static JNINativeMethod gImageReaderMethods[] = {
     {"nativeInit",             "(Ljava/lang/Object;IIII)V",  (void*)ImageReader_init },
     {"nativeClose",            "()V",                        (void*)ImageReader_close },
     {"nativeReleaseImage",     "(Landroid/media/Image;)V",   (void*)ImageReader_imageRelease },
-    {"nativeImageSetup",       "(Landroid/media/Image;)I",    (void*)ImageReader_imageSetup },
+    {"nativeImageSetup",       "(Landroid/media/Image;)I",   (void*)ImageReader_imageSetup },
     {"nativeGetSurface",       "()Landroid/view/Surface;",   (void*)ImageReader_getSurface },
 };
 
 static JNINativeMethod gImageMethods[] = {
     {"nativeImageGetBuffer",   "(II)Ljava/nio/ByteBuffer;",   (void*)Image_getByteBuffer },
     {"nativeCreatePlane",      "(II)Landroid/media/ImageReader$SurfaceImage$SurfacePlane;",
-                                                             (void*)Image_createSurfacePlane },
+                                                              (void*)Image_createSurfacePlane },
+    {"nativeGetWidth",         "()I",                         (void*)Image_getWidth },
+    {"nativeGetHeight",        "()I",                         (void*)Image_getHeight },
 };
 
 int register_android_media_ImageReader(JNIEnv *env) {
