@@ -57,6 +57,8 @@
         </service>
         <receiver android:name="UserTarget">
         </receiver>
+        <service android:name="IsolatedService" android:isolatedProcess="true">
+        </service>
         <receiver android:name="StartEmpty" android:exported="true">
             <intent-filter>
                 <action android:name="com.example.START_EMPTY" />
