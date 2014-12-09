@@ -916,10 +916,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     }
 
     private Future<Void> expectPolicyDataEnable(int type, boolean enabled) throws Exception {
-        final FutureAnswer future = new FutureAnswer();
-        mConnManager.setPolicyDataEnable(type, enabled);
-        expectLastCall().andAnswer(future);
-        return future;
+        // TODO: bring back this test
+        return null;
     }
 
     private void expectAdvisePersistThreshold() throws Exception {

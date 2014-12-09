@@ -128,6 +128,20 @@ public class ArrayUtils
     }
 
     /**
+     * Checks if given array is null or has zero elements.
+     */
+    public static boolean isEmpty(int[] array) {
+        return array == null || array.length == 0;
+    }
+
+    /**
+     * Checks if given array is null or has zero elements.
+     */
+    public static boolean isEmpty(long[] array) {
+        return array == null || array.length == 0;
+    }
+
+    /**
      * Checks that value is present as at least one of the elements of the array.
      * @param array the array to check in
      * @param value the value to check for
@@ -157,6 +171,7 @@ public class ArrayUtils
      * Test if all {@code check} items are contained in {@code array}.
      */
     public static <T> boolean containsAll(T[] array, T[] check) {
+        if (check == null) return true;
         for (T checkItem : check) {
             if (!contains(array, checkItem)) {
                 return false;
