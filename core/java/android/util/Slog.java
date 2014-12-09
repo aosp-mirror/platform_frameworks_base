@@ -83,6 +83,13 @@ public final class Slog {
     }
 
     /**
+     * Like {@link #wtf(String, String)}, but does not output anything to the log.
+     */
+    public static void wtfQuiet(String tag, String msg) {
+        Log.wtfQuiet(Log.LOG_ID_SYSTEM, tag, msg, true);
+    }
+
+    /**
      * Like {@link Log#wtfStack(String, String)}, but will never cause the caller to crash, and
      * will always be handled asynchronously.  Primarily for use by coding running within
      * the system process.
