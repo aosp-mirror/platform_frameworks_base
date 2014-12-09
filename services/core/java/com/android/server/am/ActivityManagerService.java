@@ -1075,6 +1075,13 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     boolean mSafeMode;
 
+    /**
+     * If true, we are running under a test environment so will sample PSS from processes
+     * much more rapidly to try to collect better data when the tests are rapidly
+     * running through apps.
+     */
+    boolean mTestPssMode = false;
+
     String mDebugApp = null;
     boolean mWaitForDebugger = false;
     boolean mDebugTransient = false;
@@ -1090,6 +1097,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mAutoStopProfiler = false;
     int mProfileType = 0;
     String mOpenGlTraceApp = null;
+
+    final long[] mTmpLong = new long[1];
 
     static class ProcessChangeItem {
         static final int CHANGE_ACTIVITIES = 1<<0;
@@ -1802,7 +1811,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     continue;
                                 }
                             }
-                            nativeTotalPss += Debug.getPss(st.pid, null);
+                            nativeTotalPss += Debug.getPss(st.pid, null, null);
                         }
                     }
                     memInfo.readMemInfo();
@@ -1815,48 +1824,38 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                int i = 0;
                 int num = 0;
                 long[] tmp = new long[1];
                 do {
                     ProcessRecord proc;
                     int procState;
                     int pid;
+                    long lastPssTime;
                     synchronized (ActivityManagerService.this) {
-                        if (i >= mPendingPssProcesses.size()) {
-                            if (DEBUG_PSS) Slog.d(TAG, "Collected PSS of " + num + " of " + i
+                        if (mPendingPssProcesses.size() <= 0) {
+                            if (mTestPssMode || DEBUG_PSS) Slog.d(TAG, "Collected PSS of " + num
                                     + " processes in " + (SystemClock.uptimeMillis()-start) + "ms");
                             mPendingPssProcesses.clear();
                             return;
                         }
-                        proc = mPendingPssProcesses.get(i);
+                        proc = mPendingPssProcesses.remove(0);
                         procState = proc.pssProcState;
+                        lastPssTime = proc.lastPssTime;
                         if (proc.thread != null && procState == proc.setProcState) {
                             pid = proc.pid;
                         } else {
                             proc = null;
                             pid = 0;
                         }
-                        i++;
                     }
                     if (proc != null) {
-                        long pss = Debug.getPss(pid, tmp);
+                        long pss = Debug.getPss(pid, tmp, null);
                         synchronized (ActivityManagerService.this) {
-                            if (proc.thread != null && proc.setProcState == procState
-                                    && proc.pid == pid) {
+                            if (pss != 0 && proc.thread != null && proc.setProcState == procState
+                                    && proc.pid == pid && proc.lastPssTime == lastPssTime) {
                                 num++;
-                                proc.lastPssTime = SystemClock.uptimeMillis();
-                                proc.baseProcessTracker.addPss(pss, tmp[0], true, proc.pkgList);
-                                if (DEBUG_PSS) Slog.d(TAG, "PSS of " + proc.toShortString()
-                                        + ": " + pss + " lastPss=" + proc.lastPss
-                                        + " state=" + ProcessList.makeProcStateString(procState));
-                                if (proc.initialIdlePss == 0) {
-                                    proc.initialIdlePss = pss;
-                                }
-                                proc.lastPss = pss;
-                                if (procState >= ActivityManager.PROCESS_STATE_HOME) {
-                                    proc.lastCachedPss = pss;
-                                }
+                                recordPssSample(proc, procState, pss, tmp[0],
+                                        SystemClock.uptimeMillis());
                             }
                         }
                     }
@@ -5420,7 +5419,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             long[] tmpUss = new long[1];
-            pss[i] = Debug.getPss(pids[i], tmpUss);
+            pss[i] = Debug.getPss(pids[i], tmpUss, null);
             if (proc != null) {
                 synchronized (this) {
                     if (proc.thread != null && proc.setAdj == oomAdj) {
@@ -10949,7 +10948,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     proc.notCachedSinceIdle = true;
                     proc.initialIdlePss = 0;
                     proc.nextPssTime = ProcessList.computeNextPssTime(proc.curProcState, true,
-                            isSleeping(), now);
+                            mTestPssMode, isSleeping(), now);
                 }
             }
 
@@ -12919,7 +12918,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + PowerManagerInternal.wakefulnessToString(mWakefulness));
             pw.println("  mSleeping=" + mSleeping + " mLockScreenShown="
                     + lockScreenShownToString());
-            pw.println("  mShuttingDown=" + mShuttingDown + " mRunningVoice=" + mRunningVoice);
+            pw.println("  mShuttingDown=" + mShuttingDown + " mRunningVoice=" + mRunningVoice
+                    + " mTestPssMode=" + mTestPssMode);
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
@@ -14014,7 +14014,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (dumpDetails || (!brief && !oomOnly)) {
                             Debug.getMemoryInfo(pid, mi);
                         } else {
-                            mi.dalvikPss = (int)Debug.getPss(pid, tmpLong);
+                            mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
                             mi.dalvikPrivateDirty = (int)tmpLong[0];
                         }
                         ActivityThread.dumpMemInfoTable(pw, mi, isCheckinRequest, dumpFullDetails,
@@ -14076,7 +14076,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (dumpDetails || (!brief && !oomOnly)) {
                     Debug.getMemoryInfo(pid, mi);
                 } else {
-                    mi.dalvikPss = (int)Debug.getPss(pid, tmpLong);
+                    mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
                     mi.dalvikPrivateDirty = (int)tmpLong[0];
                 }
                 if (dumpDetails) {
@@ -14152,6 +14152,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // If we are showing aggregations, also look for native processes to
             // include so that our aggregations are more accurate.
             updateCpuStatsNow();
+            mi = null;
             synchronized (mProcessCpuTracker) {
                 final int N = mProcessCpuTracker.countStats();
                 for (int i=0; i<N; i++) {
@@ -14163,7 +14164,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (!brief && !oomOnly) {
                             Debug.getMemoryInfo(st.pid, mi);
                         } else {
-                            mi.nativePss = (int)Debug.getPss(st.pid, tmpLong);
+                            mi.nativePss = (int)Debug.getPss(st.pid, tmpLong, null);
                             mi.nativePrivateDirty = (int)tmpLong[0];
                         }
 
@@ -14354,7 +14355,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void appendBasicMemEntry(StringBuilder sb, int oomAdj, int procState, long pss,
-            String name) {
+            long memtrack, String name) {
         sb.append("  ");
         sb.append(ProcessList.makeOomAdjString(oomAdj));
         sb.append(' ');
@@ -14363,11 +14364,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         ProcessList.appendRamKb(sb, pss);
         sb.append(" kB: ");
         sb.append(name);
+        if (memtrack > 0) {
+            sb.append(" (");
+            sb.append(memtrack);
+            sb.append(" kB memtrack)");
+        }
     }
 
     private void appendMemInfo(StringBuilder sb, ProcessMemInfo mi) {
-        appendBasicMemEntry(sb, mi.oomAdj, mi.procState, mi.pss, mi.name);
-        sb.append(" (");
+        appendBasicMemEntry(sb, mi.oomAdj, mi.procState, mi.pss, mi.memtrack, mi.name);
+        sb.append(" (pid ");
         sb.append(mi.pid);
         sb.append(") ");
         sb.append(mi.adjType);
@@ -14386,17 +14392,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             infoMap.put(mi.pid, mi);
         }
         updateCpuStatsNow();
+        long[] memtrackTmp = new long[1];
         synchronized (mProcessCpuTracker) {
             final int N = mProcessCpuTracker.countStats();
             for (int i=0; i<N; i++) {
                 ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
                 if (st.vsize > 0) {
-                    long pss = Debug.getPss(st.pid, null);
+                    long pss = Debug.getPss(st.pid, null, memtrackTmp);
                     if (pss > 0) {
                         if (infoMap.indexOfKey(st.pid) < 0) {
                             ProcessMemInfo mi = new ProcessMemInfo(st.name, st.pid,
                                     ProcessList.NATIVE_ADJ, -1, "native", null);
                             mi.pss = pss;
+                            mi.memtrack = memtrackTmp[0];
                             memInfos.add(mi);
                         }
                     }
@@ -14405,12 +14413,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         long totalPss = 0;
+        long totalMemtrack = 0;
         for (int i=0, N=memInfos.size(); i<N; i++) {
             ProcessMemInfo mi = memInfos.get(i);
             if (mi.pss == 0) {
-                mi.pss = Debug.getPss(mi.pid, null);
+                mi.pss = Debug.getPss(mi.pid, null, memtrackTmp);
+                mi.memtrack = memtrackTmp[0];
             }
             totalPss += mi.pss;
+            totalMemtrack += mi.memtrack;
         }
         Collections.sort(memInfos, new Comparator<ProcessMemInfo>() {
             @Override public int compare(ProcessMemInfo lhs, ProcessMemInfo rhs) {
@@ -14437,6 +14448,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean firstLine = true;
         int lastOomAdj = Integer.MIN_VALUE;
         long extraNativeRam = 0;
+        long extraNativeMemtrack = 0;
         long cachedPss = 0;
         for (int i=0, N=memInfos.size(); i<N; i++) {
             ProcessMemInfo mi = memInfos.get(i);
@@ -14487,18 +14499,19 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             appendMemInfo(fullNativeBuilder, mi);
             if (mi.oomAdj == ProcessList.NATIVE_ADJ) {
-                // The short form only has native processes that are >= 1MB.
-                if (mi.pss >= 1000) {
+                // The short form only has native processes that are >= 512K.
+                if (mi.pss >= 512) {
                     appendMemInfo(shortNativeBuilder, mi);
                 } else {
                     extraNativeRam += mi.pss;
+                    extraNativeMemtrack += mi.memtrack;
                 }
             } else {
                 // Short form has all other details, but if we have collected RAM
                 // from smaller native processes let's dump a summary of that.
                 if (extraNativeRam > 0) {
                     appendBasicMemEntry(shortNativeBuilder, ProcessList.NATIVE_ADJ,
-                            -1, extraNativeRam, "(Other native)");
+                            -1, extraNativeRam, extraNativeMemtrack, "(Other native)");
                     shortNativeBuilder.append('\n');
                     extraNativeRam = 0;
                 }
@@ -14508,7 +14521,14 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         fullJavaBuilder.append("           ");
         ProcessList.appendRamKb(fullJavaBuilder, totalPss);
-        fullJavaBuilder.append(" kB: TOTAL\n");
+        fullJavaBuilder.append(" kB: TOTAL");
+        if (totalMemtrack > 0) {
+            fullJavaBuilder.append(" (");
+            fullJavaBuilder.append(totalMemtrack);
+            fullJavaBuilder.append(" kB memtrack)");
+        } else {
+        }
+        fullJavaBuilder.append("\n");
 
         MemInfoReader memInfo = new MemInfoReader();
         memInfo.readMemInfo();
@@ -17336,6 +17356,24 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     /**
+     * Record new PSS sample for a process.
+     */
+    void recordPssSample(ProcessRecord proc, int procState, long pss, long uss, long now) {
+        proc.lastPssTime = now;
+        proc.baseProcessTracker.addPss(pss, uss, true, proc.pkgList);
+        if (DEBUG_PSS) Slog.d(TAG, "PSS of " + proc.toShortString()
+                + ": " + pss + " lastPss=" + proc.lastPss
+                + " state=" + ProcessList.makeProcStateString(procState));
+        if (proc.initialIdlePss == 0) {
+            proc.initialIdlePss = pss;
+        }
+        proc.lastPss = pss;
+        if (procState >= ActivityManager.PROCESS_STATE_HOME) {
+            proc.lastCachedPss = pss;
+        }
+    }
+
+    /**
      * Schedule PSS collection of a process.
      */
     void requestPssLocked(ProcessRecord proc, int procState) {
@@ -17370,11 +17408,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (memLowered || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
                 app.pssProcState = app.setProcState;
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
-                        isSleeping(), now);
+                        mTestPssMode, isSleeping(), now);
                 mPendingPssProcesses.add(app);
             }
         }
         mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
+    }
+
+    public void setTestPssMode(boolean enabled) {
+        synchronized (this) {
+            mTestPssMode = enabled;
+            if (enabled) {
+                // Whenever we enable the mode, we want to take a snapshot all of current
+                // process mem use.
+                requestPssAllProcsLocked(SystemClock.uptimeMillis(), true, true);
+            }
+        }
     }
 
     /**
@@ -17673,9 +17722,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (app.setProcState < 0 || ProcessList.procStatesDifferForMem(app.curProcState,
                 app.setProcState)) {
+            if (false && mTestPssMode && app.setProcState >= 0 && app.lastStateTime <= (now-200)) {
+                // Experimental code to more aggressively collect pss while
+                // running test...  the problem is that this tends to collect
+                // the data right when a process is transitioning between process
+                // states, which well tend to give noisy data.
+                long start = SystemClock.uptimeMillis();
+                long pss = Debug.getPss(app.pid, mTmpLong, null);
+                recordPssSample(app, app.curProcState, pss, mTmpLong[0], now);
+                mPendingPssProcesses.remove(app);
+                Slog.i(TAG, "Recorded pss for " + app + " state " + app.setProcState
+                        + " to " + app.curProcState + ": "
+                        + (SystemClock.uptimeMillis()-start) + "ms");
+            }
             app.lastStateTime = now;
             app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
-                    isSleeping(), now);
+                    mTestPssMode, isSleeping(), now);
             if (DEBUG_PSS) Slog.d(TAG, "Process state change from "
                     + ProcessList.makeProcStateString(app.setProcState) + " to "
                     + ProcessList.makeProcStateString(app.curProcState) + " next pss in "
@@ -17685,7 +17747,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     && now > (app.lastStateTime+ProcessList.PSS_MIN_TIME_FROM_STATE_CHANGE))) {
                 requestPssLocked(app, app.setProcState);
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, false,
-                        isSleeping(), now);
+                        mTestPssMode, isSleeping(), now);
             } else if (false && DEBUG_PSS) {
                 Slog.d(TAG, "Not requesting PSS of " + app + ": next=" + (app.nextPssTime-now));
             }
