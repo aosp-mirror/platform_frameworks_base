@@ -483,6 +483,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 cachedControllers.get(key).unregisterListener();
             }
         }
+        // There may be new MobileSignalControllers around, make sure they get the current
+        // inet condition and airplane mode.
+        pushConnectivityToSignals();
+        updateAirplaneMode(true /* force */);
     }
 
     private boolean hasCorrectMobileControllers(List<SubscriptionInfo> allSubscriptions) {
@@ -577,6 +581,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mBluetoothTethered = mConnectedTransports.get(TRANSPORT_BLUETOOTH);
         mEthernetConnected = mConnectedTransports.get(TRANSPORT_ETHERNET);
 
+        pushConnectivityToSignals();
+    }
+
+    /**
+     * Pushes the current connectivity state to all SignalControllers.
+     */
+    private void pushConnectivityToSignals() {
         // We want to update all the icons, all at once, for any condition change
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.setInetCondition(
