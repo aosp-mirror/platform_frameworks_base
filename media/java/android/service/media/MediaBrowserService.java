@@ -323,24 +323,22 @@ public abstract class MediaBrowserService extends Service {
      * <p>
      * This should be called as soon as possible during the service's startup.
      * It may only be called once.
-     *
-     * @return The media session token, must not be null.
      */
     public void setSessionToken(final MediaSession.Token token) {
         if (token == null) {
             throw new IllegalArgumentException("Session token may not be null.");
         }
+        if (mSession != null) {
+            throw new IllegalStateException("The session token has already been set.");
+        }
+        mSession = token;
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (mSession != null) {
-                    throw new IllegalStateException("The session token has already been set.");
-                }
-                mSession = token;
                 for (IBinder key : mConnections.keySet()) {
                     ConnectionRecord connection = mConnections.get(key);
                     try {
-                        connection.callbacks.onConnect(connection.root.getRootId(), mSession,
+                        connection.callbacks.onConnect(connection.root.getRootId(), token,
                                 connection.root.getExtras());
                     } catch (RemoteException e) {
                         Log.w(TAG, "Connection for " + connection.pkg + " is no longer valid.");
