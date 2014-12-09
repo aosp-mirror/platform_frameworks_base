@@ -2269,7 +2269,7 @@ final class ActivityStack {
                     // In this case, we want to finish this activity
                     // and everything above it, so be sneaky and pretend
                     // like these are all in the reply chain.
-                    end = numActivities - 1;
+                    end = activities.size() - 1;
                 } else if (replyChainEnd < 0) {
                     end = i;
                 } else {
