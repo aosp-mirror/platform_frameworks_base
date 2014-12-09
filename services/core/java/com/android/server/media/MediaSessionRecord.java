@@ -38,6 +38,7 @@ import android.media.session.ISessionControllerCallback;
 import android.media.session.MediaController;
 import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
+import android.media.session.MediaSessionManager;
 import android.media.session.ParcelableVolumeInfo;
 import android.media.session.PlaybackState;
 import android.media.AudioAttributes;
@@ -95,6 +96,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final MediaSessionService mService;
     private final boolean mUseMasterVolume;
 
+    private final IBinder mICallback = new Binder();
     private final Object mLock = new Object();
     private final ArrayList<ISessionControllerCallback> mControllerCallbacks =
             new ArrayList<ISessionControllerCallback>();
@@ -249,6 +251,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         if (isPlaybackActive(false) || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
+        boolean isMute = direction == MediaSessionManager.DIRECTION_MUTE;
         if (direction > 1) {
             direction = 1;
         } else if (direction < -1) {
@@ -258,27 +261,50 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mUseMasterVolume) {
                 // If this device only uses master volume and playback is local
                 // just adjust the master volume and return.
-                mAudioManagerInternal.adjustMasterVolumeForUid(direction, flags, packageName, uid);
+                if (isMute) {
+                    mAudioManagerInternal.setMasterMuteForUid(!mAudioManager.isMasterMute(),
+                            flags, packageName, mICallback, uid);
+                } else {
+                    mAudioManagerInternal.adjustMasterVolumeForUid(direction, flags, packageName,
+                            uid);
+                }
                 return;
             }
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
             if (useSuggested) {
                 if (AudioSystem.isStreamActive(stream, 0)) {
-                    mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream, direction,
-                            flags, packageName, uid);
+                    if (isMute) {
+                        mAudioManager.setStreamMute(stream, !mAudioManager.isStreamMute(stream));
+                    } else {
+                        mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream, direction,
+                                flags, packageName, uid);
+                    }
                 } else {
                     flags |= previousFlagPlaySound;
-                    mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
-                            AudioManager.USE_DEFAULT_STREAM_TYPE, direction, flags, packageName,
-                            uid);
+                    if (isMute) {
+                        mAudioManager.setStreamMute(AudioManager.USE_DEFAULT_STREAM_TYPE,
+                                !mAudioManager.isStreamMute(AudioManager.USE_DEFAULT_STREAM_TYPE));
+                    } else {
+                        mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
+                                AudioManager.USE_DEFAULT_STREAM_TYPE, direction, flags, packageName,
+                                uid);
+                    }
                 }
             } else {
-                mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
-                        packageName, uid);
+                if (isMute) {
+                    mAudioManager.setStreamMute(stream, !mAudioManager.isStreamMute(stream));
+                } else {
+                    mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
+                            packageName, uid);
+                }
             }
         } else {
             if (mVolumeControlType == VolumeProvider.VOLUME_CONTROL_FIXED) {
                 // Nothing to do, the volume cannot be changed
+                return;
+            }
+            if (isMute) {
+                Log.w(TAG, "Muting remote playback is not supported");
                 return;
             }
             mSessionCb.adjustVolume(direction);
