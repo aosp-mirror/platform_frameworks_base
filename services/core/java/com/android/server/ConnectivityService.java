@@ -2268,6 +2268,46 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    // Is nai unneeded by all NetworkRequests (and should be disconnected)?
+    // For validated Networks this is simply whether it is satsifying any NetworkRequests.
+    // For unvalidated Networks this is whether it is satsifying any NetworkRequests or
+    // were it to become validated, would it have a chance of satisfying any NetworkRequests.
+    private boolean unneeded(NetworkAgentInfo nai) {
+        if (!nai.created || nai.isVPN()) return false;
+        boolean unneeded = true;
+        if (nai.everValidated) {
+            for (int i = 0; i < nai.networkRequests.size() && unneeded; i++) {
+                final NetworkRequest nr = nai.networkRequests.valueAt(i);
+                try {
+                    if (isRequest(nr)) unneeded = false;
+                } catch (Exception e) {
+                    loge("Request " + nr + " not found in mNetworkRequests.");
+                    loge("  it came from request list  of " + nai.name());
+                }
+            }
+        } else {
+            for (NetworkRequestInfo nri : mNetworkRequests.values()) {
+                // If this Network is already the highest scoring Network for a request, or if
+                // there is hope for it to become one if it validated, then it is needed.
+                if (nri.isRequest && nai.satisfies(nri.request) &&
+                        (nai.networkRequests.get(nri.request.requestId) != null ||
+                        // Note that this catches two important cases:
+                        // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
+                        //    is currently satisfying the request.  This is desirable when
+                        //    cellular ends up validating but WiFi does not.
+                        // 2. Unvalidated WiFi will not be reaped when validated cellular
+                        //    is currently satsifying the request.  This is desirable when
+                        //    WiFi ends up validating and out scoring cellular.
+                        mNetworkForRequestId.get(nri.request.requestId).getCurrentScore() <
+                                nai.getCurrentScoreAsValidated())) {
+                    unneeded = false;
+                    break;
+                }
+            }
+        }
+        return unneeded;
+    }
+
     private void handleReleaseNetworkRequest(NetworkRequest request, int callingUid) {
         NetworkRequestInfo nri = mNetworkRequests.get(request);
         if (nri != null) {
@@ -2289,16 +2329,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                     ", leaving " + nai.networkRequests.size() +
                                     " requests.");
                         }
-                        // check if has any requests remaining and if not,
-                        // disconnect (unless it's a VPN).
-                        boolean keep = nai.isVPN();
-                        for (int i = 0; i < nai.networkRequests.size() && !keep; i++) {
-                            NetworkRequest r = nai.networkRequests.valueAt(i);
-                            if (isRequest(r)) keep = true;
-                        }
-                        if (!keep) {
+                        if (unneeded(nai)) {
                             if (DBG) log("no live requests for " + nai.name() + "; disconnecting");
-                            nai.asyncChannel.disconnect();
+                            teardownUnneededNetwork(nai);
                         }
                     }
                 }
@@ -4052,19 +4085,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         // Linger any networks that are no longer needed.
         for (NetworkAgentInfo nai : affectedNetworks) {
-            boolean teardown = !nai.isVPN() && nai.everValidated;
-            for (int i = 0; i < nai.networkRequests.size() && teardown; i++) {
-                NetworkRequest nr = nai.networkRequests.valueAt(i);
-                try {
-                if (isRequest(nr)) {
-                    teardown = false;
-                }
-                } catch (Exception e) {
-                    loge("Request " + nr + " not found in mNetworkRequests.");
-                    loge("  it came from request list  of " + nai.name());
-                }
-            }
-            if (teardown) {
+            if (nai.everValidated && unneeded(nai)) {
                 nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_LINGER);
                 notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOSING);
             } else {
@@ -4164,27 +4185,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         if (reapUnvalidatedNetworks == ReapUnvalidatedNetworks.REAP) {
             for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                if (!nai.created || nai.everValidated || nai.isVPN()) continue;
-                boolean reap = true;
-                for (NetworkRequestInfo nri : mNetworkRequests.values()) {
-                    // If this Network is already the highest scoring Network for a request, or if
-                    // there is hope for it to become one if it validated, then don't reap it.
-                    if (nri.isRequest && nai.satisfies(nri.request) &&
-                            (nai.networkRequests.get(nri.request.requestId) != null ||
-                            // Note that this catches two important cases:
-                            // 1. Unvalidated cellular will not be reaped when unvalidated WiFi
-                            //    is currently satisfying the request.  This is desirable when
-                            //    cellular ends up validating but WiFi does not.
-                            // 2. Unvalidated WiFi will not be reaped when validated cellular
-                            //    is currently satsifying the request.  This is desirable when
-                            //    WiFi ends up validating and out scoring cellular.
-                            mNetworkForRequestId.get(nri.request.requestId).getCurrentScore() <
-                                    nai.getCurrentScoreAsValidated())) {
-                        reap = false;
-                        break;
-                    }
-                }
-                if (reap) {
+                if (!nai.everValidated && unneeded(nai)) {
                     if (DBG) log("Reaping " + nai.name());
                     teardownUnneededNetwork(nai);
                 }
