@@ -51,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * A Drawable is a general abstraction for "something that can be drawn."  Most
@@ -1244,10 +1245,16 @@ public abstract class Drawable {
         public abstract int getChangingConfigurations();
 
         /**
+         * @return Total pixel count
          * @hide
          */
-        public Bitmap getBitmap() {
-            return null;
+        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
+            return 0;
+        }
+
+        /** @hide */
+        protected final boolean isAtlasable(Bitmap bitmap) {
+            return bitmap != null && bitmap.getConfig() == Bitmap.Config.ARGB_8888;
         }
 
         /**
