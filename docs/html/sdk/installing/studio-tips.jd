@@ -40,25 +40,19 @@ For example, if you add a button to the layout without specifying the <em>width<
 add all missing attributs</em>. Clicking the message adds the missing attributes to the layout.</p>
 
 
-<h2>Output window message filtering</h2>
-<p>When checking build results, you can filter messages by <em>message type</em> to quickly
-locate messages of interest.</p>
-<img src="{@docRoot}images/tools/studio-outputwindowmsgfiltering.png" style="width:200px"style="width:200px" />
-<p class="img-caption"><strong>Figure 14.</strong> Filter Build Messages</p>
-
 <h3> Bitmap rendering in the debugger</h3>
 <p>While debugging, you can now right-click on bitmap variables in your app and invoke
 <em>View Bitmap</em>. This fetches the associated data from the debugged process and renders
 the bitmap in the debugger. </p>
 <p><img src="{@docRoot}images/tools/studio-bitmap-rendering.png" style="width:350px"/></p>
-<p class="img-caption"><strong>Figure 2.</strong> Bitmap Rendering</p>
+<p class="img-caption"><strong>Figure 1.</strong> Bitmap Rendering</p>
 
 
 <h3>Output window message filtering</h3>
 <p>When checking build results, you can filter messages by <em>message type</em> to quickly
 locate messages of interest.</p>
 <img src="{@docRoot}images/tools/studio-outputwindowmsgfiltering.png" style="width:200px"style="width:200px" />
-<p class="img-caption"><strong>Figure 3.</strong> Filter Build Messages</p>
+<p class="img-caption"><strong>Figure 2.</strong> Filter Build Messages</p>
 
 
 <h3>Hierarchical parent setting</h3>
@@ -79,7 +73,7 @@ including the preview device, layout theme, platform version and more. To previe
 multiple devices simultaneously, select <strong>Preview All Screen Sizes</strong> from the
 device drop-down.</p>
 <p><img src="{@docRoot}images/tools/studio-previewall.png" style="width:350px"/></p>
-<p class="img-caption"><strong>Figure 4.</strong> Preview All Screens</p>
+<p class="img-caption"><strong>Figure 3.</strong> Preview All Screens</p>
 
 <p>You can switch to the graphical editor by clicking <strong>Design</strong> at the
 bottom of the window. While editing in the Design view, you can show and hide the
@@ -166,7 +160,7 @@ resolved values for the various attributes that are pulled in.</p>
 </strong> <code>F1</code>, see the theme inheritance hierarchy, and resolved values for the
 various attributes.</p>
 <img src="{@docRoot}images/tools/studio-allocationtracker.png" style="width:300px" />
-<p class="img-caption"><strong>Figure 1.</strong> Allocation Tracker</p>
+<p class="img-caption"><strong>Figure 4.</strong> Allocation Tracker</p>
 
 
 <h3 id="key-commands">Keyboard Commands</h3>
