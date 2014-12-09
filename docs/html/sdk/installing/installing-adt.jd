@@ -15,12 +15,17 @@ of Eclipse to let you quickly set up new Android projects, build an app
 UI, debug your app, and export signed (or unsigned) app packages (APKs) for distribution.
 </p>
 
-<p class="note"><strong>Note:</strong> You should install the ADT plugin
-only if you already have an Eclipse installation that you want to continue using. If you do not
-have Eclipse installed, you should instead <b><a href="{@docRoot}sdk/index.html">install
-the complete Android SDK</a></b>, which includes the latest IDE for Android developers.</p>
 
-<p>Your existing Eclipse installation must meet these requirements:</p>
+<p class="caution"><strong>Caution:</strong>
+The ADT plugin for Eclipse is no longer in active development. If you're currently using it,
+you should <a href="{@docRoot}sdk/installing/migrate.html">migrate
+to Android Studio</a> as soon as possible. For more details about Android Studio, see the
+<a href="{@docRoot}tools/studio/index.html">Android Studio</a> guide.</p>
+
+
+<p>You should install the ADT plugin
+only if you already have an Eclipse installation that you want to continue using.
+Your existing Eclipse installation must meet these requirements:</p>
     <ul>
       <li><a href="http://eclipse.org/mobile/">Eclipse</a> 3.7.2 (Indigo) or greater
 <p class="note"><strong>Note:</strong> Eclipse 3.6 (Helios) is no longer
