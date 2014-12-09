@@ -112,4 +112,12 @@ interface IImsConfig {
      * @return void
      */
     oneway void setFeatureValue(int feature, int network, int value, ImsConfigListener listener);
+
+    /**
+     * Gets the value for IMS volte provisioned.
+     * This should be the same as the operator provisioned value if applies.
+     *
+     * @return void
+     */
+    boolean getVolteProvisioned();
 }
