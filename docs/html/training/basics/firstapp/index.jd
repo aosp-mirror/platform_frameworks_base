@@ -32,7 +32,7 @@ design, including how to build a simple user interface and handle user input.</p
 <p>Before you start this class, be sure you have your development environment set up. You need
 to:</p>
 <ol>
-  <li>Download the <a href="{@docRoot}sdk/index.html">Android Studio</a>.</li>
+  <li>Download <a href="{@docRoot}sdk/index.html">Android Studio</a>.</li>
   <li>Download the latest SDK tools and platforms using the
   <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>.</li>
 </ol>
