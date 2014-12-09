@@ -34,6 +34,7 @@
 #include "RenderState.h"
 #include "UvMapper.h"
 #include "utils/LinearAllocator.h"
+#include "utils/PaintUtils.h"
 
 // Use OP_LOG for logging with arglist, OP_LOGS if just printing char*
 #define OP_LOGS(s) OP_LOG("%s", (s))
@@ -203,7 +204,7 @@ protected:
             if (mPaint->getShader() && !mPaint->getShader()->isOpaque()) {
                 return false;
             }
-            if (Renderer::isBlendedColorFilter(mPaint->getColorFilter())) {
+            if (PaintUtils::isBlendedColorFilter(mPaint->getColorFilter())) {
                 return false;
             }
         }

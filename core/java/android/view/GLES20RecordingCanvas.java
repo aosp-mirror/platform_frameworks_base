@@ -56,7 +56,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     }
 
     long finishRecording() {
-        return nFinishRecording(mRenderer);
+        return nFinishRecording(mNativeCanvasWrapper);
     }
 
     @Override

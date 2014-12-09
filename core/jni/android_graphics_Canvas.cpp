@@ -411,9 +411,10 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jlong bitma
 class DrawTextFunctor {
 public:
     DrawTextFunctor(const Layout& layout, Canvas* canvas, uint16_t* glyphs, float* pos,
-                    const SkPaint& paint, float x, float y, MinikinRect& bounds)
+                    const SkPaint& paint, float x, float y, MinikinRect& bounds,
+                    float totalAdvance)
             : layout(layout), canvas(canvas), glyphs(glyphs), pos(pos), paint(paint),
-              x(x), y(y), bounds(bounds) { }
+              x(x), y(y), bounds(bounds), totalAdvance(totalAdvance) { }
 
     void operator()(size_t start, size_t end) {
         if (canvas->drawTextAbsolutePos()) {
@@ -432,7 +433,8 @@ public:
 
         size_t glyphCount = end - start;
         canvas->drawText(glyphs + start, pos + (2 * start), glyphCount, paint, x, y,
-                         bounds.mLeft , bounds.mTop , bounds.mRight , bounds.mBottom);
+                         bounds.mLeft, bounds.mTop, bounds.mRight, bounds.mBottom,
+                         totalAdvance);
     }
 private:
     const Layout& layout;
@@ -443,6 +445,7 @@ private:
     float x;
     float y;
     MinikinRect& bounds;
+    float totalAdvance;
 };
 
 // Same values used by Skia
@@ -494,8 +497,11 @@ void drawText(Canvas* canvas, const uint16_t* text, int start, int count, int co
 
     MinikinRect bounds;
     layout.getBounds(&bounds);
+    if (!canvas->drawTextAbsolutePos()) {
+        bounds.offset(x, y);
+    }
 
-    DrawTextFunctor f(layout, canvas, glyphs, pos, paint, x, y, bounds);
+    DrawTextFunctor f(layout, canvas, glyphs, pos, paint, x, y, bounds, layout.getAdvance());
     MinikinUtils::forFontRun(layout, &paint, f);
 
     drawTextDecorations(canvas, x, y, layout.getAdvance(), paint);
