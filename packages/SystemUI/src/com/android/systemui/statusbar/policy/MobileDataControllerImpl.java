@@ -196,6 +196,7 @@ public class MobileDataControllerImpl implements NetworkController.MobileDataCon
     }
 
     public void setMobileDataEnabled(boolean enabled) {
+        Log.d(TAG, "setMobileDataEnabled: enabled=" + enabled);
         mTelephonyManager.setDataEnabled(enabled);
         if (mCallback != null) {
             mCallback.onMobileDataEnabled(enabled);
