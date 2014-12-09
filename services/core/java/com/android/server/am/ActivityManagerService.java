@@ -12901,7 +12901,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + PowerManagerInternal.wakefulnessToString(mWakefulness));
             pw.println("  mSleeping=" + mSleeping + " mLockScreenShown="
                     + lockScreenShownToString());
-            pw.print("  mShuttingDown=" + mShuttingDown + " mRunningVoice=" + mRunningVoice);
+            pw.println("  mShuttingDown=" + mShuttingDown + " mRunningVoice=" + mRunningVoice);
         }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
