@@ -114,6 +114,15 @@ public class ValueAnimator extends Animator {
     private boolean mPlayingBackwards = false;
 
     /**
+     * Flag to indicate whether this animator is playing in reverse mode, specifically
+     * by being started or interrupted by a call to reverse(). This flag is different than
+     * mPlayingBackwards, which indicates merely whether the current iteration of the
+     * animator is playing in reverse. It is used in corner cases to determine proper end
+     * behavior.
+     */
+    private boolean mReversing;
+
+    /**
      * This variable tracks the current iteration that is playing. When mCurrentIteration exceeds the
      * repeatCount (if repeatCount!=INFINITE), the animation ends
      */
@@ -545,20 +554,50 @@ public class ValueAnimator extends Animator {
      * Sets the position of the animation to the specified fraction. This fraction should
      * be between 0 and the total fraction of the animation, including any repetition. That is,
      * a fraction of 0 will position the animation at the beginning, a value of 1 at the end,
-     * and a value of 2 at the beginning of a reversing animator that repeats once. If
+     * and a value of 2 at the end of a reversing animator that repeats once. If
      * the animation has not yet been started, then it will not advance forward after it is
      * set to this fraction; it will simply set the fraction to this value and perform any
      * appropriate actions based on that fraction. If the animation is already running, then
      * setCurrentFraction() will set the current fraction to this value and continue
-     * playing from that point.
+     * playing from that point. {@link AnimatorListener} events are not called
+     * due to changing the fraction; those events are only processed while the animation
+     * is running.
      *
-     * @param fraction The fraction to which the animation is advanced or rewound.
+     * @param fraction The fraction to which the animation is advanced or rewound. Values
+     * outside the range of 0 to the maximum fraction for the animator will be clamped to
+     * the correct range.
      */
     public void setCurrentFraction(float fraction) {
         initAnimation();
+        if (fraction < 0) {
+            fraction = 0;
+        }
+        int iteration = (int) fraction;
+        if (fraction == 1) {
+            iteration -= 1;
+        } else if (fraction > 1) {
+            if (iteration < (mRepeatCount + 1) || mRepeatCount == INFINITE) {
+                if (mRepeatMode == REVERSE) {
+                    mPlayingBackwards = (iteration % 2) != 0;
+                }
+                fraction = fraction % 1f;
+            } else {
+                fraction = 1;
+                iteration -= 1;
+            }
+        } else {
+            mPlayingBackwards = mReversing;
+        }
+        mCurrentIteration = iteration;
+        long seekTime = (long) (mDuration * fraction);
+        long currentTime = AnimationUtils.currentAnimationTimeMillis();
+        mStartTime = currentTime - seekTime;
         if (mPlayingState != RUNNING) {
             mSeekFraction = fraction;
             mPlayingState = SEEKED;
+        }
+        if (mPlayingBackwards) {
+            fraction = 1f - fraction;
         }
         animateValue(fraction);
     }
@@ -962,8 +1001,30 @@ public class ValueAnimator extends Animator {
         if (Looper.myLooper() == null) {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
+        mReversing = playBackwards;
         mPlayingBackwards = playBackwards;
-        mCurrentIteration = 0;
+        if (playBackwards && mSeekFraction != -1) {
+            if (mSeekFraction == 0 && mCurrentIteration == 0) {
+                // special case: reversing from seek-to-0 should act as if not seeked at all
+                mSeekFraction = 0;
+            } else if (mRepeatCount == INFINITE) {
+                mSeekFraction = 1 - (mSeekFraction % 1);
+            } else {
+                mSeekFraction = 1 + mRepeatCount - (mCurrentIteration + mSeekFraction);
+            }
+            mCurrentIteration = (int) mSeekFraction;
+            mSeekFraction = mSeekFraction % 1;
+        }
+        if (mCurrentIteration > 0 && mRepeatMode == REVERSE &&
+                (mCurrentIteration < (mRepeatCount + 1) || mRepeatCount == INFINITE)) {
+            // if we were seeked to some other iteration in a reversing animator,
+            // figure out the correct direction to start playing based on the iteration
+            if (playBackwards) {
+                mPlayingBackwards = (mCurrentIteration % 2) == 0;
+            } else {
+                mPlayingBackwards = (mCurrentIteration % 2) != 0;
+            }
+        }
         int prevPlayingState = mPlayingState;
         mPlayingState = STOPPED;
         mStarted = true;
@@ -1071,6 +1132,7 @@ public class ValueAnimator extends Animator {
             long currentPlayTime = currentTime - mStartTime;
             long timeLeft = mDuration - currentPlayTime;
             mStartTime = currentTime - timeLeft;
+            mReversing = !mReversing;
         } else if (mStarted) {
             end();
         } else {
@@ -1113,6 +1175,8 @@ public class ValueAnimator extends Animator {
         mStarted = false;
         mStartListenersCalled = false;
         mPlayingBackwards = false;
+        mReversing = false;
+        mCurrentIteration = 0;
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                     System.identityHashCode(this));
@@ -1201,8 +1265,16 @@ public class ValueAnimator extends Animator {
         case RUNNING:
         case SEEKED:
             float fraction = mDuration > 0 ? (float)(currentTime - mStartTime) / mDuration : 1f;
+            if (mDuration == 0 && mRepeatCount != INFINITE) {
+                // Skip to the end
+                mCurrentIteration = mRepeatCount;
+                if (!mReversing) {
+                    mPlayingBackwards = false;
+                }
+            }
             if (fraction >= 1f) {
-                if (mCurrentIteration < mRepeatCount || mRepeatCount == INFINITE) {
+                if (mCurrentIteration < mRepeatCount ||
+                        (mRepeatCount == INFINITE && mDuration != 0)) {
                     // Time to repeat
                     if (mListeners != null) {
                         int numListeners = mListeners.size();
@@ -1213,7 +1285,7 @@ public class ValueAnimator extends Animator {
                     if (mRepeatMode == REVERSE) {
                         mPlayingBackwards = !mPlayingBackwards;
                     }
-                    mCurrentIteration += (int)fraction;
+                    mCurrentIteration += (int) fraction;
                     fraction = fraction % 1f;
                     mStartTime += mDuration;
                 } else {
@@ -1313,6 +1385,7 @@ public class ValueAnimator extends Animator {
         }
         anim.mSeekFraction = -1;
         anim.mPlayingBackwards = false;
+        anim.mReversing = false;
         anim.mCurrentIteration = 0;
         anim.mInitialized = false;
         anim.mPlayingState = STOPPED;
