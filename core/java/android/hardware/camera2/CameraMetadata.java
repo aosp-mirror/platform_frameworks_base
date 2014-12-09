@@ -1648,11 +1648,41 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_SCENE_MODE_HIGH_SPEED_VIDEO = 17;
 
     /**
-     * <p>Turn on custom high dynamic range (HDR) mode.</p>
-     * <p>This is intended for LEGACY mode devices only;
-     * HAL3+ camera devices should not implement this mode.</p>
+     * <p>Turn on a device-specific high dynamic range (HDR) mode.</p>
+     * <p>In this scene mode, the camera device captures images
+     * that keep a larger range of scene illumination levels
+     * visible in the final image. For example, when taking a
+     * picture of a object in front of a bright window, both
+     * the object and the scene through the window may be
+     * visible when using HDR mode, while in normal AUTO mode,
+     * one or the other may be poorly exposed. As a tradeoff,
+     * HDR mode generally takes much longer to capture a single
+     * image, has no user control, and may have other artifacts
+     * depending on the HDR method used.</p>
+     * <p>Therefore, HDR captures operate at a much slower rate
+     * than regular captures.</p>
+     * <p>In this mode, on LIMITED or FULL devices, when a request
+     * is made with a {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} of
+     * STILL_CAPTURE, the camera device will capture an image
+     * using a high dynamic range capture technique.  On LEGACY
+     * devices, captures that target a JPEG-format output will
+     * be captured with HDR, and the capture intent is not
+     * relevant.</p>
+     * <p>The HDR capture may involve the device capturing a burst
+     * of images internally and combining them into one, or it
+     * may involve the device using specialized high dynamic
+     * range capture hardware. In all cases, a single image is
+     * produced in response to a capture request submitted
+     * while in HDR mode.</p>
+     * <p>Since substantial post-processing is generally needed to
+     * produce an HDR image, only YUV and JPEG outputs are
+     * supported for LIMITED/FULL device HDR captures, and only
+     * JPEG outputs are supported for LEGACY HDR
+     * captures. Using a RAW output for HDR capture is not
+     * supported.</p>
+     *
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      * @see CaptureRequest#CONTROL_SCENE_MODE
-     * @hide
      */
     public static final int CONTROL_SCENE_MODE_HDR = 18;
 
