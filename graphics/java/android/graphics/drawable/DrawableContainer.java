@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Insets;
@@ -30,6 +31,8 @@ import android.graphics.PorterDuff.Mode;
 import android.os.SystemClock;
 import android.util.LayoutDirection;
 import android.util.SparseArray;
+
+import java.util.Collection;
 
 /**
  * A helper class that contains several {@link Drawable}s and selects which one to use.
@@ -1060,6 +1063,20 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
 
             mCanConstantState = true;
             return true;
+        }
+
+        /** @hide */
+        @Override
+        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
+            final int N = mNumChildren;
+            int pixelCount = 0;
+            for (int i = 0; i < N; i++) {
+                final ConstantState state = getChild(i).getConstantState();
+                if (state != null) {
+                    pixelCount += state.addAtlasableBitmaps(atlasList);
+                }
+            }
+            return pixelCount;
         }
 
         /**

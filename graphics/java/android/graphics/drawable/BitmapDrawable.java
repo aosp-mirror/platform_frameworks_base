@@ -48,6 +48,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * A Drawable that wraps a bitmap and can be tiled, stretched, or aligned. You can create a
@@ -913,8 +914,11 @@ public class BitmapDrawable extends Drawable {
         }
 
         @Override
-        public Bitmap getBitmap() {
-            return mBitmap;
+        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
+            if (isAtlasable(mBitmap) && atlasList.add(mBitmap)) {
+                return mBitmap.getWidth() * mBitmap.getHeight();
+            }
+            return 0;
         }
 
         @Override
