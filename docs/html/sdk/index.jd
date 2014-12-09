@@ -4,19 +4,27 @@ page.template=sdk
 header.hide=1
 page.metaDescription=Download the official Android developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
-studio.version=0.8.14
+studio.version=1.0.0
 
-studio.linux_bundle_download=android-studio-ide-135.1538390-linux.zip
-studio.linux_bundle_bytes=176358193
-studio.linux_bundle_checksum=718356b49254f6c4e55c64b99164d311995205dd
+studio.linux_bundle_download=android-studio-ide-135.1629389-linux.zip
+studio.linux_bundle_bytes=243909934
+studio.linux_bundle_checksum=601a302f10cf8a22ba4216e0884a035bdfec38b3
 
-studio.mac_bundle_download=android-studio-ide-135.1538390-mac.zip
-studio.mac_bundle_bytes=176745627
-studio.mac_bundle_checksum=4070e6f6a44d042266f46f1f2f9ca3448ac23f8cd
+studio.mac_bundle_download=android-studio-ide-135.1629389.dmg
+studio.mac_bundle_bytes=245757810
+studio.mac_bundle_checksum=0d9e0e230ece9f2e696b1b076c36ee1e73edcf3c
 
-studio.win_bundle_download=android-studio-ide-135.1538390-windows.zip
-studio.win_bundle_bytes=177343814
-studio.win_bundle_checksum=b533480200ba893616c73b32477e66ebb357a1b3
+studio.win_bundle_exe_download=android-studio-bundle-135.1629389.exe
+studio.win_bundle_exe_bytes=852499624
+studio.win_bundle_exe_checksum=0c8a3b45385a698b43a47757fdd6a83ca837abd2
+
+studio.win_notools_exe_download=android-studio-ide-135.1629389.exe
+studio.win_notools_exe_bytes=262099808
+studio.win_notools_exe_checksum=bfc6e9397f72969bcb3db80c9abe3a205540c8ab
+
+studio.win_bundle_download=android-studio-ide-135.1629389-windows.zip
+studio.win_bundle_bytes=246241434
+studio.win_bundle_checksum=6951e678a41b94b6172276727537db8590be7270
 
 
 
@@ -325,18 +333,19 @@ srcset="{@docRoot}images/tools/studio-hero-code_2x.png 2x, {@docRoot}images/tool
 
 
 
-<h2 class="feature norule">
-Android builds evolved, with Gradle</h2>
+
+<h2 class="feature norule">Code templates and GitHub integration</h2>
 
 <div class="col-9" style="margin:0 20px 0 0">
-  <img src="{@docRoot}images/tools/studio-hero-gradle.png"
-srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
+  <img src="{@docRoot}images/tools/studio-hero-import.png"
+srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
 <div class="col-4 feature-blurb">
-  <p>Create multiple APKs for your Android app with different features using the same project.</p>
-  <p>Manage app dependencies with Maven.</p>
-  <p>Build APKs from Android Studio or the command line.</p>
+  <p>New project wizards make it easier than ever to start a new project.</p>
+
+  <p>Start projects using template code for patterns such as navigation drawer and view pagers,
+  and even import Google code samples from GitHub.</p>
 </div>
 
 
@@ -375,19 +384,18 @@ srcset="{@docRoot}images/tools/studio-hero-avds_2x.png 2x, {@docRoot}images/tool
 
 
 
-
-<h2 class="feature norule">Code templates and GitHub integration</h2>
+<h2 class="feature norule">
+Android builds evolved, with Gradle</h2>
 
 <div class="col-9" style="margin:0 20px 0 0">
-  <img src="{@docRoot}images/tools/studio-hero-import.png"
-srcset="{@docRoot}images/tools/studio-hero-import_2x.png 2x, {@docRoot}images/tools/studio-hero-import.png 1x" width="520" />
+  <img src="{@docRoot}images/tools/studio-hero-gradle.png"
+srcset="{@docRoot}images/tools/studio-hero-gradle_2x.png 2x, {@docRoot}images/tools/studio-hero-gradle.png 1x" width="520" />
 </div><!-- end col-9 (left column) -->
 
 <div class="col-4 feature-blurb">
-  <p>New project wizards make it easier than ever to start a new project.</p>
-
-  <p>Start projects using template code for patterns such as navigation drawer and view pagers,
-  and even import Google code samples from GitHub.</p>
+  <p>Create multiple APKs for your Android app with different features using the same project.</p>
+  <p>Manage app dependencies with Maven.</p>
+  <p>Build APKs from Android Studio or the command line.</p>
 </div>
 
 

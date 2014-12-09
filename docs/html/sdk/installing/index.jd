@@ -113,7 +113,7 @@ where they are installed. For example:</p>
 <p><b>To set up Android Studio on Linux:</b></p>
 
   <ol>
-    <li>Unpack the downloaded Tar file, {@code android-studio-ide-&lt;version&gt;-linux.zip}, into an 
+    <li>Unpack the downloaded Tar file, {@code android-studio-ide-&lt;version&gt;-linux.zip}, into an
         appropriate location for your applications.
     <li>To launch Android Studio, navigate to the {@code android-studio/bin/} directory
     in a terminal and execute {@code studio.sh}.
@@ -155,8 +155,7 @@ for your favorite IDE (if available).</p>
 
 <p>If you didn't download the SDK tools, go <a href="{@docRoot}sdk/index.html#Other"
 ><b>download the SDK now</b></a>,
-or switch to the <a href="{@docRoot}sdk/installing/index.html?pkg=adt">Eclipse ADT
-install</a> or <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
+or switch to the <a href="{@docRoot}sdk/installing/index.html?pkg=studio">Android Studio
 install</a> instructions.</p>
 
 
@@ -208,7 +207,7 @@ the SDK tools from the command line.</p>
 
 <p><b>To get started on Linux:</b></p>
 
-<p>Unpack the {@code .zip} file you've downloaded. The SDK files are download separately to a 
+<p>Unpack the {@code .zip} file you've downloaded. The SDK files are download separately to a
 user-specified directory. </p>
 
 <p>Make a note of the name and location of the SDK directory on your system&mdash;you will need to
@@ -328,7 +327,8 @@ Continue: Adding SDK Packages</a></p>
 <div id="default" style="display:none">
 
 <p>If you haven't already, <b><a href="{@docRoot}sdk/index.html">download
-the Android SDK bundle for Android Studio or the stand-alone SDK Tools</a></b>. </p>
+the Android SDK bundle for Android Studio</a></b> or the
+<a href="{@docRoot}sdk/index.html#Other">stand-alone SDK Tools</a>. </p>
 
 <p>Then, select which SDK bundle you want to install:</p>
 

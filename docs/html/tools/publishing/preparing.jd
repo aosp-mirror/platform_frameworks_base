@@ -85,7 +85,7 @@ and it is optimized with the zipalign tool.</p>
 Android Studio. For example, you can use Android Studio with the Gradle build files to compile, sign,
 and optimize your application all at once. You can also configure the Gradle build files to do the
 same when you build from the command line. For more details about using the Gradle build files, see
-<a href="{@docRoot}tools/gradle/studio-build.html">Building Your Project with Gradle</a>.</p>
+the <a href="{@docRoot}sdk/installing/studio-build.html">Build System</a> guide.</p>
 
 <p>To prepare your application for release you typically perform five main tasks (see figure 2).
 Each main task may include one or more smaller tasks depending on how you are releasing your
@@ -306,15 +306,16 @@ application, see <a href="{@docRoot}google/play/licensing/index.html">Applicatio
 <code>.apk</code> file that is signed and optimized. The JDK includes the tools for signing the
 <code>.apk</code> file (Keytool and Jarsigner); the Android SDK includes the tools for compiling and
 optimizing the <code>.apk</code> file. If you are using Android Studio or you are using
-the Gradle build system from the command line, you can automate the entire build process. See
-<a href="{@docRoot}tools/gradle/studio-build.html">Building Your Project with Gradle</a>.</p>
+the Gradle build system from the command line, you can automate the entire build process.
+For more information about configuring Gradle builds, see
+<a href="{@docRoot}tools/building/configuring-gradle.html">Configuring Gradle Builds</a>.</p>
 
 <h3>Building with Android Studio</h3>
 
 <p>You can use the Gradle build system, integrated with Android Studio to build a release-ready
 <code>.apk</code> file that is signed with your private key and optimized. To learn how to setup and
 run builds from Android Studio, see
-<a href="{@docRoot}tools/gradle/studio-build.html">Building Your Project with Gradle</a>.</p>
+<a href="{@docRoot}tools/building/building-studio.html">Building and Running from Android Studio</a>.</p>
 
 <p>The build process assumes that you have a certificate and private key
 suitable for signing your application. If you do not have a suitable certificate and private key,
