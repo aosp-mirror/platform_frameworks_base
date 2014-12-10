@@ -1,8 +1,8 @@
-page.title=Android Studio
+page.title=Download Android Studio and SDK Tools
 page.tags=download
 page.template=sdk
 header.hide=1
-page.metaDescription=Download the official Android developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
+page.metaDescription=Download the official Android IDE and developer tools to build apps for Android phones, tablets, wearables, TVs, and more.
 
 studio.version=1.0.0
 
