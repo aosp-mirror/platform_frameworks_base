@@ -535,15 +535,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     Log.d(TAG, "Creating new ProfileServiceConnections object for"
                             + " profile: " + bluetoothProfile);
                 }
-                Intent intent = null;
-                if (bluetoothProfile == BluetoothProfile.HEADSET) {
-                    intent = new Intent(IBluetoothHeadset.class.getName());
-                } else {
-                    return false;
-                }
+
+                if (bluetoothProfile != BluetoothProfile.HEADSET) return false;
+
+                Intent intent = new Intent(IBluetoothHeadset.class.getName());
                 psc = new ProfileServiceConnections(intent);
+                if (!psc.bindService()) return false;
+
                 mProfileServices.put(new Integer(bluetoothProfile), psc);
-                psc.bindService();
             }
         }
 
@@ -571,7 +570,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         synchronized (mProfileServices) {
             for (Integer i : mProfileServices.keySet()) {
                 ProfileServiceConnections psc = mProfileServices.get(i);
-                mContext.unbindService(psc);
+                try {
+                    mContext.unbindService(psc);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Unable to unbind service with intent: " + psc.mIntent, e);
+                }
                 psc.removeAllProxies();
             }
             mProfileServices.clear();
@@ -596,16 +599,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mIntent = intent;
         }
 
-        private void bindService() {
-            if (mIntent != null && mService == null) {
-                if (!doBind(mIntent, this, 0, UserHandle.CURRENT_OR_SELF)) {
-                    Log.w(TAG, "Unable to bind with intent: " + mIntent
-                            + ". Triggering retry.");
-                }
+        private boolean bindService() {
+            if (mIntent != null && mService == null &&
+                    doBind(mIntent, this, 0, UserHandle.CURRENT_OR_SELF)) {
                 Message msg = mHandler.obtainMessage(MESSAGE_BIND_PROFILE_SERVICE);
                 msg.obj = this;
                 mHandler.sendMessageDelayed(msg, TIMEOUT_BIND_MS);
+                return true;
             }
+            Log.w(TAG, "Unable to bind with intent: " + mIntent);
+            return false;
         }
 
         private void addProxy(IBluetoothProfileServiceConnection proxy) {
