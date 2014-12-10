@@ -102,9 +102,8 @@ the <strong>Project</strong drop-down. </p>
 
 
 <h3>New Project and Directory Structure</h3>
-<p>When you use the <em>Project</em> view of a new project in Android Studio or
-(<a href="{@docRoot}tools/eclipse/migrate-adt.html"> a project migrated from Eclipse</a>), you
-should notice that the project structure appears different than you may be used to. Each
+<p>When you use the <em>Project</em> view of a new project in Android Studio, you
+should notice that the project structure appears different than you may be used to in Eclipse. Each
 instance of Android Studio contains a project with one or more application modules. Each
 application module folder contains the complete source sets for that module, including
 {@code src/main} and {@code src/androidTest} directories, resources, build

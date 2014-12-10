@@ -288,11 +288,13 @@ class="en">Platforms</span></a></li>
 
   <li class="nav-section">
     <div class="nav-section-header">
-    <a href="<?cs var:toroot ?>tools/eclipse/index.html">
+    <a href="<?cs var:toroot ?>tools/help/adt.html">
       <span class="en">Eclipse with ADT</span></a>
     </div>
     <ul>
     <li><a href="<?cs var:toroot ?>sdk/installing/migrate.html">Migrating to Android Studio</a></li>
+    <li><a href="<?cs var:toroot ?>sdk/installing/installing-adt.html">
+        <span class="en">Installing the Eclipse Plugin</span></a></li>
     <li><a href="<?cs var:toroot ?>tools/projects/projects-eclipse.html">Managing Projects</a></li>
     <li><a href="<?cs var:toroot ?>tools/building/building-eclipse.html">Building and Running</a></li>
     <li><a href="<?cs var:toroot ?>tools/building/building-cmdline-ant.html">Building with Ant</a></li>
