@@ -61,6 +61,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -979,6 +980,9 @@ public class MediaPlayer implements SubtitleController.Listener
             // Redirect ringtones to go directly to underlying provider
             uri = RingtoneManager.getActualDefaultRingtoneUri(context,
                     RingtoneManager.getDefaultType(uri));
+            if (uri == null) {
+                throw new FileNotFoundException("Failed to resolve default ringtone");
+            }
         }
 
         AssetFileDescriptor fd = null;
