@@ -311,6 +311,11 @@ void OpenGLRenderer::finish() {
     renderOverdraw();
     endTiling();
 
+    for (size_t i = 0; i < mTempPaths.size(); i++) {
+        delete mTempPaths[i];
+    }
+    mTempPaths.clear();
+
     // When finish() is invoked on FBO 0 we've reached the end
     // of the current frame
     if (getTargetFbo() == 0) {
