@@ -8796,7 +8796,8 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!gone || !win.mHaveFrame || win.mLayoutNeeded
                     || ((win.isConfigChanged() || win.setInsetsChanged()) &&
                             ((win.mAttrs.privateFlags & PRIVATE_FLAG_KEYGUARD) != 0 ||
-                            win.mAppToken != null && win.mAppToken.layoutConfigChanges))
+                            (win.mHasSurface && win.mAppToken != null &&
+                            win.mAppToken.layoutConfigChanges)))
                     || win.mAttrs.type == TYPE_UNIVERSE_BACKGROUND) {
                 if (!win.mLayoutAttached) {
                     if (initial) {
