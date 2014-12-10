@@ -21,6 +21,7 @@ import java.util.Locale;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.net.ConnectivityManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
@@ -140,14 +141,23 @@ public class CarrierText extends TextView {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-        mKeyguardUpdateMonitor.registerCallback(mCallback);
+        if (ConnectivityManager.from(mContext).isNetworkSupported(
+                ConnectivityManager.TYPE_MOBILE)) {
+            mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
+            mKeyguardUpdateMonitor.registerCallback(mCallback);
+        } else {
+            // Don't listen and clear out the text when the device isn't a phone.
+            mKeyguardUpdateMonitor = null;
+            setText("");
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        mKeyguardUpdateMonitor.removeCallback(mCallback);
+        if (mKeyguardUpdateMonitor != null) {
+            mKeyguardUpdateMonitor.removeCallback(mCallback);
+        }
     }
 
     /**
