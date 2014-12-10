@@ -4391,7 +4391,7 @@ public class Intent implements Parcelable, Cloneable {
                 // scheme
                 else if (uri.startsWith("scheme=", i)) {
                     if (inSelector) {
-                        intent.mData = Uri.parse(value);
+                        intent.mData = Uri.parse(value + ":");
                     } else {
                         scheme = value;
                     }
@@ -4461,14 +4461,19 @@ public class Intent implements Parcelable, Cloneable {
                             String authority = null;
                             intent.mPackage = data.substring(14, end);
                             int newEnd;
-                            if (end < data.length() && (newEnd=data.indexOf('/', end+1)) >= 0) {
-                                // Found a scheme, remember it.
-                                scheme = data.substring(end+1, newEnd);
-                                end = newEnd;
-                                if (end < data.length() && (newEnd=data.indexOf('/', end+1)) >= 0) {
-                                    // Found a authority, remember it.
-                                    authority = data.substring(end+1, newEnd);
+                            if ((end+1) < data.length()) {
+                                if ((newEnd=data.indexOf('/', end+1)) >= 0) {
+                                    // Found a scheme, remember it.
+                                    scheme = data.substring(end+1, newEnd);
                                     end = newEnd;
+                                    if (end < data.length() && (newEnd=data.indexOf('/', end+1)) >= 0) {
+                                        // Found a authority, remember it.
+                                        authority = data.substring(end+1, newEnd);
+                                        end = newEnd;
+                                    }
+                                } else {
+                                    // All we have is a scheme.
+                                    scheme = data.substring(end+1);
                                 }
                             }
                             if (scheme == null) {
@@ -7355,7 +7360,7 @@ public class Intent implements Parcelable, Cloneable {
 
         toUriInner(frag, scheme, defAction, defPackage, flags);
         if (mSelector != null) {
-            uri.append("SEL;");
+            frag.append("SEL;");
             // Note that for now we are not going to try to handle the
             // data part; not clear how to represent this as a URI, and
             // not much utility in it.
