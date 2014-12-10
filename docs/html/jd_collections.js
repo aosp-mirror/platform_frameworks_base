@@ -4,7 +4,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "training/building-wearables.html",
       "training/material/index.html",
-      "sdk/installing/studio.html"
+      "sdk/index.html"
     ]
   },
   "index/primary/zhcn": {
