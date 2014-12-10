@@ -342,6 +342,12 @@ public:
     uint8_t getAmbientShadowAlpha() const { return mAmbientShadowAlpha; }
     uint8_t getSpotShadowAlpha() const { return mSpotShadowAlpha; }
 
+    SkPath* allocPathForFrame() {
+        SkPath* path = new SkPath();
+        mTempPaths.push_back(path);
+        return path;
+    }
+
 protected:
     /**
      * Perform the setup specific to a frame. This method does not
@@ -1013,6 +1019,9 @@ private:
     float mLightRadius;
     uint8_t mAmbientShadowAlpha;
     uint8_t mSpotShadowAlpha;
+
+    // Paths kept alive for the duration of the frame
+    std::vector<SkPath*> mTempPaths;
 
     friend class Layer;
     friend class TextSetupFunctor;

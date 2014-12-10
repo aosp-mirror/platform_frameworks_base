@@ -77,18 +77,14 @@ public:
     OpenGLRenderer& mRenderer;
     const int mReplayFlags;
 
-    // Allocator with the lifetime of a single frame.
-    // replay uses an Allocator owned by the struct, while defer shares the DeferredDisplayList's Allocator
+    // Allocator with the lifetime of a single frame. replay uses an Allocator owned by the struct,
+    // while defer shares the DeferredDisplayList's Allocator
+    // TODO: move this allocator to be owned by object with clear frame lifecycle
     LinearAllocator * const mAllocator;
 
     SkPath* allocPathForFrame() {
-        mTempPaths.push_back(SkPath());
-        return &mTempPaths.back();
+        return mRenderer.allocPathForFrame();
     }
-
-private:
-    // Paths kept alive for the duration of the frame
-    std::vector<SkPath> mTempPaths;
 };
 
 struct DeferStateStruct : public PlaybackStateStruct {
