@@ -4874,9 +4874,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             stats.noteProcessDiedLocked(app.info.uid, pid);
         }
 
-        Process.killProcessQuiet(pid);
-        Process.killProcessGroup(app.info.uid, pid);
-        app.killed = true;
+        if (!app.killed) {
+            Process.killProcessQuiet(pid);
+            Process.killProcessGroup(app.info.uid, pid);
+            app.killed = true;
+        }
 
         // Clean up already done if the process has been re-started.
         if (app.pid == pid && app.thread != null &&
