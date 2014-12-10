@@ -18972,6 +18972,31 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             mUserSwitchObservers.finishBroadcast();
         }
+        stopGuestUserIfBackground();
+    }
+
+    /**
+     * Stops the guest user if it has gone to the background.
+     */
+    private void stopGuestUserIfBackground() {
+        synchronized (this) {
+            final int num = mUserLru.size();
+            for (int i = 0; i < num; i++) {
+                Integer oldUserId = mUserLru.get(i);
+                UserStartedState oldUss = mStartedUsers.get(oldUserId);
+                if (oldUserId == UserHandle.USER_OWNER || oldUserId == mCurrentUserId
+                        || oldUss.mState == UserStartedState.STATE_STOPPING
+                        || oldUss.mState == UserStartedState.STATE_SHUTDOWN) {
+                    continue;
+                }
+                UserInfo userInfo = mUserManager.getUserInfo(oldUserId);
+                if (userInfo.isGuest()) {
+                    // This is a user to be stopped.
+                    stopUserLocked(oldUserId, null);
+                    break;
+                }
+            }
+        }
     }
 
     void scheduleStartProfilesLocked() {
