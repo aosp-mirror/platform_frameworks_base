@@ -67,8 +67,10 @@ public class QSPanel extends ViewGroup {
     private int mPanelPaddingBottom;
     private int mDualTileUnderlap;
     private int mBrightnessPaddingTop;
+    private int mGridHeight;
     private boolean mExpanded;
     private boolean mListening;
+    private boolean mClosingDetail;
 
     private Record mDetailRecord;
     private Callback mCallback;
@@ -320,6 +322,14 @@ public class QSPanel extends ViewGroup {
         showDetail(false, mDetailRecord);
     }
 
+    public boolean isClosingDetail() {
+        return mClosingDetail;
+    }
+
+    public int getGridHeight() {
+        return mGridHeight;
+    }
+
     private void handleShowDetail(Record r, boolean show) {
         if (r instanceof TileRecord) {
             handleShowDetailTile((TileRecord) r, show);
@@ -364,6 +374,7 @@ public class QSPanel extends ViewGroup {
             setDetailRecord(r);
             listener = mHideGridContentWhenDone;
         } else {
+            mClosingDetail = true;
             setGridContentVisibility(true);
             listener = mTeardownDetailWhenDone;
             fireScanStateChanged(false);
@@ -426,6 +437,7 @@ public class QSPanel extends ViewGroup {
         if (mDetail.getMeasuredHeight() < h) {
             mDetail.measure(exactly(width), exactly(h));
         }
+        mGridHeight = h;
         setMeasuredDimension(width, Math.max(h, mDetail.getMeasuredHeight()));
     }
 
@@ -537,6 +549,7 @@ public class QSPanel extends ViewGroup {
         public void onAnimationEnd(Animator animation) {
             mDetailContent.removeAllViews();
             setDetailRecord(null);
+            mClosingDetail = false;
         };
     };
 
