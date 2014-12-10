@@ -6128,7 +6128,7 @@ public final class Settings {
 
         /**
          * The number of milliseconds to delay before sending out
-         * {@link ConnectivityManager#CONNECTIVITY_ACTION} broadcasts.
+         * {@link ConnectivityManager#CONNECTIVITY_ACTION} broadcasts. Ignored.
          *
          * @hide
          */
