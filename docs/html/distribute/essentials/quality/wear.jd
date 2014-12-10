@@ -50,9 +50,8 @@ page.image=/distribute/images/gp-wear-quality.png
 </p>
 
 <p class="note">
- <strong>Note:</strong> You will soon be able to submit your apps for Android Wear review.
- Stay tuned for more information about how to submit your apps for Android Wear review through
- the <a href="https://play.google.com/apps/publish/signup/">Google Play Developer Console</a>.
+ <strong>Note:</strong> For information about how to publish your Wear apps in Google Play, see <a
+ href="{@docRoot}distribute/googleplay/wear.html">Distributing to Android Wear</a>.
 </p>
 
 <div class="headerLine">
@@ -109,7 +108,8 @@ page.image=/distribute/images/gp-wear-quality.png
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      Wearable apps that run directly on the device are packaged inside the primary handheld app.
+      Wearable apps that are dependent on a handheld app for functionality are packaged inside that
+      handheld app.
       (<a href="{@docRoot}training/wearables/apps/packaging.html">Learn how</a>)
     </p>
   </td>
@@ -187,6 +187,22 @@ page.image=/distribute/images/gp-wear-quality.png
   </td>
 </tr>
 
+<tr>
+  <td rowspan="1" id="watchface">
+    Watch Face
+  </td>
+
+  <td id="WR-WF">
+    WR-WF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Apps that include watch faces use the official Watch Face API.
+      (<a href="{@docRoot}training/wearables/watch-faces/index.html">Learn how</a>)
+    </p>
+  </td>
+</tr>
+
 </table>
 
 
@@ -248,8 +264,9 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
   </td>
   <td>
     <p style="margin-bottom:.5em;">
-      App user interface is formatted appropriately for round displays. App content fits within
-      the physical display area and no text or controls are cut off by the screen edges.
+      App user interface is formatted appropriately for round displays including devices with an
+      inset (or "chin") at the bottom of the screen. App content fits within the physical display
+      area and no text or controls are cut off by the screen edges.
       <br/>
       (<a href="{@docRoot}training/wearables/ui/layouts.html">Learn how</a>)
     </p>
@@ -367,6 +384,7 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
   </td>
 </tr>
 
+
 </table>
 
 
@@ -399,9 +417,8 @@ data-sortorder="-timestamp" data-cardsizes="6x2" data-maxresults="6">
   for Wear <a href="#ux">design and interaction</a>.
 </p>
 <p class="note">
- <strong>Note:</strong> You will be able to submit your apps for Android Wear review soon.
- Stay tuned for more information about how to submit your apps for Android Wear review through
- the <a href="https://play.google.com/apps/publish/signup/">Google Play Developer Console</a>.
+ <strong>Note:</strong> For information about how to publish your Wear apps in Google Play, see <a
+ href="{@docRoot}distribute/googleplay/wear.html">Distributing to Android Wear</a>.
 </p>
 
 
