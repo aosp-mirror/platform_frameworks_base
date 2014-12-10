@@ -834,6 +834,38 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
         </ul>
       </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/wearables/watch-faces/index.html"
+             description="How to create custom watch faces for wearables."
+            >Creating Custom Watch Faces</a>
+        </div>
+        <ul>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/watch-faces/designing.html">Designing Watch Faces</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/watch-faces/service.html">Building a Watch Face Service</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/watch-faces/drawing.html">Drawing Watch Faces</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/watch-faces/information.html">Showing Information in Watch Faces</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/watch-faces/configuration.html">Providing Configuration Activities</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/watch-faces/issues.html">Addressing Common Issues</a>
+          </li>
+          <li>
+            <a href="<?cs var:toroot ?>training/wearables/watch-faces/performance.html">Optimizing Performance and Battery Life</a>
+          </li>
+        </ul>
+      </li>
+
       <li>
         <a href="<?cs var:toroot ?>training/articles/wear-location-detection.html"
            description=
