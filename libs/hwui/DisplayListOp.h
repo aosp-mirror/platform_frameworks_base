@@ -684,7 +684,8 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw bitmap %p at %f %f", mBitmap, mLocalBounds.left, mLocalBounds.top);
+        OP_LOG("Draw bitmap %p at %f %f%s", mBitmap, mLocalBounds.left, mLocalBounds.top,
+                mEntry ? " using AssetAtlas" : "");
     }
 
     virtual const char* name() { return "DrawBitmap"; }
@@ -918,7 +919,8 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("Draw patch " RECT_STRING, RECT_ARGS(mLocalBounds));
+        OP_LOG("Draw patch " RECT_STRING "%s", RECT_ARGS(mLocalBounds),
+                mEntry ? " with AssetAtlas" : "");
     }
 
     virtual const char* name() { return "DrawPatch"; }

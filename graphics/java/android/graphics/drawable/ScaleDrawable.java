@@ -31,6 +31,7 @@ import android.view.Gravity;
 import android.util.AttributeSet;
 
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * A Drawable that changes the size of another Drawable based on its current
@@ -412,6 +413,15 @@ public class ScaleDrawable extends Drawable implements Drawable.Callback {
             }
 
             return mCanConstantState;
+        }
+
+        @Override
+        public int addAtlasableBitmaps(Collection<Bitmap> atlasList) {
+            final ConstantState state = mDrawable.getConstantState();
+            if (state != null) {
+                return state.addAtlasableBitmaps(atlasList);
+            }
+            return 0;
         }
     }
 
