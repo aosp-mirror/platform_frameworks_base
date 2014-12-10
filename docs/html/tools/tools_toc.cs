@@ -122,7 +122,7 @@
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/debugging/index.html"><span class="en">Debugging</span></a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects.html"><span class="en">From Eclipse with ADT</span></a></li>
+      <li><a href="<?cs var:toroot ?>tools/debugging/debugging-studio.html"><span class="en">From Android Studio</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-projects-cmdline.html"><span class="en">From Other IDEs</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/ddms.html"><span class="en">Using DDMS</span></a></li>
       <li><a href="<?cs var:toroot ?>tools/debugging/debugging-log.html"><span class="en">Reading and Writing Logs</span></a></li>
@@ -145,14 +145,6 @@
     </ul>
   </li>
 
-  <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/support-library/index.html"><span
-class="en">Support Library</span></a></div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>tools/support-library/features.html">Features</a></li>
-      <li><a href="<?cs var:toroot ?>tools/support-library/setup.html">Setup</a></li>
-    </ul>
-  </li>
 
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/index.html"><span
