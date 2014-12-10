@@ -1,5 +1,6 @@
 page.title=Recommending TV Content
-page.tags="recommendation","recommend"
+page.tags=tv, recommendations
+helpoutsWidget=true
 
 trainingnavtop=true
 

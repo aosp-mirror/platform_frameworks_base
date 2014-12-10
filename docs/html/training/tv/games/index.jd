@@ -1,5 +1,6 @@
 page.title=Building TV Games
-page.tags="tv", "games", "controller"
+page.tags=tv, games, controller
+helpoutsWidget=true
 page.image=images/games/game-controller-buttons_2x_crop.png
 page.metaDescription=How to bring your games to Android TV, including recommendations and examples.
 page.article=true
