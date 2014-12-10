@@ -25,8 +25,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -43,7 +41,6 @@ import android.view.animation.LinearInterpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.NotificationPanelView;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationOverflowContainer}
@@ -355,11 +352,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
             if (mActivated) {
                 mBackgroundDimmed.setVisibility(View.VISIBLE);
                 mBackgroundNormal.setVisibility(View.VISIBLE);
-            } else {
+            } else if (mDimmed) {
                 mBackgroundDimmed.setVisibility(View.VISIBLE);
                 mBackgroundNormal.setVisibility(View.INVISIBLE);
+            } else {
+                mBackgroundDimmed.setVisibility(View.INVISIBLE);
+                mBackgroundNormal.setVisibility(View.VISIBLE);
             }
-            fadeDarkToDimmed(delay);
+            fadeInFromDark(delay);
         } else {
             updateBackground();
         }
@@ -401,15 +401,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     /**
-     * Fades the dimmed background when exiting dark mode.
+     * Fades in the background when exiting dark mode.
      */
-    private void fadeDarkToDimmed(long delay) {
-        mBackgroundDimmed.setAlpha(0f);
-        mBackgroundDimmed.setPivotX(mBackgroundDimmed.getWidth() / 2f);
-        mBackgroundDimmed.setPivotY(getActualHeight() / 2f);
-        mBackgroundDimmed.setScaleX(DARK_EXIT_SCALE_START);
-        mBackgroundDimmed.setScaleY(DARK_EXIT_SCALE_START);
-        mBackgroundDimmed.animate()
+    private void fadeInFromDark(long delay) {
+        final View background = mDimmed ? mBackgroundDimmed : mBackgroundNormal;
+        background.setAlpha(0f);
+        background.setPivotX(mBackgroundDimmed.getWidth() / 2f);
+        background.setPivotY(getActualHeight() / 2f);
+        background.setScaleX(DARK_EXIT_SCALE_START);
+        background.setScaleY(DARK_EXIT_SCALE_START);
+        background.animate()
                 .alpha(1f)
                 .scaleX(1f)
                 .scaleY(1f)
@@ -420,9 +421,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                     @Override
                     public void onAnimationCancel(Animator animation) {
                         // Jump state if we are cancelled
-                        mBackgroundDimmed.setScaleX(1f);
-                        mBackgroundDimmed.setScaleY(1f);
-                        mBackgroundDimmed.setAlpha(1f);
+                        background.setScaleX(1f);
+                        background.setScaleY(1f);
+                        background.setAlpha(1f);
                     }
                 })
                 .start();
