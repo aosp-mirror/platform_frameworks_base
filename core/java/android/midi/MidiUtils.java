@@ -26,6 +26,8 @@ import android.util.Log;
 public final class MidiUtils {
     private static final String TAG = "MidiUtils";
 
+    private MidiUtils() { }
+
     /**
      * Returns data size of a MIDI message based on the message's command byte
      * @param b the message command byte
