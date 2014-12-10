@@ -1217,8 +1217,10 @@ public class Instrumentation {
     public void callActivityOnNewIntent(Activity activity, ReferrerIntent intent) {
         final String oldReferrer = activity.mReferrer;
         try {
-            activity.mReferrer = intent.mReferrer;
-            callActivityOnNewIntent(activity, new Intent(intent));
+            if (intent != null) {
+                activity.mReferrer = intent.mReferrer;
+            }
+            callActivityOnNewIntent(activity, intent != null ? new Intent(intent) : null);
         } finally {
             activity.mReferrer = oldReferrer;
         }
