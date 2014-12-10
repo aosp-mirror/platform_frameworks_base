@@ -238,7 +238,7 @@ final class ProcessList {
         if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
             // Increase the high min-free levels for cached processes for 64-bit
             mOomMinFreeHigh[4] = (mOomMinFreeHigh[4]*3)/2;
-            mOomMinFreeHigh[5] = (mOomMinFreeHigh[5]*7)/8;
+            mOomMinFreeHigh[5] = (mOomMinFreeHigh[5]*7)/4;
         }
 
         for (int i=0; i<mOomAdj.length; i++) {
