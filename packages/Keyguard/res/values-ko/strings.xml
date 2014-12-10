@@ -66,12 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"비밀번호를 사용하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"패턴을 그리는 부분입니다."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"슬라이드하는 부분입니다."</string>
-    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
-    <skip />
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN 영역"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN 영역"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK 영역"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"이전 트랙 버튼"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"다음 트랙 버튼"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"일시중지 버튼"</string>
