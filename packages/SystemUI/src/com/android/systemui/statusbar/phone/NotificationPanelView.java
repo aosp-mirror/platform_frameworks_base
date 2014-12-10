@@ -1629,6 +1629,7 @@ public class NotificationPanelView extends PanelView implements
         } else {
             mSecureCameraLaunchManager.startSecureCameraLaunch();
         }
+        mStatusBar.startLaunchTransitionTimeout();
         mBlockTouches = true;
     }
 
