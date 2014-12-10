@@ -134,6 +134,22 @@ enables you to get a ready-to-use Street View panorama.
     when compiling your app. For more details, see the Android Studio setup
     instructions in
     <a href="{@docRoot}google/play-services/setup.html">Setting Up Google Play Services</a>.
+  </li>
+  <li><strong>Deprecated clients</strong> - The {@code ActivityRecognitionClient},
+    {@code LocationClient}, and {@code PlusClient} classes are deprecated. If
+    you used those APIs in your app and want to call Google Play services 6.5
+    or higher APIs, you must switch to the new programming model that utilizes
+    <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code GoogleApiClient}</a>. For more information about using <a href="{@docRoot}reference/com/google/android/gms/common/api/GoogleApiClient.html">{@code GoogleApiClient}</a>, see <a href="{@docRoot}google/auth/api-client.html">Accessing Google APIs</a>.
+    <p>Use these APIs instead of the deprecated APIs:</p>
+    <ul>
+      <li>If you were previously using {@code ActivityRecognitionClient}, call
+        <a href="{@docRoot}reference/com/google/android/gms/location/ActivityRecognition.html">{@code ActivityRecognition}</a> instead.</li>
+      <li>If you were previously using {@code LocationClient}, call the APIs in the
+        <a href="{@docRoot}reference/com/google/android/gms/location/package-summary.html">{@code com.google.android.gms.location} package</a> instead.</li>
+      <li>If you were previously using {@code PlusClient}, call the APIs in the
+        <a href="{@docRoot}reference/com/google/android/gms/plus/package-summary.html">{@code com.google.android.gms.plus} package</a> instead.</li>
+    </ul>
+  </li>
 </ul>
 </dd>
 </dl>
