@@ -203,7 +203,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_PANELS = 1001;
     private static final int MSG_OPEN_SETTINGS_PANEL = 1002;
+    private static final int MSG_LAUNCH_TRANSITION_TIMEOUT = 1003;
     // 1020-1040 reserved for BaseStatusBar
+
+    // Time after we abort the launch transition.
+    private static final long LAUNCH_TRANSITION_TIMEOUT_MS = 5000;
 
     private static final boolean CLOSE_PANEL_WHEN_EMPTIED = true;
 
@@ -2196,6 +2200,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     escalateHeadsUp();
                     setHeadsUpVisibility(false);
                     break;
+                case MSG_LAUNCH_TRANSITION_TIMEOUT:
+                    onLaunchTransitionTimeout();
+                    break;
             }
         }
     }
@@ -3528,12 +3535,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mLaunchTransitionFadingAway) {
             mNotificationPanel.animate().cancel();
             mNotificationPanel.setAlpha(1f);
-            if (mLaunchTransitionEndRunnable != null) {
-                mLaunchTransitionEndRunnable.run();
-            }
-            mLaunchTransitionEndRunnable = null;
+            runLaunchTransitionEndRunnable();
             mLaunchTransitionFadingAway = false;
         }
+        mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         setBarState(StatusBarState.KEYGUARD);
         updateKeyguardState(false /* goingToFullShade */, false /* fromShadeLocked */);
         if (!mScreenOnFromKeyguard) {
@@ -3574,6 +3579,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      */
     public void fadeKeyguardAfterLaunchTransition(final Runnable beforeFading,
             Runnable endRunnable) {
+        mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         mLaunchTransitionEndRunnable = endRunnable;
         Runnable hideRunnable = new Runnable() {
             @Override
@@ -3592,10 +3598,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                             @Override
                             public void run() {
                                 mNotificationPanel.setAlpha(1);
-                                if (mLaunchTransitionEndRunnable != null) {
-                                    mLaunchTransitionEndRunnable.run();
-                                }
-                                mLaunchTransitionEndRunnable = null;
+                                runLaunchTransitionEndRunnable();
                                 mLaunchTransitionFadingAway = false;
                             }
                         });
@@ -3605,6 +3608,32 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mNotificationPanel.setLaunchTransitionEndRunnable(hideRunnable);
         } else {
             hideRunnable.run();
+        }
+    }
+
+    /**
+     * Starts the timeout when we try to start the affordances on Keyguard. We usually rely that
+     * Keyguard goes away via fadeKeyguardAfterLaunchTransition, however, that might not happen
+     * because the launched app crashed or something else went wrong.
+     */
+    public void startLaunchTransitionTimeout() {
+        mHandler.sendEmptyMessageDelayed(MSG_LAUNCH_TRANSITION_TIMEOUT,
+                LAUNCH_TRANSITION_TIMEOUT_MS);
+    }
+
+    private void onLaunchTransitionTimeout() {
+        Log.w(TAG, "Launch transition: Timeout!");
+        mNotificationPanel.resetViews();
+    }
+
+    private void runLaunchTransitionEndRunnable() {
+        if (mLaunchTransitionEndRunnable != null) {
+            Runnable r = mLaunchTransitionEndRunnable;
+
+            // mLaunchTransitionEndRunnable might call showKeyguard, which would execute it again,
+            // which would lead to infinite recursion. Protect against it.
+            mLaunchTransitionEndRunnable = null;
+            r.run();
         }
     }
 
@@ -3631,6 +3660,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mQSPanel != null) {
             mQSPanel.refreshAllTiles();
         }
+        mHandler.removeMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
         return staying;
     }
 

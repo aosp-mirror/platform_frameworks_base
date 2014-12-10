@@ -199,7 +199,7 @@ public class StatusBarKeyguardViewManager {
                         new Runnable() {
                             @Override
                             public void run() {
-                                mStatusBarWindowManager.setKeyguardOccluded(true);
+                                mStatusBarWindowManager.setKeyguardOccluded(mOccluded);
                                 reset();
                             }
                         });
