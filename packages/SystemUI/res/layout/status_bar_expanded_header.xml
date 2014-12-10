@@ -154,7 +154,7 @@
         android:layout_alignParentBottom="true"
         />
 
-    <ImageView
+    <com.android.systemui.statusbar.AlphaOptimizedImageView
         android:id="@+id/qs_detail_header_progress"
         android:src="@drawable/indeterminate_anim"
         android:alpha="0"
