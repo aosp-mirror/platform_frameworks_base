@@ -2618,7 +2618,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    public ProxyInfo getProxy() {
+    public ProxyInfo getDefaultProxy() {
         // this information is already available as a world read/writable jvm property
         // so this API change wouldn't have a benifit.  It also breaks the passing
         // of proxy info to all the JVMs.
@@ -2628,6 +2628,34 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if ((ret == null) && !mDefaultProxyDisabled) ret = mDefaultProxy;
             return ret;
         }
+    }
+
+    // Convert empty ProxyInfo's to null as null-checks are used to determine if proxies are present
+    // (e.g. if mGlobalProxy==null fall back to network-specific proxy, if network-specific
+    // proxy is null then there is no proxy in place).
+    private ProxyInfo canonicalizeProxyInfo(ProxyInfo proxy) {
+        if (proxy != null && TextUtils.isEmpty(proxy.getHost())
+                && (proxy.getPacFileUrl() == null || Uri.EMPTY.equals(proxy.getPacFileUrl()))) {
+            proxy = null;
+        }
+        return proxy;
+    }
+
+    // ProxyInfo equality function with a couple modifications over ProxyInfo.equals() to make it
+    // better for determining if a new proxy broadcast is necessary:
+    // 1. Canonicalize empty ProxyInfos to null so an empty proxy compares equal to null so as to
+    //    avoid unnecessary broadcasts.
+    // 2. Make sure all parts of the ProxyInfo's compare true, including the host when a PAC URL
+    //    is in place.  This is important so legacy PAC resolver (see com.android.proxyhandler)
+    //    changes aren't missed.  The legacy PAC resolver pretends to be a simple HTTP proxy but
+    //    actually uses the PAC to resolve; this results in ProxyInfo's with PAC URL, host and port
+    //    all set.
+    private boolean proxyInfoEqual(ProxyInfo a, ProxyInfo b) {
+        a = canonicalizeProxyInfo(a);
+        b = canonicalizeProxyInfo(b);
+        // ProxyInfo.equals() doesn't check hosts when PAC URLs are present, but we need to check
+        // hosts even when PAC URLs are present to account for the legacy PAC resolver.
+        return Objects.equals(a, b) && (a == null || Objects.equals(a.getHost(), b.getHost()));
     }
 
     public void setGlobalProxy(ProxyInfo proxyProperties) {
@@ -2744,6 +2772,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (!mDefaultProxyDisabled) {
                 sendProxyBroadcast(proxy);
             }
+        }
+    }
+
+    // If the proxy has changed from oldLp to newLp, resend proxy broadcast with default proxy.
+    // This method gets called when any network changes proxy, but the broadcast only ever contains
+    // the default proxy (even if it hasn't changed).
+    // TODO: Deprecate the broadcast extras as they aren't necessarily applicable in a multi-network
+    // world where an app might be bound to a non-default network.
+    private void updateProxy(LinkProperties newLp, LinkProperties oldLp, NetworkAgentInfo nai) {
+        ProxyInfo newProxyInfo = newLp == null ? null : newLp.getHttpProxy();
+        ProxyInfo oldProxyInfo = oldLp == null ? null : oldLp.getHttpProxy();
+
+        if (!proxyInfoEqual(newProxyInfo, oldProxyInfo)) {
+            sendProxyBroadcast(getDefaultProxy());
         }
     }
 
@@ -3660,7 +3702,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         updateDnses(newLp, oldLp, netId, flushDns, useDefaultDns);
 
         updateClat(newLp, oldLp, networkAgent);
-        if (isDefaultNetwork(networkAgent)) handleApplyDefaultProxy(newLp.getHttpProxy());
+        if (isDefaultNetwork(networkAgent)) {
+            handleApplyDefaultProxy(newLp.getHttpProxy());
+        } else {
+            updateProxy(newLp, oldLp, networkAgent);
+        }
         // TODO - move this check to cover the whole function
         if (!Objects.equals(newLp, oldLp)) {
             notifyIfacesChanged();
