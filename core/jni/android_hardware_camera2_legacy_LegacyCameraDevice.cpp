@@ -470,6 +470,26 @@ static jint LegacyCameraDevice_nativeDetectSurfaceDimens(JNIEnv* env, jobject th
     return NO_ERROR;
 }
 
+static jint LegacyCameraDevice_nativeDetectSurfaceUsageFlags(JNIEnv* env, jobject thiz,
+          jobject surface) {
+    ALOGV("nativeDetectSurfaceUsageFlags");
+
+    sp<ANativeWindow> anw;
+    if ((anw = getNativeWindow(env, surface)) == NULL) {
+        jniThrowException(env, "Ljava/lang/UnsupportedOperationException;",
+            "Could not retrieve native window from surface.");
+        return BAD_VALUE;
+    }
+    int32_t usage = 0;
+    status_t err = anw->query(anw.get(), NATIVE_WINDOW_CONSUMER_USAGE_BITS, &usage);
+    if(err != NO_ERROR) {
+        jniThrowException(env, "Ljava/lang/UnsupportedOperationException;",
+            "Error while querying surface usage bits");
+        return err;
+    }
+    return usage;
+}
+
 static jint LegacyCameraDevice_nativeDetectTextureDimens(JNIEnv* env, jobject thiz,
         jobject surfaceTexture, jintArray dimens) {
     ALOGV("nativeDetectTextureDimens");
@@ -713,6 +733,9 @@ static JNINativeMethod gCameraDeviceMethods[] = {
     { "nativeGetJpegFooterSize",
     "()I",
     (void *)LegacyCameraDevice_nativeGetJpegFooterSize },
+    { "nativeDetectSurfaceUsageFlags",
+    "(Landroid/view/Surface;)I",
+    (void *)LegacyCameraDevice_nativeDetectSurfaceUsageFlags },
 };
 
 // Get all the required offsets in java class and register native functions
