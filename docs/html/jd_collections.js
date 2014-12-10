@@ -67,6 +67,7 @@ var RESOURCE_COLLECTIONS = {
     "resources": [
       "distribute/googleplay/guide.html",
       "distribute/googleplay/tv.html",
+      "distribute/googleplay/wear.html",
       "distribute/googleplay/edu/about.html"
     ]
   },
@@ -994,6 +995,14 @@ var RESOURCE_COLLECTIONS = {
       "tv/index.html",
       "design/tv/index.html",
       "training/tv/index.html"
+    ]
+  },
+  "wearlanding": {
+    "title": "",
+    "resources": [
+      "design/wear/index.html",
+      "training/building-wearables.html",
+      "training/wearables/ui/index.html"
     ]
   },
   "play_dev_guide": {
