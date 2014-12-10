@@ -411,7 +411,10 @@ final class ProcessList {
         sb.append(ramKb);
     }
 
-    // The minimum amount of time after a state change it is safe ro collect PSS.
+    // How long after a state change that it is safe to collect PSS without it being dirty.
+    public static final int PSS_SAFE_TIME_FROM_STATE_CHANGE = 1000;
+
+    // The minimum time interval after a state change it is safe to collect PSS.
     public static final int PSS_MIN_TIME_FROM_STATE_CHANGE = 15*1000;
 
     // The maximum amount of time we want to go between PSS collections.
@@ -440,6 +443,9 @@ final class ProcessList {
 
     // The amount of time until PSS when a cached process stays in the same state.
     private static final int PSS_SAME_CACHED_INTERVAL = 30*60*1000;
+
+    // The minimum time interval after a state change it is safe to collect PSS.
+    public static final int PSS_TEST_MIN_TIME_FROM_STATE_CHANGE = 10*1000;
 
     // The amount of time during testing until PSS when a process first becomes top.
     private static final int PSS_TEST_FIRST_TOP_INTERVAL = 3*1000;
@@ -546,6 +552,10 @@ final class ProcessList {
 
     public static boolean procStatesDifferForMem(int procState1, int procState2) {
         return sProcStateToProcMem[procState1] != sProcStateToProcMem[procState2];
+    }
+
+    public static long minTimeFromStateChange(boolean test) {
+        return test ? PSS_TEST_MIN_TIME_FROM_STATE_CHANGE : PSS_MIN_TIME_FROM_STATE_CHANGE;
     }
 
     public static long computeNextPssTime(int procState, boolean first, boolean test,

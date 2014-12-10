@@ -1841,7 +1841,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         proc = mPendingPssProcesses.remove(0);
                         procState = proc.pssProcState;
                         lastPssTime = proc.lastPssTime;
-                        if (proc.thread != null && procState == proc.setProcState) {
+                        if (proc.thread != null && procState == proc.setProcState
+                                && (lastPssTime+ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE)
+                                        < SystemClock.uptimeMillis()) {
                             pid = proc.pid;
                         } else {
                             proc = null;
@@ -17747,7 +17749,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + (app.nextPssTime-now) + ": " + app);
         } else {
             if (now > app.nextPssTime || (now > (app.lastPssTime+ProcessList.PSS_MAX_INTERVAL)
-                    && now > (app.lastStateTime+ProcessList.PSS_MIN_TIME_FROM_STATE_CHANGE))) {
+                    && now > (app.lastStateTime+ProcessList.minTimeFromStateChange(
+                    mTestPssMode)))) {
                 requestPssLocked(app, app.setProcState);
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, false,
                         mTestPssMode, isSleeping(), now);
