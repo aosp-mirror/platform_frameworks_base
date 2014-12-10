@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.media.AudioAttributes.USAGE_ALARM;
+import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
 import android.app.AppOpsManager;
@@ -77,6 +78,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
     private ZenModeConfig mConfig;
     private AudioManagerInternal mAudioManager;
     private int mPreviousRingerMode = -1;
+    private boolean mEffectsSuppressed;
 
     public ZenModeHelper(Context context, Looper looper) {
         mContext = context;
@@ -153,6 +155,12 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         }
     }
 
+    public void setEffectsSuppressed(boolean effectsSuppressed) {
+        if (mEffectsSuppressed == effectsSuppressed) return;
+        mEffectsSuppressed = effectsSuppressed;
+        applyRestrictions();
+    }
+
     public boolean shouldIntercept(NotificationRecord record) {
         if (isSystem(record)) {
             return false;
@@ -225,29 +233,35 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
             ZenLog.traceUpdateZenMode(oldMode, newMode);
         }
         mZenMode = newMode;
+        applyRestrictions();
+        onZenUpdated(oldMode, newMode);
+        dispatchOnZenModeChanged();
+    }
+
+    private void applyRestrictions() {
         final boolean zen = mZenMode != Global.ZEN_MODE_OFF;
-        final String[] exceptionPackages = null; // none (for now)
+
+        // notification restrictions
+        final boolean muteNotifications = mEffectsSuppressed;
+        applyRestrictions(muteNotifications, USAGE_NOTIFICATION);
 
         // call restrictions
-        final boolean muteCalls = zen && !mConfig.allowCalls;
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, USAGE_NOTIFICATION_RINGTONE,
-                muteCalls ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
-        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, USAGE_NOTIFICATION_RINGTONE,
-                muteCalls ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
+        final boolean muteCalls = zen && !mConfig.allowCalls || mEffectsSuppressed;
+        applyRestrictions(muteCalls, USAGE_NOTIFICATION_RINGTONE);
 
         // alarm restrictions
         final boolean muteAlarms = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
-        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, USAGE_ALARM,
-                muteAlarms ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
-        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, USAGE_ALARM,
-                muteAlarms ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
-                exceptionPackages);
+        applyRestrictions(muteAlarms, USAGE_ALARM);
+    }
 
-        onZenUpdated(oldMode, newMode);
-        dispatchOnZenModeChanged();
+    private void applyRestrictions(boolean mute, int usage) {
+        final String[] exceptionPackages = null; // none (for now)
+        mAppOps.setRestriction(AppOpsManager.OP_VIBRATE, usage,
+                mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
+                exceptionPackages);
+        mAppOps.setRestriction(AppOpsManager.OP_PLAY_AUDIO, usage,
+                mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED,
+                exceptionPackages);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -257,6 +271,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         pw.print(prefix); pw.print("mDefaultConfig="); pw.println(mDefaultConfig);
         pw.print(prefix); pw.print("mPreviousRingerMode="); pw.println(mPreviousRingerMode);
         pw.print(prefix); pw.print("mDefaultPhoneApp="); pw.println(mDefaultPhoneApp);
+        pw.print(prefix); pw.print("mEffectsSuppressed="); pw.println(mEffectsSuppressed);
     }
 
     public void readXml(XmlPullParser parser) throws XmlPullParserException, IOException {

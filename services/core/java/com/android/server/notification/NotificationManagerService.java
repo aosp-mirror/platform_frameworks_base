@@ -1028,6 +1028,7 @@ public class NotificationManagerService extends SystemService {
                 ? mListenersDisablingEffects.valueAt(0).component : null;
         if (Objects.equals(suppressor, mEffectsSuppressor)) return;
         mEffectsSuppressor = suppressor;
+        mZenModeHelper.setEffectsSuppressed(suppressor != null);
         getContext().sendBroadcast(new Intent(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED)
                 .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
     }
