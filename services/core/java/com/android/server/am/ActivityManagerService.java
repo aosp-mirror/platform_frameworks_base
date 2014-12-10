@@ -15701,11 +15701,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 true, ALLOW_NON_FULL, "broadcast", callerPackage);
 
         // Make sure that the user who is receiving this broadcast is running.
-        // If not, we will just skip it.
+        // If not, we will just skip it. Make an exception for shutdown broadcasts
+        // and upgrade steps.
 
         if (userId != UserHandle.USER_ALL && !isUserRunningLocked(userId, false)) {
-            if (callingUid != Process.SYSTEM_UID || (intent.getFlags()
-                    & Intent.FLAG_RECEIVER_BOOT_UPGRADE) == 0) {
+            if ((callingUid != Process.SYSTEM_UID
+                    || (intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) == 0)
+                    && !Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
                 Slog.w(TAG, "Skipping broadcast of " + intent
                         + ": user " + userId + " is stopped");
                 return ActivityManager.BROADCAST_FAILED_USER_STOPPED;
