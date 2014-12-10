@@ -1,9 +1,9 @@
-page.title=Introduction
+page.title=Developer Workflow
 @jd:body
 
-<p>To develop apps for Android devices, you use a set of tools that are included in the Android SDK.
-Once you've downloaded Android Studio and the Android SDK tools you can access these tools directly.
-You can also access most of the SDK tools from the command line. Developing with Android Studio is the
+<p>To develop apps for Android, you use a set of tools that are included in Android Studio.
+In addition to using the tools from Android Studio,
+you can also access most of the SDK tools from the command line. Developing with Android Studio is the
 preferred method because it can directly invoke the tools that you need while developing applications.</p>
 
 <p>However, you may choose to develop with another IDE or a simple text editor and invoke the
