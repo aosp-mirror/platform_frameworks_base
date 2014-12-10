@@ -370,6 +370,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             final Runnable finishListener) {
         if (appearing) {
             animatedCell.scale = 0.0f;
+            animatedCell.alpha = 1.0f;
         }
         animatedCell.translateY = appearing ? translationY : 0;
         ValueAnimator animator = ValueAnimator.ofFloat(animatedCell.translateY,
