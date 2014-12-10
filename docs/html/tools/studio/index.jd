@@ -114,8 +114,9 @@ specification and the files under {@code src/androidTest} directory for test cas
     <p>  <img src="{@docRoot}images/tools/studio-project-layout.png" alt="" /></p>
     <p>  <class="img-caption"><strong>Figure 3.</strong> Android Studio project structure</p>
 
-<p>For more information, see <a href="http://confluence.jetbrains.com/display/IntelliJIDEA/Project +Organization"class="external-link">IntelliJ project organization</a> and
-<a href="{@docRoot}tools/workflow/project/index.html">Managing Projects</a>.</p>
+<p>For more information, see
+<a href="http://confluence.jetbrains.com/display/IntelliJIDEA/Project+Organization"class="external-link">IntelliJ project organization</a> and
+<a href="{@docRoot}tools/projects/index.html">Managing Projects</a>.</p>
 
 
 <h3>Creating new files</h3>
