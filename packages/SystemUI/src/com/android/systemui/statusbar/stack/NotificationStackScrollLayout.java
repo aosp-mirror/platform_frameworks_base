@@ -2280,8 +2280,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 updateContentHeight();
                 notifyHeightChangeListener(mDismissView);
             } else {
-                mEmptyShadeView.setWillBeGone(true);
-                mEmptyShadeView.performVisibilityAnimation(false, new Runnable() {
+                Runnable onFinishedRunnable = new Runnable() {
                     @Override
                     public void run() {
                         mEmptyShadeView.setVisibility(GONE);
@@ -2289,7 +2288,14 @@ public class NotificationStackScrollLayout extends ViewGroup
                         updateContentHeight();
                         notifyHeightChangeListener(mDismissView);
                     }
-                });
+                };
+                if (mAnimationsEnabled) {
+                    mEmptyShadeView.setWillBeGone(true);
+                    mEmptyShadeView.performVisibilityAnimation(false, onFinishedRunnable);
+                } else {
+                    mEmptyShadeView.setInvisible();
+                    onFinishedRunnable.run();
+                }
             }
         }
     }
@@ -2318,7 +2324,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                         notifyHeightChangeListener(mDismissView);
                     }
                 };
-                if (mDismissView.isButtonVisible() && mIsExpanded) {
+                if (mDismissView.isButtonVisible() && mIsExpanded && mAnimationsEnabled) {
                     mDismissView.setWillBeGone(true);
                     mDismissView.performVisibilityAnimation(false, dimissHideFinishRunnable);
                 } else {
