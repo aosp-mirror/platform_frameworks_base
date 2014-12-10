@@ -1,4 +1,4 @@
-page.title=Creating Custom Watch Faces
+page.title=Creating Watch Faces
 
 @jd:body
 
@@ -12,6 +12,14 @@ page.title=Creating Custom Watch Faces
   </ul>
 </div>
 </div>
+
+<!-- design guide box -->
+<a class="notice-designers wide" href="{@docRoot}design/wear/watchfaces.html">
+  <div>
+    <h3>Design Guide</h3>
+    <p>Watch Faces</p>
+  </div>
+</a>
 
 <p>Watch faces in Android Wear leverage a dynamic digital canvas to tell time using colors,
 animations, and relevant contextual information. The <a
