@@ -66,12 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"पासवर्ड अनलक।"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ढाँचा क्षेत्र।"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"स्लाइड क्षेत्र।"</string>
-    <!-- no translation found for keyguard_accessibility_pin_area (7903959476607833485) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_sim_pin_area (3887780775111719336) -->
-    <skip />
-    <!-- no translation found for keyguard_accessibility_sim_puk_area (1880823406954996207) -->
-    <skip />
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"पीन क्षेत्र"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM पिन क्षेत्र"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM पुक क्षेत्र"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"अघिल्लो पथ बटन"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"अर्को पथ बटन"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"रोक्ने बटन"</string>
