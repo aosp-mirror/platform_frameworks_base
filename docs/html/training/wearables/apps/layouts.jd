@@ -116,7 +116,13 @@ dependencies {
     <li><code>CircledImageView</code> - An image view surrounded by a circle.</li>
     <li><code>ConfirmationActivity</code> - An activity that displays confirmation animations after the user
     completes an action.</li>
+    <li><code>CrossFadeDrawable</code> - A drawable that contains two child drawables and provides
+    methods to directly adjust the blend between the two.</li>
+    <li><code>DelayedConfirmationView</code> - A view that provides a circular countdown timer,
+    typically used to automatically confirm an operation after a short delay has elapsed.</li>
     <li><code>DismissOverlayView</code> - A view for implementing long-press-to-dismiss.</li>
+    <li><code>DotsPageIndicator</code> - A page indicator for GridViewPager that identifies the
+    current page in relation to all available pages on the current row.</li>
     <li><code>GridViewPager</code> - A layout manager that allows the user to both vertically and
     horizontally through pages of data. You supply an implementation of a GridPagerAdapter to
     generate the pages that the view shows.</li>
