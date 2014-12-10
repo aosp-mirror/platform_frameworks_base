@@ -329,7 +329,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
             String fullDateText = DateUtils.formatDateTime(mContext, millis, flags);
             mAnimator.announceForAccessibility(fullDateText);
         }
-        updatePickers();
     }
 
     private void setCurrentView(final int viewIndex) {
@@ -369,11 +368,14 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     @Override
     public void init(int year, int monthOfYear, int dayOfMonth,
             DatePicker.OnDateChangedListener callBack) {
-        mDateChangedListener = callBack;
         mCurrentDate.set(Calendar.YEAR, year);
         mCurrentDate.set(Calendar.MONTH, monthOfYear);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        updateDisplay(false);
+
+        onDateChanged(false);
+
+        // Set the listener last so that we don't call it.
+        mDateChangedListener = callBack;
     }
 
     @Override
@@ -381,10 +383,29 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mCurrentDate.set(Calendar.YEAR, year);
         mCurrentDate.set(Calendar.MONTH, month);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+        onDateChanged(false);
+    }
+
+    private void onDateChanged(boolean fromUser) {
         if (mDateChangedListener != null) {
-            mDateChangedListener.onDateChanged(mDelegator, year, month, dayOfMonth);
+            final int year = mCurrentDate.get(Calendar.YEAR);
+            final int monthOfYear = mCurrentDate.get(Calendar.MONTH);
+            final int dayOfMonth = mCurrentDate.get(Calendar.DAY_OF_MONTH);
+            mDateChangedListener.onDateChanged(mDelegator, year, monthOfYear, dayOfMonth);
         }
-        updateDisplay(false);
+
+        for (OnDateChangedListener listener : mListeners) {
+            listener.onDateChanged();
+        }
+
+        mDayPickerView.setDate(getSelectedDay().getTimeInMillis());
+
+        updateDisplay(fromUser);
+
+        if (fromUser) {
+            tryVibrate();
+        }
     }
 
     @Override
@@ -411,8 +432,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         }
         if (mCurrentDate.before(mTempDate)) {
             mCurrentDate.setTimeInMillis(minDate);
-            updatePickers();
-            updateDisplay(false);
+            onDateChanged(false);
         }
         mMinDate.setTimeInMillis(minDate);
         mDayPickerView.setMinDate(minDate);
@@ -433,8 +453,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         }
         if (mCurrentDate.after(mTempDate)) {
             mCurrentDate.setTimeInMillis(maxDate);
-            updatePickers();
-            updateDisplay(false);
+            onDateChanged(false);
         }
         mMaxDate.setTimeInMillis(maxDate);
         mDayPickerView.setMaxDate(maxDate);
@@ -573,9 +592,10 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     public void onYearSelected(int year) {
         adjustDayInMonthIfNeeded(mCurrentDate.get(Calendar.MONTH), year);
         mCurrentDate.set(Calendar.YEAR, year);
-        updatePickers();
+        onDateChanged(true);
+
+        // Auto-advance to month and day view.
         setCurrentView(MONTH_AND_DAY_VIEW);
-        updateDisplay(true);
     }
 
     // If the newly selected month / year does not contain the currently selected day number,
@@ -612,14 +632,6 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         }
     }
 
-    private void updatePickers() {
-        for (OnDateChangedListener listener : mListeners) {
-            listener.onDateChanged();
-        }
-
-        mDayPickerView.setDate(getSelectedDay().getTimeInMillis());
-    }
-
     @Override
     public void registerOnDateChangedListener(OnDateChangedListener listener) {
         mListeners.add(listener);
@@ -653,11 +665,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         @Override
         public void onDaySelected(DayPickerView view, Calendar day) {
             mCurrentDate.setTimeInMillis(day.getTimeInMillis());
-
-            updatePickers();
-            updateDisplay(true);
-
-            tryVibrate();
+            onDateChanged(true);
         }
     };
 
