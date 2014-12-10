@@ -6,6 +6,14 @@ package android.media {
 
 }
 
+package android.net {
+
+  public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {
+    method public static deprecated org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
+  }
+
+}
+
 package android.os {
 
   public final class PowerManager {

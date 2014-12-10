@@ -159,6 +159,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *     instead. The Apache HTTP client is no longer maintained and may be removed in a future
      *     release. Please visit <a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">this webpage</a>
      *     for further details.
+     *
+     * @removed
      */
     @Deprecated
     public static org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(

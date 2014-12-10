@@ -18894,7 +18894,6 @@ package android.net {
     method public static javax.net.SocketFactory getDefault(int);
     method public static javax.net.ssl.SSLSocketFactory getDefault(int, android.net.SSLSessionCache);
     method public java.lang.String[] getDefaultCipherSuites();
-    method public static deprecated org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
     method public static javax.net.ssl.SSLSocketFactory getInsecure(int, android.net.SSLSessionCache);
     method public byte[] getNpnSelectedProtocol(java.net.Socket);
     method public java.lang.String[] getSupportedCipherSuites();
