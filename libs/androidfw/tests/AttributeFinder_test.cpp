@@ -50,6 +50,10 @@ static const uint32_t packageUnsortedAttributes[] = {
         0x01010002, 0x01010004, 0x7f010001
 };
 
+static const uint32_t singlePackageAttributes[] = {
+        0x7f010007, 0x7f01000a, 0x7f01000d, 0x00000000
+};
+
 TEST(AttributeFinderTest, IteratesSequentially) {
     const int end = sizeof(sortedAttributes) / sizeof(*sortedAttributes);
     MockAttributeFinder finder(sortedAttributes, end);
@@ -108,4 +112,17 @@ TEST(AttributeFinderTest, FindAttributesInPackageUnsortedAttributeList) {
     EXPECT_EQ(end, finder.find(0x02010002));
     EXPECT_EQ(1, finder.find(0x02010010));
     EXPECT_EQ(6, finder.find(0x7f010001));
+}
+
+TEST(AttributeFinderTest, FindAttributesInSinglePackageAttributeList) {
+    const int end = sizeof(singlePackageAttributes) / sizeof(*singlePackageAttributes);
+    MockAttributeFinder finder(singlePackageAttributes, end);
+
+    EXPECT_EQ(end, finder.find(0x010100f4));
+    EXPECT_EQ(end, finder.find(0x010100f5));
+    EXPECT_EQ(end, finder.find(0x010100f6));
+    EXPECT_EQ(end, finder.find(0x010100f7));
+    EXPECT_EQ(end, finder.find(0x010100f8));
+    EXPECT_EQ(end, finder.find(0x010100fa));
+    EXPECT_EQ(0, finder.find(0x7f010007));
 }
