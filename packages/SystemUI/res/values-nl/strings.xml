@@ -319,7 +319,7 @@
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Opnieuw starten"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Ja, doorgaan"</string>
     <string name="user_add_user_title" msgid="4553596395824132638">"Nieuwe gebruiker toevoegen?"</string>
-    <string name="user_add_user_message_short" msgid="2161624834066214559">"Wanneer u een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\n1Elke gebruiker kan apps bijwerken voor alle andere gebruikers."</string>
+    <string name="user_add_user_message_short" msgid="2161624834066214559">"Wanneer u een nieuwe gebruiker toevoegt, moet die persoon zijn eigen profiel instellen.\n\n1Elke gebruiker kan apps updaten voor alle andere gebruikers."</string>
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Accubesparing is ingeschakeld"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Vermindert de prestaties en achtergrondgegevens"</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Accubesparing uitschakelen"</string>
