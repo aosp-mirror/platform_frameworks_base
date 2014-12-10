@@ -1,6 +1,8 @@
 page.title=Adding Wearable Features to Notifications
-page.tags="wear","notifications","wearables"
+page.tags=notifications, wear
 page.image=wear/images/01_notifications.png
+helpoutsWidget=true
+
 @jd:body
 
 <div id="tb-wrapper">

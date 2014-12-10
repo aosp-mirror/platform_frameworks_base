@@ -1,5 +1,6 @@
 page.title=Creating Wearable Apps
-page.tags="wear","wearable","app"
+page.tags=wear
+helpoutsWidget=true
 page.image=wear/images/01_create.png
 
 @jd:body

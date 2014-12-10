@@ -1,5 +1,6 @@
 page.title=Get Started with TV Apps
-page.tags="leanback","recyclerview","launcher"
+page.tags=tv, leanback, recyclerview
+helpoutsWidget=true
 
 trainingnavtop=true
 startpage=true

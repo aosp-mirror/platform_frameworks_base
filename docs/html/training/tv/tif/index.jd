@@ -1,5 +1,6 @@
 page.title=Building Live TV Apps
-page.tags="tv", "tif"
+page.tags=tv, tif
+helpoutsWidget=true
 page.article=true
 
 @jd:body
