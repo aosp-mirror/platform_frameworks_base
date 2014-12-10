@@ -21559,6 +21559,9 @@ package android.os {
     method public void clear();
     method public boolean containsKey(java.lang.String);
     method public java.lang.Object get(java.lang.String);
+    method public boolean getBoolean(java.lang.String);
+    method public boolean getBoolean(java.lang.String, boolean);
+    method public boolean[] getBooleanArray(java.lang.String);
     method public double getDouble(java.lang.String);
     method public double getDouble(java.lang.String, double);
     method public double[] getDoubleArray(java.lang.String);
@@ -21574,6 +21577,8 @@ package android.os {
     method public boolean isEmpty();
     method public java.util.Set<java.lang.String> keySet();
     method public void putAll(android.os.PersistableBundle);
+    method public void putBoolean(java.lang.String, boolean);
+    method public void putBooleanArray(java.lang.String, boolean[]);
     method public void putDouble(java.lang.String, double);
     method public void putDoubleArray(java.lang.String, double[]);
     method public void putInt(java.lang.String, int);
@@ -21719,9 +21724,6 @@ package android.os {
     method public java.lang.Object clone();
     method public int describeContents();
     method public android.os.IBinder getBinder(java.lang.String);
-    method public boolean getBoolean(java.lang.String);
-    method public boolean getBoolean(java.lang.String, boolean);
-    method public boolean[] getBooleanArray(java.lang.String);
     method public android.os.Bundle getBundle(java.lang.String);
     method public byte getByte(java.lang.String);
     method public java.lang.Byte getByte(java.lang.String, byte);
@@ -21752,8 +21754,6 @@ package android.os {
     method public boolean hasFileDescriptors();
     method public void putAll(android.os.Bundle);
     method public void putBinder(java.lang.String, android.os.IBinder);
-    method public void putBoolean(java.lang.String, boolean);
-    method public void putBooleanArray(java.lang.String, boolean[]);
     method public void putBundle(java.lang.String, android.os.Bundle);
     method public void putByte(java.lang.String, byte);
     method public void putByteArray(java.lang.String, byte[]);
