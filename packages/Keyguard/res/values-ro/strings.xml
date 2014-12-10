@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Deblocare cu parolă."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Zonă model."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Zonă glisare."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Zona codului PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Zona codului PIN al cardului SIM"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Zona codului PUK al cardului SIM"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Butonul Melodia anterioară"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Butonul Melodia următoare"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Butonul Întrerupeți"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Ați efectuat <xliff:g id="NUMBER">%d</xliff:g> încercări incorecte de deblocare a telefonului. Profilul de serviciu va fi eliminat, iar toate datele profilului vor fi șterse."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi tableta cu ajutorul unui cont de e-mail.\n\n Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Aţi desenat incorect modelul pentru deblocare de <xliff:g id="NUMBER_0">%d</xliff:g> ori. După încă <xliff:g id="NUMBER_1">%d</xliff:g> încercări nereuşite, vi se va solicita să deblocaţi telefonul cu ajutorul unui cont de e-mail.\n\n Încercaţi din nou peste <xliff:g id="NUMBER_2">%d</xliff:g> (de) secunde."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminaţi"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Codul PIN pentru cardul SIM este incorect. Contactați operatorul pentru a vă debloca dispozitivul."</string>
   <plurals name="kg_password_wrong_pin_code">

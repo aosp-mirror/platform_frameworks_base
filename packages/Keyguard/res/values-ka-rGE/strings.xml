@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"პაროლის განბლოკვა"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ნიმუშების სივრცე."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"გადასრიალების სივრცე."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN-ის არე"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM-ის PIN-ის არე"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM-ის PUK-ის არე"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"წინა ჩანაწერის ღილაკი"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"შემდეგი ჩანაწერის ღილაკი"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"პაუზის ღილაკი"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"თქვენ არასწორად სცადეთ ტელეფონის განბლოკვა <xliff:g id="NUMBER">%d</xliff:g> ჯერ. სამუშაო პროფილი ამოიშლება, რაც წაშლის პროფილის მთლიან მონაცემს."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"თქვენ არასწორად დახატეთ თქვენი განბლოკვის ნიმუში <xliff:g id="NUMBER_0">%d</xliff:g> ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ მოგთხოვთ ტაბლეტის განბლოკვას ელფოსტის ანგარიშის გამოყენებით.\n\n ხელახლა სცადეთ <xliff:g id="NUMBER_2">%d</xliff:g> წამში."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"თქვენ არასწორად დახატეთ თქვენი განბლოკვის ნიმუში <xliff:g id="NUMBER_0">%d</xliff:g>-ჯერ. კიდევ <xliff:g id="NUMBER_1">%d</xliff:g> წარუმატებელი ცდის შემდეგ, დაგჭირდებათ თქვენი ტელეფონის განბლოკვა ელფოსტის ანგარიშის გამოყენებით.\n\n ხელახლა სცადეთ <xliff:g id="NUMBER_2">%d</xliff:g> წამში."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ამოშლა"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM-ის არასწორი PIN კოდი. თქვენ ახლა მოგიწევთ მოწყობილობის განსაბლოკად მიმართოთ ოპერატორს."</string>
   <plurals name="kg_password_wrong_pin_code">

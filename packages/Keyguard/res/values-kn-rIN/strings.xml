@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"ಪಾಸ್‌ವರ್ಡ್ ಅನ್‌ಲಾಕ್."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ನಮೂನೆ ಪ್ರದೇಶ."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ಸ್ಲೈಡ್ ಪ್ರದೇಶ."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"ಪಿನ್ ಪ್ರದೇಶ"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"ಸಿಮ್ ಪಿನ್ ಪ್ರದೇಶ"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"ಸಿಮ್ PUK ಪ್ರದೇಶ"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"ಹಿಂದಿನ ಹಾಡಿನ ಬಟನ್"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"ಮುಂದಿನ ಹಾಡಿನ ಬಟನ್"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"ವಿರಾಮ ಬಟನ್"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"ಫೋನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು <xliff:g id="NUMBER">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಪ್ರಯತ್ನಿಸಿರುವಿರಿ. ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ, ಇದು ಎಲ್ಲ ಪ್ರೊಫೈಲ್ ಡೇಟಾವನ್ನು ಅಳಿಸುತ್ತದೆ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಡ್ರಾ ಮಾಡಿರುವಿರಿ. <xliff:g id="NUMBER_1">%d</xliff:g> ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ಬಳಿಕ, ನಿಮ್ಮ ಇಮೇಲ್ ಖಾತೆಯನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್‌ಲಾಕ್ ಮಾಡುವಂತೆ ನಿಮ್ಮಲ್ಲಿ ಕೇಳಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ನಿಮ್ಮ ಅನ್‍‍ಲಾಕ್ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ನೀವು <xliff:g id="NUMBER_0">%d</xliff:g> ಬಾರಿ ತಪ್ಪಾಗಿ ಡ್ರಾ ಮಾಡಿರುವಿರಿ. <xliff:g id="NUMBER_1">%d</xliff:g> ಹೆಚ್ಚಿನ ವಿಫಲ ಪ್ರಯತ್ನಗಳ ಬಳಿಕ, ನಿಮ್ಮ ಇಮೇಲ್ ಖಾತೆಯನ್ನು ಬಳಸಿಕೊಂಡು ನಿಮ್ಮ ಫೋನ್ ಅನ್‌ಲಾಕ್ ಮಾಡುವಂತೆ ನಿಮ್ಮಲ್ಲಿ ಕೇಳಿಕೊಳ್ಳಲಾಗುತ್ತದೆ.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ತೆಗೆದುಹಾಕು"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"ಸಿಮ್‌ ಪಿನ್‌ ಕೋಡ್ ತಪ್ಪಾಗಿದೆ, ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ನೀವು ಈ ಕೂಡಲೇ ನಿಮ್ಮ ವಾಹಕವನ್ನು ಸಂಪರ್ಕಿಸಬೇಕು."</string>
   <plurals name="kg_password_wrong_pin_code">

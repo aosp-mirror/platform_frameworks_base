@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Entsperrung mit Passwort"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Bereich für Muster"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Bereich für Fingerbewegung"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN-Bereich"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM-PIN-Bereich"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM-PUK-Bereich"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Schaltfläche für vorherigen Titel"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Schaltfläche für nächsten Titel"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Schaltfläche für Pause"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Sie haben <xliff:g id="NUMBER">%d</xliff:g>-mal erfolglos versucht, das Telefon zu entsperren. Das Arbeitsprofil wird nun entfernt und alle Profildaten werden gelöscht."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Tablet mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Sie haben Ihr Entsperrungsmuster <xliff:g id="NUMBER_0">%d</xliff:g>-mal falsch gezeichnet. Nach <xliff:g id="NUMBER_1">%d</xliff:g> weiteren erfolglosen Versuchen werden Sie aufgefordert, Ihr Telefon mithilfe eines E-Mail-Kontos zu entsperren.\n\n Versuchen Sie es in <xliff:g id="NUMBER_2">%d</xliff:g> Sekunden erneut."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Entfernen"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Falscher PIN-Code der SIM-Karte. Bitte wenden Sie sich an Ihren Mobilfunkanbieter, damit er Ihr Gerät entsperrt."</string>
   <plurals name="kg_password_wrong_pin_code">

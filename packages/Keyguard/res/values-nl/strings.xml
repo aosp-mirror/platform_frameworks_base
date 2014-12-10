@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Ontgrendeling via wachtwoord."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Tekengebied voor patroon."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Schuifgebied."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Gebied voor pincode"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Gebied voor sim-pincode"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Gebied voor sim-pukcode"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Knop voor vorig nummer"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Knop voor volgend nummer"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Knop voor onderbreken"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"U heeft <xliff:g id="NUMBER">%d</xliff:g> mislukte pogingen ondernomen om de telefoon te ontgrendelen. Het werkprofiel wordt verwijderd, waardoor alle profielgegevens worden verwijderd."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt u gevraagd uw tablet te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"U heeft uw ontgrendelingspatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer onjuist getekend. Na nog eens <xliff:g id="NUMBER_1">%d</xliff:g> mislukte pogingen wordt u gevraagd uw telefoon te ontgrendelen via een e-mailaccount.\n\n Probeer het over <xliff:g id="NUMBER_2">%d</xliff:g> seconden opnieuw."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwijderen"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Onjuiste pincode voor simkaart. U moet nu contact opnemen met uw provider om uw apparaat te ontgrendelen."</string>
   <plurals name="kg_password_wrong_pin_code">

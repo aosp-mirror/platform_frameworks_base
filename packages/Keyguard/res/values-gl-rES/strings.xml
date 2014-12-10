@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Desbloqueo mediante contrasinal"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Zona do padrón"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Zona para pasar o dedo"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Área do PIN"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Área do PIN da tarxeta SIM"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Área do PUK da tarxeta SIM"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Botón de pista anterior"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Botón de pista seguinte"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Botón de pausa"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Tentaches desbloquear o teléfono <xliff:g id="NUMBER">%d</xliff:g> veces de forma incorrecta. Eliminarase o perfil de traballo e, por conseguinte, todos os datos do perfil."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Debuxaches o padrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%d</xliff:g> veces. Se realizas <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos máis, terás que desbloquear o tablet a través dunha unha conta de correo electrónico.\n\n Téntao de novo dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Debuxaches o padrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%d</xliff:g> veces. Se realizas <xliff:g id="NUMBER_1">%d</xliff:g> intentos incorrectos máis, terás que desbloquear o teléfono a través dunha conta de correo electrónico.\n\n Téntao de novo dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eliminar"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"O código PIN da SIM non é correcto. Agora debes contactar co teu operador para desbloquear o dispositivo."</string>
   <plurals name="kg_password_wrong_pin_code">

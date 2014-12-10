@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"पासवर्ड अनलक।"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"ढाँचा क्षेत्र।"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"स्लाइड क्षेत्र।"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"पीन क्षेत्र"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM पिन क्षेत्र"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM पुक क्षेत्र"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"अघिल्लो पथ बटन"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"अर्को पथ बटन"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"रोक्ने बटन"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"तपाईंले गलत तरिकाले फोन अनलक गर्ने प्रयास गर्नु भएको छ <xliff:g id="NUMBER">%d</xliff:g> पटक। काम प्रोफाइल हटाइनेछ जसले सम्पूर्ण प्रोफाइल डेटा मेट्नेछ।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"तपाईंले गलत तरिकाले आफ्नो अनलक ढाँचा <xliff:g id="NUMBER_0">%d</xliff:g> पटक कोर्नुभयो। <xliff:g id="NUMBER_1">%d</xliff:g> विफल प्रयत्नहरू पछि, तपाईंलाई आफ्नो ट्याब्लेट इमेल खाता प्रयोग गरेर अनलक गर्न सोधिने छ।\n\n फेरि प्रयास गर्नुहोस् <xliff:g id="NUMBER_2">%d</xliff:g> सेकेन्डहरूमा।"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"तपाईँले आफ्नो अनलक ढाँचा गलत रूपमा <xliff:g id="NUMBER_0">%d</xliff:g> पटक तान्नु भएको छ। <xliff:g id="NUMBER_1">%d</xliff:g> धेरै असफल प्रयासहरूपछि, तपाईँलाई एउटा इमेल खाताको प्रयोग गरेर तपाईँको फोन अनलक गर्न सोधिने छ।\n\n फेरि <xliff:g id="NUMBER_2">%d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्।"</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"हटाउनुहोस्"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN कोड गलत छ। अब तपाईंले अाफ्नो उपकरण खोल्नलाई तपाईंको वाहकसँग सम्पर्क गर्नै पर्दर।"</string>
   <plurals name="kg_password_wrong_pin_code">

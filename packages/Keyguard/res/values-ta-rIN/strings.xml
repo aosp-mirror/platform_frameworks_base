@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"கடவுச்சொல் மூலம் திறத்தல்."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"வடிவப் பகுதி."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"ஸ்லைடு பகுதி."</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN பகுதி"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"சிம் PIN பகுதி"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"சிம் PUK பகுதி"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"முந்தைய டிராக்கிற்கான பொத்தான்"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"அடுத்த டிராக்கிற்கான பொத்தான்"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"இடைநிறுத்த பொத்தான்"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"மொபைலைத் திறக்க, <xliff:g id="NUMBER">%d</xliff:g> முறை தவறாக முயற்சித்துள்ளீர்கள். பணி சுயவிவரம் அகற்றப்படும், அத்துடன் சுயவிவரத்தின் எல்லா தரவும் நீக்கப்படும்."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"திறப்பதற்கான வடிவத்தை <xliff:g id="NUMBER_0">%d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். மேலும் <xliff:g id="NUMBER_1">%d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, மின்னஞ்சல் கணக்கைப் பயன்படுத்தி உங்கள் டேப்லெட்டைத் திறக்க கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> வினாடிகளில் மீண்டும் முயற்சிக்கவும்."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"திறப்பதற்கான வடிவத்தை <xliff:g id="NUMBER_0">%d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். மேலும் <xliff:g id="NUMBER_1">%d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, மின்னஞ்சல் கணக்கைப் பயன்படுத்தி உங்கள் மொபைலைத் திறக்கக் கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"அகற்று"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"சிம் பின் குறியீடு தவறானது, உங்கள் சாதனத்தின் தடையை நீக்க, உங்கள் மொபைல் நிறுவனத்தைத் தொடர்புகொள்ள வேண்டும்."</string>
   <plurals name="kg_password_wrong_pin_code">

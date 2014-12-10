@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"パスワードロックを解除します。"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"パターンエリアです。"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"スライドエリアです。"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PINエリア"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PINエリア"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUKエリア"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"前のトラックボタン"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"次のトラックボタン"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"一時停止ボタン"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"携帯電話のロック解除に<xliff:g id="NUMBER">%d</xliff:g>回失敗しました。ワークプロフィールが削除され、プロフィールのデータがすべて削除されます。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、タブレットのロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"ロック解除パターンの入力を<xliff:g id="NUMBER_0">%d</xliff:g>回間違えました。あと<xliff:g id="NUMBER_1">%d</xliff:g>回間違えると、携帯端末のロック解除にメールアカウントが必要になります。\n\n<xliff:g id="NUMBER_2">%d</xliff:g>秒後にもう一度お試しください。"</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"削除"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PINコードが無効です。お使いの端末をロック解除するには携帯通信会社にお問い合わせいただく必要があります。"</string>
   <plurals name="kg_password_wrong_pin_code">

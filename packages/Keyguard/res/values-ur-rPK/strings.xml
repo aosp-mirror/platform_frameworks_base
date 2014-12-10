@@ -66,6 +66,9 @@
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"پاس ورڈ کے ذریعہ غیر مقفل کریں۔"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"پیٹرن کا علاقہ۔"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"سلائیڈ کرنے کا علاقہ۔"</string>
+    <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"‏PIN کا علاقہ"</string>
+    <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"‏SIM PIN کا علاقہ"</string>
+    <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"‏SIM PUK کا علاقہ"</string>
     <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"سابقہ ٹریک بٹن"</string>
     <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"اگلا ٹریک بٹن"</string>
     <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"موقوف کرنے کا بٹن"</string>
@@ -144,7 +147,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"آپ نے فون کو غیر مقفل کرنے کیلئے <xliff:g id="NUMBER">%d</xliff:g> بار غلط طریقے سے کوشش کی ہے۔ دفتری پروفائل ہٹا دیا جائے گا، جس سے پروفائل کا سبھی ڈیٹا حذف ہو جائے گا۔"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے ایک ای میل اکاؤنٹ استعمال کرکے اپنا ٹیبلیٹ غیر مقفل کرنے کو کہا جائے گا۔\n\n <xliff:g id="NUMBER_2">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"آپ نے اپنا غیر مقفل کرنے کا پیٹرن <xliff:g id="NUMBER_0">%d</xliff:g> بار غلط طریقے سے ڈرا کیا ہے۔ <xliff:g id="NUMBER_1">%d</xliff:g> مزید ناکام کوششوں کے بعد، آپ سے ایک ای میل اکاؤنٹ استعمال کرکے اپنا فون غیر مقفل کرنے کو کہا جائے گا۔\n\n <xliff:g id="NUMBER_2">%d</xliff:g> سیکنڈ میں دوبارہ کوشش کریں۔"</string>
-    <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"ہٹائیں"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"‏غلط SIM PIN کوڈ اب آپ کو اپنا آلہ غیر مقفل کرنے کیلئے لازمی طور پر اپنے کیریئر سے رابطہ کرنا چاہئے۔"</string>
   <plurals name="kg_password_wrong_pin_code">
