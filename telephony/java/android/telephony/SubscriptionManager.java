@@ -52,6 +52,7 @@ public class SubscriptionManager {
     private static final boolean VDBG = false;
 
     /** An invalid subscription identifier */
+    /** @hide */
     public static final int INVALID_SUBSCRIPTION_ID = -1;
 
     /** Base value for Dummy SUBSCRIPTION_ID's. */
@@ -662,7 +663,7 @@ public class SubscriptionManager {
      * @param subId the unique SubscriptionInfo index in database
      * @param nameSource 0: NAME_SOURCE_DEFAULT_SOURCE, 1: NAME_SOURCE_SIM_SOURCE,
      *                   2: NAME_SOURCE_USER_INPUT, -1 NAME_SOURCE_UNDEFINED
-     * @return the number of records updated or -1 if invalid subId
+     * @return the number of records updated or < 0 if invalid subId
      * @hide
      */
     public int setDisplayName(String displayName, int subId, long nameSource) {
@@ -749,7 +750,7 @@ public class SubscriptionManager {
     /**
      * Get slotId associated with the subscription.
      * @return slotId as a positive integer or a negative value if an error either
-     * SIM_NOT_INSERTED or INVALID_SLOT_ID.
+     * SIM_NOT_INSERTED or < 0 if an invalid slot index
      * @hide
      */
     public static int getSlotId(int subId) {
@@ -884,7 +885,7 @@ public class SubscriptionManager {
 
     /**
      * @return subId of the DefaultSms subscription or
-     * the value INVALID_SUBSCRIPTION_ID if an error.
+     * a value < 0 if an error.
      *
      * @hide
      */
@@ -998,7 +999,7 @@ public class SubscriptionManager {
 
     /**
      * If a default is set to subscription which is not active, this will reset that default back to
-     * INVALID_SUBSCRIPTION_ID.
+     * an invalid subscription id, i.e. < 0.
      * @hide
      */
     public void clearDefaultsForInactiveSubIds() {
@@ -1023,7 +1024,7 @@ public class SubscriptionManager {
 
     /**
      * @return true if subId is an usable subId value else false. A
-     * usable subId means its neither a INVALID_SUBSCRIPTION_ID nor a DEFAUL_SUB_ID.
+     * usable subId means its neither a INVALID_SUBSCRIPTION_ID nor a DEFAULT_SUB_ID.
      * @hide
      */
     public static boolean isUsableSubIdValue(int subId) {
