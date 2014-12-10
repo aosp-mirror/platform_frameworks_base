@@ -28651,7 +28651,6 @@ package android.telephony {
     method public boolean isNetworkRoaming(int);
     method public void registerOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method public void unregisterOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
-    field public static final int INVALID_SUBSCRIPTION_ID = -1; // 0xffffffff
   }
 
   public static class SubscriptionManager.OnSubscriptionsChangedListener {
