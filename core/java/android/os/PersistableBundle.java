@@ -96,7 +96,8 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
                     !(value instanceof Double) && !(value instanceof String) &&
                     !(value instanceof int[]) && !(value instanceof long[]) &&
                     !(value instanceof double[]) && !(value instanceof String[]) &&
-                    !(value instanceof PersistableBundle) && (value != null)) {
+                    !(value instanceof PersistableBundle) && (value != null) &&
+                    !(value instanceof Boolean) && !(value instanceof boolean[])) {
                 throw new IllegalArgumentException("Bad value in PersistableBundle key=" + key +
                         " value=" + value);
             }
