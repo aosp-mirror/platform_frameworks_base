@@ -152,7 +152,6 @@
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/index.html"><span class="en">Tools Help</span></a></div>
     <ul>
       <li><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></li>
-      <li><a href="<?cs var:toroot ?>tools/help/adt.html">ADT</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/avd-manager.html">AVD Manager</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/bmgr.html">bmgr</a>
