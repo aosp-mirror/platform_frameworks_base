@@ -430,7 +430,9 @@ public final class MediaSession {
      * @param metadata The new metadata
      */
     public void setMetadata(@Nullable MediaMetadata metadata) {
-        metadata = (new MediaMetadata.Builder(metadata, mMaxBitmapSize)).build();
+        if (metadata != null ) {
+            metadata = (new MediaMetadata.Builder(metadata, mMaxBitmapSize)).build();
+        }
         try {
             mBinder.setMetadata(metadata);
         } catch (RemoteException e) {
