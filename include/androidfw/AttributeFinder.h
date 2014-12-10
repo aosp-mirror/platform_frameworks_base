@@ -64,6 +64,7 @@ private:
     void jumpToClosestAttribute(uint32_t packageId);
     void markCurrentPackageId(uint32_t packageId);
 
+    bool mFirstTime;
     Iterator mBegin;
     Iterator mEnd;
     Iterator mCurrent;
@@ -81,7 +82,8 @@ private:
 
 template <typename Derived, typename Iterator> inline
 BackTrackingAttributeFinder<Derived, Iterator>::BackTrackingAttributeFinder(const Iterator& begin, const Iterator& end)
-    : mBegin(begin)
+    : mFirstTime(true)
+    , mBegin(begin)
     , mEnd(end)
     , mCurrent(begin)
     , mLargest(begin)
@@ -145,8 +147,11 @@ Iterator BackTrackingAttributeFinder<Derived, Iterator>::find(uint32_t attr) {
         return mEnd;
     }
 
-    if (mCurrentAttr == 0) {
-        // One-time initialization.
+    if (mFirstTime) {
+        // One-time initialization. We do this here instead of the constructor
+        // because the derived class we access in getAttribute() may not be
+        // fully constructed.
+        mFirstTime = false;
         mCurrentAttr = static_cast<const Derived*>(this)->getAttribute(mBegin);
         mLastPackageId = getPackage(mCurrentAttr);
         markCurrentPackageId(mLastPackageId);
