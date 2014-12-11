@@ -50,6 +50,7 @@ public class RecentsTaskLoadPlan {
         public boolean loadIcons = true;
         public boolean loadThumbnails = true;
         public boolean onlyLoadForCache = false;
+        public boolean onlyLoadPausedActivities = false;
         public int numVisibleTasks = 0;
         public int numVisibleTaskThumbnails = 0;
     }
@@ -141,6 +142,7 @@ public class RecentsTaskLoadPlan {
                     activityColor, (i == (taskCount - 1)), mConfig.lockToAppEnabled, icon,
                     iconFilename);
             task.thumbnail = loader.getAndUpdateThumbnail(taskKey, mSystemServicesProxy, false);
+            if (DEBUG) Log.d(TAG, "\tthumbnail: " + taskKey + ", " + task.thumbnail);
             loadedTasks.add(task);
         }
         mStack.setTasks(loadedTasks);
@@ -186,6 +188,11 @@ public class RecentsTaskLoadPlan {
             boolean isVisibleTask = i >= (taskCount - opts.numVisibleTasks);
             boolean isVisibleThumbnail = i >= (taskCount - opts.numVisibleTaskThumbnails);
 
+            // If requested, skip the running task
+            if (opts.onlyLoadPausedActivities && isRunningTask) {
+                continue;
+            }
+
             if (opts.loadIcons && (isRunningTask || isVisibleTask)) {
                 if (task.activityIcon == null) {
                     if (DEBUG) Log.d(TAG, "\tLoading icon: " + taskKey);
@@ -194,7 +201,7 @@ public class RecentsTaskLoadPlan {
                 }
             }
             if (opts.loadThumbnails && (isRunningTask || isVisibleThumbnail)) {
-                if (task.thumbnail == null) {
+                if (task.thumbnail == null || isRunningTask) {
                     if (DEBUG) Log.d(TAG, "\tLoading thumbnail: " + taskKey);
                     if (mConfig.svelteLevel <= RecentsConfiguration.SVELTE_LIMIT_CACHE) {
                         task.thumbnail = loader.getAndUpdateThumbnail(taskKey, mSystemServicesProxy,
