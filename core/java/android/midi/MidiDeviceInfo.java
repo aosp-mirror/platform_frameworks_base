@@ -34,7 +34,14 @@ public class MidiDeviceInfo implements Parcelable {
 
     private static final String TAG = "MidiDeviceInfo";
 
+    /**
+     * Constant representing USB MIDI devices for {@link #getType}
+     */
     public static final int TYPE_USB = 1;
+
+    /**
+     * Constant representing virtual (software based) MIDI devices for {@link #getType}
+     */
     public static final int TYPE_VIRTUAL = 2;
 
     private final int mType;    // USB or virtual

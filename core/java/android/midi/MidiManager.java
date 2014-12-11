@@ -35,6 +35,7 @@ import java.util.HashMap;
  *
  * {@samplecode
  * MidiManager manager = (MidiManager) getSystemService(Context.MIDI_SERVICE);}
+ *
  * @hide
  */
 public class MidiManager {
@@ -64,9 +65,22 @@ public class MidiManager {
         }
     }
 
-    // Callback interface clients to receive Device added and removed notifications
+    /**
+     * Callback interface used for clients to receive MIDI device added and removed notifications
+     */
     public interface DeviceCallback {
+        /**
+         * Called to notify when a new MIDI device has been added
+         *
+         * @param device a {@link MidiDeviceInfo} for the newly added device
+         */
         void onDeviceAdded(MidiDeviceInfo device);
+
+        /**
+         * Called to notify when a MIDI device has been removed
+         *
+         * @param device a {@link MidiDeviceInfo} for the removed device
+         */
         void onDeviceRemoved(MidiDeviceInfo device);
     }
 
@@ -78,7 +92,11 @@ public class MidiManager {
         mService = service;
     }
 
-    // Used by clients to register for Device added and removed notifications
+    /**
+     * Registers a callback to receive notifications when MIDI devices are added and removed.
+     *
+     * @param callback a {@link DeviceCallback} for MIDI device notifications
+     */
     public void registerDeviceCallback(DeviceCallback callback) {
         DeviceListener deviceListener = new DeviceListener(callback);
         try {
@@ -90,7 +108,11 @@ public class MidiManager {
         mDeviceListeners.put(callback, deviceListener);
     }
 
-    // Used by clients to unregister for device added and removed notifications
+    /**
+     * Unregisters a {@link DeviceCallback}.
+      *
+     * @param callback a {@link DeviceCallback} to unregister
+     */
     public void unregisterDeviceCallback(DeviceCallback callback) {
         DeviceListener deviceListener = mDeviceListeners.remove(callback);
         if (deviceListener != null) {
@@ -102,6 +124,11 @@ public class MidiManager {
         }
     }
 
+    /**
+     * Gets the list of all connected MIDI devices.
+     *
+     * @return an array of all MIDI devices
+     */
     public MidiDeviceInfo[] getDeviceList() {
         try {
            return mService.getDeviceList();
@@ -111,7 +138,12 @@ public class MidiManager {
         }
     }
 
-    // Use this if you want to communicate with a MIDI device.
+    /**
+     * Opens a MIDI device for reading and writing.
+     *
+     * @param deviceInfo a {@link android.midi.MidiDeviceInfo} to open
+     * @return a {@link MidiDevice} object for the device
+     */
     public MidiDevice openDevice(MidiDeviceInfo deviceInfo) {
         try {
             ParcelFileDescriptor pfd = mService.openDevice(mToken, deviceInfo);
@@ -130,8 +162,15 @@ public class MidiManager {
         return null;
     }
 
-    // Use this if you want to register and implement a virtual device.
-    // The MidiDevice returned by this method is the proxy you use to implement the device.
+    /**
+     * Creates a new MIDI virtual device.
+     * NOTE: The method for creating virtual devices is likely to change before release.
+     *
+     * @param numInputPorts number of input ports for the virtual device
+     * @param numOutputPorts number of output ports for the virtual device
+     * @param properties a {@link android.os.Bundle} containing properties describing the device
+     * @return a {@link MidiDevice} object to locally represent the device
+     */
     public MidiDevice createVirtualDevice(int numInputPorts, int numOutputPorts,
             Bundle properties) {
         try {
@@ -147,6 +186,11 @@ public class MidiManager {
         }
     }
 
+    /**
+     * Removes a MIDI virtual device.
+     *
+     * @param device the {@link MidiDevice} for the virtual device to remove
+     */
     public void closeVirtualDevice(MidiDevice device) {
         try {
             device.close();

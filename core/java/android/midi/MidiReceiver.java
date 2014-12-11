@@ -24,7 +24,18 @@ import java.io.IOException;
  * @hide
  */
 public interface MidiReceiver {
-    // NOTE: the msg array is only valid within the context of this call.
-    // the byte array may get reused by the MIDI device for the next message.
+    /**
+     * Called to pass a MIDI event to the receiver.
+     *
+     * NOTE: the msg array parameter is only valid within the context of this call.
+     * The msg bytes should be copied by the receiver rather than retaining a reference
+     * to this parameter.
+     *
+     * @param msg a byte array containing the MIDI message
+     * @param offset the offset of the first byte of the message in the byte array
+     * @param count the number of bytes in the message
+     * @param timestamp the timestamp of the message (based on {@link java.lang.System#nanoTime}
+     * @throws IOException
+     */
     public void onPost(byte[] msg, int offset, int count, long timestamp) throws IOException;
 }
