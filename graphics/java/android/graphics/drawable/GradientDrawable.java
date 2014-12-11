@@ -1795,5 +1795,7 @@ public class GradientDrawable extends Drawable {
                 mStrokePaint.setPathEffect(e);
             }
         }
+
+        mTintFilter = updateTintFilter(mTintFilter, s.mTint, s.mTintMode);
     }
 }
