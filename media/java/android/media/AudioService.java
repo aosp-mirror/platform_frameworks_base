@@ -1841,12 +1841,22 @@ public class AudioService extends IAudioService.Stub {
     }
 
     public void setRingerModeExternal(int ringerMode, String caller) {
-        setRingerMode(ringerMode, caller, true /*external*/);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            setRingerMode(ringerMode, caller, true /*external*/);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     public void setRingerModeInternal(int ringerMode, String caller) {
         enforceSelfOrSystemUI("setRingerModeInternal");
-        setRingerMode(ringerMode, caller, false /*external*/);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            setRingerMode(ringerMode, caller, false /*external*/);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private void setRingerMode(int ringerMode, String caller, boolean external) {
@@ -1860,26 +1870,28 @@ public class AudioService extends IAudioService.Stub {
         if ((ringerMode == AudioManager.RINGER_MODE_VIBRATE) && !mHasVibrator) {
             ringerMode = AudioManager.RINGER_MODE_SILENT;
         }
-        final int ringerModeInternal = getRingerModeInternal();
-        final int ringerModeExternal = getRingerModeExternal();
-        if (external) {
-            setRingerModeExt(ringerMode);
-            if (mRingerModeDelegate != null) {
-                ringerMode = mRingerModeDelegate.onSetRingerModeExternal(ringerModeExternal,
-                        ringerMode, caller, ringerModeInternal);
+        synchronized (mSettingsLock) {
+            final int ringerModeInternal = getRingerModeInternal();
+            final int ringerModeExternal = getRingerModeExternal();
+            if (external) {
+                setRingerModeExt(ringerMode);
+                if (mRingerModeDelegate != null) {
+                    ringerMode = mRingerModeDelegate.onSetRingerModeExternal(ringerModeExternal,
+                            ringerMode, caller, ringerModeInternal);
+                }
+                if (ringerMode != ringerModeInternal) {
+                    setRingerModeInt(ringerMode, true /*persist*/);
+                }
+            } else /*internal*/ {
+                if (ringerMode != ringerModeInternal) {
+                    setRingerModeInt(ringerMode, true /*persist*/);
+                }
+                if (mRingerModeDelegate != null) {
+                    ringerMode = mRingerModeDelegate.onSetRingerModeInternal(ringerModeInternal,
+                            ringerMode, caller, ringerModeExternal);
+                }
+                setRingerModeExt(ringerMode);
             }
-            if (ringerMode != ringerModeInternal) {
-                setRingerModeInt(ringerMode, true /*persist*/);
-            }
-        } else /*internal*/ {
-            if (ringerMode != ringerModeInternal) {
-                setRingerModeInt(ringerMode, true /*persist*/);
-            }
-            if (mRingerModeDelegate != null) {
-                ringerMode = mRingerModeDelegate.onSetRingerModeInternal(ringerModeInternal,
-                        ringerMode, caller, ringerModeExternal);
-            }
-            setRingerModeExt(ringerMode);
         }
     }
 
@@ -1968,10 +1980,10 @@ public class AudioService extends IAudioService.Stub {
         switch (getVibrateSetting(vibrateType)) {
 
             case AudioManager.VIBRATE_SETTING_ON:
-                return getRingerModeInternal() != AudioManager.RINGER_MODE_SILENT;
+                return getRingerModeExternal() != AudioManager.RINGER_MODE_SILENT;
 
             case AudioManager.VIBRATE_SETTING_ONLY_SILENT:
-                return getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE;
+                return getRingerModeExternal() == AudioManager.RINGER_MODE_VIBRATE;
 
             case AudioManager.VIBRATE_SETTING_OFF:
                 // return false, even for incoming calls

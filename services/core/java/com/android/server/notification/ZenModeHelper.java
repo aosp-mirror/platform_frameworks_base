@@ -221,21 +221,26 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
     }
 
     public void setZenMode(int zenMode, String reason) {
-        ZenLog.traceSetZenMode(zenMode, reason);
-        Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zenMode);
+        setZenMode(zenMode, reason, true);
     }
 
-    public void updateZenMode() {
-        final int oldMode = mZenMode;
+    private void setZenMode(int zenMode, String reason, boolean setRingerMode) {
+        ZenLog.traceSetZenMode(zenMode, reason);
+        if (mZenMode == zenMode) return;
+        ZenLog.traceUpdateZenMode(mZenMode, zenMode);
+        mZenMode = zenMode;
+        Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, mZenMode);
+        if (setRingerMode) {
+            applyZenToRingerMode();
+        }
+        applyRestrictions();
+        mHandler.postDispatchOnZenModeChanged();
+    }
+
+    public void readZenModeFromSetting() {
         final int newMode = Global.getInt(mContext.getContentResolver(),
                 Global.ZEN_MODE, Global.ZEN_MODE_OFF);
-        if (oldMode != newMode) {
-            ZenLog.traceUpdateZenMode(oldMode, newMode);
-        }
-        mZenMode = newMode;
-        applyRestrictions();
-        onZenUpdated(oldMode, newMode);
-        dispatchOnZenModeChanged();
+        setZenMode(newMode, "setting");
     }
 
     private void applyRestrictions() {
@@ -297,18 +302,16 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         dispatchOnConfigChanged();
         final String val = Integer.toString(mConfig.hashCode());
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
-        updateZenMode();
+        applyRestrictions();
         return true;
     }
 
-    private void onZenUpdated(int oldZen, int newZen) {
+    private void applyZenToRingerMode() {
         if (mAudioManager == null) return;
-        if (oldZen == newZen) return;
-
         // force the ringer mode into compliance
         final int ringerModeInternal = mAudioManager.getRingerModeInternal();
         int newRingerModeInternal = ringerModeInternal;
-        switch (newZen) {
+        switch (mZenMode) {
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 if (ringerModeInternal != AudioManager.RINGER_MODE_SILENT) {
                     mPreviousRingerMode = ringerModeInternal;
@@ -337,7 +340,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         int ringerModeExternalOut = ringerModeNew;
 
         int newZen = -1;
-        switch(ringerModeNew) {
+        switch (ringerModeNew) {
             case AudioManager.RINGER_MODE_SILENT:
                 if (isChange) {
                     if (mZenMode != Global.ZEN_MODE_NO_INTERRUPTIONS) {
@@ -356,7 +359,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
                 break;
         }
         if (newZen != -1) {
-            mHandler.postSetZenMode(newZen, "ringerModeInternal");
+            setZenMode(newZen, "ringerModeInternal", false /*setRingerMode*/);
         }
 
         if (isChange || newZen != -1 || ringerModeExternal != ringerModeExternalOut) {
@@ -374,7 +377,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
         final boolean isVibrate = ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE;
 
         int newZen = -1;
-        switch(ringerModeNew) {
+        switch (ringerModeNew) {
             case AudioManager.RINGER_MODE_SILENT:
                 if (isChange) {
                     if (mZenMode == Global.ZEN_MODE_OFF) {
@@ -394,7 +397,7 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
                 break;
         }
         if (newZen != -1) {
-            mHandler.postSetZenMode(newZen, "ringerModeExternal");
+            setZenMode(newZen, "ringerModeExternal", false /*setRingerMode*/);
         }
 
         ZenLog.traceSetRingerModeExternal(ringerModeOld, ringerModeNew, caller, ringerModeInternal,
@@ -516,27 +519,28 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
 
         public void update(Uri uri) {
             if (ZEN_MODE.equals(uri)) {
-                updateZenMode();
+                readZenModeFromSetting();
             }
         }
     }
 
     private class H extends Handler {
-        private static final int MSG_SET_ZEN = 1;
+        private static final int MSG_DISPATCH = 1;
 
         private H(Looper looper) {
             super(looper);
         }
 
-        private void postSetZenMode(int zen, String reason) {
-            obtainMessage(MSG_SET_ZEN, zen, 0, reason).sendToTarget();
+        private void postDispatchOnZenModeChanged() {
+            removeMessages(MSG_DISPATCH);
+            sendEmptyMessage(MSG_DISPATCH);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            switch(msg.what) {
-                case MSG_SET_ZEN:
-                    setZenMode(msg.arg1, (String) msg.obj);
+            switch (msg.what) {
+                case MSG_DISPATCH:
+                    dispatchOnZenModeChanged();
                     break;
             }
         }
