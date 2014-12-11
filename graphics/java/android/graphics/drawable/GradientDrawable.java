@@ -1796,6 +1796,6 @@ public class GradientDrawable extends Drawable {
             }
         }
 
-        mTintFilter = updateTintFilter(mTintFilter, s.mTint, s.mTintMode);
+        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
     }
 }
