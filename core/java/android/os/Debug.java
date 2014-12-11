@@ -296,7 +296,7 @@ public final class Debug
                 case 1: return "Stack";
                 case 2: return "Cursor";
                 case 3: return "Ashmem";
-                case 4: return "Gfx driver";
+                case 4: return "Gfx dev";
                 case 5: return "Other dev";
                 case 6: return ".so mmap";
                 case 7: return ".jar mmap";
@@ -306,9 +306,9 @@ public final class Debug
                 case 11: return ".oat mmap";
                 case 12: return ".art mmap";
                 case 13: return "Other mmap";
-                case 14: return "Graphics";
-                case 15: return "GL";
-                case 16: return "Memtrack";
+                case 14: return "EGL mtrack";
+                case 15: return "GL mtrack";
+                case 16: return "Other mtrack";
                 case 17: return ".Heap";
                 case 18: return ".LOS";
                 case 19: return ".LinearAlloc";
