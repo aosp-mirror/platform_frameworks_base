@@ -714,10 +714,17 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                     mDrawableFutures = new SparseArray<ConstantStateFuture>(mNumChildren);
                 }
 
+                // Create futures for drawables with constant states. If a
+                // drawable doesn't have a constant state, then we can't clone
+                // it and we'll have to reference the original.
                 final int N = mNumChildren;
                 for (int i = 0; i < N; i++) {
                     if (origDr[i] != null) {
-                        mDrawableFutures.put(i, new ConstantStateFuture(origDr[i]));
+                        if (origDr[i].getConstantState() != null) {
+                            mDrawableFutures.put(i, new ConstantStateFuture(origDr[i]));
+                        } else {
+                            mDrawables[i] = origDr[i];
+                        }
                     }
                 }
             } else {
