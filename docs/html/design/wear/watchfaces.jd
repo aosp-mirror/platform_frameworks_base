@@ -4,10 +4,10 @@ page.title=Watch Faces for Android Wear
 
 <!-- developer docs box -->
 <a class="notice-developers right" href="{@docRoot}training/wearables/watch-faces/index.html"
-   style="clear:left;margin-bottom:70px">
+   style="clear:left;margin-bottom:90px">
   <div>
     <h3>Developer Docs</h3>
-    <p>Creating Custom Watch Faces</p>
+    <p>Creating Watch Faces</p>
   </div>
 </a>
 
@@ -158,8 +158,8 @@ screens.</p>
   burn-in effect. When these screens are in ambient mode, the system shifts the contents of
   the screen periodically by a few pixels to avoid pixel burn-in. Do not use large blocks of
   pixels in your ambient mode designs and keep 95% of the pixels black. Replace solid shapes in
-  your regular ambient mode designs with outlined shapes in burn-protected ambient mode. Replace
-  also filled images with pixel patterns. For analog watch face designs, hollow out the center
+  your regular ambient mode designs with outlined shapes in burn-protected ambient mode. Also
+  replace filled images with pixel patterns. For analog watch face designs, hollow out the center
   where the hands meet to avoid pixel burn-in in this mode.</p>
 </div>
 <div class="layout-content-col span-4">

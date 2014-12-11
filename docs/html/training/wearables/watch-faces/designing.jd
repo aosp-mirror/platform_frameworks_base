@@ -16,6 +16,14 @@ page.title=Designing Watch Faces
 </div>
 </div>
 
+<!-- design guide box -->
+<a class="notice-designers wide" href="{@docRoot}design/wear/watchfaces.html">
+  <div>
+    <h3>Design Guide</h3>
+    <p>Watch Faces</p>
+  </div>
+</a>
+
 <p>Similar to the process of designing a traditional watch face, creating one for
 Android Wear is an exercise in visualizing time clearly. Android Wear devices
 provide advanced capabilities for watch faces that you can leverage in your designs, such as
