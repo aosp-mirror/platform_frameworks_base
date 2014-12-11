@@ -938,7 +938,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     + slotId + ", state=" + state +")");
         }
 
-        if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             Log.w(TAG, "invalid subId in handleSimStateChange()");
             return;
         }

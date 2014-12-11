@@ -964,11 +964,10 @@ public class KeyguardViewMediator extends SystemUI {
 
         // if the setup wizard hasn't run yet, don't show
         final boolean requireSim = !SystemProperties.getBoolean("keyguard.no_require_sim", false);
-        final boolean absent = mUpdateMonitor.getNextSubIdForState(
-                IccCardConstants.State.ABSENT) != SubscriptionManager.INVALID_SUBSCRIPTION_ID;
-        final boolean disabled = mUpdateMonitor.getNextSubIdForState(
-                IccCardConstants.State.PERM_DISABLED)
-                != SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        final boolean absent = SubscriptionManager.isValidSubscriptionId(
+                mUpdateMonitor.getNextSubIdForState(IccCardConstants.State.ABSENT));
+        final boolean disabled = SubscriptionManager.isValidSubscriptionId(
+                mUpdateMonitor.getNextSubIdForState(IccCardConstants.State.PERM_DISABLED));
         final boolean lockedOrMissing = mUpdateMonitor.isSimPinSecure()
                 || ((absent || disabled) && requireSim);
 
