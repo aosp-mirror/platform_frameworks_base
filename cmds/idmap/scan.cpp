@@ -146,13 +146,13 @@ namespace {
         }
         char *buf = new char[uncompLen];
         if (NULL == buf) {
-            ALOGW("%s: failed to allocate %d byte\n", __FUNCTION__, uncompLen);
+            ALOGW("%s: failed to allocate %zd byte\n", __FUNCTION__, uncompLen);
             dataMap->release();
             return -1;
         }
         StreamingZipInflater inflater(dataMap, uncompLen);
         if (inflater.read(buf, uncompLen) < 0) {
-            ALOGW("%s: failed to inflate %d byte\n", __FUNCTION__, uncompLen);
+            ALOGW("%s: failed to inflate %zd byte\n", __FUNCTION__, uncompLen);
             delete[] buf;
             dataMap->release();
             return -1;

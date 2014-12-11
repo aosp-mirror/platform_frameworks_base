@@ -290,7 +290,7 @@ static jlong init_timerfd()
 
     epollfd = epoll_create(N_ANDROID_TIMERFDS);
     if (epollfd < 0) {
-        ALOGV("epoll_create(%u) failed: %s", N_ANDROID_TIMERFDS,
+        ALOGV("epoll_create(%zu) failed: %s", N_ANDROID_TIMERFDS,
                 strerror(errno));
         return 0;
     }
