@@ -384,6 +384,12 @@ public:
     virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored);
     virtual GLuint onGetTargetFbo() const { return 0; }
 
+    SkPath* allocPathForFrame() {
+        SkPath* path = new SkPath();
+        mTempPaths.push_back(path);
+        return path;
+    }
+
 protected:
     /**
      * Perform the setup specific to a frame. This method does not
@@ -1055,6 +1061,9 @@ private:
     float mLightRadius;
     uint8_t mAmbientShadowAlpha;
     uint8_t mSpotShadowAlpha;
+
+    // Paths kept alive for the duration of the frame
+    std::vector<SkPath*> mTempPaths;
 
     friend class Layer;
     friend class TextSetupFunctor;
