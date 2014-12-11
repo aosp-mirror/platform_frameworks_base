@@ -44,6 +44,8 @@ namespace uirenderer {
 // Classes
 ///////////////////////////////////////////////////////////////////////////////
 
+class AssetAtlas;
+
 /**
  * A simple LRU texture cache. The cache has a maximum size expressed in bytes.
  * Any texture added to the cache causing the cache to grow beyond the maximum
@@ -123,6 +125,8 @@ public:
      */
     void setFlushRate(float flushRate);
 
+    void setAssetAtlas(AssetAtlas* assetAtlas);
+
 private:
 
     bool canMakeTextureFromBitmap(const SkBitmap* bitmap);
@@ -155,6 +159,8 @@ private:
 
     Vector<uint32_t> mGarbage;
     mutable Mutex mLock;
+
+    AssetAtlas* mAssetAtlas;
 }; // class TextureCache
 
 }; // namespace uirenderer
