@@ -58,6 +58,11 @@ public class SurfaceTextureRenderer {
     private static final int GLES_VERSION = 2;
     private static final int PBUFFER_PIXEL_BYTES = 4;
 
+    private static final int FLIP_TYPE_NONE = 0;
+    private static final int FLIP_TYPE_HORIZONTAL = 1;
+    private static final int FLIP_TYPE_VERTICAL = 2;
+    private static final int FLIP_TYPE_BOTH = FLIP_TYPE_HORIZONTAL | FLIP_TYPE_VERTICAL;
+
     private EGLDisplay mEGLDisplay = EGL14.EGL_NO_DISPLAY;
     private EGLContext mEGLContext = EGL14.EGL_NO_CONTEXT;
     private EGLConfig mConfigs;
@@ -82,8 +87,8 @@ public class SurfaceTextureRenderer {
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
     private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
 
-    // Sampling is mirrored across the vertical axis to undo horizontal flip from the front camera
-    private static final float[] sFrontCameraTriangleVertices = {
+    // Sampling is mirrored across the horizontal axis
+    private static final float[] sHorizontalFlipTriangleVertices = {
             // X, Y, Z, U, V
             -1.0f, -1.0f, 0, 1.f, 0.f,
             1.0f, -1.0f, 0, 0.f, 0.f,
@@ -91,8 +96,26 @@ public class SurfaceTextureRenderer {
             1.0f,  1.0f, 0, 0.f, 1.f,
     };
 
+    // Sampling is mirrored across the vertical axis
+    private static final float[] sVerticalFlipTriangleVertices = {
+            // X, Y, Z, U, V
+            -1.0f, -1.0f, 0, 0.f, 1.f,
+            1.0f, -1.0f, 0, 1.f, 1.f,
+            -1.0f,  1.0f, 0, 0.f, 0.f,
+            1.0f,  1.0f, 0, 1.f, 0.f,
+    };
+
+    // Sampling is mirrored across the both axes
+    private static final float[] sBothFlipTriangleVertices = {
+            // X, Y, Z, U, V
+            -1.0f, -1.0f, 0, 1.f, 1.f,
+            1.0f, -1.0f, 0, 0.f, 1.f,
+            -1.0f,  1.0f, 0, 1.f, 0.f,
+            1.0f,  1.0f, 0, 0.f, 0.f,
+    };
+
     // Sampling is 1:1 for a straight copy for the back camera
-    private static final float[] sBackCameraTriangleVertices = {
+    private static final float[] sRegularTriangleVertices = {
             // X, Y, Z, U, V
             -1.0f, -1.0f, 0, 0.f, 0.f,
             1.0f, -1.0f, 0, 1.f, 0.f,
@@ -100,7 +123,11 @@ public class SurfaceTextureRenderer {
             1.0f,  1.0f, 0, 1.f, 1.f,
     };
 
-    private FloatBuffer mTriangleVertices;
+    private FloatBuffer mRegularTriangleVertices;
+    private FloatBuffer mHorizontalFlipTriangleVertices;
+    private FloatBuffer mVerticalFlipTriangleVertices;
+    private FloatBuffer mBothFlipTriangleVertices;
+    private final int mFacing;
 
     /**
      * As used in this file, this vertex shader maps a unit square to the view, and
@@ -148,15 +175,27 @@ public class SurfaceTextureRenderer {
     private static final String LEGACY_PERF_PROPERTY = "persist.camera.legacy_perf";
 
     public SurfaceTextureRenderer(int facing) {
-        if (facing == CameraCharacteristics.LENS_FACING_BACK) {
-            mTriangleVertices = ByteBuffer.allocateDirect(sBackCameraTriangleVertices.length *
-                    FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-            mTriangleVertices.put(sBackCameraTriangleVertices).position(0);
-        } else {
-            mTriangleVertices = ByteBuffer.allocateDirect(sFrontCameraTriangleVertices.length *
-                    FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-            mTriangleVertices.put(sFrontCameraTriangleVertices).position(0);
-        }
+        mFacing = facing;
+
+        mRegularTriangleVertices = ByteBuffer.allocateDirect(sRegularTriangleVertices.length *
+                FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mRegularTriangleVertices.put(sRegularTriangleVertices).position(0);
+
+        mHorizontalFlipTriangleVertices = ByteBuffer.allocateDirect(
+                sHorizontalFlipTriangleVertices.length * FLOAT_SIZE_BYTES).
+                order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mHorizontalFlipTriangleVertices.put(sHorizontalFlipTriangleVertices).position(0);
+
+        mVerticalFlipTriangleVertices = ByteBuffer.allocateDirect(
+                sVerticalFlipTriangleVertices.length * FLOAT_SIZE_BYTES).
+                order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mVerticalFlipTriangleVertices.put(sVerticalFlipTriangleVertices).position(0);
+
+        mBothFlipTriangleVertices = ByteBuffer.allocateDirect(
+                sBothFlipTriangleVertices.length * FLOAT_SIZE_BYTES).
+                order(ByteOrder.nativeOrder()).asFloatBuffer();
+        mBothFlipTriangleVertices.put(sBothFlipTriangleVertices).position(0);
+
         Matrix.setIdentityM(mSTMatrix, 0);
     }
 
@@ -209,7 +248,7 @@ public class SurfaceTextureRenderer {
         return program;
     }
 
-    private void drawFrame(SurfaceTexture st, int width, int height) {
+    private void drawFrame(SurfaceTexture st, int width, int height, int flipType) {
         checkGlError("onDrawFrame start");
         st.getTransformMatrix(mSTMatrix);
 
@@ -266,16 +305,32 @@ public class SurfaceTextureRenderer {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, mTextureID);
 
-        mTriangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+        FloatBuffer triangleVertices;
+        switch(flipType) {
+            case FLIP_TYPE_HORIZONTAL:
+                triangleVertices = mHorizontalFlipTriangleVertices;
+                break;
+            case FLIP_TYPE_VERTICAL:
+                triangleVertices = mVerticalFlipTriangleVertices;
+                break;
+            case FLIP_TYPE_BOTH:
+                triangleVertices = mBothFlipTriangleVertices;
+                break;
+            default:
+                triangleVertices = mRegularTriangleVertices;
+                break;
+        }
+
+        triangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
         GLES20.glVertexAttribPointer(maPositionHandle, VERTEX_POS_SIZE, GLES20.GL_FLOAT,
-                /*normalized*/ false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
+                /*normalized*/ false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, triangleVertices);
         checkGlError("glVertexAttribPointer maPosition");
         GLES20.glEnableVertexAttribArray(maPositionHandle);
         checkGlError("glEnableVertexAttribArray maPositionHandle");
 
-        mTriangleVertices.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+        triangleVertices.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
         GLES20.glVertexAttribPointer(maTextureHandle, VERTEX_UV_SIZE, GLES20.GL_FLOAT,
-                /*normalized*/ false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
+                /*normalized*/ false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, triangleVertices);
         checkGlError("glVertexAttribPointer maTextureHandle");
         GLES20.glEnableVertexAttribArray(maTextureHandle);
         checkGlError("glEnableVertexAttribArray maTextureHandle");
@@ -666,7 +721,9 @@ public class SurfaceTextureRenderer {
                     makeCurrent(holder.eglSurface);
 
                     LegacyCameraDevice.setNextTimestamp(holder.surface, captureHolder.second);
-                    drawFrame(mSurfaceTexture, holder.width, holder.height);
+                    drawFrame(mSurfaceTexture, holder.width, holder.height,
+                            (mFacing == CameraCharacteristics.LENS_FACING_FRONT) ?
+                                    FLIP_TYPE_HORIZONTAL : FLIP_TYPE_NONE);
                     swapBuffers(holder.eglSurface);
                 } catch (LegacyExceptionUtils.BufferQueueAbandonedException e) {
                     Log.w(TAG, "Surface abandoned, dropping frame. ", e);
@@ -676,7 +733,10 @@ public class SurfaceTextureRenderer {
         for (EGLSurfaceHolder holder : mConversionSurfaces) {
             if (LegacyCameraDevice.containsSurfaceId(holder.surface, targetSurfaceIds)) {
                 makeCurrent(holder.eglSurface);
-                drawFrame(mSurfaceTexture, holder.width, holder.height);
+                // glReadPixels reads from the bottom of the buffer, so add an extra vertical flip
+                drawFrame(mSurfaceTexture, holder.width, holder.height,
+                        (mFacing == CameraCharacteristics.LENS_FACING_FRONT) ?
+                                FLIP_TYPE_BOTH : FLIP_TYPE_VERTICAL);
                 mPBufferPixels.clear();
                 GLES20.glReadPixels(/*x*/ 0, /*y*/ 0, holder.width, holder.height,
                         GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, mPBufferPixels);
