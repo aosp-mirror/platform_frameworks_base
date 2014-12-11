@@ -100,7 +100,7 @@ interface IConnectivityManager
 
     void setGlobalProxy(in ProxyInfo p);
 
-    ProxyInfo getProxy();
+    ProxyInfo getDefaultProxy();
 
     void setDataDependency(int networkType, boolean met);
 

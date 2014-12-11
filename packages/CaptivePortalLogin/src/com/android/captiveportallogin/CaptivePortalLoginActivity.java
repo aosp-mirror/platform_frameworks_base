@@ -23,12 +23,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.Proxy;
-import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -96,26 +94,10 @@ public class CaptivePortalLoginActivity extends Activity {
             done(CAPTIVE_PORTAL_APP_RETURN_WANTED_AS_IS);
         }
 
+        final ConnectivityManager cm = ConnectivityManager.from(this);
         final Network network = new Network(mNetId);
-        ConnectivityManager.setProcessDefaultNetwork(network);
-
-        // Set HTTP proxy system properties to those of the selected Network.
-        final LinkProperties lp = ConnectivityManager.from(this).getLinkProperties(network);
-        if (lp != null) {
-            final ProxyInfo proxyInfo = lp.getHttpProxy();
-            String host = "";
-            String port = "";
-            String exclList = "";
-            Uri pacFileUrl = Uri.EMPTY;
-            if (proxyInfo != null) {
-                host = proxyInfo.getHost();
-                port = Integer.toString(proxyInfo.getPort());
-                exclList = proxyInfo.getExclusionListAsString();
-                pacFileUrl = proxyInfo.getPacFileUrl();
-            }
-            Proxy.setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
-            Log.v(TAG, "Set proxy system properties to " + proxyInfo);
-        }
+        // Also initializes proxy system properties.
+        cm.setProcessDefaultNetwork(network);
 
         // Proxy system properties must be initialized before setContentView is called because
         // setContentView initializes the WebView logic which in turn reads the system properties.
@@ -124,8 +106,7 @@ public class CaptivePortalLoginActivity extends Activity {
         getActionBar().setDisplayShowHomeEnabled(false);
 
         // Exit app if Network disappears.
-        final NetworkCapabilities networkCapabilities =
-                ConnectivityManager.from(this).getNetworkCapabilities(network);
+        final NetworkCapabilities networkCapabilities = cm.getNetworkCapabilities(network);
         if (networkCapabilities == null) {
             finish();
             return;
@@ -140,7 +121,7 @@ public class CaptivePortalLoginActivity extends Activity {
         for (int transportType : networkCapabilities.getTransportTypes()) {
             builder.addTransportType(transportType);
         }
-        ConnectivityManager.from(this).registerNetworkCallback(builder.build(), mNetworkCallback);
+        cm.registerNetworkCallback(builder.build(), mNetworkCallback);
 
         final WebView myWebView = (WebView) findViewById(R.id.webview);
         myWebView.clearCache(true);
