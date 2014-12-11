@@ -246,10 +246,8 @@ TrafficStats.tagSocket(outputSocket);
 // Transfer data using socket
 TrafficStats.untagSocket(outputSocket);</pre>
 
-<p>Alternatively, the Apache {@link org.apache.http.client.HttpClient} and 
-{@link java.net.URLConnection} APIs included in the platform
-automatically tag sockets internally based on the active tag (as 
-identified by 
+<p>Alternatively, the {@link java.net.URLConnection} APIs included in the platform
+automatically tag sockets internally based on the active tag (as identified by 
 {@link android.net.TrafficStats#getThreadStatsTag getThreadStatsTag()}).
 These APIs correctly tag/untag sockets when recycled through
 keep-alive pools. In the following example,  
@@ -258,15 +256,14 @@ sets the active tag to be {@code 0xF00D}.
 There can only be one active tag per thread. 
 That is the value that will 
 be returned by {@link android.net.TrafficStats#getThreadStatsTag getThreadStatsTag()}
-and thus used by {@link org.apache.http.client.HttpClient}  
- to tag sockets. The {@code finally} statement 
+and thus used by the HTTP client to tag sockets. The {@code finally} statement 
 invokes 
 {@link android.net.TrafficStats#clearThreadStatsTag clearThreadStatsTag()} 
 to clear the tag.</p>
 
 <pre>TrafficStats.setThreadStatsTag(0xF00D);
     try {
-        // Make network request using HttpClient.execute()
+        // Make network request using your http client.
     } finally {
         TrafficStats.clearThreadStatsTag();
 }</pre>

@@ -52,8 +52,7 @@ android.net.SSLCertificateSocketFactory
 android.net.SSLCertificateSocketFactory}. Rather than using this class, we
 encourage app developers to use high-level methods for interacting with
 cryptography. Most apps can use APIs like {@link
-javax.net.ssl.HttpsURLConnection}, {@link org.apache.http.client.HttpClient},
-and {@link android.net.http.AndroidHttpClient} without needing to set a custom
+javax.net.ssl.HttpsURLConnection} without needing to set a custom
 {@link javax.net.ssl.TrustManager} or create an {@link
 android.net.SSLCertificateSocketFactory}.</p>
 

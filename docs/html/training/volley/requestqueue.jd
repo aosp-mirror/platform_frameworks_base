@@ -39,14 +39,14 @@ as a singleton, which makes the {@code RequestQueue} last the lifetime of your a
 of the requests, and a cache to handle caching. There are standard implementations of these
 available in the Volley toolbox: {@code DiskBasedCache} provides a one-file-per-response
 cache with an in-memory index, and {@code BasicNetwork} provides a network transport based
-on your choice of {@link android.net.http.AndroidHttpClient} or {@link java.net.HttpURLConnection}.</p>
+on your choice of the Apache HTTP client {@code android.net.http.AndroidHttpClient} or
+{@link java.net.HttpURLConnection}.</p>
 
 <p>{@code BasicNetwork} is Volley's default network implementation. A {@code BasicNetwork}
 must be initialized with the HTTP client your app is using to connect to the network.
-Typically this is {@link android.net.http.AndroidHttpClient} or
-{@link java.net.HttpURLConnection}:</p>
+Typically this is a {@link java.net.HttpURLConnection}:</p>
 <ul>
-<li>Use {@link android.net.http.AndroidHttpClient} for apps targeting Android API levels
+<li>Use {@code android.net.http.AndroidHttpClient} for apps targeting Android API levels
 lower than API Level 9 (Gingerbread). Prior to Gingerbread, {@link java.net.HttpURLConnection}
 was unreliable. For more discussion of this topic, see
 <a href="http://android-developers.blogspot.com/2011/09/androids-http-clients.html">
