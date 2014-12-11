@@ -75,7 +75,7 @@ android { ... }
 dependencies {
     ...
     wearApp project(':wear')
-    compile 'com.google.android.gms:play-services:6.1.+'
+    compile 'com.google.android.gms:play-services:6.5.+'
 }
 </pre>
 
@@ -90,7 +90,7 @@ android { ... }
 dependencies {
     ...
     compile 'com.google.android.support:wearable:1.1.+'
-    compile 'com.google.android.gms:play-services-wearable:6.1.+'
+    compile 'com.google.android.gms:play-services-wearable:6.5.+'
 }
 </pre>
 
@@ -183,7 +183,7 @@ public class AnalogWatchFaceService extends CanvasWatchFaceService {
         }
 
         &#64;Override
-        public void onDraw(Canvas canvas) {
+        public void onDraw(Canvas canvas, Rect bounds) {
             /* draw your watch face */
         }
 
