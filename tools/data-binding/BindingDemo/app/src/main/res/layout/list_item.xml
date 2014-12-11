@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:bind_var="http://schemas.android.com/apk/res-auto"
+    card_view:cardUseCompatPadding="true"
+    card_view:contentPadding="8dp"
+    android:orientation="horizontal" android:layout_width="wrap_content"
+    bind_var:user="com.birbit.android.bindingdemo.vo.User"
+    bind_var:clickListener="android.view.View.OnClickListener"
+    android:id="@+id/root"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    bind:onClickListener="clickListener"
+    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/user_photo"
+        bind:backgroundResource="user.photoResource"
+        android:scaleType="fitCenter"
+        android:layout_width="@dimen/user_photo"
+        android:layout_height="@dimen/user_photo" />
+
+    <TextView
+        android:layout_marginLeft="@dimen/user_name_margin_left"
+        android:id="@+id/fullname"
+        android:gravity="center"
+        bind:text="user.name.substring(0,1).toUpperCase() + &quot;. &quot; + user.lastName"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
+</android.support.v7.widget.CardView>

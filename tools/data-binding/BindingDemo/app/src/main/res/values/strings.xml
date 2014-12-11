@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BindingDemo</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="toolkitty_list">toolkitties</string>
+    <string name="became_robot">%s joined robots</string>
+    <string name="became_kitten">%s joined tool kitties</string>
+    <string name="toolkitties">%s ToolKitties</string>
+
+</resources>

@@ -11,9 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by yboyar on 11/8/14.
- */
 abstract public class ViewDataBinder {
     WeakReferencedListener[] mLocalFieldObservers;
     protected abstract boolean onFieldChange(int mLocalFieldId, Object object, int fieldId);

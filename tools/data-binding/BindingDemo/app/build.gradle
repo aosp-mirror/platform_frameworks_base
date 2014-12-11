@@ -1,0 +1,34 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.birbit.android.databinding'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.1"
+
+    defaultConfig {
+        applicationId "com.birbit.android.bindingdemo"
+        minSdkVersion 15
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21+'
+    compile 'com.birbit.android.databinding:library:0.1-SNAPSHOT@aar'
+    compile 'com.android.support:recyclerview-v7:21+'
+    compile 'com.android.support:gridlayout-v7:21+'
+    compile 'com.android.support:cardview-v7:21+'
+}
