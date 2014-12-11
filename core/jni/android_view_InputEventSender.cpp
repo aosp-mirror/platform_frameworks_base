@@ -204,7 +204,7 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
 
             if (kDebugDispatchCycle) {
                 ALOGD("channel '%s' ~ Received finished signal, seq=%u, handled=%s, "
-                        "pendingEvents=%u.",
+                        "pendingEvents=%zu.",
                         getInputChannelName(), seq, handled ? "true" : "false",
                         mPublishedSeqMap.size());
             }

@@ -93,7 +93,7 @@ class JavaDataSourceBridge : public DataSource {
         env->GetByteArrayRegion(byteArrayObj, 0, size, (jbyte*) buffer);
         env->DeleteLocalRef(byteArrayObj);
         if (env->ExceptionCheck()) {
-            ALOGW("Exception occurred while reading %zu at %lld", size, offset);
+            ALOGW("Exception occurred while reading %zu at %lld", size, (long long)offset);
             LOGW_EX(env);
             env->ExceptionClear();
             return -1;

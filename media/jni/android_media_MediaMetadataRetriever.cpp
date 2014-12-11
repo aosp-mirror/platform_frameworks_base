@@ -229,7 +229,7 @@ static void rotate(T *dst, const T *src, size_t width, size_t height, int angle)
 
 static jobject android_media_MediaMetadataRetriever_getFrameAtTime(JNIEnv *env, jobject thiz, jlong timeUs, jint option)
 {
-    ALOGV("getFrameAtTime: %lld us option: %d", timeUs, option);
+    ALOGV("getFrameAtTime: %lld us option: %d", (long long)timeUs, option);
     MediaMetadataRetriever* retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");

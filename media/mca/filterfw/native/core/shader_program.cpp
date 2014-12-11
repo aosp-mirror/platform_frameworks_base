@@ -315,7 +315,7 @@ GLuint ShaderProgram::CompileShader(GLenum shader_type, const char* source) {
       size_t next_pos = 0;
       size_t line_number = 1;
       while ( (next_pos = src.find_first_of('\n', cur_pos)) != std::string::npos) {
-        ALOGE("%03d : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
+        ALOGE("%03zd : %s", line_number, src.substr(cur_pos, next_pos-cur_pos).c_str());
         cur_pos = next_pos + 1;
         line_number++;
       }
@@ -435,7 +435,7 @@ bool ShaderProgram::BindInputTextures(const std::vector<GLuint>& textures,
     if (tex_var >= 0) {
       glUniform1i(tex_var, i);
     } else {
-      ALOGE("ShaderProgram: Shader does not seem to support %d number of "
+      ALOGE("ShaderProgram: Shader does not seem to support %zd number of "
            "inputs! Missing uniform 'tex_sampler_%d'!", textures.size(), i);
       return false;
     }
