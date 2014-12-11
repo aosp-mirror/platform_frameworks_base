@@ -52,12 +52,12 @@ using namespace android;
  * Convert from RGB 888 to Y'CbCr using the conversion specified in JFIF v1.02
  */
 static void rgbToYuv420(uint8_t* rgbBuf, size_t width, size_t height, uint8_t* yPlane,
-        uint8_t* uPlane, uint8_t* vPlane, size_t chromaStep, size_t yStride, size_t chromaStride) {
+        uint8_t* crPlane, uint8_t* cbPlane, size_t chromaStep, size_t yStride, size_t chromaStride) {
     uint8_t R, G, B;
     size_t index = 0;
     for (size_t j = 0; j < height; j++) {
-        uint8_t* u = uPlane;
-        uint8_t* v = vPlane;
+        uint8_t* cr = crPlane;
+        uint8_t* cb = cbPlane;
         uint8_t* y = yPlane;
         bool jEven = (j & 1) == 0;
         for (size_t i = 0; i < width; i++) {
@@ -66,18 +66,18 @@ static void rgbToYuv420(uint8_t* rgbBuf, size_t width, size_t height, uint8_t* y
             B = rgbBuf[index++];
             *y++ = (77 * R + 150 * G +  29 * B) >> 8;
             if (jEven && (i & 1) == 0) {
-                *v = (( -43 * R - 85 * G + 128 * B) >> 8) + 128;
-                *u = (( 128 * R - 107 * G - 21 * B) >> 8) + 128;
-                u += chromaStep;
-                v += chromaStep;
+                *cb = (( -43 * R - 85 * G + 128 * B) >> 8) + 128;
+                *cr = (( 128 * R - 107 * G - 21 * B) >> 8) + 128;
+                cr += chromaStep;
+                cb += chromaStep;
             }
             // Skip alpha
             index++;
         }
         yPlane += yStride;
         if (jEven) {
-            uPlane += chromaStride;
-            vPlane += chromaStride;
+            crPlane += chromaStride;
+            cbPlane += chromaStride;
         }
     }
 }
