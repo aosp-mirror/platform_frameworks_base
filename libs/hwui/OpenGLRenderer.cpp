@@ -2049,7 +2049,7 @@ status_t OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, i
     }
 
     mCaches.activeTexture(0);
-    Texture* texture = mCaches.assetAtlas.getEntryTexture(bitmap);
+    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
     const UvMapper& mapper(getMapper(texture));
 
     for (int32_t y = 0; y < meshHeight; y++) {
@@ -2232,7 +2232,7 @@ status_t OpenGLRenderer::drawPatch(const SkBitmap* bitmap, const Res_png_9patch*
         return DrawGlInfo::kStatusDone;
     }
 
-    AssetAtlas::Entry* entry = mCaches.assetAtlas.getEntry(bitmap);
+    AssetAtlas::Entry* entry = mRenderState.assetAtlas().getEntry(bitmap);
     const Patch* mesh = mCaches.patchCache.get(entry, bitmap->width(), bitmap->height(),
             right - left, bottom - top, patch);
 
@@ -3028,7 +3028,7 @@ const SkPaint* OpenGLRenderer::filterPaint(const SkPaint* paint) {
 ///////////////////////////////////////////////////////////////////////////////
 
 Texture* OpenGLRenderer::getTexture(const SkBitmap* bitmap) {
-    Texture* texture = mCaches.assetAtlas.getEntryTexture(bitmap);
+    Texture* texture = mRenderState.assetAtlas().getEntryTexture(bitmap);
     if (!texture) {
         return mCaches.textureCache.get(bitmap);
     }
