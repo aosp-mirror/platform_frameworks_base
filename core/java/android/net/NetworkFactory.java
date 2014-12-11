@@ -274,4 +274,12 @@ public class NetworkFactory extends Handler {
     protected void log(String s) {
         Log.d(LOG_TAG, s);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("{").append(LOG_TAG).append(" - ScoreFilter=").
+                append(mScore).append(", Filter=").append(mCapabilityFilter).append(", requests=").
+                append(mNetworkRequests.size()).append("}");
+        return sb.toString();
+    }
 }
