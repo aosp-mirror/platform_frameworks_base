@@ -1456,6 +1456,32 @@ public class RadialTimePickerView extends View implements View.OnTouchListener {
 
             final boolean selected = isVirtualViewSelected(type, value);
             node.setSelected(selected);
+
+            final int nextId = getVirtualViewIdAfter(type, value);
+            if (nextId != INVALID_ID) {
+                node.setTraversalBefore(RadialTimePickerView.this, nextId);
+            }
+        }
+
+        private int getVirtualViewIdAfter(int type, int value) {
+            if (type == TYPE_HOUR) {
+                final int nextValue = value + 1;
+                final int max = mIs24HourMode ? 23 : 12;
+                if (nextValue <= max) {
+                    return makeId(type, nextValue);
+                }
+            } else if (type == TYPE_MINUTE) {
+                final int current = getCurrentMinute();
+                final int snapValue = value - (value % MINUTE_INCREMENT);
+                final int nextValue = snapValue + MINUTE_INCREMENT;
+                if (value < current && nextValue > current) {
+                    // The current value is between two snap values.
+                    return makeId(type, current);
+                } else if (nextValue < 60) {
+                    return makeId(type, nextValue);
+                }
+            }
+            return INVALID_ID;
         }
 
         @Override
