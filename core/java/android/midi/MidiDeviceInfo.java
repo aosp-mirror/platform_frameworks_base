@@ -50,10 +50,6 @@ public class MidiDeviceInfo implements Parcelable {
     private final int mOutputPortCount;
     private final Bundle mProperties;
 
-    // used for USB devices only
-    private final int mAlsaCard;
-    private final int mAlsaDevice;
-
     /**
      * Bundle key for the device's manufacturer name property.
      * Used with the {@link android.os.Bundle} returned by {@link #getProperties}.
@@ -83,6 +79,20 @@ public class MidiDeviceInfo implements Parcelable {
     public static final String PROPERTY_USB_DEVICE = "usb_device";
 
     /**
+     * Bundle key for the device's ALSA card number.
+     * Only set for USB MIDI devices.
+     * Used with the {@link android.os.Bundle} returned by {@link #getProperties}
+     */
+    public static final String PROPERTY_ALSA_CARD = "alsa_card";
+
+    /**
+     * Bundle key for the device's ALSA device number.
+     * Only set for USB MIDI devices.
+     * Used with the {@link android.os.Bundle} returned by {@link #getProperties}
+     */
+    public static final String PROPERTY_ALSA_DEVICE = "alsa_device";
+
+    /**
      * MidiDeviceInfo should only be instantiated by MidiService implementation
      * @hide
      */
@@ -93,23 +103,6 @@ public class MidiDeviceInfo implements Parcelable {
         mInputPortCount = numInputPorts;
         mOutputPortCount = numOutputPorts;
         mProperties = properties;
-        mAlsaCard = -1;
-        mAlsaDevice = -1;
-    }
-
-    /**
-     * MidiDeviceInfo should only be instantiated by MidiService implementation
-     * @hide
-     */
-    public MidiDeviceInfo(int type, int id, int numInputPorts, int numOutputPorts,
-            Bundle properties, int alsaCard, int alsaDevice) {
-        mType = type;
-        mId = id;
-        mInputPortCount = numInputPorts;
-        mOutputPortCount = numOutputPorts;
-        mProperties = properties;
-        mAlsaCard = alsaCard;
-        mAlsaDevice = alsaDevice;
     }
 
     /**
@@ -158,20 +151,6 @@ public class MidiDeviceInfo implements Parcelable {
         return mProperties;
     }
 
-    /**
-     * @hide
-     */
-    public int getAlsaCard() {
-        return mAlsaCard;
-    }
-
-    /**
-     * @hide
-     */
-    public int getAlsaDevice() {
-        return mAlsaDevice;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o instanceof MidiDeviceInfo) {
@@ -191,9 +170,7 @@ public class MidiDeviceInfo implements Parcelable {
         return ("MidiDeviceInfo[mType=" + mType +
                 ",mInputPortCount=" + mInputPortCount +
                 ",mOutputPortCount=" + mOutputPortCount +
-                ",mProperties=" + mProperties +
-                ",mAlsaCard=" + mAlsaCard +
-                ",mAlsaDevice=" + mAlsaDevice);
+                ",mProperties=" + mProperties);
     }
 
     public static final Parcelable.Creator<MidiDeviceInfo> CREATOR =
@@ -204,9 +181,7 @@ public class MidiDeviceInfo implements Parcelable {
             int inputPorts = in.readInt();
             int outputPorts = in.readInt();
             Bundle properties = in.readBundle();
-            int card = in.readInt();
-            int device = in.readInt();
-            return new MidiDeviceInfo(type, id, inputPorts, outputPorts, properties, card, device);
+            return new MidiDeviceInfo(type, id, inputPorts, outputPorts, properties);
         }
 
         public MidiDeviceInfo[] newArray(int size) {
@@ -224,7 +199,5 @@ public class MidiDeviceInfo implements Parcelable {
         parcel.writeInt(mInputPortCount);
         parcel.writeInt(mOutputPortCount);
         parcel.writeBundle(mProperties);
-        parcel.writeInt(mAlsaCard);
-        parcel.writeInt(mAlsaDevice);
    }
 }

@@ -16,6 +16,10 @@
 
 package android.midi;
 
+import android.os.ParcelFileDescriptor;
+
+import libcore.io.IoUtils;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -24,15 +28,16 @@ import java.io.IOException;
  *
  * @hide
  */
-public final class MidiInputPort extends MidiPort implements MidiReceiver {
+public class MidiInputPort extends MidiPort implements MidiReceiver {
 
     private final FileOutputStream mOutputStream;
-    // buffer to use for sending messages out our output stream
-    private final byte[] mBuffer = new byte[MidiDevice.MAX_PACKED_MESSAGE_SIZE];
 
-  /* package */ MidiInputPort(FileOutputStream outputStream, int portNumber) {
+    // buffer to use for sending messages out our output stream
+    private final byte[] mBuffer = new byte[MAX_PACKED_MESSAGE_SIZE];
+
+  /* package */ MidiInputPort(ParcelFileDescriptor pfd, int portNumber) {
         super(portNumber);
-        mOutputStream = outputStream;
+        mOutputStream = new ParcelFileDescriptor.AutoCloseOutputStream(pfd);
     }
 
     /**
@@ -46,9 +51,20 @@ public final class MidiInputPort extends MidiPort implements MidiReceiver {
      */
     public void onPost(byte[] msg, int offset, int count, long timestamp) throws IOException {
         synchronized (mBuffer) {
-            int length = MidiDevice.packMessage(msg, offset, count, timestamp, getPortNumber(),
-                    mBuffer);
-            mOutputStream.write(mBuffer, 0, length);
+            int length = packMessage(msg, offset, count, timestamp, mBuffer);
+            try {
+                mOutputStream.write(mBuffer, 0, length);
+            } catch (IOException e) {
+                IoUtils.closeQuietly(mOutputStream);
+                // report I/O failure
+                onIOException();
+                throw e;
+            }
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        mOutputStream.close();
     }
 }

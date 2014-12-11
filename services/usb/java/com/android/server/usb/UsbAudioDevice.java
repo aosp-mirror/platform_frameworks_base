@@ -24,7 +24,6 @@ public final class UsbAudioDevice {
     public int mDevice;
     public boolean mHasPlayback;
     public boolean mHasCapture;
-    public boolean mHasMIDI;
 
     // Device "class" flags
     public static final int kAudioDeviceClassMask = 0x00FFFFFF;
@@ -41,12 +40,11 @@ public final class UsbAudioDevice {
     public String mDeviceDescription = "";
 
     public UsbAudioDevice(int card, int device,
-            boolean hasPlayback, boolean hasCapture, boolean hasMidi, int deviceClass) {
+            boolean hasPlayback, boolean hasCapture, int deviceClass) {
         mCard = card;
         mDevice = device;
         mHasPlayback = hasPlayback;
         mHasCapture = hasCapture;
-        mHasMIDI = hasMidi;
         mDeviceClass = deviceClass;
     }
 
@@ -58,7 +56,6 @@ public final class UsbAudioDevice {
         sb.append(", description: " + mDeviceDescription);
         sb.append(", hasPlayback: " + mHasPlayback);
         sb.append(", hasCapture: " + mHasCapture);
-        sb.append(", hasMidi: " + mHasMIDI);
         sb.append(", class: 0x" + Integer.toHexString(mDeviceClass) + "]");
         return sb.toString();
     }

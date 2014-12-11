@@ -16,13 +16,11 @@
 
 package android.midi;
 
-import android.hardware.usb.UsbDevice;
+import android.midi.IMidiDeviceServer;
 import android.midi.IMidiListener;
-import android.midi.MidiDevice;
 import android.midi.MidiDeviceInfo;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.ParcelFileDescriptor;
 
 /** @hide */
 interface IMidiManager
@@ -34,14 +32,10 @@ interface IMidiManager
     void unregisterListener(IBinder token, in IMidiListener listener);
 
     // for communicating with MIDI devices
-    ParcelFileDescriptor openDevice(IBinder token, in MidiDeviceInfo device);
+    IMidiDeviceServer openDevice(IBinder token, in MidiDeviceInfo device);
 
     // for implementing virtual MIDI devices
-    MidiDevice registerVirtualDevice(IBinder token, int numInputPorts, int numOutputPorts,
-            in Bundle properties);
-    void unregisterVirtualDevice(IBinder token, in MidiDeviceInfo device);
-
-    // for use by UsbAudioManager
-    void alsaDeviceAdded(int card, int device, in UsbDevice usbDevice);
-    void alsaDeviceRemoved(in UsbDevice usbDevice);
+    MidiDeviceInfo registerDeviceServer(in IMidiDeviceServer server, int numInputPorts,
+            int numOutputPorts, in Bundle properties, boolean isPrivate, int type);
+    void unregisterDeviceServer(in IMidiDeviceServer server);
 }
