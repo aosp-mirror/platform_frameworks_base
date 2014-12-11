@@ -260,7 +260,8 @@ public class ProxyInfo implements Parcelable {
         if (!Uri.EMPTY.equals(mPacFileUrl)) {
             sb.append("PAC Script: ");
             sb.append(mPacFileUrl);
-        } else if (mHost != null) {
+        }
+        if (mHost != null) {
             sb.append("[");
             sb.append(mHost);
             sb.append("] ");

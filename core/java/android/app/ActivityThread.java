@@ -44,7 +44,10 @@ import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.hardware.display.DisplayManagerGlobal;
+import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
+import android.net.LinkProperties;
+import android.net.Network;
 import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -839,7 +842,13 @@ public final class ActivityThread {
         }
 
         public void setHttpProxy(String host, String port, String exclList, Uri pacFileUrl) {
-            Proxy.setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
+            final Network network = ConnectivityManager.getProcessDefaultNetwork();
+            if (network != null) {
+                Proxy.setHttpProxySystemProperty(
+                        ConnectivityManager.from(getSystemContext()).getDefaultProxy());
+            } else {
+                Proxy.setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
+            }
         }
 
         public void processInBackground() {
@@ -4430,7 +4439,7 @@ public final class ActivityThread {
             // crash if we can't get it.
             IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
             try {
-                ProxyInfo proxyInfo = service.getProxy();
+                final ProxyInfo proxyInfo = service.getDefaultProxy();
                 Proxy.setHttpProxySystemProperty(proxyInfo);
             } catch (RemoteException e) {}
         }
