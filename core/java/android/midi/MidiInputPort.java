@@ -38,14 +38,15 @@ public final class MidiInputPort extends MidiPort implements MidiReceiver {
     /**
      * Writes a MIDI message to the input port
      *
-     * @param msg message bytes
-     * @param offset offset of first byte of the message in msg array
+     * @param msg byte array containing the message
+     * @param offset offset of first byte of the message in msg byte array
      * @param count size of the message in bytes
-     * @param timestamp future time to post the message
+     * @param timestamp future time to post the message (based on
+     *                  {@link java.lang.System#nanoTime}
      */
     public void onPost(byte[] msg, int offset, int count, long timestamp) throws IOException {
         synchronized (mBuffer) {
-            int length = MidiDevice.packMessage(msg, offset, count, timestamp, mPortNumber,
+            int length = MidiDevice.packMessage(msg, offset, count, timestamp, getPortNumber(),
                     mBuffer);
             mOutputStream.write(mBuffer, 0, length);
         }

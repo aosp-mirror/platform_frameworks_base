@@ -32,11 +32,22 @@ public final class MidiOutputPort extends MidiPort implements MidiSender {
         mDevice = device;
     }
 
+    /**
+     * Connects a {@link MidiReceiver} to the output port to allow receiving
+     * MIDI messages from the port.
+     *
+     * @param receiver the receiver to connect
+     */
     public void connect(MidiReceiver receiver) {
-        mDevice.connect(receiver, mPortNumber);
+        mDevice.connect(receiver, getPortNumber());
     }
 
+    /**
+     * Disconnects a {@link MidiReceiver} from the output port.
+     *
+     * @param receiver the receiver to connect
+     */
     public void disconnect(MidiReceiver receiver) {
-        mDevice.disconnect(receiver, mPortNumber);
+        mDevice.disconnect(receiver, getPortNumber());
     }
 }

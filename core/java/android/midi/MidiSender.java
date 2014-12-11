@@ -23,6 +23,17 @@ package android.midi;
  * @hide
  */
 public interface MidiSender {
+    /**
+     * Called to connect a {@link MidiReceiver} to the sender
+     *
+     * @param receiver the receiver to connect
+     */
     public void connect(MidiReceiver receiver);
+
+    /**
+     * Called to disconnect a {@link MidiReceiver} from the sender
+     *
+     * @param receiver the receiver to disconnect
+     */
     public void disconnect(MidiReceiver receiver);
 }

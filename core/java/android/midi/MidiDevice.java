@@ -140,6 +140,12 @@ public final class MidiDevice implements Parcelable {
         mReceivers = new ArrayList[outputPorts];
     }
 
+    /**
+     * Called to open a {@link MidiInputPort} for the specified port number.
+     *
+     * @param portNumber the number of the input port to open
+     * @return the {@link MidiInputPort}
+     */
     public MidiInputPort openInputPort(int portNumber) {
         if (portNumber < 0 || portNumber >= mDeviceInfo.getInputPortCount()) {
             throw new IllegalArgumentException("input port number out of range");
@@ -152,6 +158,12 @@ public final class MidiDevice implements Parcelable {
         }
     }
 
+    /**
+     * Called to open a {@link MidiOutputPort} for the specified port number.
+     *
+     * @param portNumber the number of the output port to open
+     * @return the {@link MidiOutputPort}
+     */
     public MidiOutputPort openOutputPort(int portNumber) {
         if (portNumber < 0 || portNumber >= mDeviceInfo.getOutputPortCount()) {
             throw new IllegalArgumentException("output port number out of range");
@@ -203,7 +215,7 @@ public final class MidiDevice implements Parcelable {
         return true;
     }
 
-    void close() {
+    /* package */ void close() {
         try {
             if (mInputStream != null) {
                 mInputStream.close();
@@ -216,7 +228,11 @@ public final class MidiDevice implements Parcelable {
         }
     }
 
-    // returns our MidiDeviceInfo object, which describes this device
+    /**
+     * Returns a {@link MidiDeviceInfo} object, which describes this device.
+     *
+     * @return the {@link MidiDeviceInfo} object
+     */
     public MidiDeviceInfo getInfo() {
         return mDeviceInfo;
     }
@@ -239,10 +255,12 @@ public final class MidiDevice implements Parcelable {
         }
     };
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mDeviceInfo, flags);
         parcel.writeParcelable(mParcelFileDescriptor, flags);

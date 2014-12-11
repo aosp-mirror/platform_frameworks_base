@@ -20,13 +20,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
- * This class represents a MIDI input or output port
+ * This class represents a MIDI input or output port.
+ * Base class for {@link MidiInputPort} and {@link MidiOutputPort}
  *
  * @hide
  */
 public class MidiPort {
 
-    protected final int mPortNumber;
+    private final int mPortNumber;
 
   /* package */ MidiPort(int portNumber) {
         mPortNumber = portNumber;
@@ -37,7 +38,7 @@ public class MidiPort {
      *
      * @return the port's port number
      */
-    public int getPortNumber() {
+    public final int getPortNumber() {
         return mPortNumber;
     }
 }
