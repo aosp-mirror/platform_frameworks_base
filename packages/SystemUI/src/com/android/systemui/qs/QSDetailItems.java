@@ -51,8 +51,10 @@ public class QSDetailItems extends FrameLayout {
     private boolean mItemsVisible = true;
     private LinearLayout mItems;
     private View mEmpty;
+    private View mMinHeightSpacer;
     private TextView mEmptyText;
     private ImageView mEmptyIcon;
+    private int mMaxItems;
 
     public QSDetailItems(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -77,6 +79,12 @@ public class QSDetailItems extends FrameLayout {
         mEmpty.setVisibility(GONE);
         mEmptyText = (TextView) mEmpty.findViewById(android.R.id.title);
         mEmptyIcon = (ImageView) mEmpty.findViewById(android.R.id.icon);
+        mMinHeightSpacer = findViewById(R.id.min_height_spacer);
+
+        // By default, a detail item view has fixed size.
+        mMaxItems = getResources().getInteger(
+                R.integer.quick_settings_detail_max_item_count);
+        setMinHeightInItems(mMaxItems);
     }
 
     @Override
@@ -100,6 +108,16 @@ public class QSDetailItems extends FrameLayout {
     public void setEmptyState(int icon, int text) {
         mEmptyIcon.setImageResource(icon);
         mEmptyText.setText(text);
+    }
+
+    /**
+     * Set the minimum height of this detail view, in item count.
+     */
+    public void setMinHeightInItems(int minHeightInItems) {
+        ViewGroup.LayoutParams lp = mMinHeightSpacer.getLayoutParams();
+        lp.height = minHeightInItems * getResources().getDimensionPixelSize(
+                R.dimen.qs_detail_item_height);
+        mMinHeightSpacer.setLayoutParams(lp);
     }
 
     @Override
@@ -135,7 +153,7 @@ public class QSDetailItems extends FrameLayout {
     }
 
     private void handleSetItems(Item[] items) {
-        final int itemCount = items != null ? items.length : 0;
+        final int itemCount = items != null ? Math.min(items.length, mMaxItems) : 0;
         mEmpty.setVisibility(itemCount == 0 ? VISIBLE : GONE);
         mItems.setVisibility(itemCount == 0 ? GONE : VISIBLE);
         for (int i = mItems.getChildCount() - 1; i >= itemCount; i--) {
