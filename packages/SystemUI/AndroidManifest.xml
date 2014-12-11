@@ -197,6 +197,7 @@
         <!-- Alternate Recents -->
         <activity android:name=".recents.RecentsActivity"
                   android:label="@string/accessibility_desc_recent_apps"
+                  android:exported="false"
                   android:launchMode="singleInstance"
                   android:excludeFromRecents="true"
                   android:stateNotNeeded="true"
@@ -206,6 +207,17 @@
                 <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".recents.RecentsUserEventProxyReceiver"
+                  android:exported="false">
+            <intent-filter>
+                <action android:name="com.android.systemui.recents.action.SHOW_RECENTS_FOR_USER" />
+                <action android:name="com.android.systemui.recents.action.HIDE_RECENTS_FOR_USER" />
+                <action android:name="com.android.systemui.recents.action.TOGGLE_RECENTS_FOR_USER" />
+                <action android:name="com.android.systemui.recents.action.PRELOAD_RECENTS_FOR_USER" />
+                <action android:name="com.android.systemui.recents.action.CONFIG_CHANGED_FOR_USER" />
+            </intent-filter>
+        </receiver>
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"

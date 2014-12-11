@@ -49,14 +49,12 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.IWindowManager;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -393,6 +391,15 @@ public class SystemServicesProxy {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns whether the foreground user is the owner.
+     */
+    public boolean isForegroundUserOwner() {
+        if (mAm == null) return false;
+
+        return mAm.getCurrentUser() == UserHandle.USER_OWNER;
     }
 
     /**
