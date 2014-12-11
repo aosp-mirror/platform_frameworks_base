@@ -305,7 +305,7 @@ static void
 android_media_MediaRecorder_setMaxFileSize(
         JNIEnv *env, jobject thiz, jlong max_filesize_bytes)
 {
-    ALOGV("setMaxFileSize(%lld)", max_filesize_bytes);
+    ALOGV("setMaxFileSize(%lld)", (long long)max_filesize_bytes);
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
 
     char params[64];
