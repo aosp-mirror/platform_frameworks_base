@@ -480,7 +480,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 r.callerUid = callerUid;
                 // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
                 // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
-                if (!SubscriptionManager.isValidSubId(subId)) {
+                if (!SubscriptionManager.isValidSubscriptionId(subId)) {
                     r.subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
                  } else {//APP specify subID
                     r.subId = subId;
