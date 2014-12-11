@@ -234,8 +234,8 @@ new virtual devices for running your app in the emulator.</p>
 
 <p>The AVD Manager comes with emulators for Nexus 6 and Nexus 9 devices and also supports
 creating custom Android device skins based on specific emulator properties and assigning those
-skins to hardware profiles. Android Studio installs the the Intel x86 Emulator Accelerator (HAXM)
-and creates a default emulator for quick app prototyping.</p>
+skins to hardware profiles. Android Studio installs the Intel&#174; x86 Hardware Accelerated Execution
+Manager (HAXM) emulator accelerator and creates a default emulator for quick app prototyping.</p>
 
 <p>For more information, see <a href="{@docRoot}tools/devices/managing-avds.html">Managing AVDs</a>.</p>
 
@@ -333,7 +333,7 @@ controlling device behaviors, and more. It also includes the Hierarchy Viewer to
 <p>An updated installation and setup wizards walk you through a step-by-step installation
 and setup process as the wizard checks for system requirements, such as the Java Development
 Kit (JDK) and available RAM, and then prompts for optional installation options, such as the
-Intel &#174; HAXM accelerator.</p>
+Intel&#174; HAXM emulator accelerator.</p>
 
 <p>An updated setup wizard walks you through the setup processes as
 the wizard updates your system image and emulation requirements, such GPU, and then creates
@@ -385,7 +385,7 @@ code-level preference:
 
 
 
-<h2 id="other">Other Highlights/h2>
+<h2 id="other">Other Highlights</h2>
 
 <h3> Translation Editor</h3>
 <p>Multi-language support is enhanced with the Translation Editor plugin so you can easily add
@@ -413,5 +413,5 @@ and &lt;animated-selector&gt;, are supported.</p>
 <p>Clicking <strong>Import Samples</strong> from the <strong>File</strong> menu or Welcome page
 provides seamless access to Google code samples on GitHub.</p>
     <p><img src="{@docRoot}images/tools/studio-samples-githubaccess.png" /></p>
-    <p class="img-caption"><strong>Figure 12.</strong> Code Sample Access/p>
+    <p class="img-caption"><strong>Figure 12.</strong> Code Sample Access</p>
 
