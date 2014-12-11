@@ -269,6 +269,7 @@ public class ImsCallProfile implements Parcelable {
     public String toString() {
         return "{ serviceType=" + mServiceType +
                 ", callType=" + mCallType +
+                ", restrictCause=" + mRestrictCause +
                 ", callExtras=" + mCallExtras.toString() +
                 ", mediaProfile=" + mMediaProfile.toString() + " }";
     }
