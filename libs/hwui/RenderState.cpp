@@ -38,6 +38,7 @@ void RenderState::onGLContextCreated() {
     mCaches = &Caches::getInstance();
     mCaches->init();
     mCaches->setRenderState(this);
+    mCaches->textureCache.setAssetAtlas(&mAssetAtlas);
 }
 
 void RenderState::onGLContextDestroyed() {
@@ -72,6 +73,7 @@ void RenderState::onGLContextDestroyed() {
         LOG_ALWAYS_FATAL("%d layers have survived gl context destruction", size);
     }
 */
+    mAssetAtlas.terminate();
 }
 
 void RenderState::setViewport(GLsizei width, GLsizei height) {

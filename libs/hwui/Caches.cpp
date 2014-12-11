@@ -237,8 +237,6 @@ void Caches::terminate() {
     programCache.clear();
     currentProgram = NULL;
 
-    assetAtlas.terminate();
-
     patchCache.clear();
 
     clearGarbage();

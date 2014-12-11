@@ -175,7 +175,8 @@ void EglManager::setTextureAtlas(const sp<GraphicBuffer>& buffer,
 
 void EglManager::initAtlas() {
     if (mAtlasBuffer.get()) {
-        Caches::getInstance().assetAtlas.init(mAtlasBuffer, mAtlasMap, mAtlasMapSize);
+        mRenderThread.renderState().assetAtlas().init(mAtlasBuffer,
+                mAtlasMap, mAtlasMapSize);
     }
 }
 
