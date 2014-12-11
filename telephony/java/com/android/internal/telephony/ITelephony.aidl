@@ -792,6 +792,27 @@ interface ITelephony {
     boolean setOperatorBrandOverride(String brand);
 
     /**
+     * Override the roaming indicator for the current ICCID.
+     *
+     * Using this call, the carrier app (see #hasCarrierPrivileges) can override
+     * the platform's notion of a network operator being considered roaming or not.
+     * The change only affects the ICCID that was active when this call was made.
+     *
+     * If null is passed as any of the input, the corresponding value is deleted.
+     *
+     * <p>Requires that the caller have carrier privilege. See #hasCarrierPrivileges.
+     *
+     * @param gsmRoamingList - List of MCCMNCs to be considered roaming for 3GPP RATs.
+     * @param gsmNonRoamingList - List of MCCMNCs to be considered not roaming for 3GPP RATs.
+     * @param cdmaRoamingList - List of SIDs to be considered roaming for 3GPP2 RATs.
+     * @param cdmaNonRoamingList - List of SIDs to be considered not roaming for 3GPP2 RATs.
+     * @return true if the operation was executed correctly.
+     */
+    boolean setRoamingOverride(in List<String> gsmRoamingList,
+            in List<String> gsmNonRoamingList, in List<String> cdmaRoamingList,
+            in List<String> cdmaNonRoamingList);
+
+    /**
      * Returns the result and response from RIL for oem request
      *
      * @param oemReq the data is sent to ril.
