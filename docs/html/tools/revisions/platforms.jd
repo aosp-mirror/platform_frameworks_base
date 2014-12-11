@@ -59,6 +59,22 @@ packages may not be available for download.</p>
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />Revision 2</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <p>Updated layouts in the Support Library and fixed various issues.</p>
+    <p>Dependencies:</p>
+    <ul>
+      <li>Android SDK Platform-tools r21 or higher is required.</li>
+      <li>Android SDK Tools 23.0.5 or higher is required.</li>
+    </ul>
+  </div>
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png"
 class="toggle-content-img" alt="" />Revision 1</a> <em>(October 2014)</em>
   </p>
 
