@@ -1,0 +1,69 @@
+
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.14.2'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1"
+
+    defaultConfig {
+        applicationId "com.android.databinding.library"
+        minSdkVersion 7
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    buildTypes {
+        release {
+            runProguard false
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+//create jar tasks
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+
+    if (name.equals("debug")) {
+        return; // Skip debug builds.
+    }
+    def suffix = name.capitalize()
+
+//    def sourcesJarTask = project.tasks.create(name: "sourceJar${suffix}", type: Jar) {
+//        classifier = 'sources'
+//        from android.sourceSets.main.java
+//    }
+//
+//    artifacts.add('archives', sourcesJarTask);
+}
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: mavenLocal().url)
+            pom.version = '0.1-SNAPSHOT'
+            pom.artifactId = 'library'
+            pom.groupId='com.android.databinding'
+        }
+    }
+}

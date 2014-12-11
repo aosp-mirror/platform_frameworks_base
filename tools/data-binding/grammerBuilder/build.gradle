@@ -1,0 +1,49 @@
+apply plugin: 'java'
+apply plugin:'application'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.5
+version = '1.0'
+
+mainClassName = "org.antlr.v4.Tool"
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+
+repositories {
+    mavenCentral()
+}
+
+run {
+    args "DataBinder.g4", "-visitor", "-o", "src/main/java-gen/com/android/databinding", "-package", "com.android.databinding"
+}
+
+dependencies {
+    testCompile 'junit:junit:4.11'
+    compile 'com.tunnelvisionlabs:antlr4:4.4'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+            srcDir 'src/main/java-gen'
+        }
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: mavenLocal().url)
+            pom.version = '0.1-SNAPSHOT'
+            pom.artifactId = 'grammerBuilder'
+            pom.groupId='com.android.databinding'
+        }
+    }
+}

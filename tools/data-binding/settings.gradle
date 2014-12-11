@@ -1,0 +1,9 @@
+rootProject.name = 'KDataBinder'
+
+include ':grammerBuilder'
+
+include 'library'
+
+include 'compiler'
+include 'gradlePlugin'
+
