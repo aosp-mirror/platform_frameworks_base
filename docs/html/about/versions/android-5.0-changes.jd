@@ -1,4 +1,4 @@
-page.title=Android 5.0 Changes
+page.title=Android 5.0 Behavior Changes
 excludeFromSuggestions=true
 sdk.platform.version=5.0
 sdk.platform.apiLevel=21
@@ -20,6 +20,7 @@ sdk.platform.apiLevel=21
   <li><a href="#Power"><a href="#BehaviorWebView">WebView</a></a></li>
   <li><a href="#custom_permissions">Custom Permissions</a></li>
   <li><a href="#ssl">TLS/SSL Configuration</a></li>
+  <li><a href="#managed_profiles">Support for Managed Profiles</a></li>
 </ol>
 
 <h2>API Differences</h2>
@@ -40,9 +41,8 @@ sdk.platform.apiLevel=21
 </div>
 
 <p>API Level: {@sdkPlatformApiLevel}</p>
-<p>Along with new features and capabilities, Android 5.0 includes a variety of changes
-API changes,
-behavior changes, system enhancements, and bug fixes. This document highlights
+<p>Along with new features and capabilities, Android 5.0 includes a variety of
+system changes and API behavior changes. This document highlights
 some of the key changes that you should be understand and account for in your apps.</p>
 
 <p>If you have previously published an app for Android, be aware that your app
@@ -523,3 +523,63 @@ methods respectively.</li>
   SSLSocket instances with only those protocols enabled which are correctly
   supported by the server.
 </p>
+
+<h2 id="managed_profiles">Support for Managed Profiles</h2>
+
+<p>
+  Device administrators can add a <em>managed profile</em> to a device. This
+  profile is owned by the administrator, giving the administrator control
+  over the managed profile while leaving the user's personal profile, and its
+  storage space, under the user's control.
+  This change can affect the behavior of your existing app in
+  the following ways.</p>
+
+<h3 id="mg_profile_intents">Handling intents</h3>
+
+<p>Device administrators can restrict access to system applications from the
+managed profile. In this case, if an app fires an intent from the managed
+profile that would ordinarily be handled by that application, and there is no
+suitable handler for the intent on the managed profile,
+the intent causes an exception. For example, the
+device administrator can restrict apps on the managed profile from accessing
+the system's camera application. If your app is running on the managed profile
+and calls {@link
+android.app.Activity#startActivityForResult startActivityForResult()} for {@link
+android.provider.MediaStore#ACTION_IMAGE_CAPTURE
+MediaStore.ACTION_IMAGE_CAPTURE}, and there is no app on the managed profile
+that can handle the intent, this results in an {@link
+android.content.ActivityNotFoundException}.</p>
+
+<p>You can prevent this by checking
+that there is at least one handler for any intent
+before firing it. To check for a valid handler, call {@link
+android.content.Intent#resolveActivity Intent.resolveActivity()}. You can see
+an example of this being done in <a
+href="{@docRoot}training/camera/photobasics.html#TaskCaptureIntent">Take Photos
+Simply: Take a Photo with the Camera App</a>.</p>
+
+<h3 id="mp_profile_file_sharing">Sharing files across profiles</h3>
+
+<p>Each profile has its own file storage. Since a file URI refers to a specific
+location in the file storage, this means that a file URI that is valid on one
+profile is not valid on the other one. This is not ordinarily a problem for an
+app, which usually just accesses the files it creates. However, if an app
+attaches a file to an intent, it is not safe to attach a file URI, since in some
+circumstances, the intent might be handled on the other profile.
+For example, a device administrator might specify that image capture events
+should be handled by the camera app on the personal profile. If the intent is
+fired by an app on the managed profile, the camera needs to be able to write the
+image to a location where the managed profile's apps can read it.</p>
+
+<p>To be safe, when
+you need to attach a file to an intent that might cross from one profile to the
+other, you should create and use a <em>content URI</em> for the file. For more
+information about sharing files with content URIs, see <a
+href="{@docRoot}training/secure-file-sharing/index.html">Sharing Files</a>.
+For example, the device administrator might whitelist {@link
+android.provider.MediaStore#ACTION_IMAGE_CAPTURE ACTION_IMAGE_CAPTURE} to be
+handled by the camera in the personal profile. The firing intent's {@link
+android.provider.MediaStore#EXTRA_OUTPUT EXTRA_OUTPUT} should contain a content
+URI specifying where the photo should be stored. The camera app can write the
+image to the location specified by that URI, and the app that fired the intent
+would be able to read that file, even if the app is on the other profile. </p>
