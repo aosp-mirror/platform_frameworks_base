@@ -350,8 +350,6 @@ public:
     Dither dither;
     Stencil stencil;
 
-    AssetAtlas assetAtlas;
-
     bool gpuPixelBuffersEnabled;
 
     // Debug methods

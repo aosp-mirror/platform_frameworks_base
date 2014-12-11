@@ -25,6 +25,8 @@
 
 #include <private/hwui/DrawGlInfo.h>
 
+#include "AssetAtlas.h"
+#include "Caches.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -77,6 +79,8 @@ public:
     // more thinking...
     void postDecStrong(VirtualLightRefBase* object);
 
+    AssetAtlas& assetAtlas() { return mAssetAtlas; }
+
 private:
     friend class renderthread::RenderThread;
     friend class Caches;
@@ -90,6 +94,7 @@ private:
 
     renderthread::RenderThread& mRenderThread;
     Caches* mCaches;
+    AssetAtlas mAssetAtlas;
     std::set<const Layer*> mActiveLayers;
     std::set<renderthread::CanvasContext*> mRegisteredContexts;
 

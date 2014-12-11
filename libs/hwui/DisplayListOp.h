@@ -35,6 +35,7 @@
 #include "GammaFontRenderer.h"
 #include "Patch.h"
 #include "RenderNode.h"
+#include "RenderState.h"
 #include "UvMapper.h"
 #include "utils/LinearAllocator.h"
 
@@ -611,24 +612,17 @@ public:
     DrawBitmapOp(const SkBitmap* bitmap, const SkPaint* paint)
             : DrawBoundedOp(0, 0, bitmap->width(), bitmap->height(), paint)
             , mBitmap(bitmap)
-            , mAtlas(Caches::getInstance().assetAtlas) {
-        mEntry = mAtlas.getEntry(bitmap);
-        if (mEntry) {
-            mEntryGenerationId = mAtlas.getGenerationId();
-            mUvMapper = mEntry->uvMapper;
-        }
+            , mEntryValid(false), mEntry(NULL) {
     }
 
     virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         renderer.drawBitmap(mBitmap, mPaint);
     }
 
-    AssetAtlas::Entry* getAtlasEntry() {
-        // The atlas entry is stale, let's get a new one
-        if (mEntry && mEntryGenerationId != mAtlas.getGenerationId()) {
-            mEntryGenerationId = mAtlas.getGenerationId();
-            mEntry = mAtlas.getEntry(mBitmap);
-            mUvMapper = mEntry->uvMapper;
+    AssetAtlas::Entry* getAtlasEntry(OpenGLRenderer& renderer) {
+        if (!mEntryValid) {
+            mEntryValid = true;
+            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap);
         }
         return mEntry;
     }
@@ -664,7 +658,7 @@ public:
             pureTranslate &= state.mMatrix.isPureTranslate();
 
             Rect texCoords(0, 0, 1, 1);
-            ((DrawBitmapOp*) ops[i].op)->mUvMapper.map(texCoords);
+            ((DrawBitmapOp*) ops[i].op)->uvMap(renderer, texCoords);
 
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, left, top);
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, top);
@@ -693,7 +687,7 @@ public:
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
-        deferInfo.mergeId = getAtlasEntry() ?
+        deferInfo.mergeId = getAtlasEntry(renderer) ?
                 (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
 
         // Don't merge non-simply transformed or neg scale ops, SET_TEXTURE doesn't handle rotation
@@ -706,13 +700,17 @@ public:
                 (mBitmap->colorType() != kAlpha_8_SkColorType);
     }
 
+    void uvMap(OpenGLRenderer& renderer, Rect& texCoords) {
+        if (getAtlasEntry(renderer)) {
+            mEntry->uvMapper.map(texCoords);
+        }
+    }
+
     const SkBitmap* bitmap() { return mBitmap; }
 protected:
     const SkBitmap* mBitmap;
-    const AssetAtlas& mAtlas;
-    uint32_t mEntryGenerationId;
+    bool mEntryValid;
     AssetAtlas::Entry* mEntry;
-    UvMapper mUvMapper;
 };
 
 class DrawBitmapRectOp : public DrawBoundedOp {
@@ -805,18 +803,13 @@ public:
             float left, float top, float right, float bottom, const SkPaint* paint)
             : DrawBoundedOp(left, top, right, bottom, paint),
             mBitmap(bitmap), mPatch(patch), mGenerationId(0), mMesh(NULL),
-            mAtlas(Caches::getInstance().assetAtlas) {
-        mEntry = mAtlas.getEntry(bitmap);
-        if (mEntry) {
-            mEntryGenerationId = mAtlas.getGenerationId();
-        }
+            mEntryValid(false), mEntry(NULL) {
     };
 
-    AssetAtlas::Entry* getAtlasEntry() {
-        // The atlas entry is stale, let's get a new one
-        if (mEntry && mEntryGenerationId != mAtlas.getGenerationId()) {
-            mEntryGenerationId = mAtlas.getGenerationId();
-            mEntry = mAtlas.getEntry(mBitmap);
+    AssetAtlas::Entry* getAtlasEntry(OpenGLRenderer& renderer) {
+        if (!mEntryValid) {
+            mEntryValid = true;
+            mEntry = renderer.renderState().assetAtlas().getEntry(mBitmap);
         }
         return mEntry;
     }
@@ -824,7 +817,7 @@ public:
     const Patch* getMesh(OpenGLRenderer& renderer) {
         if (!mMesh || renderer.getCaches().patchCache.getGenerationId() != mGenerationId) {
             PatchCache& cache = renderer.getCaches().patchCache;
-            mMesh = cache.get(getAtlasEntry(), mBitmap->width(), mBitmap->height(),
+            mMesh = cache.get(getAtlasEntry(renderer), mBitmap->width(), mBitmap->height(),
                     mLocalBounds.getWidth(), mLocalBounds.getHeight(), mPatch);
             mGenerationId = cache.getGenerationId();
         }
@@ -906,14 +899,14 @@ public:
             indexCount += opMesh->indexCount;
         }
 
-        renderer.drawPatches(mBitmap, getAtlasEntry(),
+        renderer.drawPatches(mBitmap, getAtlasEntry(renderer),
                 &vertices[0], indexCount, mPaint);
     }
 
     virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         // We're not calling the public variant of drawPatch() here
         // This method won't perform the quickReject() since we've already done it at this point
-        renderer.drawPatch(mBitmap, getMesh(renderer), getAtlasEntry(),
+        renderer.drawPatch(mBitmap, getMesh(renderer), getAtlasEntry(renderer),
                 mLocalBounds.left, mLocalBounds.top, mLocalBounds.right, mLocalBounds.bottom,
                 mPaint);
     }
@@ -928,7 +921,7 @@ public:
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Patch;
-        deferInfo.mergeId = getAtlasEntry() ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
+        deferInfo.mergeId = getAtlasEntry(renderer) ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
         deferInfo.mergeable = state.mMatrix.isPureTranslate() &&
                 OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
         deferInfo.opaqueOverBounds = isOpaqueOverBounds(state) && mBitmap->isOpaque();
@@ -941,8 +934,7 @@ private:
     uint32_t mGenerationId;
     const Patch* mMesh;
 
-    const AssetAtlas& mAtlas;
-    uint32_t mEntryGenerationId;
+    bool mEntryValid;
     AssetAtlas::Entry* mEntry;
 };
 

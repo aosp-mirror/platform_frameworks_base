@@ -24,6 +24,7 @@
 
 #include <utils/Mutex.h>
 
+#include "AssetAtlas.h"
 #include "Caches.h"
 #include "Texture.h"
 #include "TextureCache.h"
@@ -40,7 +41,7 @@ namespace uirenderer {
 TextureCache::TextureCache():
         mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
-        mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE) {
+        mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE), mAssetAtlas(0) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, NULL) > 0) {
         INIT_LOGD("  Setting texture cache size to %sMB", property);
@@ -63,7 +64,7 @@ TextureCache::TextureCache():
 
 TextureCache::TextureCache(uint32_t maxByteSize):
         mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize) {
+        mSize(0), mMaxSize(maxByteSize), mAssetAtlas(0) {
     init();
 }
 
@@ -125,6 +126,10 @@ void TextureCache::operator()(uint32_t&, Texture*& texture) {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
+void TextureCache::setAssetAtlas(AssetAtlas* assetAtlas) {
+    mAssetAtlas = assetAtlas;
+}
+
 void TextureCache::resetMarkInUse() {
     LruCache<uint32_t, Texture*>::Iterator iter(mCache);
     while (iter.next()) {
@@ -144,6 +149,13 @@ bool TextureCache::canMakeTextureFromBitmap(const SkBitmap* bitmap) {
 // Returns a prepared Texture* that either is already in the cache or can fit
 // in the cache (and is thus added to the cache)
 Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
+    if (CC_LIKELY(mAssetAtlas)) {
+        AssetAtlas::Entry* entry = mAssetAtlas->getEntry(bitmap);
+        if (CC_UNLIKELY(entry)) {
+            return entry->texture;
+        }
+    }
+
     Texture* texture = mCache.get(bitmap->pixelRef()->getStableID());
 
     if (!texture) {
