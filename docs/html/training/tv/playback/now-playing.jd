@@ -1,5 +1,6 @@
 page.title=Displaying a Now Playing Card
-page.tags="nowplaying","mediasession"
+page.tags=tv, mediasession
+helpoutsWidget=true
 
 trainingnavtop=true
 

@@ -1,5 +1,6 @@
 page.title=Helping Users Find Your Content on TV
-page.tags="tv", "leanback"
+page.tags=tv, leanback
+helpoutsWidget=true
 
 startpage=true
 
