@@ -1,0 +1,2 @@
+ext.kotlinVersion = '0.9.206'
+ext.releaseVersion = "0.3-SNAPSHOT"

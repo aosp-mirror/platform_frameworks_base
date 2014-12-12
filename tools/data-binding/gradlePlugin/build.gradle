@@ -23,7 +23,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.9.206'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 
@@ -34,10 +34,10 @@ repositories {
 
 dependencies {
     compile 'com.android.tools.build:gradle:0.14.2'
-    compile 'org.jetbrains.kotlin:kotlin-stdlib:0.9.206'
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compile gradleApi()
     compile 'commons-io:commons-io:2.4'
-    compile 'com.android.databinding:compiler:0.2-SNAPSHOT'
+    compile project(':compiler')
 }
 uploadArchives {
     repositories {

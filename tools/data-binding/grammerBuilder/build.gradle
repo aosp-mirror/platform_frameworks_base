@@ -52,14 +52,3 @@ sourceSets {
         }
     }
 }
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: mavenLocal().url)
-            pom.version = '0.1-SNAPSHOT'
-            pom.artifactId = 'grammerBuilder'
-            pom.groupId='com.android.databinding'
-        }
-    }
-}
