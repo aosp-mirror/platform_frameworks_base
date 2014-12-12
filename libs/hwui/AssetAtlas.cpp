@@ -64,6 +64,12 @@ void AssetAtlas::terminate() {
 
 void AssetAtlas::updateTextureId() {
     mTexture->id = mImage ? mImage->getTexture() : 0;
+    if (mTexture->id) {
+        // Texture ID changed, force-set to defaults to sync the wrapper & GL
+        // state objects
+        mTexture->setWrap(GL_CLAMP_TO_EDGE, false, true);
+        mTexture->setFilter(GL_NEAREST, false, true);
+    }
     for (size_t i = 0; i < mEntries.size(); i++) {
         AssetAtlas::Entry* entry = mEntries.valueAt(i);
         entry->texture->id = mTexture->id;
