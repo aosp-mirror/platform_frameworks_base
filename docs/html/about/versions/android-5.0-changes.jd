@@ -4,6 +4,7 @@ sdk.platform.version=5.0
 sdk.platform.apiLevel=21
 @jd:body
 
+<!-- video box -->
 
 <div id="qv-wrapper">
 <div id="qv">
@@ -22,6 +23,13 @@ sdk.platform.apiLevel=21
   <li><a href="#ssl">TLS/SSL Configuration</a></li>
   <li><a href="#managed_profiles">Support for Managed Profiles</a></li>
 </ol>
+
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=Uiq2kZ2JHVY">
+<div>
+    <h3>Video</h3>
+    <p>Notifications</p>
+</div>
+</a>
 
 <h2>API Differences</h2>
 <ol>
@@ -296,8 +304,8 @@ methods respectively.</li>
 
 <p>
   Android 5.0 includes a behavior change to ensure
-  that only one app can define a given custom permission, unless signed with the 
-  same key as other apps defining the permission. 
+  that only one app can define a given custom permission, unless signed with the
+  same key as other apps defining the permission.
 </p>
 
 <h3>
@@ -316,7 +324,7 @@ methods respectively.</li>
 <p>
   In Android 4.4 and earlier, users were able to install multiple such
   apps on a given device, although the system assigned the protection level
-  specified by the first-installed app. 
+  specified by the first-installed app.
 </p>
 
 <p>
