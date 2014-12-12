@@ -41,7 +41,7 @@ public class DataBinder {
         try {
             sMapper = (DataBinderMapper) DataBinder.class.getClassLoader()
                     .loadClass(
-                            "com.android.databinding.GeneratedDataBinderRenderer")
+                            "com.android.databinding.library.GeneratedDataBinderRenderer")
                     .newInstance();
         } catch (Throwable t) {
             throw new RuntimeException(t);
