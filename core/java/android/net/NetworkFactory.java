@@ -219,16 +219,21 @@ public class NetworkFactory extends Handler {
     }
 
     private void evalRequest(NetworkRequestInfo n) {
+        if (VDBG) log("evalRequest");
         if (n.requested == false && n.score < mScore &&
                 n.request.networkCapabilities.satisfiedByNetworkCapabilities(
                 mCapabilityFilter) && acceptRequest(n.request, n.score)) {
+            if (VDBG) log("  needNetworkFor");
             needNetworkFor(n.request, n.score);
             n.requested = true;
         } else if (n.requested == true &&
                 (n.score > mScore || n.request.networkCapabilities.satisfiedByNetworkCapabilities(
                 mCapabilityFilter) == false || acceptRequest(n.request, n.score) == false)) {
+            if (VDBG) log("  releaseNetworkFor");
             releaseNetworkFor(n.request);
             n.requested = false;
+        } else {
+            if (VDBG) log("  done");
         }
     }
 
