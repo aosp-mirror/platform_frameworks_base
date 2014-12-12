@@ -289,9 +289,11 @@ public class BluetoothControllerImpl implements BluetoothController {
                         .getDevicesMatchingConnectionStates(connectionType);
                 for (int k = 0; k < devices.size(); k++) {
                     DeviceInfo info = mDeviceInfo.get(devices.get(k));
-                    info.connectionState = CONNECTION_STATES[i];
-                    if (CONNECTION_STATES[i] == BluetoothProfile.STATE_CONNECTED) {
-                        info.connectedProfiles.put(profile, true);
+                    if (info != null) {
+                        info.connectionState = CONNECTION_STATES[i];
+                        if (CONNECTION_STATES[i] == BluetoothProfile.STATE_CONNECTED) {
+                            info.connectedProfiles.put(profile, true);
+                        }
                     }
                 }
             }
