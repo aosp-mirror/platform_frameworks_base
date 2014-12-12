@@ -252,6 +252,11 @@ public class ColorDrawable extends Drawable {
     }
 
     @Override
+    public boolean canApplyTheme() {
+        return mColorState.canApplyTheme() || super.canApplyTheme();
+    }
+
+    @Override
     public void applyTheme(Theme t) {
         super.applyTheme(t);
 
