@@ -21,7 +21,6 @@ import static android.net.NetworkCapabilities.TRANSPORT_BLUETOOTH;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -49,6 +48,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IccCardConstants;
@@ -92,7 +92,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final ConnectivityManager mConnectivityManager;
     private final SubscriptionManager mSubscriptionManager;
     private final boolean mHasMobileDataFeature;
-    private final Config mConfig;
+    private Config mConfig;
 
     // Subcontrollers.
     @VisibleForTesting
@@ -377,8 +377,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             updateConnectivity();
             refreshCarrierLabel();
         } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
-            refreshLocale();
-            refreshCarrierLabel();
+            mConfig = Config.readConfig(mContext);
+            handleConfigurationChanged();
         } else if (action.equals(Intent.ACTION_AIRPLANE_MODE_CHANGED)) {
             refreshLocale();
             updateAirplaneMode(false);
@@ -410,6 +410,15 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mWifiSignalController.handleBroadcast(intent);
             }
         }
+    }
+
+    @VisibleForTesting
+    void handleConfigurationChanged() {
+        for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
+            mobileSignalController.setConfiguration(mConfig);
+        }
+        refreshLocale();
+        refreshCarrierLabel();
     }
 
     private void updateMobileControllers() {
@@ -983,7 +992,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
     // TODO: Move to its own file.
     static class MobileSignalController extends SignalController<MobileSignalController.MobileState,
             MobileSignalController.MobileIconGroup> {
-        private final Config mConfig;
         private final TelephonyManager mPhone;
         private final String mNetworkNameDefault;
         private final String mNetworkNameSeparator;
@@ -993,7 +1001,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         private final SubscriptionInfo mSubscriptionInfo;
 
         // @VisibleForDemoMode
-        Map<Integer, MobileIconGroup> mNetworkToIconLookup;
+        final SparseArray<MobileIconGroup> mNetworkToIconLookup;
 
         // Since some pieces of the phone state are interdependent we store it locally,
         // this could potentially become part of MobileState for simplification/complication
@@ -1004,6 +1012,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         private ServiceState mServiceState;
         private SignalStrength mSignalStrength;
         private MobileIconGroup mDefaultIcons;
+        private Config mConfig;
 
         // TODO: Reduce number of vars passed in, if we have the NetworkController, probably don't
         // need listener lists anymore.
@@ -1014,6 +1023,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             super("MobileSignalController(" + info.getSubscriptionId() + ")", context,
                     NetworkCapabilities.TRANSPORT_CELLULAR, signalCallbacks, signalClusters,
                     networkController);
+            mNetworkToIconLookup = new SparseArray<>();
             mConfig = config;
             mPhone = phone;
             mSubscriptionInfo = info;
@@ -1029,6 +1039,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
             mLastState.iconGroup = mCurrentState.iconGroup = mDefaultIcons;
             // Get initial data sim state.
             updateDataSim();
+        }
+
+        public void setConfiguration(Config config) {
+            mConfig = config;
+            mapIconSets();
+            updateTelephony();
         }
 
         /**
@@ -1115,12 +1131,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         /**
          * Produce a mapping of data network types to icon groups for simple and quick use in
          * updateTelephony.
-         *
-         * TODO: See if config can change with locale, this may need to be regenerated on Locale
-         * change.
          */
         private void mapIconSets() {
-            mNetworkToIconLookup = new HashMap<Integer, MobileIconGroup>();
+            mNetworkToIconLookup.clear();
 
             mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyIcons.THREE_G);
             mNetworkToIconLookup.put(TelephonyManager.NETWORK_TYPE_EVDO_A, TelephonyIcons.THREE_G);
@@ -1324,7 +1337,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     mCurrentState.level = mSignalStrength.getLevel();
                 }
             }
-            if (mNetworkToIconLookup.containsKey(mDataNetType)) {
+            if (mNetworkToIconLookup.indexOfKey(mDataNetType) >= 0) {
                 mCurrentState.iconGroup = mNetworkToIconLookup.get(mDataNetType);
             } else {
                 mCurrentState.iconGroup = mDefaultIcons;
