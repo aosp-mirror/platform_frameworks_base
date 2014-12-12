@@ -4,9 +4,17 @@ package com.android.systemui.statusbar.policy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -21,14 +29,6 @@ import com.android.internal.telephony.cdma.EriInfo;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.Config;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl.SignalCluster;
-
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class NetworkControllerBaseTest extends AndroidTestCase {
     private static final String TAG = "NetworkControllerBaseTest";
@@ -52,6 +52,8 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
     protected TelephonyManager mMockTm;
     protected Config mConfig;
 
+    private NetworkCapabilities mNetCapabilities;
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -63,7 +65,10 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         mMockTm = mock(TelephonyManager.class);
         mMockSm = mock(SubscriptionManager.class);
         mMockCm = mock(ConnectivityManager.class);
+        mNetCapabilities = new NetworkCapabilities();
         when(mMockCm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE)).thenReturn(true);
+        when(mMockCm.getDefaultNetworkCapabilitiesForUser(0)).thenReturn(
+                new NetworkCapabilities[] { mNetCapabilities });
 
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);
@@ -115,13 +120,18 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
 
     public void setConnectivity(int inetCondition, int networkType, boolean isConnected) {
         Intent i = new Intent(ConnectivityManager.INET_CONDITION_ACTION);
-        NetworkInfo networkInfo = mock(NetworkInfo.class);
-        when(networkInfo.isConnected()).thenReturn(isConnected);
-        when(networkInfo.getType()).thenReturn(networkType);
-        when(networkInfo.getTypeName()).thenReturn("");
-        when(mMockCm.getActiveNetworkInfo()).thenReturn(networkInfo);
+        // TODO: Separate out into several NetworkCapabilities.
+        if (isConnected) {
+            mNetCapabilities.addTransportType(networkType);
+        } else {
+            mNetCapabilities.removeTransportType(networkType);
+        }
+        if (inetCondition != 0) {
+            mNetCapabilities.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        } else {
+            mNetCapabilities.removeCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        }
 
-        i.putExtra(ConnectivityManager.EXTRA_INET_CONDITION, inetCondition);
         mNetworkController.onReceive(mContext, i);
     }
 
