@@ -720,7 +720,7 @@ public:
 
     virtual const char* name() { return "DrawBitmap"; }
 
-    virtual void onDefer(OpenGLRenderer& /* renderer */, DeferInfo& deferInfo,
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
         deferInfo.mergeId = getAtlasEntry(renderer) ?
@@ -954,7 +954,7 @@ public:
 
     virtual const char* name() { return "DrawPatch"; }
 
-    virtual void onDefer(OpenGLRenderer& /* renderer */, DeferInfo& deferInfo,
+    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
             const DeferredDisplayState& state) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Patch;
         deferInfo.mergeId = getAtlasEntry(renderer) ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
