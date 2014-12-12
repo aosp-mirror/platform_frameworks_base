@@ -148,7 +148,7 @@ class RippleBackground {
         final boolean canUseHardware = c.isHardwareAccelerated();
         if (mCanUseHardware != canUseHardware && mCanUseHardware) {
             // We've switched from hardware to non-hardware mode. Panic.
-            cancelHardwareAnimations(true);
+            cancelHardwareAnimations(false);
         }
         mCanUseHardware = canUseHardware;
 
@@ -399,7 +399,7 @@ class RippleBackground {
      */
     public void cancel() {
         cancelSoftwareAnimations();
-        cancelHardwareAnimations(true);
+        cancelHardwareAnimations(false);
     }
 
     private void cancelSoftwareAnimations() {
@@ -412,15 +412,27 @@ class RippleBackground {
     /**
      * Cancels any running hardware animations.
      */
-    private void cancelHardwareAnimations(boolean cancelPending) {
+    private void cancelHardwareAnimations(boolean jumpToEnd) {
         final ArrayList<RenderNodeAnimator> runningAnimations = mRunningAnimations;
         final int N = runningAnimations.size();
         for (int i = 0; i < N; i++) {
-            runningAnimations.get(i).cancel();
+            if (jumpToEnd) {
+                runningAnimations.get(i).end();
+            } else {
+                runningAnimations.get(i).cancel();
+            }
         }
         runningAnimations.clear();
 
-        mHasPendingHardwareExit = false;
+        if (mHasPendingHardwareExit) {
+            // If we had a pending hardware exit, jump to the end state.
+            mHasPendingHardwareExit = false;
+
+            if (jumpToEnd) {
+                mOuterOpacity = 0;
+            }
+        }
+
         mHardwareAnimating = false;
     }
 
