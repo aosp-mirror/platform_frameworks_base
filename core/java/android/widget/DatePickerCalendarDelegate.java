@@ -372,10 +372,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mCurrentDate.set(Calendar.MONTH, monthOfYear);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-        onDateChanged(false);
-
-        // Set the listener last so that we don't call it.
         mDateChangedListener = callBack;
+
+        onDateChanged(false, false);
     }
 
     @Override
@@ -384,11 +383,11 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mCurrentDate.set(Calendar.MONTH, month);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-        onDateChanged(false);
+        onDateChanged(false, true);
     }
 
-    private void onDateChanged(boolean fromUser) {
-        if (mDateChangedListener != null) {
+    private void onDateChanged(boolean fromUser, boolean callbackToClient) {
+        if (callbackToClient && mDateChangedListener != null) {
             final int year = mCurrentDate.get(Calendar.YEAR);
             final int monthOfYear = mCurrentDate.get(Calendar.MONTH);
             final int dayOfMonth = mCurrentDate.get(Calendar.DAY_OF_MONTH);
@@ -432,7 +431,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         }
         if (mCurrentDate.before(mTempDate)) {
             mCurrentDate.setTimeInMillis(minDate);
-            onDateChanged(false);
+            onDateChanged(false, true);
         }
         mMinDate.setTimeInMillis(minDate);
         mDayPickerView.setMinDate(minDate);
@@ -453,7 +452,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         }
         if (mCurrentDate.after(mTempDate)) {
             mCurrentDate.setTimeInMillis(maxDate);
-            onDateChanged(false);
+            onDateChanged(false, true);
         }
         mMaxDate.setTimeInMillis(maxDate);
         mDayPickerView.setMaxDate(maxDate);
@@ -592,7 +591,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
     public void onYearSelected(int year) {
         adjustDayInMonthIfNeeded(mCurrentDate.get(Calendar.MONTH), year);
         mCurrentDate.set(Calendar.YEAR, year);
-        onDateChanged(true);
+        onDateChanged(true, true);
 
         // Auto-advance to month and day view.
         setCurrentView(MONTH_AND_DAY_VIEW);
@@ -665,7 +664,7 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         @Override
         public void onDaySelected(DayPickerView view, Calendar day) {
             mCurrentDate.setTimeInMillis(day.getTimeInMillis());
-            onDateChanged(true);
+            onDateChanged(true, true);
         }
     };
 
