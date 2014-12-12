@@ -125,40 +125,6 @@ static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env,
     } while (err < 0 && errno == EINTR);
 }
 
-static void com_android_internal_os_ZygoteInit_setCloseOnExec (JNIEnv *env,
-    jobject clazz, jobject descriptor, jboolean flag)
-{
-    int fd;
-    int err;
-    int fdFlags;
-
-    fd = jniGetFDFromFileDescriptor(env, descriptor);
-
-    if  (env->ExceptionCheck()) {
-        return;
-    }
-
-    fdFlags = fcntl(fd, F_GETFD);
-
-    if (fdFlags < 0) {
-        jniThrowIOException(env, errno);
-        return;
-    }
-
-    if (flag) {
-        fdFlags |= FD_CLOEXEC;
-    } else {
-        fdFlags &= ~FD_CLOEXEC;
-    }
-
-    err = fcntl(fd, F_SETFD, fdFlags);
-
-    if (err < 0) {
-        jniThrowIOException(env, errno);
-        return;
-    }
-}
-
 static jint com_android_internal_os_ZygoteInit_selectReadable (
         JNIEnv *env, jobject clazz, jobjectArray fds)
 {
@@ -226,12 +192,6 @@ static jint com_android_internal_os_ZygoteInit_selectReadable (
     return -1;
 }
 
-static jobject com_android_internal_os_ZygoteInit_createFileDescriptor (
-        JNIEnv *env, jobject clazz, jint fd)
-{
-    return jniCreateFileDescriptor(env, fd);
-}
-
 /*
  * JNI registration.
  */
@@ -249,12 +209,8 @@ static JNINativeMethod gMethods[] = {
         "(Ljava/io/FileDescriptor;Ljava/io/FileDescriptor;"
         "Ljava/io/FileDescriptor;)V",
             (void *) com_android_internal_os_ZygoteInit_reopenStdio},
-    { "setCloseOnExec", "(Ljava/io/FileDescriptor;Z)V",
-        (void *)  com_android_internal_os_ZygoteInit_setCloseOnExec},
     { "selectReadable", "([Ljava/io/FileDescriptor;)I",
         (void *) com_android_internal_os_ZygoteInit_selectReadable },
-    { "createFileDescriptor", "(I)Ljava/io/FileDescriptor;",
-        (void *) com_android_internal_os_ZygoteInit_createFileDescriptor }
 };
 int register_com_android_internal_os_ZygoteInit(JNIEnv* env)
 {
