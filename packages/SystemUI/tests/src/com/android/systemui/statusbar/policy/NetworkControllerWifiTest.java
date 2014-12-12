@@ -27,7 +27,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
 
             setConnectivity(100, ConnectivityManager.TYPE_WIFI, true);
             verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[1][testLevel]);
-            setConnectivity(10, ConnectivityManager.TYPE_WIFI, true);
+            setConnectivity(0, ConnectivityManager.TYPE_WIFI, true);
             verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[0][testLevel]);
         }
     }
@@ -48,7 +48,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
             setConnectivity(100, ConnectivityManager.TYPE_WIFI, true);
             verifyLastQsWifiIcon(true, true, WifiIcons.QS_WIFI_SIGNAL_STRENGTH[1][testLevel],
                     testSsid);
-            setConnectivity(10, ConnectivityManager.TYPE_WIFI, true);
+            setConnectivity(0, ConnectivityManager.TYPE_WIFI, true);
             verifyLastQsWifiIcon(true, true, WifiIcons.QS_WIFI_SIGNAL_STRENGTH[0][testLevel],
                     testSsid);
         }
@@ -73,22 +73,6 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         verifyLastQsDataDirection(false, true);
         setWifiActivity(WifiManager.DATA_ACTIVITY_INOUT);
         verifyLastQsDataDirection(true, true);
-    }
-
-    public void testNoDataIconDuringWifi() {
-        // Setup normal connection
-        String testSsid = "Test SSID";
-        int testLevel = 2;
-        setWifiEnabled(true);
-        setWifiState(true, testSsid);
-        setWifiLevel(testLevel);
-        setConnectivity(100, ConnectivityManager.TYPE_WIFI, true);
-        verifyLastWifiIcon(true, WifiIcons.WIFI_SIGNAL_STRENGTH[1][testLevel]);
-
-        setupDefaultSignal();
-        // Still be on wifi though.
-        setConnectivity(100, ConnectivityManager.TYPE_WIFI, true);
-        verifyLastMobileDataIndicators(true, DEFAULT_SIGNAL_STRENGTH, 0 /* No icon */);
     }
 
     public void testRoamingIconDuringWifi() {
