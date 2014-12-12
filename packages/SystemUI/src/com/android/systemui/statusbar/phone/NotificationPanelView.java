@@ -40,6 +40,7 @@ import android.widget.TextView;
 
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
+import com.android.systemui.qs.QSContainer;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -71,7 +72,7 @@ public class NotificationPanelView extends PanelView implements
     private StatusBarHeaderView mHeader;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
     private KeyguardStatusBarView mKeyguardStatusBar;
-    private View mQsContainer;
+    private QSContainer mQsContainer;
     private QSPanel mQsPanel;
     private KeyguardStatusView mKeyguardStatusView;
     private ObservableScrollView mScrollView;
@@ -161,6 +162,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mKeyguardStatusViewAnimating;
     private boolean mHeaderAnimatingIn;
     private ObjectAnimator mQsContainerAnimator;
+    private ValueAnimator mQsSizeChangeAnimator;
 
     private boolean mShadeEmpty;
 
@@ -188,7 +190,7 @@ public class NotificationPanelView extends PanelView implements
         mHeader.setOnClickListener(this);
         mKeyguardStatusBar = (KeyguardStatusBarView) findViewById(R.id.keyguard_header);
         mKeyguardStatusView = (KeyguardStatusView) findViewById(R.id.keyguard_status_view);
-        mQsContainer = findViewById(R.id.quick_settings_container);
+        mQsContainer = (QSContainer) findViewById(R.id.quick_settings_container);
         mQsPanel = (QSPanel) findViewById(R.id.quick_settings_panel);
         mClockView = (TextView) findViewById(R.id.clock_view);
         mScrollView = (ObservableScrollView) findViewById(R.id.scroll_view);
@@ -283,21 +285,35 @@ public class NotificationPanelView extends PanelView implements
         mKeyguardStatusView.setPivotY((FONT_HEIGHT - CAP_HEIGHT) / 2048f * mClockView.getTextSize());
 
         // Calculate quick setting heights.
+        int oldMaxHeight = mQsMaxExpansionHeight;
         mQsMinExpansionHeight = mKeyguardShowing ? 0 : mHeader.getCollapsedHeight() + mQsPeekHeight;
-        mQsMaxExpansionHeight = mHeader.getExpandedHeight() + mQsContainer.getHeight();
+        mQsMaxExpansionHeight = mHeader.getExpandedHeight() + mQsContainer.getDesiredHeight();
         positionClockAndNotifications();
-        if (mQsExpanded) {
-            if (mQsFullyExpanded) {
-                mQsExpansionHeight = mQsMaxExpansionHeight;
-                requestScrollerTopPaddingUpdate(false /* animate */);
+        if (mQsExpanded && mQsFullyExpanded) {
+            mQsExpansionHeight = mQsMaxExpansionHeight;
+            requestScrollerTopPaddingUpdate(false /* animate */);
+            requestPanelHeightUpdate();
+
+            // Size has changed, start an animation.
+            if (mQsMaxExpansionHeight != oldMaxHeight) {
+                startQsSizeChangeAnimation(oldMaxHeight, mQsMaxExpansionHeight);
             }
-        } else {
+        } else if (!mQsExpanded) {
             setQsExpansion(mQsMinExpansionHeight + mLastOverscroll);
-            mNotificationStackScroller.setStackHeight(getExpandedHeight());
         }
+        mNotificationStackScroller.setStackHeight(getExpandedHeight());
         updateHeader();
         mNotificationStackScroller.updateIsSmallScreen(
                 mHeader.getCollapsedHeight() + mQsPeekHeight);
+
+        // If we are running a size change animation, the animation takes care of the height of
+        // the container. However, if we are not animating, we always need to make the QS container
+        // the desired height so when closing the QS detail, it stays smaller after the size change
+        // animation is finished but the detail view is still being animated away (this animation
+        // takes longer than the size change animation).
+        if (mQsSizeChangeAnimator == null) {
+            mQsContainer.setHeightOverride(mQsContainer.getDesiredHeight());
+        }
     }
 
     @Override
@@ -308,6 +324,32 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void onDetachedFromWindow() {
         mSecureCameraLaunchManager.destroy();
+    }
+
+    private void startQsSizeChangeAnimation(int oldHeight, final int newHeight) {
+        if (mQsSizeChangeAnimator != null) {
+            oldHeight = (int) mQsSizeChangeAnimator.getAnimatedValue();
+            mQsSizeChangeAnimator.cancel();
+        }
+        mQsSizeChangeAnimator = ValueAnimator.ofInt(oldHeight, newHeight);
+        mQsSizeChangeAnimator.setDuration(300);
+        mQsSizeChangeAnimator.setInterpolator(mFastOutSlowInInterpolator);
+        mQsSizeChangeAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                requestScrollerTopPaddingUpdate(false /* animate */);
+                requestPanelHeightUpdate();
+                int height = (int) mQsSizeChangeAnimator.getAnimatedValue();
+                mQsContainer.setHeightOverride(height - mHeader.getExpandedHeight());
+            }
+        });
+        mQsSizeChangeAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mQsSizeChangeAnimator = null;
+            }
+        });
+        mQsSizeChangeAnimator.start();
     }
 
     /**
@@ -1113,7 +1155,7 @@ public class NotificationPanelView extends PanelView implements
 
     private void setQsTranslation(float height) {
         if (!mHeaderAnimatingIn) {
-            mQsContainer.setY(height - mQsContainer.getHeight() + getHeaderTranslation());
+            mQsContainer.setY(height - mQsContainer.getDesiredHeight() + getHeaderTranslation());
         }
         if (mKeyguardShowing) {
             mHeader.setY(interpolate(getQsExpansionFraction(), -mHeader.getHeight(), 0));
@@ -1137,6 +1179,8 @@ public class NotificationPanelView extends PanelView implements
                     : maxQs;
             return (int) interpolate(getExpandedFraction(),
                     mQsMinExpansionHeight, max);
+        } else if (mQsSizeChangeAnimator != null) {
+            return (int) mQsSizeChangeAnimator.getAnimatedValue();
         } else if (mKeyguardShowing && mScrollYOverride == -1) {
 
             // We can only do the smoother transition on Keyguard when we also are not collapsing
@@ -1348,14 +1392,20 @@ public class NotificationPanelView extends PanelView implements
                     + mNotificationStackScroller.getBottomStackPeekSize()
                     + mNotificationStackScroller.getCollapseSecondCardPadding();
         }
+        int maxQsHeight = mQsMaxExpansionHeight;
+
+        // If an animation is changing the size of the QS panel, take the animated value.
+        if (mQsSizeChangeAnimator != null) {
+            maxQsHeight = (int) mQsSizeChangeAnimator.getAnimatedValue();
+        }
         float totalHeight = Math.max(
-                mQsMaxExpansionHeight + mNotificationStackScroller.getNotificationTopPadding(),
+                maxQsHeight + mNotificationStackScroller.getNotificationTopPadding(),
                 mStatusBarState == StatusBarState.KEYGUARD
                         ? mClockPositionResult.stackScrollerPadding - mTopPaddingAdjustment
                         : 0)
                 + notificationHeight;
         if (totalHeight > mNotificationStackScroller.getHeight()) {
-            float fullyCollapsedHeight = mQsMaxExpansionHeight
+            float fullyCollapsedHeight = maxQsHeight
                     + mNotificationStackScroller.getMinStackHeight()
                     + mNotificationStackScroller.getNotificationTopPadding()
                     - getScrollViewScrollY();
