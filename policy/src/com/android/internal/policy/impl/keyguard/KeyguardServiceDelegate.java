@@ -37,7 +37,6 @@ public class KeyguardServiceDelegate {
     private final Context mContext;
     private final View mScrim; // shown if keyguard crashes
     private final KeyguardState mKeyguardState = new KeyguardState();
-    private ShowListener mShowListenerWhenConnect;
 
     /* package */ static final class KeyguardState {
         KeyguardState() {
@@ -131,13 +130,7 @@ public class KeyguardServiceDelegate {
                 // If the system is ready, it means keyguard crashed and restarted.
                 mKeyguardService.onSystemReady();
                 // This is used to hide the scrim once keyguard displays.
-                mKeyguardService.onScreenTurnedOn(new KeyguardShowDelegate(
-                        mShowListenerWhenConnect));
-                if (mShowListenerWhenConnect != null) {
-                    Log.v(TAG, "*** hiding scrim because keyguard wasn't ready");
-                    mShowListenerWhenConnect = null;
-                    hideScrim();
-                }
+                mKeyguardService.onScreenTurnedOn(new KeyguardShowDelegate(null));
             }
             if (mKeyguardState.bootCompleted) {
                 mKeyguardService.onBootCompleted();
@@ -219,10 +212,9 @@ public class KeyguardServiceDelegate {
         } else {
             // try again when we establish a connection
             Slog.w(TAG, "onScreenTurnedOn(): no keyguard service!");
-            // This shouldn't happen, but if it does, show the scrim immediately and
-            // invoke the listener's callback after the service actually connects.
-            mShowListenerWhenConnect = showListener;
-            showScrim();
+            // This shouldn't happen, but if it does, invoke the listener immediately
+            // to avoid a dark screen...
+            showListener.onShown(null);
         }
         mKeyguardState.screenIsOn = true;
     }
@@ -288,6 +280,7 @@ public class KeyguardServiceDelegate {
         lp.setTitle("KeyguardScrim");
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         wm.addView(view, lp);
+        view.setVisibility(View.GONE);
         // Disable pretty much everything in statusbar until keyguard comes back and we know
         // the state of the world.
         view.setSystemUiVisibility(View.STATUS_BAR_DISABLE_HOME
