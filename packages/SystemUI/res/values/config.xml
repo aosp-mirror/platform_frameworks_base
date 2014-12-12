@@ -131,6 +131,9 @@
     <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
     <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
 
+    <!-- The maximum number of items to be displayed in quick settings -->
+    <integer name="quick_settings_detail_max_item_count">7</integer>
+
     <integer name="blinds_pop_duration_ms">10</integer>
 
     <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
