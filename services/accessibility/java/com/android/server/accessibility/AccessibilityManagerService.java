@@ -2145,6 +2145,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
                 if (!permissionGranted) {
                     return null;
                 }
+                if (mSecurityPolicy.mWindows == null) {
+                    return null;
+                }
                 List<AccessibilityWindowInfo> windows = new ArrayList<>();
                 final int windowCount = mSecurityPolicy.mWindows.size();
                 for (int i = 0; i < windowCount; i++) {
