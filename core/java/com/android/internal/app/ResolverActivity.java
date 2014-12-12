@@ -248,12 +248,14 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
         mAlwaysUseOption = alwaysUseOption;
 
-        int count = mAdapter.mList.size();
         if (mLaunchedFromUid < 0 || UserHandle.isIsolated(mLaunchedFromUid)) {
             // Gulp!
             finish();
             return;
-        } else if (count > 1) {
+        }
+
+        int count = mAdapter.mList.size();
+        if (count > 1 || (count == 1 && mAdapter.getOtherProfile() != null)) {
             setContentView(layoutId);
             mListView = (ListView) findViewById(R.id.resolver_list);
             mListView.setAdapter(mAdapter);
@@ -797,11 +799,9 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
 
         public void handlePackagesChanged() {
-            final int oldItemCount = getCount();
             rebuildList();
             notifyDataSetChanged();
-            final int newItemCount = getCount();
-            if (newItemCount == 0) {
+            if (getCount() == 0) {
                 // We no longer have any items...  just finish the activity.
                 finish();
             }
@@ -963,14 +963,9 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
             // Process labels from start to i
             int num = end - start+1;
             if (num == 1) {
-                if (mLastChosen != null
-                        && mLastChosen.activityInfo.packageName.equals(
-                                ro.activityInfo.packageName)
-                        && mLastChosen.activityInfo.name.equals(ro.activityInfo.name)) {
-                    mLastChosenPosition = mList.size();
-                }
                 // No duplicate labels. Use label for entry at start
                 addResolveInfo(new DisplayResolveInfo(ro, roLabel, null, null));
+                updateLastChosenPosition(ro);
             } else {
                 mShowExtended = true;
                 boolean usePkg = false;
@@ -998,12 +993,6 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 }
                 for (int k = start; k <= end; k++) {
                     ResolveInfo add = rList.get(k);
-                    if (mLastChosen != null
-                            && mLastChosen.activityInfo.packageName.equals(
-                                    add.activityInfo.packageName)
-                            && mLastChosen.activityInfo.name.equals(add.activityInfo.name)) {
-                        mLastChosenPosition = mList.size();
-                    }
                     if (usePkg) {
                         // Use application name for all entries from start to end-1
                         addResolveInfo(new DisplayResolveInfo(add, roLabel,
@@ -1013,7 +1002,16 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                         addResolveInfo(new DisplayResolveInfo(add, roLabel,
                                 add.activityInfo.applicationInfo.loadLabel(mPm), null));
                     }
+                    updateLastChosenPosition(add);
                 }
+            }
+        }
+
+        private void updateLastChosenPosition(ResolveInfo info) {
+            if (mLastChosen != null
+                    && mLastChosen.activityInfo.packageName.equals(info.activityInfo.packageName)
+                    && mLastChosen.activityInfo.name.equals(info.activityInfo.name)) {
+                mLastChosenPosition = mList.size() - 1;
             }
         }
 
@@ -1217,4 +1215,3 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
         }
     }
 }
-
