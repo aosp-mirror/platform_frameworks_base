@@ -526,8 +526,8 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jl
                         c++;
                     }
                     pss += atoi(c);
-                } else if (strncmp(line, "Private_Clean:", 14)
-                        || strncmp(line, "Private_Dirty:", 14)) {
+                } else if (strncmp(line, "Private_Clean:", 14) == 0
+                        || strncmp(line, "Private_Dirty:", 14) == 0) {
                     char* c = line + 14;
                     while (*c != 0 && (*c < '0' || *c > '9')) {
                         c++;
