@@ -430,9 +430,9 @@ void RenderNode::setViewProperties(OpenGLRenderer& renderer, T& handler) {
                 clipFlags = 0; // all clipping done by saveLayer
             }
 
-            ATRACE_FORMAT("%s alpha caused %ssaveLayer %ux%u",
+            ATRACE_FORMAT("%s alpha caused %ssaveLayer %dx%d",
                     getName(), clipFlags ? "" : "unclipped ",
-                    layerBounds.getWidth(), layerBounds.getHeight());
+                    (int)layerBounds.getWidth(), (int)layerBounds.getHeight());
 
             SaveLayerOp* op = new (handler.allocator()) SaveLayerOp(
                     layerBounds.left, layerBounds.top, layerBounds.right, layerBounds.bottom,
