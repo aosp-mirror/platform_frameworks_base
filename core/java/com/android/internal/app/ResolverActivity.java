@@ -956,6 +956,13 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 // Process last group
                 processGroup(currentResolveList, start, (N-1), r0, r0Label);
             }
+
+            // Layout doesn't handle both profile button and last chosen
+            // so disable last chosen if profile button is present.
+            if (mOtherProfile != null && mLastChosenPosition >= 0) {
+                mLastChosenPosition = -1;
+                mFilterLastUsed = false;
+            }
         }
 
         private void processGroup(List<ResolveInfo> rList, int start, int end, ResolveInfo ro,
