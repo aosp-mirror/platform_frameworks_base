@@ -60,7 +60,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                     DEFAULT_ICON);
 
             // Verify low inet number indexing.
-            setConnectivity(10, ConnectivityManager.TYPE_MOBILE, true);
+            setConnectivity(0, ConnectivityManager.TYPE_MOBILE, true);
             verifyLastMobileDataIndicators(true,
                     TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH[0][testStrength], 0);
         }
