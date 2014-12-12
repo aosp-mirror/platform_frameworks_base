@@ -111,14 +111,23 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
         public void run() {
             RecentsConfiguration config = RecentsConfiguration.getInstance();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
+                ActivityManager.RunningTaskInfo runningTaskInfo = getTopMostTask();
+
                 // Load the next task only if we aren't svelte
                 RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
                 RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
                 loader.preloadTasks(plan, true /* isTopTaskHome */);
                 RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
-                launchOpts.numVisibleTasks = 1;
-                launchOpts.numVisibleTaskThumbnails = 1;
+                // This callback is made when a new activity is launched and the old one is paused
+                // so ignore the current activity and try and preload the thumbnail for the
+                // previous one.
+                if (runningTaskInfo != null) {
+                    launchOpts.runningTaskId = runningTaskInfo.id;
+                }
+                launchOpts.numVisibleTasks = 2;
+                launchOpts.numVisibleTaskThumbnails = 2;
                 launchOpts.onlyLoadForCache = true;
+                launchOpts.onlyLoadPausedActivities = true;
                 loader.loadTasks(mContext, plan, launchOpts);
             }
         }
