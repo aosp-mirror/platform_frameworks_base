@@ -6068,6 +6068,17 @@ public class Activity extends ContextThemeWrapper
                 " did not call through to super.onResume()");
         }
 
+        // invisible activities must be finished before onResume() completes
+        if (!mVisibleFromClient && !mFinished) {
+            Log.w(TAG, "An activity without a UI must call finish() before onResume() completes");
+            if (getApplicationInfo().targetSdkVersion
+                    > android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
+                throw new IllegalStateException(
+                        "Activity " + mComponent.toShortString() +
+                        " did not call finish() prior to onResume() completing");
+            }
+        }
+
         // Now really resume, and install the current status bar and menu.
         mCalled = false;
 
