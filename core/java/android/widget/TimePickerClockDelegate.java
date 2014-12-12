@@ -33,9 +33,11 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.AccessibilityDelegate;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import com.android.internal.R;
 
@@ -136,9 +138,13 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         // Set up hour/minute labels.
         mHourView = (TextView) mHeaderView.findViewById(R.id.hours);
         mHourView.setOnClickListener(mClickListener);
+        mHourView.setAccessibilityDelegate(
+                new ClickActionDelegate(context, R.string.select_hours));
         mSeparatorView = (TextView) mHeaderView.findViewById(R.id.separator);
         mMinuteView = (TextView) mHeaderView.findViewById(R.id.minutes);
         mMinuteView.setOnClickListener(mClickListener);
+        mMinuteView.setAccessibilityDelegate(
+                new ClickActionDelegate(context, R.string.select_minutes));
 
         final int headerTimeTextAppearance = a.getResourceId(
                 R.styleable.TimePicker_headerTimeTextAppearance, 0);
@@ -204,6 +210,22 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         final int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
         final int currentMinute = calendar.get(Calendar.MINUTE);
         initialize(currentHour, currentMinute, false /* 12h */, HOUR_INDEX);
+    }
+
+    private static class ClickActionDelegate extends AccessibilityDelegate {
+        private final AccessibilityAction mClickAction;
+
+        public ClickActionDelegate(Context context, int resId) {
+            mClickAction = new AccessibilityAction(
+                    AccessibilityNodeInfo.ACTION_CLICK, context.getString(resId));
+        }
+
+        @Override
+        public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(host, info);
+
+            info.addAction(mClickAction);
+        }
     }
 
     private int computeStableWidth(TextView v, int maxNumber) {
