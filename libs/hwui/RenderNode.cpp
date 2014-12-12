@@ -282,7 +282,7 @@ void RenderNode::pushStagingPropertiesChanges(TreeInfo& info) {
     }
 }
 
-void RenderNode::applyLayerPropertiesToLayer(TreeInfo& /* info */) {
+void RenderNode::applyLayerPropertiesToLayer(TreeInfo& info) {
     if (CC_LIKELY(!mLayer)) return;
 
     const LayerProperties& props = properties().layerProperties();
@@ -589,7 +589,7 @@ public:
         operation->defer(mDeferStruct, saveCount, mLevel, clipToBounds);
     }
     inline LinearAllocator& allocator() { return *(mDeferStruct.mAllocator); }
-    inline void startMark(const char* /* name */) {} // do nothing
+    inline void startMark(const char* name) {} // do nothing
     inline void endMark() {}
     inline int level() { return mLevel; }
     inline int replayFlags() { return mDeferStruct.mReplayFlags; }
