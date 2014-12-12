@@ -185,6 +185,7 @@ public class BluetoothTile extends QSTile<QSTile.BooleanState>  {
             mItems.setEmptyState(R.drawable.ic_qs_bluetooth_detail_empty,
                     R.string.quick_settings_bluetooth_detail_empty_text);
             mItems.setCallback(this);
+            mItems.setMinHeightInItems(0);
             updateItems();
             setItemsVisible(mState.value);
             return mItems;
