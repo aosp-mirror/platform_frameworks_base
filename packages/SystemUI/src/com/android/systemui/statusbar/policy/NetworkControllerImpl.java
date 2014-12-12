@@ -265,7 +265,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     private MobileSignalController getDataController() {
         int dataSubId = SubscriptionManager.getDefaultDataSubId();
-        if (dataSubId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+        if (!SubscriptionManager.isValidSubscriptionId(dataSubId)) {
             if (DEBUG) Log.e(TAG, "No data sim selected");
             return mDefaultSignalController;
         }
@@ -283,8 +283,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     public boolean isEmergencyOnly() {
         int voiceSubId = SubscriptionManager.getDefaultVoiceSubId();
-        if (voiceSubId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
-            for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
+        if (!SubscriptionManager.isValidSubscriptionId(voiceSubId)) {
+            for (MobileSignalController mobileSignalController :
+                                            mMobileSignalControllers.values()) {
                 if (!mobileSignalController.isEmergencyOnly()) {
                     return false;
                 }
@@ -397,7 +398,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         } else {
             int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID);
-            if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            if (SubscriptionManager.isValidSubscriptionId(subId)) {
                 if (mMobileSignalControllers.containsKey(subId)) {
                     mMobileSignalControllers.get(subId).handleBroadcast(intent);
                 } else {
@@ -1265,7 +1266,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
         private void updateDataSim() {
             int defaultDataSub = SubscriptionManager.getDefaultDataSubId();
-            if (SubscriptionManager.isValidSubId(defaultDataSub)) {
+            if (SubscriptionManager.isValidSubscriptionId(defaultDataSub)) {
                 mCurrentState.dataSim = defaultDataSub == mSubscriptionInfo.getSubscriptionId();
             } else {
                 // There doesn't seem to be a data sim selected, however if
