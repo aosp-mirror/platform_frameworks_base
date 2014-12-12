@@ -1184,6 +1184,13 @@ public class RenderScript {
             mApplicationContext = ctx.getApplicationContext();
         }
         mRWLock = new ReentrantReadWriteLock();
+        try {
+            registerNativeAllocation.invoke(sRuntime, 4 * 1024 * 1024 * 1024); // 4MB for GC sake
+        } catch (Exception e) {
+            Log.e(RenderScript.LOG_TAG, "Couldn't invoke registerNativeAllocation:" + e);
+            throw new RSRuntimeException("Couldn't invoke registerNativeAllocation:" + e);
+        }
+
     }
 
     /**
