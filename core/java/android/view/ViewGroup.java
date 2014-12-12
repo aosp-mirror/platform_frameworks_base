@@ -5113,7 +5113,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final int height = mBottom - mTop;
 
         boolean rectIsVisible = true;
-        if (mParent instanceof ViewGroup && ((ViewGroup)mParent).getClipChildren()) {
+        if (mParent == null ||
+                (mParent instanceof ViewGroup && ((ViewGroup) mParent).getClipChildren())) {
             // Clip to bounds.
             rectIsVisible = rect.intersect(0, 0, width, height);
         }
