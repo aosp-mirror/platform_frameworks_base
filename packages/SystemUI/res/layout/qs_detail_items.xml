@@ -49,4 +49,8 @@
             android:textAppearance="@style/TextAppearance.QS.DetailEmpty" />
     </LinearLayout>
 
+    <View
+        android:id="@+id/min_height_spacer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
 </com.android.systemui.qs.QSDetailItems>
