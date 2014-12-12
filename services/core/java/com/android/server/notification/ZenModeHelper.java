@@ -347,7 +347,10 @@ public class ZenModeHelper implements AudioManagerInternal.RingerModeDelegate {
                 break;
             case AudioManager.RINGER_MODE_VIBRATE:
             case AudioManager.RINGER_MODE_NORMAL:
-                if (mZenMode != Global.ZEN_MODE_OFF) {
+                if (isChange && ringerModeOld == AudioManager.RINGER_MODE_SILENT
+                        && mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                    newZen = Global.ZEN_MODE_OFF;
+                } else if (mZenMode != Global.ZEN_MODE_OFF) {
                     ringerModeExternalOut = AudioManager.RINGER_MODE_SILENT;
                 }
                 break;
