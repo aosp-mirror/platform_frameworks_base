@@ -164,11 +164,6 @@ public final class RemoteConference {
         return mState;
     }
 
-    /** @hide */
-    @Deprecated public final int getCallCapabilities() {
-        return getConnectionCapabilities();
-    }
-
     public final int getConnectionCapabilities() {
         return mConnectionCapabilities;
     }

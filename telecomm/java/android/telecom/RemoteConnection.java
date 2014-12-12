@@ -73,11 +73,6 @@ public final class RemoteConnection {
          */
         public void onRingbackRequested(RemoteConnection connection, boolean ringback) {}
 
-        /** @hide */
-        @Deprecated public void onCallCapabilitiesChanged(
-                RemoteConnection connection,
-                int callCapabilities) {}
-
         /**
          * Indicates that the call capabilities of this {@code RemoteConnection} have changed.
          * See {@link #getConnectionCapabilities()}.
@@ -842,7 +837,6 @@ public final class RemoteConnection {
         mConnectionCapabilities = connectionCapabilities;
         for (Callback c : mCallbacks) {
             c.onConnectionCapabilitiesChanged(this, connectionCapabilities);
-            c.onCallCapabilitiesChanged(this, connectionCapabilities);
         }
     }
 
