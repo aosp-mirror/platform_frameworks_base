@@ -136,13 +136,36 @@ public class RadioAccessFamily implements Parcelable {
     };
 
     public static int getRafFromNetworkType(int type) {
-        // TODO map from RILConstants.NETWORK_TYPE_* to RAF_*
         switch (type) {
             case RILConstants.NETWORK_MODE_WCDMA_PREF:
-            case RILConstants.NETWORK_MODE_GSM_UMTS:
-                return RAF_UMTS | RAF_GSM;
+                return RAF_GSM | RAF_UMTS | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
             case RILConstants.NETWORK_MODE_GSM_ONLY:
                 return RAF_GSM;
+            case RILConstants.NETWORK_MODE_WCDMA_ONLY:
+                return RAF_UMTS | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+            case RILConstants.NETWORK_MODE_GSM_UMTS:
+                return RAF_GSM | RAF_UMTS | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+            case RILConstants.NETWORK_MODE_CDMA:
+                return RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B | RAF_IS95A | RAF_IS95B | RAF_1xRTT;
+            case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO:
+                return RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B | RAF_IS95A | RAF_IS95B | RAF_1xRTT
+                        | RAF_EHRPD;
+            case RILConstants.NETWORK_MODE_LTE_GSM_WCDMA:
+                return RAF_GSM | RAF_UMTS | RAF_LTE | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+            case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA:
+                return RAF_GSM | RAF_UMTS | RAF_LTE | RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B
+                        | RAF_IS95A | RAF_IS95B | RAF_1xRTT | RAF_EHRPD | RAF_HSUPA | RAF_HSDPA
+                        | RAF_HSPA | RAF_HSPAP;
+            case RILConstants.NETWORK_MODE_LTE_ONLY:
+                return RAF_LTE;
+            case RILConstants.NETWORK_MODE_LTE_WCDMA:
+                return RAF_LTE | RAF_UMTS | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+            case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
+                return RAF_UNKNOWN;
+            case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
+                return RAF_UNKNOWN;
+            case RILConstants.NETWORK_MODE_GLOBAL:
+                return RAF_UNKNOWN;
             default:
                 return RAF_UNKNOWN;
         }
