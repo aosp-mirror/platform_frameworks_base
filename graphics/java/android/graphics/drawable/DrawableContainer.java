@@ -447,36 +447,10 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
             mCurrDrawable = d;
             mCurIndex = idx;
             if (d != null) {
-                d.mutate();
                 if (mDrawableContainerState.mEnterFadeDuration > 0) {
                     mEnterAnimationEnd = now + mDrawableContainerState.mEnterFadeDuration;
-                } else if (mHasAlpha) {
-                    d.setAlpha(mAlpha);
                 }
-                if (mDrawableContainerState.mHasColorFilter) {
-                    // Color filter always overrides tint.
-                    d.setColorFilter(mDrawableContainerState.mColorFilter);
-                } else {
-                    if (mDrawableContainerState.mHasTintList) {
-                        d.setTintList(mDrawableContainerState.mTintList);
-                    }
-                    if (mDrawableContainerState.mHasTintMode) {
-                        d.setTintMode(mDrawableContainerState.mTintMode);
-                    }
-                }
-                d.setVisible(isVisible(), true);
-                d.setDither(mDrawableContainerState.mDither);
-                d.setState(getState());
-                d.setLevel(getLevel());
-                d.setBounds(getBounds());
-                d.setLayoutDirection(getLayoutDirection());
-                d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
-
-                final Rect hotspotBounds = mHotspotBounds;
-                if (hotspotBounds != null) {
-                    d.setHotspotBounds(hotspotBounds.left, hotspotBounds.top,
-                            hotspotBounds.right, hotspotBounds.bottom);
-                }
+                initializeDrawableForDisplay(d);
             }
         } else {
             mCurrDrawable = null;
@@ -501,6 +475,45 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         invalidateSelf();
 
         return true;
+    }
+
+    /**
+     * Initializes a drawable for display in this container.
+     *
+     * @param d The drawable to initialize.
+     */
+    private void initializeDrawableForDisplay(Drawable d) {
+        d.mutate();
+
+        if (mDrawableContainerState.mEnterFadeDuration <= 0 && mHasAlpha) {
+            d.setAlpha(mAlpha);
+        }
+
+        if (mDrawableContainerState.mHasColorFilter) {
+            // Color filter always overrides tint.
+            d.setColorFilter(mDrawableContainerState.mColorFilter);
+        } else {
+            if (mDrawableContainerState.mHasTintList) {
+                d.setTintList(mDrawableContainerState.mTintList);
+            }
+            if (mDrawableContainerState.mHasTintMode) {
+                d.setTintMode(mDrawableContainerState.mTintMode);
+            }
+        }
+
+        d.setVisible(isVisible(), true);
+        d.setDither(mDrawableContainerState.mDither);
+        d.setState(getState());
+        d.setLevel(getLevel());
+        d.setBounds(getBounds());
+        d.setLayoutDirection(getLayoutDirection());
+        d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+
+        final Rect hotspotBounds = mHotspotBounds;
+        if (hotspotBounds != null) {
+            d.setHotspotBounds(hotspotBounds.left, hotspotBounds.top,
+                    hotspotBounds.right, hotspotBounds.bottom);
+        }
     }
 
     void animate(boolean schedule) {
@@ -1136,9 +1149,14 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         // The locally cached drawables may have changed.
         if (mCurIndex >= 0) {
             mCurrDrawable = state.getChild(mCurIndex);
+            if (mCurrDrawable != null) {
+                initializeDrawableForDisplay(mCurrDrawable);
+            }
         }
-        if (mLastIndex >= 0) {
-            mLastDrawable = state.getChild(mLastIndex);
-        }
+
+        // Clear out the last drawable. We don't have enough information to
+        // propagate local state from the past.
+        mLastIndex = -1;
+        mLastDrawable = null;
     }
 }
