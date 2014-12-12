@@ -2165,7 +2165,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 mStatusBar = win;
                 mStatusBarController.setWindow(win);
-                mKeyguardDelegate.hideScrim();
                 break;
             case TYPE_NAVIGATION_BAR:
                 mContext.enforceCallingOrSelfPermission(
