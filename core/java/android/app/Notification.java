@@ -4000,7 +4000,7 @@ public class Notification implements Parcelable
      *
      * Unlike the other styles provided here, MediaStyle can also modify the standard-size
      * {@link Notification#contentView}; by providing action indices to
-     * {@link #setShowActionsInCompactView(int...)} you can promote up to 2 actions to be displayed
+     * {@link #setShowActionsInCompactView(int...)} you can promote up to 3 actions to be displayed
      * in the standard view alongside the usual content.
      *
      * Notifications created with MediaStyle will have their category set to
