@@ -777,9 +777,11 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
                 v.bringToFront();
                 v.setVisibility(VISIBLE);
             }
+            if (v.hasOverlappingRendering()) {
+                v.animate().withLayer();
+            }
             v.animate()
                     .alpha(in ? 1 : 0)
-                    .withLayer()
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
