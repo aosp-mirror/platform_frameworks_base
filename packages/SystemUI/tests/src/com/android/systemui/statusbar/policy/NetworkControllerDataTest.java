@@ -1,9 +1,9 @@
 package com.android.systemui.statusbar.policy;
 
+import org.mockito.Mockito;
+
 import android.telephony.TelephonyManager;
 
-// WARNING: Many of these tests may fail with config showMin3G.
-// TODO: Maybe fix the above.
 public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
     public void test3gDataIcon() {
@@ -57,7 +57,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_LTE);
 
-        // WARNING: May fail depending on config.
         verifyDataIndicators(TelephonyIcons.DATA_LTE[1][0 /* No direction */],
                 TelephonyIcons.QS_DATA_LTE[1]);
     }
@@ -67,9 +66,40 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
                 TelephonyManager.NETWORK_TYPE_HSPA);
 
-        // WARNING: May fail depending on config.
         verifyDataIndicators(TelephonyIcons.DATA_H[1][0 /* No direction */],
                 TelephonyIcons.QS_DATA_H[1]);
+    }
+
+    public void test4gDataIcon() {
+        // Switch to showing 4g icon and re-initialize the NetworkController.
+        mConfig.show4gForLte = true;
+        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm, mMockWm, mMockSm,
+                mConfig, Mockito.mock(AccessPointControllerImpl.class),
+                Mockito.mock(MobileDataControllerImpl.class));
+        setupNetworkController();
+
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        verifyDataIndicators(TelephonyIcons.DATA_4G[1][0 /* No direction */],
+                TelephonyIcons.QS_DATA_4G[1]);
+    }
+
+    public void test4gDataIconConfigChange() {
+        setupDefaultSignal();
+        updateDataConnectionState(TelephonyManager.DATA_CONNECTED,
+                TelephonyManager.NETWORK_TYPE_LTE);
+
+        // Switch to showing 4g icon and re-initialize the NetworkController.
+        mConfig.show4gForLte = true;
+        // Can't send the broadcast as that would actually read the config from
+        // the context.  Instead we'll just poke at a function that does all of
+        // the after work.
+        mNetworkController.handleConfigurationChanged();
+
+        verifyDataIndicators(TelephonyIcons.DATA_4G[1][0 /* No direction */],
+                TelephonyIcons.QS_DATA_4G[1]);
     }
 
     public void testDataActivity() {
