@@ -118,7 +118,7 @@ public class KeyguardSimPukView extends KeyguardPinBasedInputView {
             state = ENTER_PUK;
             KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
             mSubId = monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED);
-            if (mSubId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            if (SubscriptionManager.isValidSubscriptionId(mSubId)) {
                 int count = TelephonyManager.getDefault().getSimCount();
                 Resources rez = getResources();
                 final String msg;
