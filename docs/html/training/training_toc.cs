@@ -838,8 +838,8 @@ include the action bar on devices running Android 2.1 or higher."
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/wearables/watch-faces/index.html"
-             description="How to create custom watch faces for wearables."
-            >Creating Custom Watch Faces</a>
+             description="How to create watch faces for wearables."
+            >Creating Watch Faces</a>
         </div>
         <ul>
           <li>
