@@ -165,8 +165,9 @@ public class ZygoteInit {
             }
 
             try {
-                sServerSocket = new LocalServerSocket(
-                        createFileDescriptor(fileDesc));
+                FileDescriptor fd = new FileDescriptor();
+                fd.setInt$(fileDesc);
+                sServerSocket = new LocalServerSocket(fd);
             } catch (IOException ex) {
                 throw new RuntimeException(
                         "Error binding to local socket '" + fileDesc + "'", ex);
@@ -781,16 +782,6 @@ public class ZygoteInit {
             FileDescriptor out, FileDescriptor err) throws IOException;
 
     /**
-     * Toggles the close-on-exec flag for the specified file descriptor.
-     *
-     * @param fd non-null; file descriptor
-     * @param flag desired close-on-exec flag state
-     * @throws IOException
-     */
-    static native void setCloseOnExec(FileDescriptor fd, boolean flag)
-            throws IOException;
-
-    /**
      * Invokes select() on the provider array of file descriptors (selecting
      * for readability only). Array elements of null are ignored.
      *
@@ -799,16 +790,6 @@ public class ZygoteInit {
      * @throws IOException if an error occurs
      */
     static native int selectReadable(FileDescriptor[] fds) throws IOException;
-
-    /**
-     * Creates a file descriptor from an int fd.
-     *
-     * @param fd integer OS file descriptor
-     * @return non-null; FileDescriptor instance
-     * @throws IOException if fd is invalid
-     */
-    static native FileDescriptor createFileDescriptor(int fd)
-            throws IOException;
 
     /**
      * Class not instantiable.

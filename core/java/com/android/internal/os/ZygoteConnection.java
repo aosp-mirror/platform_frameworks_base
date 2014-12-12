@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import static android.system.OsConstants.O_CLOEXEC;
+
 import android.net.Credentials;
 import android.net.LocalSocket;
 import android.os.Process;
@@ -186,10 +188,9 @@ class ZygoteConnection {
             }
 
             if (parsedArgs.runtimeInit && parsedArgs.invokeWith != null) {
-                FileDescriptor[] pipeFds = Os.pipe();
+                FileDescriptor[] pipeFds = Os.pipe2(O_CLOEXEC);
                 childPipeFd = pipeFds[1];
                 serverPipeFd = pipeFds[0];
-                ZygoteInit.setCloseOnExec(serverPipeFd, true);
             }
 
             /**
@@ -224,8 +225,6 @@ class ZygoteConnection {
                     parsedArgs.debugFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
                     parsedArgs.niceName, fdsToClose, parsedArgs.instructionSet,
                     parsedArgs.appDataDir);
-        } catch (IOException ex) {
-            logAndPrintError(newStderr, "Exception creating pipe", ex);
         } catch (ErrnoException ex) {
             logAndPrintError(newStderr, "Exception creating pipe", ex);
         } catch (IllegalArgumentException ex) {

@@ -62,7 +62,8 @@ public class WrapperInit {
             // wrapper that it directly forked).
             if (fdNum != 0) {
                 try {
-                    FileDescriptor fd = ZygoteInit.createFileDescriptor(fdNum);
+                    FileDescriptor fd = new FileDescriptor();
+                    fd.setInt$(fdNum);
                     DataOutputStream os = new DataOutputStream(new FileOutputStream(fd));
                     os.writeInt(Process.myPid());
                     os.close();
