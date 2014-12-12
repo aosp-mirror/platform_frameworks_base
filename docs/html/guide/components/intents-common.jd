@@ -1027,7 +1027,7 @@ and include email details such as the recipient and subject using the extra keys
 <dt><b>MIME Type</b></dt>
 <dd>
   <dl>
-    <dt>{@link org.apache.http.protocol.HTTP#PLAIN_TEXT_TYPE} ("text/plain")
+    <dt><code>"text/plain"</code>
     <dt><code>"*/*"</code>
   </dl>
 </dd>
@@ -2447,7 +2447,7 @@ details such as the phone number, subject, and message body using the extra keys
 <dt><b>MIME Type</b></dt>
 <dd>
   <dl>
-    <dt>{@link org.apache.http.protocol.HTTP#PLAIN_TEXT_TYPE} (<code>"text/plain"</code>)
+    <dt><code>"text/plain"</code>
     <dt><code>"image/*"</code>
     <dt><code>"video/*"</code>
   </dl>
@@ -2558,7 +2558,7 @@ and specify the web URL in the intent data.</p>
   <dt><b>MIME Type</b></dt>
   <dd>
     <dl>
-      <dt>{@link org.apache.http.protocol.HTTP#PLAIN_TEXT_TYPE} (<code>"text/plain"</code>)
+      <dt><code>"text/plain"</code>
       <dt><code>"text/html"</code>
       <dt><code>"application/xhtml+xml"</code>
       <dt><code>"application/vnd.wap.xhtml+xml"</code>
