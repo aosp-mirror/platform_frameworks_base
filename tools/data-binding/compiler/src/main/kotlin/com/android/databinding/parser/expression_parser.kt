@@ -32,9 +32,6 @@ import com.android.databinding.parser.VariableRef
 import com.android.databinding.parser.SymbolExpr
 import com.android.databinding.util.Log
 
-/**
- * Created by yboyar on 11/16/14.
- */
 class ExpressionParser {
     val model = ExprModel()
     val visitor = ExprVisitor(model)

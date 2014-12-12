@@ -21,9 +21,6 @@ import com.android.databinding.ext.joinToCamelCaseAsVar
 import com.android.databinding.ext.joinIndented
 import com.android.databinding.ext.joinIndentedExceptFirst
 
-/**
- * Created by yboyar on 11/11/14.
- */
 public fun String.extractAndroidId() : String = this.split("/")[1]
 
 public fun String.times(x : Int) : String = 0.rangeTo(x-1).map { this }.join("")

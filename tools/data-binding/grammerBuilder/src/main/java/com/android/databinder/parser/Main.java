@@ -20,9 +20,6 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-/**
- * Created by yboyar on 11/15/14.
- */
 public class Main {
     static String input = "`name` + last_name";
     static class Field {

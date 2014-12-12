@@ -18,9 +18,6 @@ package com.android.databinding.library;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
-/**
- * Created by yboyar on 11/9/14.
- */
 public class BaseObservable implements Observable {
     final ObservableHelper mHelper;
 

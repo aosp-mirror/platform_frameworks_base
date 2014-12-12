@@ -27,9 +27,6 @@ import com.android.databinding.ext.toCamelCaseAsVar
 import com.android.databinding.ext.joinIndentedExceptFirst
 import com.android.databinding.ext.joinIndented
 
-/**
- * Created by yboyar on 11/17/14.
- */
 class ViewExprBinderRenderer(val pkg: String, val projectPackage: String, val baseClassName: String,
         val layoutName:String, val lb: LayoutExprBinding) {
     val className = "${baseClassName}Impl"

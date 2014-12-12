@@ -18,10 +18,6 @@ package com.android.databinding.ext
 
 import org.w3c.dom.Node
 
-/**
- * Created by yboyar on 11/11/14.
- */
-
 public fun Node.getAndroidId() : String? =
     getAttributes()?.getNamedItem("android:id")?.getNodeValue()
 

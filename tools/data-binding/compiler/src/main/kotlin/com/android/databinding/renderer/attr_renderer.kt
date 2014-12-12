@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Created by yboyar on 11/10/14.
- */
 package com.android.databinding.renderer
 
 import java.util.TreeSet

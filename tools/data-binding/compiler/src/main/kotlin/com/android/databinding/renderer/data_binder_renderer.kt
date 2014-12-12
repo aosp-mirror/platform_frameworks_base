@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/**
- * Created by yboyar on 11/8/14.
- */
 package com.android.databinding.renderer
 
 class DataBinderRenderer(val pkg: String, val projectPackage: String, val className: String, val renderers : List<ViewExprBinderRenderer> ) {

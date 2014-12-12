@@ -26,9 +26,6 @@ import android.view.ViewGroup;
 import java.lang.ref.WeakReference;
 import java.util.WeakHashMap;
 
-/**
- * Created by yboyar on 11/8/14.
- */
 public class DataBinder {
 
     static DataBinderMapper sMapper;

@@ -2,9 +2,6 @@ package com.birbit.android.bindingdemo.vo;
 
 import com.birbit.android.bindingdemo.R;
 
-/**
- * Created by yboyar on 11/19/14.
- */
 public class Users {
     public static final User[] robots = new User[]{
             new User("romain", "guy", R.drawable.romain, User.ROBOT),

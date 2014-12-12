@@ -21,9 +21,6 @@ import com.android.databinding.ext.toCamelCaseAsVar
 import com.android.databinding.ext.times
 import com.android.databinding.ext.getIndentation
 
-/**
- * Created by yboyar on 11/11/14.
- */
 public fun List<String>.joinToCamelCase(): String = when(size()) {
     0 -> throw IllegalArgumentException("invalid section size, cannot be zero")
     1 -> this.get(0).toCamelCase()

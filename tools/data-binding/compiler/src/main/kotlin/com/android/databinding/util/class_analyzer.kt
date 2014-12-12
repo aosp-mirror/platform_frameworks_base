@@ -22,9 +22,6 @@ import com.android.databinding.ext.toCamelCase
 import com.android.databinding.util.Log
 import java.lang.reflect.Modifier
 
-/**
- * Created by yboyar on 11/12/14.
- */
 public fun Class<*>.isObservable() : Boolean = ClassAnalyzer.instance.observable.isAssignableFrom(this)
 
 public fun Class<*>.getCodeName() : String = getName().replace("$", ".")

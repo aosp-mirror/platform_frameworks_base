@@ -32,10 +32,6 @@ import com.android.databinding.util.Log
 import com.android.databinding.ext.joinToCamelCaseAsVar
 import com.android.databinding.util.isObservable
 
-/**
- * Created by yboyar on 11/17/14.
- */
-
 class Binding(val target : BindingTarget, val targetFieldName : String, val expr : Expr) {
     // which variables effect the result of this binding
     // ordered by depth

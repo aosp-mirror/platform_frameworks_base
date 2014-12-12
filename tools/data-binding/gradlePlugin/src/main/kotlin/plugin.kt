@@ -129,11 +129,6 @@ class DataBinderPlugin : Plugin<Project> {
         //TODO
         val codeGenTargetFolder = variantData.generateRClassTask.getSourceOutputDir()
         val resGenTargetFolder = variantData.generateRClassTask.getResDir()
-//        variantData.getExtraGeneratedSourceFolders().forEach {
-//            log("extra source gen folder ${it}")
-//        }
-//        val codeGenTargetFolder = File(sources[2].toString())//File("/Users/yboyar/Desktop/tmp/binding")//variantData.processResourcesTask.getSourceOutputDir()
-//        val resGenTargetFolder = File(sources[2].toString())//File("/Users/yboyar/Desktop/tmp/binding")//variantData.processResourcesTask.getResDir()
         variantData.addJavaSourceFoldersToModel(codeGenTargetFolder)
         val jCompileTask = variantData.javaCompileTask
         val dexTask = variantData.dexTask
@@ -171,8 +166,6 @@ class DataBinderPlugin : Plugin<Project> {
         val dexTask = variantData.dexTask
         log("dex task files: ${dexTask.getInputFiles()} ${dexTask.getInputFiles().javaClass}")
         log("compile CP: ${jCompileTask.getClasspath().getAsPath()}")
-        //TODO get from target sdk
-        //val jarUrl = File("/Users/yboyar/android/sdk/platforms/android-21/android.jar").toURI().toURL()
         val jarUrl = androidJar.toURI().toURL()
         val androidClassLoader = URLClassLoader(array(jarUrl))
         val cpFiles = arrayListOf<File>()

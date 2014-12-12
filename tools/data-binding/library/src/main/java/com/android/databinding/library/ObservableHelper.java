@@ -18,9 +18,6 @@ package com.android.databinding.library;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
-/**
- * Created by yboyar on 11/19/14.
- */
 public class ObservableHelper implements Observable {
     final Observable owner;
     CopyOnWriteArraySet<ObservableListener> mListeners;

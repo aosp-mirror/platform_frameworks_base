@@ -21,10 +21,6 @@ import java.util.HashSet
 import com.android.databinding.vo.Variable
 import com.android.databinding.util.Log
 
-/**
- * Created by yboyar on 11/16/14.
- */
-
 public open class ExprModel {
     var start : Expr by Delegates.notNull()
     val variables = hashMapOf<String, VariableRef>()
