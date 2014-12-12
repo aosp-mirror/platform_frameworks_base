@@ -15,8 +15,8 @@ studio.mac_bundle_bytes=245757810
 studio.mac_bundle_checksum=0d9e0e230ece9f2e696b1b076c36ee1e73edcf3c
 
 studio.win_bundle_exe_download=android-studio-bundle-135.1629389.exe
-studio.win_bundle_exe_bytes=852499624
-studio.win_bundle_exe_checksum=0c8a3b45385a698b43a47757fdd6a83ca837abd2
+studio.win_bundle_exe_bytes=868337656
+studio.win_bundle_exe_checksum=1931dbaeadb52f5e0a8ba6e2ae60d9df20b2076b
 
 studio.win_notools_exe_download=android-studio-ide-135.1629389.exe
 studio.win_notools_exe_bytes=262099808
