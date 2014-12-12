@@ -123,12 +123,12 @@ void CanvasContext::updateSurface(ANativeWindow* window) {
     setSurface(window);
 }
 
-bool CanvasContext::pauseSurface(ANativeWindow* /* window */) {
+bool CanvasContext::pauseSurface(ANativeWindow* window) {
     return mRenderThread.removeFrameCallback(this);
 }
 
 // TODO: don't pass viewport size, it's automatic via EGL
-void CanvasContext::setup(int /* width */, int /* height */, const Vector3& lightCenter,
+void CanvasContext::setup(int width, int height, const Vector3& lightCenter,
         float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     if (!mCanvas) return;
     mCanvas->initLight(lightCenter, lightRadius, ambientShadowAlpha, spotShadowAlpha);
