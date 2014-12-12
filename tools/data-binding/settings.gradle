@@ -1,0 +1,4 @@
+include ':library'
+include ':compiler'
+include ':gradlePlugin'
+include ':grammerBuilder'
