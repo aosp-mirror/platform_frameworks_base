@@ -1159,8 +1159,13 @@ public class AudioService extends IAudioService.Stub {
         synchronized (mHdmiManager) {
             if (!mHdmiSystemAudioSupported) return;
             synchronized (mHdmiTvClient) {
-                mHdmiTvClient.setSystemAudioVolume(
-                        (oldVolume + 5) / 10, (newVolume + 5) / 10, maxVolume);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mHdmiTvClient.setSystemAudioVolume(
+                            (oldVolume + 5) / 10, (newVolume + 5) / 10, maxVolume);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         }
     }
@@ -1538,15 +1543,14 @@ public class AudioService extends IAudioService.Stub {
     private void setSystemAudioMute(boolean state) {
         if (mHdmiManager == null || mHdmiTvClient == null) return;
         synchronized (mHdmiManager) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                synchronized (mHdmiTvClient) {
-                    if (mHdmiSystemAudioSupported) {
-                        mHdmiTvClient.setSystemAudioMute(state);
-                    }
+            if (!mHdmiSystemAudioSupported) return;
+            synchronized (mHdmiTvClient) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mHdmiTvClient.setSystemAudioMute(state);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
                 }
-            } finally {
-                Binder.restoreCallingIdentity(token);
             }
         }
     }
