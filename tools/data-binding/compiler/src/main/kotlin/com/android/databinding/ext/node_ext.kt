@@ -17,6 +17,8 @@
 package com.android.databinding.ext
 
 import org.w3c.dom.Node
+import org.w3c.dom.NodeList
+import java.util.ArrayList
 
 public fun Node.getAndroidId() : String? =
     getAttributes()?.getNamedItem("android:id")?.getNodeValue()
@@ -34,4 +36,21 @@ public fun Node.getAndroidIdPath(includeRoot : Boolean) : List<String> {
     }
     return ids
 }
+
+public fun NodeList.forEach( f : (Node) -> Unit ) {
+    val cnt = getLength()
+    if (cnt == 0) return
+    for (i in 0..cnt - 1) {
+        f(item(i))
+    }
+}
+public fun NodeList.toArrayList() : ArrayList<Node> {
+    val cnt = getLength()
+    val arrayList = arrayListOf<Node>()
+    for (i in 0..cnt - 1) {
+        arrayList.add(item(i))
+    }
+    return arrayList
+}
+
 

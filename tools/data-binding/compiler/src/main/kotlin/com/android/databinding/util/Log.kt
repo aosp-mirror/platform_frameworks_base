@@ -20,4 +20,8 @@ object Log {
     fun d(s : String) {
         System.out.println("[debug] $s")
     }
+
+    fun d(f : () -> String) {
+        System.out.println("[debug] ${f()}")
+    }
 }

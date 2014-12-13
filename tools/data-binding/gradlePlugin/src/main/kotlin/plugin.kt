@@ -74,14 +74,13 @@ class DataBinderPlugin : Plugin<Project> {
             // TODO read from app
             val variants = arrayListOf("Debug")
             parser = createKParser(project)
-            parser.process()
             log("after eval")
             //processDebugResources
             variants.forEach { variant ->
-                val preTasks = it.getTasksByName("pre${variant}Build", true)
-                preTasks.forEach {
-                    it.doLast (generateAttr)
-                }
+//                val preTasks = it.getTasksByName("pre${variant}Build", true)
+//                preTasks.forEach {
+//                    it.doLast (generateAttr)
+//                }
                 val processResTasks = it.getTasksByName("process${variant}Resources", true)
                 processResTasks.forEach {
                     it.doFirst (generateAttr)
@@ -125,7 +124,8 @@ class DataBinderPlugin : Plugin<Project> {
         sources.forEach({
             log("source: ${it}");
         })
-        val resourceFolders = variantData.mergeResourcesTask.getRawInputFolders()
+        val resourceFolders = arrayListOf(variantData.mergeResourcesTask.getOutputDir())
+        log("MERGE RES OUTPUT ${variantData.mergeResourcesTask.getOutputDir()}")
         //TODO
         val codeGenTargetFolder = variantData.generateRClassTask.getSourceOutputDir()
         val resGenTargetFolder = variantData.generateRClassTask.getResDir()
@@ -214,6 +214,7 @@ class DataBinderPlugin : Plugin<Project> {
     }
 
     fun generateAttr(o: Any?) {
+        parser.processIfNecessary()
         log("generate attr ${o}")
         parser.writeAttrFile()
     }
@@ -227,6 +228,7 @@ class DataBinderPlugin : Plugin<Project> {
     }
 
     fun generateBrFile(o: Any?) {
+        parser.processIfNecessary()
         log("generating BR ${o}")
         parser.writeBrFile()
         parser.writeViewBinderInterfaces()

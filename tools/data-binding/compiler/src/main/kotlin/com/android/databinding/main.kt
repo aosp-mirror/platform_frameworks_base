@@ -48,7 +48,15 @@ import com.android.databinding.vo.LayoutExprBinding
 import com.android.databinding.vo.VariableScope
 import com.android.databinding.vo.VariableDefinition
 import com.android.databinding.vo.BindingTarget
-
+import javax.xml.namespace.NamespaceContext
+import com.android.databinding.ext.forEach
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.dom.DOMSource
+import java.io.FileOutputStream
+import com.android.databinding.ext.toArrayList
+import com.android.databinding.util.XmlEditor
+import com.android.databinding.util.Log
 
 
 public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Iterable<File>,
@@ -57,6 +65,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
     var dbr : DataBinderRenderer by Delegates.notNull()
     var styler : AttrRenderer by Delegates.notNull()
     val viewExprBinderRenderers = arrayListOf<ViewExprBinderRenderer>()
+    var processed = false
     public var classAnalyzer : ClassAnalyzer by Delegates.notNull()
 
     val outputResDir by Delegates.lazy { File(outputResBaseDir, "values") }
@@ -69,6 +78,15 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         File(outputBaseDir.getAbsolutePath() + "/" + dbr.pkg.replace('.','/'))
     }
 
+    class object {
+        val XPATH_VARIABLE_DEFINITIONS = "//variable"
+        val XPATH_IMPORT_DEFINITIONS = "//import"
+        //val XPATH_BINDING_EXPR = "//@*[starts-with(name(), 'bind')]"
+        val XPATH_STATIC_BINDING_EXPR = "//@*[starts-with(name(), 'bind')]"
+        val XPATH_BINDING_2_EXPR = "//@*[starts-with(., '{') and substring(., string-length(.)) = '}']"
+        val XPATH_BINDING_ELEMENTS = "$XPATH_BINDING_2_EXPR/.."
+    }
+
     public fun analyzeClasses() {
         viewExprBinderRenderers.forEach {
             it.lb.analyzeVariables()
@@ -77,7 +95,14 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
 
     fun log (s : String) = System.out.println("LOG:$s");
 
-    public fun process() {
+    public fun processIfNecessary() {
+        if (!processed) {
+            processed = true
+            process()
+        }
+    }
+
+    fun process() {
         val xmlFiles = ArrayList<File>()
         resourceFolders.filter({it.exists()}).forEach {
             findLayoutFolders(it).forEach {
@@ -87,7 +112,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         //viewBinderRenderers.clear()
         for (xml in xmlFiles) {
             log("xmlFile $xml")
-            val exprBinding = parseXml3(xml)
+            val exprBinding = parseAndStripXml(xml)
             if (exprBinding == null) {
                 log("no bindings in $xml, skipping")
                 continue
@@ -103,7 +128,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
 
     public fun writeAttrFile() {
         outputResDir.mkdirs()
-        writeToFile(File(outputResDir, "bindingattrs.xml"), styler.render())
+//        writeToFile(File(outputResDir, "bindingattrs.xml"), styler.render())
     }
 
     public fun writeDbrFile() : Unit = writeDbrFile(dbrOutputDir)
@@ -149,73 +174,133 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
     private fun toLayoutId(name:String) : String =
             name.substring(0, name.indexOf("."))
 
-    private fun parseXml3(xml: File) : LayoutExprBinding? {
+    private fun stripBindingTags(xml  : File) {
+        val res = XmlEditor.strip(xml)
+        if (res != null) {
+            Log.d{"file ${xml.getName()} has changed, overwriting ${xml.getAbsolutePath()}"}
+            xml.writeText(res)
+        }
+    }
+
+    private fun stripFileAndGetOriginal(xml : File) : File? {
+        System.out.println("parsing resourceY file ${xml.getAbsolutePath()}")
         val factory = DocumentBuilderFactory.newInstance()
         val builder = factory.newDocumentBuilder()
         val doc = builder.parse(xml)
         val xPathFactory = XPathFactory.newInstance()
         val xPath = xPathFactory.newXPath()
+        val commentElementExpr = xPath.compile("//comment()[starts-with(., \" From: file:\")][last()]")
+        var commentElementNodes = commentElementExpr.evaluate(doc, XPathConstants.NODESET) as NodeList
+        System.out.println("comment element nodes count ${commentElementNodes.getLength()}")
+        if (commentElementNodes.getLength() == 0) {
+            System.out.println("cannot find comment element to find the actual file")
+            return null
+        }
+        val first = commentElementNodes.item(0)
+        val actualFilePath = first.getNodeValue().substring(" From: file:".length()).trim()
+        System.out.println("actual file to parse: ${actualFilePath}")
+        val actualFile = File(actualFilePath)
+        if (!actualFile.canRead()) {
+            System.out.println("cannot find original, skipping. ${actualFile.getAbsolutePath()}")
+            return null
+        }
+
+        // now if file has any binding expressions, find and delete them
+        val variableNodes = getVariableNodes(doc, xPath)
+        var changed = variableNodes.getLength() > 0 //TODO do we need to check more?
+        if (changed) {
+            stripBindingTags(xml)
+        }
+
+        return actualFile
+    }
+
+    private fun parseAndStripXml(xml : File) : LayoutExprBinding? {
+        val original = stripFileAndGetOriginal(xml)
+        return if (original == null) {
+            null
+        } else {
+            parseXml3(original)
+        }
+    }
+
+    private fun parseXml3(xml: File) : LayoutExprBinding? {
+        System.out.println("parsing file ${xml.getAbsolutePath()}")
+        val factory = DocumentBuilderFactory.newInstance()
+        val builder = factory.newDocumentBuilder()
+        val doc = builder.parse(xml)
+
+        val xPathFactory = XPathFactory.newInstance()
+        val xPath = xPathFactory.newXPath()
         //
         val layoutBinding = LayoutExprBinding(doc)
         val exprParser = ExpressionParser()
-        val varsExprs = xPath.compile("//@*[starts-with(name(), 'bind_var')]/..")
-        val varNodes = varsExprs.evaluate(doc, XPathConstants.NODESET) as NodeList
 
-        System.out.println("var node count" + varNodes.getLength())
-        for (i in 0..varNodes.getLength() - 1) {
-            val item = varNodes.item(i)
-            System.out.println("checking variable node $item")
+        val varElementNodes = getVariableNodes(doc, xPath)
+
+        System.out.println("varX element node count" + varElementNodes.getLength())
+        val variableScope = VariableScope(doc)//all variables global for now
+        for (i in 0..varElementNodes.getLength() - 1) {
+            val item = varElementNodes.item(i)
+            System.out.println("checking variable element node $item")
             val attributes = item.getAttributes()
-            val variableScope = VariableScope(item)
-            val attrCount = attributes.getLength()
-            for (j in 0..(attrCount - 1)) {
-                val attr = attributes.item(j)
-                val name = attr.getNodeName()
-                if (name.startsWith("bind_var:")) {
-                    variableScope.variables.add(VariableDefinition(name.substring("bind_var:".length), attr.getNodeValue()))
-                }
-            }
-            layoutBinding.addVariableScope(variableScope)
+            val variableName = attributes.getNamedItem("name").getNodeValue()
+            val variableType = attributes.getNamedItem("type").getNodeValue()
+            System.out.println("name:$variableName type:$variableType")
+            variableScope.variables.add(VariableDefinition(variableName, variableType))
         }
+        layoutBinding.addVariableScope(variableScope)
 
-        val expr = xPath.compile("//@*[starts-with(name(), 'bind')]/..")
-        val nodes = expr.evaluate(doc, XPathConstants.NODESET) as NodeList
-        System.out.println("binding node count " + nodes.getLength())
-        for (i in 0..nodes.getLength() - 1) {
-            val item = nodes.item(i)
-            System.out.println("checking node $item")
-            val attributes = item.getAttributes()
+        val bindingNodes = getBindingNodes(doc, xPath)
+        System.out.println("binding node count " + bindingNodes.getLength())
+        bindingNodes.forEach { parent ->
+            System.out.println("binding node: $parent")
+            val attributes = parent.getAttributes()
             val id = attributes.getNamedItem("android:id")
-            if (id == null) {
-                continue
-            }
-            val bindingTarget = BindingTarget(item, id.getNodeValue(), getFullViewClassName(item.getNodeName()))
-            val attrCount = attributes.getLength()
-            for (j in 0..(attrCount - 1)) {
-                val attr = attributes.item(j)
-                val name = attr.getNodeName()
-                if (name.startsWith("bind:")) {
-                    bindingTarget.addBinding(name.substring("bind:".length), exprParser.parse(attr.getNodeValue()))
+            if (id != null) {
+                val bindingTarget = BindingTarget(parent, id.getNodeValue(), getFullViewClassName(parent.getNodeName()))
+                val attrCount = attributes.getLength()
+                for (j in 0..(attrCount - 1)) {
+                    val attr = attributes.item(j)
+                    val value = attr.getNodeValue()
+                    if (value.first() == '{' && value.last() == '}') {
+                        val name = attr.getNodeName().split(":").last()
+                        val strippedValue = value.substring(1, value.length() - 1)
+                        bindingTarget.addBinding(name, exprParser.parse(strippedValue))
+                    }
                 }
+                layoutBinding.bindingTargets.add(bindingTarget)
             }
-            layoutBinding.bindingTargets.add(bindingTarget)
         }
+//        System.out.println("binding node count " + nodes.getLength())
+//        for (i in 0..nodes.getLength() - 1) {
+//            val item = nodes.item(i)
+//            System.out.println("checking node $item")
+//            val attributes = item.getAttributes()
+//            val id = attributes.getNamedItem("android:id")
+//            if (id == null) {
+//                continue
+//            }
+//            val bindingTarget = BindingTarget(item, id.getNodeValue(), getFullViewClassName(item.getNodeName()))
+//            val attrCount = attributes.getLength()
+//            for (j in 0..(attrCount - 1)) {
+//                val attr = attributes.item(j)
+//                val name = attr.getNodeName()
+//                if (name.startsWith("bind:")) {
+//                    bindingTarget.addBinding(name.substring("bind:".length), exprParser.parse(attr.getNodeValue()))
+//                }
+//            }
+//            layoutBinding.bindingTargets.add(bindingTarget)
+//        }
 
-        val convExpr = xPath.compile("//@*[starts-with(name(), 'bind_static')]/..")
-        val convNodes = convExpr.evaluate(doc, XPathConstants.NODESET) as NodeList
-        System.out.println("converter node count " + nodes.getLength())
-        for (i in 0..convNodes.getLength() - 1) {
-            val item = convNodes.item(i)
-            System.out.println("checking conv node $item")
+        val imports = getImportNodes(doc, xPath)
+        System.out.println("import node count " + imports.getLength())
+        imports.forEach { item ->
             val attributes = item.getAttributes()
-            val attrCount = attributes.getLength()
-            for (j in 0..(attrCount - 1)) {
-                val attr = attributes.item(j)
-                val name = attr.getNodeName()
-                if (name.startsWith("bind_static:")) {
-                    layoutBinding.addStaticClass(name.substring("bind_static:".length), attr.getNodeValue())
-                }
-            }
+            val type = attributes.getNamedItem("type").getNodeValue()
+            System.out.println("type ${type}")
+            val alias = attributes.getNamedItem("alias")?.getNodeValue() ?: type.split("\\.").last();
+            layoutBinding.addStaticClass(alias, type)
         }
         if (exprParser.model.variables.size == 0) {
             return null
@@ -223,6 +308,21 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         layoutBinding.exprModel = exprParser.model
         layoutBinding.pack()
         return layoutBinding
+    }
+
+    private fun getBindingNodes(doc: Document, xPath: XPath): NodeList {
+        val expr = xPath.compile(XPATH_BINDING_ELEMENTS)
+        return expr.evaluate(doc, XPathConstants.NODESET) as NodeList
+    }
+
+    private fun getVariableNodes(doc: Document?, xPath: XPath): NodeList {
+        val expr = xPath.compile(XPATH_VARIABLE_DEFINITIONS)
+        return expr.evaluate(doc, XPathConstants.NODESET) as NodeList
+    }
+
+    private fun getImportNodes(doc: Document?, xPath: XPath): NodeList {
+        val expr = xPath.compile(XPATH_IMPORT_DEFINITIONS)
+        return expr.evaluate(doc, XPathConstants.NODESET) as NodeList
     }
 
     private fun findLayoutFolders(resources: File): Array<File> {

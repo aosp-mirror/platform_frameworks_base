@@ -16,8 +16,6 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:bind="http://schemas.android.com/apk/res-auto"
-    xmlns:bind_static="http://schemas.android.com/apk/res-auto"
-    xmlns:bind_var="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -29,24 +27,28 @@
     android:id="@+id/activityRoot"
     tools:activity=".MainActivity"
     android:clickable="true"
-
-    bind_static:View="android.view.View"
-    bind_static:Strings="com.android.example.bindingdemo.R.string"
-    bind_static:User="com.android.example.bindingdemo.vo.User"
-    bind_var:activity="com.android.example.bindingdemo.MainActivity"
-    bind:onClickListener="activity.onUnselect">
-
+    android:onClickListener="{activity.onUnselect}">
+    <variable name="activity" type="com.android.example.bindingdemo.MainActivity"/>
+    <!---->
+    <import
+            type="android.view.View"
+            />
+    <!---->
+    <import type="com.android.example.bindingdemo.R.string" alias="Strings"/>
+    <import type="com.android.example.bindingdemo.vo.User"/>
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        bind:text="activity.getString(Strings.toolkitties, activity.tkAdapter.itemCount)" />
+        android:text="{activity.getString(Strings.toolkitties, activity.tkAdapter.itemCount)}">
+
+    </TextView>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/toolkittyList"
         android:layout_width="match_parent"
         android:layout_height="@dimen/list_height"
-        bind:adapter="activity.tkAdapter"
+        bind:adapter="{activity.tkAdapter}"
         ></android.support.v7.widget.RecyclerView>
 
     <View
@@ -57,7 +59,7 @@
         android:id="@+id/selected_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        bind:visibility="activity.selected == null ? View.GONE : View.VISIBLE">
+        bind:visibility="{activity.selected == null ? View.INVISIBLE : View.VISIBLE}">
 
         <GridLayout
             android:layout_width="match_parent"
@@ -73,7 +75,7 @@
                 android:layout_row="0"
                 android:layout_rowSpan="2"
                 android:scaleType="fitCenter"
-                bind:backgroundResource="activity.selected.photoResource" />
+                android:backgroundResource="{activity.selected.photoResource}" />
 
             <EditText
                 android:id="@+id/selected_name"
@@ -84,7 +86,7 @@
                 android:layout_row="0"
                 android:background="@android:color/holo_blue_dark"
                 android:gravity="center"
-                bind:text="activity.selected.name" />
+                android:text="{activity.selected.name}" />
 
             <EditText
                 android:id="@+id/selected_lastname"
@@ -95,11 +97,11 @@
                 android:layout_row="1"
                 android:background="@android:color/holo_blue_bright"
                 android:gravity="center"
-                bind:text="activity.selected.lastName" />
+                android:text="{activity.selected.lastName}" />
             <Button
                 android:id="@+id/edit_button"
-                bind:onClickListener="activity.onSave"
-                bind:text="`Save changes to ` + activity.selected.name"
+                bind:onClickListener="{activity.onSave}"
+                android:text="{`Save changes to ` + activity.selected.name}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
@@ -108,8 +110,8 @@
 
             <Button
                 android:id="@+id/delete_button"
-                bind:onClickListener="activity.onDelete"
-                bind:text="activity.getString(activity.selected.group == User.TOOLKITTY ? Strings.became_robot : Strings.became_kitten, activity.selected.name)"
+                bind:onClickListener="{activity.onDelete}"
+                android:text="{activity.getString(activity.selected.group == User.TOOLKITTY ? Strings.became_robot : Strings.became_kitten, activity.selected.name)}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
@@ -125,11 +127,9 @@
         android:id="@+id/robotsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        bind:text="activity.robotAdapter.itemCount + &quot; Robots &quot;" />
+        android:text="{activity.robotAdapter.itemCount + &quot; Robots &quot;}" />
     <android.support.v7.widget.RecyclerView
         android:id="@+id/robotList"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/list_height"
-        bind:adapter="activity.robotAdapter"
+        android:layout_width="match_parent" bind:adapter="{activity.robotAdapter}"  android:layout_height="@dimen/list_height"
         ></android.support.v7.widget.RecyclerView>
 </LinearLayout>
