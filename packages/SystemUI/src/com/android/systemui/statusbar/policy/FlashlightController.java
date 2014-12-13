@@ -92,6 +92,11 @@ public class FlashlightController {
         }
     }
 
+    public synchronized void toggleFlashlight() {
+        mFlashlightEnabled = !mFlashlightEnabled;
+        postUpdateFlashlight();
+    }
+
     public void killFlashlight() {
         boolean enabled;
         synchronized (this) {
