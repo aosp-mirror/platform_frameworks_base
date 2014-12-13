@@ -116,6 +116,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
         final WallpaperData mWallpaper;
         final File mWallpaperDir;
         final File mWallpaperFile;
+        final File mWallpaperInfoFile;
 
         public WallpaperObserver(WallpaperData wallpaper) {
             super(getWallpaperDir(wallpaper.userId).getAbsolutePath(),
@@ -123,6 +124,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
             mWallpaperDir = getWallpaperDir(wallpaper.userId);
             mWallpaper = wallpaper;
             mWallpaperFile = new File(mWallpaperDir, WALLPAPER);
+            mWallpaperInfoFile = new File(mWallpaperDir, WALLPAPER_INFO);
         }
 
         @Override
@@ -131,13 +133,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub {
                 return;
             }
             synchronized (mLock) {
-                // changing the wallpaper means we'll need to back up the new one
-                long origId = Binder.clearCallingIdentity();
-                BackupManager bm = new BackupManager(mContext);
-                bm.dataChanged();
-                Binder.restoreCallingIdentity(origId);
-
                 File changedFile = new File(mWallpaperDir, path);
+                if (mWallpaperFile.equals(changedFile)
+                        || mWallpaperInfoFile.equals(changedFile)) {
+                    // changing the wallpaper means we'll need to back up the new one
+                    long origId = Binder.clearCallingIdentity();
+                    BackupManager bm = new BackupManager(mContext);
+                    bm.dataChanged();
+                    Binder.restoreCallingIdentity(origId);
+                }
                 if (mWallpaperFile.equals(changedFile)) {
                     notifyCallbacksLocked(mWallpaper);
                     final boolean written = (event == CLOSE_WRITE || event == MOVED_TO);
