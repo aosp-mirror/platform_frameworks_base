@@ -1,2 +1,12 @@
 ext.kotlinVersion = '0.9.206'
-ext.releaseVersion = "0.3-SNAPSHOT"
+ext.releaseVersion = "0.3"
+ext.snapshotVersion = "0.3-SNAPSHOT"
+
+subprojects {
+    group = 'com.android.databinding'
+    version = '0.3-SNAPSHOT'
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}

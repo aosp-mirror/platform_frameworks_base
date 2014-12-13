@@ -77,9 +77,7 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: mavenLocal().url)
-            pom.version = '0.1-SNAPSHOT'
             pom.artifactId = 'library'
-            pom.groupId='com.android.databinding'
         }
     }
 }
