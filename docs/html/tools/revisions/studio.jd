@@ -39,9 +39,32 @@ manually check for updates, select <strong>Help > Check for updates</strong> (on
 <p>The sections below provide notes about successive releases of
 Android Studio, as denoted by revision number. </p>
 
+
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>Android Studio v1.0.1</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+    <p>Various fixes and enhancements:</p>
+    <ul>
+      <li>Fixed AVD Manager and <strong>device.xml</strong> file lock issue. </li>
+      <li>Fixed the emulator log on Windows systems. </li>
+      <li>Fixed issue with creating AVDs with Android Studio and Android SDK installed on different
+      drives on Windows systems.</li>
+      <li>Sets the default update channel for new downloads to <strong>Stable</strong>. If you
+      installed the 1.0.0 version of Android Studio and would like stable, production-ready version
+      updates, use <strong>File > Settings > Updates</strong> to change to the <strong>Stable</strong>
+      update channel.
+      </li>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>Android Studio v1.0</a> <em>(December 2014)</em>
   </p>
 
