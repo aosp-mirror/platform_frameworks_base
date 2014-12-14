@@ -983,6 +983,42 @@ public class WifiConfiguration implements Parcelable {
         }
     }
 
+    /** @hide
+     *  trim the scan Result Cache
+     * @param: number of entries to keep in the cache
+     */
+    public void trimScanResultsCache(int num) {
+        if (this.scanResultCache == null) {
+            return;
+        }
+        int currenSize = this.scanResultCache.size();
+        if (currenSize <= num) {
+            return; // Nothing to trim
+        }
+        ArrayList<ScanResult> list = new ArrayList<ScanResult>(this.scanResultCache.values());
+        if (list.size() != 0) {
+            // Sort by descending timestamp
+            Collections.sort(list, new Comparator() {
+                public int compare(Object o1, Object o2) {
+                    ScanResult a = (ScanResult)o1;
+                    ScanResult b = (ScanResult)o2;
+                    if (a.seen > b.seen) {
+                        return 1;
+                    }
+                    if (a.seen < b.seen) {
+                        return -1;
+                    }
+                    return a.BSSID.compareTo(b.BSSID);
+                }
+            });
+        }
+        for (int i = 0; i < currenSize - num ; i++) {
+            // Remove oldest results from scan cache
+            ScanResult result = list.get(i);
+            this.scanResultCache.remove(result.BSSID);
+        }
+    }
+
     /* @hide */
     private ArrayList<ScanResult> sortScanResults() {
         ArrayList<ScanResult> list = new ArrayList<ScanResult>(this.scanResultCache.values());
