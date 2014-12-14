@@ -65,6 +65,7 @@ LOCAL_SOURCE_FILES_ALL_GENERATED := true
 include $(BUILD_STATIC_JAVA_LIBRARY)
 # Make sure to run droiddoc first to generate the stub source files.
 $(full_classes_compiled_jar) : $(uiautomator_stubs_stamp)
+$(built_dex_intermediate) : $(uiautomator_stubs_stamp)
 uiautomator_stubs_jar := $(full_classes_compiled_jar)
 
 ###############################################
