@@ -898,7 +898,7 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
             <li>Added a flag that sets <em>jumbo mode</em> for DEX files, which allows a larger
               number of strings in the DEX files. Enable this mode by adding the following line to
               the {@code project.properties} file of your project:
-              <pre>set dex.force.jumbo=true</pre></li>
+              <pre>dex.force.jumbo=true</pre></li>
             <li>Improved the build time by pre-dexing libraries (both JAR files and library
               projects).</li>
             <li>Updated the build to generate {@code R} resource classes for library projects
