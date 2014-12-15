@@ -410,9 +410,14 @@ UI versions). Also, the new drawable XML tags and attributes, such as &lt;ripple
 and &lt;animated-selector&gt;, are supported.</p>
 
 
-<h3> Easy access to Android code samples on GitHub</h3>
+<h3 id="git-samples"> Easy access to Android code samples on GitHub</h3>
 <p>Clicking <strong>Import Samples</strong> from the <strong>File</strong> menu or Welcome page
 provides seamless access to Google code samples on GitHub.</p>
     <p><img src="{@docRoot}images/tools/studio-samples-githubaccess.png" /></p>
     <p class="img-caption"><strong>Figure 12.</strong> Code Sample Access</p>
+
+
+    <p><img src="{@docRoot}images/tools/studio-sample-in-editor.png" /></p>
+    <p class="img-caption"><strong>Figure 13.</strong> Imported Code Sample</p>
+
 
