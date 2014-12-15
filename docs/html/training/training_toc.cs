@@ -694,7 +694,7 @@ include the action bar on devices running Android 2.1 or higher."
         <ul>
           <li>
             <a href="<?cs var:toroot ?>training/location/retrieve-current.html">
-            Retrieving the Current Location
+            Getting the Last Known Location
             </a>
           </li>
           <li>
