@@ -88,43 +88,6 @@ static jint com_android_internal_os_ZygoteInit_getpgid(
     return ret;
 }
 
-static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env,
-        jobject clazz, jobject in, jobject out, jobject errfd)
-{
-    int fd;
-    int err;
-
-    fd = jniGetFDFromFileDescriptor(env, in);
-
-    if  (env->ExceptionCheck()) {
-        return;
-    }
-
-    do {
-        err = dup2(fd, STDIN_FILENO);
-    } while (err < 0 && errno == EINTR);
-
-    fd = jniGetFDFromFileDescriptor(env, out);
-
-    if  (env->ExceptionCheck()) {
-        return;
-    }
-
-    do {
-        err = dup2(fd, STDOUT_FILENO);
-    } while (err < 0 && errno == EINTR);
-
-    fd = jniGetFDFromFileDescriptor(env, errfd);
-
-    if  (env->ExceptionCheck()) {
-        return;
-    }
-
-    do {
-        err = dup2(fd, STDERR_FILENO);
-    } while (err < 0 && errno == EINTR);
-}
-
 static jint com_android_internal_os_ZygoteInit_selectReadable (
         JNIEnv *env, jobject clazz, jobjectArray fds)
 {
@@ -205,10 +168,6 @@ static JNINativeMethod gMethods[] = {
       (void *) com_android_internal_os_ZygoteInit_setpgid },
     { "getpgid", "(I)I",
       (void *) com_android_internal_os_ZygoteInit_getpgid },
-    { "reopenStdio",
-        "(Ljava/io/FileDescriptor;Ljava/io/FileDescriptor;"
-        "Ljava/io/FileDescriptor;)V",
-            (void *) com_android_internal_os_ZygoteInit_reopenStdio},
     { "selectReadable", "([Ljava/io/FileDescriptor;)I",
         (void *) com_android_internal_os_ZygoteInit_selectReadable },
 };
