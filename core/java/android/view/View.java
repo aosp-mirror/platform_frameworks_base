@@ -8185,8 +8185,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     * @see #performAccessibilityAction(int, Bundle)
     *
     * Note: Called from the default {@link AccessibilityDelegate}.
+    *
+    * @hide Until we've refactored all accessibility delegation methods.
     */
-    boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
                 if (isClickable()) {
