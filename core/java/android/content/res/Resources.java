@@ -2425,12 +2425,49 @@ public class Resources {
                 final String themeKey = theme == null ? "" : theme.mKey;
                 LongSparseArray<WeakReference<ConstantState>> themedCache = caches.get(themeKey);
                 if (themedCache == null) {
+                    // Clean out the caches before we add more. This shouldn't
+                    // happen very often.
+                    pruneCaches(caches);
                     themedCache = new LongSparseArray<WeakReference<ConstantState>>(1);
                     caches.put(themeKey, themedCache);
                 }
                 themedCache.put(key, new WeakReference<ConstantState>(cs));
             }
         }
+    }
+
+    /**
+     * Prunes empty caches from the cache map.
+     *
+     * @param caches The map of caches to prune.
+     */
+    private void pruneCaches(ArrayMap<String,
+            LongSparseArray<WeakReference<ConstantState>>> caches) {
+        final int N = caches.size();
+        for (int i = N - 1; i >= 0; i--) {
+            final LongSparseArray<WeakReference<ConstantState>> cache = caches.get(i);
+            if (pruneCache(cache)) {
+                caches.removeAt(i);
+            }
+        }
+    }
+
+    /**
+     * Prunes obsolete weak references from a cache, returning {@code true} if
+     * the cache is empty and should be removed.
+     *
+     * @param cache The cache of weak references to prune.
+     * @return {@code true} if the cache is empty and should be removed.
+     */
+    private boolean pruneCache(LongSparseArray<WeakReference<ConstantState>> cache) {
+        final int N = cache.size();
+        for (int i = N - 1; i >= 0; i--) {
+            final WeakReference entry = cache.valueAt(i);
+            if (entry.get() == null) {
+                cache.removeAt(i);
+            }
+        }
+        return cache.size() == 0;
     }
 
     /**
