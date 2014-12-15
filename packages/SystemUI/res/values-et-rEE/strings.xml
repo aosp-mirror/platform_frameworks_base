@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Süsteemi UI"</string>
-    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Kustuta"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Tühjenda"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Loendist eemaldamine"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Rakenduse teave"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Teie viimane ekraanikuva ilmub siia"</string>
@@ -31,7 +31,7 @@
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Teatisi pole"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Jätkuv"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Teadistused"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Märguanded"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Aku hakkab tühjaks saama"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Jäänud on <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Jäänud on <xliff:g id="PERCENTAGE">%s</xliff:g>. Akusäästja on sisse lülitatud."</string>
@@ -149,7 +149,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Aku: <xliff:g id="NUMBER">%d</xliff:g> protsenti."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Süsteemiseaded"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Teatised"</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Teatise kustutamine"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Märguande eemaldamine."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS on lubatud."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS-signaali otsimine."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter lubatud."</string>
