@@ -286,10 +286,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             final String original = setCallingPackage(callingPkg);
             try {
                 ContentProviderResult[] results = ContentProvider.this.applyBatch(operations);
-                for (int i = 0; i < results.length ; i++) {
-                    if (userIds[i] != UserHandle.USER_CURRENT) {
-                        // Adding the userId to the uri.
-                        results[i] = new ContentProviderResult(results[i], userIds[i]);
+                if (results != null) {
+                    for (int i = 0; i < results.length ; i++) {
+                        if (userIds[i] != UserHandle.USER_CURRENT) {
+                            // Adding the userId to the uri.
+                            results[i] = new ContentProviderResult(results[i], userIds[i]);
+                        }
                     }
                 }
                 return results;
