@@ -17,6 +17,9 @@
 package com.android.internal.os;
 
 import static android.system.OsConstants.O_CLOEXEC;
+import static android.system.OsConstants.STDERR_FILENO;
+import static android.system.OsConstants.STDIN_FILENO;
+import static android.system.OsConstants.STDOUT_FILENO;
 
 import android.net.Credentials;
 import android.net.LocalSocket;
@@ -856,14 +859,15 @@ class ZygoteConnection {
 
         if (descriptors != null) {
             try {
-                ZygoteInit.reopenStdio(descriptors[0],
-                        descriptors[1], descriptors[2]);
+                Os.dup2(descriptors[0], STDIN_FILENO);
+                Os.dup2(descriptors[1], STDOUT_FILENO);
+                Os.dup2(descriptors[2], STDERR_FILENO);
 
                 for (FileDescriptor fd: descriptors) {
                     IoUtils.closeQuietly(fd);
                 }
                 newStderr = System.err;
-            } catch (IOException ex) {
+            } catch (ErrnoException ex) {
                 Log.e(TAG, "Error reopening stdio", ex);
             }
         }
