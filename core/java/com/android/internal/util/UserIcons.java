@@ -48,9 +48,12 @@ public class UserIcons {
         if (icon == null) {
             return null;
         }
-        Bitmap bitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(),
-                Bitmap.Config.ARGB_8888);
-        icon.draw(new Canvas(bitmap));
+        final int width = icon.getIntrinsicWidth();
+        final int height = icon.getIntrinsicHeight();
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        icon.setBounds(0, 0, width, height);
+        icon.draw(canvas);
         return bitmap;
     }
 
