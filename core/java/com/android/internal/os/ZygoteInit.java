@@ -767,21 +767,6 @@ public class ZygoteInit {
     static native int getpgid(int pid) throws IOException;
 
     /**
-     * Invokes the syscall dup2() to copy the specified descriptors into
-     * stdin, stdout, and stderr. The existing stdio descriptors will be
-     * closed and errors during close will be ignored. The specified
-     * descriptors will also remain open at their original descriptor numbers,
-     * so the caller may want to close the original descriptors.
-     *
-     * @param in new stdin
-     * @param out new stdout
-     * @param err new stderr
-     * @throws IOException
-     */
-    static native void reopenStdio(FileDescriptor in,
-            FileDescriptor out, FileDescriptor err) throws IOException;
-
-    /**
      * Invokes select() on the provider array of file descriptors (selecting
      * for readability only). Array elements of null are ignored.
      *
