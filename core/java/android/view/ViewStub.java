@@ -69,8 +69,8 @@ import java.lang.ref.WeakReference;
  */
 @RemoteView
 public final class ViewStub extends View {
-    private int mLayoutResource = 0;
     private int mInflatedId;
+    private int mLayoutResource;
 
     private WeakReference<View> mInflatedViewRef;
 
@@ -78,7 +78,7 @@ public final class ViewStub extends View {
     private OnInflateListener mInflateListener;
 
     public ViewStub(Context context) {
-        initialize(context);
+        this(context, 0);
     }
 
     /**
@@ -88,38 +88,29 @@ public final class ViewStub extends View {
      * @param layoutResource The reference to a layout resource that will be inflated.
      */
     public ViewStub(Context context, int layoutResource) {
+        this(context, null);
+
         mLayoutResource = layoutResource;
-        initialize(context);
     }
 
     public ViewStub(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    @SuppressWarnings({"UnusedDeclaration"})
     public ViewStub(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
     public ViewStub(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        TypedArray a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.ViewStub, defStyleAttr, defStyleRes);
+        super(context);
 
+        final TypedArray a = context.obtainStyledAttributes(attrs,
+                R.styleable.ViewStub, defStyleAttr, defStyleRes);
         mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);
         mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, 0);
-
+        mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);
         a.recycle();
 
-        a = context.obtainStyledAttributes(
-                attrs, com.android.internal.R.styleable.View, defStyleAttr, defStyleRes);
-        mID = a.getResourceId(R.styleable.View_id, NO_ID);
-        a.recycle();
-
-        initialize(context);
-    }
-
-    private void initialize(Context context) {
-        mContext = context;
         setVisibility(GONE);
         setWillNotDraw(true);
     }
