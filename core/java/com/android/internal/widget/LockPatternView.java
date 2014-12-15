@@ -65,8 +65,8 @@ public class LockPatternView extends View {
 
     private boolean mDrawingProfilingStarted = false;
 
-    private Paint mPaint = new Paint();
-    private Paint mPathPaint = new Paint();
+    private final Paint mPaint = new Paint();
+    private final Paint mPathPaint = new Paint();
 
     /**
      * How many milliseconds we spend animating each circle of a lock pattern
@@ -82,7 +82,7 @@ public class LockPatternView extends View {
     private static final float DRAG_THRESHHOLD = 0.0f;
 
     private OnPatternListener mOnPatternListener;
-    private ArrayList<Cell> mPattern = new ArrayList<Cell>(9);
+    private final ArrayList<Cell> mPattern = new ArrayList<Cell>(9);
 
     /**
      * Lookup table for the circles of the pattern we are currently drawing.
@@ -90,7 +90,7 @@ public class LockPatternView extends View {
      * in which case we use this to hold the cells we are drawing for the in
      * progress animation.
      */
-    private boolean[][] mPatternDrawLookup = new boolean[3][3];
+    private final boolean[][] mPatternDrawLookup = new boolean[3][3];
 
     /**
      * the in progress point:
@@ -122,24 +122,27 @@ public class LockPatternView extends View {
     private int mErrorColor;
     private int mSuccessColor;
 
-    private Interpolator mFastOutSlowInInterpolator;
-    private Interpolator mLinearOutSlowInInterpolator;
+    private final Interpolator mFastOutSlowInInterpolator;
+    private final Interpolator mLinearOutSlowInInterpolator;
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
      */
-    public static class Cell {
-        int row;
-        int column;
+    public static final class Cell {
+        final int row;
+        final int column;
 
         // keep # objects limited to 9
-        static Cell[][] sCells = new Cell[3][3];
-        static {
+        private static final Cell[][] sCells = createCells();
+
+        private static Cell[][] createCells() {
+            Cell[][] res = new Cell[3][3];
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    sCells[i][j] = new Cell(i, j);
+                    res[i][j] = new Cell(i, j);
                 }
             }
+            return res;
         }
 
         /**
@@ -160,11 +163,7 @@ public class LockPatternView extends View {
             return column;
         }
 
-        /**
-         * @param row The row of the cell.
-         * @param column The column of the cell.
-         */
-        public static synchronized Cell of(int row, int column) {
+        public static Cell of(int row, int column) {
             checkRange(row, column);
             return sCells[row][column];
         }
@@ -178,6 +177,7 @@ public class LockPatternView extends View {
             }
         }
 
+        @Override
         public String toString() {
             return "(row=" + row + ",clmn=" + column + ")";
         }
@@ -722,7 +722,7 @@ public class LockPatternView extends View {
                 handleActionDown(event);
                 return true;
             case MotionEvent.ACTION_UP:
-                handleActionUp(event);
+                handleActionUp();
                 return true;
             case MotionEvent.ACTION_MOVE:
                 handleActionMove(event);
@@ -812,7 +812,7 @@ public class LockPatternView extends View {
         announceForAccessibility(mContext.getString(resId));
     }
 
-    private void handleActionUp(MotionEvent event) {
+    private void handleActionUp() {
         // report pattern detected
         if (!mPattern.isEmpty()) {
             mPatternInProgress = false;
@@ -1119,12 +1119,15 @@ public class LockPatternView extends View {
             dest.writeValue(mTactileFeedbackEnabled);
         }
 
+        @SuppressWarnings({ "unused", "hiding" }) // Found using reflection
         public static final Parcelable.Creator<SavedState> CREATOR =
                 new Creator<SavedState>() {
+                    @Override
                     public SavedState createFromParcel(Parcel in) {
                         return new SavedState(in);
                     }
 
+                    @Override
                     public SavedState[] newArray(int size) {
                         return new SavedState[size];
                     }
