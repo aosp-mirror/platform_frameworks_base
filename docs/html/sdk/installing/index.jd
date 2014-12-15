@@ -56,8 +56,7 @@ style="float:right;font-size:13px"><a href='' onclick='showAll();return false;'
 
 <p><b>To set up Android Studio on Windows:</b></p>
   <ol>
-    <li>Unzip the file, {@code android-studio-ide-&lt;version&gt;-windows.zip} and launch the
-        <code>studio.exe</code> file.</li>
+    <li>Launch the <code>.exe</code> file you just downloaded.</li>
     <li>Follow the setup wizard to install Android Studio and any necessary SDK tools.
 
     <p>On some Windows systems, the launcher script does not find where Java is installed.
