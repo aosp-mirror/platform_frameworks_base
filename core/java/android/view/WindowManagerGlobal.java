@@ -212,15 +212,15 @@ public final class WindowManagerGlobal {
             throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
         }
 
-        final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams)params;
+        final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
         if (parentWindow != null) {
             parentWindow.adjustLayoutParamsForSubWindow(wparams);
-        } else {
+        } else if (ActivityManager.isHighEndGfx()) {
             // If there's no parent and we're running on L or above (or in the
             // system context), assume we want hardware acceleration.
             final Context context = view.getContext();
-            if (context != null
-                    && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.LOLLIPOP) {
+            if (context != null && context.getApplicationInfo().targetSdkVersion
+                    >= Build.VERSION_CODES.LOLLIPOP) {
                 wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
         }
