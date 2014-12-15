@@ -86,6 +86,8 @@ public class SystemBackupAgent extends BackupAgentHelper {
         }
         addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this, files, keys));
         addHelper("recents", new RecentsBackupHelper(SystemBackupAgent.this));
+        addHelper("account_sync_settings",
+                new AccountSyncSettingsBackupHelper(SystemBackupAgent.this));
 
         super.onBackup(oldState, data, newState);
     }
@@ -118,6 +120,8 @@ public class SystemBackupAgent extends BackupAgentHelper {
                 new String[] { WALLPAPER_IMAGE },
                 new String[] { WALLPAPER_IMAGE_KEY} ));
         addHelper("recents", new RecentsBackupHelper(SystemBackupAgent.this));
+        addHelper("account_sync_settings",
+                new AccountSyncSettingsBackupHelper(SystemBackupAgent.this));
 
         try {
             super.onRestore(data, appVersionCode, newState);
