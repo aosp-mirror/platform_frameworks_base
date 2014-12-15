@@ -1823,13 +1823,11 @@ public class PhoneNumberUtils
         String emergencyNumbers = "";
         int slotId = SubscriptionManager.getSlotId(subId);
 
-        if (slotId >= 0) {
-            // retrieve the list of emergency numbers
-            // check read-write ecclist property first
-            String ecclist = (slotId == 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
+        // retrieve the list of emergency numbers
+        // check read-write ecclist property first
+        String ecclist = (slotId <= 0) ? "ril.ecclist" : ("ril.ecclist" + slotId);
 
-            emergencyNumbers = SystemProperties.get(ecclist, "");
-        }
+        emergencyNumbers = SystemProperties.get(ecclist, "");
 
         Rlog.d(LOG_TAG, "slotId:" + slotId + ", emergencyNumbers: " +  emergencyNumbers);
 
