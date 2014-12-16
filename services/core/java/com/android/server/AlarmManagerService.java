@@ -61,7 +61,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
-import java.util.Random;
 import java.util.TimeZone;
 
 import static android.app.AlarmManager.RTC_WAKEUP;
@@ -109,12 +108,8 @@ class AlarmManagerService extends SystemService {
     final Object mLock = new Object();
 
     long mNativeData;
-
-    private final Random mFuzzer = new Random();
-    private long mNextWakeupBatchStart;     // nominal start of next wakeup's delivery window
-    private long mNextWakeup;               // actual scheduled next wakeup within that window
+    private long mNextWakeup;
     private long mNextNonWakeup;
-
     int mBroadcastRefCount = 0;
     PowerManager.WakeLock mWakeLock;
     boolean mLastWakeLockUnimportantForLogging;
@@ -366,27 +361,14 @@ class AlarmManagerService extends SystemService {
 
     static class BatchTimeOrder implements Comparator<Batch> {
         public int compare(Batch b1, Batch b2) {
-            final long start1 = b1.start;
-            final long start2 = b2.start;
-            if (start1 > start2) {
+            long when1 = b1.start;
+            long when2 = b2.start;
+            if (when1 - when2 > 0) {
                 return 1;
             }
-            if (start1 < start2) {
+            if (when1 - when2 < 0) {
                 return -1;
             }
-
-            // Identical trigger times.  As a secondary ordering, require that
-            // the batch with the shorter allowable delivery window sorts first.
-            final long interval1 = b1.end - b1.start;
-            final long interval2 = b2.end - b2.start;
-            if (interval1 > interval2) {
-                return 1;
-            }
-            if (interval2 < interval1) {
-                return -1;
-            }
-
-            // equal start + delivery window => they're identical
             return 0;
         }
     }
@@ -609,7 +591,7 @@ class AlarmManagerService extends SystemService {
     @Override
     public void onStart() {
         mNativeData = init();
-        mNextWakeup = mNextWakeupBatchStart = mNextNonWakeup = 0;
+        mNextWakeup = mNextNonWakeup = 0;
 
         // We have to set current TimeZone info to kernel
         // because kernel doesn't keep this after reboot
@@ -804,7 +786,6 @@ class AlarmManagerService extends SystemService {
                         "AlarmManager.set");
             }
 
-            // Exact alarms are standalone; inexact get batched together
             setImpl(type, triggerAtTime, windowLength, interval, operation,
                     windowLength == AlarmManager.WINDOW_EXACT, workSource, alarmClock);
         }
@@ -877,7 +858,7 @@ class AlarmManagerService extends SystemService {
 
             pw.print("nowRTC="); pw.print(nowRTC);
             pw.print("="); pw.print(sdf.format(new Date(nowRTC)));
-            pw.print(" nowELAPSED="); pw.print(nowELAPSED);
+            pw.print(" nowELAPSED="); TimeUtils.formatDuration(nowELAPSED, pw);
             pw.println();
             if (!mInteractive) {
                 pw.print("Time since non-interactive: ");
@@ -1083,6 +1064,17 @@ class AlarmManagerService extends SystemService {
         return true;
     }
 
+    private Batch findFirstWakeupBatchLocked() {
+        final int N = mAlarmBatches.size();
+        for (int i = 0; i < N; i++) {
+            Batch b = mAlarmBatches.get(i);
+            if (b.hasWakeups()) {
+                return b;
+            }
+        }
+        return null;
+    }
+
     private AlarmManager.AlarmClockInfo getNextAlarmClockImpl(int userId) {
         synchronized (mLock) {
             return mNextAlarmClockForUser.get(userId);
@@ -1216,48 +1208,16 @@ class AlarmManagerService extends SystemService {
         // prior to that which contains no wakeups, we schedule that as well.
         long nextNonWakeup = 0;
         if (mAlarmBatches.size() > 0) {
-            // Find the first wakeup alarm and note the following batch as well.  We'll be
-            // choosing a fuzzed delivery time within the first's allowable interval but
-            // ensuring that it does not encroach on the second's start time, to minimize
-            // alarm reordering.
-            Batch firstWakeup = null, nextAfterWakeup = null;
-            final int N = mAlarmBatches.size();
-            for (int i = 0; i < N; i++) {
-                Batch b = mAlarmBatches.get(i);
-                if (b.hasWakeups()) {
-                    firstWakeup = b;
-                    if (i < N-1) {
-                        nextAfterWakeup = mAlarmBatches.get(i+1);
-                    }
-                    break;
-                }
-            }
-
-            // There's a subtlety here: we depend on the invariant that if two batches
-            // exist with the same start time, the one with the shorter delivery window
-            // is sorted before the other.  This guarantees us that we need only look
-            // at the first [relevant] batch in the queue in order to schedule an alarm
-            // appropriately.
+            final Batch firstWakeup = findFirstWakeupBatchLocked();
             final Batch firstBatch = mAlarmBatches.get(0);
-            if (firstWakeup != null && mNextWakeupBatchStart != firstWakeup.start) {
-                mNextWakeupBatchStart = mNextWakeup = firstWakeup.start;
-                final long windowEnd = (nextAfterWakeup == null)
-                        ? firstWakeup.end
-                        : Math.min(firstWakeup.end, nextAfterWakeup.start);
-                final long interval = windowEnd - firstWakeup.start;
-                // if the interval is over maxint we're into crazy land anyway, but
-                // just in case we check and don't fuzz if the conversion to int for
-                // random-number purposes would blow up
-                if (interval > 0 && interval < Integer.MAX_VALUE) {
-                    mNextWakeup += mFuzzer.nextInt((int) interval);
-                }
-                setLocked(ELAPSED_REALTIME_WAKEUP, mNextWakeup);
+            if (firstWakeup != null && mNextWakeup != firstWakeup.start) {
+                mNextWakeup = firstWakeup.start;
+                setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
             }
             if (firstBatch != firstWakeup) {
                 nextNonWakeup = firstBatch.start;
             }
         }
-
         if (mPendingNonWakeupAlarms.size() > 0) {
             if (nextNonWakeup == 0 || mNextNonWakeupDeliveryTime < nextNonWakeup) {
                 nextNonWakeup = mNextNonWakeupDeliveryTime;
