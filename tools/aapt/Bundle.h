@@ -179,6 +179,8 @@ public:
     void setVersionName(const char* val) { mVersionName = val; }
     bool getReplaceVersion() { return mReplaceVersion; }
     void setReplaceVersion(bool val) { mReplaceVersion = val; }
+    const android::String8& getRevisionCode() { return mRevisionCode; }
+    void setRevisionCode(const char* val) { mRevisionCode = android::String8(val); }
     const char* getCustomPackage() const { return mCustomPackage; }
     void setCustomPackage(const char* val) { mCustomPackage = val; }
     const char* getExtraPackages() const { return mExtraPackages; }
@@ -297,6 +299,7 @@ private:
 
     android::String8 mFeatureOfPackage;
     android::String8 mFeatureAfterPackage;
+    android::String8 mRevisionCode;
     const char* mManifestMinSdkVersion;
     const char* mMinSdkVersion;
     const char* mTargetSdkVersion;

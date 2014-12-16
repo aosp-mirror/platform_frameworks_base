@@ -257,6 +257,11 @@ static status_t parsePackage(Bundle* bundle, const sp<AaptAssets>& assets,
 
     assets->setPackage(String8(block.getAttributeStringValue(nameIndex, &len)));
 
+    ssize_t revisionCodeIndex = block.indexOfAttribute(RESOURCES_ANDROID_NAMESPACE, "revisionCode");
+    if (revisionCodeIndex >= 0) {
+        bundle->setRevisionCode(String8(block.getAttributeStringValue(revisionCodeIndex, &len)).string());
+    }
+
     String16 uses_sdk16("uses-sdk");
     while ((code=block.next()) != ResXMLTree::END_DOCUMENT
            && code != ResXMLTree::BAD_DOCUMENT) {
@@ -1073,6 +1078,14 @@ status_t generateAndroidManifestForSplit(Bundle* bundle, const sp<AaptAssets>& a
     if (!addTagAttribute(manifest, RESOURCES_ANDROID_NAMESPACE, "versionCode",
             bundle->getVersionCode(), true, true)) {
         return UNKNOWN_ERROR;
+    }
+
+    // Add the 'revisionCode' attribute, which is set to the original revisionCode.
+    if (bundle->getRevisionCode().size() > 0) {
+        if (!addTagAttribute(manifest, RESOURCES_ANDROID_NAMESPACE, "revisionCode",
+                    bundle->getRevisionCode().string(), true, true)) {
+            return UNKNOWN_ERROR;
+        }
     }
 
     // Add the 'split' attribute which describes the configurations included.
