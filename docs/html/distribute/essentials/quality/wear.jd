@@ -82,7 +82,7 @@ page.image=/distribute/images/gp-wear-quality.png
 </tr>
 
 <tr>
-  <td rowspan="1" id="general">
+  <td rowspan="3" id="general">
    General
   </td>
 
@@ -94,6 +94,28 @@ page.image=/distribute/images/gp-wear-quality.png
       Handheld app includes either notifications with wearable-specific functionality or a wearable
       app that runs directly on the Wear device.
       (<a href="{@docRoot}training/building-wearables.html">Learn how</a>)
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-VF">
+    WR-VF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      App has Wear functionality that is visible to the user.
+    </p>
+  </td>
+</tr>
+
+<tr>
+ <td id="WR-BF">
+    WR-BF
+  </td>
+  <td>
+    <p style="margin-bottom:.5em;">
+      Wear functionality works as expected or as described in the app's Google Play Store listing.
     </p>
   </td>
 </tr>
@@ -114,7 +136,6 @@ page.image=/distribute/images/gp-wear-quality.png
     </p>
   </td>
 </tr>
-
 
 <tr>
   <td rowspan="3" id="functional-notifications">
