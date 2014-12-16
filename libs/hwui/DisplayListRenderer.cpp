@@ -59,6 +59,7 @@ DisplayListData* DisplayListRenderer::finishRecording() {
     mPathMap.clear();
     DisplayListData* data = mDisplayListData;
     mDisplayListData = nullptr;
+    mSkiaCanvasProxy.reset(nullptr);
     return data;
 }
 
@@ -92,6 +93,15 @@ void DisplayListRenderer::callDrawGLFunction(Functor *functor, Rect& dirty) {
     // Ignore dirty during recording, it matters only when we replay
     addDrawOp(new (alloc()) DrawFunctorOp(functor));
     mDisplayListData->functors.add(functor);
+}
+
+SkCanvas* DisplayListRenderer::asSkCanvas() {
+    LOG_ALWAYS_FATAL_IF(!mDisplayListData,
+            "attempting to get an SkCanvas when we are not recording!");
+    if (!mSkiaCanvasProxy) {
+        mSkiaCanvasProxy.reset(new SkiaCanvasProxy(this));
+    }
+    return mSkiaCanvasProxy.get();
 }
 
 int DisplayListRenderer::save(SkCanvas::SaveFlags flags) {
