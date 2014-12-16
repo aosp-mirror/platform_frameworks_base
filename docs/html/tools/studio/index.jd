@@ -338,7 +338,7 @@ Intel&#174; HAXM emulator accelerator.</p>
 
 <p>An updated setup wizard walks you through the setup processes as
 the wizard updates your system image and emulation requirements, such GPU, and then creates
-an optimized default Android Virtual Device (AVD) based on Android 5 (Lollipop) for speedie and
+an optimized default Android Virtual Device (AVD) based on Android 5 (Lollipop) for speedy and
 reliable emulation. </p>
 <p><img src="{@docRoot}images/tools/studio-setup-wizard.png" /></p>
 <p class="img-caption"><strong>Figure 8.</strong> Setup Wizard</p>
@@ -377,7 +377,7 @@ code-level preference:
   the test of time. They are updated roughly bi-weekly or monthly.</li>
   <li><strong>Beta channel</strong>: Beta builds are used for beta-quality releases before a
   production release.</li>
-  <li><strong>Stable channel</strong>: Used for stable, production-read versions.</li>
+  <li><strong>Stable channel</strong>: Used for stable, production-ready versions.</li>
 </ul>
 </p>
 
