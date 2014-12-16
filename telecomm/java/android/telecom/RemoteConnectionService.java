@@ -223,6 +223,12 @@ final class RemoteConnectionService {
         }
 
         @Override
+        public void onPostDialChar(String callId, char nextChar) {
+            findConnectionForAction(callId, "onPostDialChar")
+                    .onPostDialChar(nextChar);
+        }
+
+        @Override
         public void queryRemoteConnectionServices(RemoteServiceCallback callback) {
             // Not supported from remote connection service.
         }

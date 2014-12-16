@@ -58,6 +58,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_SET_CALLER_DISPLAY_NAME = 19;
     private static final int MSG_SET_CONFERENCEABLE_CONNECTIONS = 20;
     private static final int MSG_ADD_EXISTING_CONNECTION = 21;
+    private static final int MSG_ON_POST_DIAL_CHAR = 22;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -138,6 +139,15 @@ final class ConnectionServiceAdapterServant {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         mDelegate.onPostDialWait((String) args.arg1, (String) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
+                    break;
+                }
+                case MSG_ON_POST_DIAL_CHAR: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.onPostDialChar((String) args.arg1, (char) args.argi1);
                     } finally {
                         args.recycle();
                     }
@@ -296,6 +306,14 @@ final class ConnectionServiceAdapterServant {
             args.arg1 = connectionId;
             args.arg2 = remainingDigits;
             mHandler.obtainMessage(MSG_ON_POST_DIAL_WAIT, args).sendToTarget();
+        }
+
+        @Override
+        public void onPostDialChar(String connectionId, char nextChar) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = connectionId;
+            args.argi1 = nextChar;
+            mHandler.obtainMessage(MSG_ON_POST_DIAL_CHAR, args).sendToTarget();
         }
 
         @Override
