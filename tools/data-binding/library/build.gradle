@@ -57,6 +57,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
+
 //create jar tasks
 android.libraryVariants.all { variant ->
     def name = variant.buildType.name

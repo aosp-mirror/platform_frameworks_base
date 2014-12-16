@@ -17,7 +17,6 @@
 package com.android.databinding.library;
 
 import android.content.Context;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,9 +29,9 @@ public class DataBinder {
 
     static DataBinderMapper sMapper;
 
-    private WeakHashMap<View, ViewDataBinder> mDataBinderMap = new WeakHashMap<>();
+    private WeakHashMap<View, BindingContext> mDataBinderMap = new WeakHashMap<>();
 
-    private SparseArray<WeakReference<ViewDataBinder>> mDataBinderById = new SparseArray<>();
+    private SparseArray<WeakReference<BindingContext>> mDataBinderById = new SparseArray<>();
 
     private static DataBinderMapper getMapper() {
         if (sMapper != null) {
@@ -55,7 +54,7 @@ public class DataBinder {
 
     public View inflate(Context context, int layoutId) {
         View view = LayoutInflater.from(context).inflate(layoutId, null);
-        ViewDataBinder dataBinder = getMapper().getDataBinder(view, layoutId);
+        BindingContext dataBinder = getMapper().getDataBinder(view, layoutId);
         if (dataBinder != null) {
             mDataBinderMap.put(view, dataBinder);
             mDataBinderById.put(layoutId, new WeakReference<>(dataBinder));
@@ -64,7 +63,7 @@ public class DataBinder {
     }
 
     public boolean setVariable(View view, String name, Object variable) {
-        ViewDataBinder binder = getDataBinder(view);
+        BindingContext binder = getDataBinder(view);
         if (binder == null) {
             return false;
         }
@@ -76,7 +75,7 @@ public class DataBinder {
     }
 
     public boolean setVariable(int layoutId, String name, Object variable) {
-        ViewDataBinder binder = getDataBinder(layoutId);
+        BindingContext binder = getDataBinder(layoutId);
         if (binder == null) {
             return false;
         }
@@ -87,7 +86,7 @@ public class DataBinder {
         return binder.setVariable(nameId, variable);
     }
 
-    public ViewDataBinder getDataBinder(View view) {
+    public BindingContext getDataBinder(View view) {
         return mDataBinderMap.get(view);
     }
 
@@ -99,7 +98,7 @@ public class DataBinder {
         return (T) getDataBinder(layoutId);
     }
 
-    public static ViewDataBinder createBinder(Context context, int layoutId, ViewGroup parent) {
+    public static BindingContext createBinder(Context context, int layoutId, ViewGroup parent) {
         return getMapper()
                 .getDataBinder(LayoutInflater.from(context).inflate(layoutId, parent, false),
                         layoutId);
@@ -109,8 +108,8 @@ public class DataBinder {
         return (T) createBinder(context, layoutId, parent);
     }
 
-    public ViewDataBinder getDataBinder(int layoutId) {
-        WeakReference<ViewDataBinder> weakReference = mDataBinderById.get(layoutId);
+    public BindingContext getDataBinder(int layoutId) {
+        WeakReference<BindingContext> weakReference = mDataBinderById.get(layoutId);
         if (weakReference == null) {
             return null;
         }

@@ -13,12 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.binding;
 
-package com.android.databinding.library;
-
-import android.view.View;
-
-public interface DataBinderMapper {
-    BindingContext getDataBinder(View view, int layoutId);
-    public int getId(String key);
+public @interface Bindable {
 }
