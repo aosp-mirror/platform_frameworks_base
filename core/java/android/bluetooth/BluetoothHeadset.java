@@ -229,7 +229,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
     private ServiceListener mServiceListener;
     private IBluetoothHeadset mService;
     private BluetoothAdapter mAdapter;
-    private boolean mIsClosed;
 
     final private IBluetoothStateChangeCallback mBluetoothStateChangeCallback =
             new IBluetoothStateChangeCallback.Stub() {
@@ -260,7 +259,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
         mContext = context;
         mServiceListener = l;
         mAdapter = BluetoothAdapter.getDefaultAdapter();
-        mIsClosed = false;
 
         IBluetoothManager mgr = mAdapter.getBluetoothManager();
         if (mgr != null) {
@@ -314,7 +312,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
                 Log.e(TAG,"",e);
             }
         }
-        mIsClosed = true;
+        mServiceListener = null;
         doUnbind();
     }
 
@@ -982,9 +980,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
                 case MESSAGE_HEADSET_SERVICE_DISCONNECTED: {
                     if (mServiceListener != null) {
                         mServiceListener.onServiceDisconnected(BluetoothProfile.HEADSET);
-                    }
-                    if (mIsClosed){
-                        mServiceListener = null;
                     }
                     break;
                 }
