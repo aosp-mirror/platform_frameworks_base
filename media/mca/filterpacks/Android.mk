@@ -48,8 +48,6 @@ LOCAL_SRC_FILES += native/imageproc/brightness.c \
 
 LOCAL_SHARED_LIBRARIES := liblog libutils libfilterfw
 
-LOCAL_PRELINK_MODULE := false
-
 LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
 
 include $(BUILD_SHARED_LIBRARY)
