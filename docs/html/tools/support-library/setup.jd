@@ -300,7 +300,7 @@ dependencies {
   overrides the manifest settings.  </p>
 
 <pre>
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
     ...

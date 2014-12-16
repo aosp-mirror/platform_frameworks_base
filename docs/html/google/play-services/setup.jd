@@ -62,7 +62,7 @@ to <a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK Packages</
   <li>Add a new build rule under <code>dependencies</code> for the latest version of
 <code>play-services</code>. For example:
 <pre class="no-pretty-print">
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 ...
 
 dependencies {
