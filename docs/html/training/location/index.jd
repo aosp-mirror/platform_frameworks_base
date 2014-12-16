@@ -67,9 +67,10 @@ startpage=true
 <h2>Lessons</h2>
 <dl>
   <dt>
-    <b><a href="retrieve-current.html">Retrieving the Current Location</a></b>
+    <b><a href="retrieve-current.html">Getting the Last Known Location</a></b>
   </dt> <dd>
-     Learn how to retrieve the user's current location.
+     Learn how to retrieve the last known location of an Android device, which
+     is usually equivalent to the user's current location.
   </dd> <dt>
     <b><a href="receive-location-updates.html">Receiving Location
     Updates</a></b>
