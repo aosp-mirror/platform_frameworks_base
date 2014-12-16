@@ -484,6 +484,13 @@ public abstract class ConnectionService extends Service {
         }
 
         @Override
+        public void onPostDialChar(Connection c, char nextChar) {
+            String id = mIdByConnection.get(c);
+            Log.d(this, "Adapter onPostDialChar %s, %s", c, nextChar);
+            mAdapter.onPostDialChar(id, nextChar);
+        }
+
+        @Override
         public void onRingbackRequested(Connection c, boolean ringback) {
             String id = mIdByConnection.get(c);
             Log.d(this, "Adapter onRingback %b", ringback);
