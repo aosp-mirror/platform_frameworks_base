@@ -1,6 +1,5 @@
 package com.android.example.bindingdemo;
 
-import android.binding.Bindable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,14 +9,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.android.databinding.library.ChangeListenerRegistry;
-import com.android.databinding.library.Observable;
-import com.android.databinding.library.OnPropertyChangedListener;
+import com.android.example.bindingdemo.generated.BR;
 import com.android.example.bindingdemo.generated.ListItemBinder;
 import com.android.example.bindingdemo.generated.MainActivityBinder;
 import com.android.example.bindingdemo.vo.User;
 import com.android.example.bindingdemo.vo.Users;
 import com.android.databinding.library.DataBinder;
+import com.android.databinding.library.Observable;
+import com.android.databinding.library.ObservableHelper;
+import com.android.databinding.library.ObservableListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,13 +28,13 @@ public class MainActivity extends ActionBarActivity implements Observable {
     UserAdapter tkAdapter;
     UserAdapter robotAdapter;
     MainActivityBinder dataBinder;
-    @Bindable
     User selected;
-    ChangeListenerRegistry mChangeListeners = new ChangeListenerRegistry();
+    ObservableHelper helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        helper = new ObservableHelper(this);
         dataBinder = DataBinder.createBinder(MainActivityBinder.class, this, R.layout.main_activity, null);
         setContentView(dataBinder.getRoot());
         dataBinder.getRobotList().setHasFixedSize(true);
@@ -64,7 +64,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             return;
         }
         this.selected = selected;
-        mChangeListeners.notifyCallbacks(this, android.binding.BR.selected);
+        helper.fireChange(BR.selected);
     }
 
     public View.OnClickListener onSave = new View.OnClickListener() {
@@ -130,20 +130,21 @@ public class MainActivity extends ActionBarActivity implements Observable {
     }
 
     @Override
-    public void addListener(OnPropertyChangedListener onPropertyChangedListener) {
-        mChangeListeners.add(onPropertyChangedListener);
+    public void register(ObservableListener observableListener) {
+        helper.register(observableListener);
     }
 
     @Override
-    public void removeListener(OnPropertyChangedListener onPropertyChangedListener) {
-        mChangeListeners.remove(onPropertyChangedListener);
+    public void unRegister(ObservableListener observableListener) {
+        helper.unRegister(observableListener);
     }
 
     public class UserAdapter extends DataBoundAdapter<ListItemBinder> implements View.OnClickListener, Observable {
-        List<User> userList = new ArrayList<User>();
-        ChangeListenerRegistry mChangeListeners = new ChangeListenerRegistry();
+        List<User> userList = new ArrayList<>();
+        ObservableHelper mHelper;
         public UserAdapter(User[] toolkities) {
             super(R.layout.list_item, ListItemBinder.class);
+            mHelper = new ObservableHelper(this);
             userList.addAll(Arrays.asList(toolkities));
         }
 
@@ -161,7 +162,6 @@ public class MainActivity extends ActionBarActivity implements Observable {
         }
 
         @Override
-        @Bindable
         public int getItemCount() {
             return userList.size();
         }
@@ -172,7 +172,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             }
             userList.add(user);
             notifyItemInserted(userList.size() - 1);
-            mChangeListeners.notifyCallbacks(this, android.binding.BR.itemCount);
+            mHelper.fireChange("itemCount");
         }
 
         public void remove(User user) {
@@ -182,7 +182,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             }
             userList.remove(i);
             notifyItemRemoved(i);
-            mChangeListeners.notifyCallbacks(this, android.binding.BR.itemCount);
+            mHelper.fireChange("itemCount");
         }
 
         @Override
@@ -198,13 +198,13 @@ public class MainActivity extends ActionBarActivity implements Observable {
         }
 
         @Override
-        public void addListener(OnPropertyChangedListener onPropertyChangedListener) {
-            mChangeListeners.add(onPropertyChangedListener);
+        public void register(ObservableListener observableListener) {
+            mHelper.register(observableListener);
         }
 
         @Override
-        public void removeListener(OnPropertyChangedListener onPropertyChangedListener) {
-            mChangeListeners.remove(onPropertyChangedListener);
+        public void unRegister(ObservableListener observableListener) {
+            mHelper.unRegister(observableListener);
         }
     }
 }

@@ -16,11 +16,16 @@
 
 package com.android.databinding.library;
 
+import android.util.SparseIntArray;
 import android.view.View;
 
 import java.lang.Override;
 import java.lang.Runnable;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 abstract public class ViewDataBinder {
     WeakReferencedListener[] mLocalFieldObservers;
@@ -107,7 +112,7 @@ abstract public class ViewDataBinder {
         listener.setTarget(observable);
     }
 
-    protected abstract class WeakReferencedListener implements OnPropertyChangedListener {
+    protected abstract class WeakReferencedListener implements ObservableListener {
         WeakReference<Observable> mTarget;
 
         public WeakReferencedListener() {
@@ -116,7 +121,7 @@ abstract public class ViewDataBinder {
         public void setTarget(Observable observable) {
             if (observable != null) {
                 mTarget = new WeakReference<>(observable);
-                observable.addListener(this);
+                observable.register(this);
             } else {
                 mTarget = null;
             }
@@ -125,7 +130,7 @@ abstract public class ViewDataBinder {
         public boolean unregister() {
             Observable oldTarget = getTarget();
             if (oldTarget != null) {
-                oldTarget.removeListener(this);
+                oldTarget.unRegister(this);
             }
             mTarget = null;
             return oldTarget != null;
@@ -143,7 +148,16 @@ abstract public class ViewDataBinder {
         }
 
         @Override
-        public void onPropertyChanged(int fieldId) {
+        public void onChange() {
+            Observable obj = getTarget();
+            if (obj == null) {
+                return;//how come i live if it died ?
+            }
+            ViewDataBinder.this.handleFieldChange(mLocalFieldId, obj, 0);
+        }
+
+        @Override
+        public void onChange(int fieldId) {
             Observable obj = getTarget();
             if (obj == null) {
                 return;//how come i live if it died ?

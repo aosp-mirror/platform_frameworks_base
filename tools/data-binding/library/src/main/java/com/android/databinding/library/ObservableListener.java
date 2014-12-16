@@ -14,35 +14,9 @@
  * limitations under the License.
  */
 
-apply plugin: 'java'
-apply plugin: 'maven'
+package com.android.databinding.library;
 
-buildscript {
-    repositories {
-        mavenLocal()
-        mavenCentral()
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir 'src/main/java'
-        }
-    }
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: mavenLocal().url)
-            pom.version = '0.1-SNAPSHOT'
-            pom.artifactId = 'annotationprocessor'
-            pom.groupId='com.android.databinding'
-        }
-    }
+public interface ObservableListener {
+    public void onChange();
+    public void onChange(int fieldId);
 }
