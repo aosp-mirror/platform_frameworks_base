@@ -4561,7 +4561,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         return NO_ERROR;
     }
 
-    Vector<key_value_pair_t<sp<XMLNode>, size_t> > attrsToRemove;
+    sp<XMLNode> newRoot = NULL;
 
     Vector<sp<XMLNode> > nodesToVisit;
     nodesToVisit.push(root);
@@ -4570,11 +4570,23 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         nodesToVisit.pop();
 
         const Vector<XMLNode::attribute_entry>& attrs = node->getAttributes();
-        const size_t attrCount = attrs.size();
-        for (size_t i = 0; i < attrCount; i++) {
+        for (size_t i = 0; i < attrs.size(); i++) {
             const XMLNode::attribute_entry& attr = attrs[i];
             if (isAttributeFromL(attr.nameResId)) {
-                attrsToRemove.add(key_value_pair_t<sp<XMLNode>, size_t>(node, i));
+                if (newRoot == NULL) {
+                    newRoot = root->clone();
+                }
+
+                if (bundle->getVerbose()) {
+                    SourcePos(node->getFilename(), node->getStartLineNumber()).printf(
+                            "removing attribute %s%s%s from <%s>",
+                            String8(attr.ns).string(),
+                            (attr.ns.size() == 0 ? "" : ":"),
+                            String8(attr.name).string(),
+                            String8(node->getElementName()).string());
+                }
+                node->removeAttribute(i);
+                i--;
             }
         }
 
@@ -4586,7 +4598,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         }
     }
 
-    if (attrsToRemove.isEmpty()) {
+    if (newRoot == NULL) {
         return NO_ERROR;
     }
 
@@ -4596,12 +4608,8 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
     // Look to see if we already have an overriding v21 configuration.
     sp<ConfigList> cl = getConfigList(String16(mAssets->getPackage()),
             String16(target->getResourceType()), resourceName);
-    //if (cl == NULL) {
-    //    fprintf(stderr, "fuuuuck\n");
-    //}
     if (cl->getEntries().indexOfKey(newConfig) < 0) {
         // We don't have an overriding entry for v21, so we must duplicate this one.
-        sp<XMLNode> newRoot = root->clone();
         sp<AaptFile> newFile = new AaptFile(target->getSourceFile(),
                 AaptGroupEntry(newConfig), target->getResourceType());
         String8 resPath = String8::format("res/%s/%s",
@@ -4634,22 +4642,6 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         item.resPath = resPath;
         item.file = newFile;
         mWorkQueue.push(item);
-    }
-
-    const size_t removeCount = attrsToRemove.size();
-    for (size_t i = 0; i < removeCount; i++) {
-        sp<XMLNode> node = attrsToRemove[i].key;
-        size_t attrIndex = attrsToRemove[i].value;
-        const XMLNode::attribute_entry& ae = node->getAttributes()[attrIndex];
-        if (bundle->getVerbose()) {
-            SourcePos(node->getFilename(), node->getStartLineNumber()).printf(
-                    "removing attribute %s%s%s from <%s>",
-                    String8(ae.ns).string(),
-                    (ae.ns.size() == 0 ? "" : ":"),
-                    String8(ae.name).string(),
-                    String8(node->getElementName()).string());
-        }
-        node->removeAttribute(attrIndex);
     }
 
     return NO_ERROR;
