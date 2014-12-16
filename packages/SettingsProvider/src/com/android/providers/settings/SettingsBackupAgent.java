@@ -580,7 +580,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private void writeNewChecksums(long[] checksums, ParcelFileDescriptor newState)
             throws IOException {
         DataOutputStream dataOutput = new DataOutputStream(
-                new FileOutputStream(newState.getFileDescriptor()));
+                new BufferedOutputStream(new FileOutputStream(newState.getFileDescriptor())));
 
         dataOutput.writeInt(STATE_VERSION);
         for (int i = 0; i < STATE_SIZE; i++) {
