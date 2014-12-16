@@ -2458,13 +2458,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return result;
     }
 
-    void finishTopRunningActivityLocked(ProcessRecord app) {
+    void finishTopRunningActivityLocked(ProcessRecord app, String reason) {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ArrayList<ActivityStack> stacks = mActivityDisplays.valueAt(displayNdx).mStacks;
             final int numStacks = stacks.size();
             for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
-                stack.finishTopRunningActivityLocked(app);
+                stack.finishTopRunningActivityLocked(app, reason);
             }
         }
     }
