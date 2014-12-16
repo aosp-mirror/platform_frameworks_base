@@ -1,4 +1,4 @@
-include ':library'
+include ':library', ':annotationprocessor'
 include ':compiler'
 include ':gradlePlugin'
 include ':grammerBuilder'
