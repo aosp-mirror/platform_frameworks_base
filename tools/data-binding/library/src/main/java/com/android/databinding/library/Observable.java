@@ -17,6 +17,6 @@
 package com.android.databinding.library;
 
 public interface Observable {
-    public void addListener(OnPropertyChangedListener listener);
-    public void removeListener(OnPropertyChangedListener listener);
+    public void register(ObservableListener listener);
+    public void unRegister(ObservableListener listener);
 }

@@ -1,23 +1,17 @@
 package com.android.example.bindingdemo.vo;
 
-import android.binding.Bindable;
 import android.graphics.Color;
 
-import com.android.databinding.library.AbsObservable;
+import com.android.databinding.library.BaseObservable;
 
 import java.util.Objects;
 
-public class User extends AbsObservable {
-    @Bindable
+public class User extends BaseObservable {
     private String name;
-    @Bindable
     private String lastName;
-    @Bindable
     private int photoResource = 0;
     private int favoriteColor = Color.RED;
-    @Bindable
     private int group;
-
     public static final int TOOLKITTY = 1;
     public static final int ROBOT = 2;
 
@@ -33,7 +27,7 @@ public class User extends AbsObservable {
             return;
         }
         this.group = group;
-        notifyChange(android.binding.BR.group);
+        fireChange("group");
     }
 
     public int getGroup() {
@@ -49,7 +43,7 @@ public class User extends AbsObservable {
             return;
         }
         this.name = name;
-        notifyChange(android.binding.BR.name);
+        fireChange("name");
     }
 
     public String getLastName() {
@@ -61,7 +55,7 @@ public class User extends AbsObservable {
             return;
         }
         this.lastName = lastName;
-        notifyChange(android.binding.BR.lastName);
+        fireChange("lastName");
     }
 
     public int getPhotoResource() {
@@ -73,7 +67,7 @@ public class User extends AbsObservable {
             return;
         }
         this.photoResource = photoResource;
-        notifyChange(android.binding.BR.photoResource);
+        fireChange("photoResource");
     }
 
     public int getFavoriteColor() {
