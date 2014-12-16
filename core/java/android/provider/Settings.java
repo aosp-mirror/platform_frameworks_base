@@ -5924,6 +5924,18 @@ public final class Settings {
        public static final String WIFI_REENABLE_DELAY_MS = "wifi_reenable_delay";
 
        /**
+        * Timeout for ephemeral networks when all known BSSIDs go out of range. We will disconnect
+        * from an ephemeral network if there is no BSSID for that network with a non-null score that
+        * has been seen in this time period.
+        *
+        * If this is less than or equal to zero, we use a more conservative behavior and only check
+        * for a non-null score from the currently connected or target BSSID.
+        * @hide
+        */
+       public static final String WIFI_EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS =
+               "wifi_ephemeral_out_of_range_timeout_ms";
+
+       /**
         * The number of milliseconds to delay when checking for data stalls during
         * non-aggressive detection. (screen is turned off.)
         * @hide
