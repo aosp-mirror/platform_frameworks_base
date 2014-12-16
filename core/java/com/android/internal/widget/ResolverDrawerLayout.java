@@ -217,8 +217,9 @@ public class ResolverDrawerLayout extends ViewGroup {
                 mInitialTouchX = x;
                 mInitialTouchY = mLastTouchY = y;
                 mActivePointerId = ev.getPointerId(0);
-                mIsDragging = findChildUnder(mInitialTouchX, mInitialTouchY) != null;
-                handled = (!mIsDragging && mOnDismissedListener != null) || mCollapsibleHeight > 0;
+                final boolean hitView = findChildUnder(mInitialTouchX, mInitialTouchY) != null;
+                handled = (!hitView && mOnDismissedListener != null) || mCollapsibleHeight > 0;
+                mIsDragging = hitView && handled;
                 abortAnimation();
             }
             break;
