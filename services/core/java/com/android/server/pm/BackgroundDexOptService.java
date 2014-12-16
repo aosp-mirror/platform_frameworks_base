@@ -39,6 +39,11 @@ public class BackgroundDexOptService extends JobService {
             "android",
             BackgroundDexOptService.class.getName());
 
+    /**
+     * Set of failed packages remembered across job runs.
+     */
+    static final ArraySet<String> sFailedPackageNames = new ArraySet<String>();
+
     final AtomicBoolean mIdleTime = new AtomicBoolean(false);
 
     public static void schedule(Context context) {
@@ -75,7 +80,15 @@ public class BackgroundDexOptService extends JobService {
                         schedule(BackgroundDexOptService.this);
                         return;
                     }
-                    pm.performDexOpt(pkg, null /* instruction set */, true);
+                    if (sFailedPackageNames.contains(pkg)) {
+                        // skip previously failing package
+                        continue;
+                    }
+                    if (!pm.performDexOpt(pkg, null /* instruction set */, true)) {
+                        // there was a problem running dexopt,
+                        // remember this so we do not keep retrying.
+                        sFailedPackageNames.add(pkg);
+                    }
                 }
                 // ran to completion, so we abandon our timeslice and do not reschedule
                 jobFinished(jobParams, false);
