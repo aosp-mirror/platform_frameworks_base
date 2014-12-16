@@ -274,6 +274,15 @@ public class TelephonyIntents {
     public static final String ACTION_CARRIER_SETUP = "android.intent.action.ACTION_CARRIER_SETUP";
 
     /**
+     * <p>Broadcast Action: Indicates that the action is forbidden by network.
+     * <p class="note">
+     * This is for the OEM applications to understand about possible provisioning issues.
+     * Used in OMA-DM applications.
+     */
+    public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION
+            = "android.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
+
+    /**
      * Broadcast Action: A "secret code" has been entered in the dialer. Secret codes are
      * of the form {@code *#*#<code>#*#*}. The intent will have the data URI:
      *
