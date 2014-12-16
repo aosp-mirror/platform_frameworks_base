@@ -3055,6 +3055,11 @@ public class Notification implements Parcelable
          * Apply any necessary background to smallIcons being used in the largeIcon spot.
          */
         private void processSmallIconAsLarge(int largeIconId, RemoteViews contentView) {
+            if (!isLegacy()) {
+                contentView.setDrawableParameters(R.id.icon, false, -1,
+                        0xFFFFFFFF,
+                        PorterDuff.Mode.SRC_ATOP, -1);
+            }
             if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, largeIconId)) {
                 applyLargeIconBackground(contentView);
             }
@@ -3102,11 +3107,12 @@ public class Notification implements Parcelable
          */
         private void processSmallRightIcon(int smallIconDrawableId,
                 RemoteViews contentView) {
-            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, smallIconDrawableId)) {
+            if (!isLegacy()) {
                 contentView.setDrawableParameters(R.id.right_icon, false, -1,
                         0xFFFFFFFF,
                         PorterDuff.Mode.SRC_ATOP, -1);
-
+            }
+            if (!isLegacy() || mColorUtil.isGrayscaleIcon(mContext, smallIconDrawableId)) {
                 contentView.setInt(R.id.right_icon,
                         "setBackgroundResource",
                         R.drawable.notification_icon_legacy_bg);

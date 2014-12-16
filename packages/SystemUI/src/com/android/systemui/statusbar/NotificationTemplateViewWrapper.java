@@ -53,6 +53,9 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
     private ImageView mIcon;
     protected ImageView mPicture;
 
+    /** Whether the icon needs to be forced grayscale when in dark mode. */
+    private boolean mIconForceGraysaleWhenDark;
+
     protected NotificationTemplateViewWrapper(Context ctx, View view) {
         super(view);
         mIconDarkAlpha = ctx.getResources().getInteger(R.integer.doze_small_icon_alpha);
@@ -73,11 +76,15 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         mIcon = resolveIcon(largeIcon, rightIcon);
         mPicture = resolvePicture(largeIcon);
         mIconBackgroundColor = resolveBackgroundColor(mIcon);
+
+        // If the icon already has a color filter, we assume that we already forced the icon to be
+        // white when we created the notification.
+        mIconForceGraysaleWhenDark = mIcon != null && mIcon.getDrawable().getColorFilter() != null;
     }
 
     private ImageView resolveIcon(ImageView largeIcon, ImageView rightIcon) {
         return largeIcon != null && largeIcon.getBackground() != null ? largeIcon
-                : rightIcon != null && rightIcon.getBackground() != null ? rightIcon
+                : rightIcon != null && rightIcon.getVisibility() == View.VISIBLE ? rightIcon
                 : null;
     }
 
@@ -118,9 +125,15 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
             if (fade) {
                 fadeIconColorFilter(mIcon, dark, delay);
                 fadeIconAlpha(mIcon, dark, delay);
+                if (!mIconForceGraysaleWhenDark) {
+                    fadeGrayscale(mIcon, dark, delay);
+                }
             } else {
                 updateIconColorFilter(mIcon, dark);
                 updateIconAlpha(mIcon, dark);
+                if (!mIconForceGraysaleWhenDark) {
+                    updateGrayscale(mIcon, dark);
+                }
             }
         }
         setPictureGrayscale(dark, fade, delay);
@@ -196,8 +209,8 @@ public class NotificationTemplateViewWrapper extends NotificationViewWrapper {
         mIconColorFilter.setColor(color);
         Drawable background = target.getBackground();
 
-        // The notification might have been modified during the animation, so background might be
-        // null here.
+        // The background might be null for legacy notifications. Also, the notification might have
+        // been modified during the animation, so background might be null here.
         if (background != null) {
             background.mutate().setColorFilter(mIconColorFilter);
         }
