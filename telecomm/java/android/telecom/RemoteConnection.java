@@ -101,6 +101,15 @@ public final class RemoteConnection {
         public void onPostDialWait(RemoteConnection connection, String remainingPostDialSequence) {}
 
         /**
+         * Invoked when the post-dial sequence in the outgoing {@code Connection} has processed
+         * a character.
+         *
+         * @param connection The {@code RemoteConnection} invoking this method.
+         * @param nextChar The character being processed.
+         */
+        public void onPostDialChar(RemoteConnection connection, char nextChar) {}
+
+        /**
          * Indicates that the VOIP audio status of this {@code RemoteConnection} has changed.
          * See {@link #isVoipAudioMode()}.
          *
@@ -726,7 +735,7 @@ public final class RemoteConnection {
      * of time.
      *
      * If the DTMF string contains a {@link TelecomManager#DTMF_CHARACTER_WAIT} symbol, this
-     * {@code RemoteConnection} will pause playing the tones and notify callbackss via
+     * {@code RemoteConnection} will pause playing the tones and notify callbacks via
      * {@link Callback#onPostDialWait(RemoteConnection, String)}. At this point, the in-call app
      * should display to the user an indication of this state and an affordance to continue
      * the postdial sequence. When the user decides to continue the postdial sequence, the in-call
@@ -863,6 +872,15 @@ public final class RemoteConnection {
     void setPostDialWait(String remainingDigits) {
         for (Callback c : mCallbacks) {
             c.onPostDialWait(this, remainingDigits);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    void onPostDialChar(char nextChar) {
+        for (Callback c : mCallbacks) {
+            c.onPostDialChar(this, nextChar);
         }
     }
 
