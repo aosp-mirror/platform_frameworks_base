@@ -36,6 +36,14 @@ public class HotspotControllerImpl implements HotspotController {
 
     private static final String TAG = "HotspotController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    // Keep these in sync with Settings TetherService.java
+    public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
+    public static final String EXTRA_SET_ALARM = "extraSetAlarm";
+    public static final String EXTRA_RUN_PROVISION = "extraRunProvision";
+    public static final String EXTRA_ENABLE_WIFI_TETHER = "extraEnableWifiTether";
+    // Keep this in sync with Settings TetherSettings.java
+    public static final int WIFI_TETHERING = 0;
+
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final Receiver mReceiver = new Receiver();
     private final Context mContext;
@@ -97,9 +105,13 @@ public class HotspotControllerImpl implements HotspotController {
                 String tetherEnable = mContext.getResources().getString(
                         com.android.internal.R.string.config_wifi_tether_enable);
                 Intent intent = new Intent();
+                intent.putExtra(EXTRA_ADD_TETHER_TYPE, WIFI_TETHERING);
+                intent.putExtra(EXTRA_SET_ALARM, true);
+                intent.putExtra(EXTRA_RUN_PROVISION, true);
+                intent.putExtra(EXTRA_ENABLE_WIFI_TETHER, true);
                 intent.setComponent(ComponentName.unflattenFromString(tetherEnable));
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+                mContext.startServiceAsUser(intent, UserHandle.CURRENT);
             } else {
                 int wifiState = mWifiManager.getWifiState();
                 if ((wifiState == WifiManager.WIFI_STATE_ENABLING) ||
