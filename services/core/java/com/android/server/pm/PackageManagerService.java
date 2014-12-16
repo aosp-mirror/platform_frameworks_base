@@ -12196,7 +12196,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return;
                 }
             }
-            mSettings.writePackageRestrictionsLPr(userId);
+            scheduleWritePackageRestrictionsLocked(userId);
             components = mPendingBroadcasts.get(userId, packageName);
             final boolean newPackage = components == null;
             if (newPackage) {

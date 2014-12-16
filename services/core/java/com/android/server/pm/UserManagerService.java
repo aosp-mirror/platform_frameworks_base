@@ -16,8 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
-
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -33,11 +31,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IUserManager;
+import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -134,6 +132,8 @@ public class UserManagerService extends IUserManager.Stub {
     // BACKOFF_INC_INTERVAL times.
     private static final int[] BACKOFF_TIMES = { 0, 30*1000, 60*1000, 5*60*1000, 30*60*1000 };
 
+    static final int WRITE_USER_MSG = 1;
+    static final int WRITE_USER_DELAY = 2*1000;  // 2 seconds
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -210,7 +210,7 @@ public class UserManagerService extends IUserManager.Stub {
         mPm = pm;
         mInstallLock = installLock;
         mPackagesLock = packagesLock;
-        mHandler = new Handler();
+        mHandler = new MainHandler();
         synchronized (mInstallLock) {
             synchronized (mPackagesLock) {
                 mUsersDir = new File(dataDir, USER_INFO_DIR);
@@ -458,7 +458,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             if ((info.flags&UserInfo.FLAG_INITIALIZED) == 0) {
                 info.flags |= UserInfo.FLAG_INITIALIZED;
-                writeUserLocked(info);
+                scheduleWriteUserLocked(info);
             }
         }
     }
@@ -526,7 +526,7 @@ public class UserManagerService extends IUserManager.Stub {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-            writeUserLocked(mUsers.get(userId));
+            scheduleWriteUserLocked(mUsers.get(userId));
         }
     }
 
@@ -692,7 +692,7 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo user = mUsers.get(UserHandle.USER_OWNER);
             if ("Primary".equals(user.name)) {
                 user.name = mContext.getResources().getString(com.android.internal.R.string.owner_name);
-                writeUserLocked(user);
+                scheduleWriteUserLocked(user);
             }
             userVersion = 1;
         }
@@ -702,7 +702,7 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo user = mUsers.get(UserHandle.USER_OWNER);
             if ((user.flags & UserInfo.FLAG_INITIALIZED) == 0) {
                 user.flags |= UserInfo.FLAG_INITIALIZED;
-                writeUserLocked(user);
+                scheduleWriteUserLocked(user);
             }
             userVersion = 2;
         }
@@ -743,6 +743,13 @@ public class UserManagerService extends IUserManager.Stub {
 
         writeUserListLocked();
         writeUserLocked(primary);
+    }
+
+    private void scheduleWriteUserLocked(UserInfo userInfo) {
+        if (!mHandler.hasMessages(WRITE_USER_MSG, userInfo)) {
+            Message msg = mHandler.obtainMessage(WRITE_USER_MSG, userInfo);
+            mHandler.sendMessageDelayed(msg, WRITE_USER_DELAY);
+        }
     }
 
     /*
@@ -1188,14 +1195,13 @@ public class UserManagerService extends IUserManager.Stub {
                     if (parent != null) {
                         if (parent.profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
                             parent.profileGroupId = parent.id;
-                            writeUserLocked(parent);
+                            scheduleWriteUserLocked(parent);
                         }
                         userInfo.profileGroupId = parent.profileGroupId;
                     }
-                    writeUserLocked(userInfo);
                     mPm.createNewUserLILPw(userId, userPath);
                     userInfo.partial = false;
-                    writeUserLocked(userInfo);
+                    scheduleWriteUserLocked(userInfo);
                     updateUserIdsLocked();
                     Bundle restrictions = new Bundle();
                     mUserRestrictions.append(userId, restrictions);
@@ -1520,12 +1526,12 @@ public class UserManagerService extends IUserManager.Stub {
                 }
                 if (passwordToHash(pin, pinState.salt).equals(pinState.pinHash)) {
                     pinState.failedAttempts = 0;
-                    writeUserLocked(mUsers.get(userId));
+                    scheduleWriteUserLocked(mUsers.get(userId));
                     return UserManager.PIN_VERIFICATION_SUCCESS;
                 } else {
                     pinState.failedAttempts++;
                     pinState.lastAttemptTime = System.currentTimeMillis();
-                    writeUserLocked(mUsers.get(userId));
+                    scheduleWriteUserLocked(mUsers.get(userId));
                     return waitTime;
                 }
             }
@@ -1824,7 +1830,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
             if (now > EPOCH_PLUS_30_YEARS) {
                 user.lastLoggedInTime = now;
-                writeUserLocked(user);
+                scheduleWriteUserLocked(user);
             }
         }
     }
@@ -1898,6 +1904,24 @@ public class UserManagerService extends IUserManager.Stub {
                     sb.append(" ago");
                     pw.println(sb);
                 }
+            }
+        }
+    }
+
+    final class MainHandler extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case WRITE_USER_MSG:
+                    removeMessages(WRITE_USER_MSG, msg.obj);
+                    synchronized (mPackagesLock) {
+                        int userId = ((UserInfo) msg.obj).id;
+                        UserInfo userInfo = mUsers.get(userId);
+                        if (userInfo != null) {
+                            writeUserLocked(userInfo);
+                        }
+                    }
             }
         }
     }
