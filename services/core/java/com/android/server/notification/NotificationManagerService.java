@@ -927,7 +927,7 @@ public class NotificationManagerService extends SystemService {
                     Settings.Global.DEVICE_PROVISIONED, 0)) {
             mDisableNotificationEffects = true;
         }
-        mZenModeHelper.updateZenMode();
+        mZenModeHelper.readZenModeFromSetting();
 
         mUserProfiles.updateCache(getContext());
         listenForCallState();
