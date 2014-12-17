@@ -28,6 +28,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.net.Proxy;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -37,6 +38,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -250,6 +252,19 @@ public class CaptivePortalLoginActivity extends Activity {
                 return;
             }
             testForCaptivePortal();
+        }
+
+        // A web page consisting of a large broken lock icon to indicate SSL failure.
+        final static String SSL_ERROR_HTML = "<!DOCTYPE html><html><head><style>" +
+                "html { width:100%; height:100%; " +
+                "       background:url(locked_page.png) center center no-repeat; }" +
+                "</style></head><body></body></html>";
+
+        @Override
+        public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+            Log.w(TAG, "SSL error; displaying broken lock icon.");
+            view.loadDataWithBaseURL("file:///android_asset/", SSL_ERROR_HTML, "text/HTML",
+                    "UTF-8", null);
         }
     }
 
