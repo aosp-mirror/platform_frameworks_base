@@ -45,7 +45,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"Telefonsvarer"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Forbindelsesproblemer eller ugyldigt MMI-nummer."</string>
-    <string name="mmiFdnError" msgid="5224398216385316471">"Du kan kun foretage handlinger med faste opkaldsnumre."</string>
+    <string name="mmiFdnError" msgid="5224398216385316471">"Du kan kun foretage handlinger med dine numre til begrænset opkald."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"Tjenesten blev aktiveret."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Tjenesten blev aktiveret for:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"Tjenesten er deaktiveret."</string>
