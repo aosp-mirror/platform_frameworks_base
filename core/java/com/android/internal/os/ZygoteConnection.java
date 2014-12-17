@@ -993,8 +993,8 @@ class ZygoteConnection {
     private void setChildPgid(int pid) {
         // Try to move the new child into the peer's process group.
         try {
-            ZygoteInit.setpgid(pid, ZygoteInit.getpgid(peer.getPid()));
-        } catch (IOException ex) {
+            Os.setpgid(pid, Os.getpgid(peer.getPid()));
+        } catch (ErrnoException ex) {
             // This exception is expected in the case where
             // the peer is not in our session
             // TODO get rid of this log message in the case where
