@@ -12,7 +12,7 @@ yet repeatable manner.</p>
 <a name="overview"></a>
 <h2>Overview</h2>
 
-<p>The Monkey is a command-line tool that that you can run on any emulator
+<p>The Monkey is a command-line tool that you can run on any emulator
 instance or on a device.  It sends a pseudo-random stream of 
 user events into the system, which acts as a stress test on the application software you are 
 developing.</p>
