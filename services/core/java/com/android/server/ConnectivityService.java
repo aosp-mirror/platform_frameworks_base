@@ -3949,6 +3949,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         notifyLockdownVpn(newNetwork);
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
         updateTcpBufferSizes(newNetwork);
+        setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
     }
 
     // Handles a network appearing or improving its score.
@@ -3988,6 +3989,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         boolean keep = newNetwork.isVPN();
         boolean isNewDefault = false;
+        NetworkAgentInfo oldDefaultNetwork = null;
         if (DBG) log("rematching " + newNetwork.name());
         // Find and migrate to this Network any NetworkRequests for
         // which this network is now the best.
@@ -4045,25 +4047,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     sendUpdatedScoreToFactories(nri.request, newNetwork.getCurrentScore());
                     if (mDefaultRequest.requestId == nri.request.requestId) {
                         isNewDefault = true;
-                        // TODO: Remove following line.  It's redundant with makeDefault call.
-                        if (newNetwork.linkProperties != null) {
-                            updateTcpBufferSizes(newNetwork);
-                            setDefaultDnsSystemProperties(
-                                    newNetwork.linkProperties.getDnsServers());
-                        } else {
-                            setDefaultDnsSystemProperties(new ArrayList<InetAddress>());
-                        }
-                        // Maintain the illusion: since the legacy API only
-                        // understands one network at a time, we must pretend
-                        // that the current default network disconnected before
-                        // the new one connected.
-                        if (currentNetwork != null) {
-                            mLegacyTypeTracker.remove(currentNetwork.networkInfo.getType(),
-                                                      currentNetwork);
-                        }
-                        mDefaultInetConditionPublished = newNetwork.validated ? 100 : 0;
-                        mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
-                        notifyLockdownVpn(newNetwork);
+                        oldDefaultNetwork = currentNetwork;
                     }
                 }
             }
@@ -4104,6 +4088,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 1000);
                     }
                 }
+                // Maintain the illusion: since the legacy API only
+                // understands one network at a time, we must pretend
+                // that the current default network disconnected before
+                // the new one connected.
+                if (oldDefaultNetwork != null) {
+                    mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
+                                              oldDefaultNetwork);
+                }
+                mDefaultInetConditionPublished = newNetwork.validated ? 100 : 0;
+                mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
+                notifyLockdownVpn(newNetwork);
             }
 
             // Notify battery stats service about this network, both the normal
