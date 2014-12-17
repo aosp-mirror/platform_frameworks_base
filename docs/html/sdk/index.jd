@@ -90,7 +90,7 @@ sdk.win_installer_checksum=505d7a95647bccc194b7aa707854422d9c7288d5
     display:block;
     padding:0;
     white-space: nowrap;
-    text-indent: 10000px;
+    text-indent: -10000px;
     font-size:0px;
     background: url(../images/tools/studio-logo.png);
     background-image: -webkit-image-set(url(../images/tools/studio-logo.png) 1x, url(../images/tools/studio-logo_2x.png) 2x);
