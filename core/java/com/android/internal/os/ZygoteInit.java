@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import static android.system.OsConstants.POLLIN;
+import static android.system.OsConstants.POLLOUT;
 import static android.system.OsConstants.S_IRWXG;
 import static android.system.OsConstants.S_IRWXO;
 
@@ -32,6 +34,7 @@ import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.system.StructPollfd;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -699,34 +702,36 @@ public class ZygoteInit {
     private static void runSelectLoop(String abiList) throws MethodAndArgsCaller {
         ArrayList<FileDescriptor> fds = new ArrayList<FileDescriptor>();
         ArrayList<ZygoteConnection> peers = new ArrayList<ZygoteConnection>();
-        FileDescriptor[] fdArray = new FileDescriptor[4];
 
         fds.add(sServerSocket.getFileDescriptor());
         peers.add(null);
 
         while (true) {
-            int index;
-
-            try {
-                fdArray = fds.toArray(fdArray);
-                index = selectReadable(fdArray);
-            } catch (IOException ex) {
-                throw new RuntimeException("Error in select()", ex);
+            StructPollfd[] pollFds = new StructPollfd[fds.size()];
+            for (int i = 0; i < pollFds.length; ++i) {
+                pollFds[i] = new StructPollfd();
+                pollFds[i].fd = fds.get(i);
+                pollFds[i].events = (short) POLLIN;
             }
-
-            if (index < 0) {
-                throw new RuntimeException("Error in select()");
-            } else if (index == 0) {
-                ZygoteConnection newPeer = acceptCommandPeer(abiList);
-                peers.add(newPeer);
-                fds.add(newPeer.getFileDesciptor());
-            } else {
-                boolean done;
-                done = peers.get(index).runOnce();
-
-                if (done) {
-                    peers.remove(index);
-                    fds.remove(index);
+            try {
+                Os.poll(pollFds, -1);
+            } catch (ErrnoException ex) {
+                throw new RuntimeException("poll failed", ex);
+            }
+            for (int i = pollFds.length - 1; i >= 0; --i) {
+                if ((pollFds[i].revents & POLLIN) == 0) {
+                    continue;
+                }
+                if (i == 0) {
+                    ZygoteConnection newPeer = acceptCommandPeer(abiList);
+                    peers.add(newPeer);
+                    fds.add(newPeer.getFileDesciptor());
+                } else {
+                    boolean done = peers.get(i).runOnce();
+                    if (done) {
+                        peers.remove(i);
+                        fds.remove(i);
+                    }
                 }
             }
         }
@@ -765,16 +770,6 @@ public class ZygoteInit {
      * @throws IOException on error
      */
     static native int getpgid(int pid) throws IOException;
-
-    /**
-     * Invokes select() on the provider array of file descriptors (selecting
-     * for readability only). Array elements of null are ignored.
-     *
-     * @param fds non-null; array of readable file descriptors
-     * @return index of descriptor that is now readable or -1 for empty array.
-     * @throws IOException if an error occurs
-     */
-    static native int selectReadable(FileDescriptor[] fds) throws IOException;
 
     /**
      * Class not instantiable.
