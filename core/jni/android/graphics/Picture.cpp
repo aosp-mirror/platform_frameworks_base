@@ -42,10 +42,6 @@ Canvas* Picture::beginRecording(int width, int height) {
     mWidth = width;
     mHeight = height;
     SkCanvas* canvas = mRecorder->beginRecording(width, height, NULL, 0);
-    // the java side will wrap this guy in a Canvas.java, which will call
-    // unref in its finalizer, so we have to ref it here, so that both that
-    // Canvas.java and our picture can both be owners
-    canvas->ref();
     return Canvas::create_canvas(canvas);
 }
 

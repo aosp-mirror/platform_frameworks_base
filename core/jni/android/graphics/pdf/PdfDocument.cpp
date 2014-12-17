@@ -73,11 +73,6 @@ public:
         SkCanvas* canvas = page->mPictureRecorder->beginRecording(
                 contentRect.width(), contentRect.height(), NULL, 0);
 
-        // We pass this canvas to Java where it is used to construct
-        // a Java Canvas object which dereferences the pointer when it
-        // is destroyed, so we have to bump up the reference count.
-        canvas->ref();
-
         return canvas;
     }
 
