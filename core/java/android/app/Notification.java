@@ -3772,7 +3772,23 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews makeBigContentView() {
+
+            // Replace mLargeIcon with mBigLargeIcon if mBigLargeIconSet
+            // This covers the following cases:
+            //   1. mBigLargeIconSet -> mBigLargeIcon (null or non-null) applies, overrides
+            //          mLargeIcon
+            //   2. !mBigLargeIconSet -> mLargeIcon applies
+            Bitmap oldLargeIcon = null;
+            if (mBigLargeIconSet) {
+                oldLargeIcon = mBuilder.mLargeIcon;
+                mBuilder.mLargeIcon = mBigLargeIcon;
+            }
+
             RemoteViews contentView = getStandardView(mBuilder.getBigPictureLayoutResource());
+
+            if (mBigLargeIconSet) {
+                mBuilder.mLargeIcon = oldLargeIcon;
+            }
 
             contentView.setImageViewBitmap(R.id.big_picture, mPicture);
 
@@ -3804,6 +3820,7 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
 
             if (extras.containsKey(EXTRA_LARGE_ICON_BIG)) {
+                mBigLargeIconSet = true;
                 mBigLargeIcon = extras.getParcelable(EXTRA_LARGE_ICON_BIG);
             }
             mPicture = extras.getParcelable(EXTRA_PICTURE);
