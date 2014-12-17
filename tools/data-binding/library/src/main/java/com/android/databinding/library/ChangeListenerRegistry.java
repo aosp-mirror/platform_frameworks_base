@@ -13,10 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.databinding.library;
 
-public interface Observable {
-    public void addOnPropertyChangedListener(OnPropertyChangedListener listener);
-    public void removeOnPropertyChangedListener(OnPropertyChangedListener listener);
+/**
+ * Created by mount on 12/15/14.
+ */
+public class ChangeListenerRegistry extends
+        CallbackRegistry<OnPropertyChangedListener, Observable> {
+
+    private static final CallbackRegistry.NotifierCallback<OnPropertyChangedListener, Observable> NOTIFIER_CALLBACK = new CallbackRegistry.NotifierCallback<OnPropertyChangedListener, Observable>() {
+        @Override
+        public void onNotifyCallback(OnPropertyChangedListener callback, Observable sender,
+                int arg) {
+            callback.onPropertyChanged(sender, arg);
+        }
+    };
+
+    public ChangeListenerRegistry() {
+        super(NOTIFIER_CALLBACK);
+    }
 }

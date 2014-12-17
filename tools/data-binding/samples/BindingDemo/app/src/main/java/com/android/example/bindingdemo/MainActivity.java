@@ -10,6 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.databinding.library.ChangeListenerRegistry;
+import com.android.databinding.library.OnPropertyChangedListener;
 import com.android.example.bindingdemo.generated.BR;
 import com.android.example.bindingdemo.generated.ListItemBinder;
 import com.android.example.bindingdemo.generated.MainActivityBinder;
@@ -17,8 +19,6 @@ import com.android.example.bindingdemo.vo.User;
 import com.android.example.bindingdemo.vo.Users;
 import com.android.databinding.library.DataBinder;
 import com.android.databinding.library.Observable;
-import com.android.databinding.library.ObservableHelper;
-import com.android.databinding.library.ObservableListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,12 +34,12 @@ public class MainActivity extends ActionBarActivity implements Observable {
     MainActivityBinder dataBinder;
     @Bindable
     User selected;
-    ObservableHelper helper;
+
+    private final ChangeListenerRegistry mListeners = new ChangeListenerRegistry();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        helper = new ObservableHelper(this);
         dataBinder = DataBinder.createBinder(MainActivityBinder.class, this, R.layout.main_activity, null);
         setContentView(dataBinder.getRoot());
         dataBinder.getRobotList().setHasFixedSize(true);
@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             return;
         }
         this.selected = selected;
-        helper.fireChange(android.binding.BR.selected);
+        mListeners.notifyCallbacks(this, android.binding.BR.selected);
     }
 
     @Bindable
@@ -138,21 +138,21 @@ public class MainActivity extends ActionBarActivity implements Observable {
     }
 
     @Override
-    public void register(ObservableListener observableListener) {
-        helper.register(observableListener);
+    public void addOnPropertyChangedListener(OnPropertyChangedListener listener) {
+        mListeners.add(listener);
     }
 
     @Override
-    public void unRegister(ObservableListener observableListener) {
-        helper.unRegister(observableListener);
+    public void removeOnPropertyChangedListener(OnPropertyChangedListener listener) {
+        mListeners.remove(listener);
     }
 
     public class UserAdapter extends DataBoundAdapter<ListItemBinder> implements View.OnClickListener, Observable {
-        List<User> userList = new ArrayList<>();
-        ObservableHelper mHelper;
+        final private List<User> userList = new ArrayList<>();
+        final private ChangeListenerRegistry mListeners = new ChangeListenerRegistry();
+
         public UserAdapter(User[] toolkities) {
             super(R.layout.list_item, ListItemBinder.class);
-            mHelper = new ObservableHelper(this);
             userList.addAll(Arrays.asList(toolkities));
         }
 
@@ -181,7 +181,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             }
             userList.add(user);
             notifyItemInserted(userList.size() - 1);
-            mHelper.fireChange(android.binding.BR.itemCount);
+            mListeners.notifyCallbacks(this, android.binding.BR.itemCount);
         }
 
         public void remove(User user) {
@@ -191,7 +191,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             }
             userList.remove(i);
             notifyItemRemoved(i);
-            mHelper.fireChange(android.binding.BR.itemCount);
+            mListeners.notifyCallbacks(this, android.binding.BR.itemCount);
         }
 
         @Override
@@ -207,13 +207,13 @@ public class MainActivity extends ActionBarActivity implements Observable {
         }
 
         @Override
-        public void register(ObservableListener observableListener) {
-            mHelper.register(observableListener);
+        public void addOnPropertyChangedListener(OnPropertyChangedListener listener) {
+            mListeners.add(listener);
         }
 
         @Override
-        public void unRegister(ObservableListener observableListener) {
-            mHelper.unRegister(observableListener);
+        public void removeOnPropertyChangedListener(OnPropertyChangedListener listener) {
+            mListeners.remove(listener);
         }
     }
 }

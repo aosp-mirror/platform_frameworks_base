@@ -33,7 +33,7 @@ public class User extends BaseObservable {
             return;
         }
         this.group = group;
-        fireChange(android.binding.BR.group);
+        notifyPropertyChanged(android.binding.BR.group);
     }
 
     public int getGroup() {
@@ -49,7 +49,7 @@ public class User extends BaseObservable {
             return;
         }
         this.name = name;
-        fireChange(android.binding.BR.name);
+        notifyPropertyChanged(android.binding.BR.name);
     }
 
     public String getLastName() {
@@ -61,7 +61,7 @@ public class User extends BaseObservable {
             return;
         }
         this.lastName = lastName;
-        fireChange(android.binding.BR.lastName);
+        notifyPropertyChanged(android.binding.BR.lastName);
     }
 
     public int getPhotoResource() {
@@ -73,7 +73,7 @@ public class User extends BaseObservable {
             return;
         }
         this.photoResource = photoResource;
-        fireChange(android.binding.BR.photoResource);
+        notifyPropertyChanged(android.binding.BR.photoResource);
     }
 
     public int getFavoriteColor() {

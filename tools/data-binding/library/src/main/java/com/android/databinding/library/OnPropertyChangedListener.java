@@ -16,7 +16,6 @@
 
 package com.android.databinding.library;
 
-public interface ObservableListener {
-    public void onChange();
-    public void onChange(int fieldId);
+public interface OnPropertyChangedListener {
+    public void onPropertyChanged(Observable sender, int fieldId);
 }

@@ -16,27 +16,36 @@
 
 package com.android.databinding.library;
 
-import java.util.concurrent.CopyOnWriteArraySet;
-
 public class BaseObservable implements Observable {
-    final ObservableHelper mHelper;
+    private ChangeListenerRegistry mCallbacks;
 
     public BaseObservable() {
-        mHelper = new ObservableHelper(this);
     }
 
     @Override
-    public void register(ObservableListener listener) {
-        mHelper.register(listener);
+    public synchronized void addOnPropertyChangedListener(OnPropertyChangedListener listener) {
+        if (mCallbacks == null) {
+            mCallbacks = new ChangeListenerRegistry();
+        }
+        mCallbacks.add(listener);
     }
 
     @Override
-    public void unRegister(ObservableListener listener) {
-        mHelper.unRegister(listener);
+    public synchronized void removeOnPropertyChangedListener(OnPropertyChangedListener listener) {
+        if (mCallbacks != null) {
+            mCallbacks.remove(listener);
+        }
     }
 
-    public void fireChange() {
-        mHelper.fireChange();
+    public synchronized void notifyChange() {
+        if (mCallbacks != null) {
+            mCallbacks.notifyCallbacks(this, 0);
+        }
     }
-    public void fireChange(int fieldId) {mHelper.fireChange(fieldId);}
+
+    public void notifyPropertyChanged(int fieldId) {
+        if (mCallbacks != null) {
+            mCallbacks.notifyCallbacks(this, fieldId);
+        }
+    }
 }

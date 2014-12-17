@@ -16,16 +16,11 @@
 
 package com.android.databinding.library;
 
-import android.util.SparseIntArray;
 import android.view.View;
 
 import java.lang.Override;
 import java.lang.Runnable;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 abstract public class ViewDataBinder {
     WeakReferencedListener[] mLocalFieldObservers;
@@ -112,7 +107,7 @@ abstract public class ViewDataBinder {
         listener.setTarget(observable);
     }
 
-    protected abstract class WeakReferencedListener implements ObservableListener {
+    protected abstract class WeakReferencedListener implements OnPropertyChangedListener {
         WeakReference<Observable> mTarget;
 
         public WeakReferencedListener() {
@@ -121,7 +116,7 @@ abstract public class ViewDataBinder {
         public void setTarget(Observable observable) {
             if (observable != null) {
                 mTarget = new WeakReference<>(observable);
-                observable.register(this);
+                observable.addOnPropertyChangedListener(this);
             } else {
                 mTarget = null;
             }
@@ -130,7 +125,7 @@ abstract public class ViewDataBinder {
         public boolean unregister() {
             Observable oldTarget = getTarget();
             if (oldTarget != null) {
-                oldTarget.unRegister(this);
+                oldTarget.removeOnPropertyChangedListener(this);
             }
             mTarget = null;
             return oldTarget != null;
@@ -148,16 +143,7 @@ abstract public class ViewDataBinder {
         }
 
         @Override
-        public void onChange() {
-            Observable obj = getTarget();
-            if (obj == null) {
-                return;//how come i live if it died ?
-            }
-            ViewDataBinder.this.handleFieldChange(mLocalFieldId, obj, 0);
-        }
-
-        @Override
-        public void onChange(int fieldId) {
+        public void onPropertyChanged(Observable sender, int fieldId) {
             Observable obj = getTarget();
             if (obj == null) {
                 return;//how come i live if it died ?
