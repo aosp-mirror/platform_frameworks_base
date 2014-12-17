@@ -127,10 +127,10 @@ public final class TvInputManager {
      * <receiver android:name=".TvInputReceiver">
      *     <intent-filter>
      *         <action android:name=
-     *                 "android.media.tv.TvInputManager.ACTION_QUERY_CONTENT_RATING_SYSTEMS" />
+     *                 "android.media.tv.action.QUERY_CONTENT_RATING_SYSTEMS" />
      *     </intent-filter>
      *     <meta-data
-     *             android:name="android.media.tv.TvInputManager.META_DATA_CONTENT_RATING_SYSTEMS"
+     *             android:name="android.media.tv.metadata.CONTENT_RATING_SYSTEMS"
      *             android:resource="@xml/tv_content_rating_systems" />
      * </receiver>}</pre></p>
      * In the above example, the <code>@xml/tv_content_rating_systems</code> resource refers to an
