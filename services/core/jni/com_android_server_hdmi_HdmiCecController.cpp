@@ -62,7 +62,7 @@ public:
     // Set a flag and its value.
     void setOption(int flag, int value);
     // Set audio return channel status.
-    void setAudioReturnChannel(bool flag);
+    void setAudioReturnChannel(int port, bool flag);
     // Whether to hdmi device is connected to the given port.
     bool isConnected(int port);
 
@@ -260,8 +260,8 @@ void HdmiCecController::setOption(int flag, int value) {
 }
 
 // Set audio return channel status.
-void HdmiCecController::setAudioReturnChannel(bool enabled) {
-    mDevice->set_audio_return_channel(mDevice, enabled ? 1 : 0);
+  void HdmiCecController::setAudioReturnChannel(int port, bool enabled) {
+    mDevice->set_audio_return_channel(mDevice, port, enabled ? 1 : 0);
 }
 
 // Whether to hdmi device is connected to the given port.
@@ -374,9 +374,9 @@ static void nativeSetOption(JNIEnv* env, jclass clazz, jlong controllerPtr, jint
 }
 
 static void nativeSetAudioReturnChannel(JNIEnv* env, jclass clazz, jlong controllerPtr,
-        jboolean enabled) {
+        jint port, jboolean enabled) {
     HdmiCecController* controller = reinterpret_cast<HdmiCecController*>(controllerPtr);
-    controller->setAudioReturnChannel(enabled == JNI_TRUE);
+    controller->setAudioReturnChannel(port, enabled == JNI_TRUE);
 }
 
 static jboolean nativeIsConnected(JNIEnv* env, jclass clazz, jlong controllerPtr, jint port) {
@@ -399,7 +399,7 @@ static JNINativeMethod sMethods[] = {
       "(J)[Landroid/hardware/hdmi/HdmiPortInfo;",
       (void *) nativeGetPortInfos },
     { "nativeSetOption", "(JII)V", (void *) nativeSetOption },
-    { "nativeSetAudioReturnChannel", "(JZ)V", (void *) nativeSetAudioReturnChannel },
+    { "nativeSetAudioReturnChannel", "(JIZ)V", (void *) nativeSetAudioReturnChannel },
     { "nativeIsConnected", "(JI)Z", (void *) nativeIsConnected },
 };
 
