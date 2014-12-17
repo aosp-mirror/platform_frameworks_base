@@ -756,8 +756,8 @@ public final class HdmiControlService extends SystemService {
         return dispatchMessageToLocalDevice(message);
     }
 
-    void setAudioReturnChannel(boolean enabled) {
-        mCecController.setAudioReturnChannel(enabled);
+    void setAudioReturnChannel(int portId, boolean enabled) {
+        mCecController.setAudioReturnChannel(portId, enabled);
     }
 
     @ServiceThreadOnly
