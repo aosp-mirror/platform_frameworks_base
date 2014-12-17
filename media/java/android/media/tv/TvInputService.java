@@ -597,13 +597,16 @@ public abstract class TvInputService extends Service {
         public void onSetMain(boolean isMain) {
         }
 
-        /**
-         * Sets the {@link Surface} for the current input session on which the TV input renders
-         * video.
-         *
-         * @param surface {@link Surface} an application passes to this TV input session.
-         * @return {@code true} if the surface was set, {@code false} otherwise.
-         */
+    /**
+     * Sets the {@link Surface} for the current input session on which the TV input renders video.
+     * <p>
+     * When {@code setSurface(null)} is called, the implementation should stop using the Surface
+     * object previously given and release any references to it.
+     *
+     * @param surface possibly {@code null} {@link Surface} an application passes to this TV input
+     *        session.
+     * @return {@code true} if the surface was set, {@code false} otherwise.
+     */
         public abstract boolean onSetSurface(Surface surface);
 
         /**
