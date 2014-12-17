@@ -509,10 +509,10 @@ you should update to it as soon as convenient. </p>
 revision of the Android SDK Tools. If such dependencies exist, you will need to
 update the SDK Tools package of the SDK after installing the new revision of
 ADT. To update the SDK Tools package, use the Android SDK Manager, as
-described in <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
+described in <a href="{@docRoot}sdk/installing/adding-packages.html">Adding SDK Packages</a>.</p>
 
 <p>To learn about new features of each ADT revision and also any dependencies on
-the SDK Tools, see the listings in the <a href="#notes">Revisions</a>
+the SDK Tools, see the listings in the <a href="{@docRoot}tools/revisions/index.html">Revisions</a>
 section. To determine the version currently installed, open the
 Eclipse Installed Software window using <strong>Help</strong>
 &gt; <strong>Software Updates</strong> and refer to the version listed for
