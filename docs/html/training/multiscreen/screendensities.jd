@@ -15,8 +15,8 @@ next.link=adaptui.html
 
 
 <!-- This is the training bar -->
-<div id="tb-wrapper"> 
-<div id="tb"> 
+<div id="tb-wrapper">
+<div id="tb">
 
 <h2>This lesson teaches you to</h2>
 <ol>
@@ -33,16 +33,15 @@ Guidelines</a></li>
 </ul>
 
 <h2>Try it out</h2>
- 
-<div class="download-box"> 
+
+<div class="download-box">
 <a href="http://developer.android.com/shareables/training/NewsReader.zip" class="button">Download
   the sample app</a>
-<p class="filename">NewsReader.zip</p> 
-</div> 
- 
- 
-</div> 
-</div> 
+<p class="filename">NewsReader.zip</p>
+</div>
+
+</div>
+</div>
 
 <p>This lesson shows you how to support different screen densities
 by providing different resources and using resolution-independent units of
@@ -54,19 +53,29 @@ measurements.</p>
 absolute pixels to define distances or sizes. Defining layout dimensions with
 pixels is a problem because different screens have different pixel densities,
 so the same number of pixels may correspond to different physical sizes on
-different devices. Therefore, when specifying dimensions, always use either 
+different devices. Therefore, when specifying dimensions, always use either
 <code>dp</code> or <code>sp</code> units. A <code>dp</code> is a density-independent pixel
 that corresponds to the physical size of a pixel at 160 dpi. An <code>sp</code> is the same
 base unit, but is scaled by the user's preferred text size (it’s a
 scale-independent pixel), so you should use this measurement unit when defining
 text size (but never for layout sizes).</p>
 
-<p>For example, when you specify spacing between two views, use <code>dp</code> 
+ <!-- video box -->
+<a class="notice-developers-video left" href="https://www.youtube.com/watch?v=zhszwkcay2A">
+<div>
+    <h3>Video</h3>
+    <p>DesignBytes: Density-independent Pixels</p>
+</div>
+</a>
+
+<br style="clear:left">
+
+<p>For example, when you specify spacing between two views, use <code>dp</code>
 rather than <code>px</code>:</p>
 
 <pre>
-&lt;Button android:layout_width="wrap_content" 
-    android:layout_height="wrap_content" 
+&lt;Button android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:text="&#64;string/clickme"
     android:layout_marginTop="20dp" /&gt;
 </pre>
@@ -74,8 +83,8 @@ rather than <code>px</code>:</p>
 <p>When specifying text size, always use <code>sp</code>:</p>
 
 <pre>
-&lt;TextView android:layout_width="match_parent" 
-    android:layout_height="wrap_content" 
+&lt;TextView android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:textSize="20sp" /&gt;
 </pre>
 
