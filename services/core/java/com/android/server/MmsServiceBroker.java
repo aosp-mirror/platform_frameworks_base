@@ -35,7 +35,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Telephony;
+import android.service.carrier.CarrierMessagingService;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 
@@ -230,7 +230,7 @@ public class MmsServiceBroker extends SystemService {
                 return;
             }
             contentUri = adjustUriForUserAndGrantPermission(contentUri,
-                    Telephony.Mms.Intents.MMS_SEND_ACTION,
+                    CarrierMessagingService.SERVICE_INTERFACE,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION);
             getServiceGuarded().sendMessage(subId, callingPkg, contentUri, locationUrl,
                     configOverrides, sentIntent);
@@ -248,7 +248,7 @@ public class MmsServiceBroker extends SystemService {
                 return;
             }
             contentUri = adjustUriForUserAndGrantPermission(contentUri,
-                    Telephony.Mms.Intents.MMS_DOWNLOAD_ACTION,
+                    CarrierMessagingService.SERVICE_INTERFACE,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
             getServiceGuarded().downloadMessage(subId, callingPkg, locationUrl, contentUri,
