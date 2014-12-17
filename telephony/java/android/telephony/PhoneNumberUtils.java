@@ -1503,7 +1503,7 @@ public class PhoneNumberUtils
             int digit = Character.digit(c, 10);
             if (digit != -1) {
                 sb.append(digit);
-            } else if (i == 0 && c == '+') {
+            } else if (sb.length() == 0 && c == '+') {
                 sb.append(c);
             } else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
                 return normalizeNumber(PhoneNumberUtils.convertKeypadLettersToDigits(phoneNumber));
