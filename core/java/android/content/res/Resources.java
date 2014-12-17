@@ -2445,7 +2445,7 @@ public class Resources {
             LongSparseArray<WeakReference<ConstantState>>> caches) {
         final int N = caches.size();
         for (int i = N - 1; i >= 0; i--) {
-            final LongSparseArray<WeakReference<ConstantState>> cache = caches.get(i);
+            final LongSparseArray<WeakReference<ConstantState>> cache = caches.valueAt(i);
             if (pruneCache(cache)) {
                 caches.removeAt(i);
             }
