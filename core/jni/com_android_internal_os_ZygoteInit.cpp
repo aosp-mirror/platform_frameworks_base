@@ -88,73 +88,6 @@ static jint com_android_internal_os_ZygoteInit_getpgid(
     return ret;
 }
 
-static jint com_android_internal_os_ZygoteInit_selectReadable (
-        JNIEnv *env, jobject clazz, jobjectArray fds)
-{
-    if (fds == NULL) {
-        jniThrowNullPointerException(env, "fds == null");
-        return -1;
-    }
-
-    jsize length = env->GetArrayLength(fds);
-    fd_set fdset;
-
-    if (env->ExceptionCheck()) {
-        return -1;
-    }
-
-    FD_ZERO(&fdset);
-
-    int nfds = 0;
-    for (jsize i = 0; i < length; i++) {
-        jobject fdObj = env->GetObjectArrayElement(fds, i);
-        if  (env->ExceptionCheck()) {
-            return -1;
-        }
-        if (fdObj == NULL) {
-            continue;
-        }
-        int fd = jniGetFDFromFileDescriptor(env, fdObj);
-        if  (env->ExceptionCheck()) {
-            return -1;
-        }
-
-        FD_SET(fd, &fdset);
-
-        if (fd >= nfds) {
-            nfds = fd + 1;
-        }
-    }
-
-    int err;
-    do {
-        err = select (nfds, &fdset, NULL, NULL, NULL);
-    } while (err < 0 && errno == EINTR);
-
-    if (err < 0) {
-        jniThrowIOException(env, errno);
-        return -1;
-    }
-
-    for (jsize i = 0; i < length; i++) {
-        jobject fdObj = env->GetObjectArrayElement(fds, i);
-        if  (env->ExceptionCheck()) {
-            return -1;
-        }
-        if (fdObj == NULL) {
-            continue;
-        }
-        int fd = jniGetFDFromFileDescriptor(env, fdObj);
-        if  (env->ExceptionCheck()) {
-            return -1;
-        }
-        if (FD_ISSET(fd, &fdset)) {
-            return (jint)i;
-        }
-    }
-    return -1;
-}
-
 /*
  * JNI registration.
  */
@@ -168,8 +101,6 @@ static JNINativeMethod gMethods[] = {
       (void *) com_android_internal_os_ZygoteInit_setpgid },
     { "getpgid", "(I)I",
       (void *) com_android_internal_os_ZygoteInit_getpgid },
-    { "selectReadable", "([Ljava/io/FileDescriptor;)I",
-        (void *) com_android_internal_os_ZygoteInit_selectReadable },
 };
 int register_com_android_internal_os_ZygoteInit(JNIEnv* env)
 {
