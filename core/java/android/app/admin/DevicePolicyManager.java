@@ -2803,6 +2803,8 @@ public class DevicePolicyManager {
     /**
      * Called by the profile owner of a managed profile so that some intents sent in the managed
      * profile can also be resolved in the parent, or vice versa.
+     * Only activity intents are supported.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param filter The {@link IntentFilter} the intent has to match to be also resolved in the
      * other profile
