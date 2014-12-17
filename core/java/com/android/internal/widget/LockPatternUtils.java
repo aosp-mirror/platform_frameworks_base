@@ -48,6 +48,9 @@ import android.widget.Button;
 
 import com.android.internal.R;
 import com.google.android.collect.Lists;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import libcore.util.HexEncoding;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -357,7 +360,7 @@ public class LockPatternUtils {
      */
     public boolean checkPasswordHistory(String password) {
         String passwordHashString = new String(
-                passwordToHash(password, getCurrentOrCallingUserId()));
+                passwordToHash(password, getCurrentOrCallingUserId()), StandardCharsets.UTF_8);
         String passwordHistory = getString(PASSWORD_HISTORY_KEY);
         if (passwordHistory == null) {
             return false;
@@ -889,7 +892,7 @@ public class LockPatternUtils {
                     passwordHistory = "";
                 } else {
                     byte[] hash = passwordToHash(password, userHandle);
-                    passwordHistory = new String(hash) + "," + passwordHistory;
+                    passwordHistory = new String(hash, StandardCharsets.UTF_8) + "," + passwordHistory;
                     // Cut it to contain passwordHistoryLength hashes
                     // and passwordHistoryLength -1 commas.
                     passwordHistory = passwordHistory.substring(0, Math.min(hash.length
@@ -1076,34 +1079,30 @@ public class LockPatternUtils {
      * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
      * Not the most secure, but it is at least a second level of protection. First level is that
      * the file is in a location only readable by the system process.
+     *
      * @param password the gesture pattern.
+     *
      * @return the hash of the pattern in a byte array.
      */
     public byte[] passwordToHash(String password, int userId) {
         if (password == null) {
             return null;
         }
-        String algo = null;
-        byte[] hashed = null;
+
         try {
             byte[] saltedPassword = (password + getSalt(userId)).getBytes();
-            byte[] sha1 = MessageDigest.getInstance(algo = "SHA-1").digest(saltedPassword);
-            byte[] md5 = MessageDigest.getInstance(algo = "MD5").digest(saltedPassword);
-            hashed = (toHex(sha1) + toHex(md5)).getBytes();
-        } catch (NoSuchAlgorithmException e) {
-            Log.w(TAG, "Failed to encode string because of missing algorithm: " + algo);
-        }
-        return hashed;
-    }
+            byte[] sha1 = MessageDigest.getInstance("SHA-1").digest(saltedPassword);
+            byte[] md5 = MessageDigest.getInstance("MD5").digest(saltedPassword);
 
-    private static String toHex(byte[] ary) {
-        final String hex = "0123456789ABCDEF";
-        String ret = "";
-        for (int i = 0; i < ary.length; i++) {
-            ret += hex.charAt((ary[i] >> 4) & 0xf);
-            ret += hex.charAt(ary[i] & 0xf);
+            byte[] combined = new byte[sha1.length + md5.length];
+            System.arraycopy(sha1, 0, combined, 0, sha1.length);
+            System.arraycopy(md5, 0, combined, sha1.length, md5.length);
+
+            final char[] hexEncoded = HexEncoding.encode(combined);
+            return new String(hexEncoded).getBytes(StandardCharsets.UTF_8);
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError("Missing digest algorithm: ", e);
         }
-        return ret;
     }
 
     /**
