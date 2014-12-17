@@ -17,6 +17,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.android.databinding'
 
+def generatedSources = "$buildDir/generated/source/br"
+
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.1"
@@ -38,6 +40,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    //sourceSets {
+    //    main.java.srcDirs += generatedSources
+    //}
+}
+
+android.applicationVariants.all { variant ->
+    variant.javaCompile.doFirst {
+        println "*** compile doFirst ${variant.name}"
+        new File(generatedSources).mkdirs()
+        variant.javaCompile.options.compilerArgs += [
+                '-s', generatedSources
+        ]
+    }
 }
 
 dependencies {
@@ -47,4 +62,5 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:21.0.2'
     compile 'com.android.support:gridlayout-v7:21+'
     compile 'com.android.support:cardview-v7:21.0.2'
+    provided 'com.android.databinding:annotationprocessor:0.1-SNAPSHOT'
 }

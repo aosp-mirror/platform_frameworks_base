@@ -1,5 +1,6 @@
 package com.android.example.bindingdemo;
 
+import android.binding.Bindable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,9 +26,13 @@ import java.util.List;
 
 
 public class MainActivity extends ActionBarActivity implements Observable {
+    @Bindable
     UserAdapter tkAdapter;
+    @Bindable
     UserAdapter robotAdapter;
+    @Bindable
     MainActivityBinder dataBinder;
+    @Bindable
     User selected;
     ObservableHelper helper;
 
@@ -67,6 +72,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
         helper.fireChange(BR.selected);
     }
 
+    @Bindable
     public View.OnClickListener onSave = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -78,6 +84,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
         }
     };
 
+    @Bindable
     public View.OnClickListener onUnselect = new View.OnClickListener() {
 
         @Override
@@ -86,6 +93,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
         }
     };
 
+    @Bindable
     public View.OnClickListener onDelete = new View.OnClickListener() {
         @Override
         public void onClick(View v) {

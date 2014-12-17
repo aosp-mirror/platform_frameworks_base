@@ -1,5 +1,6 @@
 package com.android.example.bindingdemo.vo;
 
+import android.binding.Bindable;
 import android.graphics.Color;
 
 import com.android.databinding.library.BaseObservable;
@@ -7,10 +8,15 @@ import com.android.databinding.library.BaseObservable;
 import java.util.Objects;
 
 public class User extends BaseObservable {
+    @Bindable
     private String name;
+    @Bindable
     private String lastName;
+    @Bindable
     private int photoResource = 0;
+    @Bindable
     private int favoriteColor = Color.RED;
+    @Bindable
     private int group;
     public static final int TOOLKITTY = 1;
     public static final int ROBOT = 2;
