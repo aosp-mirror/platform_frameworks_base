@@ -69,7 +69,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             return;
         }
         this.selected = selected;
-        helper.fireChange(BR.selected);
+        helper.fireChange(android.binding.BR.selected);
     }
 
     @Bindable
@@ -169,6 +169,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             vh.dataBinder.rebindDirty();
         }
 
+        @Bindable
         @Override
         public int getItemCount() {
             return userList.size();
@@ -180,7 +181,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             }
             userList.add(user);
             notifyItemInserted(userList.size() - 1);
-            mHelper.fireChange("itemCount");
+            mHelper.fireChange(android.binding.BR.itemCount);
         }
 
         public void remove(User user) {
@@ -190,7 +191,7 @@ public class MainActivity extends ActionBarActivity implements Observable {
             }
             userList.remove(i);
             notifyItemRemoved(i);
-            mHelper.fireChange("itemCount");
+            mHelper.fireChange(android.binding.BR.itemCount);
         }
 
         @Override

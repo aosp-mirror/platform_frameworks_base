@@ -38,8 +38,5 @@ public class BaseObservable implements Observable {
     public void fireChange() {
         mHelper.fireChange();
     }
-    public void fireChange(String fieldName) {
-        mHelper.fireChange(fieldName);
-    }
     public void fireChange(int fieldId) {mHelper.fireChange(fieldId);}
 }

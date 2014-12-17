@@ -37,7 +37,7 @@ class BrRenderer(val pkg : String, val className : String, val vbrs : List<ViewE
     }
 
     public fun toInt(key : String) : Int = if (key == "") keyToInt.get("__") else keyToInt.get(key) ?: -1
-    public fun toIntS(key : String) : String = "${className}.${if (key == "") "__" else key}"
+    public fun toIntS(key : String) : String = "android.binding.BR.${if (key == "") "_all" else key}"
     public fun render() : String {
         return """
 package $pkg;

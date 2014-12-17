@@ -36,10 +36,7 @@ public class ObservableHelper implements Observable {
     }
 
     public void fireChange() {
-        fireChange("");
-    }
-    public void fireChange(String fieldName) {
-        fireChange(DataBinder.convertToId(fieldName));
+        fireChange(0);
     }
     public void fireChange(int fieldId) {
         final CopyOnWriteArraySet<ObservableListener> listeners = getListeners(false);

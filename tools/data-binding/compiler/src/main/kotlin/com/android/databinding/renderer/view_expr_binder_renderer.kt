@@ -182,8 +182,11 @@ ${lb.bindingTargets.map{ target ->
             """
 package $pkg;
 
+import android.binding.Bindable;
+
 public interface ${interfaceName} extends com.android.databinding.library.IViewDataBinder {
 ${lb.rootVariables.values().filterNot{it.static}.map { variable -> """
+    @Bindable
     public void ${variable.setter}(${variable.klassName} ${variable.name});
 """}.joinIndentedExceptFirst(1)}
 ${lb.bindingTargets.filter { it.bindings.size > 0 }.map { """
