@@ -837,7 +837,7 @@ public abstract class LayoutInflater {
             throws XmlPullParserException, IOException {
         int type;
 
-        final TypedArray ta = view.getContext().obtainStyledAttributes(
+        final TypedArray ta = mContext.obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.ViewTag);
         final int key = ta.getResourceId(com.android.internal.R.styleable.ViewTag_id, 0);
         final CharSequence value = ta.getText(com.android.internal.R.styleable.ViewTag_value);
@@ -856,26 +856,7 @@ public abstract class LayoutInflater {
         int type;
 
         if (parent instanceof ViewGroup) {
-            Context context = inheritContext ? parent.getContext() : mContext;
-
-            // Apply a theme wrapper, if requested.
-            final TypedArray ta = context.obtainStyledAttributes(attrs, ATTRS_THEME);
-            final int themeResId = ta.getResourceId(0, 0);
-            if (themeResId != 0) {
-                context = new ContextThemeWrapper(context, themeResId);
-            }
-            ta.recycle();
-
-            final TypedArray a = context.obtainStyledAttributes(
-                    attrs, com.android.internal.R.styleable.Include);
-            final int layout = a.getResourceId(
-                    com.android.internal.R.styleable.Include_layout, 0);
-            final int id = a.getResourceId(
-                    com.android.internal.R.styleable.Include_id, View.NO_ID);
-            final int visibility = a.getInt(
-                    com.android.internal.R.styleable.Include_visibility, -1);
-            a.recycle();
-
+            final int layout = attrs.getAttributeResourceValue(null, "layout", 0);
             if (layout == 0) {
                 final String value = attrs.getAttributeValue(null, "layout");
                 if (value == null) {
@@ -933,6 +914,15 @@ public abstract class LayoutInflater {
 
                         // Inflate all children.
                         rInflate(childParser, view, childAttrs, true, true);
+
+                        // Attempt to override the included layout's android:id with the
+                        // one set on the <include /> tag itself.
+                        TypedArray a = mContext.obtainStyledAttributes(attrs,
+                            com.android.internal.R.styleable.View, 0, 0);
+                        int id = a.getResourceId(com.android.internal.R.styleable.View_id, View.NO_ID);
+                        // While we're at it, let's try to override android:visibility.
+                        int visibility = a.getInt(com.android.internal.R.styleable.View_visibility, -1);
+                        a.recycle();
 
                         if (id != View.NO_ID) {
                             view.setId(id);
