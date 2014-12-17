@@ -402,7 +402,7 @@ public class Linkify {
         }
 
         boolean hasPrefix = false;
-
+        
         for (int i = 0; i < prefixes.length; i++) {
             if (url.regionMatches(true, 0, prefixes[i], 0,
                                   prefixes[i].length())) {
@@ -450,7 +450,7 @@ public class Linkify {
     private static final void gatherTelLinks(ArrayList<LinkSpec> links, Spannable s) {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         Iterable<PhoneNumberMatch> matches = phoneUtil.findNumbers(s.toString(),
-                Locale.getDefault().getCountry(), Leniency.VALID, Long.MAX_VALUE);
+                Locale.getDefault().getCountry(), Leniency.POSSIBLE, Long.MAX_VALUE);
         for (PhoneNumberMatch match : matches) {
             LinkSpec spec = new LinkSpec();
             spec.url = "tel:" + PhoneNumberUtils.normalizeNumber(match.rawString());
