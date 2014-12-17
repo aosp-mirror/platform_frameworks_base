@@ -20,6 +20,7 @@ import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvStreamConfig;
 import android.os.Handler;
 import android.os.Message;
+import android.os.MessageQueue;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -53,7 +54,7 @@ final class TvInputHal implements Handler.Callback {
         public void onFirstFrameCaptured(int deviceId, int streamId);
     }
 
-    private native long nativeOpen();
+    private native long nativeOpen(MessageQueue queue);
 
     private static native int nativeAddOrUpdateStream(long ptr, int deviceId, int streamId,
             Surface surface);
@@ -76,7 +77,7 @@ final class TvInputHal implements Handler.Callback {
 
     public void init() {
         synchronized (mLock) {
-            mPtr = nativeOpen();
+            mPtr = nativeOpen(mHandler.getLooper().getQueue());
         }
     }
 
