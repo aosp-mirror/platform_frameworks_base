@@ -499,7 +499,7 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
     deferInfo.mergeable &= !recordingComplexClip();
     deferInfo.opaqueOverBounds &= !recordingComplexClip() && mSaveStack.isEmpty();
 
-    if (mBatches.size() &&
+    if (CC_LIKELY(mAvoidOverdraw) && mBatches.size() &&
             state->mClipSideFlags != kClipSide_ConservativeFull &&
             deferInfo.opaqueOverBounds && state->mBounds.contains(mBounds)) {
         // avoid overdraw by resetting drawing state + discarding drawing ops
@@ -647,12 +647,13 @@ void DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     DrawModifiers restoreDrawModifiers = renderer.getDrawModifiers();
     renderer.save(SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
-    for (unsigned int i = 1; i < mBatches.size(); i++) {
-        if (mBatches[i] && mBatches[i]->coversBounds(mBounds)) {
-            discardDrawingBatches(i - 1);
+    if (CC_LIKELY(mAvoidOverdraw)) {
+        for (unsigned int i = 1; i < mBatches.size(); i++) {
+            if (mBatches[i] && mBatches[i]->coversBounds(mBounds)) {
+                discardDrawingBatches(i - 1);
+            }
         }
     }
-
     // NOTE: depth of the save stack at this point, before playback, should be reflected in
     // FLUSH_SAVE_STACK_DEPTH, so that save/restores match up correctly
     replayBatchList(mBatches, renderer, dirty);
