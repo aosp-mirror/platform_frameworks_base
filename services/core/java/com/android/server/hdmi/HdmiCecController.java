@@ -331,12 +331,13 @@ final class HdmiCecController {
     /**
      * Configure ARC circuit in the hardware logic to start or stop the feature.
      *
+     * @param port ID of HDMI port to which AVR is connected
      * @param enabled whether to enable/disable ARC
      */
     @ServiceThreadOnly
-    void setAudioReturnChannel(boolean enabled) {
+    void setAudioReturnChannel(int port, boolean enabled) {
         assertRunOnServiceThread();
-        nativeSetAudioReturnChannel(mNativePtr, enabled);
+        nativeSetAudioReturnChannel(mNativePtr, port, enabled);
     }
 
     /**
@@ -633,6 +634,6 @@ final class HdmiCecController {
     private static native int nativeGetVendorId(long controllerPtr);
     private static native HdmiPortInfo[] nativeGetPortInfos(long controllerPtr);
     private static native void nativeSetOption(long controllerPtr, int flag, int value);
-    private static native void nativeSetAudioReturnChannel(long controllerPtr, boolean flag);
+    private static native void nativeSetAudioReturnChannel(long controllerPtr, int port, boolean flag);
     private static native boolean nativeIsConnected(long controllerPtr, int port);
 }
