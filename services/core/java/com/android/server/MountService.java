@@ -76,9 +76,8 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+import libcore.util.HexEncoding;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.DecoderException;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
@@ -2206,10 +2205,10 @@ class MountService extends IMountService.Stub
 
     private String toHex(String password) {
         if (password == null) {
-            return new String();
+            return "";
         }
         byte[] bytes = password.getBytes(StandardCharsets.UTF_8);
-        return new String(Hex.encodeHex(bytes));
+        return new String(HexEncoding.encode(bytes));
     }
 
     private String fromHex(String hexPassword) {
@@ -2217,12 +2216,14 @@ class MountService extends IMountService.Stub
             return null;
         }
 
+        final byte[] bytes;
         try {
-            byte[] bytes = Hex.decodeHex(hexPassword.toCharArray());
-            return new String(bytes, StandardCharsets.UTF_8);
-        } catch (DecoderException e) {
+            bytes = HexEncoding.decode(hexPassword.toCharArray(), false);
+        } catch (IllegalArgumentException e) {
             return null;
         }
+
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     @Override
