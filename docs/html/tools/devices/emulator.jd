@@ -294,9 +294,10 @@ with the {@code -gpu on} option enabled:
       <strong>Run > Edit Configurations...</strong></li>
       <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
       run configuration or create a new configuration.</li>
-      <li>Under the <strong>Device Target</strong> options,
+      <li>Under the <strong>Target Device </strong> options,
       select the AVD you created in the previous procedure.</li>
-      <li>In the <strong>Additional Command Line Options</strong> field, enter:<br>
+      <li>In the <strong>Emulator</strong> tab, in the
+      <strong>Additional command line options</strong> field, enter:<br>
         {@code -gpu on}</li>
       <li>Run your Android project using this run configuration.</li>
     </ol>
@@ -421,7 +422,7 @@ AVD:
 Configurations...</strong></li>
       <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
 run configuration or create a new configuration.</li>
-      <li>Under the <strong>Device Target</strong> options, select the x86-based AVD you created
+      <li>Under the <strong>Target Device</strong> options, select the x86-based AVD you created
 previously.</li>
       <li>Run your Android project using this run configuration.</li>
     </ol>
@@ -474,7 +475,7 @@ AVD:
 Configurations...</strong></li>
       <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
 run configuration or create a new configuration.</li>
-      <li>Under the <strong>Device Target</strong> options,
+      <li>Under the <strong>Target Device</strong> options,
       select the x86-based AVD you created previously.</li>
       <li>Run your Android project using this run configuration.</li>
     </ol>
@@ -513,17 +514,18 @@ AVD and include the KVM options:
     <p class="note"><strong>Note:</strong> You must provide an x86-based AVD configuration
 name, otherwise VM acceleration will not be enabled.</p>
   </li>
-  <li>If you are running the emulator from Android Studio, run your Android application with an x86-based
-AVD and include the KVM options:
+  <li>If you are running the emulator from Android Studio, run your Android application with an
+  x86-based AVD and include the KVM options:
     <ol>
       <li>In Android Studio, click your Android module folder and then select <strong>Run > Edit
 Configurations...</strong></li>
       <li>In the left panel of the <strong>Run/Debug Configurations</strong> dialog, select your Android
 run configuration or create a new configuration.</li>
-      <li>Under the <strong>Device Target</strong> options, select the x86-based AVD you created
+      <li>Under the <strong>Target Device</strong> options, select the x86-based AVD you created
 previously.</li>
-      <li>In the <strong>Additional Command Line Options</strong> field, enter:
-        <pre>-qemu -m 512 -enable-kvm</pre>
+      <li>In the <strong>Emulator</strong> tab, in the
+      <strong>Additional command line options</strong> field, enter:
+      <pre>-qemu -m 512 -enable-kvm</pre>
       </li>
       <li>Run your Android project using this run configuration.</li>
     </ol>
