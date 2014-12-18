@@ -117,7 +117,7 @@ also has its own build.gradle file for build settings specific to that module.</
 <em>repositories</em> and <em>dependencies</em>. This allows different projects to use different
 Gradle versions. Supported repositories include JCenter, Maven Central, or Ivy. This example
 declares that the build script uses the JCenter repository and a classpath dependency artifact
-that contains the Android plugin for Gradle version 0.14.4.
+that contains the Android plugin for Gradle version 1.0.1.
 </p>
 <p>
 <pre>
@@ -126,7 +126,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.14.4'
+        classpath 'com.android.tools.build:gradle:1.0.1'
 
         // NOTE: Do not place your application dependencies here: they belong
         // in the individual module build.gradle files
