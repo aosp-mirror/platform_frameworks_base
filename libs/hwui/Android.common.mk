@@ -76,7 +76,7 @@ intermediates := $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,TARGET,)
 LOCAL_C_INCLUDES += \
     external/skia/src/core
 
-LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
+LOCAL_CFLAGS += -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
 LOCAL_CFLAGS += -Wno-unused-parameter
 LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libEGL libGLESv2 libskia libui libgui
 

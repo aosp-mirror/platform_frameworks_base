@@ -34,13 +34,6 @@ namespace android {
 
 using namespace uirenderer;
 
-/**
- * Note: OpenGLRenderer JNI layer is generated and compiled only on supported
- *       devices. This means all the logic must be compiled only when the
- *       preprocessor variable USE_OPENGL_RENDERER is defined.
- */
-#ifdef USE_OPENGL_RENDERER
-
 #define SET_AND_DIRTY(prop, val, dirtyFlag) \
     (reinterpret_cast<RenderNode*>(renderNodePtr)->mutateStagingProperties().prop(val) \
         ? (reinterpret_cast<RenderNode*>(renderNodePtr)->setPropertyFieldsDirty(dirtyFlag), true) \
@@ -469,8 +462,6 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
     renderNode->animators().endAllStagingAnimators();
 }
 
-#endif // USE_OPENGL_RENDERER
-
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -478,7 +469,6 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
 const char* const kClassPathName = "android/view/RenderNode";
 
 static JNINativeMethod gMethods[] = {
-#ifdef USE_OPENGL_RENDERER
     { "nCreate",               "(Ljava/lang/String;)J",    (void*) android_view_RenderNode_create },
     { "nDestroyRenderNode",   "(J)V",   (void*) android_view_RenderNode_destroyRenderNode },
     { "nSetDisplayListData",   "(JJ)V", (void*) android_view_RenderNode_setDisplayListData },
@@ -550,7 +540,6 @@ static JNINativeMethod gMethods[] = {
 
     { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
     { "nEndAllAnimators",          "(J)V", (void*) android_view_RenderNode_endAllAnimators },
-#endif
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {

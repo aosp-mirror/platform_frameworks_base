@@ -26,8 +26,6 @@ namespace android {
 
 using namespace uirenderer;
 
-#ifdef USE_OPENGL_RENDERER
-
 static jlong createAccelerateDecelerateInterpolator(JNIEnv* env, jobject clazz) {
     return reinterpret_cast<jlong>(new AccelerateDecelerateInterpolator());
 }
@@ -74,8 +72,6 @@ static jlong createLutInterpolator(JNIEnv* env, jobject clazz, jfloatArray jlut)
     return reinterpret_cast<jlong>(new LUTInterpolator(lut, len));
 }
 
-#endif
-
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -83,7 +79,6 @@ static jlong createLutInterpolator(JNIEnv* env, jobject clazz, jfloatArray jlut)
 const char* const kClassPathName = "com/android/internal/view/animation/NativeInterpolatorFactoryHelper";
 
 static JNINativeMethod gMethods[] = {
-#ifdef USE_OPENGL_RENDERER
     { "createAccelerateDecelerateInterpolator", "()J", (void*) createAccelerateDecelerateInterpolator },
     { "createAccelerateInterpolator", "(F)J", (void*) createAccelerateInterpolator },
     { "createAnticipateInterpolator", "(F)J", (void*) createAnticipateInterpolator },
@@ -94,7 +89,6 @@ static JNINativeMethod gMethods[] = {
     { "createLinearInterpolator", "()J", (void*) createLinearInterpolator },
     { "createOvershootInterpolator", "(F)J", (void*) createOvershootInterpolator },
     { "createLutInterpolator", "([F)J", (void*) createLutInterpolator },
-#endif
 };
 
 int register_com_android_internal_view_animation_NativeInterpolatorFactoryHelper(JNIEnv* env) {

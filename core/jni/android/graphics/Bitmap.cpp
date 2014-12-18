@@ -363,24 +363,20 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
 
 static void Bitmap_destructor(JNIEnv* env, jobject, jlong bitmapHandle) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-#ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::ResourceCache::hasInstance()) {
         android::uirenderer::ResourceCache::getInstance().destructor(bitmap);
-        return;
+    } else {
+        delete bitmap;
     }
-#endif // USE_OPENGL_RENDERER
-    delete bitmap;
 }
 
 static jboolean Bitmap_recycle(JNIEnv* env, jobject, jlong bitmapHandle) {
     SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapHandle);
-#ifdef USE_OPENGL_RENDERER
     if (android::uirenderer::ResourceCache::hasInstance()) {
         bool result;
         result = android::uirenderer::ResourceCache::getInstance().recycle(bitmap);
         return result ? JNI_TRUE : JNI_FALSE;
     }
-#endif // USE_OPENGL_RENDERER
     bitmap->setPixels(NULL, NULL);
     return JNI_TRUE;
 }

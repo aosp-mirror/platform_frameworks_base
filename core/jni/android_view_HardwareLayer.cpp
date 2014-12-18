@@ -41,8 +41,6 @@ namespace android {
 
 using namespace uirenderer;
 
-#ifdef USE_OPENGL_RENDERER
-
 static jboolean android_view_HardwareLayer_prepare(JNIEnv* env, jobject clazz,
         jlong layerUpdaterPtr, jint width, jint height, jboolean isOpaque) {
     DeferredLayerUpdater* layer = reinterpret_cast<DeferredLayerUpdater*>(layerUpdaterPtr);
@@ -87,8 +85,6 @@ static jint android_view_HardwareLayer_getTexName(JNIEnv* env, jobject clazz,
     return layer->backingLayer()->getTexture();
 }
 
-#endif // USE_OPENGL_RENDERER
-
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -96,8 +92,6 @@ static jint android_view_HardwareLayer_getTexName(JNIEnv* env, jobject clazz,
 const char* const kClassPathName = "android/view/HardwareLayer";
 
 static JNINativeMethod gMethods[] = {
-#ifdef USE_OPENGL_RENDERER
-
     { "nPrepare",                "(JIIZ)Z",    (void*) android_view_HardwareLayer_prepare },
     { "nSetLayerPaint",          "(JJ)V",      (void*) android_view_HardwareLayer_setLayerPaint },
     { "nSetTransform",           "(JJ)V",      (void*) android_view_HardwareLayer_setTransform },
@@ -106,7 +100,6 @@ static JNINativeMethod gMethods[] = {
     { "nUpdateSurfaceTexture",   "(J)V",       (void*) android_view_HardwareLayer_updateSurfaceTexture },
 
     { "nGetTexName",             "(J)I",       (void*) android_view_HardwareLayer_getTexName },
-#endif
 };
 
 int register_android_view_HardwareLayer(JNIEnv* env) {

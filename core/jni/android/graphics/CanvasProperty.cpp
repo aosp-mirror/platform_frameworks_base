@@ -24,12 +24,6 @@
 
 namespace android {
 
-#ifdef USE_OPENGL_RENDERER
-static const bool kUseOpenGLRenderer = true;
-#else
-static const bool kUseOpenGLRenderer = false;
-#endif
-
 using namespace uirenderer;
 
 static jlong createFloat(JNIEnv* env, jobject clazz, jfloat initialValue) {
@@ -51,11 +45,8 @@ static JNINativeMethod gMethods[] = {
 };
 
 int register_android_graphics_CanvasProperty(JNIEnv* env) {
-    if (kUseOpenGLRenderer) {
-        return RegisterMethodsOrDie(env, "android/graphics/CanvasProperty", gMethods,
-                                    NELEM(gMethods));
-    }
-    return 0;
+    return RegisterMethodsOrDie(env, "android/graphics/CanvasProperty", gMethods,
+                                NELEM(gMethods));
 }
 
 }; // namespace android

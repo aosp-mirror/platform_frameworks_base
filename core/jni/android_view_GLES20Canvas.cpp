@@ -57,13 +57,6 @@ static struct {
     jmethodID set;
 } gRectClassInfo;
 
-/**
- * Note: DisplayListRenderer JNI layer is generated and compiled only on supported
- *       devices. This means all the logic must be compiled only when the
- *       preprocessor variable USE_OPENGL_RENDERER is defined.
- */
-#ifdef USE_OPENGL_RENDERER
-
 // ----------------------------------------------------------------------------
 // Defines
 // ----------------------------------------------------------------------------
@@ -803,32 +796,20 @@ static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
     renderer->drawLayer(layer, x, y);
 }
 
-#endif // USE_OPENGL_RENDERER
-
-#ifdef USE_OPENGL_RENDERER
-static const bool kUseOpenGLRenderer = true;
-#else
-static const bool kUseOpenGLRenderer = false;
-#endif
-
 // ----------------------------------------------------------------------------
 // Common
 // ----------------------------------------------------------------------------
 
 static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz) {
-    if (kUseOpenGLRenderer) {
-        char prop[PROPERTY_VALUE_MAX];
-        if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
-            // not in the emulator
-            return JNI_TRUE;
-        }
-        // In the emulator this property will be set to 1 when hardware GLES is
-        // enabled, 0 otherwise. On old emulator versions it will be undefined.
-        property_get("ro.kernel.qemu.gles", prop, "0");
-        return atoi(prop) == 1 ? JNI_TRUE : JNI_FALSE;
-    } else {
-        return JNI_FALSE;
+    char prop[PROPERTY_VALUE_MAX];
+    if (property_get("ro.kernel.qemu", prop, NULL) == 0) {
+        // not in the emulator
+        return JNI_TRUE;
     }
+    // In the emulator this property will be set to 1 when hardware GLES is
+    // enabled, 0 otherwise. On old emulator versions it will be undefined.
+    property_get("ro.kernel.qemu.gles", prop, "0");
+    return atoi(prop) == 1 ? JNI_TRUE : JNI_FALSE;
 }
 
 // ----------------------------------------------------------------------------
@@ -837,10 +818,8 @@ static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz
 
 static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
-    if (kUseOpenGLRenderer) {
-        int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
-        android::uirenderer::renderthread::RenderProxy::outputLogBuffer(fd);
-    }
+    int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
+    android::uirenderer::renderthread::RenderProxy::outputLogBuffer(fd);
 }
 
 // ----------------------------------------------------------------------------
@@ -851,9 +830,6 @@ const char* const kClassPathName = "android/view/GLES20Canvas";
 
 static JNINativeMethod gMethods[] = {
     { "nIsAvailable",       "()Z",             (void*) android_view_GLES20Canvas_isAvailable },
-
-#ifdef USE_OPENGL_RENDERER
-
     { "nDestroyRenderer",   "(J)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
     { "nSetViewport",       "(JII)V",          (void*) android_view_GLES20Canvas_setViewport },
     { "nSetHighContrastText","(JZ)V",          (void*) android_view_GLES20Canvas_setHighContrastText },
@@ -939,8 +915,6 @@ static JNINativeMethod gMethods[] = {
 
     { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_GLES20Canvas_getMaxTextureWidth },
     { "nGetMaximumTextureHeight", "()I",       (void*) android_view_GLES20Canvas_getMaxTextureHeight },
-
-#endif
 };
 
 static JNINativeMethod gActivityThreadMethods[] = {
@@ -949,10 +923,8 @@ static JNINativeMethod gActivityThreadMethods[] = {
 };
 
 int register_android_view_GLES20Canvas(JNIEnv* env) {
-    if (kUseOpenGLRenderer) {
-        jclass clazz = FindClassOrDie(env, "android/graphics/Rect");
-        gRectClassInfo.set = GetMethodIDOrDie(env, clazz, "set", "(IIII)V");
-    }
+    jclass clazz = FindClassOrDie(env, "android/graphics/Rect");
+    gRectClassInfo.set = GetMethodIDOrDie(env, clazz, "set", "(IIII)V");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
