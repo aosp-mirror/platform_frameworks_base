@@ -98,7 +98,7 @@ To avoid this error, see
 <h3>Build output</h3>
 
 <p>The build generates an APK for each build variant in the <code>app/build</code> folder:
-the <code>app/build/apk/</code> directory contains packages named
+the <code>app/build/outputs/apk/</code> directory contains packages named
 <code>app-&lt;flavor>-&lt;buildtype>.apk</code>; for example, <code>app-full-release.apk</code> and
 <code>app-demo-debug.apk</code>.</p>
 
