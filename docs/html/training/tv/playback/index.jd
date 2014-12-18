@@ -17,8 +17,19 @@ startpage=true
     <li><a href="{@docRoot}design/tv/index.html">
       Design for TV</a></li>
   </ul>
+
 </div>
 </div>
+
+  <!-- video box -->
+<a class="notice-developers-video" href="https://www.youtube.com/watch?v=72K1VhjoL98">
+<div>
+    <h3>Video</h3>
+    <p>DevBytes: Android TV &mdash; Using the Leanback library</p>
+</div>
+</a>
+
+
 
 <p>
   Browsing and playing media files is frequently part of the user experience provided by a TV app.
