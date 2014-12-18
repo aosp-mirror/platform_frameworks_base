@@ -229,26 +229,6 @@ public class ZygoteInit {
     private static final int ROOT_UID = 0;
     private static final int ROOT_GID = 0;
 
-    /**
-     * Sets effective user ID.
-     */
-    private static void setEffectiveUser(int uid) {
-        int errno = setreuid(ROOT_UID, uid);
-        if (errno != 0) {
-            Log.e(TAG, "setreuid() failed. errno: " + errno);
-        }
-    }
-
-    /**
-     * Sets effective group ID.
-     */
-    private static void setEffectiveGroup(int gid) {
-        int errno = setregid(ROOT_GID, gid);
-        if (errno != 0) {
-            Log.e(TAG, "setregid() failed. errno: " + errno);
-        }
-    }
-
     static void preload() {
         Log.d(TAG, "begin preload");
         preloadClasses();
@@ -296,8 +276,12 @@ public class ZygoteInit {
         long startTime = SystemClock.uptimeMillis();
 
         // Drop root perms while running static initializers.
-        setEffectiveGroup(UNPRIVILEGED_GID);
-        setEffectiveUser(UNPRIVILEGED_UID);
+        try {
+            Os.setregid(ROOT_GID, UNPRIVILEGED_GID);
+            Os.setreuid(ROOT_UID, UNPRIVILEGED_UID);
+        } catch (ErrnoException ex) {
+            throw new RuntimeException("Failed to drop root", ex);
+        }
 
         // Alter the target heap utilization.  With explicit GCs this
         // is not likely to have any effect.
@@ -352,8 +336,12 @@ public class ZygoteInit {
             runtime.preloadDexCaches();
 
             // Bring back root. We'll need it later.
-            setEffectiveUser(ROOT_UID);
-            setEffectiveGroup(ROOT_GID);
+            try {
+                Os.setreuid(ROOT_UID, ROOT_UID);
+                Os.setregid(ROOT_GID, ROOT_GID);
+            } catch (ErrnoException ex) {
+                throw new RuntimeException("Failed to restore root", ex);
+            }
         }
     }
 
@@ -736,40 +724,6 @@ public class ZygoteInit {
             }
         }
     }
-
-    /**
-     * The Linux syscall "setreuid()"
-     * @param ruid real uid
-     * @param euid effective uid
-     * @return 0 on success, non-zero errno on fail
-     */
-    static native int setreuid(int ruid, int euid);
-
-    /**
-     * The Linux syscall "setregid()"
-     * @param rgid real gid
-     * @param egid effective gid
-     * @return 0 on success, non-zero errno on fail
-     */
-    static native int setregid(int rgid, int egid);
-
-    /**
-     * Invokes the linux syscall "setpgid"
-     *
-     * @param pid pid to change
-     * @param pgid new process group of pid
-     * @return 0 on success or non-zero errno on fail
-     */
-    static native int setpgid(int pid, int pgid);
-
-    /**
-     * Invokes the linux syscall "getpgid"
-     *
-     * @param pid pid to query
-     * @return pgid of pid in question
-     * @throws IOException on error
-     */
-    static native int getpgid(int pid) throws IOException;
 
     /**
      * Class not instantiable.
