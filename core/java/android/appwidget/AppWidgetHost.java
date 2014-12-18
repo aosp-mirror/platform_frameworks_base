@@ -16,6 +16,7 @@
 
 package android.appwidget;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -58,18 +59,28 @@ public class AppWidgetHost {
     private DisplayMetrics mDisplayMetrics;
 
     private String mContextOpPackageName;
-    Handler mHandler;
-    int mHostId;
-    Callbacks mCallbacks = new Callbacks();
-    final HashMap<Integer,AppWidgetHostView> mViews = new HashMap<Integer, AppWidgetHostView>();
+    private final Handler mHandler;
+    private final int mHostId;
+    private final Callbacks mCallbacks;
+    private final HashMap<Integer,AppWidgetHostView> mViews = new HashMap<>();
     private OnClickHandler mOnClickHandler;
 
-    class Callbacks extends IAppWidgetHost.Stub {
+    static class Callbacks extends IAppWidgetHost.Stub {
+        private final WeakReference<Handler> mWeakHandler;
+
+        public Callbacks(Handler handler) {
+            mWeakHandler = new WeakReference<>(handler);
+        }
+
         public void updateAppWidget(int appWidgetId, RemoteViews views) {
             if (isLocalBinder() && views != null) {
                 views = views.clone();
             }
-            Message msg = mHandler.obtainMessage(HANDLE_UPDATE, appWidgetId, 0, views);
+            Handler handler = mWeakHandler.get();
+            if (handler == null) {
+                return;
+            }
+            Message msg = handler.obtainMessage(HANDLE_UPDATE, appWidgetId, 0, views);
             msg.sendToTarget();
         }
 
@@ -77,19 +88,35 @@ public class AppWidgetHost {
             if (isLocalBinder() && info != null) {
                 info = info.clone();
             }
-            Message msg = mHandler.obtainMessage(HANDLE_PROVIDER_CHANGED,
+            Handler handler = mWeakHandler.get();
+            if (handler == null) {
+                return;
+            }
+            Message msg = handler.obtainMessage(HANDLE_PROVIDER_CHANGED,
                     appWidgetId, 0, info);
             msg.sendToTarget();
         }
 
         public void providersChanged() {
-            mHandler.obtainMessage(HANDLE_PROVIDERS_CHANGED).sendToTarget();
+            Handler handler = mWeakHandler.get();
+            if (handler == null) {
+                return;
+            }
+            handler.obtainMessage(HANDLE_PROVIDERS_CHANGED).sendToTarget();
         }
 
         public void viewDataChanged(int appWidgetId, int viewId) {
-            Message msg = mHandler.obtainMessage(HANDLE_VIEW_DATA_CHANGED,
+            Handler handler = mWeakHandler.get();
+            if (handler == null) {
+                return;
+            }
+            Message msg = handler.obtainMessage(HANDLE_VIEW_DATA_CHANGED,
                     appWidgetId, viewId);
             msg.sendToTarget();
+        }
+
+        private static boolean isLocalBinder() {
+            return Process.myPid() == Binder.getCallingPid();
         }
     }
 
@@ -132,6 +159,7 @@ public class AppWidgetHost {
         mHostId = hostId;
         mOnClickHandler = handler;
         mHandler = new UpdateHandler(looper);
+        mCallbacks = new Callbacks(mHandler);
         mDisplayMetrics = context.getResources().getDisplayMetrics();
         bindService();
     }
@@ -249,10 +277,6 @@ public class AppWidgetHost {
         } catch (RemoteException e) {
             throw new RuntimeException("system server dead?", e);
         }
-    }
-
-    private boolean isLocalBinder() {
-        return Process.myPid() == Binder.getCallingPid();
     }
 
     /**
