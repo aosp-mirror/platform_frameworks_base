@@ -1521,6 +1521,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+
         writer.println("enabled: " + mEnable);
         writer.println("state: " + mState);
         writer.println("address: " + mAddress);
