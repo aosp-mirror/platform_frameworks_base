@@ -44,8 +44,6 @@
 
 namespace android {
 
-#ifdef USE_OPENGL_RENDERER
-
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
 
@@ -399,8 +397,6 @@ static void android_view_ThreadedRenderer_dumpProfileInfo(JNIEnv* env, jobject c
     proxy->dumpProfileInfo(fd);
 }
 
-#endif
-
 // ----------------------------------------------------------------------------
 // Shaders
 // ----------------------------------------------------------------------------
@@ -420,7 +416,6 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
 const char* const kClassPathName = "android/view/ThreadedRenderer";
 
 static JNINativeMethod gMethods[] = {
-#ifdef USE_OPENGL_RENDERER
     { "nSetAtlas", "(JLandroid/view/GraphicBuffer;[J)V",   (void*) android_view_ThreadedRenderer_setAtlas },
     { "nCreateRootRenderNode", "()J", (void*) android_view_ThreadedRenderer_createRootRenderNode },
     { "nCreateProxy", "(ZJ)J", (void*) android_view_ThreadedRenderer_createProxy },
@@ -448,7 +443,6 @@ static JNINativeMethod gMethods[] = {
     { "nStopDrawing", "(J)V", (void*) android_view_ThreadedRenderer_stopDrawing },
     { "nNotifyFramePending", "(J)V", (void*) android_view_ThreadedRenderer_notifyFramePending },
     { "nDumpProfileInfo", "(JLjava/io/FileDescriptor;)V", (void*) android_view_ThreadedRenderer_dumpProfileInfo },
-#endif
     { "setupShadersDiskCache", "(Ljava/lang/String;)V",
                 (void*) android_view_ThreadedRenderer_setupShadersDiskCache },
 };

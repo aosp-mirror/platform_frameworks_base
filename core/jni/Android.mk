@@ -16,10 +16,6 @@ else
     LOCAL_CFLAGS += -DPACKED=""
 endif
 
-ifeq ($(USE_OPENGL_RENDERER),true)
-    LOCAL_CFLAGS += -DUSE_OPENGL_RENDERER
-endif
-
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
 LOCAL_SRC_FILES:= \
@@ -247,11 +243,8 @@ LOCAL_SHARED_LIBRARIES := \
     libprocessgroup \
     libnativebridge
 
-ifeq ($(USE_OPENGL_RENDERER),true)
-    LOCAL_SHARED_LIBRARIES += libhwui
-endif
-
 LOCAL_SHARED_LIBRARIES += \
+    libhwui \
     libdl
 
 # we need to access the private Bionic header

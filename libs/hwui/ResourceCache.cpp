@@ -22,10 +22,8 @@
 
 namespace android {
 
-#ifdef USE_OPENGL_RENDERER
 using namespace uirenderer;
 ANDROID_SINGLETON_STATIC_INSTANCE(ResourceCache);
-#endif
 
 namespace uirenderer {
 

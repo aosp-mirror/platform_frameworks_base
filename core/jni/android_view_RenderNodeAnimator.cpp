@@ -37,8 +37,6 @@ static struct {
     jmethodID callOnFinished;
 } gRenderNodeAnimatorClassInfo;
 
-#ifdef USE_OPENGL_RENDERER
-
 static JNIEnv* getEnv(JavaVM* vm) {
     JNIEnv* env;
     if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
@@ -189,8 +187,6 @@ static void end(JNIEnv* env, jobject clazz, jlong animatorPtr) {
     animator->end();
 }
 
-#endif
-
 // ----------------------------------------------------------------------------
 // JNI Glue
 // ----------------------------------------------------------------------------
@@ -198,7 +194,6 @@ static void end(JNIEnv* env, jobject clazz, jlong animatorPtr) {
 const char* const kClassPathName = "android/view/RenderNodeAnimator";
 
 static JNINativeMethod gMethods[] = {
-#ifdef USE_OPENGL_RENDERER
     { "nCreateAnimator", "(IF)J", (void*) createAnimator },
     { "nCreateCanvasPropertyFloatAnimator", "(JF)J", (void*) createCanvasPropertyFloatAnimator },
     { "nCreateCanvasPropertyPaintAnimator", "(JIF)J", (void*) createCanvasPropertyPaintAnimator },
@@ -212,13 +207,10 @@ static JNINativeMethod gMethods[] = {
     { "nSetListener", "(JLandroid/view/RenderNodeAnimator;)V", (void*) setListener},
     { "nStart", "(J)V", (void*) start},
     { "nEnd", "(J)V", (void*) end },
-#endif
 };
 
 int register_android_view_RenderNodeAnimator(JNIEnv* env) {
-#ifdef USE_OPENGL_RENDERER
     sLifecycleChecker.incStrong(0);
-#endif
     gRenderNodeAnimatorClassInfo.clazz = FindClassOrDie(env, kClassPathName);
     gRenderNodeAnimatorClassInfo.clazz = MakeGlobalRefOrDie(env,
                                                             gRenderNodeAnimatorClassInfo.clazz);
