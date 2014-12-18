@@ -2075,8 +2075,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             final TaskRecord topTask = targetStack.topTask();
             if (topTask != sourceTask) {
                 targetStack.moveTaskToFrontLocked(sourceTask, r, options);
-            } else {
-                mWindowManager.moveTaskToTop(topTask.taskId);
             }
             if (!addingToTask && (launchFlags&Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
                 // In this case, we are adding the activity to an existing
@@ -2131,8 +2129,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
             }
             targetStack = inTask.stack;
             targetStack.moveTaskToFrontLocked(inTask, r, options);
-            targetStack.moveToFront();
-            mWindowManager.moveTaskToTop(inTask.taskId);
 
             // Check whether we should actually launch the new activity in to the task,
             // or just reuse the current activity on top.
