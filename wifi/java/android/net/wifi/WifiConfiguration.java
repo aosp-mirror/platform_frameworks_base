@@ -510,6 +510,11 @@ public class WifiConfiguration implements Parcelable {
         public long age24;  // timestamp of the strongest 2.4GHz BSSID (last time it was seen)
         public String BSSID24;
         public String BSSID5;
+        public int score; // Debug only, indicate last score used for autojoin/cell-handover
+        public int currentNetworkBoost; // Debug only, indicate boost applied to RSSI if current
+        public int bandPreferenceBoost; // Debug only, indicate boost applied to RSSI if current
+        public int lastChoiceBoost; // Debug only, indicate last choice applied to this configuration
+        public String lastChoiceConfig; // Debug only, indicate last choice applied to this configuration
 
         public Visibility() {
             rssi5 = INVALID_RSSI;
@@ -536,15 +541,22 @@ public class WifiConfiguration implements Parcelable {
                 sbuf.append(",");
                 sbuf.append(Integer.toString(num24));
                 if (BSSID24 != null) sbuf.append(",").append(BSSID24);
-            } else {
-                sbuf.append("*");
             }
-            sbuf.append(" - ");
+            sbuf.append("; ");
             if (rssi5 > INVALID_RSSI) {
                 sbuf.append(Integer.toString(rssi5));
                 sbuf.append(",");
                 sbuf.append(Integer.toString(num5));
                 if (BSSID5 != null) sbuf.append(",").append(BSSID5);
+            }
+            if (score != 0) {
+                sbuf.append("; ").append(score);
+                sbuf.append(", ").append(currentNetworkBoost);
+                sbuf.append(", ").append(bandPreferenceBoost);
+                if (lastChoiceConfig != null) {
+                    sbuf.append(", ").append(lastChoiceBoost);
+                    sbuf.append(", ").append(lastChoiceConfig);
+                }
             }
             sbuf.append("]");
             return sbuf.toString();
