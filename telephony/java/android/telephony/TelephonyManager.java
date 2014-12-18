@@ -3663,4 +3663,18 @@ public class TelephonyManager {
             }
         }
     }
+
+   /**
+    * Returns the IMS Registration Status
+    *@hide
+    */
+   public boolean isImsRegistered() {
+       try {
+           return getITelephony().isImsRegistered();
+       } catch (RemoteException ex) {
+           return false;
+       } catch (NullPointerException ex) {
+           return false;
+       }
+   }
 }
