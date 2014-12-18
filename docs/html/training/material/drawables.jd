@@ -83,6 +83,16 @@ class.</p>
 
 <h2 id="VectorDrawables">Create Vector Drawables</h2>
 
+<!-- video box -->
+<a class="notice-developers-video"
+   href="https://www.youtube.com/watch?v=wlFVIIstKmA"
+   style="margin-top:18px">
+<div>
+    <h3>Video</h3>
+    <p>Android Vector Graphics</p>
+</div>
+</a>
+
 <p>In Android 5.0 (API Level 21) and above, you can define vector drawables, which scale without
 losing definition. You need only one asset file for a vector image, as opposed to an asset file for
 each screen density in the case of bitmap images. To create a vector image, you define the details
