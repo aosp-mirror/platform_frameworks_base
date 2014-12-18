@@ -386,7 +386,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         // to/from unpremultiplied bitmaps.
         outputBitmap->setInfo(SkImageInfo::Make(scaledWidth, scaledHeight,
                 colorType, decodingBitmap.alphaType()));
-        if (!outputBitmap->allocPixels(outputAllocator, NULL)) {
+        if (!outputBitmap->tryAllocPixels(outputAllocator, NULL)) {
             return nullObjectReturn("allocation failed for scaled bitmap");
         }
 

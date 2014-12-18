@@ -390,7 +390,7 @@ static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
                                hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
                                kPremul_SkAlphaType);
     SkBitmap* bitmap = new SkBitmap;
-    if (!bitmap->allocPixels(info)) {
+    if (!bitmap->tryAllocPixels(info)) {
         delete bitmap;
         return;
     }

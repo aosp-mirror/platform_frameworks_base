@@ -383,7 +383,7 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
                            hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
                            kPremul_SkAlphaType);
     SkBitmap bitmap;
-    if (!bitmap.allocPixels(info)) {
+    if (!bitmap.tryAllocPixels(info)) {
         return;
     }
 
