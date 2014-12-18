@@ -603,7 +603,7 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
             mStartAnimationTriggered = false;
             return ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
                     thumbnail, toTaskRect.left, toTaskRect.top, toTaskRect.width(),
-                    toTaskRect.height(), this);
+                    toTaskRect.height(), mHandler, this);
         }
 
         // If both the screenshot and thumbnail fails, then just fall back to the default transition
