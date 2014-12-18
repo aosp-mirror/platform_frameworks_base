@@ -480,6 +480,10 @@ final class ActivityStack {
             }
             mStacks.remove(this);
             mStacks.add(this);
+            final TaskRecord task = topTask();
+            if (task != null) {
+                mWindowManager.moveTaskToTop(task.taskId);
+            }
         }
     }
 
@@ -3480,11 +3484,10 @@ final class ActivityStack {
             return;
         }
 
-        moveToFront();
-
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
         insertTaskAtTop(tr);
+        moveToFront();
 
         if (DEBUG_TRANSITION) Slog.v(TAG, "Prepare to front transition: task=" + tr);
         if (reason != null &&
@@ -3498,8 +3501,6 @@ final class ActivityStack {
         } else {
             updateTransitLocked(AppTransition.TRANSIT_TASK_TO_FRONT, options);
         }
-
-        mWindowManager.moveTaskToTop(tr.taskId);
 
         mStackSupervisor.resumeTopActivitiesLocked();
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
