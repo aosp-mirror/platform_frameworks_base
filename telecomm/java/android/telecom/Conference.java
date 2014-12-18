@@ -53,7 +53,7 @@ public abstract class Conference implements IConferenceable {
     private final List<Connection> mUnmodifiableConferenceableConnections =
             Collections.unmodifiableList(mConferenceableConnections);
 
-    private PhoneAccountHandle mPhoneAccount;
+    protected PhoneAccountHandle mPhoneAccount;
     private AudioState mAudioState;
     private int mState = Connection.STATE_NEW;
     private DisconnectCause mDisconnectCause;
