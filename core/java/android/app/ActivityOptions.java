@@ -384,6 +384,8 @@ public class ActivityOptions {
      * of the animation.
      * @param startX The x starting location of the bitmap, relative to <var>source</var>.
      * @param startY The y starting location of the bitmap, relative to <var>source</var>.
+     * @param handler If <var>listener</var> is non-null this must be a valid
+     * Handler on which to dispatch the callback; otherwise it should be null.
      * @param listener Optional OnAnimationStartedListener to find out when the
      * requested animation has started running.  If for some reason the animation
      * is not executed, the callback will happen immediately.
@@ -393,9 +395,9 @@ public class ActivityOptions {
      */
     public static ActivityOptions makeThumbnailAspectScaleUpAnimation(View source,
             Bitmap thumbnail, int startX, int startY, int targetWidth, int targetHeight,
-            OnAnimationStartedListener listener) {
+            Handler handler, OnAnimationStartedListener listener) {
         return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY,
-                targetWidth, targetHeight, listener, true);
+                targetWidth, targetHeight, handler, listener, true);
     }
 
     /**
@@ -408,6 +410,8 @@ public class ActivityOptions {
      * of the animation.
      * @param startX The x end location of the bitmap, relative to <var>source</var>.
      * @param startY The y end location of the bitmap, relative to <var>source</var>.
+     * @param handler If <var>listener</var> is non-null this must be a valid
+     * Handler on which to dispatch the callback; otherwise it should be null.
      * @param listener Optional OnAnimationStartedListener to find out when the
      * requested animation has started running.  If for some reason the animation
      * is not executed, the callback will happen immediately.
@@ -417,14 +421,14 @@ public class ActivityOptions {
      */
     public static ActivityOptions makeThumbnailAspectScaleDownAnimation(View source,
             Bitmap thumbnail, int startX, int startY, int targetWidth, int targetHeight,
-            OnAnimationStartedListener listener) {
+            Handler handler, OnAnimationStartedListener listener) {
         return makeAspectScaledThumbnailAnimation(source, thumbnail, startX, startY,
-                targetWidth, targetHeight, listener, false);
+                targetWidth, targetHeight, handler, listener, false);
     }
 
     private static ActivityOptions makeAspectScaledThumbnailAnimation(View source, Bitmap thumbnail,
             int startX, int startY, int targetWidth, int targetHeight,
-            OnAnimationStartedListener listener, boolean scaleUp) {
+            Handler handler, OnAnimationStartedListener listener, boolean scaleUp) {
         ActivityOptions opts = new ActivityOptions();
         opts.mPackageName = source.getContext().getPackageName();
         opts.mAnimationType = scaleUp ? ANIM_THUMBNAIL_ASPECT_SCALE_UP :
@@ -436,7 +440,7 @@ public class ActivityOptions {
         opts.mStartY = pts[1] + startY;
         opts.mWidth = targetWidth;
         opts.mHeight = targetHeight;
-        opts.setOnAnimationStartedListener(source.getHandler(), listener);
+        opts.setOnAnimationStartedListener(handler, listener);
         return opts;
     }
 

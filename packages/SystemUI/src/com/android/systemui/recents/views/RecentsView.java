@@ -477,7 +477,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
             }
             opts = ActivityOptions.makeThumbnailAspectScaleUpAnimation(sourceView,
                     b, offsetX, offsetY, transform.rect.width(), transform.rect.height(),
-                    animStartedListener);
+                    sourceView.getHandler(), animStartedListener);
         }
 
         final ActivityOptions launchOpts = opts;
