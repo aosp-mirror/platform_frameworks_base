@@ -3635,6 +3635,8 @@ public class TelephonyManager {
         } catch (SettingNotFoundException e) {
             try {
                 int val = Settings.Global.getInt(cr, name);
+                Settings.Global.putInt(cr, name + subId, val);
+
                 /* We are now moving from 'setting' to 'setting+subId', and using the value stored
                  * for 'setting' as default. Reset the default (since it may have a user set
                  * value). */
