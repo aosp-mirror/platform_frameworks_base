@@ -2624,6 +2624,12 @@
         <attr name="value" />
     </declare-styleable>
 
+    <!-- Attributes that can be assigned to an &lt;include&gt; tag. -->
+    <declare-styleable name="Include">
+        <attr name="id" />
+        <attr name="visibility" />
+    </declare-styleable>
+
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
          of its subclasses.  Also see {@link #ViewGroup_Layout} for
          attributes that this class processes in its children. -->

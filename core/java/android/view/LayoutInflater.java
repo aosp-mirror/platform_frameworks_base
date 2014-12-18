@@ -20,6 +20,7 @@ import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Trace;
+import android.util.TypedValue;
 import android.widget.FrameLayout;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -64,6 +65,7 @@ import java.util.HashMap;
  * @see Context#getSystemService
  */
 public abstract class LayoutInflater {
+
     private static final String TAG = LayoutInflater.class.getSimpleName();
     private static final boolean DEBUG = false;
 
@@ -90,11 +92,15 @@ public abstract class LayoutInflater {
     
     private HashMap<String, Boolean> mFilterMap;
 
+    private TypedValue mTempValue;
+
     private static final String TAG_MERGE = "merge";
     private static final String TAG_INCLUDE = "include";
     private static final String TAG_1995 = "blink";
     private static final String TAG_REQUEST_FOCUS = "requestFocus";
     private static final String TAG_TAG = "tag";
+
+    private static final String ATTR_LAYOUT = "layout";
 
     private static final int[] ATTRS_THEME = new int[] {
             com.android.internal.R.attr.theme };
@@ -837,7 +843,7 @@ public abstract class LayoutInflater {
             throws XmlPullParserException, IOException {
         int type;
 
-        final TypedArray ta = mContext.obtainStyledAttributes(
+        final TypedArray ta = view.getContext().obtainStyledAttributes(
                 attrs, com.android.internal.R.styleable.ViewTag);
         final int key = ta.getResourceId(com.android.internal.R.styleable.ViewTag_id, 0);
         final CharSequence value = ta.getText(com.android.internal.R.styleable.ViewTag_value);
@@ -856,16 +862,41 @@ public abstract class LayoutInflater {
         int type;
 
         if (parent instanceof ViewGroup) {
-            final int layout = attrs.getAttributeResourceValue(null, "layout", 0);
+            Context context = inheritContext ? parent.getContext() : mContext;
+
+            // Apply a theme wrapper, if requested.
+            final TypedArray ta = context.obtainStyledAttributes(attrs, ATTRS_THEME);
+            final int themeResId = ta.getResourceId(0, 0);
+            if (themeResId != 0) {
+                context = new ContextThemeWrapper(context, themeResId);
+            }
+            ta.recycle();
+
+            // If the layout is pointing to a theme attribute, we have to
+            // massage the value to get a resource identifier out of it.
+            int layout = attrs.getAttributeResourceValue(null, ATTR_LAYOUT, 0);
             if (layout == 0) {
-                final String value = attrs.getAttributeValue(null, "layout");
-                if (value == null) {
-                    throw new InflateException("You must specifiy a layout in the"
+                final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
+                if (value == null || value.length() < 1) {
+                    throw new InflateException("You must specify a layout in the"
                             + " include tag: <include layout=\"@layout/layoutID\" />");
-                } else {
-                    throw new InflateException("You must specifiy a valid layout "
-                            + "reference. The layout ID " + value + " is not valid.");
                 }
+
+                layout = context.getResources().getIdentifier(value.substring(1), null, null);
+            }
+
+            // The layout might be referencing a theme attribute.
+            if (mTempValue == null) {
+                mTempValue = new TypedValue();
+            }
+            if (layout != 0 && context.getTheme().resolveAttribute(layout, mTempValue, true)) {
+                layout = mTempValue.resourceId;
+            }
+
+            if (layout == 0) {
+                final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
+                throw new InflateException("You must specify a valid layout "
+                        + "reference. The layout ID " + value + " is not valid.");
             } else {
                 final XmlResourceParser childParser =
                         getContext().getResources().getLayout(layout);
@@ -915,13 +946,12 @@ public abstract class LayoutInflater {
                         // Inflate all children.
                         rInflate(childParser, view, childAttrs, true, true);
 
-                        // Attempt to override the included layout's android:id with the
-                        // one set on the <include /> tag itself.
-                        TypedArray a = mContext.obtainStyledAttributes(attrs,
-                            com.android.internal.R.styleable.View, 0, 0);
-                        int id = a.getResourceId(com.android.internal.R.styleable.View_id, View.NO_ID);
-                        // While we're at it, let's try to override android:visibility.
-                        int visibility = a.getInt(com.android.internal.R.styleable.View_visibility, -1);
+                        final TypedArray a = context.obtainStyledAttributes(
+                                attrs, com.android.internal.R.styleable.Include);
+                        final int id = a.getResourceId(
+                                com.android.internal.R.styleable.Include_id, View.NO_ID);
+                        final int visibility = a.getInt(
+                                com.android.internal.R.styleable.Include_visibility, -1);
                         a.recycle();
 
                         if (id != View.NO_ID) {
