@@ -25,6 +25,33 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>SDK Tools, Revision 24.0.2</a> <em>(December 2014)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+
+    <dl>
+    <dt>Dependencies:</dt>
+
+    <dd>
+      <ul>
+        <li>Android SDK Platform-tools revision 19 or later.</li>
+      </ul>
+    </dd>
+
+    <dt>General Notes:</dt>
+    <dd>
+      <ul>
+        <li>Fixed issue with creating projects and activities from templates using Eclipse ADT.</li>
+      </ul>
+    </dd>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>SDK Tools, Revision 24.0.1</a> <em>(December 2014)</em>
   </p>
 
