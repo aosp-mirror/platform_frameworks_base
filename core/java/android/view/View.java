@@ -5942,8 +5942,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void addClickableRectsForAccessibility(List<RectF> outRects) {
-        if (isClickable() || isLongClickable()
-                || (mListenerInfo != null && mListenerInfo.mOnTouchListener != null)) {
+        if (isClickable() || isLongClickable()) {
             RectF bounds = new RectF();
             bounds.set(0, 0, getWidth(), getHeight());
             outRects.add(bounds);
