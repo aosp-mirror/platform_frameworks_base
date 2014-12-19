@@ -1048,7 +1048,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (nai) {
                 if (nai.created) {
                     NetworkCapabilities nc = new NetworkCapabilities(nai.networkCapabilities);
-                    if (nai.validated) {
+                    if (nai.everValidated) {
                         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
                     } else {
                         nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
@@ -1956,8 +1956,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         boolean valid = (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
                         if (valid) {
                             if (DBG) log("Validated " + nai.name());
-                            if (!nai.validated) {
-                                nai.validated = true;
+                            if (!nai.everValidated) {
+                                nai.everValidated = true;
                                 rematchNetworkAndRequests(nai, NascentState.JUST_VALIDATED,
                                     ReapUnvalidatedNetworks.REAP);
                                 // If score has changed, rebroadcast to NetworkFactories. b/17726566
@@ -3984,7 +3984,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void rematchNetworkAndRequests(NetworkAgentInfo newNetwork, NascentState nascent,
             ReapUnvalidatedNetworks reapUnvalidatedNetworks) {
         if (!newNetwork.created) return;
-        if (nascent == NascentState.JUST_VALIDATED && !newNetwork.validated) {
+        if (nascent == NascentState.JUST_VALIDATED && !newNetwork.everValidated) {
             loge("ERROR: nascent network not validated.");
         }
         boolean keep = newNetwork.isVPN();
@@ -4054,7 +4054,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         // Linger any networks that are no longer needed.
         for (NetworkAgentInfo nai : affectedNetworks) {
-            boolean teardown = !nai.isVPN() && nai.validated;
+            boolean teardown = !nai.isVPN() && nai.everValidated;
             for (int i = 0; i < nai.networkRequests.size() && teardown; i++) {
                 NetworkRequest nr = nai.networkRequests.valueAt(i);
                 try {
@@ -4096,7 +4096,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     mLegacyTypeTracker.remove(oldDefaultNetwork.networkInfo.getType(),
                                               oldDefaultNetwork);
                 }
-                mDefaultInetConditionPublished = newNetwork.validated ? 100 : 0;
+                mDefaultInetConditionPublished = newNetwork.everValidated ? 100 : 0;
                 mLegacyTypeTracker.add(newNetwork.networkInfo.getType(), newNetwork);
                 notifyLockdownVpn(newNetwork);
             }
@@ -4139,7 +4139,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         if (reapUnvalidatedNetworks == ReapUnvalidatedNetworks.REAP) {
             for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-                if (!nai.created || nai.validated || nai.isVPN()) continue;
+                if (!nai.created || nai.everValidated || nai.isVPN()) continue;
                 boolean reap = true;
                 for (NetworkRequestInfo nri : mNetworkRequests.values()) {
                     // If this Network is already the highest scoring Network for a request, or if
@@ -4202,7 +4202,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void updateInetCondition(NetworkAgentInfo nai, boolean valid) {
         // Don't bother updating until we've graduated to validated at least once.
-        if (!nai.validated) return;
+        if (!nai.everValidated) return;
         // For now only update icons for default connection.
         // TODO: Update WiFi and cellular icons separately. b/17237507
         if (!isDefaultNetwork(nai)) return;

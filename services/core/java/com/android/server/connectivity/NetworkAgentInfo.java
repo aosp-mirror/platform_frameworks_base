@@ -53,7 +53,7 @@ public class NetworkAgentInfo {
     // default NetworkRequest in which case validation will not be attempted.
     // NOTE: This is a sticky bit; once set it is never cleared even if future validation attempts
     // fail.
-    public boolean validated;
+    public boolean everValidated;
 
     // This represents the last score received from the NetworkAgent.
     private int currentScore;
@@ -89,7 +89,7 @@ public class NetworkAgentInfo {
         networkMonitor = new NetworkMonitor(context, handler, this, defaultRequest);
         networkMisc = misc;
         created = false;
-        validated = false;
+        everValidated = false;
     }
 
     public void addRequest(NetworkRequest networkRequest) {
@@ -114,7 +114,7 @@ public class NetworkAgentInfo {
 
         int score = currentScore;
 
-        if (!validated && !pretendValidated) score -= UNVALIDATED_SCORE_PENALTY;
+        if (!everValidated && !pretendValidated) score -= UNVALIDATED_SCORE_PENALTY;
         if (score < 0) score = 0;
 
         if (networkMisc.explicitlySelected) score = EXPLICITLY_SELECTED_NETWORK_SCORE;
@@ -143,7 +143,7 @@ public class NetworkAgentInfo {
                 network + "}  lp{" +
                 linkProperties + "}  nc{" +
                 networkCapabilities + "}  Score{" + getCurrentScore() + "} " +
-                "validated{" + validated + "} created{" + created + "} " +
+                "everValidated{" + everValidated + "} created{" + created + "} " +
                 "explicitlySelected{" + networkMisc.explicitlySelected + "} }";
     }
 
