@@ -1048,7 +1048,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             synchronized (nai) {
                 if (nai.created) {
                     NetworkCapabilities nc = new NetworkCapabilities(nai.networkCapabilities);
-                    if (nai.everValidated) {
+                    if (nai.lastValidated) {
                         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
                     } else {
                         nc.removeCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
@@ -1954,6 +1954,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     NetworkAgentInfo nai = (NetworkAgentInfo)msg.obj;
                     if (isLiveNetworkAgent(nai, "EVENT_NETWORK_VALIDATED")) {
                         boolean valid = (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
+                        nai.lastValidated = valid;
                         if (valid) {
                             if (DBG) log("Validated " + nai.name());
                             if (!nai.everValidated) {
@@ -1964,7 +1965,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 sendUpdatedScoreToFactories(nai);
                             }
                         }
-                        updateInetCondition(nai, valid);
+                        updateInetCondition(nai);
                         // Let the NetworkAgent know the state of its network
                         nai.asyncChannel.sendMessage(
                                 android.net.NetworkAgent.CMD_REPORT_NETWORK_STATUS,
@@ -4200,14 +4201,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void updateInetCondition(NetworkAgentInfo nai, boolean valid) {
+    private void updateInetCondition(NetworkAgentInfo nai) {
         // Don't bother updating until we've graduated to validated at least once.
         if (!nai.everValidated) return;
         // For now only update icons for default connection.
         // TODO: Update WiFi and cellular icons separately. b/17237507
         if (!isDefaultNetwork(nai)) return;
 
-        int newInetCondition = valid ? 100 : 0;
+        int newInetCondition = nai.lastValidated ? 100 : 0;
         // Don't repeat publish.
         if (newInetCondition == mDefaultInetConditionPublished) return;
 
