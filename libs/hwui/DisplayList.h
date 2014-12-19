@@ -67,7 +67,7 @@ class DrawRenderNodeOp;
 /**
  * Holds data used in the playback a tree of DisplayLists.
  */
-class PlaybackStateStruct {
+struct PlaybackStateStruct {
 protected:
     PlaybackStateStruct(OpenGLRenderer& renderer, int replayFlags, LinearAllocator* allocator)
             : mRenderer(renderer)
@@ -96,8 +96,7 @@ struct DeferStateStruct : public PlaybackStateStruct {
     DeferredDisplayList& mDeferredList;
 };
 
-class ReplayStateStruct : public PlaybackStateStruct {
-public:
+struct ReplayStateStruct : public PlaybackStateStruct {
     ReplayStateStruct(OpenGLRenderer& renderer, Rect& dirty, int replayFlags)
             : PlaybackStateStruct(renderer, replayFlags, &mReplayAllocator),
             mDirty(dirty) {}

@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-// LOG_TAG is being provided by the Makefile, reset.
-#ifdef LOG_TAG
-#undef LOG_TAG
-#endif
-#define LOG_TAG "RenderTask"
-
 #include "RenderTask.h"
 
-#include <utils/Log.h>
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
 

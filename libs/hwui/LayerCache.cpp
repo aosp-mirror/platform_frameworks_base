@@ -80,10 +80,8 @@ int LayerCache::LayerEntry::compare(const LayerCache::LayerEntry& lhs,
 
 void LayerCache::deleteLayer(Layer* layer) {
     if (layer) {
-        if (kDebugLayers) {
-            ALOGD("Destroying layer %dx%d, fbo %d", layer->getWidth(), layer->getHeight(),
-                    layer->getFbo());
-        }
+        LAYER_LOGD("Destroying layer %dx%d, fbo %d", layer->getWidth(), layer->getHeight(),
+                layer->getFbo());
         mSize -= layer->getWidth() * layer->getHeight() * 4;
         layer->state = Layer::kState_DeletedFromCache;
         layer->decStrong(0);
@@ -112,13 +110,9 @@ Layer* LayerCache::get(RenderState& renderState, const uint32_t width, const uin
         layer->state = Layer::kState_RemovedFromCache;
         mSize -= layer->getWidth() * layer->getHeight() * 4;
 
-        if (kDebugLayers) {
-            ALOGD("Reusing layer %dx%d", layer->getWidth(), layer->getHeight());
-        }
+        LAYER_LOGD("Reusing layer %dx%d", layer->getWidth(), layer->getHeight());
     } else {
-        if (kDebugLayers) {
-            ALOGD("Creating new layer %dx%d", entry.mWidth, entry.mHeight);
-        }
+        LAYER_LOGD("Creating new layer %dx%d", entry.mWidth, entry.mHeight);
 
         layer = new Layer(Layer::kType_DisplayList, renderState, entry.mWidth, entry.mHeight);
         layer->setBlend(true);
@@ -143,9 +137,7 @@ void LayerCache::dump() {
     size_t size = mCache.size();
     for (size_t i = 0; i < size; i++) {
         const LayerEntry& entry = mCache.itemAt(i);
-        if (kDebugLayers) {
-            ALOGD("  Layer size %dx%d", entry.mWidth, entry.mHeight);
-        }
+        ALOGD("  Layer size %dx%d", entry.mWidth, entry.mHeight);
     }
 }
 
@@ -165,10 +157,8 @@ bool LayerCache::put(Layer* layer) {
             deleteLayer(victim);
             mCache.removeAt(position);
 
-            if (kDebugLayers) {
-                ALOGD("  Deleting layer %.2fx%.2f", victim->layer.getWidth(),
-                        victim->layer.getHeight());
-            }
+            LAYER_LOGD("  Deleting layer %.2fx%.2f", victim->layer.getWidth(),
+                    victim->layer.getHeight());
         }
 
         layer->cancelDefer();

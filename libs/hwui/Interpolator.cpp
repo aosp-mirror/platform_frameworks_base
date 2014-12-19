@@ -14,12 +14,6 @@
  * limitations under the License.
  */
 
-// LOG_TAG is being provided by the Makefile, reset.
-#ifdef LOG_TAG
-#undef LOG_TAG
-#endif
-#define LOG_TAG "Interpolator"
-
 #include "Interpolator.h"
 
 #include <cmath>

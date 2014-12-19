@@ -1,7 +1,6 @@
 # getConfig in external/skia/include/core/SkBitmap.h is deprecated.
 # Allow Gnu extension: in-class initializer of static 'const float' member.
 LOCAL_CLANG_CFLAGS += \
-    -Wno-unused-parameter \
     -Wno-deprecated-declarations \
     -Wno-gnu-static-float-init
 
@@ -77,7 +76,6 @@ LOCAL_C_INCLUDES += \
     external/skia/src/core
 
 LOCAL_CFLAGS += -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
-LOCAL_CFLAGS += -Wno-unused-parameter
 LOCAL_SHARED_LIBRARIES := liblog libcutils libutils libEGL libGLESv2 libskia libui libgui
 
 ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
@@ -102,4 +100,4 @@ endif
 # Defaults for ATRACE_TAG and LOG_TAG for libhwui
 LOCAL_CFLAGS += -DATRACE_TAG=ATRACE_TAG_VIEW -DLOG_TAG=\"OpenGLRenderer\"
 
-LOCAL_CFLAGS += -Wall -Werror -Wunused -Wunreachable-code
+LOCAL_CFLAGS += -Wall -Werror -Wno-unused-parameter -Wunused -Wunreachable-code

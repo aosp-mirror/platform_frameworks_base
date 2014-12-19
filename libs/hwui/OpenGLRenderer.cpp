@@ -740,10 +740,8 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
  */
 bool OpenGLRenderer::createLayer(float left, float top, float right, float bottom,
         const SkPaint* paint, int flags, const SkPath* convexMask) {
-    if (kDebugLayers) {
-        ALOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
-        ALOGD("Layer cache size = %d", mCaches.layerCache.getSize());
-    }
+    LAYER_LOGD("Requesting layer %.2fx%.2f", right - left, bottom - top);
+    LAYER_LOGD("Layer cache size = %d", mCaches.layerCache.getSize());
 
     const bool fboLayer = flags & SkCanvas::kClipToLayer_SaveFlag;
 
@@ -921,9 +919,7 @@ void OpenGLRenderer::composeLayer(const Snapshot& removed, const Snapshot& resto
     // Failing to add the layer to the cache should happen only if the layer is too large
     layer->setConvexMask(NULL);
     if (!mCaches.layerCache.put(layer)) {
-        if (kDebugLayers) {
-            ALOGD("Deleting layer");
-        }
+        LAYER_LOGD("Deleting layer");
         layer->decStrong(0);
     }
 }
