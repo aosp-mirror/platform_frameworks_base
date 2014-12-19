@@ -212,6 +212,9 @@ public class KeyguardBouncer {
         return false;
     }
 
+    /**
+     * WARNING: This method might cause Binder calls.
+     */
     public boolean isSecure() {
         return mKeyguardView == null || mKeyguardView.getSecurityMode() != SecurityMode.None;
     }
