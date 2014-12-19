@@ -136,38 +136,57 @@ public class RadioAccessFamily implements Parcelable {
     };
 
     public static int getRafFromNetworkType(int type) {
+        final int GSM = RAF_GSM | RAF_GPRS | RAF_EDGE;
+        final int HS = RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+        final int CDMA = RAF_IS95A | RAF_IS95B | RAF_1xRTT;
+        final int EVDO = RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B;
+        final int WCDMA = HS | RAF_UMTS;
+
+        int raf;
+
         switch (type) {
             case RILConstants.NETWORK_MODE_WCDMA_PREF:
-                return RAF_GSM | RAF_UMTS | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+                raf = GSM | WCDMA;
+                break;
             case RILConstants.NETWORK_MODE_GSM_ONLY:
-                return RAF_GSM;
+                raf = GSM;
+                break;
             case RILConstants.NETWORK_MODE_WCDMA_ONLY:
-                return RAF_UMTS | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+                raf = WCDMA;
+                break;
             case RILConstants.NETWORK_MODE_GSM_UMTS:
-                return RAF_GSM | RAF_UMTS | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+                raf = GSM | WCDMA;
+                break;
             case RILConstants.NETWORK_MODE_CDMA:
-                return RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B | RAF_IS95A | RAF_IS95B | RAF_1xRTT;
+                raf = CDMA;
+                break;
             case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO:
-                return RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B | RAF_IS95A | RAF_IS95B | RAF_1xRTT
-                        | RAF_EHRPD;
+                raf = RAF_LTE | CDMA | EVDO;
+                break;
             case RILConstants.NETWORK_MODE_LTE_GSM_WCDMA:
-                return RAF_GSM | RAF_UMTS | RAF_LTE | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+                raf = RAF_LTE | GSM | WCDMA;
+                break;
             case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA:
-                return RAF_GSM | RAF_UMTS | RAF_LTE | RAF_EVDO_0 | RAF_EVDO_A | RAF_EVDO_B
-                        | RAF_IS95A | RAF_IS95B | RAF_1xRTT | RAF_EHRPD | RAF_HSUPA | RAF_HSDPA
-                        | RAF_HSPA | RAF_HSPAP;
+                raf = RAF_LTE | CDMA | EVDO | GSM | WCDMA;
+                break;
             case RILConstants.NETWORK_MODE_LTE_ONLY:
-                return RAF_LTE;
+                raf = RAF_LTE;
+                break;
             case RILConstants.NETWORK_MODE_LTE_WCDMA:
-                return RAF_LTE | RAF_UMTS | RAF_HSUPA | RAF_HSDPA | RAF_HSPA | RAF_HSPAP;
+                raf = RAF_LTE | WCDMA;
+                break;
             case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
-                return RAF_UNKNOWN;
+                raf = CDMA;
+                break;
             case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
-                return RAF_UNKNOWN;
+                raf = EVDO;
+                break;
             case RILConstants.NETWORK_MODE_GLOBAL:
-                return RAF_UNKNOWN;
+                raf = GSM | WCDMA | CDMA | EVDO;
+                break;
             default:
-                return RAF_UNKNOWN;
+                raf = RAF_UNKNOWN;
+                break;
         }
     }
 }
