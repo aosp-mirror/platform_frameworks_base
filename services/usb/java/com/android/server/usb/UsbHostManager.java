@@ -60,7 +60,7 @@ public class UsbHostManager {
     private ArrayList<UsbInterface> mNewInterfaces;
     private ArrayList<UsbEndpoint> mNewEndpoints;
 
-    private UsbAudioManager mUsbAudioManager;
+    private UsbAlsaManager mUsbAlsaManager;
 
     @GuardedBy("mLock")
     private UsbSettingsManager mCurrentSettings;
@@ -69,7 +69,7 @@ public class UsbHostManager {
         mContext = context;
         mHostBlacklist = context.getResources().getStringArray(
                 com.android.internal.R.array.config_usbHostBlacklist);
-        mUsbAudioManager = new UsbAudioManager(context);
+        mUsbAlsaManager = new UsbAlsaManager(context);
     }
 
     public void setCurrentSettings(UsbSettingsManager settings) {
@@ -222,7 +222,7 @@ public class UsbHostManager {
                 mDevices.put(mNewDevice.getDeviceName(), mNewDevice);
                 Slog.d(TAG, "Added device " + mNewDevice);
                 getCurrentSettings().deviceAttached(mNewDevice);
-                mUsbAudioManager.deviceAdded(mNewDevice);
+                mUsbAlsaManager.deviceAdded(mNewDevice);
             } else {
                 Slog.e(TAG, "mNewDevice is null in endUsbDeviceAdded");
             }
@@ -238,14 +238,14 @@ public class UsbHostManager {
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceName);
             if (device != null) {
-                mUsbAudioManager.deviceRemoved(device);
+                mUsbAlsaManager.deviceRemoved(device);
                 getCurrentSettings().deviceDetached(device);
             }
         }
     }
 
     public void systemReady() {
-        mUsbAudioManager.systemReady();
+        mUsbAlsaManager.systemReady();
 
         synchronized (mLock) {
             // Create a thread to call into native code to wait for USB host events.
@@ -292,7 +292,7 @@ public class UsbHostManager {
                 pw.println("    " + name + ": " + mDevices.get(name));
             }
         }
-        mUsbAudioManager.dump(fd, pw);
+        mUsbAlsaManager.dump(fd, pw);
     }
 
     private native void monitorUsbHostBus();

@@ -39,10 +39,10 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 
 /**
- * UsbAudioManager manages USB audio devices.
+ * UsbAlsaManager manages USB audio and MIDI devices.
  */
-public class UsbAudioManager {
-    private static final String TAG = UsbAudioManager.class.getSimpleName();
+public class UsbAlsaManager {
+    private static final String TAG = UsbAlsaManager.class.getSimpleName();
     private static final boolean DEBUG = false;
 
     private static final String ALSA_DIRECTORY = "/dev/snd/";
@@ -132,7 +132,7 @@ public class UsbAudioManager {
         }
     };
 
-    /* package */ UsbAudioManager(Context context) {
+    /* package */ UsbAlsaManager(Context context) {
         mContext = context;
     }
 
