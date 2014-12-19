@@ -48,12 +48,6 @@
          to unlock the keyguard.  Displayed in one line in a large font.  -->
     <string name="keyguard_password_wrong_pin_code">Incorrect PIN code.</string>
 
-    <!-- Instructions telling the user how to unlock the phone. -->
-    <string name="keyguard_label_text">To unlock, press Menu then 0.</string>
-
-    <!-- Shown when face unlock failed multiple times so we're just using the backup -->
-    <string name="faceunlock_multiple_failures">Maximum Face Unlock attempts exceeded</string>
-
     <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
          charged, say that it is charged. -->
     <string name="keyguard_charged">Charged</string>
@@ -101,35 +95,6 @@
     <!-- Time format strings for fall-back clock widget -->
     <string name="keyguard_widget_24_hours_format" translatable="false">kk\uee01mm</string>
 
-    <!-- Accessibility description sent when user changes the current lock screen widget. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_widget_changed">%1$s. Widget %2$d of %3$d.</string>
-    <!-- Accessibility description of the add widget button. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_add_widget">Add widget.</string>
-    <!-- Accessibility description of the empty sidget slot (place holder for a new widget). [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_widget_empty_slot">Empty</string>
-    <!-- Accessibility description of the event of expanding an unlock area. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_unlock_area_expanded">Unlock area expanded.</string>
-    <!-- Accessibility description of the event of collapsing an unlock area. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_unlock_area_collapsed">Unlock area collapsed.</string>
-    <!-- Accessibility description of a lock screen widget. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_widget"><xliff:g id="widget_index">%1$s</xliff:g> widget.</string>
-    <!-- Accessibility description of the lock screen user selector widget. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_user_selector">User selector</string>
-    <!-- Accessibility description of the camera widget. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_camera">Camera</string>
-    <!-- Accessibility description of the lock media control widget. [CHAR_LIMIT=none] -->
-    <string name="keygaurd_accessibility_media_controls">Media controls</string>
-    <!-- Accessibility description of widget reordering start. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_widget_reorder_start">Widget reordering started.</string>
-    <!-- Accessibility description of widget reordering end. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_widget_reorder_end">Widget reordering ended.</string>
-    <!-- Accessibility description of the a widget deletion event. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_widget_deleted">Widget <xliff:g id="widget_index">%1$s</xliff:g> deleted.</string>
-    <!-- Accessibility description of the button to expand the lock area. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_expand_lock_area">Expand unlock area.</string>
-    <!-- Accessibility description of the slide unlock. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_slide_unlock">Slide unlock.</string>
-    <!-- Accessibility description of the pattern unlock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pattern_unlock">Pattern unlock.</string>
     <!-- Accessibility description of the face unlock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_face_unlock">Face unlock.</string>
@@ -148,24 +113,6 @@
     <!-- Accessibility description of the SIM PUK password view. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_sim_puk_area">SIM PUK area</string>
 
-    <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->
-    <string name="keyguard_accessibility_transport_prev_description">Previous track button</string>
-    <!-- Shown on transport control of lockscreen. Pressing button goes to next track. -->
-    <string name="keyguard_accessibility_transport_next_description">Next track button</string>
-    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="keyguard_accessibility_transport_pause_description">Pause button</string>
-    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="keyguard_accessibility_transport_play_description">Play button</string>
-    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="keyguard_accessibility_transport_stop_description">Stop button</string>
-    <!-- Shown on transport control of lockscreen. Pressing button rates the track as "thumbs up." -->
-    <string name="keyguard_accessibility_transport_thumbs_up_description">Thumbs up</string>
-    <!-- Shown on transport control of lockscreen. Pressing button rates the track as "thumbs down." -->
-    <string name="keyguard_accessibility_transport_thumbs_down_description">Thumbs down</string>
-    <!-- Shown on transport control of lockscreen. Pressing button toggles the "heart" rating. -->
-    <string name="keyguard_accessibility_transport_heart_description">Heart</string>
-
-
     <!-- Accessibility description for when the device prompts the user to dismiss keyguard
          in order to complete an action. This will be followed by a message about the current
          security option (e.g. "Pattern unlock."). [CHAR LIMIT=NONE] -->
@@ -174,61 +121,14 @@
     <!-- Accessibility description for when the bouncer prompt is dismissed. [CHAR LIMIT=NONE] -->
     <string name="keyguard_accessibility_hide_bouncer">Launch canceled</string>
 
-    <!-- Accessibility description announced when user drags widget over the delete drop target [CHAR LIMIT=NONE] -->
-    <string name="keyguard_accessibility_delete_widget_start">Drop <xliff:g id="widget_index">%1$s</xliff:g> to delete.</string>
-
-    <!-- Accessibility description announced when user drags widget away from delete drop target [CHAR LIMIT=NONE] -->
-    <string name="keyguard_accessibility_delete_widget_end"><xliff:g id="widget_index">%1$s</xliff:g> will not be deleted.</string>
-
     <!-- Accessibility description for the text view that indicates when the next alarm is set (not shown on screen). [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_next_alarm">Next alarm set for <xliff:g id="alarm" example="Fri 8:30 AM">%1$s</xliff:g></string>
 
-    <!-- Password keyboard strings. Used by LockScreen and Settings --><skip />
-    <!-- Label for "switch to symbols" key.  Must be short to fit on key! -->
-    <string name="password_keyboard_label_symbol_key">\?123</string>
-    <!-- Label for "switch to alphabetic" key.  Must be short to fit on key! -->
-    <string name="password_keyboard_label_alpha_key">ABC</string>
-    <!-- Label for ALT modifier key.  Must be short to fit on key! -->
-    <string name="password_keyboard_label_alt_key">ALT</string>
-
-    <!-- KeyboardView - accessibility support --><skip />
-    <!-- Description of the Alt button in a KeyboardView. [CHAR LIMIT=NONE] -->
-    <string name="keyboardview_keycode_alt">Alt</string>
-    <!-- Description of the Cancel button in a KeyboardView. [CHAR LIMIT=NONE] -->
-    <string name="keyboardview_keycode_cancel">Cancel</string>
+    <!-- KeyguardPinView - accessibility support --><skip />
     <!-- Description of the Delete button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_delete">Delete</string>
-    <!-- Description of the Done button in a KeyboardView. [CHAR LIMIT=NONE] -->
-    <string name="keyboardview_keycode_done">Done</string>
-    <!-- Description of the Mode change button in a KeyboardView. [CHAR LIMIT=NONE] -->
-    <string name="keyboardview_keycode_mode_change">Mode change</string>
-    <!-- Description of the Shift button in a KeyboardView. [CHAR LIMIT=NONE] -->
-    <string name="keyboardview_keycode_shift">Shift</string>
     <!-- Description of the Enter button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_enter">Enter</string>
-
-    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_unlock">Unlock</string>
-    <!-- Description of the camera target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_camera">Camera</string>
-    <!-- Description of the silent target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_silent">Silent</string>
-    <!-- Description of the sound on target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_soundon">Sound on</string>
-    <!-- Description of the unlock target in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_target_search">Search</string>
-
-    <!-- Description of the up direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_up">Slide up for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the down direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_down">Slide down for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the left direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_left">"Slide left for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-    <!-- Description of the right direction in which one can to slide the handle in the Slide unlock screen. [CHAR LIMIT=NONE] -->
-    <string name="description_direction_right">Slide right for <xliff:g id="target_description" example="Unlock">%s</xliff:g>.</string>
-
-    <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
-    <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
 
     <!-- Label shown on emergency call button in keyguard -->
     <string name="kg_emergency_call_label">Emergency call</string>
@@ -386,8 +286,6 @@
        you will be asked to unlock your phone using an email account.\n\n
        Try again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
-    <!-- The delete-widget drop target button text -->
-    <string name="kg_reordering_delete_drop_target_text">Remove</string>
 
     <!-- Instructions telling the user that they entered the wrong SIM PIN for the last time.
          Displayed in a dialog box.  -->
@@ -416,18 +314,6 @@
     <string name="kg_password_puk_failed">SIM PUK operation failed!</string>
     <!-- Notification telling the user that the PIN1 they entered is valid -->
     <string name="kg_pin_accepted">Code Accepted!</string>
-
-    <!-- Transport control strings -->
-    <!-- Shown on transport control of lockscreen. Pressing button goes to previous track. -->
-    <string name="keyguard_transport_prev_description">Previous track button</string>
-    <!-- Shown on transport control of lockscreen. Pressing button goes to next track. -->
-    <string name="keyguard_transport_next_description">Next track button</string>
-    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="keyguard_transport_pause_description">Pause button</string>
-    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="keyguard_transport_play_description">Play button</string>
-    <!-- Shown on transport control of lockscreen. Pressing button pauses playback -->
-    <string name="keyguard_transport_stop_description">Stop button</string>
 
     <!-- On the keyguard screen, it shows the carrier the phone is connected to.
         This is displayed if the phone is not connected to a carrier.-->

@@ -55,11 +55,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     protected void resetState() {
         super.resetState();
-        if (KeyguardUpdateMonitor.getInstance(mContext).getMaxBiometricUnlockAttemptsReached()) {
-            mSecurityMessageDisplay.setMessage(R.string.faceunlock_multiple_failures, true);
-        } else {
-            mSecurityMessageDisplay.setMessage(R.string.kg_pin_instructions, false);
-        }
+        mSecurityMessageDisplay.setMessage(R.string.kg_pin_instructions, false);
     }
 
     @Override
