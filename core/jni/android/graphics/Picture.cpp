@@ -106,8 +106,7 @@ void Picture::draw(Canvas* canvas) {
         SkASSERT(NULL != mPicture.get());
     }
     if (NULL != mPicture.get()) {
-        // TODO: remove this const_cast once pictures are immutable
-        const_cast<SkPicture*>(mPicture.get())->draw(canvas->getSkCanvas());
+        mPicture.get()->playback(canvas->getSkCanvas());
     }
 }
 
