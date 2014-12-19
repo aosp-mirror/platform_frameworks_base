@@ -763,7 +763,10 @@ public class AudioTrack
      * unsigned 32-bits.  That is, the next position after 0x7FFFFFFF is (int) 0x80000000.
      * This is a continuously advancing counter.  It will wrap (overflow) periodically,
      * for example approximately once every 27:03:11 hours:minutes:seconds at 44.1 kHz.
-     * It is reset to zero by flush(), reload(), and stop().
+     * It is reset to zero by {@link #flush()}, {@link #reloadStaticData()}, and {@link #stop()}.
+     * If the track's creation mode is {@link #MODE_STATIC}, the return value indicates
+     * the total number of frames played since reset,
+     * <i>not</i> the current offset within the buffer.
      */
     public int getPlaybackHeadPosition() {
         return native_get_position();
@@ -1048,7 +1051,8 @@ public class AudioTrack
 
     /**
      * Sets the period for the periodic notification event.
-     * @param periodInFrames update period expressed in frames
+     * @param periodInFrames update period expressed in frames.
+     * Zero period means no position updates.  A negative period is not allowed.
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_INVALID_OPERATION}
      */
     public int setPositionNotificationPeriod(int periodInFrames) {
@@ -1060,12 +1064,19 @@ public class AudioTrack
 
 
     /**
-     * Sets the playback head position.
+     * Sets the playback head position within the static buffer.
      * The track must be stopped or paused for the position to be changed,
      * and must use the {@link #MODE_STATIC} mode.
-     * @param positionInFrames playback head position expressed in frames
+     * @param positionInFrames playback head position within buffer, expressed in frames.
      * Zero corresponds to start of buffer.
      * The position must not be greater than the buffer size in frames, or negative.
+     * Though this method and {@link #getPlaybackHeadPosition()} have similar names,
+     * the position values have different meanings.
+     * <br>
+     * If looping is currently enabled and the new position is greater than or equal to the
+     * loop end marker, the behavior varies by API level: for API level 22 and above,
+     * the looping is first disabled and then the position is set.
+     * For earlier API levels, the behavior is unspecified.
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
@@ -1085,17 +1096,29 @@ public class AudioTrack
      * Similarly to setPlaybackHeadPosition,
      * the track must be stopped or paused for the loop points to be changed,
      * and must use the {@link #MODE_STATIC} mode.
-     * @param startInFrames loop start marker expressed in frames
+     * @param startInFrames loop start marker expressed in frames.
      * Zero corresponds to start of buffer.
      * The start marker must not be greater than or equal to the buffer size in frames, or negative.
-     * @param endInFrames loop end marker expressed in frames
+     * @param endInFrames loop end marker expressed in frames.
      * The total buffer size in frames corresponds to end of buffer.
      * The end marker must not be greater than the buffer size in frames.
      * For looping, the end marker must not be less than or equal to the start marker,
      * but to disable looping
      * it is permitted for start marker, end marker, and loop count to all be 0.
-     * @param loopCount the number of times the loop is looped.
+     * If any input parameters are out of range, this method returns {@link #ERROR_BAD_VALUE}.
+     * If the loop period (endInFrames - startInFrames) is too small for the implementation to
+     * support,
+     * {@link #ERROR_BAD_VALUE} is returned.
+     * The loop range is the interval [startInFrames, endInFrames).
+     * <br>
+     * For API level 22 and above, the position is left unchanged,
+     * unless it is greater than or equal to the loop end marker, in which case
+     * it is forced to the loop start marker.
+     * For earlier API levels, the effect on position is unspecified.
+     * @param loopCount the number of times the loop is looped; must be greater than or equal to -1.
      *    A value of -1 means infinite looping, and 0 disables looping.
+     *    A value of positive N means to "loop" (go back) N times.  For example,
+     *    a value of one means to play the region two times in total.
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *    {@link #ERROR_INVALID_OPERATION}
      */
@@ -1131,7 +1154,12 @@ public class AudioTrack
     //--------------------
     /**
      * Starts playing an AudioTrack.
-     * If track's creation mode is {@link #MODE_STATIC}, you must have called write() prior.
+     * If track's creation mode is {@link #MODE_STATIC}, you must have called one of
+     * the {@link #write(byte[], int, int)}, {@link #write(short[], int, int)},
+     * or {@link #write(float[], int, int, int)} methods.
+     * If the mode is {@link #MODE_STREAMING}, you can optionally prime the
+     * output buffer by writing up to bufferSizeInBytes (from constructor) before starting.
+     * This priming will avoid an immediate underrun, but is not required.
      *
      * @throws IllegalStateException
      */
@@ -1449,9 +1477,17 @@ public class AudioTrack
     }
 
     /**
-     * Notifies the native resource to reuse the audio data already loaded in the native
-     * layer, that is to rewind to start of buffer.
-     * The track's creation mode must be {@link #MODE_STATIC}.
+     * Sets the playback head position within the static buffer to zero,
+     * that is it rewinds to start of static buffer.
+     * The track must be stopped or paused, and
+     * the track's creation mode must be {@link #MODE_STATIC}.
+     * <p>
+     * For API level 22 and above, also resets the value returned by
+     * {@link #getPlaybackHeadPosition()} to zero.
+     * For earlier API levels, the reset behavior is unspecified.
+     * <p>
+     * {@link #setPlaybackHeadPosition(int)} to zero
+     * is recommended instead when the reset of {@link #getPlaybackHeadPosition} is not needed.
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
      *  {@link #ERROR_INVALID_OPERATION}
      */
