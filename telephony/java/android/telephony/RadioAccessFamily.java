@@ -188,6 +188,7 @@ public class RadioAccessFamily implements Parcelable {
                 raf = RAF_UNKNOWN;
                 break;
         }
+        return raf;
     }
 }
 
