@@ -28,6 +28,16 @@ public:
     virtual ~Canvas() {};
 
     static Canvas* create_canvas(SkBitmap* bitmap);
+
+    /**
+     *  Create a new Canvas object which delegates to an SkCanvas.
+     *
+     *  @param skiaCanvas Must not be NULL. All drawing calls will be
+     *      delegated to this object. This function will call ref() on the
+     *      SkCanvas, and the returned Canvas will unref() it upon
+     *      destruction.
+     *  @return new Canvas object. Will not return NULL.
+     */
     static Canvas* create_canvas(SkCanvas* skiaCanvas);
 
     // TODO: enable HWUI to either create similar canvas wrapper or subclass

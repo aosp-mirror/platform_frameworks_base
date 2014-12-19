@@ -44,10 +44,18 @@ namespace android {
 // Holds an SkCanvas reference plus additional native data.
 class SkiaCanvas : public Canvas {
 public:
-    SkiaCanvas(SkBitmap* bitmap);
+    explicit SkiaCanvas(SkBitmap* bitmap);
 
-    SkiaCanvas(SkCanvas* canvas) : mCanvas(canvas) {
+    /**
+     *  Create a new SkiaCanvas.
+     *
+     *  @param canvas SkCanvas to handle calls made to this SkiaCanvas. Must
+     *      not be NULL. This constructor will ref() the SkCanvas, and unref()
+     *      it in its destructor.
+     */
+    explicit SkiaCanvas(SkCanvas* canvas) : mCanvas(canvas) {
         SkASSERT(canvas);
+        canvas->ref();
     }
 
     virtual SkCanvas* getSkCanvas() {
