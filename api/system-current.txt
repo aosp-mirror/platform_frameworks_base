@@ -30605,10 +30605,14 @@ package android.telecom {
     method public java.util.List<java.lang.String> getSupportedUriSchemes();
     method public boolean hasCapabilities(int);
     method public boolean supportsUriScheme(java.lang.String);
+    method public android.telecom.PhoneAccount.Builder toBuilder();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CAPABILITY_CALL_PROVIDER = 2; // 0x2
     field public static final int CAPABILITY_CONNECTION_MANAGER = 1; // 0x1
+    field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
     field public static final int CAPABILITY_PLACE_EMERGENCY_CALLS = 16; // 0x10
     field public static final int CAPABILITY_SIM_SUBSCRIPTION = 4; // 0x4
+    field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
     field public static final android.os.Parcelable.Creator<android.telecom.PhoneAccount> CREATOR;
     field public static final int NO_HIGHLIGHT_COLOR = 0; // 0x0
     field public static final int NO_ICON_TINT = 0; // 0x0
@@ -30621,7 +30625,9 @@ package android.telecom {
   public static class PhoneAccount.Builder {
     ctor public PhoneAccount.Builder(android.telecom.PhoneAccountHandle, java.lang.CharSequence);
     ctor public PhoneAccount.Builder(android.telecom.PhoneAccount);
+    method public android.telecom.PhoneAccount.Builder addSupportedUriScheme(java.lang.String);
     method public android.telecom.PhoneAccount build();
+    method public android.telecom.PhoneAccount.Builder setAccountHandle(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccount.Builder setAddress(android.net.Uri);
     method public android.telecom.PhoneAccount.Builder setCapabilities(int);
     method public android.telecom.PhoneAccount.Builder setHighlightColor(int);
@@ -30637,9 +30643,11 @@ package android.telecom {
 
   public class PhoneAccountHandle implements android.os.Parcelable {
     ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String);
+    ctor public PhoneAccountHandle(android.content.ComponentName, java.lang.String, android.os.UserHandle);
     method public int describeContents();
     method public android.content.ComponentName getComponentName();
     method public java.lang.String getId();
+    method public android.os.UserHandle getUserHandle();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telecom.PhoneAccountHandle> CREATOR;
   }
@@ -30775,12 +30783,41 @@ package android.telecom {
     field public static final java.lang.String EXTRA_OUTGOING_CALL_EXTRAS = "android.telecom.extra.OUTGOING_CALL_EXTRAS";
     field public static final java.lang.String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecom.extra.PHONE_ACCOUNT_HANDLE";
     field public static final java.lang.String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecom.extra.START_CALL_WITH_SPEAKERPHONE";
+    field public static final java.lang.String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.telecom.extra.START_CALL_WITH_VIDEO_STATE";
     field public static final java.lang.String GATEWAY_ORIGINAL_ADDRESS = "android.telecom.extra.GATEWAY_ORIGINAL_ADDRESS";
     field public static final java.lang.String GATEWAY_PROVIDER_PACKAGE = "android.telecom.extra.GATEWAY_PROVIDER_PACKAGE";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
+  }
+
+  public class VideoProfile implements android.os.Parcelable {
+    ctor public VideoProfile(int);
+    ctor public VideoProfile(int, int);
+    method public int describeContents();
+    method public int getQuality();
+    method public int getVideoState();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telecom.VideoProfile> CREATOR;
+    field public static final int QUALITY_DEFAULT = 4; // 0x4
+    field public static final int QUALITY_HIGH = 1; // 0x1
+    field public static final int QUALITY_LOW = 3; // 0x3
+    field public static final int QUALITY_MEDIUM = 2; // 0x2
+  }
+
+  public static class VideoProfile.VideoState {
+    ctor public VideoProfile.VideoState();
+    method public static boolean isAudioOnly(int);
+    method public static boolean isBidirectional(int);
+    method public static boolean isPaused(int);
+    method public static boolean isReceptionEnabled(int);
+    method public static boolean isTransmissionEnabled(int);
+    field public static final int AUDIO_ONLY = 0; // 0x0
+    field public static final int BIDIRECTIONAL = 3; // 0x3
+    field public static final int PAUSED = 4; // 0x4
+    field public static final int RX_ENABLED = 2; // 0x2
+    field public static final int TX_ENABLED = 1; // 0x1
   }
 
 }
