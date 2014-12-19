@@ -38,7 +38,6 @@ public class KeyguardSecurityModel {
         Pattern, // Unlock by drawing a pattern.
         Password, // Unlock by entering an alphanumeric password
         PIN, // Strictly numeric password
-        Biometric, // Unlock with a biometric key (e.g. finger print or face unlock)
         Account, // Unlock by entering an account's login and password.
         SimPin, // Unlock by entering a sim pin.
         SimPuk // Unlock by entering a sim puk
@@ -54,28 +53,6 @@ public class KeyguardSecurityModel {
 
     void setLockPatternUtils(LockPatternUtils utils) {
         mLockPatternUtils = utils;
-    }
-
-    /**
-     * Returns true if biometric unlock is installed and selected.  If this returns false there is
-     * no need to even construct the biometric unlock.
-     */
-    boolean isBiometricUnlockEnabled() {
-        return mLockPatternUtils.usingBiometricWeak()
-                && mLockPatternUtils.isBiometricWeakInstalled();
-    }
-
-    /**
-     * Returns true if a condition is currently suppressing the biometric unlock.  If this returns
-     * true there is no need to even construct the biometric unlock.
-     */
-    private boolean isBiometricUnlockSuppressed() {
-        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
-        final boolean backupIsTimedOut = monitor.getFailedUnlockAttempts() >=
-                LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT;
-        return monitor.getMaxBiometricUnlockAttemptsReached() || backupIsTimedOut
-                || !monitor.isAlternateUnlockEnabled()
-                || monitor.getPhoneState() != TelephonyManager.CALL_STATE_IDLE;
     }
 
     SecurityMode getSecurityMode() {
@@ -127,12 +104,6 @@ public class KeyguardSecurityModel {
      * @return alternate or the given mode
      */
     SecurityMode getAlternateFor(SecurityMode mode) {
-        if (isBiometricUnlockEnabled() && !isBiometricUnlockSuppressed()
-                && (mode == SecurityMode.Password
-                        || mode == SecurityMode.PIN
-                        || mode == SecurityMode.Pattern)) {
-            return SecurityMode.Biometric;
-        }
         return mode; // no alternate, return what was given
     }
 
@@ -144,8 +115,6 @@ public class KeyguardSecurityModel {
      */
     SecurityMode getBackupSecurityMode(SecurityMode mode) {
         switch(mode) {
-            case Biometric:
-                return getSecurityMode();
             case Pattern:
                 return SecurityMode.Account;
         }

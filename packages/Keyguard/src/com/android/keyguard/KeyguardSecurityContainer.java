@@ -199,7 +199,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 break;
             // These don't have timeout dialogs.
             case Account:
-            case Biometric:
             case Invalid:
             case None:
             case SimPin:
@@ -379,7 +378,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 case Password:
                 case PIN:
                 case Account:
-                case Biometric:
                     finish = true;
                     break;
 
@@ -492,11 +490,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 monitor.clearFailedUnlockAttempts();
                 mLockPatternUtils.reportSuccessfulPasswordAttempt();
             } else {
-                if (mCurrentSecuritySelection == SecurityMode.Biometric) {
-                    monitor.reportFailedBiometricUnlockAttempt();
-                } else {
-                    KeyguardSecurityContainer.this.reportFailedUnlockAttempt();
-                }
+                KeyguardSecurityContainer.this.reportFailedUnlockAttempt();
             }
         }
 
@@ -528,7 +522,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             case Pattern: return R.id.keyguard_pattern_view;
             case PIN: return R.id.keyguard_pin_view;
             case Password: return R.id.keyguard_password_view;
-            case Biometric: return R.id.keyguard_face_unlock_view;
             case Account: return R.id.keyguard_account_view;
             case SimPin: return R.id.keyguard_sim_pin_view;
             case SimPuk: return R.id.keyguard_sim_puk_view;
@@ -541,7 +534,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             case Pattern: return R.layout.keyguard_pattern_view;
             case PIN: return R.layout.keyguard_pin_view;
             case Password: return R.layout.keyguard_password_view;
-            case Biometric: return R.layout.keyguard_face_unlock_view;
             case Account: return R.layout.keyguard_account_view;
             case SimPin: return R.layout.keyguard_sim_pin_view;
             case SimPuk: return R.layout.keyguard_sim_puk_view;

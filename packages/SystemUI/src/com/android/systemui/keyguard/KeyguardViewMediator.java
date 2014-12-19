@@ -63,7 +63,6 @@ import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.keyguard.MultiUserAvatarCache;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
