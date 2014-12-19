@@ -142,7 +142,7 @@ public final class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_VENDOR_COMMAND,
                 maxLengthValidator, DEST_DIRECT | SRC_UNREGISTERED);
         addValidationInfo(Constants.MESSAGE_VENDOR_COMMAND_WITH_ID,
-                maxLengthValidator, DEST_ALL | SRC_UNREGISTERED);
+                new VariableLengthValidator(4, 14), DEST_ALL | SRC_UNREGISTERED);
         addValidationInfo(Constants.MESSAGE_VENDOR_REMOTE_BUTTON_DOWN,
                 maxLengthValidator, DEST_ALL | SRC_UNREGISTERED);
 
