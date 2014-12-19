@@ -829,21 +829,27 @@ public class MediaSessionService extends SystemService implements Monitor {
                     return;
                 }
                 try {
+                    String packageName = getContext().getOpPackageName();
                     if (mUseMasterVolume) {
+                        boolean isMasterMute = mAudioService.isMasterMute();
                         if (direction == MediaSessionManager.DIRECTION_MUTE) {
-                            mAudioService.setMasterMute(!mAudioService.isMasterMute(), flags,
-                                    getContext().getOpPackageName(), mICallback);
+                            mAudioService.setMasterMute(!isMasterMute, flags, packageName, mICallback);
                         } else {
-                            mAudioService.adjustMasterVolume(direction, flags,
-                                    getContext().getOpPackageName());
+                            mAudioService.adjustMasterVolume(direction, flags, packageName);
+                            if (isMasterMute) {
+                                mAudioService.setMasterMute(false, flags, packageName, mICallback);
+                            }
                         }
                     } else {
+                        boolean isStreamMute = mAudioService.isStreamMute(suggestedStream);
                         if (direction == MediaSessionManager.DIRECTION_MUTE) {
-                            mAudioService.setStreamMute(suggestedStream,
-                                    !mAudioService.isStreamMute(suggestedStream), mICallback);
+                            mAudioService.setStreamMute(suggestedStream, !isStreamMute, mICallback);
                         } else {
                             mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
-                                    flags, getContext().getOpPackageName());
+                                    flags, packageName);
+                            if (isStreamMute) {
+                                mAudioService.setStreamMute(suggestedStream, false, mICallback);
+                            }
                         }
                     }
                 } catch (RemoteException e) {
