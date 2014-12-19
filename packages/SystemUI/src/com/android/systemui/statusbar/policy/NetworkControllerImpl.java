@@ -426,6 +426,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
             return;
         }
         List<SubscriptionInfo> subscriptions = mSubscriptionManager.getActiveSubscriptionInfoList();
+        if (subscriptions == null) {
+            subscriptions = Collections.emptyList();
+        }
         // If there have been no relevant changes to any of the subscriptions, we can leave as is.
         if (hasCorrectMobileControllers(subscriptions)) {
             // Even if the controllers are correct, make sure we have the right no sims state.
@@ -500,10 +503,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private boolean hasCorrectMobileControllers(List<SubscriptionInfo> allSubscriptions) {
-        if (allSubscriptions == null) {
-            // If null then the system doesn't know the subscriptions yet, instead just wait
-            // to update the MobileControllers until it knows the state.
-            return true;
+        if (allSubscriptions.size() != mMobileSignalControllers.size()) {
+            return false;
         }
         for (SubscriptionInfo info : allSubscriptions) {
             if (!mMobileSignalControllers.containsKey(info.getSubscriptionId())) {
@@ -812,7 +813,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     private final OnSubscriptionsChangedListener mSubscriptionListener =
             new OnSubscriptionsChangedListener() {
-        public void onSubscriptionInfoChanged() {
+        @Override
+        public void onSubscriptionsChanged() {
             updateMobileControllers();
         };
     };
