@@ -28,6 +28,11 @@
     <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
     <string name="reboot_progress">Rebooting\u2026</string>
 
+    <!-- Global Actions -->
+    <string name="global_action_screenshot">Screenshot</string>
+    <string name="global_action_search">Search</string>
+    <string name="global_action_voicesearch">Voice Search</string>
+
     <!-- ADB over network notification -->
     <string name="adb_net_active_notification_title">ADB over network enabled</string>
     <!-- ADB over USB and network notification -->
