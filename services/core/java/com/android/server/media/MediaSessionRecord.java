@@ -261,41 +261,59 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (mUseMasterVolume) {
                 // If this device only uses master volume and playback is local
                 // just adjust the master volume and return.
+                boolean isMasterMute = mAudioManager.isMasterMute();
                 if (isMute) {
-                    mAudioManagerInternal.setMasterMuteForUid(!mAudioManager.isMasterMute(),
+                    mAudioManagerInternal.setMasterMuteForUid(!isMasterMute,
                             flags, packageName, mICallback, uid);
                 } else {
                     mAudioManagerInternal.adjustMasterVolumeForUid(direction, flags, packageName,
                             uid);
+                    if (isMasterMute) {
+                        mAudioManagerInternal.setMasterMuteForUid(false,
+                                flags, packageName, mICallback, uid);
+                    }
                 }
                 return;
             }
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
+            boolean isStreamMute = mAudioManager.isStreamMute(stream);
             if (useSuggested) {
                 if (AudioSystem.isStreamActive(stream, 0)) {
                     if (isMute) {
-                        mAudioManager.setStreamMute(stream, !mAudioManager.isStreamMute(stream));
+                        mAudioManager.setStreamMute(stream, !isStreamMute);
                     } else {
                         mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream, direction,
                                 flags, packageName, uid);
+                        if (isStreamMute) {
+                            mAudioManager.setStreamMute(stream, false);
+                        }
                     }
                 } else {
                     flags |= previousFlagPlaySound;
+                    isStreamMute =
+                            mAudioManager.isStreamMute(AudioManager.USE_DEFAULT_STREAM_TYPE);
                     if (isMute) {
                         mAudioManager.setStreamMute(AudioManager.USE_DEFAULT_STREAM_TYPE,
-                                !mAudioManager.isStreamMute(AudioManager.USE_DEFAULT_STREAM_TYPE));
+                                !isStreamMute);
                     } else {
                         mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
                                 AudioManager.USE_DEFAULT_STREAM_TYPE, direction, flags, packageName,
                                 uid);
+                        if (isStreamMute) {
+                            mAudioManager.setStreamMute(AudioManager.USE_DEFAULT_STREAM_TYPE,
+                                    false);
+                        }
                     }
                 }
             } else {
                 if (isMute) {
-                    mAudioManager.setStreamMute(stream, !mAudioManager.isStreamMute(stream));
+                    mAudioManager.setStreamMute(stream, !isStreamMute);
                 } else {
                     mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
                             packageName, uid);
+                    if (isStreamMute) {
+                        mAudioManager.setStreamMute(stream, false);
+                    }
                 }
             }
         } else {
