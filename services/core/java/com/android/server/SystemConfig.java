@@ -25,7 +25,11 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
+
+import libcore.io.IoUtils;
+
 import com.android.internal.util.XmlUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -59,6 +63,10 @@ public class SystemConfig {
     // These are the features this devices supports that were read from the
     // system configuration files.
     final ArrayMap<String, FeatureInfo> mAvailableFeatures = new ArrayMap<>();
+
+    // These are the features which this device doesn't support; the OEM
+    // partition uses these to opt-out of features from the system image.
+    final ArraySet<String> mUnavailableFeatures = new ArraySet<>();
 
     public static final class PermissionEntry {
         public final String name;
@@ -145,9 +153,11 @@ public class SystemConfig {
         }
 
         // Iterate over the files in the directory and scan .xml files
+        File platformFile = null;
         for (File f : libraryDir.listFiles()) {
             // We'll read platform.xml last
             if (f.getPath().endsWith("etc/permissions/platform.xml")) {
+                platformFile = f;
                 continue;
             }
 
@@ -163,10 +173,10 @@ public class SystemConfig {
             readPermissionsFromXml(f, onlyFeatures);
         }
 
-        // Read permissions from .../etc/permissions/platform.xml last so it will take precedence
-        final File permFile = new File(Environment.getRootDirectory(),
-                "etc/permissions/platform.xml");
-        readPermissionsFromXml(permFile, onlyFeatures);
+        // Read platform permissions last so it will take precedence
+        if (platformFile != null) {
+            readPermissionsFromXml(platformFile, onlyFeatures);
+        }
     }
 
     private void readPermissionsFromXml(File permFile, boolean onlyFeatures) {
@@ -298,7 +308,18 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
 
-                } else if ("allow-in-power-save".equals(name)) {
+                } else if ("unavailable-feature".equals(name)) {
+                    String fname = parser.getAttributeValue(null, "name");
+                    if (fname == null) {
+                        Slog.w(TAG, "<unavailable-feature> without name at "
+                                + parser.getPositionDescription());
+                    } else {
+                        mUnavailableFeatures.add(fname);
+                    }
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+
+                } else if ("allow-in-power-save".equals(name) && !onlyFeatures) {
                     String pkgname = parser.getAttributeValue(null, "package");
                     if (pkgname == null) {
                         Slog.w(TAG, "<allow-in-power-save> without package at "
@@ -309,7 +330,7 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
 
-                } else if ("fixed-ime-app".equals(name)) {
+                } else if ("fixed-ime-app".equals(name) && !onlyFeatures) {
                     String pkgname = parser.getAttributeValue(null, "package");
                     if (pkgname == null) {
                         Slog.w(TAG, "<fixed-ime-app> without package at "
@@ -324,13 +345,19 @@ public class SystemConfig {
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
-
             }
-            permReader.close();
         } catch (XmlPullParserException e) {
-            Slog.w(TAG, "Got execption parsing permissions.", e);
+            Slog.w(TAG, "Got exception parsing permissions.", e);
         } catch (IOException e) {
-            Slog.w(TAG, "Got execption parsing permissions.", e);
+            Slog.w(TAG, "Got exception parsing permissions.", e);
+        } finally {
+            IoUtils.closeQuietly(permReader);
+        }
+
+        for (String fname : mUnavailableFeatures) {
+            if (mAvailableFeatures.remove(fname) != null) {
+                Slog.d(TAG, "Removed unavailable feature " + fname);
+            }
         }
     }
 
