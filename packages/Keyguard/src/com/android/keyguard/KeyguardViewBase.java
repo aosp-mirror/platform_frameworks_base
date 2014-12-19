@@ -18,30 +18,20 @@ package com.android.keyguard;
 
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
-import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.media.AudioManager;
-import android.media.IAudioService;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
@@ -57,6 +47,13 @@ import java.io.File;
  * showing.
  */
 public abstract class KeyguardViewBase extends FrameLayout implements SecurityCallback {
+
+    public interface OnDismissAction {
+        /**
+         * @return true if the dismiss should be deferred
+         */
+        boolean onDismiss();
+    }
 
     private AudioManager mAudioManager;
     private TelephonyManager mTelephonyManager = null;
@@ -417,50 +414,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         mViewMediatorCallback = viewMediatorCallback;
         // Update ViewMediator with the current input method requirements
         mViewMediatorCallback.setNeedsInput(mSecurityContainer.needsInput());
-    }
-
-    protected KeyguardActivityLauncher getActivityLauncher() {
-        return mActivityLauncher;
-    }
-
-    private final KeyguardActivityLauncher mActivityLauncher = new KeyguardActivityLauncher() {
-        @Override
-        Context getContext() {
-            return mContext;
-        }
-
-        @Override
-        void setOnDismissAction(OnDismissAction action) {
-            KeyguardViewBase.this.setOnDismissAction(action);
-        }
-
-        @Override
-        LockPatternUtils getLockPatternUtils() {
-            return mLockPatternUtils;
-        }
-
-        @Override
-        void requestDismissKeyguard() {
-            KeyguardViewBase.this.dismiss(false);
-        }
-    };
-
-    public void showAssistant() {
-        final Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-          .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
-
-        if (intent == null) return;
-
-        final ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
-                R.anim.keyguard_action_assist_enter, R.anim.keyguard_action_assist_exit,
-                getHandler(), null);
-
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        mActivityLauncher.launchActivityWithAnimation(intent, false, opts.toBundle(), null, null);
-    }
-
-    public void launchCamera() {
-        mActivityLauncher.launchCamera(getHandler(), null);
     }
 
     public void setLockPatternUtils(LockPatternUtils utils) {
