@@ -24,10 +24,12 @@ TimeLord::TimeLord()
         , mFrameTimeNanos(0) {
 }
 
-void TimeLord::vsyncReceived(nsecs_t vsync) {
+bool TimeLord::vsyncReceived(nsecs_t vsync) {
     if (vsync > mFrameTimeNanos) {
         mFrameTimeNanos = vsync;
+        return true;
     }
+    return false;
 }
 
 nsecs_t TimeLord::computeFrameTimeMs() {
