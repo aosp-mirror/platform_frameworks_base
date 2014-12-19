@@ -620,7 +620,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             final int recordCount = mRecords.size();
             for (int i = 0; i < recordCount; i++) {
                 if (mRecords.get(i).binder == binder) {
-                    if (VDBG) log("remove: binder=" + binder);
+                    if (DBG) {
+                        Record r = mRecords.get(i);
+                        log("remove: binder=" + binder + "r.pkgForDebug" + r.pkgForDebug
+                                + "r.callback" + r.callback);
+                    }
                     mRecords.remove(i);
                     return;
                 }
@@ -954,7 +958,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 + " state=" + state + " isDataConnectivityPossible=" + isDataConnectivityPossible
                 + " reason='" + reason
                 + "' apn='" + apn + "' apnType=" + apnType + " networkType=" + networkType
-                + " mRecords.size()=" + mRecords.size() + " mRecords=" + mRecords);
+                + " mRecords.size()=" + mRecords.size());
         }
         synchronized (mRecords) {
             int phoneId = SubscriptionManager.getPhoneId(subId);
@@ -1558,11 +1562,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     boolean idMatch(int rSubId, int subId, int phoneId) {
+
+        if(subId < 0) {
+            // Invalid case, we need compare phoneId with default one.
+            return (mDefaultPhoneId == phoneId);
+        }
         if(rSubId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID) {
-            if(subId < 0) {
-                // Invalid case, we need compare phoneId with default one.
-                return (mDefaultPhoneId == phoneId);
-            }
             return (subId == mDefaultSubId);
         } else {
             return (rSubId == subId);
