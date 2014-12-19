@@ -3248,7 +3248,10 @@ public class AudioService extends IAudioService.Stub {
 
         TelecomManager telecomManager =
                 (TelecomManager) mContext.getSystemService(Context.TELECOM_SERVICE);
+
+        final long ident = Binder.clearCallingIdentity();
         IsInCall = telecomManager.isInCall();
+        Binder.restoreCallingIdentity(ident);
 
         return (IsInCall || getMode() == AudioManager.MODE_IN_COMMUNICATION);
     }
