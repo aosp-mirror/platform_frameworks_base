@@ -241,6 +241,7 @@ class DisplayContent {
                 mTouchExcludeRegion.op(mTmpRect, Region.Op.DIFFERENCE);
             }
         }
+        mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
     }
 
     void switchUserStacks(int newUserId) {
