@@ -38,7 +38,6 @@ public class KeyguardSecurityModel {
         Pattern, // Unlock by drawing a pattern.
         Password, // Unlock by entering an alphanumeric password
         PIN, // Strictly numeric password
-        Account, // Unlock by entering an account's login and password.
         SimPin, // Unlock by entering a sim pin.
         SimPuk // Unlock by entering a sim puk
     }
@@ -82,10 +81,8 @@ public class KeyguardSecurityModel {
 
                 case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
                 case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
-                    if (mLockPatternUtils.isLockPatternEnabled()) {
-                        mode = mLockPatternUtils.isPermanentlyLocked() ?
-                            SecurityMode.Account : SecurityMode.Pattern;
-                    }
+                    mode = mLockPatternUtils.isLockPatternEnabled() ?
+                            SecurityMode.Pattern : SecurityMode.None;
                     break;
 
                 default:
@@ -114,10 +111,6 @@ public class KeyguardSecurityModel {
      * @return backup method or current security mode
      */
     SecurityMode getBackupSecurityMode(SecurityMode mode) {
-        switch(mode) {
-            case Pattern:
-                return SecurityMode.Account;
-        }
         return mode; // no backup, return current security mode
     }
 }
