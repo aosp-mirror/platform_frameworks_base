@@ -55,6 +55,13 @@ public class NetworkAgentInfo {
     // fail.
     public boolean everValidated;
 
+    // The result of the last validation attempt on this network (true if validated, false if not).
+    // This bit exists only because we never unvalidate a network once it's been validated, and that
+    // is because the network scoring and revalidation code does not (may not?) deal properly with
+    // networks becoming unvalidated.
+    // TODO: Fix the network scoring code, remove this, and rename everValidated to validated.
+    public boolean lastValidated;
+
     // This represents the last score received from the NetworkAgent.
     private int currentScore;
     // Penalty applied to scores of Networks that have not been validated.
@@ -90,6 +97,7 @@ public class NetworkAgentInfo {
         networkMisc = misc;
         created = false;
         everValidated = false;
+        lastValidated = false;
     }
 
     public void addRequest(NetworkRequest networkRequest) {
@@ -142,8 +150,9 @@ public class NetworkAgentInfo {
         return "NetworkAgentInfo{ ni{" + networkInfo + "}  network{" +
                 network + "}  lp{" +
                 linkProperties + "}  nc{" +
-                networkCapabilities + "}  Score{" + getCurrentScore() + "} " +
-                "everValidated{" + everValidated + "} created{" + created + "} " +
+                networkCapabilities + "}  Score{" + getCurrentScore() + "}  " +
+                "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  " +
+                "created{" + created + "}  " +
                 "explicitlySelected{" + networkMisc.explicitlySelected + "} }";
     }
 
