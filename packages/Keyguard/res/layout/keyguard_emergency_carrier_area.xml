@@ -46,13 +46,11 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginTop="@dimen/eca_overlap"
-        android:drawableLeft="@drawable/lockscreen_emergency_button"
         android:text="@string/kg_emergency_call_label"
         style="?android:attr/buttonBarButtonStyle"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/kg_status_line_font_size"
         android:textColor="?android:attr/textColorSecondary"
-        android:drawablePadding="8dip"
         android:textAllCaps="@bool/kg_use_all_caps" />
 
 </com.android.keyguard.EmergencyCarrierArea>
