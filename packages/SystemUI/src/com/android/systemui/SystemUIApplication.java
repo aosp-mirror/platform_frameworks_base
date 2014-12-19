@@ -41,7 +41,7 @@ public class SystemUIApplication extends Application {
      */
     private final Class<?>[] SERVICES = new Class[] {
             com.android.systemui.keyguard.KeyguardViewMediator.class,
-            com.android.systemui.recent.Recents.class,
+            com.android.systemui.recents.Recents.class,
             com.android.systemui.volume.VolumeUI.class,
             com.android.systemui.statusbar.SystemBars.class,
             com.android.systemui.usb.StorageNotification.class,

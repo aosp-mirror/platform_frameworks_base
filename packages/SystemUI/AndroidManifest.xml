@@ -173,18 +173,6 @@
                 android:excludeFromRecents="true">
         </activity>
 
-        <activity android:name=".recent.RecentsActivity"
-                android:label="@string/accessibility_desc_recent_apps"
-                android:theme="@style/RecentsStyle"
-                android:excludeFromRecents="true"
-                android:launchMode="singleInstance"
-                android:resumeWhilePausing="true"
-                android:exported="true">
-          <intent-filter>
-            <action android:name="com.android.systemui.TOGGLE_RECENTS" />
-          </intent-filter>
-        </activity>
-
         <receiver
             android:name=".recent.RecentsPreloadReceiver"
             android:exported="false">

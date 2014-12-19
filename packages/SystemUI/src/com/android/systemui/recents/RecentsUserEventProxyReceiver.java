@@ -19,8 +19,6 @@ package com.android.systemui.recents;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import com.android.systemui.recent.Recents;
-
 
 /**
  * A proxy for Recents events which happens strictly for non-owner users.
@@ -39,28 +37,27 @@ public class RecentsUserEventProxyReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        AlternateRecentsComponent recents = Recents.getRecentsComponent(
-                context.getApplicationContext(), true);
+        Recents recents = Recents.getInstanceAndStartIfNeeded(context);
         switch (intent.getAction()) {
             case ACTION_PROXY_SHOW_RECENTS_TO_USER: {
                 boolean triggeredFromAltTab = intent.getBooleanExtra(
-                        AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
-                recents.showRecents(triggeredFromAltTab);
+                        Recents.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
+                recents.showRecentsInternal(triggeredFromAltTab);
                 break;
             }
             case ACTION_PROXY_HIDE_RECENTS_TO_USER: {
                 boolean triggeredFromAltTab = intent.getBooleanExtra(
-                        AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
+                        Recents.EXTRA_TRIGGERED_FROM_ALT_TAB, false);
                 boolean triggeredFromHome = intent.getBooleanExtra(
-                        AlternateRecentsComponent.EXTRA_TRIGGERED_FROM_HOME_KEY, false);
-                recents.hideRecents(triggeredFromAltTab, triggeredFromHome);
+                        Recents.EXTRA_TRIGGERED_FROM_HOME_KEY, false);
+                recents.hideRecentsInternal(triggeredFromAltTab, triggeredFromHome);
                 break;
             }
             case ACTION_PROXY_TOGGLE_RECENTS_TO_USER:
-                recents.toggleRecents();
+                recents.toggleRecentsInternal();
                 break;
             case ACTION_PROXY_PRELOAD_RECENTS_TO_USER:
-                recents.preloadRecents();
+                recents.preloadRecentsInternal();
                 break;
             case ACTION_PROXY_CONFIG_CHANGE_TO_USER:
                 recents.configurationChanged();

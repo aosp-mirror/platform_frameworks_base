@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recent;
+package com.android.systemui.recents;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
@@ -41,7 +41,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
-import com.android.systemui.recents.model.RecentsTaskLoader;
 
 import java.util.ArrayList;
 
