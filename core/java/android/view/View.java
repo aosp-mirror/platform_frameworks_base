@@ -439,7 +439,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </p>
  *
  * <p>
- * To intiate a layout, call {@link #requestLayout}. This method is typically
+ * To initiate a layout, call {@link #requestLayout}. This method is typically
  * called by a view on itself when it believes that is can no longer fit within
  * its current bounds.
  * </p>
@@ -1977,7 +1977,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int LAYOUT_DIRECTION_RESOLVED_DEFAULT = LAYOUT_DIRECTION_LTR;
 
     /**
-     * Text direction is inherited thru {@link ViewGroup}
+     * Text direction is inherited through {@link ViewGroup}
      */
     public static final int TEXT_DIRECTION_INHERIT = 0;
 
@@ -2545,7 +2545,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Flag for {@link #setSystemUiVisibility(int)}: View would like its window
-     * to be layed out as if it has requested
+     * to be laid out as if it has requested
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, even if it currently hasn't.  This
      * allows it to avoid artifacts when switching in and out of that mode, at
      * the expense that some of its user interface may be covered by screen
@@ -2557,7 +2557,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Flag for {@link #setSystemUiVisibility(int)}: View would like its window
-     * to be layed out as if it has requested
+     * to be laid out as if it has requested
      * {@link #SYSTEM_UI_FLAG_FULLSCREEN}, even if it currently hasn't.  This
      * allows it to avoid artifacts when switching in and out of that mode, at
      * the expense that some of its user interface may be covered by screen
@@ -5123,7 +5123,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns true if this view has focus iteself, or is the ancestor of the
+     * Returns true if this view has focus itself, or is the ancestor of the
      * view that has focus.
      *
      * @return True if this view has or contains focus, false otherwise.
@@ -5220,7 +5220,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * populate the text content of the event source including its descendants,
      * and last calls
      * {@link ViewParent#requestSendAccessibilityEvent(View, AccessibilityEvent)}
-     * on its parent to resuest sending of the event to interested parties.
+     * on its parent to request sending of the event to interested parties.
      * <p>
      * If an {@link AccessibilityDelegate} has been specified via calling
      * {@link #setAccessibilityDelegate(AccessibilityDelegate)} its
@@ -7529,8 +7529,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * including this view if it is focusable itself) to views. This method
      * adds all focusable views regardless if we are in touch mode or
      * only views focusable in touch mode if we are in touch mode or
-     * only views that can take accessibility focus if accessibility is enabeld
-     * depending on the focusable mode paramater.
+     * only views that can take accessibility focus if accessibility is enabled
+     * depending on the focusable mode parameter.
      *
      * @param views Focusable views found so far or null if all we are interested is
      *        the number of focusables.
@@ -7816,7 +7816,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Call this to try to give focus to a specific view or to one of its descendants. This is a
-     * special variant of {@link #requestFocus() } that will allow views that are not focuable in
+     * special variant of {@link #requestFocus() } that will allow views that are not focusable in
      * touch mode to request focus when they are touched.
      *
      * @return Whether this view or one of its descendants actually took focus.
@@ -8947,7 +8947,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Called when the current configuration of the resources being used
      * by the application have changed.  You can use this to decide when
      * to reload resources that can changed based on orientation and other
-     * configuration characterstics.  You only need to use this if you are
+     * configuration characteristics.  You only need to use this if you are
      * not relying on the normal {@link android.app.Activity} mechanism of
      * recreating the activity instance upon a configuration change.
      *
@@ -10616,7 +10616,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Note that if the view is backed by a
      * {@link #setLayerType(int, android.graphics.Paint) layer} and is associated with a
      * {@link #setLayerPaint(android.graphics.Paint) layer paint}, setting an alpha value less than
-     * 1.0 will supercede the alpha of the layer paint.</p>
+     * 1.0 will supersede the alpha of the layer paint.</p>
      *
      * @param alpha The opacity of the view.
      *
@@ -11664,7 +11664,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </p>
      *
      * <p>
-     * This method should be invoked everytime a subclass directly updates the
+     * This method should be invoked every time a subclass directly updates the
      * scroll parameters.
      * </p>
      *
@@ -11703,7 +11703,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </p>
      *
      * <p>
-     * This method should be invoked everytime a subclass directly updates the
+     * This method should be invoked every time a subclass directly updates the
      * scroll parameters.
      * </p>
      *
@@ -11711,7 +11711,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *        should start; when the delay is 0, the animation starts
      *        immediately
      *
-     * @param invalidate Wheter this method should call invalidate
+     * @param invalidate Whether this method should call invalidate
      *
      * @return true if the animation is played, false otherwise
      *
@@ -12616,7 +12616,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Define whether scrollbars will fade when the view is not scrolling.
      *
-     * @param fadeScrollbars wheter to enable fading
+     * @param fadeScrollbars whether to enable fading
      *
      * @attr ref android.R.styleable#View_fadeScrollbars
      */
@@ -13468,7 +13468,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * after onDetachedFromWindow().
      *
      * If you override this you *MUST* call super.onDetachedFromWindowInternal()!
-     * The super method should be called at the end of the overriden method to ensure
+     * The super method should be called at the end of the overridden method to ensure
      * subclasses are destroyed first
      *
      * @hide
@@ -13869,7 +13869,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Note: if this view's parent addStateFromChildren property is enabled and this
      * property is enabled, an exception will be thrown.</p>
      *
-     * <p>Note: if the child view uses and updates additionnal states which are unknown to the
+     * <p>Note: if the child view uses and updates additional states which are unknown to the
      * parent, these states should not be affected by this method.</p>
      *
      * @param enabled True to enable duplication of the parent's drawable state, false
@@ -13910,7 +13910,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ul>
      *
      * <p>If this view has an alpha value set to < 1.0 by calling
-     * {@link #setAlpha(float)}, the alpha value of the layer's paint is superceded
+     * {@link #setAlpha(float)}, the alpha value of the layer's paint is superseded
      * by this view's alpha value.</p>
      *
      * <p>Refer to the documentation of {@link #LAYER_TYPE_NONE},
@@ -13978,7 +13978,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </ul>
      *
      * <p>If this view has an alpha value set to < 1.0 by calling {@link #setAlpha(float)}, the
-     * alpha value of the layer's paint is superceded by this view's alpha value.</p>
+     * alpha value of the layer's paint is superseded by this view's alpha value.</p>
      *
      * @param paint The paint used to compose the layer. This argument is optional
      *        and can be null. It is ignored when the layer type is
@@ -16723,8 +16723,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Return if the padding as been set thru relative values
-     * {@link #setPaddingRelative(int, int, int, int)} or thru
+     * Return if the padding has been set through relative values
+     * {@link #setPaddingRelative(int, int, int, int)} or through
      * @attr ref android.R.styleable#View_paddingStart or
      * @attr ref android.R.styleable#View_paddingEnd
      *
@@ -17646,7 +17646,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>
      * Measure the view and its content to determine the measured width and the
      * measured height. This method is invoked by {@link #measure(int, int)} and
-     * should be overriden by subclasses to provide accurate and efficient
+     * should be overridden by subclasses to provide accurate and efficient
      * measurement of their contents.
      * </p>
      *
@@ -18252,7 +18252,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * appearance as the given View. The default also positions the center of the drag shadow
      * directly under the touch point. If no View is provided (the constructor with no parameters
      * is used), and {@link #onProvideShadowMetrics(Point,Point) onProvideShadowMetrics()} and
-     * {@link #onDrawShadow(Canvas) onDrawShadow()} are not overriden, then the
+     * {@link #onDrawShadow(Canvas) onDrawShadow()} are not overridden, then the
      * default is an invisible drag shadow.
      * <p>
      * You are not required to use the View you provide to the constructor as the basis of the

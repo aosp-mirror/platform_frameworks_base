@@ -2206,7 +2206,7 @@
             <enum name="outsideInset" value="0x03000000" />
         </attr>
 
-        <!-- Set this if the view will serve as a scrolling container, meaing
+        <!-- Set this if the view will serve as a scrolling container, meaning
              that it can be resized to shrink its overall window so that there
              will be space for an input method.  If not set, the default
              value will be true if "scrollbars" has the vertical scrollbar

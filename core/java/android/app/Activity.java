@@ -362,7 +362,7 @@ import java.util.HashMap;
  *
  * <p>Note the "Killable" column in the above table -- for those methods that
  * are marked as being killable, after that method returns the process hosting the
- * activity may killed by the system <em>at any time</em> without another line
+ * activity may be killed by the system <em>at any time</em> without another line
  * of its code being executed.  Because of this, you should use the
  * {@link #onPause} method to write any persistent data (such as user edits)
  * to storage.  In addition, the method
