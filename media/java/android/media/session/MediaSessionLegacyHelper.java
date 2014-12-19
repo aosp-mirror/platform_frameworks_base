@@ -69,12 +69,9 @@ public class MediaSessionLegacyHelper {
     }
 
     public static MediaSessionLegacyHelper getHelper(Context context) {
-        if (DEBUG) {
-            Log.d(TAG, "Attempting to get helper with context " + context);
-        }
         synchronized (sLock) {
             if (sInstance == null) {
-                sInstance = new MediaSessionLegacyHelper(context);
+                sInstance = new MediaSessionLegacyHelper(context.getApplicationContext());
             }
         }
         return sInstance;
