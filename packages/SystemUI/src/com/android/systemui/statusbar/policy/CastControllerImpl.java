@@ -193,7 +193,7 @@ public class CastControllerImpl implements CastController {
 
     @Override
     public void startCasting(CastDevice device) {
-        if (device == null || device.tag == null) return;
+        if (device == null || !(device.tag instanceof RouteInfo)) return;
         final RouteInfo route = (RouteInfo) device.tag;
         if (DEBUG) Log.d(TAG, "startCasting: " + routeToString(route));
         mMediaRouter.selectRoute(ROUTE_TYPE_REMOTE_DISPLAY, route);
