@@ -1,0 +1,134 @@
+page.title=再生中カードを表示する
+page.tags=tv, mediasession
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>学習の目的</h2>
+  <ol>
+    <li><a href="#session">Media Session を起動する</a></li>
+    <li><a href="#card">再生中カードを表示する</a></li>
+    <li><a href="#state">再生ステータスをアップデートする</a></li>
+    <li><a href="#respond">ユーザー アクションを処理する</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>TV アプリでは、ユーザーが他のアプリを使用中にバックグラウンドで音楽やその他のメディアを再生できる場合があります。このタイプのアプリの場合、アプリに戻って音楽を一時停止したり、新しい曲に切り替えたりする方法をユーザーに提供する必要があります。Android のフレームワークでは、ホーム スクリーン上の推奨する行に [<em>再生中</em>] カードを表示することで、 TV アプリで上記の操作を行えるようになります。</p>
+
+<p>[再生中] カードは、アクティブなメディア セッションのホーム スクリーンの推奨する行に表示されるシステム アーティファクトです。アルバム アート、タイトル、アプリのアイコンなど、メディアのメタデータが含まれます。ユーザーが選択すると、システムはセッション中のアプリを開きます。</p>
+
+<p>このレッスンでは、{@link android.media.session.MediaSession} クラスを使用して [再生中] カードを実装する方法を説明します。</p>
+
+<h2 id="session">Media Session を起動する</h2>
+
+<p>再生アプリは<a href="{@docRoot}guide/components/activities">アクティビティ</a>か<a href="{@docRoot}guide/components/services">サービス</a>として実行できます。サービスは、サービスを開始したアクティビティが破棄された後もメディアの再生を継続できるため、バックグラウンド再生時に必要となります。ここでは、メディア再生アプリが {@link android.service.media.MediaBrowserService} で実行されているものとします。</p>
+
+<p>ご使用中のサービスの{@link android.service.media.MediaBrowserService#onCreate() onCreate()}メソッドで、{@link android.media.session.MediaSession#MediaSession(android.content.Context, java.lang.String) MediaSession} を新規作成し、メディア アプリへの適切なコールバックとフラグを設定して、{@link android.service.media.MediaBrowserService} のセッション トークンを設定します。</p>
+
+<pre>
+mSession = new MediaSession(this, "MusicService");
+mSession.setCallback(new MediaSessionCallback());
+mSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS |
+        MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+
+// for the MediaBrowserService
+setSessionToken(mSession.getSessionToken());
+</pre>
+
+<p class="note"><strong>注意:</strong>[再生中] カードは、{@link android.media.session.MediaSession#FLAG_HANDLES_TRANSPORT_CONTROLS} フラグが設定されたメディア セッションでのみ表示されます。</p>
+
+<h2 id="card">再生中カードを表示する</h2>
+
+<p>[再生中] カードは、セッションがシステム内で最も優先度の高い場合に、{@link android.media.session.MediaSession#setActive(boolean) setActive(true)} を呼び出した後に表示されます。また、<a href="{@docRoot}training/managing-audio/audio-focus">オーディオ フォーカスを管理する</a>で説明したように、アプリからオーディオ フォーカスをリクエストする必要があります。</p>
+
+<pre>
+private void handlePlayRequest() {
+
+    tryToGetAudioFocus();
+
+    if (!mSession.isActive()) {
+        mSession.setActive(true);
+    }
+...
+</pre>
+
+<p>{@link android.media.session.MediaSession#setActive(boolean) setActive(false)} の呼び出し時や別のアプリがメディアの再生を開始した場合に、カードはホーム スクリーンから削除されます。再生が一時停止された後、通常は 5～30 分間、カードを表示したままにして、その後カードをホーム スクリーンから削除することもできiます。</p>
+
+<h2 id="state">再生ステータスをアップデートする</h2>
+
+<p>どのメディア アプリの場合でも、次の例のように現在のメタデータを表示するよう、{@link android.media.session.MediaSession} で再生ステータスをアップデートするようにします。</p>
+
+<pre>
+private void updatePlaybackState() {
+    long position = PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+    if (mMediaPlayer != null &amp;&amp; mMediaPlayer.isPlaying()) {
+        position = mMediaPlayer.getCurrentPosition();
+    }
+    PlaybackState.Builder stateBuilder = new PlaybackState.Builder()
+            .setActions(getAvailableActions());
+    stateBuilder.setState(mState, position, 1.0f);
+    mSession.setPlaybackState(stateBuilder.build());
+}
+private long getAvailableActions() {
+    long actions = PlaybackState.ACTION_PLAY |
+            PlaybackState.ACTION_PLAY_FROM_MEDIA_ID |
+            PlaybackState.ACTION_PLAY_FROM_SEARCH;
+    if (mPlayingQueue == null || mPlayingQueue.isEmpty()) {
+        return actions;
+    }
+    if (mState == PlaybackState.STATE_PLAYING) {
+        actions |= PlaybackState.ACTION_PAUSE;
+    }
+    if (mCurrentIndexOnQueue &gt; 0) {
+        actions |= PlaybackState.ACTION_SKIP_TO_PREVIOUS;
+    }
+    if (mCurrentIndexOnQueue &lt; mPlayingQueue.size() - 1) {
+        actions |= PlaybackState.ACTION_SKIP_TO_NEXT;
+    }
+    return actions;
+}
+</pre>
+
+<h2 id="metadata">メディアのメタデータを表示する</h2>
+
+<p>トラックが現在再生中の場合は、{@link android.media.session.MediaSession#setMetadata(android.media.MediaMetadata) setMetadata()} メソッドを使用して{@link android.media.MediaMetadata} を設定します。メディア セッション オブジェクトのこのメソッドを使用すると、タイトル、サブタイトル、さまざまなアイコンなど、トラックに関する情報を [再生中] カードに表示することができます。次の例は、トラック データがカスタムデータ クラスの {@code MediaData} に格納されている場合です。</p>
+
+<pre>
+private void updateMetadata(MediaData myData) {
+    MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder();
+    // To provide most control over how an item is displayed set the
+    // display fields in the metadata
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE,
+            myData.displayTitle);
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE,
+            myData.displaySubtitle);
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
+            myData.artUri);
+    // And at minimum the title and artist for legacy support
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_TITLE,
+            myData.title);
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_ARTIST,
+            myData.artist);
+    // A small bitmap for the artwork is also recommended
+    metadataBuilder.putString(MediaMetadata.METADATA_KEY_ART,
+            myData.artBitmap);
+    // Add any other fields you have for your data as well
+    mSession.setMetadata(metadataBuilder.build());
+}
+</pre>
+
+<h2 id="respond">ユーザー アクションを処理する</h2>
+
+<p>ユーザーが [再生中] カード選択すると、システムはセッション中のアプリを開きます。TV アプリが {@link android.app.PendingIntent} を{@link android.media.session.MediaSession#setSessionActivity(android.app.PendingIntent) setSessionActivity()}に渡した場合は、指定したアクティビティをシステムが次のように開始します。それ以外の場合は、デフォルトのシステム インテントが開きます。指定対象のアクティビティでは、ユーザーに再生の一時停止または停止（再生コントロール）機能を提供する必要があります。</p>
+
+<pre>
+Intent intent = new Intent(mContext, MyActivity.class);
+    PendingIntent pi = PendingIntent.getActivity(context, 99 /*request code*/,
+            intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    mSession.setSessionActivity(pi);
+</pre>

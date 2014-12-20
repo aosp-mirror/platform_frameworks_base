@@ -1,0 +1,210 @@
+page.title=詳細ビューをビルドする
+page.tags=tv, detailsfragment
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>学習の目的</h2>
+  <ol>
+    <li><a href="#details-presenter">詳細プレゼンターをビルドする</a></li>
+    <li><a href="#details-fragment">詳細フラグメントを拡張する</a>
+    <li><a href="#activity">詳細アクティビティを作成する</a></li>
+    <li><a href="#item-listener">クリックされたアイテムのリスナを定義する</a></li>
+  </ol>
+</div>
+</div>
+
+<p>
+  <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback サポート ライブラリ</a> が提供するメディア ブラウジング インターフェース クラスには、説明やレビューなどのメディア アイテムに関する追加情報を表示したり、アイテムの購入やコンテンツの再生など、アイテムに対するアクションを取ったりするためのクラスが含まれます。
+</p>
+
+<p>
+  このレッスンでは、メディア アイテムの詳細に関するプレゼンター クラスを作成したり、{@link android.support.v17.leanback.app.DetailsFragment} クラスを拡張して、ユーザーがメディア アイテムを選択した場合に表示する詳細ビューを実装したりする方法を説明します。
+</p>
+
+<p class="note">
+  <strong>注意:</strong>次の実装例では、追加的なアクティビティを使用して {@link android.support.v17.leanback.app.DetailsFragment} を含めています。ただし、フラグメント トランザクションを使用すると、現在の {@link android.support.v17.leanback.app.BrowseFragment} を<em>同じ</em>アクティビティにある {@link android.support.v17.leanback.app.DetailsFragment} で置き換えることにより、2 つ目のアクティビティの作成を回避できます。フラグメント トランザクションの使用については、<a href="{@docRoot}training/basics/fragments/fragment-ui.html#Replace">フラグメントを使用したダイナミックな UI のビルド</a>を参照してください。
+</p>
+
+
+<h2 id="details-presenter">詳細プレゼンターをビルドする</h2>
+
+<p>
+  Leanback ライブラリが提供するメディア ブラウジングのフレームワークでは、プレゼンター オブジェクトを使用して、メディア アイテムの詳細を含むスクリーン上のデータ表示を制御します。このメディア アイテムの詳細に関するプレゼンターのほぼ完全な実装を目的に、フレームワークでは{@link android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter} クラスを提供しています。これにより、次のコード サンプルのように、{@link android.support.v17.leanback.widget.AbstractDetailsDescriptionPresenter#onBindDescription onBindDescription()} メソッドを実装して、ビュー フィールドをデータ オブジェクトにバインドするだけでよくなります。
+</p>
+
+<pre>
+public class DetailsDescriptionPresenter
+        extends AbstractDetailsDescriptionPresenter {
+
+    &#64;Override
+    protected void onBindDescription(ViewHolder viewHolder, Object itemData) {
+        MyMediaItemDetails details = (MyMediaItemDetails) itemData;
+        // In a production app, the itemData object contains the information
+        // needed to display details for the media item:
+        // viewHolder.getTitle().setText(details.getShortTitle());
+
+        // Here we provide static data for testing purposes:
+        viewHolder.getTitle().setText(itemData.toString());
+        viewHolder.getSubtitle().setText("2014   Drama   TV-14");
+        viewHolder.getBody().setText("Lorem ipsum dolor sit amet, consectetur "
+                + "adipisicing elit, sed do eiusmod tempor incididunt ut labore "
+                + " et dolore magna aliqua. Ut enim ad minim veniam, quis "
+                + "nostrud exercitation ullamco laboris nisi ut aliquip ex ea "
+                + "commodo consequat.");
+    }
+}
+</pre>
+
+
+<h2 id="details-fragment">詳細フラグメントを拡張する</h2>
+
+<p>
+  メディア アイテムの詳細を表示するために {@link android.support.v17.leanback.app.DetailsFragment} クラスを使用する場合、そのクラスを拡張すると、メディア アイテムのプレビュー画像やアクションなどの追加コンテンツを提供できます。関連するメディア アイテムのリストといった追加コンテンツも提供できます。
+</p>
+
+<p>
+  次のコード例では、前のセクションで説明したプレゼンター クラスを使用して、表示中のメディア アイテムのプレビュー画像やアクションを追加する方法を示しています。この例では、詳細リストの下に表示される関連するメディア アイテムの行も追加しています。
+</p>
+
+<pre>
+public class MediaItemDetailsFragment extends DetailsFragment {
+    private static final String TAG = "MediaItemDetailsFragment";
+    private ArrayObjectAdapter mRowsAdapter;
+
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG, "onCreate");
+        super.onCreate(savedInstanceState);
+
+        buildDetails();
+    }
+
+    private void buildDetails() {
+        ClassPresenterSelector selector = new ClassPresenterSelector();
+        // Attach your media item details presenter to the row presenter:
+        DetailsOverviewRowPresenter rowPresenter =
+            new DetailsOverviewRowPresenter(new DetailsDescriptionPresenter());
+
+        selector.addClassPresenter(DetailsOverviewRow.class, rowPresenter);
+        selector.addClassPresenter(ListRow.class,
+                new ListRowPresenter());
+        mRowsAdapter = new ArrayObjectAdapter(selector);
+
+        Resources res = getActivity().getResources();
+        DetailsOverviewRow detailsOverview = new DetailsOverviewRow(
+                "Media Item Details");
+
+        // Add images and action buttons to the details view
+        detailsOverview.setImageDrawable(res.getDrawable(R.drawable.jelly_beans));
+        detailsOverview.addAction(new Action(1, "Buy $9.99"));
+        detailsOverview.addAction(new Action(2, "Rent $2.99"));
+        mRowsAdapter.add(detailsOverview);
+
+        // Add a Related items row
+        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(
+                new StringPresenter());
+        listRowAdapter.add("Media Item 1");
+        listRowAdapter.add("Media Item 2");
+        listRowAdapter.add("Media Item 3");
+        HeaderItem header = new HeaderItem(0, "Related Items", null);
+        mRowsAdapter.add(new ListRow(header, listRowAdapter));
+
+        setAdapter(mRowsAdapter);
+    }
+}
+</pre>
+
+
+<h3 id="activity">詳細アクティビティを作成する</h3>
+
+<p>
+  {@link android.support.v17.leanback.app.DetailsFragment} のようなフラグメントを表示に使用するには、これをアクティビティ内に含める必要があります。ブラウズ アクティビティとは別に、詳細ビューのアクティビティを作成すると、{@link android.content.Intent} を使用して詳細ビューを呼び出すことができます。このセクションでは、メディア アイテムの詳細ビューの実装を含んだアクティビティのビルド方法を説明します。
+</p>
+
+<p>
+  次のように {@link android.support.v17.leanback.app.DetailsFragment} の実装を参照するレイアウトをビルドして、詳細アクティビティの作成を開始します。
+</p>
+
+<pre>
+&lt;!-- file: res/layout/details.xml --&gt;
+
+&lt;fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    <strong>android:name="com.example.android.mediabrowser.MediaItemDetailsFragment"</strong>
+    android:id="&#64;+id/details_fragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+/&gt;
+</pre>
+
+<p>
+  次に、前述のコード例のレイアウトを使用して、アクティビティ クラスを作成します。
+</p>
+
+<pre>
+public class DetailsActivity extends Activity
+{
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        <strong>setContentView(R.layout.details);</strong>
+    }
+}
+</pre>
+
+<p>
+  最後に、この新しいアクティビティをマニフェストに追加します。次のように、ユーザー インターフェースがメディア ブラウズ アクティビティと一致するように、Leanback テーマを適用します。
+</p>
+
+<pre>
+&lt;application&gt;
+  ...
+
+  &lt;activity android:name=".DetailsActivity"
+    android:exported="true"
+    <strong>android:theme="@style/Theme.Leanback"/&gt;</strong>
+
+&lt;/application&gt;
+</pre>
+
+
+<h3 id="item-listener">クリックされたアイテムのリスナを定義する</h3>
+
+<p>
+  {@link android.support.v17.leanback.app.DetailsFragment} の実装後、メインのメディア ブラウジング ビューを編集して、ユーザーがメディア アイテムをクリックしたときに詳細ビューに移動するようにします。この動作を有効にするには、 {@link android.support.v17.leanback.widget.OnItemViewClickedListener} オブジェクトを、アイテム詳細アクティビティを起動するインテントの起動元の {@link android.support.v17.leanback.app.BrowseFragment} に追加します。
+</p>
+
+<p>
+  次の例では、ユーザーがメインのメディア ブラウジング アクティビティのメディア アイテムをクリックしたときに、詳細ビューを起動するリスナの実装方法を示しています。
+</p>
+
+<pre>
+public class BrowseMediaActivity extends Activity {
+    ...
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+
+        // create the media item rows
+        buildRowsAdapter();
+
+        // add a listener for selected items
+        mBrowseFragment.OnItemViewClickedListener(
+            new OnItemViewClickedListener() {
+                &#64;Override
+                public void onItemClicked(Object item, Row row) {
+                    System.out.println("Media Item clicked: " + item.toString());
+                    Intent intent = new Intent(BrowseMediaActivity.this,
+                            DetailsActivity.class);
+                    // pass the item information
+                    intent.getExtras().putLong("id", item.getId());
+                    startActivity(intent);
+                }
+            });
+    }
+}
+</pre>
