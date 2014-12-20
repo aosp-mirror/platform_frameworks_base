@@ -4953,6 +4953,18 @@ public final class Settings {
                 RING_HOME_BUTTON_BEHAVIOR_DO_NOTHING;
 
         /**
+         * Swap volume buttons when the screen is rotated
+         * 0 - Disabled
+         * 1 - Enabled (screen is rotated by 90 or 180 degrees: phone, hybrid)
+         * 2 - Enabled (screen is rotated by 180 or 270 degrees: tablet)
+         */
+        public static final String SWAP_VOLUME_KEYS_ON_ROTATION = "swap_volume_keys_on_rotation";
+
+        /** @hide */
+        public static final Validator SWAP_VOLUME_KEYS_ON_ROTATION_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5185,6 +5197,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(VOLBTN_MUSIC_CONTROLS);
             PRIVATE_SETTINGS.add(VOLUME_ANSWER_CALL);
             PRIVATE_SETTINGS.add(RING_HOME_BUTTON_BEHAVIOR);
+            PRIVATE_SETTINGS.add(SWAP_VOLUME_KEYS_ON_ROTATION);
         }
 
         /**
@@ -5320,6 +5333,7 @@ public final class Settings {
             VALIDATORS.put(VOLBTN_MUSIC_CONTROLS, VOLBTN_MUSIC_CONTROLS_VALIDATOR);
             VALIDATORS.put(VOLUME_ANSWER_CALL, VOLUME_ANSWER_CALL_VALIDATOR);
             VALIDATORS.put(RING_HOME_BUTTON_BEHAVIOR, RING_HOME_BUTTON_BEHAVIOR_VALIDATOR);
+            VALIDATORS.put(SWAP_VOLUME_KEYS_ON_ROTATION, SWAP_VOLUME_KEYS_ON_ROTATION_VALIDATOR);
         }
 
         /**
