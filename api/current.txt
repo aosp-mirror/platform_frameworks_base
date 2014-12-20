@@ -31340,6 +31340,13 @@ package android.transition {
     method public void captureStartValues(android.transition.TransitionValues);
   }
 
+  public class ChangeScroll extends android.transition.Transition {
+    ctor public ChangeScroll();
+    ctor public ChangeScroll(android.content.Context, android.util.AttributeSet);
+    method public void captureEndValues(android.transition.TransitionValues);
+    method public void captureStartValues(android.transition.TransitionValues);
+  }
+
   public class ChangeTransform extends android.transition.Transition {
     ctor public ChangeTransform();
     ctor public ChangeTransform(android.content.Context, android.util.AttributeSet);
@@ -41755,7 +41762,7 @@ package java.lang {
     method public static double nextUp(double);
     method public static float nextUp(float);
     method public static double pow(double, double);
-    method public static synchronized double random();
+    method public static double random();
     method public static double rint(double);
     method public static long round(double);
     method public static int round(float);

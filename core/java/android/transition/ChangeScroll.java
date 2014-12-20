@@ -28,8 +28,6 @@ import android.view.ViewGroup;
 /**
  * This transition captures the scroll properties of targets before and after
  * the scene change and animates any changes.
- *
- * @hide
  */
 public class ChangeScroll extends Transition {
 
