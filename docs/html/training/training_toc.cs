@@ -891,25 +891,30 @@ include the action bar on devices running Android 2.1 or higher."
         <div class="nav-section-header">
 
           <a href="<?cs var:toroot ?>training/tv/start/index.html"
+             ja-lang="TV アプリのビルド"
              description="How to start building TV apps or extend your existing app to run on TV
              devices.">
              Building TV Apps</a>
         </div>
         <ul>
           <li>
-            <a href="<?cs var:toroot ?>training/tv/start/start.html">
+            <a href="<?cs var:toroot ?>training/tv/start/start.html"
+               ja-lang="TV アプリのビルドを開始する">
               Getting Started with TV Apps</a>
           </li>
           <li>
-            <a href="<?cs var:toroot ?>training/tv/start/hardware.html">
+            <a href="<?cs var:toroot ?>training/tv/start/hardware.html"
+               ja-lang="TV ハードウェアを処理する">
               Handling TV Hardware</a>
           </li>
           <li>
-            <a href="<?cs var:toroot ?>training/tv/start/layouts.html">
+            <a href="<?cs var:toroot ?>training/tv/start/layouts.html"
+               ja-lang="TV 向けレイアウトをビルドする">
               Building TV Layouts</a>
           </li>
           <li>
-            <a href="<?cs var:toroot ?>training/tv/start/navigation.html">
+            <a href="<?cs var:toroot ?>training/tv/start/navigation.html"
+               ja-lang="TV 用のナビゲーションを作成する">
               Creating TV Navigation</a>
           </li>
         </ul>
@@ -918,20 +923,24 @@ include the action bar on devices running Android 2.1 or higher."
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/tv/playback/index.html"
+             ja-lang="TV 再生アプリのビルド">
              description="How to build apps that provide media catalogs and play content.">
              Building TV Playback Apps</a>
         </div>
         <ul>
           <li>
-            <a href="<?cs var:toroot ?>training/tv/playback/browse.html">
+            <a href="<?cs var:toroot ?>training/tv/playback/browse.html"
+               ja-lang="カタログ ブラウザを作成する">
               Creating a Catalog Browser</a>
           </li>
           <li>
-            <a href="<?cs var:toroot ?>training/tv/playback/details.html">
+            <a href="<?cs var:toroot ?>training/tv/playback/details.html"
+               ja-lang="詳細ビューをビルドする">
               Building a Details View</a>
           </li>
           <li>
-            <a href="<?cs var:toroot ?>training/tv/playback/now-playing.html">
+            <a href="<?cs var:toroot ?>training/tv/playback/now-playing.html"
+               ja-lang="再生中カードを表示する">
               Displaying a Now Playing Card</a>
           </li>
         </ul>
