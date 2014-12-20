@@ -1,0 +1,194 @@
+page.title=カタログ ブラウザを作成する
+page.tags=tv, browsefragment, presenter, backgroundmanager
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>学習の目的</h2>
+  <ol>
+    <li><a href="#layout">メディア ブラウズ レイアウトを作成する</a></li>
+    <li><a href="#lists">メディア リストを表示する</a></li>
+    <li><a href="#background">背景をアップデートする</a></li>
+  </ol>
+
+</div>
+</div>
+
+<p>
+  TV で使用するメディア アプリでは、ユーザーがコンテンツ内容をブラウズして選び、再生を開始できるようにする必要があります。このタイプのアプリのコンテンツ ブラウジングに関するユーザー エクスペリエンスは、シンプルで直感的、そして目を楽しませる魅力的なものである必要があります。
+</p>
+
+<p>
+  このレッスンでは、<a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback サポート ライブラリ</a> が提供するクラスを使用して、アプリのメディア カタログから音楽やビデオを閲覧するためのユーザー インターフェースを実装する方法を説明します。
+</p>
+
+
+<h2 id="layout">メディア ブラウズ レイアウトを作成する</h2>
+
+<p>
+  leanback サポート ライブラリの {@link android.support.v17.leanback.app.BrowseFragment} クラスを使用すると、最小限のコードでブラウジング カテゴリのプライマリ レイアウトとメディア アイテムの行を作成できます。次の例では、{@link android.support.v17.leanback.app.BrowseFragment} を含むレイアウトの作成方法を示します。
+</p>
+
+<pre>
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  &gt;
+
+  &lt;fragment
+      <strong>android:name="android.support.v17.leanback.app.BrowseFragment"</strong>
+      android:id="@+id/browse_fragment"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      /&gt;
+&lt;/LinearLayout&gt;
+</pre>
+
+<p>
+  アクティビティ内でこのレイアウトを使用して作業するには、レイアウトから{@link android.support.v17.leanback.app.BrowseFragment} エレメントを取得します。このクラスのメソッドを使用して、アイコン、タイトル、カテゴリ ヘッダーが有効になっているかどうかなどの表示パラメータを設定します。次のコード サンプルでは、レイアウト内で {@link android.support.v17.leanback.app.BrowseFragment} のレイアウト パラメータの設定方法を示します。
+</p>
+
+<pre>
+public class BrowseMediaActivity extends Activity {
+
+    public static final String TAG ="BrowseActivity";
+
+    protected BrowseFragment mBrowseFragment;
+
+    &#64;Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.browse_fragment);
+
+        final FragmentManager fragmentManager = getFragmentManager();
+        <strong>mBrowseFragment = (BrowseFragment) fragmentManager.findFragmentById(
+                R.id.browse_fragment);</strong>
+
+        // Set display parameters for the BrowseFragment
+        mBrowseFragment.setHeadersState(BrowseFragment.HEADERS_ENABLED);
+        mBrowseFragment.setTitle(getString(R.string.app_name));
+        mBrowseFragment.setBadgeDrawable(getResources().getDrawable(
+                R.drawable.ic_launcher));
+        mBrowseFragment.setBrowseParams(params);
+
+    }
+}
+</pre>
+
+
+<h2 id="lists">メディア リストを表示する</h2>
+
+<p>
+  {@link android.support.v17.leanback.app.BrowseFragment} ではアダプタとプレゼンターを使用して、ブラウズ可能なメディア コンテンツのカテゴリや、メディア カタログのメディア アイテムを定義したり、表示したりできます。アダプタを使用すると、メディア カタログ情報が含まれているローカルやオンラインのデータ ソースに接続できます。プレゼンターは、メディア アイテムに関するデータを保持し、スクリーンにアイテムを表示する際のレイアウト情報を提供します。
+</p>
+
+<p>
+  次のコード例では、文字列データを表示する際の{@link android.support.v17.leanback.widget.Presenter} の実装について示します。
+</p>
+
+<pre>
+public class StringPresenter extends Presenter {
+    private static final String TAG = "StringPresenter";
+
+    public ViewHolder onCreateViewHolder(ViewGroup parent) {
+        TextView textView = new TextView(parent.getContext());
+        textView.setFocusable(true);
+        textView.setFocusableInTouchMode(true);
+        textView.setBackground(
+                parent.getContext().getResources().getDrawable(R.drawable.text_bg));
+        return new ViewHolder(textView);
+    }
+
+    public void onBindViewHolder(ViewHolder viewHolder, Object item) {
+        ((TextView) viewHolder.view).setText(item.toString());
+    }
+
+    public void onUnbindViewHolder(ViewHolder viewHolder) {
+        // no op
+    }
+}
+</pre>
+
+<p>
+  メディア アイテムのプレゼンター クラスを構築したら、アダプタをビルドしたり、{@link android.support.v17.leanback.app.BrowseFragment} にアタッチしたりして、ユーザーのブラウジング用にスクリーン上にそれらのアイテムを表示させることができます。次のコード例では、1 つ前のコード例に示したように、{@code StringPresenter} クラスを使用して、カテゴリ内にカテゴリとアイテムを表示するためのアダプタの構築方法を示します。
+</p>
+
+<pre>
+private ArrayObjectAdapter mRowsAdapter;
+private static final int NUM_ROWS = 4;
+
+&#64;Override
+protected void onCreate(Bundle savedInstanceState) {
+    ...
+
+    buildRowsAdapter();
+}
+
+private void buildRowsAdapter() {
+    mRowsAdapter = new ArrayObjectAdapter(new ListRowPresenter());
+
+    for (int i = 0; i &lt; NUM_ROWS; ++i) {
+        ArrayObjectAdapter listRowAdapter = new ArrayObjectAdapter(
+                new StringPresenter());
+        listRowAdapter.add("Media Item 1");
+        listRowAdapter.add("Media Item 2");
+        listRowAdapter.add("Media Item 3");
+        HeaderItem header = new HeaderItem(i, "Category " + i, null);
+        mRowsAdapter.add(new ListRow(header, listRowAdapter));
+    }
+
+    mBrowseFragment.setAdapter(mRowsAdapter);
+}
+</pre>
+
+<p>
+  この例では、アダプタの静的実装を示します。一般的なメディア ブラウジング アプリは、オンライン データベースやウェブ サービスのデータを使用します。ウェブから取得したデータを使用したブラウジング アプリの例については、<a href="http://github.com/googlesamples/androidtv-leanback">Android TV</a> のサンプル アプリを参照してください。
+</p>
+
+<h2 id="background">背景をアップデートする</h2>
+
+<p>
+  TV で使用されるメディア ブラウジング アプリを目立たせるために、ユーザーがコンテンツをブラウジングしている間の背景イメージをアップデートできます。これにより、アプリの使用がユーザーにとって、より動きのある楽しいものになります。
+</p>
+
+<p>
+  Leanback サポート ライブラリは、TV アプリのアクティビティの背景を変更するための {@link android.support.v17.leanback.app.BackgroundManager} クラスを提供しています。次の例では、TV アプリのアクティビティ内の背景をアップデートする簡単なメソッドの作成方法を示します。
+</p>
+
+<pre>
+protected void updateBackground(Drawable drawable) {
+    BackgroundManager.getInstance(this).setDrawable(drawable);
+}
+</pre>
+
+<p>
+  ほとんどの既存のメディア ブラウズ アプリでは、ユーザーがメディア リストをスクロールするのに合わせて自動的に背景がアップデートされます。これを行うには選択リスナを設定して、ユーザーの現在の選択に基づいて自動的に背景をアップデートできるようにします。次の例では、{@link android.support.v17.leanback.widget.OnItemViewSelectedListener} クラスをセットアップして、選択イベントの判別後に背景をアップデートする方法を示します。
+</p>
+
+<pre>
+protected void clearBackground() {
+    BackgroundManager.getInstance(this).setDrawable(mDefaultBackground);
+}
+
+protected OnItemViewSelectedListener getDefaultItemViewSelectedListener() {
+    return new OnItemViewSelectedListener() {
+        &#64;Override
+        public void onItemSelected(Object item, Row row) {
+            if (item instanceof Movie ) {
+                URI uri = ((Movie)item).getBackdropURI();
+                updateBackground(uri);
+            } else {
+                clearBackground();
+            }
+        }
+    };
+}
+</pre>
+
+<p class="note">
+  <strong>注意:</strong>上記の実装例はわかりやすく示すため、実際よりも単純化されています。実際にアプリでこの機能を作成する際は、パフォーマンス向上のために、別のスレッドで背景のアップデート アクションを実行するようにしてください。また、ユーザーがアイテムをスクロールする動作に合わせて背景をアップデートする場合には、ユーザーが 1 つのアイテムに落ち着くまで、背景イメージのアップデートを遅らせる時間を追加することも検討してください。これにより、背景イメージのアップデートが過剰にならないようにします。
+</p>
