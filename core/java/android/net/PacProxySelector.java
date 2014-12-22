@@ -16,7 +16,6 @@
 
 package android.net;
 
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
@@ -74,8 +73,8 @@ public class PacProxySelector extends ProxySelector {
         }
         try {
             response = mProxyService.resolvePacFile(uri.getHost(), urlString);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e(TAG, "Error resolving PAC File", e);
         }
         if (response == null) {
             return mDefaultList;
