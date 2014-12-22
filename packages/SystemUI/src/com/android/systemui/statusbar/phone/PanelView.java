@@ -32,6 +32,8 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
+import com.android.systemui.EventLogConstants;
+import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -338,6 +340,15 @@ public abstract class PanelView extends FrameLayout {
                     DozeLog.traceFling(expand, mTouchAboveFalsingThreshold,
                             mStatusBar.isFalsingThresholdNeeded(),
                             mStatusBar.isScreenOnComingFromTouch());
+                    // Log collapse gesture if on lock screen.
+                    if (!expand && mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
+                        float displayDensity = mStatusBar.getDisplayDensity();
+                        int heightDp = (int) Math.abs((y - mInitialTouchY) / displayDensity);
+                        int velocityDp = (int) Math.abs(vel / displayDensity);
+                        EventLogTags.writeSysuiLockscreenGesture(
+                                EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_SWIPE_UP_UNLOCK,
+                                heightDp, velocityDp);
+                    }
                     fling(vel, expand);
                     mUpdateFlingOnLayout = expand && mPanelClosedOnDown && !mHasLayoutedSinceDown;
                     if (mUpdateFlingOnLayout) {
@@ -941,6 +952,9 @@ public abstract class PanelView extends FrameLayout {
         switch (mStatusBar.getBarState()) {
             case StatusBarState.KEYGUARD:
                 if (!mDozingOnDown) {
+                    EventLogTags.writeSysuiLockscreenGesture(
+                            EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_TAP_UNLOCK_HINT,
+                            0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
                     startUnlockHintAnimation();
                 }
                 return true;

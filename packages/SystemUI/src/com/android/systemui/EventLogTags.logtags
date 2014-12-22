@@ -27,6 +27,15 @@ option java_package com.android.systemui;
 # NotificationPanelView.java
 # ---------------------------
 36020 sysui_notificationpanel_touch (type|1),(x|1),(y|1)
+## type: 1: SWIPE_UP_UNLOCK           Swiped up to dismiss the lockscreen.
+##       2: SWIPE_DOWN_FULL_SHADE     Swiped down to enter full shade.
+##       3: TAP_UNLOCK_HINT           Tapped in empty area, causes unlock hint.
+##       4: SWIPE_CAMERA              Swiped the camera icon, launches.
+##       5: SWIPE_DIALER              Swiped the dialer icon, launches.
+##       6: TAP_LOCK                  Tapped the (unlocked) lock icon, locks the device.
+##       7: TAP_NOTIFICATION_ACTIVATE Tapped a lockscreen notification, causes "tap again" hint.
+##                                    Note: Second tap logged as notification_clicked.
+36021 sysui_lockscreen_gesture (type|1),(lengthDp|1),(velocityDp|1)
 
 # ---------------------------
 # SettingsPanelView.java
