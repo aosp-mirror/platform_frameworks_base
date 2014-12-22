@@ -255,7 +255,7 @@ enum DebugLevel {
 
 static inline DebugLevel readDebugLevel() {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DEBUG, property, NULL) > 0) {
+    if (property_get(PROPERTY_DEBUG, property, nullptr) > 0) {
         return (DebugLevel) atoi(property);
     }
     return kDebugDisabled;

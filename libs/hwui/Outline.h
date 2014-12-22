@@ -95,7 +95,7 @@ public:
     }
 
     const SkPath* getPath() const {
-        if (mType == kOutlineType_None || mType == kOutlineType_Empty) return NULL;
+        if (mType == kOutlineType_None || mType == kOutlineType_Empty) return nullptr;
 
         return &mPath;
     }

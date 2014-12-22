@@ -33,8 +33,8 @@ class Texture;
 struct GradientCacheEntry {
     GradientCacheEntry() {
         count = 0;
-        colors = NULL;
-        positions = NULL;
+        colors = nullptr;
+        positions = nullptr;
     }
 
     GradientCacheEntry(uint32_t* colors, float* positions, uint32_t count) {
@@ -118,7 +118,7 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(GradientCacheEntry& shader, Texture*& texture);
+    void operator()(GradientCacheEntry& shader, Texture*& texture) override;
 
     /**
      * Returns the texture associated with the specified shader.

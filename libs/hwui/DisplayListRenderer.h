@@ -74,48 +74,51 @@ public:
 // ----------------------------------------------------------------------------
 // Frame state operations
 // ----------------------------------------------------------------------------
-    virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
-    virtual void prepare(bool opaque) {
+    virtual void prepareDirty(float left, float top, float right,
+            float bottom, bool opaque) override;
+    virtual void prepare(bool opaque) override {
         prepareDirty(0.0f, 0.0f, mState.getWidth(), mState.getHeight(), opaque);
     }
-    virtual bool finish();
+    virtual bool finish() override;
     virtual void interrupt();
     virtual void resume();
 
 // ----------------------------------------------------------------------------
 // Canvas state operations
 // ----------------------------------------------------------------------------
-    virtual void setViewport(int width, int height) { mState.setViewport(width, height); }
+    virtual void setViewport(int width, int height) override { mState.setViewport(width, height); }
 
     // Save (layer)
-    virtual int getSaveCount() const { return mState.getSaveCount(); }
-    virtual int save(int flags);
-    virtual void restore();
-    virtual void restoreToCount(int saveCount);
+    virtual int getSaveCount() const override { return mState.getSaveCount(); }
+    virtual int save(int flags) override;
+    virtual void restore() override;
+    virtual void restoreToCount(int saveCount) override;
     virtual int saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* paint, int flags);
+            const SkPaint* paint, int flags) override;
 
     // Matrix
-    virtual void getMatrix(SkMatrix* outMatrix) const { mState.getMatrix(outMatrix); }
+    virtual void getMatrix(SkMatrix* outMatrix) const override { mState.getMatrix(outMatrix); }
 
-    virtual void translate(float dx, float dy, float dz = 0.0f);
-    virtual void rotate(float degrees);
-    virtual void scale(float sx, float sy);
-    virtual void skew(float sx, float sy);
+    virtual void translate(float dx, float dy, float dz = 0.0f) override;
+    virtual void rotate(float degrees) override;
+    virtual void scale(float sx, float sy) override;
+    virtual void skew(float sx, float sy) override;
 
-    virtual void setMatrix(const SkMatrix& matrix);
-    virtual void concatMatrix(const SkMatrix& matrix);
+    virtual void setMatrix(const SkMatrix& matrix) override;
+    virtual void concatMatrix(const SkMatrix& matrix) override;
 
     // Clip
-    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    virtual bool clipPath(const SkPath* path, SkRegion::Op op);
-    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
+    virtual bool clipRect(float left, float top, float right, float bottom,
+            SkRegion::Op op) override;
+    virtual bool clipPath(const SkPath* path, SkRegion::Op op) override;
+    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) override;
 
     // Misc
-    virtual void setDrawFilter(SkDrawFilter* filter);
-    virtual const Rect& getLocalClipBounds() const { return mState.getLocalClipBounds(); }
+    virtual void setDrawFilter(SkDrawFilter* filter) override;
+    virtual const Rect& getLocalClipBounds() const override { return mState.getLocalClipBounds(); }
     const Rect& getRenderTargetClipBounds() const { return mState.getRenderTargetClipBounds(); }
-    virtual bool quickRejectConservative(float left, float top, float right, float bottom) const {
+    virtual bool quickRejectConservative(float left, float top,
+            float right, float bottom) const override {
         return mState.quickRejectConservative(left, top, right, bottom);
     }
 
@@ -126,57 +129,57 @@ public:
 // ----------------------------------------------------------------------------
 // Canvas draw operations
 // ----------------------------------------------------------------------------
-    virtual void drawColor(int color, SkXfermode::Mode mode);
+    virtual void drawColor(int color, SkXfermode::Mode mode) override;
 
     // Bitmap-based
-    virtual void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
+    virtual void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) override;
     virtual void drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint);
-    virtual void drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint);
+            float dstRight, float dstBottom, const SkPaint* paint) override;
+    virtual void drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) override;
     virtual void drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
-            const float* vertices, const int* colors, const SkPaint* paint);
+            const float* vertices, const int* colors, const SkPaint* paint) override;
     virtual void drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
-            float left, float top, float right, float bottom, const SkPaint* paint);
+            float left, float top, float right, float bottom, const SkPaint* paint) override;
 
     // Shapes
     virtual void drawRect(float left, float top, float right, float bottom,
-            const SkPaint* paint);
-    virtual void drawRects(const float* rects, int count, const SkPaint* paint);
+            const SkPaint* paint) override;
+    virtual void drawRects(const float* rects, int count, const SkPaint* paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, const SkPaint* paint);
+            float rx, float ry, const SkPaint* paint) override;
     virtual void drawRoundRect(CanvasPropertyPrimitive* left, CanvasPropertyPrimitive* top,
                 CanvasPropertyPrimitive* right, CanvasPropertyPrimitive* bottom,
                 CanvasPropertyPrimitive* rx, CanvasPropertyPrimitive* ry,
                 CanvasPropertyPaint* paint);
-    virtual void drawCircle(float x, float y, float radius, const SkPaint* paint);
+    virtual void drawCircle(float x, float y, float radius, const SkPaint* paint) override;
     virtual void drawCircle(CanvasPropertyPrimitive* x, CanvasPropertyPrimitive* y,
                 CanvasPropertyPrimitive* radius, CanvasPropertyPaint* paint);
     virtual void drawOval(float left, float top, float right, float bottom,
-            const SkPaint* paint);
+            const SkPaint* paint) override;
     virtual void drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint);
-    virtual void drawPath(const SkPath* path, const SkPaint* paint);
-    virtual void drawLines(const float* points, int count, const SkPaint* paint);
-    virtual void drawPoints(const float* points, int count, const SkPaint* paint);
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) override;
+    virtual void drawPath(const SkPath* path, const SkPaint* paint) override;
+    virtual void drawLines(const float* points, int count, const SkPaint* paint) override;
+    virtual void drawPoints(const float* points, int count, const SkPaint* paint) override;
 
     // Text
     virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
-            DrawOpMode drawOpMode = kDrawOpMode_Immediate);
+            DrawOpMode drawOpMode = kDrawOpMode_Immediate) override;
     virtual void drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
-            float hOffset, float vOffset, const SkPaint* paint);
+            float hOffset, float vOffset, const SkPaint* paint) override;
     virtual void drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, const SkPaint* paint);
+            const float* positions, const SkPaint* paint) override;
 
 // ----------------------------------------------------------------------------
 // Canvas draw operations - special
 // ----------------------------------------------------------------------------
     virtual void drawLayer(DeferredLayerUpdater* layerHandle, float x, float y);
-    virtual void drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t replayFlags);
+    virtual void drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t replayFlags) override;
 
     // TODO: rename for consistency
-    virtual void callDrawGLFunction(Functor* functor, Rect& dirty);
+    virtual void callDrawGLFunction(Functor* functor, Rect& dirty) override;
 
     void setHighContrastText(bool highContrastText) {
         mHighContrastText = highContrastText;
@@ -185,9 +188,9 @@ public:
 // ----------------------------------------------------------------------------
 // CanvasState callbacks
 // ----------------------------------------------------------------------------
-    virtual void onViewportInitialized() { }
-    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) { }
-    virtual GLuint onGetTargetFbo() const { return -1; }
+    virtual void onViewportInitialized() override { }
+    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) override { }
+    virtual GLuint onGetTargetFbo() const override { return -1; }
 
 private:
 
@@ -217,7 +220,7 @@ private:
 
     template<class T>
     inline const T* refBuffer(const T* srcBuffer, int32_t count) {
-        if (!srcBuffer) return NULL;
+        if (!srcBuffer) return nullptr;
 
         T* dstBuffer = (T*) mDisplayListData->allocator.alloc(count * sizeof(T));
         memcpy(dstBuffer, srcBuffer, count * sizeof(T));
@@ -229,10 +232,10 @@ private:
     }
 
     inline const SkPath* refPath(const SkPath* path) {
-        if (!path) return NULL;
+        if (!path) return nullptr;
 
         const SkPath* pathCopy = mPathMap.valueFor(path);
-        if (pathCopy == NULL || pathCopy->getGenerationID() != path->getGenerationID()) {
+        if (pathCopy == nullptr || pathCopy->getGenerationID() != path->getGenerationID()) {
             SkPath* newPathCopy = new SkPath(*path);
             newPathCopy->setSourcePath(path);
 
@@ -249,7 +252,7 @@ private:
     }
 
     inline const SkPaint* refPaint(const SkPaint* paint) {
-        if (!paint) return NULL;
+        if (!paint) return nullptr;
 
         // If there is a draw filter apply it here and store the modified paint
         // so that we don't need to modify the paint every time we access it.
@@ -264,7 +267,7 @@ private:
         const SkPaint* cachedPaint = mPaintMap.valueFor(key);
         // In the unlikely event that 2 unique paints have the same hash we do a
         // object equality check to ensure we don't erroneously dedup them.
-        if (cachedPaint == NULL || *cachedPaint != *paint) {
+        if (cachedPaint == nullptr || *cachedPaint != *paint) {
             cachedPaint =  new SkPaint(*paint);
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(key, cachedPaint);
@@ -275,7 +278,7 @@ private:
     }
 
     inline SkPaint* copyPaint(const SkPaint* paint) {
-        if (!paint) return NULL;
+        if (!paint) return nullptr;
         SkPaint* paintCopy = new SkPaint(*paint);
         mDisplayListData->paints.add(paintCopy);
 
@@ -289,7 +292,7 @@ private:
 
         const SkRegion* regionCopy = mRegionMap.valueFor(region);
         // TODO: Add generation ID to SkRegion
-        if (regionCopy == NULL) {
+        if (regionCopy == nullptr) {
             regionCopy = new SkRegion(*region);
             // replaceValueFor() performs an add if the entry doesn't exist
             mRegionMap.replaceValueFor(region, regionCopy);

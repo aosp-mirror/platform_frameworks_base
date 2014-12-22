@@ -126,13 +126,14 @@ public:
     void initLight(const Vector3& lightCenter, float lightRadius,
             uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
 
-    virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
-    virtual void prepare(bool opaque) {
+    virtual void prepareDirty(float left, float top, float right, float bottom,
+            bool opaque) override;
+    virtual void prepare(bool opaque) override {
         prepareDirty(0.0f, 0.0f, mState.getWidth(), mState.getHeight(), opaque);
     }
-    virtual bool finish();
+    virtual bool finish() override;
 
-    virtual void callDrawGLFunction(Functor* functor, Rect& dirty);
+    virtual void callDrawGLFunction(Functor* functor, Rect& dirty) override;
 
     void pushLayerUpdate(Layer* layer);
     void cancelLayerUpdate(Layer* layer);
@@ -140,8 +141,8 @@ public:
     void markLayersAsBuildLayers();
 
     virtual int saveLayer(float left, float top, float right, float bottom,
-            const SkPaint* paint, int flags) {
-        return saveLayer(left, top, right, bottom, paint, flags, NULL);
+            const SkPaint* paint, int flags) override {
+        return saveLayer(left, top, right, bottom, paint, flags, nullptr);
     }
 
     // Specialized saveLayer implementation, which will pass the convexMask to an FBO layer, if
@@ -152,49 +153,51 @@ public:
     int saveLayerDeferred(float left, float top, float right, float bottom,
             const SkPaint* paint, int flags);
 
-    virtual void drawRenderNode(RenderNode* displayList, Rect& dirty, int32_t replayFlags = 1);
+    virtual void drawRenderNode(RenderNode* displayList, Rect& dirty,
+            int32_t replayFlags = 1) override;
     virtual void drawLayer(Layer* layer, float x, float y);
-    virtual void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint);
+    virtual void drawBitmap(const SkBitmap* bitmap, const SkPaint* paint) override;
     void drawBitmaps(const SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
             TextureVertex* vertices, bool pureTranslate, const Rect& bounds, const SkPaint* paint);
     virtual void drawBitmap(const SkBitmap* bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint);
-    virtual void drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint);
+            float dstRight, float dstBottom, const SkPaint* paint) override;
+    virtual void drawBitmapData(const SkBitmap* bitmap, const SkPaint* paint) override;
     virtual void drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int meshHeight,
-            const float* vertices, const int* colors, const SkPaint* paint);
+            const float* vertices, const int* colors, const SkPaint* paint) override;
     void drawPatches(const SkBitmap* bitmap, AssetAtlas::Entry* entry,
             TextureVertex* vertices, uint32_t indexCount, const SkPaint* paint);
     virtual void drawPatch(const SkBitmap* bitmap, const Res_png_9patch* patch,
-            float left, float top, float right, float bottom, const SkPaint* paint);
+            float left, float top, float right, float bottom, const SkPaint* paint) override;
     void drawPatch(const SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
             float left, float top, float right, float bottom, const SkPaint* paint);
-    virtual void drawColor(int color, SkXfermode::Mode mode);
+    virtual void drawColor(int color, SkXfermode::Mode mode) override;
     virtual void drawRect(float left, float top, float right, float bottom,
-            const SkPaint* paint);
+            const SkPaint* paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, const SkPaint* paint);
-    virtual void drawCircle(float x, float y, float radius, const SkPaint* paint);
+            float rx, float ry, const SkPaint* paint) override;
+    virtual void drawCircle(float x, float y, float radius, const SkPaint* paint) override;
     virtual void drawOval(float left, float top, float right, float bottom,
-            const SkPaint* paint);
+            const SkPaint* paint) override;
     virtual void drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint);
-    virtual void drawPath(const SkPath* path, const SkPaint* paint);
-    virtual void drawLines(const float* points, int count, const SkPaint* paint);
-    virtual void drawPoints(const float* points, int count, const SkPaint* paint);
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint* paint) override;
+    virtual void drawPath(const SkPath* path, const SkPaint* paint) override;
+    virtual void drawLines(const float* points, int count, const SkPaint* paint) override;
+    virtual void drawPoints(const float* points, int count, const SkPaint* paint) override;
     virtual void drawTextOnPath(const char* text, int bytesCount, int count, const SkPath* path,
-            float hOffset, float vOffset, const SkPaint* paint);
+            float hOffset, float vOffset, const SkPaint* paint) override;
     virtual void drawPosText(const char* text, int bytesCount, int count,
-            const float* positions, const SkPaint* paint);
+            const float* positions, const SkPaint* paint) override;
     virtual void drawText(const char* text, int bytesCount, int count, float x, float y,
             const float* positions, const SkPaint* paint, float totalAdvance, const Rect& bounds,
-            DrawOpMode drawOpMode = kDrawOpMode_Immediate);
-    virtual void drawRects(const float* rects, int count, const SkPaint* paint);
+            DrawOpMode drawOpMode = kDrawOpMode_Immediate) override;
+    virtual void drawRects(const float* rects, int count, const SkPaint* paint) override;
 
     void drawShadow(float casterAlpha,
-            const VertexBuffer* ambientShadowVertexBuffer, const VertexBuffer* spotShadowVertexBuffer);
+            const VertexBuffer* ambientShadowVertexBuffer,
+            const VertexBuffer* spotShadowVertexBuffer);
 
-    virtual void setDrawFilter(SkDrawFilter* filter);
+    virtual void setDrawFilter(SkDrawFilter* filter) override;
 
     // If this value is set to < 1.0, it overrides alpha set on layer (see drawBitmap, drawLayer)
     void setOverrideLayerAlpha(float alpha) { mDrawModifiers.mOverrideLayerAlpha = alpha; }
@@ -264,7 +267,8 @@ public:
      * @param alpha Where to store the resulting alpha
      * @param mode Where to store the resulting xfermode
      */
-    static inline void getAlphaAndModeDirect(const SkPaint* paint, int* alpha, SkXfermode::Mode* mode) {
+    static inline void getAlphaAndModeDirect(const SkPaint* paint, int* alpha,
+            SkXfermode::Mode* mode) {
         *mode = getXfermodeDirect(paint);
         *alpha = getAlphaDirect(paint);
     }
@@ -301,7 +305,7 @@ public:
     }
 
     static inline bool hasTextShadow(const SkPaint* paint) {
-        return getTextShadow(paint, NULL);
+        return getTextShadow(paint, nullptr);
     }
 
     /**
@@ -335,34 +339,36 @@ public:
     ///////////////////////////////////////////////////////////////////
     /// State manipulation
 
-    virtual void setViewport(int width, int height) { mState.setViewport(width, height); }
+    virtual void setViewport(int width, int height) override { mState.setViewport(width, height); }
 
-    virtual int getSaveCount() const;
-    virtual int save(int flags);
-    virtual void restore();
-    virtual void restoreToCount(int saveCount);
+    virtual int getSaveCount() const override;
+    virtual int save(int flags) override;
+    virtual void restore() override;
+    virtual void restoreToCount(int saveCount) override;
 
-    virtual void getMatrix(SkMatrix* outMatrix) const { mState.getMatrix(outMatrix); }
-    virtual void setMatrix(const SkMatrix& matrix) { mState.setMatrix(matrix); }
-    virtual void concatMatrix(const SkMatrix& matrix) { mState.concatMatrix(matrix); }
+    virtual void getMatrix(SkMatrix* outMatrix) const override { mState.getMatrix(outMatrix); }
+    virtual void setMatrix(const SkMatrix& matrix) override { mState.setMatrix(matrix); }
+    virtual void concatMatrix(const SkMatrix& matrix) override { mState.concatMatrix(matrix); }
 
-    virtual void translate(float dx, float dy, float dz = 0.0f);
-    virtual void rotate(float degrees);
-    virtual void scale(float sx, float sy);
-    virtual void skew(float sx, float sy);
+    virtual void translate(float dx, float dy, float dz = 0.0f) override;
+    virtual void rotate(float degrees) override;
+    virtual void scale(float sx, float sy) override;
+    virtual void skew(float sx, float sy) override;
 
     void setMatrix(const Matrix4& matrix); // internal only convenience method
     void concatMatrix(const Matrix4& matrix); // internal only convenience method
 
-    virtual const Rect& getLocalClipBounds() const { return mState.getLocalClipBounds(); }
+    virtual const Rect& getLocalClipBounds() const override { return mState.getLocalClipBounds(); }
     const Rect& getRenderTargetClipBounds() const { return mState.getRenderTargetClipBounds(); }
-    virtual bool quickRejectConservative(float left, float top, float right, float bottom) const {
+    virtual bool quickRejectConservative(float left, float top,
+            float right, float bottom) const override {
         return mState.quickRejectConservative(left, top, right, bottom);
     }
 
-    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    virtual bool clipPath(const SkPath* path, SkRegion::Op op);
-    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
+    virtual bool clipRect(float left, float top,
+            float right, float bottom, SkRegion::Op op) override;
+    virtual bool clipPath(const SkPath* path, SkRegion::Op op) override;
+    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) override;
 
     /**
      * Does not support different clipping Ops (that is, every call to setClippingOutline is
@@ -380,9 +386,9 @@ public:
     ///////////////////////////////////////////////////////////////////
     /// CanvasStateClient interface
 
-    virtual void onViewportInitialized();
-    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored);
-    virtual GLuint onGetTargetFbo() const { return 0; }
+    virtual void onViewportInitialized() override;
+    virtual void onSnapshotRestored(const Snapshot& removed, const Snapshot& restored) override;
+    virtual GLuint onGetTargetFbo() const override { return 0; }
 
     SkPath* allocPathForFrame() {
         SkPath* path = new SkPath();
@@ -427,8 +433,8 @@ protected:
     void attachStencilBufferToLayer(Layer* layer);
 
     bool quickRejectSetupScissor(float left, float top, float right, float bottom,
-            const SkPaint* paint = NULL);
-    bool quickRejectSetupScissor(const Rect& bounds, const SkPaint* paint = NULL) {
+            const SkPaint* paint = nullptr);
+    bool quickRejectSetupScissor(const Rect& bounds, const SkPaint* paint = nullptr) {
         return quickRejectSetupScissor(bounds.left, bounds.top,
                 bounds.right, bounds.bottom, paint);
     }
@@ -495,7 +501,7 @@ protected:
      * null then null is returned.
      */
     static inline SkColorFilter* getColorFilter(const SkPaint* paint) {
-        return paint ? paint->getColorFilter() : NULL;
+        return paint ? paint->getColorFilter() : nullptr;
     }
 
     /**
@@ -503,7 +509,7 @@ protected:
      * null then null is returned.
      */
     static inline const SkShader* getShader(const SkPaint* paint) {
-        return paint ? paint->getShader() : NULL;
+        return paint ? paint->getShader() : nullptr;
     }
 
     /**
@@ -903,8 +909,8 @@ private:
      * space must be scaled up and translated to fill the quad provided in (l,t,r,b). These
      * transformations are stored in the modelView matrix and uploaded to the shader.
      *
-     * @param offset Set to true if the the matrix should be fudged (translated) slightly to disambiguate
-     * geometry pixel positioning. See Vertex::GeometryFudgeFactor().
+     * @param offset Set to true if the the matrix should be fudged (translated) slightly to
+     * disambiguate geometry pixel positioning. See Vertex::GeometryFudgeFactor().
      *
      * @param ignoreTransform Set to true if l,t,r,b coordinates already in layer space,
      * currentTransform() will be ignored. (e.g. when drawing clip in layer coordinates to stencil,
@@ -930,7 +936,7 @@ private:
     void setupDrawTextureTransform();
     void setupDrawTextureTransformUniforms(mat4& transform);
     void setupDrawTextGammaUniforms();
-    void setupDrawMesh(const GLvoid* vertices, const GLvoid* texCoords = NULL, GLuint vbo = 0);
+    void setupDrawMesh(const GLvoid* vertices, const GLvoid* texCoords = nullptr, GLuint vbo = 0);
     void setupDrawMesh(const GLvoid* vertices, const GLvoid* texCoords, const GLvoid* colors);
     void setupDrawMeshIndices(const GLvoid* vertices, const GLvoid* texCoords, GLuint vbo = 0);
     void setupDrawIndexedVertices(GLvoid* vertices);

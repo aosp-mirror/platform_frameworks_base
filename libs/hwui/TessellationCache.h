@@ -166,7 +166,7 @@ private:
     sp<TaskProcessor<VertexBuffer*> > mProcessor;
     LruCache<Description, Buffer*> mCache;
     class BufferRemovedListener : public OnEntryRemoved<Description, Buffer*> {
-        void operator()(Description& description, Buffer*& buffer);
+        void operator()(Description& description, Buffer*& buffer) override;
     };
     BufferRemovedListener mBufferRemovedListener;
 
@@ -178,8 +178,8 @@ private:
     // holds a pointer, and implicit strong ref to each shadow task of the frame
     LruCache<ShadowDescription, Task<vertexBuffer_pair_t*>*> mShadowCache;
     class BufferPairRemovedListener : public OnEntryRemoved<ShadowDescription, Task<vertexBuffer_pair_t*>*> {
-        void operator()(ShadowDescription& description, Task<vertexBuffer_pair_t*>*& bufferPairTask) {
-            bufferPairTask->decStrong(NULL);
+        void operator()(ShadowDescription& description, Task<vertexBuffer_pair_t*>*& bufferPairTask) override {
+            bufferPairTask->decStrong(nullptr);
         }
     };
     BufferPairRemovedListener mBufferPairRemovedListener;

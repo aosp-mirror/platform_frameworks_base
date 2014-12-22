@@ -32,17 +32,17 @@ public:
     };
 
     VertexBuffer()
-            : mBuffer(0)
-            , mIndices(0)
+            : mBuffer(nullptr)
+            , mIndices(nullptr)
             , mVertexCount(0)
             , mIndexCount(0)
             , mAllocatedVertexCount(0)
             , mAllocatedIndexCount(0)
             , mByteCount(0)
             , mMode(kStandard)
-            , mReallocBuffer(0)
-            , mCleanupMethod(NULL)
-            , mCleanupIndexMethod(NULL)
+            , mReallocBuffer(nullptr)
+            , mCleanupMethod(nullptr)
+            , mCleanupIndexMethod(nullptr)
     {}
 
     ~VertexBuffer() {

@@ -93,13 +93,13 @@ public:
     }
 
 protected:
-    virtual void do_construct(void* storage, size_t num) const;
-    virtual void do_destroy(void* storage, size_t num) const;
-    virtual void do_copy(void* dest, const void* from, size_t num) const;
-    virtual void do_splat(void* dest, const void* item, size_t num) const;
-    virtual void do_move_forward(void* dest, const void* from, size_t num) const;
-    virtual void do_move_backward(void* dest, const void* from, size_t num) const;
-    virtual int do_compare(const void* lhs, const void* rhs) const;
+    virtual void do_construct(void* storage, size_t num) const override;
+    virtual void do_destroy(void* storage, size_t num) const override;
+    virtual void do_copy(void* dest, const void* from, size_t num) const override;
+    virtual void do_splat(void* dest, const void* item, size_t num) const override;
+    virtual void do_move_forward(void* dest, const void* from, size_t num) const override;
+    virtual void do_move_backward(void* dest, const void* from, size_t num) const override;
+    virtual int do_compare(const void* lhs, const void* rhs) const override;
 }; // class SortedList
 
 ///////////////////////////////////////////////////////////////////////////////

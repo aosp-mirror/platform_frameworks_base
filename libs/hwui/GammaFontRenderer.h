@@ -59,36 +59,36 @@ public:
         delete mRenderer;
     }
 
-    void clear() {
+    void clear() override {
         delete mRenderer;
-        mRenderer = NULL;
+        mRenderer = nullptr;
     }
 
-    void flush() {
+    void flush() override {
         if (mRenderer) {
             mRenderer->flushLargeCaches();
         }
     }
 
-    FontRenderer& getFontRenderer(const SkPaint* paint) {
+    FontRenderer& getFontRenderer(const SkPaint* paint) override {
         if (!mRenderer) {
             mRenderer = new FontRenderer;
         }
         return *mRenderer;
     }
 
-    uint32_t getFontRendererCount() const {
+    uint32_t getFontRendererCount() const override {
         return 1;
     }
 
-    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
+    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const override {
         return mRenderer ? mRenderer->getCacheSize(format) : 0;
     }
 
-    void describe(ProgramDescription& description, const SkPaint* paint) const;
-    void setupProgram(ProgramDescription& description, Program* program) const;
+    void describe(ProgramDescription& description, const SkPaint* paint) const override;
+    void setupProgram(ProgramDescription& description, Program* program) const override;
 
-    void endPrecaching();
+    void endPrecaching() override;
 
 private:
     ShaderGammaFontRenderer(bool multiGamma);
@@ -105,18 +105,18 @@ public:
         delete mRenderer;
     }
 
-    void clear() {
+    void clear() override {
         delete mRenderer;
-        mRenderer = NULL;
+        mRenderer = nullptr;
     }
 
-    void flush() {
+    void flush() override {
         if (mRenderer) {
             mRenderer->flushLargeCaches();
         }
     }
 
-    FontRenderer& getFontRenderer(const SkPaint* paint) {
+    FontRenderer& getFontRenderer(const SkPaint* paint) override {
         if (!mRenderer) {
             mRenderer = new FontRenderer;
             mRenderer->setGammaTable(&mGammaTable[0]);
@@ -124,21 +124,21 @@ public:
         return *mRenderer;
     }
 
-    uint32_t getFontRendererCount() const {
+    uint32_t getFontRendererCount() const override {
         return 1;
     }
 
-    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
+    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const override {
         return mRenderer ? mRenderer->getCacheSize(format) : 0;
     }
 
-    void describe(ProgramDescription& description, const SkPaint* paint) const {
+    void describe(ProgramDescription& description, const SkPaint* paint) const override {
     }
 
-    void setupProgram(ProgramDescription& description, Program* program) const {
+    void setupProgram(ProgramDescription& description, Program* program) const override {
     }
 
-    void endPrecaching();
+    void endPrecaching() override;
 
 private:
     LookupGammaFontRenderer();
@@ -153,16 +153,16 @@ class Lookup3GammaFontRenderer: public GammaFontRenderer {
 public:
     ~Lookup3GammaFontRenderer();
 
-    void clear();
-    void flush();
+    void clear() override;
+    void flush() override;
 
-    FontRenderer& getFontRenderer(const SkPaint* paint);
+    FontRenderer& getFontRenderer(const SkPaint* paint) override;
 
-    uint32_t getFontRendererCount() const {
+    uint32_t getFontRendererCount() const override {
         return kGammaCount;
     }
 
-    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const {
+    uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const override {
         if (fontRenderer >= kGammaCount) return 0;
 
         FontRenderer* renderer = mRenderers[fontRenderer];
@@ -171,13 +171,13 @@ public:
         return renderer->getCacheSize(format);
     }
 
-    void describe(ProgramDescription& description, const SkPaint* paint) const {
+    void describe(ProgramDescription& description, const SkPaint* paint) const override {
     }
 
-    void setupProgram(ProgramDescription& description, Program* program) const {
+    void setupProgram(ProgramDescription& description, Program* program) const override {
     }
 
-    void endPrecaching();
+    void endPrecaching() override;
 
 private:
     Lookup3GammaFontRenderer();

@@ -106,7 +106,7 @@ public:
         friend class AssetAtlas;
     };
 
-    AssetAtlas(): mTexture(NULL), mImage(NULL),
+    AssetAtlas(): mTexture(nullptr), mImage(nullptr),
             mBlendKey(true), mOpaqueKey(false) { }
     ~AssetAtlas() { terminate(); }
 

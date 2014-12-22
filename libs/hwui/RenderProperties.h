@@ -188,7 +188,7 @@ public:
         if (matrix) {
             mStaticMatrix = new SkMatrix(*matrix);
         } else {
-            mStaticMatrix = NULL;
+            mStaticMatrix = nullptr;
         }
         return true;
     }
@@ -203,7 +203,7 @@ public:
         if (matrix) {
             mAnimationMatrix = new SkMatrix(*matrix);
         } else {
-            mAnimationMatrix = NULL;
+            mAnimationMatrix = nullptr;
         }
         return true;
     }
@@ -571,7 +571,7 @@ public:
 
     bool hasShadow() const {
         return getZ() > 0.0f
-                && getOutline().getPath() != NULL
+                && getOutline().getPath() != nullptr
                 && getOutline().getAlpha() != 0.0f;
     }
 

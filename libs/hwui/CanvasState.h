@@ -161,7 +161,7 @@ public:
     int getHeight() { return mHeight; }
 
     inline const Snapshot* currentSnapshot() const {
-        return mSnapshot != NULL ? mSnapshot.get() : mFirstSnapshot.get();
+        return mSnapshot != nullptr ? mSnapshot.get() : mFirstSnapshot.get();
     }
     inline Snapshot* writableSnapshot() { return mSnapshot.get(); }
     inline const Snapshot* firstSnapshot() const { return mFirstSnapshot.get(); }

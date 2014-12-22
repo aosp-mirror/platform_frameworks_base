@@ -78,11 +78,11 @@ public:
 private:
     struct RenderBufferEntry {
         RenderBufferEntry():
-            mBuffer(NULL), mWidth(0), mHeight(0) {
+            mBuffer(nullptr), mWidth(0), mHeight(0) {
         }
 
         RenderBufferEntry(GLenum format, const uint32_t width, const uint32_t height):
-            mBuffer(NULL), mFormat(format), mWidth(width), mHeight(height) {
+            mBuffer(nullptr), mFormat(format), mWidth(width), mHeight(height) {
         }
 
         RenderBufferEntry(RenderBuffer* buffer):

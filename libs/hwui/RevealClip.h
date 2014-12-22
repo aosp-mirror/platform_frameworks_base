@@ -54,7 +54,7 @@ public:
     float getRadius() const { return mRadius; }
 
     const SkPath* getPath() const {
-        if (!mShouldClip) return NULL;
+        if (!mShouldClip) return nullptr;
 
         return &mPath;
     }

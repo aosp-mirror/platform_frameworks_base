@@ -87,7 +87,7 @@ struct PathTexture: public Texture {
     }
 
     void clearTask() {
-        if (mTask != NULL) {
+        if (mTask != nullptr) {
             mTask.clear();
         }
     }
@@ -165,7 +165,7 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(PathDescription& path, PathTexture*& texture);
+    void operator()(PathDescription& path, PathTexture*& texture) override;
 
     /**
      * Clears the cache. This causes all textures to be deleted.
@@ -292,7 +292,7 @@ private:
         PathProcessor(Caches& caches);
         ~PathProcessor() { }
 
-        virtual void onProcess(const sp<Task<SkBitmap*> >& task);
+        virtual void onProcess(const sp<Task<SkBitmap*> >& task) override;
 
     private:
         uint32_t mMaxTextureSize;

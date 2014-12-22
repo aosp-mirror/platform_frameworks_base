@@ -31,7 +31,7 @@
 namespace android {
 namespace uirenderer {
 
-class TextureVertex;
+struct TextureVertex;
 
 ///////////////////////////////////////////////////////////////////////////////
 // 9-patch structures

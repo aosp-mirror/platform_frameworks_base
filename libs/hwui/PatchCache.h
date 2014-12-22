@@ -91,7 +91,7 @@ public:
 
 private:
     struct PatchDescription {
-        PatchDescription(): mPatch(NULL), mBitmapWidth(0), mBitmapHeight(0),
+        PatchDescription(): mPatch(nullptr), mBitmapWidth(0), mBitmapHeight(0),
                 mPixelWidth(0), mPixelHeight(0) {
         }
 
@@ -146,7 +146,7 @@ private:
      * to track available regions of memory in the VBO.
      */
     struct BufferBlock {
-        BufferBlock(uint32_t offset, uint32_t size): offset(offset), size(size), next(NULL) {
+        BufferBlock(uint32_t offset, uint32_t size): offset(offset), size(size), next(nullptr) {
         }
 
         uint32_t offset;

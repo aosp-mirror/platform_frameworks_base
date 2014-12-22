@@ -248,7 +248,7 @@ public:
         bottom = fmaxf(bottom, y);
     }
 
-    void dump(const char* label = NULL) const {
+    void dump(const char* label = nullptr) const {
         ALOGD("%s[l=%f t=%f r=%f b=%f]", label ? label : "Rect", left, top, right, bottom);
     }
 

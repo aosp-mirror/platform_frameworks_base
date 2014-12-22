@@ -79,13 +79,13 @@ public:
     // TODO: move to a method on android:Paint
     static inline bool paintWillNotDrawText(const SkPaint& paint) {
         return paint.getAlpha() == 0
-                && paint.getLooper() == NULL
+                && paint.getLooper() == nullptr
                 && !paint.getColorFilter()
                 && getXfermode(paint.getXfermode()) == SkXfermode::kSrcOver_Mode;
     }
 
     static bool isBlendedColorFilter(const SkColorFilter* filter) {
-        if (filter == NULL) {
+        if (filter == nullptr) {
             return false;
         }
         return (filter->getFlags() & SkColorFilter::kAlphaUnchanged_Flag) == 0;

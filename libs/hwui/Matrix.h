@@ -210,7 +210,7 @@ public:
 
     void decomposeScale(float& sx, float& sy) const;
 
-    void dump(const char* label = NULL) const;
+    void dump(const char* label = nullptr) const;
 
     static const Matrix4& identity();
 

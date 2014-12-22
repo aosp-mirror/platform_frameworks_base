@@ -69,7 +69,7 @@ public:
 class OpStatePair {
 public:
     OpStatePair()
-            : op(NULL), state(NULL) {}
+            : op(nullptr), state(nullptr) {}
     OpStatePair(DrawOp* newOp, const DeferredDisplayState* newState)
             : op(newOp), state(newState) {}
     OpStatePair(const OpStatePair& other)

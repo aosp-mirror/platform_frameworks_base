@@ -84,8 +84,8 @@ private:
         void exit();
 
     private:
-        virtual status_t readyToRun();
-        virtual bool threadLoop();
+        virtual status_t readyToRun() override;
+        virtual bool threadLoop() override;
 
         // Lock for the list of tasks
         mutable Mutex mLock;

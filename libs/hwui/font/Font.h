@@ -38,7 +38,7 @@ namespace uirenderer {
 // Font
 ///////////////////////////////////////////////////////////////////////////////
 
-class CachedGlyphInfo;
+struct CachedGlyphInfo;
 class CacheTexture;
 class FontRenderer;
 
@@ -120,7 +120,7 @@ private:
     void measure(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
             int numGlyphs, Rect *bounds, const float* positions);
 
-    void invalidateTextureCache(CacheTexture* cacheTexture = NULL);
+    void invalidateTextureCache(CacheTexture* cacheTexture = nullptr);
 
     CachedGlyphInfo* cacheGlyph(const SkPaint* paint, glyph_t glyph, bool precaching);
     void updateGlyphCache(const SkPaint* paint, const SkGlyph& skiaGlyph,

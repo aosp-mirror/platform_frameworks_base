@@ -43,7 +43,7 @@ public:
     Fence() {
         mDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
         if (mDisplay != EGL_NO_DISPLAY) {
-            mFence = eglCreateSyncKHR(mDisplay, EGL_SYNC_FENCE_KHR, NULL);
+            mFence = eglCreateSyncKHR(mDisplay, EGL_SYNC_FENCE_KHR, nullptr);
         } else {
             mFence = EGL_NO_SYNC_KHR;
         }

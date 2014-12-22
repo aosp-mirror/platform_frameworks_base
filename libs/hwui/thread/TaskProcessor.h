@@ -47,7 +47,7 @@ public:
     virtual void onProcess(const sp<Task<T> >& task) = 0;
 
 private:
-    virtual void process(const sp<TaskBase>& task) {
+    virtual void process(const sp<TaskBase>& task) override {
         sp<Task<T> > realTask = static_cast<Task<T>* >(task.get());
         // This is the right way to do it but sp<> doesn't play nice
         // sp<Task<T> > realTask = static_cast<sp<Task<T> > >(task);

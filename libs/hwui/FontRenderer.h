@@ -66,7 +66,7 @@ public:
     }
     ~TextSetupFunctor() { }
 
-    status_t operator ()(int what, void* data);
+    status_t operator ()(int what, void* data) override;
 
     OpenGLRenderer* renderer;
     float x;

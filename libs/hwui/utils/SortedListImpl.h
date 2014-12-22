@@ -41,7 +41,7 @@ protected:
     virtual int do_compare(const void* lhs, const void* rhs) const = 0;
 
 private:
-    ssize_t _indexOrderOf(const void* item, size_t* order = 0) const;
+    ssize_t _indexOrderOf(const void* item, size_t* order = nullptr) const;
 
     // these are made private, because they can't be used on a SortedVector
     // (they don't have an implementation either)

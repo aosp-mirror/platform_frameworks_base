@@ -62,7 +62,7 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(uint32_t&, Texture*& texture);
+    void operator()(uint32_t&, Texture*& texture) override;
 
     /**
      * Resets all Textures to not be marked as in use
