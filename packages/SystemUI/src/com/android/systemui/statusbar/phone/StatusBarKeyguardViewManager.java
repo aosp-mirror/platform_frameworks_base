@@ -32,7 +32,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 
-import static com.android.keyguard.KeyguardViewBase.OnDismissAction;
+import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 /**
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
@@ -185,10 +185,6 @@ public class StatusBarKeyguardViewManager {
 
     public void setNeedsInput(boolean needsInput) {
         mStatusBarWindowManager.setKeyguardNeedsInput(needsInput);
-    }
-
-    public void updateUserActivityTimeout() {
-        mStatusBarWindowManager.setKeyguardUserActivityTimeout(mBouncer.getUserActivityTimeout());
     }
 
     public void setOccluded(boolean occluded) {

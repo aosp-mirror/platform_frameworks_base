@@ -27,6 +27,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import com.android.keyguard.R;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.StatusBarState;
 
@@ -144,7 +145,7 @@ public class StatusBarWindowManager {
         if (state.isKeyguardShowingAndNotOccluded()
                 && state.statusBarState == StatusBarState.KEYGUARD
                 && !state.qsExpanded) {
-            mLpChanged.userActivityTimeout = state.keyguardUserActivityTimeout;
+            mLpChanged.userActivityTimeout = KeyguardViewMediator.AWAKE_INTERVAL_DEFAULT_MS;
         } else {
             mLpChanged.userActivityTimeout = -1;
         }
@@ -201,11 +202,6 @@ public class StatusBarWindowManager {
         apply(mCurrentState);
     }
 
-    public void setKeyguardUserActivityTimeout(long timeout) {
-        mCurrentState.keyguardUserActivityTimeout = timeout;
-        apply(mCurrentState);
-    }
-
     public void setBouncerShowing(boolean showing) {
         mCurrentState.bouncerShowing = showing;
         apply(mCurrentState);
@@ -235,7 +231,6 @@ public class StatusBarWindowManager {
         boolean keyguardNeedsInput;
         boolean statusBarExpanded;
         boolean statusBarFocusable;
-        long keyguardUserActivityTimeout;
         boolean bouncerShowing;
         boolean keyguardFadingAway;
         boolean qsExpanded;

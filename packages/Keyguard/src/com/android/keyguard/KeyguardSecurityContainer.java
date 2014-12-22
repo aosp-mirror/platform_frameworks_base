@@ -20,7 +20,6 @@ import android.app.AlertDialog;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -46,7 +45,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private KeyguardSecurityViewFlipper mSecurityViewFlipper;
     private boolean mIsVerifyUnlockOnly;
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
-    private boolean mIsBouncing;
     private SecurityCallback mSecurityCallback;
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
@@ -106,13 +104,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         return false;
     }
 
-    void updateSecurityViews(boolean isBouncing) {
-        int children = mSecurityViewFlipper.getChildCount();
-        for (int i = 0; i < children; i++) {
-            updateSecurityView(mSecurityViewFlipper.getChildAt(i), isBouncing);
-        }
-    }
-
     public void announceCurrentSecurityMethod() {
         View v = (View) getSecurityView(mCurrentSecuritySelection);
         if (v != null) {
@@ -136,24 +127,18 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             if (DEBUG) Log.v(TAG, "inflating id = " + layoutId);
             View v = inflater.inflate(layoutId, mSecurityViewFlipper, false);
             mSecurityViewFlipper.addView(v);
-            updateSecurityView(v, mIsBouncing);
+            updateSecurityView(v);
             view = (KeyguardSecurityView)v;
         }
 
         return view;
     }
 
-    private void updateSecurityView(View view, boolean isBouncing) {
-        mIsBouncing = isBouncing;
+    private void updateSecurityView(View view) {
         if (view instanceof KeyguardSecurityView) {
             KeyguardSecurityView ksv = (KeyguardSecurityView) view;
             ksv.setKeyguardCallback(mCallback);
             ksv.setLockPatternUtils(mLockPatternUtils);
-            if (isBouncing) {
-                ksv.showBouncer(0);
-            } else {
-                ksv.hideBouncer(0);
-            }
         } else {
             Log.w(TAG, "View " + view + " is not a KeyguardSecurityView");
         }
@@ -342,7 +327,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     /**
      * Shows the next security screen if there is one.
      * @param authenticated true if the user entered the correct authentication
-     * @param authenticated
      * @return true if keyguard is done
      */
     boolean showNextSecurityScreenOrFinish(boolean authenticated) {
@@ -438,20 +422,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             }
         }
         return null;
-    }
-
-    public void showBouncer(int duration) {
-        KeyguardSecurityViewFlipper flipper = getFlipper();
-        if (flipper != null) {
-            flipper.showBouncer(duration);
-        }
-    }
-
-    public void hideBouncer(int duration) {
-        KeyguardSecurityViewFlipper flipper = getFlipper();
-        if (flipper != null) {
-            flipper.hideBouncer(duration);
-        }
     }
 
     private KeyguardSecurityCallback mCallback = new KeyguardSecurityCallback() {

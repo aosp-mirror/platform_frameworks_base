@@ -47,12 +47,6 @@ public interface ViewMediatorCallback {
     void setNeedsInput(boolean needsInput);
 
     /**
-     * Tell view mediator that the keyguard view's desired user activity timeout
-     * has changed and needs to be reapplied to the window.
-     */
-    void onUserActivityTimeoutChanged();
-
-    /**
      * Report that the keyguard is dismissable, pending the next keyguardDone call.
      */
     void keyguardDonePending();
