@@ -4036,9 +4036,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     }
                     mNetworkForRequestId.put(nri.request.requestId, newNetwork);
                     newNetwork.addRequest(nri.request);
-                    if (nri.isRequest && nri.request.legacyType != TYPE_NONE) {
-                        mLegacyTypeTracker.add(nri.request.legacyType, newNetwork);
-                    }
                     keep = true;
                     // Tell NetworkFactories about the new score, so they can stop
                     // trying to connect if they know they cannot match it.
@@ -4089,6 +4086,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
                                 1000);
                     }
                 }
+            }
+
+            // do this after the default net is switched, but
+            // before LegacyTypeTracker sends legacy broadcasts
+            notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_AVAILABLE);
+
+            if (isNewDefault) {
                 // Maintain the illusion: since the legacy API only
                 // understands one network at a time, we must pretend
                 // that the current default network disconnected before
@@ -4119,7 +4123,27 @@ public class ConnectivityService extends IConnectivityManager.Stub
             } catch (RemoteException ignored) {
             }
 
-            notifyNetworkCallbacks(newNetwork, ConnectivityManager.CALLBACK_AVAILABLE);
+            // This has to happen after the notifyNetworkCallbacks as that tickles each
+            // ConnectivityManager instance so that legacy requests correctly bind dns
+            // requests to this network.  The legacy users are listening for this bcast
+            // and will generally do a dns request so they can ensureRouteToHost and if
+            // they do that before the callbacks happen they'll use the default network.
+            //
+            // TODO: Is there still a race here? We send the broadcast
+            // after sending the callback, but if the app can receive the
+            // broadcast before the callback, it might still break.
+            //
+            // This *does* introduce a race where if the user uses the new api
+            // (notification callbacks) and then uses the old api (getNetworkInfo(type))
+            // they may get old info.  Reverse this after the old startUsing api is removed.
+            // This is on top of the multiple intent sequencing referenced in the todo above.
+            for (int i = 0; i < newNetwork.networkRequests.size(); i++) {
+                NetworkRequest nr = newNetwork.networkRequests.valueAt(i);
+                if (nr.legacyType != TYPE_NONE && isRequest(nr)) {
+                    // legacy type tracker filters out repeat adds
+                    mLegacyTypeTracker.add(nr.legacyType, newNetwork);
+                }
+            }
 
             // A VPN generally won't get added to the legacy tracker in the "for (nri)" loop above,
             // because usually there are no NetworkRequests it satisfies (e.g., mDefaultRequest
