@@ -90,6 +90,7 @@ public class ZenModePanel extends LinearLayout {
     private final boolean mCountdownConditionSupported;
     private final int mFirstConditionIndex;
     private final TransitionHelper mTransitionHelper = new TransitionHelper();
+    private final Uri mForeverId;
 
     private String mTag = TAG + "/" + Integer.toHexString(System.identityHashCode(this));
 
@@ -134,6 +135,7 @@ public class ZenModePanel extends LinearLayout {
         mMaxConditions = MathUtils.constrain(res.getInteger(R.integer.zen_mode_max_conditions),
                 minConditions, 100);
         mMaxOptionalConditions = mMaxConditions - minConditions;
+        mForeverId = Condition.newId(mContext).appendPath("forever").build();
         if (DEBUG) Log.d(mTag, "new ZenModePanel");
     }
 
@@ -338,12 +340,11 @@ public class ZenModePanel extends LinearLayout {
     }
 
     private void refreshExitConditionText() {
-        final String forever = mContext.getString(com.android.internal.R.string.zen_mode_forever);
         if (mExitCondition == null) {
-            mExitConditionText = forever;
+            mExitConditionText = foreverSummary();
         } else if (isCountdown(mExitCondition)) {
             final Condition condition = parseExistingTimeCondition(mExitCondition);
-            mExitConditionText = condition != null ? condition.summary : forever;
+            mExitConditionText = condition != null ? condition.summary : foreverSummary();
         } else {
             mExitConditionText = mExitCondition.summary;
         }
@@ -473,9 +474,9 @@ public class ZenModePanel extends LinearLayout {
         final int conditionCount = mConditions == null ? 0 : mConditions.length;
         if (DEBUG) Log.d(mTag, "handleUpdateConditions conditionCount=" + conditionCount);
         // forever
-        bind(null, mZenConditions.getChildAt(FOREVER_CONDITION_INDEX));
+        bind(forever(), mZenConditions.getChildAt(FOREVER_CONDITION_INDEX));
         // countdown
-        if (mCountdownConditionSupported) {
+        if (mCountdownConditionSupported && mTimeCondition != null) {
             bind(mTimeCondition, mZenConditions.getChildAt(COUNTDOWN_CONDITION_INDEX));
         }
         // provider conditions
@@ -483,13 +484,23 @@ public class ZenModePanel extends LinearLayout {
             bind(mConditions[i], mZenConditions.getChildAt(mFirstConditionIndex + i));
         }
         // hide the rest
-        for (int i = mZenConditions.getChildCount() - 1; i > mFirstConditionIndex + conditionCount; i--) {
+        for (int i = mZenConditions.getChildCount() - 1; i > mFirstConditionIndex + conditionCount;
+                i--) {
             mZenConditions.getChildAt(i).setVisibility(GONE);
         }
         // ensure something is selected
         if (mExpanded) {
             ensureSelection();
         }
+    }
+
+    private Condition forever() {
+        return new Condition(mForeverId, foreverSummary(), "", "", 0 /*icon*/, Condition.STATE_TRUE,
+                0 /*flags*/);
+    }
+
+    private String foreverSummary() {
+        return mContext.getString(com.android.internal.R.string.zen_mode_forever);
     }
 
     private ConditionTag getConditionTagAt(int index) {
@@ -556,8 +567,13 @@ public class ZenModePanel extends LinearLayout {
         return c != null && ZenModeConfig.isValidCountdownConditionId(c.id);
     }
 
+    private boolean isForever(Condition c) {
+        return c != null && mForeverId.equals(c.id);
+    }
+
     private void bind(final Condition condition, final View row) {
-        final boolean enabled = condition == null || condition.state == Condition.STATE_TRUE;
+        if (condition == null) throw new IllegalArgumentException("condition must not be null");
+        final boolean enabled = condition.state == Condition.STATE_TRUE;
         final ConditionTag tag =
                 row.getTag() != null ? (ConditionTag) row.getTag() : new ConditionTag();
         row.setTag(tag);
@@ -604,14 +620,9 @@ public class ZenModePanel extends LinearLayout {
         if (tag.line2 == null) {
             tag.line2 = (TextView) row.findViewById(android.R.id.text2);
         }
-        final String line1, line2;
-        if (condition == null) {
-            line1 = mContext.getString(com.android.internal.R.string.zen_mode_forever);
-            line2 = null;
-        } else {
-            line1 = !TextUtils.isEmpty(condition.line1) ? condition.line1 : condition.summary;
-            line2 = condition.line2;
-        }
+        final String line1 = !TextUtils.isEmpty(condition.line1) ? condition.line1
+                : condition.summary;
+        final String line2 = condition.line2;
         tag.line1.setText(line1);
         if (TextUtils.isEmpty(line2)) {
             tag.line2.setVisibility(GONE);
@@ -731,16 +742,17 @@ public class ZenModePanel extends LinearLayout {
 
     private void select(final Condition condition) {
         if (DEBUG) Log.d(mTag, "select " + condition);
+        final boolean isForever = isForever(condition);
         if (mController != null) {
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
-                    mController.setExitCondition(condition);
+                    mController.setExitCondition(isForever ? null : condition);
                 }
             });
         }
         setExitCondition(condition);
-        if (condition == null) {
+        if (isForever) {
             mPrefs.setMinuteIndex(-1);
         } else if (isCountdown(condition) && mBucketIndex != -1) {
             mPrefs.setMinuteIndex(mBucketIndex);
