@@ -1248,7 +1248,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     private void invokeDeviceEventListener(HdmiDeviceInfo info, int status) {
-        if (info.isSourceType() && !hideDevicesBehindLegacySwitch(info)) {
+        if (!hideDevicesBehindLegacySwitch(info)) {
             mService.invokeDeviceEventListeners(info, status);
         }
     }
