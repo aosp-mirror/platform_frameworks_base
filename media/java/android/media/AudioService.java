@@ -4979,9 +4979,13 @@ public class AudioService extends IAudioService.Stub {
                 boolean hasPlayback = intent.getBooleanExtra("hasPlayback", false);
                 boolean hasCapture = intent.getBooleanExtra("hasCapture", false);
                 boolean hasMIDI = intent.getBooleanExtra("hasMIDI", false);
+                int deviceClass = intent.getIntExtra("class", 0);
 
-                String params = (alsaCard == -1 && alsaDevice == -1 ? ""
-                                    : "card=" + alsaCard + ";device=" + alsaDevice);
+                String params = (alsaCard == -1 && alsaDevice == -1
+                        ? ""
+                        : "card=" + alsaCard +
+                          ";device=" + alsaDevice +
+                          ";class=" + Integer.toHexString(deviceClass));
 
                 // Playback Device
                 if (hasPlayback) {
