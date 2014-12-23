@@ -2091,6 +2091,8 @@
   <java-symbol type="bool" name="config_carrier_volte_tty_supported" />
   <java-symbol type="bool" name="config_device_vt_available" />
   <java-symbol type="bool" name="config_carrier_vt_available" />
+  <java-symbol type="bool" name="config_device_wfc_ims_available" />
+  <java-symbol type="bool" name="config_carrier_wfc_ims_available" />
   <java-symbol type="bool" name="useImsAlwaysForEmergencyCall" />
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
   <java-symbol type="layout" name="resolver_list_with_default" />

@@ -6630,6 +6630,33 @@ public final class Settings {
         public static final String ENHANCED_4G_MODE_ENABLED = "volte_vt_enabled";
 
         /**
+         * Whether WFC is enabled
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String WFC_IMS_ENABLED = "wfc_ims_enabled";
+
+        /**
+         * WFC Mode.
+         * <p>
+         * Type: int - 2=Wi-Fi preferred, 1=Cellular preferred, 0=Wi-Fi only
+         *
+         * @hide
+         */
+        public static final String WFC_IMS_MODE = "wfc_ims_mode";
+
+        /**
+         * Whether WFC roaming is enabled
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        public static final String WFC_IMS_ROAMING_ENABLED = "wfc_ims_roaming_enabled";
+
+        /**
          * Global override to disable VoLTE (independent of user setting)
          * <p>
          * Type: int (1 for disable VoLTE, 0 to use user configuration)
