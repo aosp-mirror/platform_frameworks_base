@@ -46,7 +46,7 @@ import java.util.Set;
  * Stores and restores state for the Device and Profile owners. By definition there can be
  * only one device owner, but there may be a profile owner for each user.
  */
-public class DeviceOwner {
+class DeviceOwner {
     private static final String TAG = "DevicePolicyManagerService";
 
     private static final String DEVICE_OWNER_XML = "device_owner.xml";
@@ -102,16 +102,6 @@ public class DeviceOwner {
     }
 
     /**
-     * @deprecated Use a component name instead of package name
-     * Creates an instance of the device owner object with the profile owner set.
-     */
-    static DeviceOwner createWithProfileOwner(String packageName, String ownerName, int userId) {
-        DeviceOwner owner = new DeviceOwner();
-        owner.mProfileOwners.put(userId, new OwnerInfo(ownerName, packageName));
-        return owner;
-    }
-
-    /**
      * Creates an instance of the device owner object with the profile owner set.
      */
     static DeviceOwner createWithProfileOwner(ComponentName admin, String ownerName, int userId) {
@@ -136,29 +126,12 @@ public class DeviceOwner {
         mDeviceOwner = null;
     }
 
-    /**
-     * @deprecated
-     */
-    void setProfileOwner(String packageName, String ownerName, int userId) {
-        mProfileOwners.put(userId, new OwnerInfo(ownerName, packageName));
-    }
-
     void setProfileOwner(ComponentName admin, String ownerName, int userId) {
         mProfileOwners.put(userId, new OwnerInfo(ownerName, admin));
     }
 
     void removeProfileOwner(int userId) {
         mProfileOwners.remove(userId);
-    }
-
-    /**
-     * @deprecated Use getProfileOwnerComponent
-     * @param userId
-     * @return
-     */
-    String getProfileOwnerPackageName(int userId) {
-        OwnerInfo profileOwner = mProfileOwners.get(userId);
-        return profileOwner != null ? profileOwner.packageName : null;
     }
 
     ComponentName getProfileOwnerComponent(int userId) {
@@ -207,6 +180,7 @@ public class DeviceOwner {
         return false;
     }
 
+    @VisibleForTesting
     void readOwnerFile() {
         try {
             InputStream input = openRead();
@@ -259,6 +233,7 @@ public class DeviceOwner {
         }
     }
 
+    @VisibleForTesting
     void writeOwnerFile() {
         synchronized (this) {
             writeOwnerFileLocked();
@@ -329,10 +304,10 @@ public class DeviceOwner {
         }
     }
 
-    static class OwnerInfo {
-        public String name;
-        public String packageName;
-        public ComponentName admin;
+    private static class OwnerInfo {
+        public final String name;
+        public final String packageName;
+        public final ComponentName admin;
 
         public OwnerInfo(String name, String packageName) {
             this.name = name;

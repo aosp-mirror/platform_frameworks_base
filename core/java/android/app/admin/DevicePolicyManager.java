@@ -2423,27 +2423,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @deprecated Use setProfileOwner(ComponentName ...)
-     * @hide
-     * Sets the given package as the profile owner of the given user profile. The package must
-     * already be installed and there shouldn't be an existing profile owner registered for this
-     * user. Also, this method must be called before the user has been used for the first time.
-     * @param packageName the package name of the application to be registered as profile owner.
-     * @param ownerName the human readable name of the organisation associated with this DPM.
-     * @param userHandle the userId to set the profile owner for.
-     * @return whether the package was successfully registered as the profile owner.
-     * @throws IllegalArgumentException if packageName is null, the package isn't installed, or
-     *         the user has already been set up.
-     */
-    public boolean setProfileOwner(String packageName, String ownerName, int userHandle)
-            throws IllegalArgumentException {
-        if (packageName == null) {
-            throw new NullPointerException("packageName cannot be null");
-        }
-        return setProfileOwner(new ComponentName(packageName, ""), ownerName, userHandle);
-    }
-
-    /**
      * @hide
      * Sets the given component as the profile owner of the given user profile. The package must
      * already be installed and there shouldn't be an existing profile owner registered for this

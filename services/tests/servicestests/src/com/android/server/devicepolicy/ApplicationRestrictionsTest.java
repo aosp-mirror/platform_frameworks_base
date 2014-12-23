@@ -65,7 +65,7 @@ public class ApplicationRestrictionsTest extends AndroidTestCase {
         sDpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         Settings.Secure.putInt(context.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 0);
-        sDpm.setProfileOwner(context.getPackageName(), "Test", UserHandle.myUserId());
+        sDpm.setProfileOwner(sAdminReceiver, "Test", UserHandle.myUserId());
         Settings.Secure.putInt(context.getContentResolver(),
                 Settings.Secure.USER_SETUP_COMPLETE, 1);
         // Remove the admin if already registered. It's async, so add it back
