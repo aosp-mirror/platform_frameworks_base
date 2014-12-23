@@ -1874,6 +1874,9 @@
     <!-- Flag specifying whether VoLTE availability is based on provisioning -->
     <bool name="config_carrier_volte_provisioned">false</bool>
 
+    <!-- Flag specifying whether VoLTE TTY is supported -->
+    <bool name="config_carrier_volte_tty_supported">true</bool>
+
     <!-- Flag specifying whether VT is available on device -->
     <bool name="config_device_vt_available">false</bool>
 
