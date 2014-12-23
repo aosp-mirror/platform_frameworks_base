@@ -530,7 +530,7 @@
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"ትኩስ ቃል ማወቅ"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"ትኩስ ቃል ለይቶ ለማወቅ ድምጽ እንዲቀርጽ ለመተግበሪያው ይፈቅድለታል። ቀረጻው በጀርባ ሊካሄድ ይችላል ነገር ግን ሌላ የድምጽ ቀረጻዎችን አይከለክልም (ለምሳሌ፣  የካሜራ መቅረጫ)።"</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"የድምጽ ማስተላለፊያ"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"መተግበሪያው በቀጥታ የድምጽ ማስተላለፍን እንዲቆጣጠርና የድምጽ መምሪያ ውሳኔዎችን እንዲጥስ ይፈቅድለታል።"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"መተግበሪያው በቀጥታ የድምጽ ማስተላለፍን እንዲቆጣጠርና የድምጽ መመሪያ ውሳኔዎችን እንዲጥስ ይፈቅድለታል።"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"የቪዲዮ ውጽዓት ይቅረጹ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"መተግበሪያው የቪዲዮ ውጽዓት እንዲቀርጽ እና አቅጣጫውን እንዲያዞር ያስችለዋል።"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"ደህንነቱ የተጠበቀ የቪዲዮ ውጽዓት ይቅረጹ"</string>
@@ -724,7 +724,7 @@
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"መተግበሪያው የውስጠ-ጥሪ ተጠቃሚ ተሞክሮ እንዲያቀርብ ያስችለዋል።"</string>
     <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"የታሪካዊ አውታረመረብ አጠቃቀም አንብብ"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"የተወሰኑ የአውታረ መረቦች እና ትግበራዎችን ታሪካዊ የአውታረመረብ አጠቃቀም ለማንበብ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
-    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"የአውታረ መረብ መምሪያ አደራጅ"</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"የአውታረ መረብ መመሪያ አደራጅ"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"የአውታረመረብ ቋሚ መመሪያዎችን እና ትግበራ ተኮር ደንቦችን ለማደራጀት ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"የአውታረ መረብ አጠቃቀም"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"ከመተግበሪያዎች በተለየ መልኩ እንዴት የአውታረ መረብ አጠቃቀም እንደተመዘገበ ለመቀየር ለመተግበሪያው ይፈቅዳሉ።ለመደበኛ መተግበሪያዎች አገልግሎት አይውልም።"</string>
@@ -761,7 +761,7 @@
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"የፋብሪካው ውሂብ ዳግም አስጀምርን በማከናወን፣ያለ ማስጠንቀቂያ የጡባዊውን ውሂብ አጥፋ።"</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"የፋብሪካ ውሂብ ድጋሚ አስጀምር በማከናወን ያለ ማሰጠንቀቂያ የስልኩን ውሂብ ደምስስ።"</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"የመሣሪያውን ሁሉንም ፕሮክሲ አዘጋጅ"</string>
-    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"መምሪያ እስኪነቃ ድረስ ለመጠቀም የመሣሪያውን ሁሉንም ፕሮክሲ አዘጋጅ። የመጀመሪያው የመሣሪያ አስተዳደር ብቻ የሁሉንም ፕሮክሲ ያዘጋጃል።"</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"መመሪያ እስኪነቃ ድረስ ለመጠቀም የመሣሪያውን ሁሉንም ፕሮክሲ አዘጋጅ። የመጀመሪያው የመሣሪያ አስተዳደር ብቻ የሁሉንም ፕሮክሲ ያዘጋጃል።"</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"የማያቆልፍ ይለፍ ቃል ማብቂያ ጊዜ አዘጋጅ"</string>
     <string name="policydesc_expirePassword" msgid="1729725226314691591">"የማያ ቆልፍ ይለፍ ቃል በምን ያህል ጊዜ ተደጋግሞ መለወጥ እንዳለበት ተቆጣጠር።"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"ማከማቻ ማመስጠር አዘጋጅ"</string>
