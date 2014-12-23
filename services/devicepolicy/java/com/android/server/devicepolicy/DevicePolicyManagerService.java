@@ -1662,13 +1662,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         private void manageNotification(UserHandle userHandle) {
-            final UserInfo userInfo = mUserManager.getUserInfo(userHandle.getIdentifier());
-
-            // Inactive users or managed profiles shouldn't provoke a warning
             if (!mUserManager.isUserRunning(userHandle)) {
-                return;
-            }
-            if (userInfo == null || userInfo.isManagedProfile()) {
                 return;
             }
 
