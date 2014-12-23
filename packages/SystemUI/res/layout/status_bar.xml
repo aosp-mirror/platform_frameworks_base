@@ -67,6 +67,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:singleLine="false"
+                android:fontFamily="sans-serif-condensed"
                 android:gravity="right|center_vertical"/>
 
             <include layout="@layout/system_icons" />
