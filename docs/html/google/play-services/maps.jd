@@ -13,7 +13,7 @@ header.hide=1
 <div class="col-6">
 
   <h1 itemprop="name" style="margin-bottom:0;">Google Maps Android API v2</h1>
-  <p itemprop="description">Allow your users explore the world with rich maps provided by
+  <p itemprop="description">Allow your users to explore the world with rich maps provided by
   Google. Identify locations with <b>custom markers</b>, augment the map data
   with <b>image overlays</b>, embed <b>one or more maps</b> as fragments,
   and much more.</p>
