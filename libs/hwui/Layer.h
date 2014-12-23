@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <utils/StrongPointer.h>
 #include <utils/RefBase.h>
+#include <memory>
 
 #include <GLES2/gl2.h>
 
@@ -44,9 +45,9 @@ namespace uirenderer {
 
 // Forward declarations
 class Caches;
+class RenderNode;
 class RenderState;
 class OpenGLRenderer;
-class RenderNode;
 class DeferredDisplayList;
 struct DeferStateStruct;
 
@@ -320,7 +321,7 @@ public:
      * Used for deferred updates.
      */
     bool deferredUpdateScheduled;
-    OpenGLRenderer* renderer;
+    std::unique_ptr<OpenGLRenderer> renderer;
     sp<RenderNode> renderNode;
     Rect dirtyRect;
     bool debugDrawUpdate;
@@ -417,7 +418,7 @@ private:
      * Used to defer display lists when the layer is updated with a
      * display list.
      */
-    DeferredDisplayList* deferredList;
+    std::unique_ptr<DeferredDisplayList> deferredList;
 
     /**
      * This convex path should be used to mask the layer's draw to the screen.

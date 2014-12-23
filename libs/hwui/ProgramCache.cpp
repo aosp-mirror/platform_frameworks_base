@@ -417,11 +417,6 @@ ProgramCache::~ProgramCache() {
 
 void ProgramCache::clear() {
     PROGRAM_LOGD("Clearing program cache");
-
-    size_t count = mCache.size();
-    for (size_t i = 0; i < count; i++) {
-        delete mCache.valueAt(i);
-    }
     mCache.clear();
 }
 
@@ -433,14 +428,14 @@ Program* ProgramCache::get(const ProgramDescription& description) {
         key = PROGRAM_KEY_TEXTURE;
     }
 
-    ssize_t index = mCache.indexOfKey(key);
+    auto iter = mCache.find(key);
     Program* program = NULL;
-    if (index < 0) {
+    if (iter == mCache.end()) {
         description.log("Could not find program");
         program = generateProgram(description, key);
-        mCache.add(key, program);
+        mCache[key] = std::unique_ptr<Program>(program);
     } else {
-        program = mCache.valueAt(index);
+        program = iter->second.get();
     }
     return program;
 }

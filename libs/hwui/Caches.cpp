@@ -224,9 +224,8 @@ void Caches::terminate() {
     mCurrentBuffer = 0;
 
     glDeleteBuffers(1, &mMeshIndices);
-    delete[] mRegionMesh;
     mMeshIndices = 0;
-    mRegionMesh = NULL;
+    mRegionMesh.release();
 
     glDeleteBuffers(1, &mShadowStripsIndices);
     mShadowStripsIndices = 0;
@@ -406,7 +405,7 @@ bool Caches::bindIndicesBufferInternal(const GLuint buffer) {
 
 bool Caches::bindQuadIndicesBuffer() {
     if (!mMeshIndices) {
-        uint16_t* regionIndices = new uint16_t[gMaxNumberOfQuads * 6];
+        std::unique_ptr<uint16_t[]> regionIndices(new uint16_t[gMaxNumberOfQuads * 6]);
         for (uint32_t i = 0; i < gMaxNumberOfQuads; i++) {
             uint16_t quad = i * 4;
             int index = i * 6;
@@ -421,9 +420,7 @@ bool Caches::bindQuadIndicesBuffer() {
         glGenBuffers(1, &mMeshIndices);
         bool force = bindIndicesBufferInternal(mMeshIndices);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, gMaxNumberOfQuads * 6 * sizeof(uint16_t),
-                regionIndices, GL_STATIC_DRAW);
-
-        delete[] regionIndices;
+                regionIndices.get(), GL_STATIC_DRAW);
         return force;
     }
 
@@ -432,14 +429,12 @@ bool Caches::bindQuadIndicesBuffer() {
 
 bool Caches::bindShadowIndicesBuffer() {
     if (!mShadowStripsIndices) {
-        uint16_t* shadowIndices = new uint16_t[MAX_SHADOW_INDEX_COUNT];
-        ShadowTessellator::generateShadowIndices(shadowIndices);
+        std::unique_ptr<uint16_t[]> shadowIndices(new uint16_t[MAX_SHADOW_INDEX_COUNT]);
+        ShadowTessellator::generateShadowIndices(shadowIndices.get());
         glGenBuffers(1, &mShadowStripsIndices);
         bool force = bindIndicesBufferInternal(mShadowStripsIndices);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, MAX_SHADOW_INDEX_COUNT * sizeof(uint16_t),
-            shadowIndices, GL_STATIC_DRAW);
-
-        delete[] shadowIndices;
+            shadowIndices.get(), GL_STATIC_DRAW);
         return force;
     }
 
@@ -687,10 +682,10 @@ void Caches::unregisterFunctors(uint32_t functorCount) {
 TextureVertex* Caches::getRegionMesh() {
     // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
     if (!mRegionMesh) {
-        mRegionMesh = new TextureVertex[gMaxNumberOfQuads * 4];
+        mRegionMesh.reset(new TextureVertex[gMaxNumberOfQuads * 4]);
     }
 
-    return mRegionMesh;
+    return mRegionMesh.get();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

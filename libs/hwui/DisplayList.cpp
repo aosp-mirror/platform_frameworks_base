@@ -62,18 +62,6 @@ void DisplayListData::cleanupResources() {
 
     resourceCache.unlock();
 
-    for (size_t i = 0; i < paints.size(); i++) {
-        delete paints.itemAt(i);
-    }
-
-    for (size_t i = 0; i < regions.size(); i++) {
-        delete regions.itemAt(i);
-    }
-
-    for (size_t i = 0; i < paths.size(); i++) {
-        delete paths.itemAt(i);
-    }
-
     bitmapResources.clear();
     ownedBitmapResources.clear();
     patchResources.clear();

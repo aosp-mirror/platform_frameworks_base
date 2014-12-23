@@ -313,10 +313,6 @@ void OpenGLRenderer::endTiling() {
 bool OpenGLRenderer::finish() {
     renderOverdraw();
     endTiling();
-
-    for (size_t i = 0; i < mTempPaths.size(); i++) {
-        delete mTempPaths[i];
-    }
     mTempPaths.clear();
 
     // When finish() is invoked on FBO 0 we've reached the end
@@ -800,7 +796,7 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
                     bounds.getWidth(), bounds.getHeight());
 
             // Enqueue the buffer coordinates to clear the corresponding region later
-            mLayers.push(new Rect(bounds));
+            mLayers.push_back(Rect(bounds));
         }
     }
 
@@ -1295,14 +1291,12 @@ void OpenGLRenderer::clearLayerRegions() {
         Vertex* vertex = mesh;
 
         for (uint32_t i = 0; i < count; i++) {
-            Rect* bounds = mLayers.itemAt(i);
+            const Rect& bounds = mLayers[i];
 
-            Vertex::set(vertex++, bounds->left, bounds->top);
-            Vertex::set(vertex++, bounds->right, bounds->top);
-            Vertex::set(vertex++, bounds->left, bounds->bottom);
-            Vertex::set(vertex++, bounds->right, bounds->bottom);
-
-            delete bounds;
+            Vertex::set(vertex++, bounds.left, bounds.top);
+            Vertex::set(vertex++, bounds.right, bounds.top);
+            Vertex::set(vertex++, bounds.left, bounds.bottom);
+            Vertex::set(vertex++, bounds.right, bounds.bottom);
         }
         // We must clear the list of dirty rects before we
         // call setupDraw() to prevent stencil setup to do
@@ -1324,9 +1318,6 @@ void OpenGLRenderer::clearLayerRegions() {
 
         if (scissorChanged) mCaches.enableScissor();
     } else {
-        for (uint32_t i = 0; i < count; i++) {
-            delete mLayers.itemAt(i);
-        }
         mLayers.clear();
     }
 }
@@ -2046,17 +2037,15 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
 
     const uint32_t count = meshWidth * meshHeight * 6;
 
-    Vector<ColorTextureVertex> mesh; // TODO: use C++11 unique_ptr
-    mesh.setCapacity(count);
-    ColorTextureVertex* vertex = mesh.editArray();
+    std::unique_ptr<ColorTextureVertex[]> mesh(new ColorTextureVertex[count]);
+    ColorTextureVertex* vertex = &mesh[0];
 
-    bool cleanupColors = false;
+    std::unique_ptr<int[]> tempColors;
     if (!colors) {
         uint32_t colorsCount = (meshWidth + 1) * (meshHeight + 1);
-        int* newColors = new int[colorsCount];
-        memset(newColors, 0xff, colorsCount * sizeof(int));
-        colors = newColors;
-        cleanupColors = true;
+        tempColors.reset(new int[colorsCount]);
+        memset(tempColors.get(), 0xff, colorsCount * sizeof(int));
+        colors = tempColors.get();
     }
 
     mCaches.activeTexture(0);
@@ -2099,14 +2088,12 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
     }
 
     if (quickRejectSetupScissor(left, top, right, bottom)) {
-        if (cleanupColors) delete[] colors;
         return;
     }
 
     if (!texture) {
         texture = mCaches.textureCache.get(bitmap);
         if (!texture) {
-            if (cleanupColors) delete[] colors;
             return;
         }
     }
@@ -2144,8 +2131,6 @@ void OpenGLRenderer::drawBitmapMesh(const SkBitmap* bitmap, int meshWidth, int m
     if (slot >= 0) {
         glDisableVertexAttribArray(slot);
     }
-
-    if (cleanupColors) delete[] colors;
 
     mDirty = true;
 }

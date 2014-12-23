@@ -183,12 +183,6 @@ Lookup3GammaFontRenderer::Lookup3GammaFontRenderer(): GammaFontRenderer() {
     memset(mRenderersUsageCount, 0, sizeof(uint32_t) * kGammaCount);
 }
 
-Lookup3GammaFontRenderer::~Lookup3GammaFontRenderer() {
-    for (int i = 0; i < kGammaCount; i++) {
-        delete mRenderers[i];
-    }
-}
-
 void Lookup3GammaFontRenderer::endPrecaching() {
     for (int i = 0; i < kGammaCount; i++) {
         if (mRenderers[i]) {
@@ -199,8 +193,7 @@ void Lookup3GammaFontRenderer::endPrecaching() {
 
 void Lookup3GammaFontRenderer::clear() {
     for (int i = 0; i < kGammaCount; i++) {
-        delete mRenderers[i];
-        mRenderers[i] = NULL;
+        mRenderers[i].release();
     }
 }
 
@@ -221,8 +214,7 @@ void Lookup3GammaFontRenderer::flush() {
 
     if (count <= 1 || min < 0) return;
 
-    delete mRenderers[min];
-    mRenderers[min] = NULL;
+    mRenderers[min].release();
 
     // Also eliminate the caches for large glyphs, as they consume significant memory
     for (int i = 0; i < kGammaCount; ++i) {
@@ -233,14 +225,12 @@ void Lookup3GammaFontRenderer::flush() {
 }
 
 FontRenderer* Lookup3GammaFontRenderer::getRenderer(Gamma gamma) {
-    FontRenderer* renderer = mRenderers[gamma];
-    if (!renderer) {
-        renderer = new FontRenderer();
-        mRenderers[gamma] = renderer;
-        renderer->setGammaTable(&mGammaTable[gamma * 256]);
+    if (!mRenderers[gamma]) {
+        mRenderers[gamma].reset(new FontRenderer());
+        mRenderers[gamma]->setGammaTable(&mGammaTable[gamma * 256]);
     }
     mRenderersUsageCount[gamma]++;
-    return renderer;
+    return mRenderers[gamma].get();
 }
 
 FontRenderer& Lookup3GammaFontRenderer::getFontRenderer(const SkPaint* paint) {

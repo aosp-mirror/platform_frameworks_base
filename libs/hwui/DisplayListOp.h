@@ -17,10 +17,6 @@
 #ifndef ANDROID_HWUI_DISPLAY_OPERATION_H
 #define ANDROID_HWUI_DISPLAY_OPERATION_H
 
-#ifndef LOG_TAG
-    #define LOG_TAG "OpenGLRenderer"
-#endif
-
 #include <SkColor.h>
 #include <SkPath.h>
 #include <SkPathOps.h>
@@ -38,11 +34,6 @@
 #include "RenderState.h"
 #include "UvMapper.h"
 #include "utils/LinearAllocator.h"
-
-#define CRASH() do { \
-    *(int *)(uintptr_t) 0xbbadbeef = 0; \
-    ((void(*)())0)(); /* More reliable, but doesn't say BBADBEEF */ \
-} while(false)
 
 // Use OP_LOG for logging with arglist, OP_LOGS if just printing char*
 #define OP_LOGS(s) OP_LOG("%s", (s))
@@ -66,9 +57,9 @@ class DisplayListOp {
 public:
     // These objects should always be allocated with a LinearAllocator, and never destroyed/deleted.
     // standard new() intentionally not implemented, and delete/deconstructor should never be used.
-    virtual ~DisplayListOp() { CRASH(); }
-    static void operator delete(void* ptr) { CRASH(); }
-    /** static void* operator new(size_t size); PURPOSELY OMITTED **/
+    virtual ~DisplayListOp() { LOG_ALWAYS_FATAL("Destructor not supported"); }
+    static void operator delete(void* ptr) { LOG_ALWAYS_FATAL("delete not supported"); }
+    static void* operator new(size_t size) = delete; /** PURPOSELY OMITTED **/
     static void* operator new(size_t size, LinearAllocator& allocator) {
         return allocator.alloc(size);
     }
@@ -93,10 +84,6 @@ public:
 
 class StateOp : public DisplayListOp {
 public:
-    StateOp() {};
-
-    virtual ~StateOp() {}
-
     virtual void defer(DeferStateStruct& deferStruct, int saveCount, int level,
             bool useQuickReject) {
         // default behavior only affects immediate, deferrable state, issue directly to renderer
@@ -869,7 +856,7 @@ public:
                     patchOp->mLocalBounds.top + 0.5f);
 
             // Copy & transform all the vertices for the current operation
-            TextureVertex* opVertices = opMesh->vertices;
+            TextureVertex* opVertices = opMesh->vertices.get();
             for (uint32_t j = 0; j < vertexCount; j++, opVertices++) {
                 TextureVertex::set(vertex++,
                         opVertices->x + tx, opVertices->y + ty,

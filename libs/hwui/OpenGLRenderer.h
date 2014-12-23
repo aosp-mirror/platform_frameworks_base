@@ -62,12 +62,11 @@ class TextSetupFunctor;
 class VertexBuffer;
 
 struct DrawModifiers {
-    DrawModifiers() {
-        reset();
-    }
+    DrawModifiers()
+        : mOverrideLayerAlpha(0.0f) {}
 
     void reset() {
-        memset(this, 0, sizeof(DrawModifiers));
+        mOverrideLayerAlpha = 0.0f;
     }
 
     float mOverrideLayerAlpha;
@@ -391,9 +390,10 @@ public:
     virtual GLuint onGetTargetFbo() const override { return 0; }
 
     SkPath* allocPathForFrame() {
-        SkPath* path = new SkPath();
-        mTempPaths.push_back(path);
-        return path;
+        std::unique_ptr<SkPath> path(new SkPath());
+        SkPath* returnPath = path.get();
+        mTempPaths.push_back(std::move(path));
+        return returnPath;
     }
 
 protected:
@@ -1029,7 +1029,7 @@ private:
     RenderState& mRenderState;
 
     // List of rectangles to clear after saveLayer() is invoked
-    Vector<Rect*> mLayers;
+    std::vector<Rect> mLayers;
     // List of layers to update at the beginning of a frame
     Vector< sp<Layer> > mLayerUpdates;
 
@@ -1069,7 +1069,7 @@ private:
     uint8_t mSpotShadowAlpha;
 
     // Paths kept alive for the duration of the frame
-    std::vector<SkPath*> mTempPaths;
+    std::vector<std::unique_ptr<SkPath>> mTempPaths;
 
     friend class Layer;
     friend class TextSetupFunctor;

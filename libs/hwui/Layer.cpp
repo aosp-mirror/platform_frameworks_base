@@ -54,14 +54,12 @@ Layer::Layer(Type layerType, RenderState& renderState, const uint32_t layerWidth
     texture.height = layerHeight;
     colorFilter = NULL;
     deferredUpdateScheduled = false;
-    renderer = NULL;
     renderNode = NULL;
     fbo = 0;
     stencil = NULL;
     debugDrawUpdate = false;
     hasDrawnSinceUpdate = false;
     forceFilter = false;
-    deferredList = NULL;
     convexMask = NULL;
     rendererLightPosDirty = true;
     wasBuildLayered = false;
@@ -76,8 +74,6 @@ Layer::~Layer() {
     deleteTexture();
 
     delete[] mesh;
-    delete deferredList;
-    delete renderer;
 }
 
 uint32_t Layer::computeIdealWidth(uint32_t layerWidth) {
@@ -90,7 +86,7 @@ uint32_t Layer::computeIdealHeight(uint32_t layerHeight) {
 
 void Layer::requireRenderer() {
     if (!renderer) {
-        renderer = new LayerRenderer(renderState, this);
+        renderer.reset(new LayerRenderer(renderState, this));
         renderer->initProperties();
     }
 }
@@ -241,8 +237,7 @@ void Layer::defer(const OpenGLRenderer& rootRenderer) {
         dirtyRect.set(0, 0, width, height);
     }
 
-    delete deferredList;
-    deferredList = new DeferredDisplayList(dirtyRect);
+    deferredList.reset(new DeferredDisplayList(dirtyRect));
 
     DeferStateStruct deferredState(*deferredList, *renderer,
             RenderNode::kReplayFlag_ClipChildren);
@@ -260,10 +255,7 @@ void Layer::defer(const OpenGLRenderer& rootRenderer) {
 void Layer::cancelDefer() {
     renderNode = NULL;
     deferredUpdateScheduled = false;
-    if (deferredList) {
-        delete deferredList;
-        deferredList = NULL;
-    }
+    deferredList.release();
 }
 
 void Layer::flush() {

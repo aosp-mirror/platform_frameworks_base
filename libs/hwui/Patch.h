@@ -40,14 +40,13 @@ struct TextureVertex;
 class Patch {
 public:
     Patch();
-    ~Patch();
 
     /**
      * Returns the size of this patch's mesh in bytes.
      */
     uint32_t getSize() const;
 
-    TextureVertex* vertices;
+    std::unique_ptr<TextureVertex[]> vertices;
     uint32_t verticesCount;
     uint32_t indexCount;
     bool hasEmptyQuads;

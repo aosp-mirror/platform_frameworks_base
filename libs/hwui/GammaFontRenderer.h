@@ -151,8 +151,6 @@ private:
 
 class Lookup3GammaFontRenderer: public GammaFontRenderer {
 public:
-    ~Lookup3GammaFontRenderer();
-
     void clear() override;
     void flush() override;
 
@@ -165,10 +163,9 @@ public:
     uint32_t getFontRendererSize(uint32_t fontRenderer, GLenum format) const override {
         if (fontRenderer >= kGammaCount) return 0;
 
-        FontRenderer* renderer = mRenderers[fontRenderer];
-        if (!renderer) return 0;
+        if (!mRenderers[fontRenderer]) return 0;
 
-        return renderer->getCacheSize(format);
+        return mRenderers[fontRenderer]->getCacheSize(format);
     }
 
     void describe(ProgramDescription& description, const SkPaint* paint) const override {
@@ -192,7 +189,7 @@ private:
     FontRenderer* getRenderer(Gamma gamma);
 
     uint32_t mRenderersUsageCount[kGammaCount];
-    FontRenderer* mRenderers[kGammaCount];
+    std::unique_ptr<FontRenderer> mRenderers[kGammaCount];
 
     uint8_t mGammaTable[256 * kGammaCount];
 

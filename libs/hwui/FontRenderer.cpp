@@ -770,15 +770,12 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, flo
     }
 #endif
 
-    float *gaussian = new float[2 * intRadius + 1];
-    Blur::generateGaussianWeights(gaussian, intRadius);
+    std::unique_ptr<float[]> gaussian(new float[2 * intRadius + 1]);
+    Blur::generateGaussianWeights(gaussian.get(), intRadius);
 
-    uint8_t* scratch = new uint8_t[width * height];
-    Blur::horizontal(gaussian, intRadius, *image, scratch, width, height);
-    Blur::vertical(gaussian, intRadius, scratch, *image, width, height);
-
-    delete[] gaussian;
-    delete[] scratch;
+    std::unique_ptr<uint8_t[]> scratch(new uint8_t[width * height]);
+    Blur::horizontal(gaussian.get(), intRadius, *image, scratch.get(), width, height);
+    Blur::vertical(gaussian.get(), intRadius, scratch.get(), *image, width, height);
 }
 
 static uint32_t calculateCacheSize(const Vector<CacheTexture*>& cacheTextures) {

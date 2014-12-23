@@ -42,20 +42,12 @@ struct GradientCacheEntry {
     }
 
     GradientCacheEntry(const GradientCacheEntry& entry) {
-        copy(entry.colors, entry.positions, entry.count);
-    }
-
-    ~GradientCacheEntry() {
-        delete[] colors;
-        delete[] positions;
+        copy(entry.colors.get(), entry.positions.get(), entry.count);
     }
 
     GradientCacheEntry& operator=(const GradientCacheEntry& entry) {
         if (this != &entry) {
-            delete[] colors;
-            delete[] positions;
-
-            copy(entry.colors, entry.positions, entry.count);
+            copy(entry.colors.get(), entry.positions.get(), entry.count);
         }
 
         return *this;
@@ -73,18 +65,18 @@ struct GradientCacheEntry {
         return compare(*this, other) != 0;
     }
 
-    uint32_t* colors;
-    float* positions;
+    std::unique_ptr<uint32_t[]> colors;
+    std::unique_ptr<float[]> positions;
     uint32_t count;
 
 private:
     void copy(uint32_t* colors, float* positions, uint32_t count) {
         this->count = count;
-        this->colors = new uint32_t[count];
-        this->positions = new float[count];
+        this->colors.reset(new uint32_t[count]);
+        this->positions.reset(new float[count]);
 
-        memcpy(this->colors, colors, count * sizeof(uint32_t));
-        memcpy(this->positions, positions, count * sizeof(float));
+        memcpy(this->colors.get(), colors, count * sizeof(uint32_t));
+        memcpy(this->positions.get(), positions, count * sizeof(float));
     }
 
 }; // GradientCacheEntry

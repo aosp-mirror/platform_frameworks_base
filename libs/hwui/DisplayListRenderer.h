@@ -234,21 +234,22 @@ private:
     inline const SkPath* refPath(const SkPath* path) {
         if (!path) return nullptr;
 
-        const SkPath* pathCopy = mPathMap.valueFor(path);
-        if (pathCopy == nullptr || pathCopy->getGenerationID() != path->getGenerationID()) {
+        const SkPath* cachedPath = mPathMap.valueFor(path);
+        if (cachedPath == nullptr || cachedPath->getGenerationID() != path->getGenerationID()) {
             SkPath* newPathCopy = new SkPath(*path);
             newPathCopy->setSourcePath(path);
+            cachedPath = newPathCopy;
+            std::unique_ptr<const SkPath> copy(newPathCopy);
+            mDisplayListData->paths.push_back(std::move(copy));
 
-            pathCopy = newPathCopy;
             // replaceValueFor() performs an add if the entry doesn't exist
-            mPathMap.replaceValueFor(path, pathCopy);
-            mDisplayListData->paths.add(pathCopy);
+            mPathMap.replaceValueFor(path, cachedPath);
         }
         if (mDisplayListData->sourcePaths.indexOf(path) < 0) {
             mResourceCache.incrementRefcount(path);
             mDisplayListData->sourcePaths.add(path);
         }
-        return pathCopy;
+        return cachedPath;
     }
 
     inline const SkPaint* refPaint(const SkPaint* paint) {
@@ -258,8 +259,8 @@ private:
         // so that we don't need to modify the paint every time we access it.
         SkTLazy<SkPaint> filteredPaint;
         if (mDrawFilter.get()) {
-           paint = filteredPaint.init();
-           mDrawFilter->filter(filteredPaint.get(), SkDrawFilter::kPaint_Type);
+            paint = filteredPaint.init();
+            mDrawFilter->filter(filteredPaint.get(), SkDrawFilter::kPaint_Type);
         }
 
         // compute the hash key for the paint and check the cache.
@@ -268,10 +269,12 @@ private:
         // In the unlikely event that 2 unique paints have the same hash we do a
         // object equality check to ensure we don't erroneously dedup them.
         if (cachedPaint == nullptr || *cachedPaint != *paint) {
-            cachedPaint =  new SkPaint(*paint);
+            cachedPaint = new SkPaint(*paint);
+            std::unique_ptr<const SkPaint> copy(cachedPaint);
+            mDisplayListData->paints.push_back(std::move(copy));
+
             // replaceValueFor() performs an add if the entry doesn't exist
             mPaintMap.replaceValueFor(key, cachedPaint);
-            mDisplayListData->paints.add(cachedPaint);
         }
 
         return cachedPaint;
@@ -279,10 +282,12 @@ private:
 
     inline SkPaint* copyPaint(const SkPaint* paint) {
         if (!paint) return nullptr;
-        SkPaint* paintCopy = new SkPaint(*paint);
-        mDisplayListData->paints.add(paintCopy);
 
-        return paintCopy;
+        SkPaint* returnPaint = new SkPaint(*paint);
+        std::unique_ptr<const SkPaint> copy(returnPaint);
+        mDisplayListData->paints.push_back(std::move(copy));
+
+        return returnPaint;
     }
 
     inline const SkRegion* refRegion(const SkRegion* region) {
@@ -290,16 +295,18 @@ private:
             return region;
         }
 
-        const SkRegion* regionCopy = mRegionMap.valueFor(region);
+        const SkRegion* cachedRegion = mRegionMap.valueFor(region);
         // TODO: Add generation ID to SkRegion
-        if (regionCopy == nullptr) {
-            regionCopy = new SkRegion(*region);
+        if (cachedRegion == nullptr) {
+            std::unique_ptr<const SkRegion> copy(new SkRegion(*region));
+            cachedRegion = copy.get();
+            mDisplayListData->regions.push_back(std::move(copy));
+
             // replaceValueFor() performs an add if the entry doesn't exist
-            mRegionMap.replaceValueFor(region, regionCopy);
-            mDisplayListData->regions.add(regionCopy);
+            mRegionMap.replaceValueFor(region, cachedRegion);
         }
 
-        return regionCopy;
+        return cachedRegion;
     }
 
     inline const SkBitmap* refBitmap(const SkBitmap* bitmap) {
