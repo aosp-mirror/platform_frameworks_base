@@ -525,8 +525,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     JavaVMInitArgs initArgs;
     char propBuf[PROPERTY_VALUE_MAX];
     char stackTraceFileBuf[sizeof("-Xstacktracefile:")-1 + PROPERTY_VALUE_MAX];
-    char dexoptFlagsBuf[PROPERTY_VALUE_MAX];
-    char enableAssertBuf[sizeof("-ea:")-1 + PROPERTY_VALUE_MAX];
     char jniOptsBuf[sizeof("-Xjniopts:")-1 + PROPERTY_VALUE_MAX];
     char heapstartsizeOptsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char heapsizeOptsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
@@ -536,8 +534,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char gctypeOptsBuf[sizeof("-Xgc:")-1 + PROPERTY_VALUE_MAX];
     char backgroundgcOptsBuf[sizeof("-XX:BackgroundGC=")-1 + PROPERTY_VALUE_MAX];
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
-    char jitcodecachesizeOptsBuf[sizeof("-Xjitcodecachesize:")-1 + PROPERTY_VALUE_MAX];
-    char dalvikVmLibBuf[PROPERTY_VALUE_MAX];
     char dex2oatXmsImageFlagsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmxImageFlagsBuf[sizeof("-Xmx")-1 + PROPERTY_VALUE_MAX];
     char dex2oatXmsFlagsBuf[sizeof("-Xms")-1 + PROPERTY_VALUE_MAX];
@@ -566,8 +562,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char langOption[sizeof("-Duser.language=") + 3];
     char regionOption[sizeof("-Duser.region=") + 3];
     char lockProfThresholdBuf[sizeof("-Xlockprofthreshold:")-1 + PROPERTY_VALUE_MAX];
-    char jitOpBuf[sizeof("-Xjitop:")-1 + PROPERTY_VALUE_MAX];
-    char jitMethodBuf[sizeof("-Xjitmethod:")-1 + PROPERTY_VALUE_MAX];
     char nativeBridgeLibrary[sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX];
 
     bool checkJni = false;
@@ -586,9 +580,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         /* extended JNI checking */
         addOption("-Xcheck:jni");
 
-        /* set a cap on JNI global references */
-        addOption("-Xjnigreflimit:2000");
-
         /* with -Xcheck:jni, this provides a JNI function call trace */
         //addOption("-verbose:jni");
     }
@@ -603,30 +594,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     }
 
     parseRuntimeOption("dalvik.vm.stack-trace-file", stackTraceFileBuf, "-Xstacktracefile:");
-
-    property_get("dalvik.vm.check-dex-sum", propBuf, "");
-    if (strcmp(propBuf, "true") == 0) {
-        /* perform additional DEX checksum tests */
-        addOption("-Xcheckdexsum");
-    }
-
-    property_get("log.redirect-stdio", propBuf, "");
-    if (strcmp(propBuf, "true") == 0) {
-        /* convert stdout/stderr to log messages */
-        addOption("-Xlog-stdio");
-    }
-
-    strcpy(enableAssertBuf, "-ea:");
-    property_get("dalvik.vm.enableassertions", enableAssertBuf+sizeof("-ea:")-1, "");
-    if (enableAssertBuf[sizeof("-ea:")-1] != '\0') {
-        /* accept "all" to mean "all classes and packages" */
-        if (strcmp(enableAssertBuf+sizeof("-ea:")-1, "all") == 0)
-            enableAssertBuf[3] = '\0'; // truncate to "-ea"
-        ALOGI("Assertions enabled: '%s'\n", enableAssertBuf);
-        addOption(enableAssertBuf);
-    } else {
-        ALOGV("Assertions disabled\n");
-    }
 
     strcpy(jniOptsBuf, "-Xjniopts:");
     if (parseRuntimeOption("dalvik.vm.jniopts", jniOptsBuf, "-Xjniopts:")) {
@@ -654,14 +621,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     parseRuntimeOption("dalvik.vm.heapstartsize", heapstartsizeOptsBuf, "-Xms", "4m");
     parseRuntimeOption("dalvik.vm.heapsize", heapsizeOptsBuf, "-Xmx", "16m");
 
-    // Increase the main thread's interpreter stack size for bug 6315322.
-    addOption("-XX:mainThreadStackSize=24K");
-
-    // Set the max jit code cache size.  Note: size of 0 will disable the JIT.
-    parseRuntimeOption("dalvik.vm.jit.codecachesize",
-                       jitcodecachesizeOptsBuf,
-                       "-Xjitcodecachesize:");
-
     parseRuntimeOption("dalvik.vm.heapgrowthlimit", heapgrowthlimitOptsBuf, "-XX:HeapGrowthLimit=");
     parseRuntimeOption("dalvik.vm.heapminfree", heapminfreeOptsBuf, "-XX:HeapMinFree=");
     parseRuntimeOption("dalvik.vm.heapmaxfree", heapmaxfreeOptsBuf, "-XX:HeapMaxFree=");
@@ -677,53 +636,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     parseRuntimeOption("dalvik.vm.gctype", gctypeOptsBuf, "-Xgc:");
     parseRuntimeOption("dalvik.vm.backgroundgctype", backgroundgcOptsBuf, "-XX:BackgroundGC=");
 
-    /*
-     * Enable or disable dexopt features, such as bytecode verification and
-     * calculation of register maps for precise GC.
-     */
-    property_get("dalvik.vm.dexopt-flags", dexoptFlagsBuf, "");
-    if (dexoptFlagsBuf[0] != '\0') {
-        const char* opc;
-        const char* val;
-
-        opc = strstr(dexoptFlagsBuf, "v=");     /* verification */
-        if (opc != NULL) {
-            switch (*(opc+2)) {
-            case 'n':   val = "-Xverify:none";      break;
-            case 'r':   val = "-Xverify:remote";    break;
-            case 'a':   val = "-Xverify:all";       break;
-            default:    val = NULL;                 break;
-            }
-
-            if (val != NULL) {
-                addOption(val);
-            }
-        }
-
-        opc = strstr(dexoptFlagsBuf, "o=");     /* optimization */
-        if (opc != NULL) {
-            switch (*(opc+2)) {
-            case 'n':   val = "-Xdexopt:none";      break;
-            case 'v':   val = "-Xdexopt:verified";  break;
-            case 'a':   val = "-Xdexopt:all";       break;
-            case 'f':   val = "-Xdexopt:full";      break;
-            default:    val = NULL;                 break;
-            }
-
-            if (val != NULL) {
-                addOption(val);
-            }
-        }
-
-        opc = strstr(dexoptFlagsBuf, "m=y");    /* register map */
-        if (opc != NULL) {
-            addOption("-Xgenregmap");
-
-            /* turn on precise GC while we're at it */
-            addOption("-Xgc:precise");
-        }
-    }
-
     /* enable debugging; set suspend=y to pause during VM init */
     /* use android ADB transport */
     addOption("-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y");
@@ -731,12 +643,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     parseRuntimeOption("dalvik.vm.lockprof.threshold",
                        lockProfThresholdBuf,
                        "-Xlockprofthreshold:");
-
-    /* Force interpreter-only mode for selected opcodes. Eg "1-0a,3c,f1-ff" */
-    parseRuntimeOption("dalvik.vm.jit.op", jitOpBuf, "-Xjitop:");
-
-    /* Force interpreter-only mode for selected methods */
-    parseRuntimeOption("dalvik.vm.jit.method", jitMethodBuf, "-Xjitmethod:");
 
     if (executionMode == kEMIntPortable) {
         addOption("-Xint:portable");
@@ -746,63 +652,56 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         addOption("-Xint:jit");
     }
 
-    // libart tolerates libdvm flags, but not vice versa, so only pass some options if libart.
-    property_get("persist.sys.dalvik.vm.lib.2", dalvikVmLibBuf, "libart.so");
-    bool libart = (strncmp(dalvikVmLibBuf, "libart", 6) == 0);
+    // If we are booting without the real /data, don't spend time compiling.
+    property_get("vold.decrypt", voldDecryptBuf, "");
+    bool skip_compilation = ((strcmp(voldDecryptBuf, "trigger_restart_min_framework") == 0) ||
+                             (strcmp(voldDecryptBuf, "1") == 0));
 
-    if (libart) {
-        // If we booting without the real /data, don't spend time compiling.
-        property_get("vold.decrypt", voldDecryptBuf, "");
-        bool skip_compilation = ((strcmp(voldDecryptBuf, "trigger_restart_min_framework") == 0) ||
-                                 (strcmp(voldDecryptBuf, "1") == 0));
-
-        // Extra options for boot.art/boot.oat image generation.
-        parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xms", dex2oatXmsImageFlagsBuf,
-                                   "-Xms", "-Ximage-compiler-option");
-        parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xmx", dex2oatXmxImageFlagsBuf,
-                                   "-Xmx", "-Ximage-compiler-option");
-        if (skip_compilation) {
-            addOption("-Ximage-compiler-option");
-            addOption("--compiler-filter=verify-none");
-        } else {
-            parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
-                                "--compiler-filter=", "-Ximage-compiler-option");
-        }
-
-        // Make sure there is a preloaded-classes file.
-        if (!hasFile("/system/etc/preloaded-classes")) {
-            ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
-                  strerror(errno));
-            goto bail;
-        }
+    // Extra options for boot.art/boot.oat image generation.
+    parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xms", dex2oatXmsImageFlagsBuf,
+                               "-Xms", "-Ximage-compiler-option");
+    parseCompilerRuntimeOption("dalvik.vm.image-dex2oat-Xmx", dex2oatXmxImageFlagsBuf,
+                               "-Xmx", "-Ximage-compiler-option");
+    if (skip_compilation) {
         addOption("-Ximage-compiler-option");
-        addOption("--image-classes=/system/etc/preloaded-classes");
-
-        // If there is a compiled-classes file, push it.
-        if (hasFile("/system/etc/compiled-classes")) {
-            addOption("-Ximage-compiler-option");
-            addOption("--compiled-classes=/system/etc/compiled-classes");
-        }
-
-        property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
-        parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
-
-        // Extra options for DexClassLoader.
-        parseCompilerRuntimeOption("dalvik.vm.dex2oat-Xms", dex2oatXmsFlagsBuf,
-                                   "-Xms", "-Xcompiler-option");
-        parseCompilerRuntimeOption("dalvik.vm.dex2oat-Xmx", dex2oatXmxFlagsBuf,
-                                   "-Xmx", "-Xcompiler-option");
-        if (skip_compilation) {
-            addOption("-Xcompiler-option");
-            addOption("--compiler-filter=verify-none");
-        } else {
-            parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
-                                "--compiler-filter=", "-Xcompiler-option");
-        }
-        property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
-        parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
-
+        addOption("--compiler-filter=verify-none");
+    } else {
+        parseCompilerOption("dalvik.vm.image-dex2oat-filter", dex2oatImageCompilerFilterBuf,
+                            "--compiler-filter=", "-Ximage-compiler-option");
     }
+
+    // Make sure there is a preloaded-classes file.
+    if (!hasFile("/system/etc/preloaded-classes")) {
+        ALOGE("Missing preloaded-classes file, /system/etc/preloaded-classes not found: %s\n",
+              strerror(errno));
+        goto bail;
+    }
+    addOption("-Ximage-compiler-option");
+    addOption("--image-classes=/system/etc/preloaded-classes");
+
+    // If there is a compiled-classes file, push it.
+    if (hasFile("/system/etc/compiled-classes")) {
+        addOption("-Ximage-compiler-option");
+        addOption("--compiled-classes=/system/etc/compiled-classes");
+    }
+
+    property_get("dalvik.vm.image-dex2oat-flags", dex2oatImageFlagsBuf, "");
+    parseExtraOpts(dex2oatImageFlagsBuf, "-Ximage-compiler-option");
+
+    // Extra options for DexClassLoader.
+    parseCompilerRuntimeOption("dalvik.vm.dex2oat-Xms", dex2oatXmsFlagsBuf,
+                               "-Xms", "-Xcompiler-option");
+    parseCompilerRuntimeOption("dalvik.vm.dex2oat-Xmx", dex2oatXmxFlagsBuf,
+                               "-Xmx", "-Xcompiler-option");
+    if (skip_compilation) {
+        addOption("-Xcompiler-option");
+        addOption("--compiler-filter=verify-none");
+    } else {
+        parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
+                            "--compiler-filter=", "-Xcompiler-option");
+    }
+    property_get("dalvik.vm.dex2oat-flags", dex2oatFlagsBuf, "");
+    parseExtraOpts(dex2oatFlagsBuf, "-Xcompiler-option");
 
     /* extra options; parse this late so it overrides others */
     property_get("dalvik.vm.extra-opts", extraOptsBuf, "");
@@ -820,67 +719,65 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     /*
      * Set profiler options
      */
-    if (libart) {
-        // Whether or not the profiler should be enabled.
-        property_get("dalvik.vm.profiler", propBuf, "0");
-        if (propBuf[0] == '1') {
-            addOption("-Xenable-profiler");
-        }
+    // Whether or not the profiler should be enabled.
+    property_get("dalvik.vm.profiler", propBuf, "0");
+    if (propBuf[0] == '1') {
+        addOption("-Xenable-profiler");
+    }
 
-        // Whether the profile should start upon app startup or be delayed by some random offset
-        // (in seconds) that is bound between 0 and a fixed value.
-        property_get("dalvik.vm.profile.start-immed", propBuf, "0");
-        if (propBuf[0] == '1') {
-            addOption("-Xprofile-start-immediately");
-        }
+    // Whether the profile should start upon app startup or be delayed by some random offset
+    // (in seconds) that is bound between 0 and a fixed value.
+    property_get("dalvik.vm.profile.start-immed", propBuf, "0");
+    if (propBuf[0] == '1') {
+        addOption("-Xprofile-start-immediately");
+    }
 
-        // Number of seconds during profile runs.
-        parseRuntimeOption("dalvik.vm.profile.period-secs", profilePeriod, "-Xprofile-period:");
+    // Number of seconds during profile runs.
+    parseRuntimeOption("dalvik.vm.profile.period-secs", profilePeriod, "-Xprofile-period:");
 
-        // Length of each profile run (seconds).
-        parseRuntimeOption("dalvik.vm.profile.duration-secs",
-                           profileDuration,
-                           "-Xprofile-duration:");
+    // Length of each profile run (seconds).
+    parseRuntimeOption("dalvik.vm.profile.duration-secs",
+                       profileDuration,
+                       "-Xprofile-duration:");
 
-        // Polling interval during profile run (microseconds).
-        parseRuntimeOption("dalvik.vm.profile.interval-us", profileInterval, "-Xprofile-interval:");
+    // Polling interval during profile run (microseconds).
+    parseRuntimeOption("dalvik.vm.profile.interval-us", profileInterval, "-Xprofile-interval:");
 
-        // Coefficient for period backoff.  The the period is multiplied
-        // by this value after each profile run.
-        parseRuntimeOption("dalvik.vm.profile.backoff-coeff", profileBackoff, "-Xprofile-backoff:");
+    // Coefficient for period backoff.  The the period is multiplied
+    // by this value after each profile run.
+    parseRuntimeOption("dalvik.vm.profile.backoff-coeff", profileBackoff, "-Xprofile-backoff:");
 
-        // Top K% of samples that are considered relevant when
-        // deciding if the app should be recompiled.
-        parseRuntimeOption("dalvik.vm.profile.top-k-thr",
-                           profileTopKThreshold,
-                           "-Xprofile-top-k-threshold:");
+    // Top K% of samples that are considered relevant when
+    // deciding if the app should be recompiled.
+    parseRuntimeOption("dalvik.vm.profile.top-k-thr",
+                       profileTopKThreshold,
+                       "-Xprofile-top-k-threshold:");
 
-        // The threshold after which a change in the structure of the
-        // top K% profiled samples becomes significant and triggers
-        // recompilation. A change in profile is considered
-        // significant if X% (top-k-change-threshold) of the top K%
-        // (top-k-threshold property) samples has changed.
-        parseRuntimeOption("dalvik.vm.profile.top-k-ch-thr",
-                           profileTopKChangeThreshold,
-                           "-Xprofile-top-k-change-threshold:");
+    // The threshold after which a change in the structure of the
+    // top K% profiled samples becomes significant and triggers
+    // recompilation. A change in profile is considered
+    // significant if X% (top-k-change-threshold) of the top K%
+    // (top-k-threshold property) samples has changed.
+    parseRuntimeOption("dalvik.vm.profile.top-k-ch-thr",
+                       profileTopKChangeThreshold,
+                       "-Xprofile-top-k-change-threshold:");
 
-        // Type of profile data.
-        parseRuntimeOption("dalvik.vm.profiler.type", profileType, "-Xprofile-type:");
+    // Type of profile data.
+    parseRuntimeOption("dalvik.vm.profiler.type", profileType, "-Xprofile-type:");
 
-        // Depth of bounded stack data
-        parseRuntimeOption("dalvik.vm.profile.stack-depth",
-                           profileMaxStackDepth,
-                           "-Xprofile-max-stack-depth:");
+    // Depth of bounded stack data
+    parseRuntimeOption("dalvik.vm.profile.stack-depth",
+                       profileMaxStackDepth,
+                       "-Xprofile-max-stack-depth:");
 
-        // Native bridge library. "0" means that native bridge is disabled.
-        property_get("ro.dalvik.vm.native.bridge", propBuf, "");
-        if (propBuf[0] == '\0') {
-            ALOGW("ro.dalvik.vm.native.bridge is not expected to be empty");
-        } else if (strcmp(propBuf, "0") != 0) {
-            snprintf(nativeBridgeLibrary, sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX,
-                     "-XX:NativeBridge=%s", propBuf);
-            addOption(nativeBridgeLibrary);
-        }
+    // Native bridge library. "0" means that native bridge is disabled.
+    property_get("ro.dalvik.vm.native.bridge", propBuf, "");
+    if (propBuf[0] == '\0') {
+        ALOGW("ro.dalvik.vm.native.bridge is not expected to be empty");
+    } else if (strcmp(propBuf, "0") != 0) {
+        snprintf(nativeBridgeLibrary, sizeof("-XX:NativeBridge=") + PROPERTY_VALUE_MAX,
+                 "-XX:NativeBridge=%s", propBuf);
+        addOption(nativeBridgeLibrary);
     }
 
     initArgs.version = JNI_VERSION_1_4;
