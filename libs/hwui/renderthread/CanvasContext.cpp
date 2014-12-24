@@ -47,14 +47,13 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mOpaque(!translucent)
         , mCanvas(NULL)
         , mHaveNewSurface(false)
+        , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mRootRenderNode(rootRenderNode) {
-    mAnimationContext = contextFactory->createAnimationContext(mRenderThread.timeLord());
     mRenderThread.renderState().registerCanvasContext(this);
 }
 
 CanvasContext::~CanvasContext() {
     destroy();
-    delete mAnimationContext;
     mRenderThread.renderState().unregisterCanvasContext(this);
 }
 

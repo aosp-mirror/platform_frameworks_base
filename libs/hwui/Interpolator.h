@@ -17,6 +17,7 @@
 #define INTERPOLATOR_H
 
 #include <stddef.h>
+#include <memory>
 
 #include <cutils/compiler.h>
 
@@ -107,7 +108,7 @@ public:
     virtual float interpolate(float input);
 
 private:
-    float* mValues;
+    std::unique_ptr<float[]> mValues;
     size_t mSize;
 };
 

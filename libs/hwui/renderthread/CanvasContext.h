@@ -128,7 +128,7 @@ private:
     OpenGLRenderer* mCanvas;
     bool mHaveNewSurface;
     DamageAccumulator mDamageAccumulator;
-    AnimationContext* mAnimationContext;
+    std::unique_ptr<AnimationContext> mAnimationContext;
 
     const sp<RenderNode> mRootRenderNode;
 

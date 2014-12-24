@@ -870,7 +870,7 @@ void RenderNode::issueOperations(OpenGLRenderer& renderer, T& handler) {
         return;
     }
 
-    const bool drawLayer = (mLayer && (&renderer != mLayer->renderer));
+    const bool drawLayer = (mLayer && (&renderer != mLayer->renderer.get()));
     // If we are updating the contents of mLayer, we don't want to apply any of
     // the RenderNode's properties to this issueOperations pass. Those will all
     // be applied when the layer is drawn, aka when this is true.

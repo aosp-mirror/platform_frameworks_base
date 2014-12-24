@@ -39,8 +39,8 @@ struct Vertex {
     float x, y;
 
     static inline void set(Vertex* vertex, float x, float y) {
-        vertex[0].x = x;
-        vertex[0].y = y;
+        vertex->x = x;
+        vertex->y = y;
     }
 
     static inline void set(Vertex* vertex, Vector2 val) {

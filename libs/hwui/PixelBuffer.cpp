@@ -34,7 +34,6 @@ namespace uirenderer {
 class CpuPixelBuffer: public PixelBuffer {
 public:
     CpuPixelBuffer(GLenum format, uint32_t width, uint32_t height);
-    ~CpuPixelBuffer();
 
     uint8_t* map(AccessMode mode = kAccessMode_ReadWrite);
     void unmap();
@@ -44,23 +43,19 @@ public:
     void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset);
 
 private:
-    uint8_t* mBuffer;
+    std::unique_ptr<uint8_t[]> mBuffer;
 };
 
-CpuPixelBuffer::CpuPixelBuffer(GLenum format, uint32_t width, uint32_t height):
-        PixelBuffer(format, width, height) {
-    mBuffer = new uint8_t[width * height * formatSize(format)];
-}
-
-CpuPixelBuffer::~CpuPixelBuffer() {
-    delete[] mBuffer;
+CpuPixelBuffer::CpuPixelBuffer(GLenum format, uint32_t width, uint32_t height)
+        : PixelBuffer(format, width, height)
+        , mBuffer(new uint8_t[width * height * formatSize(format)]) {
 }
 
 uint8_t* CpuPixelBuffer::map(AccessMode mode) {
     if (mAccessMode == kAccessMode_None) {
         mAccessMode = mode;
     }
-    return mBuffer;
+    return mBuffer.get();
 }
 
 void CpuPixelBuffer::unmap() {
@@ -68,12 +63,12 @@ void CpuPixelBuffer::unmap() {
 }
 
 uint8_t* CpuPixelBuffer::getMappedPointer() const {
-    return mAccessMode == kAccessMode_None ? NULL : mBuffer;
+    return mAccessMode == kAccessMode_None ? nullptr : mBuffer.get();
 }
 
 void CpuPixelBuffer::upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) {
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height,
-            mFormat, GL_UNSIGNED_BYTE, mBuffer + offset);
+            mFormat, GL_UNSIGNED_BYTE, &mBuffer[offset]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

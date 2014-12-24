@@ -16,6 +16,7 @@
 #ifndef ANIMATOR_H
 #define ANIMATOR_H
 
+#include <memory>
 #include <cutils/compiler.h>
 #include <utils/RefBase.h>
 #include <utils/StrongPointer.h>
@@ -99,7 +100,7 @@ protected:
     float mDeltaValue;
     float mFromValue;
 
-    Interpolator* mInterpolator;
+    std::unique_ptr<Interpolator> mInterpolator;
     PlayState mStagingPlayState;
     PlayState mPlayState;
     bool mHasStartValue;

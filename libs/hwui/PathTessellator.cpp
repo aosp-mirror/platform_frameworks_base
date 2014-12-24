@@ -229,7 +229,6 @@ void getStrokeVerticesFromPerimeter(const PaintInfo& paintInfo, const Vector<Ver
                 current->x - totalOffset.x,
                 current->y - totalOffset.y);
 
-        last = current;
         current = next;
         lastNormal = nextNormal;
     }
@@ -372,7 +371,6 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
                 current->y - totalOffset.y,
                 maxAlpha);
 
-        last = current;
         current = next;
         lastNormal = nextNormal;
     }
@@ -700,7 +698,6 @@ void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<V
                 current->y - outerOffset.y,
                 0.0f);
 
-        last = current;
         current = next;
         lastNormal = nextNormal;
     }

@@ -20,6 +20,7 @@
 #include <utils/KeyedVector.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
+#include <map>
 
 #include <GLES2/gl2.h>
 
@@ -55,7 +56,7 @@ private:
 
     void printLongString(const String8& shader) const;
 
-    KeyedVector<programid, Program*> mCache;
+    std::map<programid, std::unique_ptr<Program>> mCache;
 
     const bool mHasES3;
 }; // class ProgramCache

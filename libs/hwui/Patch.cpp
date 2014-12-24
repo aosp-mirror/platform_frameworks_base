@@ -32,11 +32,7 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Patch::Patch(): vertices(NULL), verticesCount(0), indexCount(0), hasEmptyQuads(false) {
-}
-
-Patch::~Patch() {
-    delete[] vertices;
+Patch::Patch(): vertices(), verticesCount(0), indexCount(0), hasEmptyQuads(false) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -55,7 +51,7 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
 
 TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeight,
         float width, float height, const UvMapper& mapper, const Res_png_9patch* patch) {
-    if (vertices) return vertices;
+    if (vertices) return vertices.get();
 
     int8_t emptyQuads = 0;
     mColors = patch->getColors();
@@ -77,8 +73,8 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
     uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 4;
     if (maxVertices == 0) return NULL;
 
-    TextureVertex* tempVertices = new TextureVertex[maxVertices];
-    TextureVertex* vertex = tempVertices;
+    vertices.reset(new TextureVertex[maxVertices]);
+    TextureVertex* vertex = vertices.get();
 
     const int32_t* xDivs = patch->getXDivs();
     const int32_t* yDivs = patch->getYDivs();
@@ -157,15 +153,13 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
                 width, bitmapWidth, quadCount);
     }
 
-    if (verticesCount == maxVertices) {
-        vertices = tempVertices;
-    } else {
-        vertices = new TextureVertex[verticesCount];
-        memcpy(vertices, tempVertices, verticesCount * sizeof(TextureVertex));
-        delete[] tempVertices;
+    if (verticesCount != maxVertices) {
+        std::unique_ptr<TextureVertex[]> reducedVertices(new TextureVertex[verticesCount]);
+        memcpy(reducedVertices.get(), vertices.get(), verticesCount * sizeof(TextureVertex));
+        vertices = std::move(reducedVertices);
     }
 
-    return vertices;
+    return vertices.get();
 }
 
 void Patch::generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex,

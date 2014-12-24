@@ -52,10 +52,10 @@ int GradientCacheEntry::compare(const GradientCacheEntry& lhs, const GradientCac
     int deltaInt = int(lhs.count) - int(rhs.count);
     if (deltaInt != 0) return deltaInt;
 
-    deltaInt = memcmp(lhs.colors, rhs.colors, lhs.count * sizeof(uint32_t));
+    deltaInt = memcmp(lhs.colors.get(), rhs.colors.get(), lhs.count * sizeof(uint32_t));
     if (deltaInt != 0) return deltaInt;
 
-    return memcmp(lhs.positions, rhs.positions, lhs.count * sizeof(float));
+    return memcmp(lhs.positions.get(), rhs.positions.get(), lhs.count * sizeof(float));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

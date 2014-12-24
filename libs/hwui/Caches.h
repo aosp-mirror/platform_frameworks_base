@@ -416,7 +416,7 @@ private:
     Extensions& mExtensions;
 
     // Used to render layers
-    TextureVertex* mRegionMesh;
+    std::unique_ptr<TextureVertex[]> mRegionMesh;
 
     // Global index buffer
     GLuint mMeshIndices;

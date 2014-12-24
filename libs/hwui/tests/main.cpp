@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
     rootNode->setPropertyFieldsDirty(RenderNode::GENERIC);
 
     ContextFactory factory;
-    RenderProxy* proxy = new RenderProxy(false, rootNode, &factory);
+    std::unique_ptr<RenderProxy> proxy(new RenderProxy(false, rootNode, &factory));
     proxy->loadSystemProperties();
     proxy->initialize(surface);
     float lightX = width / 2.0;
@@ -123,7 +123,6 @@ int main(int argc, char* argv[]) {
 
     sleep(5);
 
-    delete proxy;
     rootNode->decStrong(0);
 
     printf("Success!\n");

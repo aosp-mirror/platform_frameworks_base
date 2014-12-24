@@ -137,10 +137,10 @@ public:
     Vector<const SkBitmap*> ownedBitmapResources;
     Vector<const Res_png_9patch*> patchResources;
 
-    Vector<const SkPaint*> paints;
-    Vector<const SkPath*> paths;
+    std::vector<std::unique_ptr<const SkPaint>> paints;
+    std::vector<std::unique_ptr<const SkRegion>> regions;
+    std::vector<std::unique_ptr<const SkPath>> paths;
     SortedVector<const SkPath*> sourcePaths;
-    Vector<const SkRegion*> regions;
     Vector<Functor*> functors;
 
     const Vector<Chunk>& getChunks() const {
