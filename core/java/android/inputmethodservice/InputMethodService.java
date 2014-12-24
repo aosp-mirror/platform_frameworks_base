@@ -708,6 +708,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mRootView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         mWindow.setContentView(mRootView);
+        mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(mInsetsComputer);
         mRootView.getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsComputer);
         if (Settings.Global.getInt(getContentResolver(),
                 Settings.Global.FANCY_IME_ANIMATIONS, 0) != 0) {
