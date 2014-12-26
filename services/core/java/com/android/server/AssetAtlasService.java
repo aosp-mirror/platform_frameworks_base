@@ -424,6 +424,11 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
             }
         }
 
+        if (results.size() == 0) {
+            if (DEBUG_ATLAS) Log.w(LOG_TAG, "No atlas configuration found!");
+            return null;
+        }
+
         // Maximize the number of packed bitmaps, minimize the texture size
         Collections.sort(results, new Comparator<WorkerResult>() {
             @Override
