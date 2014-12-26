@@ -6343,14 +6343,7 @@ public final class Settings {
         public static final String CALL_AUTO_RETRY = "call_auto_retry";
 
         /**
-         * The preferred network mode   7 = Global
-         *                              6 = EvDo only
-         *                              5 = CDMA w/o EvDo
-         *                              4 = CDMA / EvDo auto
-         *                              3 = GSM / WCDMA auto
-         *                              2 = WCDMA only
-         *                              1 = GSM only
-         *                              0 = GSM / WCDMA preferred
+         * See RIL_PreferredNetworkType in ril.h
          * @hide
          */
         public static final String PREFERRED_NETWORK_MODE =
