@@ -216,10 +216,13 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 mHandler.obtainMessage(ListenerHandler.STATE_CHANGED,
                         convertConnectedToState(configs.length > 0), 0, inputId).sendToTarget();
             }
-            try {
-                connection.getCallbackLocked().onStreamConfigChanged(configs);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "error in onStreamConfigurationChanged", e);
+            ITvInputHardwareCallback callback = connection.getCallbackLocked();
+            if (callback != null) {
+                try {
+                    callback.onStreamConfigChanged(configs);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onStreamConfigurationChanged", e);
+                }
             }
         }
     }
