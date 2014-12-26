@@ -1108,6 +1108,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
     private final class HdmiDeviceEventListener extends IHdmiDeviceEventListener.Stub {
         @Override
         public void onStatusChanged(HdmiDeviceInfo deviceInfo, int status) {
+            if (!deviceInfo.isSourceType()) return;
             synchronized (mLock) {
                 int messageType = 0;
                 Object obj = null;
