@@ -1157,7 +1157,7 @@ public class AudioTrack
      * If track's creation mode is {@link #MODE_STATIC}, you must have called one of
      * the {@link #write(byte[], int, int)}, {@link #write(short[], int, int)},
      * or {@link #write(float[], int, int, int)} methods.
-     * If the mode is {@link #MODE_STREAMING}, you can optionally prime the
+     * If the mode is {@link #MODE_STREAM}, you can optionally prime the
      * output buffer by writing up to bufferSizeInBytes (from constructor) before starting.
      * This priming will avoid an immediate underrun, but is not required.
      *
