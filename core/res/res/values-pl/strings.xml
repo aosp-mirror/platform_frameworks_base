@@ -1845,7 +1845,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Aby odpiąć, poproś o PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Aby odpiąć, poproś o wzór odblokowania"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Aby odpiąć, poproś o hasło"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Aby wydłużyć czas pracy baterii, funkcja oszczędzania zmniejszy wydajność urządzenia oraz ograniczy wibracje, usługi lokalizacyjne i większość transmisji danych w tle. Poczta, wiadomości i inne aplikacje, które używają synchronizacji, mogą nie aktualizować się, dopóki ich nie otworzysz.\n\nOszczędzanie baterii wyłącza się automatycznie, gdy urządzenie jest ładowane."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Aby wydłużyć czas pracy baterii, Oszczędzanie baterii ogranicza aktywność urządzenia, w tym wibracje, usługi lokalizacyjne i przetwarzanie większości danych w tle. Poczta, czat i inne synchronizowane aplikacje mogą nie aktualizować swojej zawartości, dopóki ich nie otworzysz.\n\nOszczędzanie baterii wyłącza się automatycznie podczas ładowania urządzenia."</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"Do zakończenia przestoju o <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"Do zakończenia wyłączenia"</string>
   <plurals name="zen_mode_duration_minutes_summary">
