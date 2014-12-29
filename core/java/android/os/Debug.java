@@ -104,7 +104,7 @@ public final class Debug
 
     /**
      * This class is used to retrieved various statistics about the memory mappings for this
-     * process. The returns info broken down by dalvik, native, and other. All results are in kB.
+     * process. The returned info is broken down by dalvik, native, and other. All results are in kB.
      */
     public static class MemoryInfo implements Parcelable {
         /** The proportional set size for dalvik heap.  (Doesn't include other Dalvik overhead.) */
