@@ -16,6 +16,7 @@
 
 package com.android.server.devicepolicy;
 
+import android.content.ComponentName;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -32,7 +33,7 @@ import java.io.ByteArrayOutputStream;
 public class DeviceOwnerTest extends AndroidTestCase {
 
     private ByteArrayInputStream mInputStreamForTest;
-    private ByteArrayOutputStream mOutputStreamForTest = new ByteArrayOutputStream();
+    private final ByteArrayOutputStream mOutputStreamForTest = new ByteArrayOutputStream();
 
     @SmallTest
     public void testDeviceOwnerOnly() throws Exception {
@@ -46,13 +47,15 @@ public class DeviceOwnerTest extends AndroidTestCase {
 
         assertEquals("some.device.owner.package", in.getDeviceOwnerPackageName());
         assertEquals("owner", in.getDeviceOwnerName());
-        assertNull(in.getProfileOwnerPackageName(1));
+        assertNull(in.getProfileOwnerComponent(1));
     }
 
     @SmallTest
     public void testProfileOwnerOnly() throws Exception {
         DeviceOwner out = new DeviceOwner(null, mOutputStreamForTest);
-        out.setProfileOwner("some.profile.owner.package", "some-company", 1);
+        ComponentName admin = new ComponentName(
+            "some.profile.owner.package", "some.profile.owner.package.Class");
+        out.setProfileOwner(admin, "some-company", 1);
         out.writeOwnerFile();
 
         mInputStreamForTest = new ByteArrayInputStream(mOutputStreamForTest.toByteArray());
@@ -61,16 +64,24 @@ public class DeviceOwnerTest extends AndroidTestCase {
 
         assertNull(in.getDeviceOwnerPackageName());
         assertNull(in.getDeviceOwnerName());
-        assertEquals("some.profile.owner.package", in.getProfileOwnerPackageName(1));
+        assertEquals(admin, in.getProfileOwnerComponent(1));
         assertEquals("some-company", in.getProfileOwnerName(1));
     }
 
     @SmallTest
     public void testDeviceAndProfileOwners() throws Exception {
         DeviceOwner out = new DeviceOwner(null, mOutputStreamForTest);
+        ComponentName profileAdmin = new ComponentName(
+            "some.profile.owner.package", "some.profile.owner.package.Class");
+        ComponentName otherProfileAdmin = new ComponentName(
+            "some.other.profile.owner", "some.other.profile.owner.OtherClass");
+        // Old code used package name rather than component name, so the class
+        // bit could be empty.
+        ComponentName legacyComponentName = new ComponentName("legacy.profile.owner.package", "");
         out.setDeviceOwner("some.device.owner.package", "owner");
-        out.setProfileOwner("some.profile.owner.package", "some-company", 1);
-        out.setProfileOwner("some.other.profile.owner", "some-other-company", 2);
+        out.setProfileOwner(profileAdmin, "some-company", 1);
+        out.setProfileOwner(otherProfileAdmin, "some-other-company", 2);
+        out.setProfileOwner(legacyComponentName, "legacy-company", 3);
         out.writeOwnerFile();
 
         mInputStreamForTest = new ByteArrayInputStream(mOutputStreamForTest.toByteArray());
@@ -80,9 +91,10 @@ public class DeviceOwnerTest extends AndroidTestCase {
 
         assertEquals("some.device.owner.package", in.getDeviceOwnerPackageName());
         assertEquals("owner", in.getDeviceOwnerName());
-        assertEquals("some.profile.owner.package", in.getProfileOwnerPackageName(1));
+        assertEquals(profileAdmin, in.getProfileOwnerComponent(1));
         assertEquals("some-company", in.getProfileOwnerName(1));
-        assertEquals("some.other.profile.owner", in.getProfileOwnerPackageName(2));
+        assertEquals(otherProfileAdmin, in.getProfileOwnerComponent(2));
         assertEquals("some-other-company", in.getProfileOwnerName(2));
+        assertEquals(legacyComponentName, in.getProfileOwnerComponent(3));
     }
 }
