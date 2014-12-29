@@ -387,8 +387,6 @@ public class BluetoothControllerImpl implements BluetoothController {
             filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
             filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
             filter.addAction(BluetoothDevice.ACTION_ALIAS_CHANGED);
-            filter.addAction(BluetoothDevice.ACTION_CLASS_CHANGED);
-            filter.addAction(BluetoothDevice.ACTION_UUID);
             filter.addAction(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
             filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
             filter.addAction(BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED);
