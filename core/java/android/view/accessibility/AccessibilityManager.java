@@ -459,7 +459,7 @@ public final class AccessibilityManager {
      */
     public boolean addAccessibilityStateChangeListener(
             @NonNull AccessibilityStateChangeListener listener) {
-        // Final CopyOnArrayList - no lock needed.
+        // Final CopyOnWriteArrayList - no lock needed.
         return mAccessibilityStateChangeListeners.add(listener);
     }
 
@@ -471,7 +471,7 @@ public final class AccessibilityManager {
      */
     public boolean removeAccessibilityStateChangeListener(
             @NonNull AccessibilityStateChangeListener listener) {
-        // Final CopyOnArrayList - no lock needed.
+        // Final CopyOnWriteArrayList - no lock needed.
         return mAccessibilityStateChangeListeners.remove(listener);
     }
 
@@ -484,7 +484,7 @@ public final class AccessibilityManager {
      */
     public boolean addTouchExplorationStateChangeListener(
             @NonNull TouchExplorationStateChangeListener listener) {
-        // Final CopyOnArrayList - no lock needed.
+        // Final CopyOnWriteArrayList - no lock needed.
         return mTouchExplorationStateChangeListeners.add(listener);
     }
 
@@ -496,7 +496,7 @@ public final class AccessibilityManager {
      */
     public boolean removeTouchExplorationStateChangeListener(
             @NonNull TouchExplorationStateChangeListener listener) {
-        // Final CopyOnArrayList - no lock needed.
+        // Final CopyOnWriteArrayList - no lock needed.
         return mTouchExplorationStateChangeListeners.remove(listener);
     }
 
@@ -511,7 +511,7 @@ public final class AccessibilityManager {
      */
     public boolean addHighTextContrastStateChangeListener(
             @NonNull HighTextContrastChangeListener listener) {
-        // Final CopyOnArrayList - no lock needed.
+        // Final CopyOnWriteArrayList - no lock needed.
         return mHighTextContrastStateChangeListeners.add(listener);
     }
 
@@ -525,7 +525,7 @@ public final class AccessibilityManager {
      */
     public boolean removeHighTextContrastStateChangeListener(
             @NonNull HighTextContrastChangeListener listener) {
-        // Final CopyOnArrayList - no lock needed.
+        // Final CopyOnWriteArrayList - no lock needed.
         return mHighTextContrastStateChangeListeners.remove(listener);
     }
 
@@ -640,9 +640,9 @@ public final class AccessibilityManager {
         synchronized (mLock) {
             isEnabled = mIsEnabled;
         }
-        final int listenerCount = mAccessibilityStateChangeListeners.size();
-        for (int i = 0; i < listenerCount; i++) {
-            mAccessibilityStateChangeListeners.get(i).onAccessibilityStateChanged(isEnabled);
+        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
+        for (AccessibilityStateChangeListener listener :mAccessibilityStateChangeListeners) {
+            listener.onAccessibilityStateChanged(isEnabled);
         }
     }
 
@@ -654,10 +654,9 @@ public final class AccessibilityManager {
         synchronized (mLock) {
             isTouchExplorationEnabled = mIsTouchExplorationEnabled;
         }
-        final int listenerCount = mTouchExplorationStateChangeListeners.size();
-        for (int i = 0; i < listenerCount; i++) {
-            mTouchExplorationStateChangeListeners.get(i)
-                    .onTouchExplorationStateChanged(isTouchExplorationEnabled);
+        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
+        for (TouchExplorationStateChangeListener listener :mTouchExplorationStateChangeListeners) {
+            listener.onTouchExplorationStateChanged(isTouchExplorationEnabled);
         }
     }
 
@@ -669,10 +668,9 @@ public final class AccessibilityManager {
         synchronized (mLock) {
             isHighTextContrastEnabled = mIsHighTextContrastEnabled;
         }
-        final int listenerCount = mHighTextContrastStateChangeListeners.size();
-        for (int i = 0; i < listenerCount; i++) {
-            mHighTextContrastStateChangeListeners.get(i)
-                    .onHighTextContrastStateChanged(isHighTextContrastEnabled);
+        // Listeners are a final CopyOnWriteArrayList, hence no lock needed.
+        for (HighTextContrastChangeListener listener : mHighTextContrastStateChangeListeners) {
+            listener.onHighTextContrastStateChanged(isHighTextContrastEnabled);
         }
     }
 
