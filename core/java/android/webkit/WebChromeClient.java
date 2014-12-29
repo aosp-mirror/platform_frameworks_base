@@ -70,13 +70,14 @@ public class WebChromeClient {
     }
 
     /**
-     * Notify the host application that the current page would
-     * like to show a custom View.  This is used for Fullscreen
-     * video playback; see "HTML5 Video support" documentation on
+     * Notify the host application that the current page has entered full
+     * screen mode. The host application must show the custom View which
+     * contains the web contents &mdash; video or other HTML content &mdash;
+     * in full screen mode. Also see "Full screen support" documentation on
      * {@link WebView}.
      * @param view is the View object to be shown.
-     * @param callback is the callback to be invoked if and when the view
-     * is dismissed.
+     * @param callback invoke this callback to request the page to exit
+     * full screen mode.
      */
     public void onShowCustomView(View view, CustomViewCallback callback) {};
 
@@ -96,8 +97,10 @@ public class WebChromeClient {
             CustomViewCallback callback) {};
 
     /**
-     * Notify the host application that the current page would
-     * like to hide its custom view.
+     * Notify the host application that the current page has exited full
+     * screen mode. The host application must hide the custom View, ie. the
+     * View passed to {@link #onShowCustomView} when the content entered fullscreen.
+     * Also see "Full screen support" documentation on {@link WebView}.
      */
     public void onHideCustomView() {}
 
@@ -377,10 +380,9 @@ public class WebChromeClient {
     }
 
     /**
-     * When the user starts to playback a video element, it may take time for enough
-     * data to be buffered before the first frames can be rendered. While this buffering
-     * is taking place, the ChromeClient can use this function to provide a View to be
-     * displayed. For example, the ChromeClient could show a spinner animation.
+     * Obtains a View to be displayed while buffering of full screen video is taking
+     * place. The host application can override this method to provide a View
+     * containing a spinner or similar.
      *
      * @return View The View to be displayed whilst the video is loading.
      */
