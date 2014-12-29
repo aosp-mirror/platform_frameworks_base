@@ -2155,7 +2155,7 @@ class MountService extends IMountService.Stub
         }
     }
 
-    private String toHex(String password) {
+    private static String toHex(String password) {
         if (password == null) {
             return "";
         }
@@ -2163,18 +2163,12 @@ class MountService extends IMountService.Stub
         return new String(HexEncoding.encode(bytes));
     }
 
-    private String fromHex(String hexPassword) {
+    private static String fromHex(String hexPassword) throws IllegalArgumentException {
         if (hexPassword == null) {
             return null;
         }
 
-        final byte[] bytes;
-        try {
-            bytes = HexEncoding.decode(hexPassword.toCharArray(), false);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-
+        final byte[] bytes = HexEncoding.decode(hexPassword.toCharArray(), false);
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
