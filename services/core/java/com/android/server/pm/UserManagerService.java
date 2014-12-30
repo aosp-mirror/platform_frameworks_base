@@ -948,12 +948,6 @@ public class UserManagerService extends IUserManager.Stub {
                 lastAttemptTime = readLongAttribute(parser, ATTR_LAST_RETRY_MS, 0L);
                 profileGroupId = readIntAttribute(parser, ATTR_PROFILE_GROUP_ID,
                         UserInfo.NO_PROFILE_GROUP_ID);
-                if (profileGroupId == UserInfo.NO_PROFILE_GROUP_ID) {
-                    // This attribute was added and renamed during development of L.
-                    // TODO Remove upgrade path by 1st May 2014
-                    profileGroupId = readIntAttribute(parser, "relatedGroupId",
-                            UserInfo.NO_PROFILE_GROUP_ID);
-                }
                 String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
                 if ("true".equals(valueString)) {
                     partial = true;
