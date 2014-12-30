@@ -177,11 +177,9 @@ LOCAL_C_INCLUDES += \
     $(call include-path-for, bluedroid) \
     $(call include-path-for, libhardware)/hardware \
     $(call include-path-for, libhardware_legacy)/hardware_legacy \
-    $(TOP)/bionic/libc/dns/include \
     $(TOP)/frameworks/av/include \
     $(TOP)/system/media/camera/include \
     $(TOP)/system/netd/include \
-    external/icu/icu4c/source/common \
     external/pdfium/core/include/fpdfapi \
     external/pdfium/core/include/fpdfdoc \
     external/pdfium/fpdfsdk/include \
@@ -191,11 +189,9 @@ LOCAL_C_INCLUDES += \
     external/sqlite/dist \
     external/sqlite/android \
     external/expat/lib \
-    external/openssl/include \
     external/tremor/Tremor \
     external/jpeg \
     external/harfbuzz_ng/src \
-    external/zlib \
     frameworks/opt/emoji \
     libcore/include \
     $(call include-path-for, audio-utils) \
