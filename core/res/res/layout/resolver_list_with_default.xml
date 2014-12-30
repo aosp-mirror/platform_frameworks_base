@@ -33,9 +33,13 @@
         android:elevation="8dp">
 
         <LinearLayout
+            android:id="@+id/filtered_item_container"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:onClick="onButtonClick"
+            android:clickable="true"
+            android:background="?android:selectableItemBackground">
 
             <ImageView
                 android:id="@+id/icon"
@@ -54,6 +58,7 @@
                 android:layout_height="?attr/listPreferredItemHeight"
                 android:layout_marginStart="16dp"
                 android:textAppearance="?attr/textAppearanceMedium"
+                android:textColor="?attr/textColorPrimary"
                 android:gravity="start|center_vertical"
                 android:paddingEnd="16dp" />
 

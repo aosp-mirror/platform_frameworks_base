@@ -23,6 +23,9 @@
   <java-symbol type="string" name="reboot_progress" />
   <java-symbol type="string" name="global_action_reboot" />
 
+  <!-- Intent chooser -->
+  <java-symbol type="id" name="filtered_item_container" />
+
   <!-- Notification and battery light -->
   <java-symbol type="bool" name="config_multiColorNotificationLed" />
   <java-symbol type="bool" name="config_intrusiveBatteryLed" />
