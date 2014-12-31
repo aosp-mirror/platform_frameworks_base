@@ -19,7 +19,6 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "NetdClient.h"
-#include "resolv_netid.h"
 #include <utils/misc.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
