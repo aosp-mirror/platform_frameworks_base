@@ -323,20 +323,6 @@ public class ResolverActivity extends Activity implements AdapterView.OnItemClic
                 buttonLayout.setVisibility(View.VISIBLE);
                 mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
                 mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
-                mFilteredItemContainer = (ViewGroup) findViewById(R.id.filtered_item_container);
-                mFilteredItemContainer.setOnLongClickListener(new View.OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        DisplayResolveInfo filteredItem = mAdapter.getFilteredItem();
-
-                        if (filteredItem == null) {
-                            return false;
-                        }
-
-                        showAppDetails(filteredItem.ri);
-                        return true;
-                    }
-                });
             } else {
                 mAlwaysUseOption = false;
             }
