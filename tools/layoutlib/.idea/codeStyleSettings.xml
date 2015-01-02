@@ -67,9 +67,13 @@
             </groups>
           </arrangement>
         </codeStyleSettings>
+        <codeStyleSettings language="XML">
+          <indentOptions>
+            <option name="CONTINUATION_INDENT_SIZE" value="4" />
+          </indentOptions>
+        </codeStyleSettings>
       </value>
     </option>
     <option name="USE_PER_PROJECT_SETTINGS" value="true" />
   </component>
 </project>
-
