@@ -51,7 +51,7 @@ import java.io.IOException;
  * {@link Ndef} on NFC Forum Tag Types 1-4, and implement all NDEF operations
  * as defined in this class.
  *
- * <p>Some vendors have there own well defined specifications for storing NDEF data
+ * <p>Some vendors have their own well defined specifications for storing NDEF data
  * on tags that do not fall into the above categories. Android devices with NFC
  * should enumerate and implement {@link Ndef} under these vendor specifications
  * where possible, but it is not mandatory. {@link #getType} returns a String
