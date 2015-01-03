@@ -742,7 +742,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onNewAvrAdded(HdmiDeviceInfo avr) {
         assertRunOnServiceThread();
-        if (getSystemAudioModeSetting()) {
+        if (getSystemAudioModeSetting() && !isSystemAudioActivated()) {
             addAndStartAction(new SystemAudioAutoInitiationAction(this, avr.getLogicalAddress()));
         }
         if (isArcFeatureEnabled() && !hasAction(SetArcTransmissionStateAction.class)) {
@@ -1037,6 +1037,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected boolean handleSetSystemAudioMode(HdmiCecMessage message) {
         assertRunOnServiceThread();
         if (!isMessageForSystemAudio(message)) {
+            if (getAvrDeviceInfo() == null) {
+                // AVR may not have been discovered yet. Delay the message processing.
+                mDelayedMessageBuffer.add(message);
+                return true;
+            }
             HdmiLogger.warning("Invalid <Set System Audio Mode> message:" + message);
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             return true;
