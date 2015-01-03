@@ -450,6 +450,7 @@ final class ColorFade {
         if (!attachEglContext()) {
             return false;
         }
+        SurfaceTexture st = null;
         try {
             if (!mTexNamesGenerated) {
                 GLES20.glGenTextures(1, mTexNames, 0);
@@ -459,7 +460,7 @@ final class ColorFade {
                 mTexNamesGenerated = true;
             }
 
-            final SurfaceTexture st = new SurfaceTexture(mTexNames[0]);
+            st = new SurfaceTexture(mTexNames[0]);
             final Surface s = new Surface(st);
             try {
                 SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
@@ -483,6 +484,9 @@ final class ColorFade {
             GLES20.glViewport(0, 0, mDisplayWidth, mDisplayHeight);
             ortho(0, mDisplayWidth, 0, mDisplayHeight, -1, 1);
         } finally {
+            if (st != null) {
+                st.release();
+            }
             detachEglContext();
         }
         return true;
