@@ -54,6 +54,7 @@ final class DelayedMessageBuffer {
                 mBuffer.add(message);
                 break;
             case Constants.MESSAGE_INITIATE_ARC:
+            case Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE:
                 mBuffer.add(message);
                 break;
             default:
