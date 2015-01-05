@@ -21,6 +21,8 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.os.SystemProperties;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -39,6 +41,7 @@ import java.util.HashMap;
  * [hidden]
  */
 public class PowerProfile {
+    private static final String TAG = "PowerProfile";
 
     /*
      * POWER_CPU_SUSPEND: Power consumption when CPU is in power collapse mode.
@@ -259,8 +262,7 @@ public class PowerProfile {
     }
 
     private void readPowerValuesFromXml(Context context, boolean forTest) {
-        final int id = forTest ? com.android.internal.R.xml.power_profile_test :
-                com.android.internal.R.xml.power_profile;
+        int id = getPowerProfileResId(context, forTest);
         final Resources resources = context.getResources();
         XmlResourceParser parser = resources.getXml(id);
         boolean parsingArray = false;
@@ -419,6 +421,30 @@ public class PowerProfile {
             return getAveragePower(mCpuClusters[cluster].corePowerKey, step);
         }
         return 0;
+    }
+
+    private int getPowerProfileResId(final Context context, boolean forTest) {
+        if (forTest) {
+            return com.android.internal.R.xml.power_profile_test;
+        }
+
+        /*
+         * If ro.power_profile.override is set, use it to override the default.
+         * This is used for devices, which need to dynamically define the power profile.
+         */
+        String powerProfileOverride = SystemProperties.get("ro.power_profile.override");
+        if (!powerProfileOverride.isEmpty()) {
+            int id = context.getResources().getIdentifier(powerProfileOverride, "xml", "android");
+            if (id > 0) {
+                Slog.i(TAG, "getPowerProfileResId: using power profile \""
+                        + powerProfileOverride + "\"");
+                return id;
+            }
+            Slog.e(TAG, "getPowerProfileResId: could not retrieve power profile \""
+                    + powerProfileOverride + "\", using default instead");
+        }
+
+        return com.android.internal.R.xml.power_profile;
     }
 
     /**
