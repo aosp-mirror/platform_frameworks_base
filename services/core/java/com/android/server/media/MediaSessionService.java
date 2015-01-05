@@ -836,7 +836,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                             mAudioService.setMasterMute(!isMasterMute, flags, packageName, mICallback);
                         } else {
                             mAudioService.adjustMasterVolume(direction, flags, packageName);
-                            if (isMasterMute) {
+                            // Do not call setStreamMute when direction = 0 which is just to show
+                            // UI.
+                            if (isMasterMute && direction != 0) {
                                 mAudioService.setMasterMute(false, flags, packageName, mICallback);
                             }
                         }
@@ -847,7 +849,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                         } else {
                             mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
                                     flags, packageName);
-                            if (isStreamMute) {
+                            // Do not call setStreamMute when direction = 0 which is just to show
+                            // UI.
+                            if (isStreamMute && direction != 0) {
                                 mAudioService.setStreamMute(suggestedStream, false, mICallback);
                             }
                         }
