@@ -327,7 +327,7 @@ public class WifiTile extends QSTile<QSTile.SignalState> {
                                 R.string.quick_settings_connected :
                                 R.string.quick_settings_connected_via_wfa);
                     } else if (ap.networkId >= 0) {
-                        // TODO: Set line 2 to wifi saved string here.
+                        item.line2 = mContext.getString(R.string.quick_settings_saved);
                     }
                     item.overlay = ap.hasSecurity
                             ? mContext.getDrawable(R.drawable.qs_ic_wifi_lock)
