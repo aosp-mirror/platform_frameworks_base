@@ -955,10 +955,10 @@ public class AlertController {
                 if (mIcon != null) {
                     dialog.setIcon(mIcon);
                 }
-                if (mIconId >= 0) {
+                if (mIconId != 0) {
                     dialog.setIcon(mIconId);
                 }
-                if (mIconAttrId > 0) {
+                if (mIconAttrId != 0) {
                     dialog.setIcon(dialog.getIconAttributeResId(mIconAttrId));
                 }
             }
