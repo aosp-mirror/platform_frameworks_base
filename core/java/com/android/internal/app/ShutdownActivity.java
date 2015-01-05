@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.internal.app;
 
 import android.app.Activity;
 import android.content.Context;
