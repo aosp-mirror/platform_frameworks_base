@@ -1051,15 +1051,16 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
         // Cache the codes.
         if (mAmKeyCode == -1 || mPmKeyCode == -1) {
             // Find the first character in the AM/PM text that is unique.
-            KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
-            char amChar;
-            char pmChar;
-            for (int i = 0; i < Math.max(mAmText.length(), mPmText.length()); i++) {
-                amChar = mAmText.toLowerCase(mCurrentLocale).charAt(i);
-                pmChar = mPmText.toLowerCase(mCurrentLocale).charAt(i);
+            final KeyCharacterMap kcm = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD);
+            final CharSequence amText = mAmText.toLowerCase(mCurrentLocale);
+            final CharSequence pmText = mPmText.toLowerCase(mCurrentLocale);
+            final int N = Math.min(amText.length(), pmText.length());
+            for (int i = 0; i < N; i++) {
+                final char amChar = amText.charAt(i);
+                final char pmChar = pmText.charAt(i);
                 if (amChar != pmChar) {
-                    KeyEvent[] events = kcm.getEvents(new char[]{amChar, pmChar});
                     // There should be 4 events: a down and up for both AM and PM.
+                    final KeyEvent[] events = kcm.getEvents(new char[] { amChar, pmChar });
                     if (events != null && events.length == 4) {
                         mAmKeyCode = events[0].getKeyCode();
                         mPmKeyCode = events[2].getKeyCode();
@@ -1070,6 +1071,7 @@ class TimePickerClockDelegate extends TimePicker.AbstractTimePickerDelegate impl
                 }
             }
         }
+
         if (amOrPm == AM) {
             return mAmKeyCode;
         } else if (amOrPm == PM) {
