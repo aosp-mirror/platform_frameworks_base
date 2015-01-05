@@ -39,6 +39,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -279,6 +280,12 @@ public class Main {
         if (!renderResult.isSuccess()) {
             getLogger().error(session.getResult().getException(),
                     session.getResult().getErrorMessage());
+        }
+        String goldenDataDir = APP_TEST_RES + "/../../../golden/";
+        try {
+            ImageUtils.requireSimilar(goldenDataDir + "activity.png", session.getImage());
+        } catch (IOException e) {
+            getLogger().error(e, e.getMessage());
         }
     }
 
