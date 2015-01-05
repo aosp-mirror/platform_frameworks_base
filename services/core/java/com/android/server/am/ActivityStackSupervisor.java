@@ -24,6 +24,7 @@ import static com.android.server.am.ActivityManagerService.localLOGV;
 import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityManagerService.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
+import static com.android.server.am.ActivityManagerService.DEBUG_RECENTS;
 import static com.android.server.am.ActivityManagerService.DEBUG_RESULTS;
 import static com.android.server.am.ActivityManagerService.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerService.DEBUG_SWITCH;
@@ -460,7 +461,21 @@ public final class ActivityStackSupervisor implements DisplayListener {
                 }
             }
         }
-        return null;
+
+        // Don't give up! Look in recents.
+        if (DEBUG_RECENTS) Slog.v(TAG, "Looking for task id=" + id + " in recents");
+        TaskRecord task = mService.recentTaskForIdLocked(id);
+        if (task == null) {
+            if (DEBUG_RECENTS) Slog.d(TAG, "\tDidn't find task id=" + id + " in recents");
+            return null;
+        }
+
+        if (!restoreRecentTaskLocked(task)) {
+            if (DEBUG_RECENTS) Slog.w(TAG, "Couldn't restore task id=" + id + " found in recents");
+            return null;
+        }
+        if (DEBUG_RECENTS) Slog.w(TAG, "Restored task id=" + id + " from in recents");
+        return task;
     }
 
     ActivityRecord isInAnyStackLocked(IBinder token) {
@@ -2586,23 +2601,53 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return mLastStackId;
     }
 
-    void createStackForRestoredTaskHistory(ArrayList<TaskRecord> tasks) {
-        int stackId = createStackOnDisplay(getNextStackId(), Display.DEFAULT_DISPLAY);
-        final ActivityStack stack = getStack(stackId);
-        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final TaskRecord task = tasks.get(taskNdx);
-            stack.addTask(task, false, false);
-            final int taskId = task.taskId;
-            final ArrayList<ActivityRecord> activities = task.mActivities;
-            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
-                final ActivityRecord r = activities.get(activityNdx);
-                mWindowManager.addAppToken(0, r.appToken, taskId, stackId,
-                        r.info.screenOrientation, r.fullscreen,
-                        (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0,
-                        r.userId, r.info.configChanges, task.voiceSession != null,
-                        r.mLaunchTaskBehind);
+    private boolean restoreRecentTaskLocked(TaskRecord task) {
+        ActivityStack stack = null;
+        // Determine stack to restore task to.
+        if (mLeanbackOnlyDevice) {
+            // There is only one stack for lean back devices.
+            stack = mHomeStack;
+        } else {
+            // Look for the top stack on the home display that isn't the home stack.
+            final ArrayList<ActivityStack> homeDisplayStacks = mHomeStack.mStacks;
+            for (int stackNdx = homeDisplayStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+                final ActivityStack tmpStack = homeDisplayStacks.get(stackNdx);
+                if (!tmpStack.isHomeStack()) {
+                    stack = tmpStack;
+                    break;
+                }
             }
         }
+
+        if (stack == null) {
+            // We couldn't find a stack to restore the task to. Possible if are restoring recents
+            // before an application stack is created...Go ahead and create one on the default
+            // display.
+            stack = getStack(createStackOnDisplay(getNextStackId(), Display.DEFAULT_DISPLAY));
+            if (DEBUG_RECENTS)
+                Slog.v(TAG, "Created stack=" + stack + " for recents restoration.");
+        }
+
+        if (stack == null) {
+            // What does this mean??? Not sure how we would get here...
+            if (DEBUG_RECENTS)
+                Slog.v(TAG, "Unable to find/create stack to restore recent task=" + task);
+            return false;
+        }
+
+        stack.addTask(task, false, false);
+        if (DEBUG_RECENTS)
+            Slog.v(TAG, "Added restored task=" + task + " to stack=" + stack);
+        final ArrayList<ActivityRecord> activities = task.mActivities;
+        for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+            final ActivityRecord r = activities.get(activityNdx);
+            mWindowManager.addAppToken(0, r.appToken, task.taskId, stack.mStackId,
+                    r.info.screenOrientation, r.fullscreen,
+                    (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0,
+                    r.userId, r.info.configChanges, task.voiceSession != null,
+                    r.mLaunchTaskBehind);
+        }
+        return true;
     }
 
     void moveTaskToStack(int taskId, int stackId, boolean toTop) {

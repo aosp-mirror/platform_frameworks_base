@@ -8182,17 +8182,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private TaskRecord taskForIdLocked(int id) {
-        final TaskRecord task = recentTaskForIdLocked(id);
-        if (task != null) {
-            return task;
-        }
-
-        // Don't give up. Sometimes it just hasn't made it to recents yet.
-        return mStackSupervisor.anyTaskForIdLocked(id);
-    }
-
-    private TaskRecord recentTaskForIdLocked(int id) {
+    TaskRecord recentTaskForIdLocked(int id) {
         final int N = mRecentTasks.size();
             for (int i=0; i<N; i++) {
                 TaskRecord tr = mRecentTasks.get(i);
@@ -8208,7 +8198,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
                     "getTaskThumbnail()");
-            TaskRecord tr = recentTaskForIdLocked(id);
+            TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(id);
             if (tr != null) {
                 return tr.getTaskThumbnailLocked();
             }
@@ -8453,7 +8443,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @return Returns true if the given task was found and removed.
      */
     private boolean removeTaskByIdLocked(int taskId, boolean killProcess) {
-        TaskRecord tr = taskForIdLocked(taskId);
+        TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(taskId);
         if (tr != null) {
             tr.removeTaskActivitiesLocked();
             cleanUpRemovedTaskLocked(tr, killProcess);
@@ -8529,7 +8519,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 "moveTaskToBack()");
 
         synchronized(this) {
-            TaskRecord tr = taskForIdLocked(taskId);
+            TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(taskId);
             if (tr != null) {
                 if (tr == mStackSupervisor.mLockTaskModeTask) {
                     mStackSupervisor.showLockTaskToast();
@@ -8721,7 +8711,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                TaskRecord tr = taskForIdLocked(taskId);
+                TaskRecord tr = mStackSupervisor.anyTaskForIdLocked(taskId);
                 return tr != null && tr.stack != null && tr.stack.isHomeStack();
             }
         } finally {
@@ -11178,9 +11168,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (mRecentTasks == null) {
                 mRecentTasks = mTaskPersister.restoreTasksLocked();
                 mTaskPersister.restoreTasksFromOtherDeviceLocked();
-                if (!mRecentTasks.isEmpty()) {
-                    mStackSupervisor.createStackForRestoredTaskHistory(mRecentTasks);
-                }
                 cleanupRecentTasksLocked(UserHandle.USER_ALL);
                 mTaskPersister.startPersisting();
             }
@@ -11197,8 +11184,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             mDidUpdate = true;
                         }
                         writeLastDonePreBootReceivers(doneReceivers);
-                        showBootMessage(mContext.getText(
-                                R.string.android_upgrading_complete),
+                        showBootMessage(mContext.getText(R.string.android_upgrading_complete),
                                 false);
                         systemReady(goingCallback);
                     }
