@@ -40,6 +40,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelUuid;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -51,7 +54,6 @@ import com.android.systemui.statusbar.policy.BluetoothUtil.Profile;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 public class BluetoothControllerImpl implements BluetoothController {
@@ -68,6 +70,15 @@ public class BluetoothControllerImpl implements BluetoothController {
         BluetoothProfile.STATE_CONNECTING,
         BluetoothProfile.STATE_CONNECTED,
     };
+    // Update all the BT device states.
+    private static final int MSG_UPDATE_CONNECTION_STATES = 1;
+    // Update just one BT device.
+    private static final int MSG_UPDATE_SINGLE_CONNECTION_STATE = 2;
+    // Update whether devices are bonded or not.
+    private static final int MSG_UPDATE_BONDED_DEVICES = 3;
+
+    private static final int MSG_ADD_PROFILE = 4;
+    private static final int MSG_REM_PROFILE = 5;
 
     private final Context mContext;
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
@@ -76,12 +87,16 @@ public class BluetoothControllerImpl implements BluetoothController {
     private final ArrayMap<BluetoothDevice, DeviceInfo> mDeviceInfo = new ArrayMap<>();
     private final SparseArray<BluetoothProfile> mProfiles = new SparseArray<>();
 
+    private final H mHandler;
+
     private boolean mEnabled;
     private boolean mConnecting;
     private BluetoothDevice mLastDevice;
 
-    public BluetoothControllerImpl(Context context) {
+    public BluetoothControllerImpl(Context context, Looper bgLooper) {
         mContext = context;
+        mHandler = new H(bgLooper);
+
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         mAdapter = bluetoothManager.getAdapter();
@@ -92,7 +107,7 @@ public class BluetoothControllerImpl implements BluetoothController {
 
         mReceiver.register();
         setAdapterState(mAdapter.getState());
-        updateBluetoothDevices();
+        updateBondedDevices();
         bindAllProfiles();
     }
 
@@ -116,8 +131,9 @@ public class BluetoothControllerImpl implements BluetoothController {
 
     private static String infoToString(DeviceInfo info) {
         return info == null ? null : ("connectionState=" +
-                connectionStateToString(info.connectionState) + ",bonded=" + info.bonded
-                + ",profiles=" + profilesToString(info.connectedProfiles));
+                connectionStateToString(CONNECTION_STATES[info.connectionStateIndex])
+                + ",bonded=" + info.bonded + ",profiles="
+                + profilesToString(info.connectedProfiles));
     }
 
     private static String profilesToString(SparseArray<?> profiles) {
@@ -188,13 +204,14 @@ public class BluetoothControllerImpl implements BluetoothController {
             paired.id = device.getAddress();
             paired.tag = device;
             paired.name = device.getAliasName();
-            paired.state = connectionStateToPairedDeviceState(info.connectionState);
+            paired.state = connectionStateToPairedDeviceState(info.connectionStateIndex);
             rt.add(paired);
         }
         return rt;
     }
 
-    private static int connectionStateToPairedDeviceState(int state) {
+    private static int connectionStateToPairedDeviceState(int index) {
+        int state = CONNECTION_STATES[index];
         if (state == BluetoothAdapter.STATE_CONNECTED) return PairedDevice.STATE_CONNECTED;
         if (state == BluetoothAdapter.STATE_CONNECTING) return PairedDevice.STATE_CONNECTING;
         if (state == BluetoothAdapter.STATE_DISCONNECTING) return PairedDevice.STATE_DISCONNECTING;
@@ -259,13 +276,31 @@ public class BluetoothControllerImpl implements BluetoothController {
         return mLastDevice != null ? mLastDevice.getAliasName() : null;
     }
 
-    private void updateBluetoothDevices() {
+    private void updateBondedDevices() {
+        mHandler.removeMessages(MSG_UPDATE_BONDED_DEVICES);
+        mHandler.sendEmptyMessage(MSG_UPDATE_BONDED_DEVICES);
+    }
+
+    private void updateConnectionStates() {
+        mHandler.removeMessages(MSG_UPDATE_CONNECTION_STATES);
+        mHandler.removeMessages(MSG_UPDATE_SINGLE_CONNECTION_STATE);
+        mHandler.sendEmptyMessage(MSG_UPDATE_CONNECTION_STATES);
+    }
+
+    private void updateConnectionState(BluetoothDevice device, int profile, int state) {
+        if (mHandler.hasMessages(MSG_UPDATE_CONNECTION_STATES)) {
+            // If we are about to update all the devices, then we don't need to update this one.
+            return;
+        }
+        mHandler.obtainMessage(MSG_UPDATE_SINGLE_CONNECTION_STATE, profile, state, device)
+                .sendToTarget();
+    }
+
+    private void handleUpdateBondedDevices() {
         if (mAdapter == null) return;
         final Set<BluetoothDevice> bondedDevices = mAdapter.getBondedDevices();
         for (DeviceInfo info : mDeviceInfo.values()) {
             info.bonded = false;
-            info.connectionState = ERROR;
-            info.connectedProfiles.clear();
         }
         int bondedCount = 0;
         BluetoothDevice lastBonded = null;
@@ -279,32 +314,63 @@ public class BluetoothControllerImpl implements BluetoothController {
                 }
             }
         }
-        final int N = mProfiles.size();
-        final int[] connectionType = new int[1];
-        for (int i = 0; i < CONNECTION_STATES.length; i++) {
-            connectionType[0] = CONNECTION_STATES[i];
-            for (int j = 0; j < N; j++) {
-                int profile = mProfiles.keyAt(j);
-                List<BluetoothDevice> devices = mProfiles.get(profile)
-                        .getDevicesMatchingConnectionStates(connectionType);
-                for (int k = 0; k < devices.size(); k++) {
-                    DeviceInfo info = mDeviceInfo.get(devices.get(k));
-                    if (info != null) {
-                        info.connectionState = CONNECTION_STATES[i];
-                        if (CONNECTION_STATES[i] == BluetoothProfile.STATE_CONNECTED) {
-                            info.connectedProfiles.put(profile, true);
-                        }
-                    }
-                }
-            }
-        }
         if (mLastDevice == null && bondedCount == 1) {
             mLastDevice = lastBonded;
         }
+        updateConnectionStates();
+        firePairedDevicesChanged();
+    }
+
+    private void handleUpdateConnectionStates() {
+        final int N = mDeviceInfo.size();
+        for (int i = 0; i < N; i++) {
+            BluetoothDevice device = mDeviceInfo.keyAt(i);
+            DeviceInfo info = updateInfo(device);
+            info.connectionStateIndex = 0;
+            info.connectedProfiles.clear();
+            for (int j = 0; j < mProfiles.size(); j++) {
+                int state = mProfiles.valueAt(j).getConnectionState(device);
+                handleUpdateConnectionState(device, mProfiles.keyAt(j), state);
+            }
+        }
+        handleConnectionChange();
+        firePairedDevicesChanged();
+    }
+
+    private void handleUpdateConnectionState(BluetoothDevice device, int profile, int state) {
+        if (DEBUG) Log.d(TAG, "updateConnectionState " + BluetoothUtil.deviceToString(device)
+                + " " + BluetoothUtil.profileToString(profile)
+                + " " + BluetoothUtil.connectionStateToString(state));
+        DeviceInfo info = updateInfo(device);
+        int stateIndex = 0;
+        for (int i = 0; i < CONNECTION_STATES.length; i++) {
+            if (CONNECTION_STATES[i] == state) {
+                stateIndex = i;
+                break;
+            }
+        }
+        info.profileStates.put(profile, stateIndex);
+
+        info.connectionStateIndex = 0;
+        final int N = info.profileStates.size();
+        for (int i = 0; i < N; i++) {
+            if (info.profileStates.valueAt(i) > info.connectionStateIndex) {
+                info.connectionStateIndex = info.profileStates.valueAt(i);
+            }
+        }
+        if (state == BluetoothProfile.STATE_CONNECTED) {
+            info.connectedProfiles.put(profile, true);
+        } else {
+            info.connectedProfiles.remove(profile);
+        }
+    }
+
+    private void handleConnectionChange() {
         // If we are no longer connected to the current device, see if we are connected to
         // something else, so we don't display a name we aren't connected to.
         if (mLastDevice != null &&
-                mDeviceInfo.get(mLastDevice).connectionState != BluetoothProfile.STATE_CONNECTED) {
+                CONNECTION_STATES[mDeviceInfo.get(mLastDevice).connectionStateIndex]
+                        != BluetoothProfile.STATE_CONNECTED) {
             // Make sure we don't keep this device while it isn't connected.
             mLastDevice = null;
             // Look for anything else connected.
@@ -312,13 +378,13 @@ public class BluetoothControllerImpl implements BluetoothController {
             for (int i = 0; i < size; i++) {
                 BluetoothDevice device = mDeviceInfo.keyAt(i);
                 DeviceInfo info = mDeviceInfo.valueAt(i);
-                if (info.connectionState == BluetoothProfile.STATE_CONNECTED) {
+                if (CONNECTION_STATES[info.connectionStateIndex]
+                        == BluetoothProfile.STATE_CONNECTED) {
                     mLastDevice = device;
                     break;
                 }
             }
         }
-        firePairedDevicesChanged();
     }
 
     private void bindAllProfiles() {
@@ -366,17 +432,40 @@ public class BluetoothControllerImpl implements BluetoothController {
         cb.onBluetoothStateChange(mEnabled, mConnecting);
     }
 
+    private static int getProfileFromAction(String action) {
+        if (BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+            return BluetoothProfile.A2DP;
+        } else if (BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+            return BluetoothProfile.HEADSET;
+        } else if (BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+            return BluetoothProfile.A2DP_SINK;
+        } else if (BluetoothHeadsetClient.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+            return BluetoothProfile.HEADSET_CLIENT;
+        } else if (BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+            return BluetoothProfile.INPUT_DEVICE;
+        } else if (BluetoothMap.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+            return BluetoothProfile.MAP;
+        } else if (BluetoothPan.ACTION_CONNECTION_STATE_CHANGED.equals(action)) {
+            return BluetoothProfile.PAN;
+        }
+        if (DEBUG) Log.d(TAG, "Unknown action " + action);
+        return -1;
+    }
+
     private final ServiceListener mProfileListener = new ServiceListener() {
         @Override
         public void onServiceDisconnected(int profile) {
-            mProfiles.remove(profile);
-            updateBluetoothDevices();
+            if (DEBUG) Log.d(TAG, "Disconnected from " + BluetoothUtil.profileToString(profile));
+            // We lost a profile, don't do any updates until it gets removed.
+            mHandler.removeMessages(MSG_UPDATE_CONNECTION_STATES);
+            mHandler.removeMessages(MSG_UPDATE_SINGLE_CONNECTION_STATE);
+            mHandler.obtainMessage(MSG_REM_PROFILE, profile, 0).sendToTarget();
         }
 
         @Override
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            mProfiles.put(profile, proxy);
-            updateBluetoothDevices();
+            if (DEBUG) Log.d(TAG, "Connected to " + BluetoothUtil.profileToString(profile));
+            mHandler.obtainMessage(MSG_ADD_PROFILE, profile, 0, proxy).sendToTarget();
         }
     };
 
@@ -401,8 +490,10 @@ public class BluetoothControllerImpl implements BluetoothController {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             final BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
             if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
                 setAdapterState(intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, ERROR));
+                updateBondedDevices();
                 if (DEBUG) Log.d(TAG, "ACTION_STATE_CHANGED " + mEnabled);
             } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
                 updateInfo(device);
@@ -417,10 +508,17 @@ public class BluetoothControllerImpl implements BluetoothController {
                 mLastDevice = device;
             } else if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
                 if (DEBUG) Log.d(TAG, "ACTION_BOND_STATE_CHANGED " + device);
-                // we'll update all bonded devices below
+                updateBondedDevices();
+            } else {
+                int profile = getProfileFromAction(intent.getAction());
+                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1);
+                if (DEBUG) Log.d(TAG, "ACTION_CONNECTION_STATE_CHANGE "
+                        + BluetoothUtil.profileToString(profile)
+                        + " " + BluetoothUtil.connectionStateToString(state));
+                if ((profile != -1) && (state != -1)) {
+                    updateConnectionState(device, profile, state);
+                }
             }
-            // Always update bluetooth devices state.
-            updateBluetoothDevices();
         }
     }
 
@@ -431,9 +529,44 @@ public class BluetoothControllerImpl implements BluetoothController {
         return info;
     }
 
+    private class H extends Handler {
+        public H(Looper l) {
+            super(l);
+        }
+
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_UPDATE_CONNECTION_STATES:
+                    handleUpdateConnectionStates();
+                    firePairedDevicesChanged();
+                    break;
+                case MSG_UPDATE_SINGLE_CONNECTION_STATE:
+                    handleUpdateConnectionState((BluetoothDevice) msg.obj, msg.arg1, msg.arg2);
+                    handleConnectionChange();
+                    firePairedDevicesChanged();
+                    break;
+                case MSG_UPDATE_BONDED_DEVICES:
+                    handleUpdateBondedDevices();
+                    firePairedDevicesChanged();
+                    break;
+                case MSG_ADD_PROFILE:
+                    mProfiles.put(msg.arg1, (BluetoothProfile) msg.obj);
+                    handleUpdateConnectionStates();
+                    firePairedDevicesChanged();
+                    break;
+                case MSG_REM_PROFILE:
+                    mProfiles.remove(msg.arg1);
+                    handleUpdateConnectionStates();
+                    firePairedDevicesChanged();
+                    break;
+            }
+        };
+    };
+
     private static class DeviceInfo {
-        int connectionState = BluetoothAdapter.STATE_DISCONNECTED;
+        int connectionStateIndex = 0;
         boolean bonded;  // per getBondedDevices
         SparseArray<Boolean> connectedProfiles = new SparseArray<>();
+        SparseArray<Integer> profileStates = new SparseArray<>();
     }
 }
