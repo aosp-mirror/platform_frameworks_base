@@ -167,8 +167,8 @@
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"电视选项"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"手机选项"</string>
     <string name="silent_mode" msgid="7167703389802618663">"静音模式"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"打开收音机"</string>
-    <string name="turn_off_radio" msgid="8198784949987062346">"关闭收音机"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"打开无线电"</string>
+    <string name="turn_off_radio" msgid="8198784949987062346">"关闭无线电"</string>
     <string name="screen_lock" msgid="799094655496098153">"屏幕锁定"</string>
     <string name="power_off" msgid="4266614107412865048">"关机"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"振铃器关闭"</string>

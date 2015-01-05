@@ -770,7 +770,7 @@
     <string name="permdesc_use_sip" msgid="2297804849860225257">"ອະນຸຍາດ​ໃຫ້ແອັບຯ​ສາມາດ​ຮັບສາຍ ແລະໂທອອກ​ຜ່ານ SIP ໄດ້"</string>
     <string name="permlab_register_sim_subscription" msgid="3166535485877549177">"ລົງ​ທະ​ບຽນ SIM ການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ​ໃໝ່"</string>
     <string name="permdesc_register_sim_subscription" msgid="2138909035926222911">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ລົງ​ທະ​ບຽນ SIM ​ການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ​ໃໝ່."</string>
-    <string name="permlab_register_call_provider" msgid="108102120289029841">"ລົງ​ທະ​ບຽນການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມໃໝ່​"</string>
+    <string name="permlab_register_call_provider" msgid="108102120289029841">"ລົງ​ທະ​ບຽນການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມໃໝ່"</string>
     <string name="permdesc_register_call_provider" msgid="7034310263521081388">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ລົງ​ທະ​ບຽນການ​ເຊື່ອມ​ຕໍ່​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມໃໝ່​."</string>
     <string name="permlab_connection_manager" msgid="1116193254522105375">"ຈັດ​ການ​ການ​ເຊື່ອມ​ຕໍ່​​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ"</string>
     <string name="permdesc_connection_manager" msgid="5925480810356483565">"​ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບຯ​ຈັດ​ການ​ການ​ເຊື່ອມ​ຕໍ່​​ໂທ​ລະ​ຄົມ​ມະ​ນາ​ຄົມ."</string>
@@ -1816,7 +1816,7 @@
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"ຢືນຢັນລະຫັດ PIN ໃໝ່"</string>
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ​"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"ສ້າງ PIN ສໍາ​ລັບ​ການ​ປັບ​ປຸງ​ຂໍ້ຈໍາ​ກັດ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN ບໍ່​ກົງກັນ. ລອງໃໝ່ອີກຄັ້ງ​."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ​ສັ້ນ​ເກີນ​ໄປ​. ຕ້ອງມີຢ່າງໜ້ອຍ 4 ຫຼັກ​."</string>
   <plurals name="restr_pin_countdown">
