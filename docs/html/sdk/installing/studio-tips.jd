@@ -91,11 +91,6 @@ practices you should consider using when creating Android Studio apps. </p>
 is based), refer to the
 <a href="http://www.jetbrains.com/idea/documentation/index.jsp">IntelliJ IDEA documentation</a>.</p>
 
-<h3>External annotations</h3>
-<p>Specify annotations within the code or from an external annotation file. The Android Studio
-IDE keeps track of the restrictions and validates compliance, for example setting the data type
-of a string as not null.</p>
-
 
 <h3><em>Alt + Enter</em> key binding</h3>
 <p>For quick fixes to coding errors, the IntelliJ powered IDE implements the <em>Alt + Enter</em>
@@ -169,12 +164,9 @@ various attributes.</p>
 
 <p class="note"><strong>Note:</strong> This section lists Android Studio keyboard shortcuts
 for the default keymap. To change the default keymap on Windows and Linux, go to
-<strong>File</strong> &gt; <strong>Settings</strong> &gt; <strong>Keymap</strong>. To change
-the default keymap on Mac OS X, go to <strong>Android Studio</strong> &gt;
-<strong>Preferences</strong> &gt; <strong>Keymap</strong>.</p>
-
-<p class="note"><strong>Note:</strong> If you're using Mac OS X, update your keymap to use
-the Mac OS X 10.5+ version keymaps under <strong>Android Studio > Preferences > Keymap</strong>.</p>
+<strong>File</strong> &gt; <strong>Settings</strong> &gt; <strong>Keymap</strong>. If you're
+using Mac OS X, update your keymap to use the Mac OS X 10.5+ version keymaps under
+<strong>Android Studio > Preferences > Keymap</strong>.</p>
 
 
 <p class="table-caption"><strong>Table 1.</strong> Programming key commands</p>
