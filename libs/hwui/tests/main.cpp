@@ -24,12 +24,14 @@
 #include <DisplayListRenderer.h>
 #include <RenderNode.h>
 #include <renderthread/RenderProxy.h>
+#include <renderthread/RenderTask.h>
 
 #include "TestContext.h"
 
 using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
+using namespace android::uirenderer::test;
 
 class ContextFactory : public IContextFactory {
 public:
@@ -67,13 +69,12 @@ sp<RenderNode> createCard(int x, int y, int width, int height) {
 }
 
 int main(int argc, char* argv[]) {
-    createTestEnvironment();
+    TestContext testContext;
 
     // create the native surface
     const int width = gDisplay.w;
     const int height = gDisplay.h;
-    sp<SurfaceControl> control = createWindow(width, height);
-    sp<Surface> surface = control->getSurface();
+    sp<Surface> surface = testContext.surface();
 
     RenderNode* rootNode = new RenderNode();
     rootNode->incStrong(nullptr);
@@ -110,6 +111,8 @@ int main(int argc, char* argv[]) {
     endRecording(renderer, rootNode);
 
     for (int i = 0; i < 150; i++) {
+        testContext.waitForVsync();
+
         ATRACE_NAME("UI-Draw Frame");
         for (size_t ci = 0; ci < cards.size(); ci++) {
             cards[ci]->mutateStagingProperties().setTranslationX(i);
@@ -118,7 +121,6 @@ int main(int argc, char* argv[]) {
         }
         nsecs_t frameTimeNs = systemTime(CLOCK_MONOTONIC);
         proxy->syncAndDrawFrame(frameTimeNs, 0, gDisplay.density);
-        usleep(12000);
     }
 
     sleep(5);

@@ -16,30 +16,59 @@
 
 #include "TestContext.h"
 
-#include <gui/ISurfaceComposer.h>
-#include <gui/SurfaceComposerClient.h>
+namespace android {
+namespace uirenderer {
+namespace test {
 
-using namespace android;
+static const int IDENT_DISPLAYEVENT = 1;
 
-DisplayInfo gDisplay;
-sp<SurfaceComposerClient> gSession;
-
-void createTestEnvironment() {
-    gSession = new SurfaceComposerClient();
+static DisplayInfo getBuiltInDisplay() {
+    DisplayInfo display;
     sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
-                ISurfaceComposer::eDisplayIdMain));
-    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &gDisplay);
+            ISurfaceComposer::eDisplayIdMain));
+    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &display);
     LOG_ALWAYS_FATAL_IF(status, "Failed to get display info\n");
+    return display;
 }
 
-sp<SurfaceControl> createWindow(int width, int height) {
-    sp<SurfaceControl> control = gSession->createSurface(String8("HwuiTest"),
-            width, height, PIXEL_FORMAT_RGBX_8888);
+android::DisplayInfo gDisplay = getBuiltInDisplay();
 
-    SurfaceComposerClient::openGlobalTransaction();
-    control->setLayer(0x7FFFFFF);
-    control->show();
-    SurfaceComposerClient::closeGlobalTransaction();
-
-    return control;
+TestContext::TestContext() {
+    mLooper = new Looper(true);
+    mSurfaceComposerClient = new SurfaceComposerClient();
+    mLooper->addFd(mDisplayEventReceiver.getFd(), IDENT_DISPLAYEVENT,
+            Looper::EVENT_INPUT, nullptr, nullptr);
 }
+
+TestContext::~TestContext() {}
+
+sp<Surface> TestContext::surface() {
+    if (!mSurfaceControl.get()) {
+        mSurfaceControl = mSurfaceComposerClient->createSurface(String8("HwuiTest"),
+                gDisplay.w, gDisplay.h, PIXEL_FORMAT_RGBX_8888);
+
+        SurfaceComposerClient::openGlobalTransaction();
+        mSurfaceControl->setLayer(0x7FFFFFF);
+        mSurfaceControl->show();
+        SurfaceComposerClient::closeGlobalTransaction();
+    }
+
+    return mSurfaceControl->getSurface();
+}
+
+void TestContext::waitForVsync() {
+    // Request vsync
+    mDisplayEventReceiver.requestNextVsync();
+
+    // Wait
+    mLooper->pollOnce(-1);
+
+    // Drain it
+    DisplayEventReceiver::Event buf[100];
+    while (mDisplayEventReceiver.getEvents(buf, 100) > 0) { }
+}
+
+} // namespace test
+} // namespace uirenderer
+} // namespace android
+
