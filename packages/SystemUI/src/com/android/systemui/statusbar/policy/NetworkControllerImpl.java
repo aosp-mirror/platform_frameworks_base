@@ -134,7 +134,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private ArrayList<SignalCluster> mSignalClusters = new ArrayList<SignalCluster>();
     private ArrayList<NetworkSignalChangedCallback> mSignalsChangedCallbacks =
             new ArrayList<NetworkSignalChangedCallback>();
-    private boolean mListening;
+    @VisibleForTesting
+    boolean mListening;
 
     // The current user ID.
     private int mCurrentUserId;
@@ -474,7 +475,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             int subId = subscriptions.get(i).getSubscriptionId();
             // If we have a copy of this controller already reuse it, otherwise make a new one.
             if (cachedControllers.containsKey(subId)) {
-                mMobileSignalControllers.put(subId, cachedControllers.get(subId));
+                mMobileSignalControllers.put(subId, cachedControllers.remove(subId));
             } else {
                 MobileSignalController controller = new MobileSignalController(mContext, mConfig,
                         mHasMobileDataFeature, mPhone, mSignalsChangedCallbacks, mSignalClusters,
@@ -502,7 +503,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         updateAirplaneMode(true /* force */);
     }
 
-    private boolean hasCorrectMobileControllers(List<SubscriptionInfo> allSubscriptions) {
+    @VisibleForTesting
+    boolean hasCorrectMobileControllers(List<SubscriptionInfo> allSubscriptions) {
         if (allSubscriptions.size() != mMobileSignalControllers.size()) {
             return false;
         }
@@ -992,8 +994,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     // TODO: Move to its own file.
-    static class MobileSignalController extends SignalController<MobileSignalController.MobileState,
-            MobileSignalController.MobileIconGroup> {
+    public static class MobileSignalController extends SignalController<
+            MobileSignalController.MobileState, MobileSignalController.MobileIconGroup> {
         private final TelephonyManager mPhone;
         private final String mNetworkNameDefault;
         private final String mNetworkNameSeparator;
