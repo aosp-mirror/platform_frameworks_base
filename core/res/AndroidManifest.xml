@@ -3057,8 +3057,9 @@
                android:process=":ui">
         </activity>
 
-        <activity android:name="com.android.server.ShutdownActivity"
+        <activity android:name="com.android.internal.app.ShutdownActivity"
             android:permission="android.permission.SHUTDOWN"
+            android:theme="@style/Theme.NoDisplay"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_REQUEST_SHUTDOWN" />
