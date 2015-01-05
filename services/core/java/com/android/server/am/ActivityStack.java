@@ -2576,7 +2576,7 @@ final class ActivityStack {
         if (r != null && r.app == app) {
             // If the top running activity is from this crashing
             // process, then terminate it to avoid getting in a loop.
-            Slog.w(TAG, "  Force finishing activity "
+            Slog.w(TAG, "  Force finishing activity 1 "
                     + r.intent.getComponent().flattenToShortString());
             int taskNdx = mTaskHistory.indexOf(r.task);
             int activityNdx = r.task.mActivities.indexOf(r);
@@ -2600,7 +2600,7 @@ final class ActivityStack {
                         || r.state == ActivityState.PAUSING
                         || r.state == ActivityState.PAUSED) {
                     if (!r.isHomeActivity() || mService.mHomeProcess != r.app) {
-                        Slog.w(TAG, "  Force finishing activity "
+                        Slog.w(TAG, "  Force finishing activity 2 "
                                 + r.intent.getComponent().flattenToShortString());
                         finishActivityLocked(r, Activity.RESULT_CANCELED, null, "crashed", false);
                     }
@@ -3850,7 +3850,7 @@ final class ActivityStack {
                         }
                     }
                     didSomething = true;
-                    Slog.i(TAG, "  Force finishing activity " + r);
+                    Slog.i(TAG, "  Force finishing activity 3 " + r);
                     if (samePackage) {
                         if (r.app != null) {
                             r.app.removed = true;
@@ -3960,7 +3960,7 @@ final class ActivityStack {
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 final ActivityRecord r = activities.get(activityNdx);
                 if (r.app == app) {
-                    Slog.w(TAG, "  Force finishing activity "
+                    Slog.w(TAG, "  Force finishing activity 4 "
                             + r.intent.getComponent().flattenToShortString());
                     // Force the destroy to skip right to removal.
                     r.app = null;
