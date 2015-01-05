@@ -35,12 +35,12 @@ class CpuPixelBuffer: public PixelBuffer {
 public:
     CpuPixelBuffer(GLenum format, uint32_t width, uint32_t height);
 
-    uint8_t* map(AccessMode mode = kAccessMode_ReadWrite);
-    void unmap();
+    uint8_t* map(AccessMode mode = kAccessMode_ReadWrite) override;
+    void unmap() override;
 
-    uint8_t* getMappedPointer() const;
+    uint8_t* getMappedPointer() const override;
 
-    void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset);
+    void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) override;
 
 private:
     std::unique_ptr<uint8_t[]> mBuffer;
@@ -80,12 +80,12 @@ public:
     GpuPixelBuffer(GLenum format, uint32_t width, uint32_t height);
     ~GpuPixelBuffer();
 
-    uint8_t* map(AccessMode mode = kAccessMode_ReadWrite);
-    void unmap();
+    uint8_t* map(AccessMode mode = kAccessMode_ReadWrite) override;
+    void unmap() override;
 
-    uint8_t* getMappedPointer() const;
+    uint8_t* getMappedPointer() const override;
 
-    void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset);
+    void upload(uint32_t x, uint32_t y, uint32_t width, uint32_t height, int offset) override;
 
 private:
     GLuint mBuffer;
@@ -93,11 +93,13 @@ private:
     Caches& mCaches;
 };
 
-GpuPixelBuffer::GpuPixelBuffer(GLenum format, uint32_t width, uint32_t height):
-        PixelBuffer(format, width, height), mMappedPointer(0), mCaches(Caches::getInstance()) {
+GpuPixelBuffer::GpuPixelBuffer(GLenum format, uint32_t width, uint32_t height)
+        : PixelBuffer(format, width, height)
+        , mMappedPointer(nullptr)
+        , mCaches(Caches::getInstance()) {
     glGenBuffers(1, &mBuffer);
     mCaches.bindPixelBuffer(mBuffer);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, getSize(), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_PIXEL_UNPACK_BUFFER, getSize(), nullptr, GL_DYNAMIC_DRAW);
     mCaches.unbindPixelBuffer();
 }
 
@@ -133,7 +135,7 @@ void GpuPixelBuffer::unmap() {
             }
         }
         mAccessMode = kAccessMode_None;
-        mMappedPointer = NULL;
+        mMappedPointer = nullptr;
     }
 }
 

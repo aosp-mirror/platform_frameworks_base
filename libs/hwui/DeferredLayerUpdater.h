@@ -68,7 +68,7 @@ public:
 
     ANDROID_API void setTransform(const SkMatrix* matrix) {
         delete mTransform;
-        mTransform = matrix ? new SkMatrix(*matrix) : 0;
+        mTransform = matrix ? new SkMatrix(*matrix) : nullptr;
     }
 
     ANDROID_API void setPaint(const SkPaint* paint);

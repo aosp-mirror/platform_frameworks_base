@@ -71,7 +71,7 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
     uint32_t yCount = patch->numYDivs;
 
     uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 4;
-    if (maxVertices == 0) return NULL;
+    if (maxVertices == 0) return nullptr;
 
     vertices.reset(new TextureVertex[maxVertices]);
     TextureVertex* vertex = vertices.get();

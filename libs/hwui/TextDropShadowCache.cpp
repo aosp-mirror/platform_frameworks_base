@@ -100,7 +100,7 @@ TextDropShadowCache::TextDropShadowCache():
         mCache(LruCache<ShadowText, ShadowTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_DROP_SHADOW_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_DROP_SHADOW_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting drop shadow cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
@@ -182,7 +182,7 @@ ShadowTexture* TextDropShadowCache::get(const SkPaint* paint, const char* text, 
                 len, numGlyphs, radius, positions);
 
         if (!shadow.image) {
-            return NULL;
+            return nullptr;
         }
 
         Caches& caches = Caches::getInstance();

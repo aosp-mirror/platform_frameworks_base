@@ -25,8 +25,8 @@ namespace android {
 namespace uirenderer {
 
 DeferredLayerUpdater::DeferredLayerUpdater(renderthread::RenderThread& thread, Layer* layer)
-        : mSurfaceTexture(0)
-        , mTransform(0)
+        : mSurfaceTexture(nullptr)
+        , mTransform(nullptr)
         , mNeedsGLContextAttach(false)
         , mUpdateTexImage(false)
         , mLayer(layer)
@@ -42,14 +42,14 @@ DeferredLayerUpdater::DeferredLayerUpdater(renderthread::RenderThread& thread, L
 
 DeferredLayerUpdater::~DeferredLayerUpdater() {
     SkSafeUnref(mColorFilter);
-    setTransform(0);
+    setTransform(nullptr);
     mLayer->postDecStrong();
-    mLayer = 0;
+    mLayer = nullptr;
 }
 
 void DeferredLayerUpdater::setPaint(const SkPaint* paint) {
     OpenGLRenderer::getAlphaAndModeDirect(paint, &mAlpha, &mMode);
-    SkColorFilter* colorFilter = (paint) ? paint->getColorFilter() : NULL;
+    SkColorFilter* colorFilter = (paint) ? paint->getColorFilter() : nullptr;
     SkRefCnt_SafeAssign(mColorFilter, colorFilter);
 }
 
@@ -70,7 +70,7 @@ bool DeferredLayerUpdater::apply() {
         }
         if (mTransform) {
             mLayer->getTransform().load(*mTransform);
-            setTransform(0);
+            setTransform(nullptr);
         }
     }
     return success;
@@ -95,7 +95,7 @@ void DeferredLayerUpdater::doUpdateTexImage() {
 
         bool forceFilter = false;
         sp<GraphicBuffer> buffer = mSurfaceTexture->getCurrentBuffer();
-        if (buffer != NULL) {
+        if (buffer != nullptr) {
             // force filtration if buffer size != layer size
             forceFilter = mWidth != static_cast<int>(buffer->getWidth())
                     || mHeight != static_cast<int>(buffer->getHeight());
@@ -122,7 +122,7 @@ void DeferredLayerUpdater::detachSurfaceTexture() {
             // TODO: Elevate to fatal exception
             ALOGE("Failed to detach SurfaceTexture from context %d", err);
         }
-        mSurfaceTexture = 0;
+        mSurfaceTexture = nullptr;
         mLayer->clearTexture();
     }
 }

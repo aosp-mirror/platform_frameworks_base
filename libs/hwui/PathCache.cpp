@@ -48,7 +48,7 @@ PathDescription::PathDescription():
         style(SkPaint::kFill_Style),
         miter(4.0f),
         strokeWidth(1.0f),
-        pathEffect(NULL) {
+        pathEffect(nullptr) {
     memset(&shape, 0, sizeof(Shape));
 }
 
@@ -81,7 +81,7 @@ hash_t PathDescription::hash() const {
 
 bool PathCache::canDrawAsConvexPath(SkPath* path, const SkPaint* paint) {
     // NOTE: This should only be used after PathTessellator handles joins properly
-    return paint->getPathEffect() == NULL && path->getConvexity() == SkPath::kConvex_Convexity;
+    return paint->getPathEffect() == nullptr && path->getConvexity() == SkPath::kConvex_Convexity;
 }
 
 void PathCache::computePathBounds(const SkPath* path, const SkPaint* paint,
@@ -114,9 +114,9 @@ static void initPaint(SkPaint& paint) {
     // will be applied later when compositing the alpha8 texture
     paint.setColor(SK_ColorBLACK);
     paint.setAlpha(255);
-    paint.setColorFilter(NULL);
-    paint.setMaskFilter(NULL);
-    paint.setShader(NULL);
+    paint.setColorFilter(nullptr);
+    paint.setMaskFilter(nullptr);
+    paint.setShader(nullptr);
     SkXfermode* mode = SkXfermode::Create(SkXfermode::kSrc_Mode);
     SkSafeUnref(paint.setXfermode(mode));
 }
@@ -153,7 +153,7 @@ PathCache::PathCache():
         mCache(LruCache<PathDescription, PathTexture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_PATH_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_PATH_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_PATH_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting %s cache size to %sMB", name, property);
         setMaxSize(MB(atof(property)));
     } else {
@@ -211,7 +211,7 @@ void PathCache::removeTexture(PathTexture* texture) {
         // If there is a pending task we must wait for it to return
         // before attempting our cleanup
         const sp<Task<SkBitmap*> >& task = texture->task();
-        if (task != NULL) {
+        if (task != nullptr) {
             task->getResult();
             texture->clearTask();
         } else {
@@ -261,7 +261,7 @@ PathTexture* PathCache::addTexture(const PathDescription& entry, const SkPath *p
     uint32_t width, height;
     computePathBounds(path, paint, left, top, offset, width, height);
 
-    if (!checkTextureSize(width, height)) return NULL;
+    if (!checkTextureSize(width, height)) return nullptr;
 
     purgeCache(width, height);
 
@@ -355,7 +355,7 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
     } else {
         texture->width = 0;
         texture->height = 0;
-        t->setResult(NULL);
+        t->setResult(nullptr);
     }
 }
 
@@ -430,7 +430,7 @@ PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
         // A bitmap is attached to the texture, this means we need to
         // upload it as a GL texture
         const sp<Task<SkBitmap*> >& task = texture->task();
-        if (task != NULL) {
+        if (task != nullptr) {
             // But we must first wait for the worker thread to be done
             // producing the bitmap, so let's wait
             SkBitmap* bitmap = task->getResult();
@@ -440,7 +440,7 @@ PathTexture* PathCache::get(const SkPath* path, const SkPaint* paint) {
             } else {
                 ALOGW("Path too large to be rendered into a texture");
                 texture->clearTask();
-                texture = NULL;
+                texture = nullptr;
                 mCache.remove(entry);
             }
         } else if (path->getGenerationID() != texture->generation) {
@@ -490,7 +490,7 @@ void PathCache::precache(const SkPath* path, const SkPaint* paint) {
         // be enforced.
         mCache.put(entry, texture);
 
-        if (mProcessor == NULL) {
+        if (mProcessor == nullptr) {
             mProcessor = new PathProcessor(Caches::getInstance());
         }
         mProcessor->add(task);

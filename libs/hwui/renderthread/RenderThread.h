@@ -90,7 +90,7 @@ public:
     EglManager& eglManager() { return *mEglManager; }
 
 protected:
-    virtual bool threadLoop();
+    virtual bool threadLoop() override;
 
 private:
     friend class Singleton<RenderThread>;

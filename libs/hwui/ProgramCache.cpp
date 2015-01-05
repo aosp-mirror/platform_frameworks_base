@@ -429,7 +429,7 @@ Program* ProgramCache::get(const ProgramDescription& description) {
     }
 
     auto iter = mCache.find(key);
-    Program* program = NULL;
+    Program* program = nullptr;
     if (iter == mCache.end()) {
         description.log("Could not find program");
         program = generateProgram(description, key);

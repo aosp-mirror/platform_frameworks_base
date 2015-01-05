@@ -68,12 +68,12 @@ static bool load_dirty_regions_property() {
 EglManager::EglManager(RenderThread& thread)
         : mRenderThread(thread)
         , mEglDisplay(EGL_NO_DISPLAY)
-        , mEglConfig(0)
+        , mEglConfig(nullptr)
         , mEglContext(EGL_NO_CONTEXT)
         , mPBufferSurface(EGL_NO_SURFACE)
         , mAllowPreserveBuffer(load_dirty_regions_property())
         , mCurrentSurface(EGL_NO_SURFACE)
-        , mAtlasMap(NULL)
+        , mAtlasMap(nullptr)
         , mAtlasMapSize(0)
         , mInFrame(false) {
     mCanSetPreserveBuffer = mAllowPreserveBuffer;
@@ -194,7 +194,7 @@ void EglManager::usePBufferSurface() {
 
 EGLSurface EglManager::createSurface(EGLNativeWindowType window) {
     initialize();
-    EGLSurface surface = eglCreateWindowSurface(mEglDisplay, mEglConfig, window, NULL);
+    EGLSurface surface = eglCreateWindowSurface(mEglDisplay, mEglConfig, window, nullptr);
     LOG_ALWAYS_FATAL_IF(surface == EGL_NO_SURFACE,
             "Failed to create EGLSurface for window %p, eglErr = %s",
             (void*) window, egl_error_str());

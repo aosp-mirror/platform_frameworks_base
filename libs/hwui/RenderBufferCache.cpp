@@ -42,7 +42,7 @@ namespace uirenderer {
 
 RenderBufferCache::RenderBufferCache(): mSize(0), mMaxSize(MB(DEFAULT_RENDER_BUFFER_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_RENDER_BUFFER_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_RENDER_BUFFER_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting render buffer cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
@@ -108,7 +108,7 @@ void RenderBufferCache::clear() {
 }
 
 RenderBuffer* RenderBufferCache::get(GLenum format, const uint32_t width, const uint32_t height) {
-    RenderBuffer* buffer = NULL;
+    RenderBuffer* buffer = nullptr;
 
     RenderBufferEntry entry(format, width, height);
     ssize_t index = mCache.indexOf(entry);

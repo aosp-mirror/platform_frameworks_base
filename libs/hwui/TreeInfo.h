@@ -59,11 +59,11 @@ public:
         : mode(mode)
         , prepareTextures(mode == MODE_FULL)
         , runAnimations(true)
-        , damageAccumulator(NULL)
+        , damageAccumulator(nullptr)
         , renderState(renderState)
-        , renderer(NULL)
-        , errorHandler(NULL)
-        , canvasContext(NULL)
+        , renderer(nullptr)
+        , errorHandler(nullptr)
+        , canvasContext(nullptr)
     {}
 
     explicit TreeInfo(TraversalMode mode, const TreeInfo& clone)

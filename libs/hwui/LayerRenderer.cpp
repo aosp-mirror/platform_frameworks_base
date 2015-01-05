@@ -130,7 +130,7 @@ void LayerRenderer::generateMesh() {
     if (mLayer->region.isRect() || mLayer->region.isEmpty()) {
         if (mLayer->mesh) {
             delete[] mLayer->mesh;
-            mLayer->mesh = NULL;
+            mLayer->mesh = nullptr;
             mLayer->meshElementCount = 0;
         }
 
@@ -151,7 +151,7 @@ void LayerRenderer::generateMesh() {
 
     if (mLayer->mesh && mLayer->meshElementCount < elementCount) {
         delete[] mLayer->mesh;
-        mLayer->mesh = NULL;
+        mLayer->mesh = nullptr;
     }
 
     if (!mLayer->mesh) {
@@ -192,14 +192,14 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
     GLuint fbo = caches.fboCache.get();
     if (!fbo) {
         ALOGW("Could not obtain an FBO");
-        return NULL;
+        return nullptr;
     }
 
     caches.activeTexture(0);
     Layer* layer = caches.layerCache.get(renderState, width, height);
     if (!layer) {
         ALOGW("Could not obtain a layer");
-        return NULL;
+        return nullptr;
     }
 
     // We first obtain a layer before comparing against the max texture size
@@ -212,9 +212,9 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
 
         // Creating a new layer always increment its refcount by 1, this allows
         // us to destroy the layer object if one was created for us
-        layer->decStrong(0);
+        layer->decStrong(nullptr);
 
-        return NULL;
+        return nullptr;
     }
 
     layer->setFbo(fbo);
@@ -222,7 +222,7 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
     layer->texCoords.set(0.0f, height / float(layer->getHeight()),
             width / float(layer->getWidth()), 0.0f);
     layer->setAlpha(255, SkXfermode::kSrcOver_Mode);
-    layer->setColorFilter(NULL);
+    layer->setColorFilter(nullptr);
     layer->setDirty(true);
     layer->region.clear();
 
@@ -240,8 +240,8 @@ Layer* LayerRenderer::createRenderLayer(RenderState& renderState, uint32_t width
         if (glGetError() != GL_NO_ERROR) {
             ALOGE("Could not allocate texture for layer (fbo=%d %dx%d)", fbo, width, height);
             renderState.bindFramebuffer(previousFbo);
-            layer->decStrong(0);
-            return NULL;
+            layer->decStrong(nullptr);
+            return nullptr;
         }
     }
 
@@ -316,7 +316,7 @@ void LayerRenderer::destroyLayer(Layer* layer) {
 
         if (!Caches::getInstance().layerCache.put(layer)) {
             LAYER_RENDERER_LOGD("  Destroyed!");
-            layer->decStrong(0);
+            layer->decStrong(nullptr);
         } else {
             LAYER_RENDERER_LOGD("  Cached!");
 #if DEBUG_LAYER_RENDERER
@@ -423,7 +423,7 @@ bool LayerRenderer::copyLayer(RenderState& renderState, Layer* layer, SkBitmap* 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, bitmap->width(), bitmap->height(),
-                0, format, type, NULL);
+                0, format, type, nullptr);
         if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,

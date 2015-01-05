@@ -80,7 +80,7 @@ public:
     void destroy();
 
     // IFrameCallback, Chroreographer-driven frame callback entry point
-    virtual void doFrame();
+    virtual void doFrame() override;
 
     void buildLayer(RenderNode* node);
     bool copyLayerInto(DeferredLayerUpdater* layer, SkBitmap* bitmap);

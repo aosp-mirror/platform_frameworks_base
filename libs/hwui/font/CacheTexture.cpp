@@ -43,7 +43,7 @@ CacheBlock* CacheBlock::insertBlock(CacheBlock* head, CacheBlock* newBlock) {
 #endif
 
     CacheBlock* currBlock = head;
-    CacheBlock* prevBlock = NULL;
+    CacheBlock* prevBlock = nullptr;
 
     while (currBlock && currBlock->mY != TEXTURE_BORDER_SIZE) {
         if (newBlock->mWidth < currBlock->mWidth) {
@@ -110,9 +110,9 @@ CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock* blockToRemove)
 ///////////////////////////////////////////////////////////////////////////////
 
 CacheTexture::CacheTexture(uint16_t width, uint16_t height, GLenum format, uint32_t maxQuadCount) :
-            mTexture(NULL), mTextureId(0), mWidth(width), mHeight(height), mFormat(format),
+            mTexture(nullptr), mTextureId(0), mWidth(width), mHeight(height), mFormat(format),
             mLinearFiltering(false), mDirty(false), mNumGlyphs(0),
-            mMesh(NULL), mCurrentQuad(0), mMaxQuadCount(maxQuadCount),
+            mMesh(nullptr), mCurrentQuad(0), mMaxQuadCount(maxQuadCount),
             mCaches(Caches::getInstance()) {
     mCacheBlocks = new CacheBlock(TEXTURE_BORDER_SIZE, TEXTURE_BORDER_SIZE,
             mWidth - TEXTURE_BORDER_SIZE, mHeight - TEXTURE_BORDER_SIZE);
@@ -131,7 +131,7 @@ CacheTexture::~CacheTexture() {
 
 void CacheTexture::reset() {
     // Delete existing cache blocks
-    while (mCacheBlocks != NULL) {
+    while (mCacheBlocks != nullptr) {
         CacheBlock* tmpBlock = mCacheBlocks;
         mCacheBlocks = mCacheBlocks->mNext;
         delete tmpBlock;
@@ -154,7 +154,7 @@ void CacheTexture::releaseMesh() {
 void CacheTexture::releaseTexture() {
     if (mTexture) {
         delete mTexture;
-        mTexture = NULL;
+        mTexture = nullptr;
     }
     if (mTextureId) {
         mCaches.deleteTexture(mTextureId);
@@ -193,7 +193,7 @@ void CacheTexture::allocateTexture() {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Initialize texture dimensions
         glTexImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight, 0,
-                mFormat, GL_UNSIGNED_BYTE, 0);
+                mFormat, GL_UNSIGNED_BYTE, nullptr);
 
         const GLenum filtering = getLinearFiltering() ? GL_LINEAR : GL_NEAREST;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);

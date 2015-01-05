@@ -61,7 +61,7 @@ GammaFontRenderer::GammaFontRenderer() {
 
     // Get the gamma
     mGamma = DEFAULT_TEXT_GAMMA;
-    if (property_get(PROPERTY_TEXT_GAMMA, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_GAMMA, property, nullptr) > 0) {
         INIT_LOGD("  Setting text gamma to %s", property);
         mGamma = atof(property);
     } else {
@@ -70,7 +70,7 @@ GammaFontRenderer::GammaFontRenderer() {
 
     // Get the black gamma threshold
     mBlackThreshold = DEFAULT_TEXT_BLACK_GAMMA_THRESHOLD;
-    if (property_get(PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_BLACK_GAMMA_THRESHOLD, property, nullptr) > 0) {
         INIT_LOGD("  Setting text black gamma threshold to %s", property);
         mBlackThreshold = atoi(property);
     } else {
@@ -80,7 +80,7 @@ GammaFontRenderer::GammaFontRenderer() {
 
     // Get the white gamma threshold
     mWhiteThreshold = DEFAULT_TEXT_WHITE_GAMMA_THRESHOLD;
-    if (property_get(PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_WHITE_GAMMA_THRESHOLD, property, nullptr) > 0) {
         INIT_LOGD("  Setting text white gamma threshold to %s", property);
         mWhiteThreshold = atoi(property);
     } else {
@@ -98,13 +98,13 @@ GammaFontRenderer::~GammaFontRenderer() {
 
 ShaderGammaFontRenderer::ShaderGammaFontRenderer(bool multiGamma): GammaFontRenderer() {
     INIT_LOGD("Creating shader gamma font renderer");
-    mRenderer = NULL;
+    mRenderer = nullptr;
     mMultiGamma = multiGamma;
 }
 
 void ShaderGammaFontRenderer::describe(ProgramDescription& description,
         const SkPaint* paint) const {
-    if (paint->getShader() == NULL) {
+    if (paint->getShader() == nullptr) {
         if (mMultiGamma) {
             const int l = luminance(paint);
 
@@ -149,7 +149,7 @@ LookupGammaFontRenderer::LookupGammaFontRenderer(): GammaFontRenderer() {
         mGammaTable[i] = uint8_t((float)::floor(pow(i / 255.0f, gamma) * 255.0f + 0.5f));
     }
 
-    mRenderer = NULL;
+    mRenderer = nullptr;
 }
 
 void LookupGammaFontRenderer::endPrecaching() {
@@ -234,7 +234,7 @@ FontRenderer* Lookup3GammaFontRenderer::getRenderer(Gamma gamma) {
 }
 
 FontRenderer& Lookup3GammaFontRenderer::getFontRenderer(const SkPaint* paint) {
-    if (paint->getShader() == NULL) {
+    if (paint->getShader() == nullptr) {
         const int l = luminance(paint);
 
         if (l <= mBlackThreshold) {

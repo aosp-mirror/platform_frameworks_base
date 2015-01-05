@@ -33,9 +33,9 @@ namespace uirenderer {
 
 PatchCache::PatchCache():
         mSize(0), mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity),
-        mMeshBuffer(0), mFreeBlocks(NULL), mGenerationId(0) {
+        mMeshBuffer(0), mFreeBlocks(nullptr), mGenerationId(0) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_PATCH_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_PATCH_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting patch cache size to %skB", property);
         mMaxSize = KB(atoi(property));
     } else {
@@ -105,7 +105,7 @@ void PatchCache::clearCache() {
         delete block;
         block = next;
     }
-    mFreeBlocks = NULL;
+    mFreeBlocks = nullptr;
 }
 
 void PatchCache::remove(Vector<patch_pair_t>& patchesToRemove, Res_png_9patch* patch) {
@@ -125,11 +125,11 @@ void PatchCache::removeDeferred(Res_png_9patch* patch) {
     size_t count = mGarbage.size();
     for (size_t i = 0; i < count; i++) {
         if (patch == mGarbage[i]) {
-            patch = NULL;
+            patch = nullptr;
             break;
         }
     }
-    LOG_ALWAYS_FATAL_IF(patch == NULL);
+    LOG_ALWAYS_FATAL_IF(patch == nullptr);
 
     mGarbage.push(patch);
 }
@@ -175,7 +175,7 @@ void PatchCache::clearGarbage() {
 }
 
 void PatchCache::createVertexBuffer() {
-    glBufferData(GL_ARRAY_BUFFER, mMaxSize, NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mMaxSize, nullptr, GL_DYNAMIC_DRAW);
     mSize = 0;
     mFreeBlocks = new BufferBlock(0, mMaxSize);
     mGenerationId++;
@@ -197,7 +197,7 @@ void PatchCache::setupMesh(Patch* newMesh, TextureVertex* vertices) {
     }
 
     // Find a block where we can fit the mesh
-    BufferBlock* previous = NULL;
+    BufferBlock* previous = nullptr;
     BufferBlock* block = mFreeBlocks;
     while (block) {
         // The mesh fits
@@ -213,7 +213,7 @@ void PatchCache::setupMesh(Patch* newMesh, TextureVertex* vertices) {
     if (!block) {
         clearCache();
         createVertexBuffer();
-        previous = NULL;
+        previous = nullptr;
         block = mFreeBlocks;
     }
 

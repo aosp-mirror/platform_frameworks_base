@@ -29,16 +29,16 @@ namespace uirenderer {
 
 Snapshot::Snapshot()
         : flags(0)
-        , previous(NULL)
-        , layer(NULL)
+        , previous(nullptr)
+        , layer(nullptr)
         , fbo(0)
         , invisible(false)
         , empty(false)
         , alpha(1.0f)
-        , roundRectClipState(NULL) {
+        , roundRectClipState(nullptr) {
     transform = &mTransformRoot;
     clipRect = &mClipRectRoot;
-    region = NULL;
+    region = nullptr;
     clipRegion = &mClipRegionRoot;
 }
 
@@ -80,7 +80,7 @@ Snapshot::Snapshot(const sp<Snapshot>& s, int saveFlags)
         flags |= Snapshot::kFlagFboTarget;
         region = s->region;
     } else {
-        region = NULL;
+        region = nullptr;
     }
 }
 

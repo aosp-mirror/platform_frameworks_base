@@ -79,7 +79,7 @@ void DamageAccumulator::computeCurrentTransform(Matrix4* outMatrix) const {
 void DamageAccumulator::pushCommon() {
     if (!mHead->next) {
         DirtyStack* nextFrame = (DirtyStack*) mAllocator.alloc(sizeof(DirtyStack));
-        nextFrame->next = 0;
+        nextFrame->next = nullptr;
         nextFrame->prev = mHead;
         mHead->next = nextFrame;
     }
@@ -147,7 +147,7 @@ static DirtyStack* findParentRenderNode(DirtyStack* frame) {
             return frame;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 static DirtyStack* findProjectionReceiver(DirtyStack* frame) {
@@ -160,7 +160,7 @@ static DirtyStack* findProjectionReceiver(DirtyStack* frame) {
             }
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 static void applyTransforms(DirtyStack* frame, DirtyStack* end) {

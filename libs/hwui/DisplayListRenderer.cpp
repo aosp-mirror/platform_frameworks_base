@@ -36,7 +36,7 @@ namespace uirenderer {
 DisplayListRenderer::DisplayListRenderer()
     : mState(*this)
     , mResourceCache(ResourceCache::getInstance())
-    , mDisplayListData(NULL)
+    , mDisplayListData(nullptr)
     , mTranslateX(0.0f)
     , mTranslateY(0.0f)
     , mHasDeferredTranslate(false)
@@ -59,7 +59,7 @@ DisplayListData* DisplayListRenderer::finishRecording() {
     mRegionMap.clear();
     mPathMap.clear();
     DisplayListData* data = mDisplayListData;
-    mDisplayListData = 0;
+    mDisplayListData = nullptr;
     return data;
 }
 
@@ -401,12 +401,12 @@ void DisplayListRenderer::drawPosText(const uint16_t* text, const float* positio
 
 static void simplifyPaint(int color, SkPaint* paint) {
     paint->setColor(color);
-    paint->setShader(NULL);
-    paint->setColorFilter(NULL);
-    paint->setLooper(NULL);
+    paint->setShader(nullptr);
+    paint->setColorFilter(nullptr);
+    paint->setLooper(nullptr);
     paint->setStrokeWidth(4 + 0.04 * paint->getTextSize());
     paint->setStrokeJoin(SkPaint::kRound_Join);
-    paint->setLooper(NULL);
+    paint->setLooper(nullptr);
 }
 
 void DisplayListRenderer::drawText(const uint16_t* glyphs, const float* positions,

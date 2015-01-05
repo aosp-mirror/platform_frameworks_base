@@ -24,7 +24,7 @@ namespace uirenderer {
 // Lifecycle
 ///////////////////////////////////////////////////////////////////////////////
 
-Dither::Dither(): mCaches(NULL), mInitialized(false), mDitherTexture(0) {
+Dither::Dither(): mCaches(nullptr), mInitialized(false), mDitherTexture(0) {
 }
 
 void Dither::bindDitherTexture() {

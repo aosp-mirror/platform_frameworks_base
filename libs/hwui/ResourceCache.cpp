@@ -79,8 +79,8 @@ void ResourceCache::incrementRefcount(const Res_png_9patch* patchResource) {
 
 void ResourceCache::incrementRefcountLocked(void* resource, ResourceType resourceType) {
     ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
-    if (ref == NULL || mCache->size() == 0) {
+    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : nullptr;
+    if (ref == nullptr || mCache->size() == 0) {
         ref = new ResourceReference(resourceType);
         mCache->add(resource, ref);
     }
@@ -118,8 +118,8 @@ void ResourceCache::decrementRefcount(const Res_png_9patch* patchResource) {
 
 void ResourceCache::decrementRefcountLocked(void* resource) {
     ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
-    if (ref == NULL) {
+    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : nullptr;
+    if (ref == nullptr) {
         // Should not get here - shouldn't get a call to decrement if we're not yet tracking it
         return;
     }
@@ -148,8 +148,8 @@ void ResourceCache::destructor(SkPath* resource) {
 
 void ResourceCache::destructorLocked(SkPath* resource) {
     ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
-    if (ref == NULL) {
+    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : nullptr;
+    if (ref == nullptr) {
         // If we're not tracking this resource, just delete it
         if (Caches::hasInstance()) {
             Caches::getInstance().pathCache.removeDeferred(resource);
@@ -171,8 +171,8 @@ void ResourceCache::destructor(const SkBitmap* resource) {
 
 void ResourceCache::destructorLocked(const SkBitmap* resource) {
     ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
-    if (ref == NULL) {
+    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : nullptr;
+    if (ref == nullptr) {
         // If we're not tracking this resource, just delete it
         if (Caches::hasInstance()) {
             Caches::getInstance().textureCache.releaseTexture(resource);
@@ -193,8 +193,8 @@ void ResourceCache::destructor(Res_png_9patch* resource) {
 
 void ResourceCache::destructorLocked(Res_png_9patch* resource) {
     ssize_t index = mCache->indexOfKey(resource);
-    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
-    if (ref == NULL) {
+    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : nullptr;
+    if (ref == nullptr) {
         // If we're not tracking this resource, just delete it
         if (Caches::hasInstance()) {
             Caches::getInstance().patchCache.removeDeferred(resource);
@@ -231,11 +231,11 @@ bool ResourceCache::recycleLocked(SkBitmap* resource) {
             Caches::getInstance().textureCache.releaseTexture(resource);
         }
         // not tracking this resource; just recycle the pixel data
-        resource->setPixels(NULL, NULL);
+        resource->setPixels(nullptr, nullptr);
         return true;
     }
     ResourceReference* ref = mCache->valueAt(index);
-    if (ref == NULL) {
+    if (ref == nullptr) {
         // Should not get here - shouldn't get a call to recycle if we're not yet tracking it
         return true;
     }
@@ -258,7 +258,7 @@ void ResourceCache::deleteResourceReferenceLocked(const void* resource, Resource
         if (Caches::hasInstance()) {
             Caches::getInstance().textureCache.releaseTexture(bitmap);
         }
-        bitmap->setPixels(NULL, NULL);
+        bitmap->setPixels(nullptr, nullptr);
     }
     if (ref->destroyed) {
         switch (ref->resourceType) {

@@ -332,7 +332,7 @@ bool SpotShadow::testPointInsidePolygon(const Vector2 testPoint,
  * @param len the number of points of the polygon
  */
 void SpotShadow::makeClockwise(Vector2* polygon, int len) {
-    if (polygon == 0  || len == 0) {
+    if (polygon == nullptr  || len == 0) {
         return;
     }
     if (!ShadowTessellator::isClockwise(polygon, len)) {

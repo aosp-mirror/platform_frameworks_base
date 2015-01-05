@@ -60,7 +60,7 @@ CREATE_BRIDGE4(createContext, RenderThread* thread, bool translucent,
 
 RenderProxy::RenderProxy(bool translucent, RenderNode* rootRenderNode, IContextFactory* contextFactory)
         : mRenderThread(RenderThread::getInstance())
-        , mContext(0) {
+        , mContext(nullptr) {
     SETUP_TASK(createContext);
     args->translucent = translucent;
     args->rootRenderNode = rootRenderNode;
@@ -76,15 +76,15 @@ RenderProxy::~RenderProxy() {
 
 CREATE_BRIDGE1(destroyContext, CanvasContext* context) {
     delete args->context;
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::destroyContext() {
     if (mContext) {
         SETUP_TASK(destroyContext);
         args->context = mContext;
-        mContext = 0;
-        mDrawFrameTask.setContext(NULL, NULL);
+        mContext = nullptr;
+        mDrawFrameTask.setContext(nullptr, nullptr);
         // This is also a fence as we need to be certain that there are no
         // outstanding mDrawFrame tasks posted before it is destroyed
         postAndWait(task);
@@ -93,7 +93,7 @@ void RenderProxy::destroyContext() {
 
 CREATE_BRIDGE2(setFrameInterval, RenderThread* thread, nsecs_t frameIntervalNanos) {
     args->thread->timeLord().setFrameInterval(args->frameIntervalNanos);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::setFrameInterval(nsecs_t frameIntervalNanos) {
@@ -105,7 +105,7 @@ void RenderProxy::setFrameInterval(nsecs_t frameIntervalNanos) {
 
 CREATE_BRIDGE2(setSwapBehavior, CanvasContext* context, SwapBehavior swapBehavior) {
     args->context->setSwapBehavior(args->swapBehavior);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::setSwapBehavior(SwapBehavior swapBehavior) {
@@ -145,7 +145,7 @@ bool RenderProxy::initialize(const sp<ANativeWindow>& window) {
 
 CREATE_BRIDGE2(updateSurface, CanvasContext* context, ANativeWindow* window) {
     args->context->updateSurface(args->window);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::updateSurface(const sp<ANativeWindow>& window) {
@@ -171,7 +171,7 @@ CREATE_BRIDGE7(setup, CanvasContext* context, int width, int height,
         uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     args->context->setup(args->width, args->height, args->lightCenter, args->lightRadius,
             args->ambientShadowAlpha, args->spotShadowAlpha);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::setup(int width, int height, const Vector3& lightCenter, float lightRadius,
@@ -189,7 +189,7 @@ void RenderProxy::setup(int width, int height, const Vector3& lightCenter, float
 
 CREATE_BRIDGE2(setOpaque, CanvasContext* context, bool opaque) {
     args->context->setOpaque(args->opaque);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::setOpaque(bool opaque) {
@@ -207,7 +207,7 @@ int RenderProxy::syncAndDrawFrame(nsecs_t frameTimeNanos, nsecs_t recordDuration
 
 CREATE_BRIDGE1(destroy, CanvasContext* context) {
     args->context->destroy();
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::destroy() {
@@ -221,7 +221,7 @@ void RenderProxy::destroy() {
 
 CREATE_BRIDGE2(invokeFunctor, RenderThread* thread, Functor* functor) {
     CanvasContext::invokeFunctor(*args->thread, args->functor);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
@@ -242,7 +242,7 @@ void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
 
 CREATE_BRIDGE2(runWithGlContext, CanvasContext* context, RenderTask* task) {
     args->context->runWithGlContext(args->task);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::runWithGlContext(RenderTask* gltask) {
@@ -254,7 +254,7 @@ void RenderProxy::runWithGlContext(RenderTask* gltask) {
 
 CREATE_BRIDGE2(createTextureLayer, RenderThread* thread, CanvasContext* context) {
     Layer* layer = args->context->createTextureLayer();
-    if (!layer) return 0;
+    if (!layer) return nullptr;
     return new DeferredLayerUpdater(*args->thread, layer);
 }
 
@@ -269,7 +269,7 @@ DeferredLayerUpdater* RenderProxy::createTextureLayer() {
 
 CREATE_BRIDGE2(buildLayer, CanvasContext* context, RenderNode* node) {
     args->context->buildLayer(args->node);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::buildLayer(RenderNode* node) {
@@ -303,7 +303,7 @@ void RenderProxy::cancelLayerUpdate(DeferredLayerUpdater* layer) {
 
 CREATE_BRIDGE1(detachSurfaceTexture, DeferredLayerUpdater* layer) {
     args->layer->detachSurfaceTexture();
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::detachSurfaceTexture(DeferredLayerUpdater* layer) {
@@ -314,7 +314,7 @@ void RenderProxy::detachSurfaceTexture(DeferredLayerUpdater* layer) {
 
 CREATE_BRIDGE1(destroyHardwareResources, CanvasContext* context) {
     args->context->destroyHardwareResources();
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::destroyHardwareResources() {
@@ -325,7 +325,7 @@ void RenderProxy::destroyHardwareResources() {
 
 CREATE_BRIDGE2(timMemory, RenderThread* thread, int level) {
     CanvasContext::trimMemory(*args->thread, args->level);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::trimMemory(int level) {
@@ -341,7 +341,7 @@ void RenderProxy::trimMemory(int level) {
 
 CREATE_BRIDGE0(fence) {
     // Intentionally empty
-    return NULL;
+    return nullptr;
 }
 
 template <typename T>
@@ -355,7 +355,7 @@ void RenderProxy::fence() {
 
 CREATE_BRIDGE1(stopDrawing, CanvasContext* context) {
     args->context->stopDrawing();
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::stopDrawing() {
@@ -366,7 +366,7 @@ void RenderProxy::stopDrawing() {
 
 CREATE_BRIDGE1(notifyFramePending, CanvasContext* context) {
     args->context->notifyFramePending();
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::notifyFramePending() {
@@ -377,7 +377,7 @@ void RenderProxy::notifyFramePending() {
 
 CREATE_BRIDGE2(dumpProfileInfo, CanvasContext* context, int fd) {
     args->context->profiler().dumpData(args->fd);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::dumpProfileInfo(int fd) {
@@ -389,7 +389,7 @@ void RenderProxy::dumpProfileInfo(int fd) {
 
 CREATE_BRIDGE1(outputLogBuffer, int fd) {
     RenderNode::outputLogBuffer(args->fd);
-    return NULL;
+    return nullptr;
 }
 
 void RenderProxy::outputLogBuffer(int fd) {
@@ -400,15 +400,15 @@ void RenderProxy::outputLogBuffer(int fd) {
 
 CREATE_BRIDGE4(setTextureAtlas, RenderThread* thread, GraphicBuffer* buffer, int64_t* map, size_t size) {
     CanvasContext::setTextureAtlas(*args->thread, args->buffer, args->map, args->size);
-    args->buffer->decStrong(0);
-    return NULL;
+    args->buffer->decStrong(nullptr);
+    return nullptr;
 }
 
 void RenderProxy::setTextureAtlas(const sp<GraphicBuffer>& buffer, int64_t* map, size_t size) {
     SETUP_TASK(setTextureAtlas);
     args->thread = &mRenderThread;
     args->buffer = buffer.get();
-    args->buffer->incStrong(0);
+    args->buffer->incStrong(nullptr);
     args->map = map;
     args->size = size;
     post(task);

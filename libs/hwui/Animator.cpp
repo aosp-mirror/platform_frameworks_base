@@ -32,7 +32,7 @@ namespace uirenderer {
  ************************************************************/
 
 BaseRenderNodeAnimator::BaseRenderNodeAnimator(float finalValue)
-        : mTarget(NULL)
+        : mTarget(nullptr)
         , mFinalValue(finalValue)
         , mDeltaValue(0)
         , mFromValue(0)

@@ -78,10 +78,10 @@ void RenderNode::debugDumpLayers(const char* prefix) {
 RenderNode::RenderNode()
         : mDirtyPropertyFields(0)
         , mNeedsDisplayListDataSync(false)
-        , mDisplayListData(0)
-        , mStagingDisplayListData(0)
+        , mDisplayListData(nullptr)
+        , mStagingDisplayListData(nullptr)
         , mAnimatorManager(*this)
-        , mLayer(0)
+        , mLayer(nullptr)
         , mParentCount(0) {
 }
 
@@ -91,7 +91,7 @@ RenderNode::~RenderNode() {
     if (mLayer) {
         ALOGW("Memory Warning: Layer %p missed its detachment, held on to for far too long!", mLayer);
         mLayer->postDecStrong();
-        mLayer = 0;
+        mLayer = nullptr;
     }
 }
 
@@ -110,7 +110,7 @@ void RenderNode::output(uint32_t level) {
             getName(),
             (properties().hasShadow() ? ", casting shadow" : ""),
             (isRenderable() ? "" : ", empty"),
-            (mLayer != NULL ? ", on HW Layer" : ""));
+            (mLayer != nullptr ? ", on HW Layer" : ""));
     ALOGD("%*s%s %d", level * 2, "", "Save",
             SkCanvas::kMatrix_SaveFlag | SkCanvas::kClip_SaveFlag);
 
@@ -182,7 +182,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     if (CC_LIKELY(layerType != kLayerTypeRenderLayer) || CC_UNLIKELY(!isRenderable())) {
         if (CC_UNLIKELY(mLayer)) {
             LayerRenderer::destroyLayer(mLayer);
-            mLayer = NULL;
+            mLayer = nullptr;
         }
         return;
     }
@@ -196,7 +196,7 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     } else if (mLayer->layer.getWidth() != getWidth() || mLayer->layer.getHeight() != getHeight()) {
         if (!LayerRenderer::resizeLayer(mLayer, getWidth(), getHeight())) {
             LayerRenderer::destroyLayer(mLayer);
-            mLayer = 0;
+            mLayer = nullptr;
         }
         damageSelf(info);
         transformUpdateNeeded = true;
@@ -311,10 +311,10 @@ void RenderNode::pushStagingDisplayListChanges(TreeInfo& info) {
             Caches::getInstance().registerFunctors(mStagingDisplayListData->functors.size());
         }
         mDisplayListData = mStagingDisplayListData;
-        mStagingDisplayListData = NULL;
+        mStagingDisplayListData = nullptr;
         if (mDisplayListData) {
             for (size_t i = 0; i < mDisplayListData->functors.size(); i++) {
-                (*mDisplayListData->functors[i])(DrawGlInfo::kModeSync, NULL);
+                (*mDisplayListData->functors[i])(DrawGlInfo::kModeSync, nullptr);
             }
         }
         damageSelf(info);
@@ -331,7 +331,7 @@ void RenderNode::deleteDisplayListData() {
         }
     }
     delete mDisplayListData;
-    mDisplayListData = NULL;
+    mDisplayListData = nullptr;
 }
 
 void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
@@ -359,7 +359,7 @@ void RenderNode::prepareSubTree(TreeInfo& info, DisplayListData* subtree) {
 void RenderNode::destroyHardwareResources() {
     if (mLayer) {
         LayerRenderer::destroyLayer(mLayer);
-        mLayer = NULL;
+        mLayer = nullptr;
     }
     if (mDisplayListData) {
         for (size_t i = 0; i < mDisplayListData->children().size(); i++) {
@@ -517,7 +517,7 @@ void RenderNode::computeOrdering() {
 
     // TODO: create temporary DDLOp and call computeOrderingImpl on top DisplayList so that
     // transform properties are applied correctly to top level children
-    if (mDisplayListData == NULL) return;
+    if (mDisplayListData == nullptr) return;
     for (unsigned int i = 0; i < mDisplayListData->children().size(); i++) {
         DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
         childOp->mRenderNode->computeOrderingImpl(childOp,
@@ -531,7 +531,7 @@ void RenderNode::computeOrderingImpl(
         Vector<DrawRenderNodeOp*>* compositedChildrenOfProjectionSurface,
         const mat4* transformFromProjectionSurface) {
     mProjectedNodes.clear();
-    if (mDisplayListData == NULL || mDisplayListData->isEmpty()) return;
+    if (mDisplayListData == nullptr || mDisplayListData->isEmpty()) return;
 
     // TODO: should avoid this calculation in most cases
     // TODO: just calculate single matrix, down to all leaf composited elements
@@ -555,9 +555,9 @@ void RenderNode::computeOrderingImpl(
             DrawRenderNodeOp* childOp = mDisplayListData->children()[i];
             RenderNode* child = childOp->mRenderNode;
 
-            const SkPath* projectionOutline = NULL;
-            Vector<DrawRenderNodeOp*>* projectionChildren = NULL;
-            const mat4* projectionTransform = NULL;
+            const SkPath* projectionOutline = nullptr;
+            Vector<DrawRenderNodeOp*>* projectionChildren = nullptr;
+            const mat4* projectionTransform = nullptr;
             if (isProjectionReceiver && !child->properties().getProjectBackwards()) {
                 // if receiving projections, collect projecting descendent
 
@@ -683,7 +683,7 @@ void RenderNode::issueDrawShadowOperation(const Matrix4& transformFromParent, T&
 
 
     // holds temporary SkPath to store the result of intersections
-    SkPath* frameAllocatedPath = NULL;
+    SkPath* frameAllocatedPath = nullptr;
     const SkPath* outlinePath = casterOutlinePath;
 
     // intersect the outline with the reveal clip, if present
@@ -810,9 +810,9 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
 
     // If the projection reciever has an outline, we mask each of the projected rendernodes to it
     // Either with clipRect, or special saveLayer masking
-    if (projectionReceiverOutline != NULL) {
+    if (projectionReceiverOutline != nullptr) {
         const SkRect& outlineBounds = projectionReceiverOutline->getBounds();
-        if (projectionReceiverOutline->isRect(NULL)) {
+        if (projectionReceiverOutline->isRect(nullptr)) {
             // mask to the rect outline simply with clipRect
             ClipRectOp* clipOp = new (alloc) ClipRectOp(
                     outlineBounds.left(), outlineBounds.top(),
@@ -847,7 +847,7 @@ void RenderNode::issueOperationsOfProjectedChildren(OpenGLRenderer& renderer, T&
         renderer.restoreToCount(restoreTo);
     }
 
-    if (projectionReceiverOutline != NULL) {
+    if (projectionReceiverOutline != nullptr) {
         handler(new (alloc) RestoreToCountOp(restoreTo),
                 PROPERTY_SAVECOUNT, properties().getClipToBounds());
     }

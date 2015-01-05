@@ -59,7 +59,7 @@ static int dpToPx(int dp, float density) {
 DrawProfiler::DrawProfiler()
         : mType(kNone)
         , mDensity(0)
-        , mData(NULL)
+        , mData(nullptr)
         , mDataSize(0)
         , mCurrentFrame(-1)
         , mPreviousTime(0)
@@ -160,7 +160,7 @@ void DrawProfiler::createData() {
 
 void DrawProfiler::destroyData() {
     delete mData;
-    mData = NULL;
+    mData = nullptr;
 }
 
 void DrawProfiler::addRect(Rect& r, float data, float* shapeOutput) {

@@ -64,7 +64,7 @@ Program::Program(const ProgramDescription& description, const char* vertex, cons
                 glGetProgramiv(mProgramId, GL_INFO_LOG_LENGTH, &infoLen);
                 if (infoLen > 1) {
                     GLchar log[infoLen];
-                    glGetProgramInfoLog(mProgramId, infoLen, 0, &log[0]);
+                    glGetProgramInfoLog(mProgramId, infoLen, nullptr, &log[0]);
                     ALOGE("%s", log);
                 }
                 LOG_ALWAYS_FATAL("Error while linking shaders");
@@ -135,7 +135,7 @@ GLuint Program::buildShader(const char* source, GLenum type) {
     ATRACE_NAME("Build GL Shader");
 
     GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, 0);
+    glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
 
     GLint status;
@@ -145,7 +145,7 @@ GLuint Program::buildShader(const char* source, GLenum type) {
         // Some drivers return wrong values for GL_INFO_LOG_LENGTH
         // use a fixed size instead
         GLchar log[512];
-        glGetShaderInfoLog(shader, sizeof(log), 0, &log[0]);
+        glGetShaderInfoLog(shader, sizeof(log), nullptr, &log[0]);
         LOG_ALWAYS_FATAL("Shader info log: %s", log);
         return 0;
     }

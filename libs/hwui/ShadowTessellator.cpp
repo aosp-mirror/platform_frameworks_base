@@ -193,7 +193,7 @@ Vector2 ShadowTessellator::calculateNormal(const Vector2& p1, const Vector2& p2)
  * @param len the number of points of the polygon
  */
 bool ShadowTessellator::isClockwise(const Vector2* polygon, int len) {
-    if (len < 2 || polygon == NULL) {
+    if (len < 2 || polygon == nullptr) {
         return true;
     }
     double sum = 0;

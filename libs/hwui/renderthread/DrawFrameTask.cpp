@@ -32,8 +32,8 @@ namespace uirenderer {
 namespace renderthread {
 
 DrawFrameTask::DrawFrameTask()
-        : mRenderThread(NULL)
-        , mContext(NULL)
+        : mRenderThread(nullptr)
+        , mContext(nullptr)
         , mFrameTimeNanos(0)
         , mRecordDurationNanos(0)
         , mDensity(1.0f) // safe enough default
