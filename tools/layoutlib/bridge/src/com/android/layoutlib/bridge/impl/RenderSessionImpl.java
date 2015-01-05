@@ -599,9 +599,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             mSystemViewInfoList = visitAllChildren(mViewRoot, 0, params.getExtendedViewInfoMode(),
                     false);
 
-            // clear the preferences cookie map.
-            Preference_Delegate.clearCookiesMap();
-
             // success!
             return SUCCESS.createResult();
         } catch (Throwable e) {
