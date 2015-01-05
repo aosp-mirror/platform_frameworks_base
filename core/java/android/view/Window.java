@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -898,6 +899,14 @@ public abstract class Window {
             mCloseOnTouchOutside = close;
             mSetCloseOnTouchOutside = true;
         }
+    }
+
+    /** @hide */
+    @SystemApi
+    public void setDisableWallpaperTouchEvents(boolean disable) {
+        setPrivateFlags(disable
+                ? WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS : 0,
+                WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS);
     }
 
     /** @hide */
