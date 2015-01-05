@@ -2567,7 +2567,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 if (getVisibility() == VISIBLE) {
                     selector.setVisible(true, false);
                 }
-                selector.setState(getDrawableState());
+                updateSelectorState();
             }
             if (manageHotspot) {
                 selector.setHotspot(x, y);
