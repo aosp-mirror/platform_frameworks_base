@@ -705,8 +705,8 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public boolean isStateful() {
-        final BitmapState s = mBitmapState;
-        return super.isStateful() || (s.mTint != null && s.mTint.isStateful());
+        return (mBitmapState.mTint != null && mBitmapState.mTint.isStateful())
+                || super.isStateful();
     }
 
     @Override
@@ -718,6 +718,9 @@ public class BitmapDrawable extends Drawable {
         updateStateFromTypedArray(a);
         verifyState(a);
         a.recycle();
+
+        // Update local properties.
+        updateLocalState(r);
     }
 
     /**
@@ -800,9 +803,6 @@ public class BitmapDrawable extends Drawable {
         if (tileModeY != TILE_MODE_UNDEFINED) {
             setTileModeY(parseTileMode(tileModeY));
         }
-
-        // Update local properties.
-        initializeWithState(state, r);
     }
 
     @Override
@@ -810,18 +810,28 @@ public class BitmapDrawable extends Drawable {
         super.applyTheme(t);
 
         final BitmapState state = mBitmapState;
-        if (state == null || state.mThemeAttrs == null) {
+        if (state == null) {
             return;
         }
 
-        final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.BitmapDrawable);
-        try {
-            updateStateFromTypedArray(a);
-        } catch (XmlPullParserException e) {
-            throw new RuntimeException(e);
-        } finally {
-            a.recycle();
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.BitmapDrawable);
+            try {
+                updateStateFromTypedArray(a);
+            } catch (XmlPullParserException e) {
+                throw new RuntimeException(e);
+            } finally {
+                a.recycle();
+            }
         }
+
+        // Apply theme to contained color state list.
+        if (state.mTint != null && state.mTint.canApplyTheme()) {
+            state.mTint.applyTheme(t);
+        }
+
+        // Update local properties.
+        updateLocalState(t.getResources());
     }
 
     private static Shader.TileMode parseTileMode(int tileMode) {
@@ -839,7 +849,7 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public boolean canApplyTheme() {
-        return mBitmapState != null && mBitmapState.mThemeAttrs != null;
+        return mBitmapState != null && mBitmapState.canApplyTheme();
     }
 
     @Override
@@ -910,7 +920,7 @@ public class BitmapDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null;
+            return mThemeAttrs != null || mTint != null && mTint.canApplyTheme();
         }
 
         @Override
@@ -944,7 +954,7 @@ public class BitmapDrawable extends Drawable {
     private BitmapDrawable(BitmapState state, Resources res) {
         mBitmapState = state;
 
-        initializeWithState(mBitmapState, res);
+        updateLocalState(res);
     }
 
     /**
@@ -952,14 +962,14 @@ public class BitmapDrawable extends Drawable {
      * after significant state changes, e.g. from the One True Constructor and
      * after inflating or applying a theme.
      */
-    private void initializeWithState(BitmapState state, Resources res) {
+    private void updateLocalState(Resources res) {
         if (res != null) {
             mTargetDensity = res.getDisplayMetrics().densityDpi;
         } else {
-            mTargetDensity = state.mTargetDensity;
+            mTargetDensity = mBitmapState.mTargetDensity;
         }
 
-        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        mTintFilter = updateTintFilter(mTintFilter, mBitmapState.mTint, mBitmapState.mTintMode);
         computeBitmapSize();
     }
 }

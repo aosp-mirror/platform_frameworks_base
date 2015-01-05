@@ -2407,6 +2407,7 @@ package android {
     field public static final int Widget_Material_Button_Borderless = 16974425; // 0x1030259
     field public static final int Widget_Material_Button_Borderless_Colored = 16974426; // 0x103025a
     field public static final int Widget_Material_Button_Borderless_Small = 16974427; // 0x103025b
+    field public static final int Widget_Material_Button_Colored = 16974547; // 0x10302d3
     field public static final int Widget_Material_Button_Inset = 16974428; // 0x103025c
     field public static final int Widget_Material_Button_Small = 16974429; // 0x103025d
     field public static final int Widget_Material_Button_Toggle = 16974430; // 0x103025e
@@ -7148,6 +7149,8 @@ package android.content {
     method public abstract java.io.File getCacheDir();
     method public abstract java.lang.ClassLoader getClassLoader();
     method public abstract java.io.File getCodeCacheDir();
+    method public final int getColor(int);
+    method public final android.content.res.ColorStateList getColorStateList(int);
     method public abstract android.content.ContentResolver getContentResolver();
     method public abstract java.io.File getDatabasePath(java.lang.String);
     method public abstract java.io.File getDir(java.lang.String, int);
@@ -9076,7 +9079,10 @@ package android.content.res {
 
   public class ColorStateList implements android.os.Parcelable {
     ctor public ColorStateList(int[][], int[]);
-    method public static android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public void applyTheme(android.content.res.Resources.Theme);
+    method public boolean canApplyTheme();
+    method public static deprecated android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static android.content.res.ColorStateList createFromXml(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public int describeContents();
     method public int getColorForState(int[], int);
     method public int getDefaultColor();
@@ -9206,8 +9212,10 @@ package android.content.res {
     method public android.content.res.XmlResourceParser getAnimation(int) throws android.content.res.Resources.NotFoundException;
     method public final android.content.res.AssetManager getAssets();
     method public boolean getBoolean(int) throws android.content.res.Resources.NotFoundException;
-    method public int getColor(int) throws android.content.res.Resources.NotFoundException;
-    method public android.content.res.ColorStateList getColorStateList(int) throws android.content.res.Resources.NotFoundException;
+    method public deprecated int getColor(int) throws android.content.res.Resources.NotFoundException;
+    method public int getColor(int, android.content.res.Resources.Theme) throws android.content.res.Resources.NotFoundException;
+    method public deprecated android.content.res.ColorStateList getColorStateList(int) throws android.content.res.Resources.NotFoundException;
+    method public android.content.res.ColorStateList getColorStateList(int, android.content.res.Resources.Theme) throws android.content.res.Resources.NotFoundException;
     method public android.content.res.Configuration getConfiguration();
     method public float getDimension(int) throws android.content.res.Resources.NotFoundException;
     method public int getDimensionPixelOffset(int) throws android.content.res.Resources.NotFoundException;
@@ -41764,7 +41772,7 @@ package java.lang {
     method public static double nextUp(double);
     method public static float nextUp(float);
     method public static double pow(double, double);
-    method public static synchronized double random();
+    method public static double random();
     method public static double rint(double);
     method public static long round(double);
     method public static int round(float);

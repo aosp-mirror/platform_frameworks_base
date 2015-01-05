@@ -462,6 +462,11 @@ please see styles_device_defaults.xml.
         <item name="gravity">center_vertical|center_horizontal</item>
     </style>
 
+    <!-- Colored bordered ink button -->
+    <style name="Widget.Material.Button.Colored">
+        <item name="backgroundTint">@color/btn_material_accent</item>
+    </style>
+
     <!-- Small bordered ink button -->
     <style name="Widget.Material.Button.Small">
         <item name="minHeight">48dip</item>

@@ -392,8 +392,8 @@ public class TypedArray {
         } else if (type == TypedValue.TYPE_STRING) {
             final TypedValue value = mValue;
             if (getValueAt(index, value)) {
-                ColorStateList csl = mResources.loadColorStateList(
-                        value, value.resourceId);
+                final ColorStateList csl = mResources.loadColorStateList(
+                        value, value.resourceId, mTheme);
                 return csl.getDefaultColor();
             }
             return defValue;
@@ -424,7 +424,7 @@ public class TypedArray {
             if (value.type == TypedValue.TYPE_ATTRIBUTE) {
                 throw new RuntimeException("Failed to resolve attribute at index " + index);
             }
-            return mResources.loadColorStateList(value, value.resourceId);
+            return mResources.loadColorStateList(value, value.resourceId, mTheme);
         }
         return null;
     }
@@ -905,12 +905,21 @@ public class TypedArray {
      * Removes the entries from the typed array so that subsequent calls to typed
      * getters will return the default value without crashing.
      *
-     * @return an array of length {@link #getIndexCount()} populated with theme
-     *         attributes, or null if there are no theme attributes in the typed
-     *         array
+     * @return An array of length {@link #getIndexCount()} populated with theme
+     *         attributes, or {@code null} if there are no theme attributes in
+     *         the typed array.
      * @hide
      */
+    @Nullable
     public int[] extractThemeAttrs() {
+        return extractThemeAttrs(null);
+    }
+
+    /**
+     * @hide
+     */
+    @Nullable
+    public int[] extractThemeAttrs(@Nullable int[] scrap) {
         if (mRecycled) {
             throw new RuntimeException("Cannot make calls to a recycled instance!");
         }
@@ -922,6 +931,7 @@ public class TypedArray {
         for (int i = 0; i < N; i++) {
             final int index = i * AssetManager.STYLE_NUM_ENTRIES;
             if (data[index + AssetManager.STYLE_TYPE] != TypedValue.TYPE_ATTRIBUTE) {
+                // Not an attribute, ignore.
                 continue;
             }
 
@@ -930,13 +940,20 @@ public class TypedArray {
 
             final int attr = data[index + AssetManager.STYLE_DATA];
             if (attr == 0) {
-                // This attribute is useless!
+                // Useless data, ignore.
                 continue;
             }
 
+            // Ensure we have a usable attribute array.
             if (attrs == null) {
-                attrs = new int[N];
+                if (scrap != null && scrap.length == N) {
+                    attrs = scrap;
+                    Arrays.fill(attrs, 0);
+                } else {
+                    attrs = new int[N];
+                }
             }
+
             attrs[i] = attr;
         }
 
