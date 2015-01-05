@@ -108,6 +108,7 @@ public class Main {
                         "android.graphics.drawable.*",
                         "android.content.*",
                         "android.content.res.*",
+                        "android.preference.*",
                         "org.apache.harmony.xml.*",
                         "com.android.internal.R**",
                         "android.pim.*", // for datepicker

@@ -22,6 +22,7 @@ import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 import com.android.annotations.NonNull;
 import com.android.ide.common.rendering.api.Capability;
 import com.android.ide.common.rendering.api.DrawableParams;
+import com.android.ide.common.rendering.api.Features;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
@@ -180,7 +181,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      */
     private static LayoutLog sCurrentLog = sDefaultLog;
 
-    private EnumSet<Capability> mCapabilities;
+    private static final int LAST_SUPPORTED_FEATURE = Features.PREFERENCES_RENDERING;
 
     @Override
     public int getApiLevel() {
@@ -188,8 +189,16 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
     }
 
     @Override
+    @Deprecated
     public EnumSet<Capability> getCapabilities() {
-        return mCapabilities;
+        // The Capability class is deprecated and frozen. All Capabilities enumerated there are
+        // supported by this version of LayoutLibrary. So, it's safe to use EnumSet.allOf()
+        return EnumSet.allOf(Capability.class);
+    }
+
+    @Override
+    public boolean supports(int feature) {
+        return feature <= LAST_SUPPORTED_FEATURE;
     }
 
     @Override
@@ -199,26 +208,6 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             LayoutLog log) {
         sPlatformProperties = platformProperties;
         sEnumValueMap = enumValueMap;
-
-        // don't use EnumSet.allOf(), because the bridge doesn't come with its specific version
-        // of layoutlib_api. It is provided by the client which could have a more recent version
-        // with newer, unsupported capabilities.
-        mCapabilities = EnumSet.of(
-                Capability.UNBOUND_RENDERING,
-                Capability.CUSTOM_BACKGROUND_COLOR,
-                Capability.RENDER,
-                Capability.LAYOUT_ONLY,
-                Capability.EMBEDDED_LAYOUT,
-                Capability.VIEW_MANIPULATION,
-                Capability.PLAY_ANIMATION,
-                Capability.ANIMATED_VIEW_MANIPULATION,
-                Capability.ADAPTER_BINDING,
-                Capability.EXTENDED_VIEWINFO,
-                Capability.FIXED_SCALABLE_NINE_PATCH,
-                Capability.RTL,
-                Capability.ACTION_BAR,
-                Capability.SIMULATE_PLATFORM);
-
 
         BridgeAssetManager.initSystem();
 
