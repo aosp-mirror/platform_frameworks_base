@@ -43,11 +43,6 @@ public class Preference_Delegate {
     private static final Map<Preference, Object> sViewCookies = new HashMap<Preference, Object>();
 
     @LayoutlibDelegate
-    /*package*/ static void dispatchSetInitialValue(Preference preference) {
-        // pass.
-    }
-
-    @LayoutlibDelegate
     /*package*/ static View getView(Preference pref, View convertView, ViewGroup parent) {
         Context context = pref.getContext();
         BridgeContext bc = context instanceof BridgeContext ? ((BridgeContext) context) : null;

@@ -120,8 +120,9 @@ public final class BridgeContext extends Context {
     private BridgeContentResolver mContentResolver;
 
     private final Stack<BridgeXmlBlockParser> mParserStack = new Stack<BridgeXmlBlockParser>();
+    private SharedPreferences mSharedPreferences;
 
-    /**
+  /**
      * @param projectKey An Object identifying the project. This is used for the cache mechanism.
      * @param metrics the {@link DisplayMetrics}.
      * @param renderResources the configured resources (both framework and projects) for this
@@ -1163,8 +1164,10 @@ public final class BridgeContext extends Context {
 
     @Override
     public SharedPreferences getSharedPreferences(String arg0, int arg1) {
-        // pass
-        return null;
+        if (mSharedPreferences == null) {
+            mSharedPreferences = new BridgeSharedPreferences();
+        }
+        return mSharedPreferences;
     }
 
     @Override
