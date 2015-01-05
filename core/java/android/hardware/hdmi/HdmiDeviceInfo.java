@@ -336,9 +336,15 @@ public class HdmiDeviceInfo implements Parcelable {
      * Returns {@code true} if the device is of a type that can be an input source.
      */
     public boolean isSourceType() {
-        return mDeviceType == DEVICE_PLAYBACK
-                || mDeviceType == DEVICE_RECORDER
-                || mDeviceType == DEVICE_TUNER;
+        if (isCecDevice()) {
+            return mDeviceType == DEVICE_PLAYBACK
+                    || mDeviceType == DEVICE_RECORDER
+                    || mDeviceType == DEVICE_TUNER;
+        } else if (isMhlDevice()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
