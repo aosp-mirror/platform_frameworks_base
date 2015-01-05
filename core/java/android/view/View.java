@@ -15531,6 +15531,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final int width = bounds.width();
         final int height = bounds.height();
         final HardwareCanvas canvas = renderNode.start(width, height);
+
+        // Reverse left/top translation done by drawable canvas, which will
+        // instead be applied by rendernode's LTRB bounds below. This way, the
+        // drawable's bounds match with its rendernode bounds and its content
+        // will lie within those bounds in the rendernode tree.
+        canvas.translate(-bounds.left, -bounds.top);
+
         try {
             drawable.draw(canvas);
         } finally {
