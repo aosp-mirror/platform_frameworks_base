@@ -1667,8 +1667,8 @@ public final class Pm {
                         System.out.print("package:");
                         System.out.println(splitSourceDir);
                     }
-                    return 0;
                 }
+                return 0;
             }
         } catch (RemoteException e) {
             System.err.println(e.toString());
