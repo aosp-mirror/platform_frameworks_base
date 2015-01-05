@@ -125,7 +125,7 @@ public class AccessPointControllerImpl implements NetworkController.AccessPointC
                 Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
                 intent.putExtra(EXTRA_START_CONNECT_SSID, ap.ssid);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
+                mContext.startActivityAsUser(intent, new UserHandle(mCurrentUser));
                 return true;
             } else {
                 WifiConfiguration config = new WifiConfiguration();
