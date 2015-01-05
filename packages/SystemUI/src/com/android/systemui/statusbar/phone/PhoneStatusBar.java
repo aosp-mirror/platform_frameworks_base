@@ -69,9 +69,11 @@ import android.media.session.PlaybackState;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -368,6 +370,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private ScreenPinningRequest mScreenPinningRequest;
 
     private int mNavigationIconHints = 0;
+    private HandlerThread mHandlerThread;
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -782,6 +785,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         // set the inital view visibility
         setAreThereNotifications();
 
+        // Background thread for any controllers that need it.
+        mHandlerThread = new HandlerThread(TAG, Process.THREAD_PRIORITY_BACKGROUND);
+        mHandlerThread.start();
+
         // Other icons
         mLocationController = new LocationControllerImpl(mContext); // will post a notification
         mBatteryController = new BatteryController(mContext);
@@ -800,7 +807,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         });
         mNetworkController = new NetworkControllerImpl(mContext);
         mHotspotController = new HotspotControllerImpl(mContext);
-        mBluetoothController = new BluetoothControllerImpl(mContext);
+        mBluetoothController = new BluetoothControllerImpl(mContext, mHandlerThread.getLooper());
         mSecurityController = new SecurityControllerImpl(mContext);
         if (mContext.getResources().getBoolean(R.bool.config_showRotationLock)) {
             mRotationLockController = new RotationLockControllerImpl(mContext);
@@ -3444,6 +3451,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (mNavigationBarView != null) {
             mWindowManager.removeViewImmediate(mNavigationBarView);
             mNavigationBarView = null;
+        }
+        if (mHandlerThread != null) {
+            mHandlerThread.quitSafely();
+            mHandlerThread = null;
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
     }
