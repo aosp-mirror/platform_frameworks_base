@@ -41,7 +41,7 @@ public:
 static DisplayListRenderer* startRecording(RenderNode* node) {
     DisplayListRenderer* renderer = new DisplayListRenderer();
     renderer->setViewport(node->getWidth(), node->getHeight());
-    renderer->prepare(false);
+    renderer->prepare();
     return renderer;
 }
 

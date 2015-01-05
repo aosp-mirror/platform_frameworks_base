@@ -29,6 +29,14 @@ import android.graphics.Rect;
  */
 public abstract class HardwareCanvas extends Canvas {
 
+    /**
+     * Pass a reference to the native renderer to our superclass's
+     * constructor.
+     */
+    protected HardwareCanvas(long renderer) {
+        super(renderer);
+    }
+
     @Override
     public boolean isHardwareAccelerated() {
         return true;

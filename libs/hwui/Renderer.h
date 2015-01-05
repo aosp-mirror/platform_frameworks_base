@@ -57,40 +57,6 @@ class ANDROID_API Renderer {
 public:
     virtual ~Renderer() {}
 
-    /**
-     * Safely retrieves the mode from the specified xfermode. If the specified
-     * xfermode is null, the mode is assumed to be SkXfermode::kSrcOver_Mode.
-     */
-    static inline SkXfermode::Mode getXfermode(SkXfermode* mode) {
-        SkXfermode::Mode resultMode;
-        if (!SkXfermode::AsMode(mode, &resultMode)) {
-            resultMode = SkXfermode::kSrcOver_Mode;
-        }
-        return resultMode;
-    }
-
-    // TODO: move to a method on android:Paint
-    static inline bool paintWillNotDraw(const SkPaint& paint) {
-        return paint.getAlpha() == 0
-                && !paint.getColorFilter()
-                && getXfermode(paint.getXfermode()) == SkXfermode::kSrcOver_Mode;
-    }
-
-    // TODO: move to a method on android:Paint
-    static inline bool paintWillNotDrawText(const SkPaint& paint) {
-        return paint.getAlpha() == 0
-                && paint.getLooper() == nullptr
-                && !paint.getColorFilter()
-                && getXfermode(paint.getXfermode()) == SkXfermode::kSrcOver_Mode;
-    }
-
-    static bool isBlendedColorFilter(const SkColorFilter* filter) {
-        if (filter == nullptr) {
-            return false;
-        }
-        return (filter->getFlags() & SkColorFilter::kAlphaUnchanged_Flag) == 0;
-    }
-
 // ----------------------------------------------------------------------------
 // Frame state operations
 // ----------------------------------------------------------------------------

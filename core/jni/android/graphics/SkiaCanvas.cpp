@@ -126,7 +126,8 @@ public:
 
     virtual void drawText(const uint16_t* text, const float* positions, int count,
             const SkPaint& paint, float x, float y,
-            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom);
+            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+            float totalAdvance);
     virtual void drawPosText(const uint16_t* text, const float* positions, int count,
             int posCount, const SkPaint& paint);
     virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
@@ -686,7 +687,8 @@ void SkiaCanvas::drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshH
 
 void SkiaCanvas::drawText(const uint16_t* text, const float* positions, int count,
         const SkPaint& paint, float x, float y,
-        float boundsLeft, float boundsTop, float boundsRight, float boundsBottom) {
+        float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+        float totalAdvance) {
     // Set align to left for drawing, as we don't want individual
     // glyphs centered or right-aligned; the offset above takes
     // care of all alignment.

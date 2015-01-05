@@ -49,6 +49,7 @@
 #include "UvMapper.h"
 #include "Vertex.h"
 #include "Caches.h"
+#include "utils/PaintUtils.h"
 
 class SkShader;
 
@@ -274,7 +275,7 @@ public:
 
     static inline SkXfermode::Mode getXfermodeDirect(const SkPaint* paint) {
         if (!paint) return SkXfermode::kSrcOver_Mode;
-        return getXfermode(paint->getXfermode());
+        return PaintUtils::getXfermode(paint->getXfermode());
     }
 
     static inline int getAlphaDirect(const SkPaint* paint) {

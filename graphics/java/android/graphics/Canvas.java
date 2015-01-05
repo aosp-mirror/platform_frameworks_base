@@ -44,8 +44,12 @@ import javax.microedition.khronos.opengles.GL;
  */
 public class Canvas {
 
-    // assigned in constructors or setBitmap, freed in finalizer
-    private long mNativeCanvasWrapper;
+    /**
+     * Should only be assigned in constructors (or setBitmap if software canvas),
+     * freed in finalizer.
+     * @hide
+     */
+    protected long mNativeCanvasWrapper;
 
     /** @hide */
     public long getNativeCanvasWrapper() {
@@ -1619,6 +1623,9 @@ public class Canvas {
             int colorOffset, @Nullable short[] indices, int indexOffset, int indexCount,
             @NonNull Paint paint) {
         checkRange(verts.length, vertOffset, vertexCount);
+        if (isHardwareAccelerated()) {
+            return;
+        }
         if (texs != null) {
             checkRange(texs.length, texOffset, vertexCount);
         }

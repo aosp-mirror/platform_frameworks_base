@@ -47,6 +47,7 @@
 #include "Vector.h"
 #include "VertexBuffer.h"
 #include "utils/GLUtils.h"
+#include "utils/PaintUtils.h"
 #include "utils/TraceUtils.h"
 
 #if DEBUG_DETAILED_EVENTS
@@ -1667,8 +1668,10 @@ void OpenGLRenderer::setupDrawBlending(const Layer* layer, bool swapSrcDst) {
     // argb=1,0,0,0
     accountForClear(mode);
     // TODO: check shader blending, once we have shader drawing support for layers.
-    bool blend = layer->isBlend() || getLayerAlpha(layer) < 1.0f ||
-            (mColorSet && mColorA < 1.0f) || isBlendedColorFilter(layer->getColorFilter());
+    bool blend = layer->isBlend()
+            || getLayerAlpha(layer) < 1.0f
+            || (mColorSet && mColorA < 1.0f)
+            || PaintUtils::isBlendedColorFilter(layer->getColorFilter());
     chooseBlending(blend, mode, mDescription, swapSrcDst);
 }
 
@@ -1679,7 +1682,7 @@ void OpenGLRenderer::setupDrawBlending(const SkPaint* paint, bool blend, bool sw
     accountForClear(mode);
     blend |= (mColorSet && mColorA < 1.0f) ||
             (getShader(paint) && !getShader(paint)->isOpaque()) ||
-            isBlendedColorFilter(getColorFilter(paint));
+            PaintUtils::isBlendedColorFilter(getColorFilter(paint));
     chooseBlending(blend, mode, mDescription, swapSrcDst);
 }
 
@@ -2476,7 +2479,7 @@ void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bot
         float rx, float ry, const SkPaint* p) {
     if (mState.currentlyIgnored()
             || quickRejectSetupScissor(left, top, right, bottom, p)
-            || paintWillNotDraw(*p)) {
+            || PaintUtils::paintWillNotDraw(*p)) {
         return;
     }
 
@@ -2495,7 +2498,7 @@ void OpenGLRenderer::drawRoundRect(float left, float top, float right, float bot
 void OpenGLRenderer::drawCircle(float x, float y, float radius, const SkPaint* p) {
     if (mState.currentlyIgnored()
             || quickRejectSetupScissor(x - radius, y - radius, x + radius, y + radius, p)
-            || paintWillNotDraw(*p)) {
+            || PaintUtils::paintWillNotDraw(*p)) {
         return;
     }
     if (p->getPathEffect() != nullptr) {
@@ -2517,7 +2520,7 @@ void OpenGLRenderer::drawOval(float left, float top, float right, float bottom,
         const SkPaint* p) {
     if (mState.currentlyIgnored()
             || quickRejectSetupScissor(left, top, right, bottom, p)
-            || paintWillNotDraw(*p)) {
+            || PaintUtils::paintWillNotDraw(*p)) {
         return;
     }
 
@@ -2540,7 +2543,7 @@ void OpenGLRenderer::drawArc(float left, float top, float right, float bottom,
         float startAngle, float sweepAngle, bool useCenter, const SkPaint* p) {
     if (mState.currentlyIgnored()
             || quickRejectSetupScissor(left, top, right, bottom, p)
-            || paintWillNotDraw(*p)) {
+            || PaintUtils::paintWillNotDraw(*p)) {
         return;
     }
 
@@ -2575,7 +2578,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom,
         const SkPaint* p) {
     if (mState.currentlyIgnored()
             || quickRejectSetupScissor(left, top, right, bottom, p)
-            || paintWillNotDraw(*p)) {
+            || PaintUtils::paintWillNotDraw(*p)) {
         return;
     }
 
@@ -2657,7 +2660,8 @@ void OpenGLRenderer::drawTextShadow(const SkPaint* paint, const char* text,
 
 bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
     float alpha = (hasTextShadow(paint) ? 1.0f : paint->getAlpha()) * currentSnapshot()->alpha;
-    return alpha == 0.0f && getXfermode(paint->getXfermode()) == SkXfermode::kSrcOver_Mode;
+    return MathUtils::isZero(alpha)
+            && PaintUtils::getXfermode(paint->getXfermode()) == SkXfermode::kSrcOver_Mode;
 }
 
 void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,

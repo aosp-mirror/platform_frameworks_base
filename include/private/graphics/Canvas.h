@@ -131,15 +131,23 @@ public:
             const float* vertices, const int* colors, const SkPaint* paint) = 0;
 
     // Text
-    virtual void drawText(const uint16_t* text, const float* positions, int count,
+    /**
+     * drawText: count is of glyphs
+     * totalAdvance is ignored in software renderering, used by hardware renderer for
+     * text decorations (underlines, strikethroughs).
+     */
+    virtual void drawText(const uint16_t* glyphs, const float* positions, int count,
             const SkPaint& paint, float x, float y,
-            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom) = 0;
+            float boundsLeft, float boundsTop, float boundsRight, float boundsBottom,
+            float totalAdvance) = 0;
+    /** drawPosText: count is of UTF16 characters, posCount is floats (2 * glyphs) */
     virtual void drawPosText(const uint16_t* text, const float* positions, int count,
             int posCount, const SkPaint& paint) = 0;
+    /** drawTextOnPath: count is of glyphs */
     virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
             float hOffset, float vOffset, const SkPaint& paint) = 0;
 
-    /*
+    /**
      * Specifies if the positions passed to ::drawText are absolute or relative
      * to the (x,y) value provided.
      *
