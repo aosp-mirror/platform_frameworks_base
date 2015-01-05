@@ -3,5 +3,5 @@
 #
 base=/system
 export CLASSPATH=$base/framework/input.jar
-exec app_process $base/bin com.android.commands.input.Input $*
+exec app_process $base/bin com.android.commands.input.Input "$@"
 
