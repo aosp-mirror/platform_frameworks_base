@@ -100,7 +100,7 @@ of a string as not null.</p>
 <h3><em>Alt + Enter</em> key binding</h3>
 <p>For quick fixes to coding errors, the IntelliJ powered IDE implements the <em>Alt + Enter</em>
 key binding to fix errors (missing imports, variable assignments, missing references, etc) when
-possible, and if not, suggest the most probably solution. </p>
+possible, and if not, suggest the most probable solution. </p>
 
 
 <h3><em>Ctrl + D</em> key binding</h3>
