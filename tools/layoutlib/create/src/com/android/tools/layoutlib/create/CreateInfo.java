@@ -152,7 +152,6 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.Typeface#getSystemFontConfigLocation",
         "android.os.Handler#sendMessageAtTime",
         "android.os.HandlerThread#run",
-        "android.preference.Preference#dispatchSetInitialValue",
         "android.preference.Preference#getView",
         "android.text.format.DateFormat#is24HourFormat",
         "android.util.Xml#newPullParser",
