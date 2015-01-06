@@ -1,0 +1,190 @@
+page.title=TV 向けレイアウトをビルドする
+page.tags=tv
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>学習の目的</h2>
+  <ol>
+    <li><a href="#themes">TV 向けのレイアウト テーマを使用する</a></li>
+    <li><a href="#structure">基本的な TV レイアウトをビルドする</a></li>
+    <li><a href="#visibility">使用可能なテキストとコントロールをビルドする</a></li>
+    <li><a href="#density-resources">TV のレイアウト リソースを管理する</a></li>
+    <li><a href="#anti-patterns">レイアウトのアンチパターンを回避する</a></li>
+    <li><a href="#large-bitmaps">大容量のビットマップを処理する</a></li>
+  </ol>
+  <h2>関連コンテンツ</h2>
+  <ol>
+    <li><a href="{@docRoot}design/tv/index.html">Android の TV 向けデザイン</a></li>
+  </ol>
+</div>
+</div>
+
+<p>
+  TV スクリーンは 10 フィートほど離れて見ることが通常であり、他の Android 端末のディスプレイよりもはるかに大きいことが多く、小型の端末と同レベルの精度と色を再現できません。便利で楽しいユーザー エクスペリエンスを作成する上で、これらの要素を配慮して TV 端末向けアプリのレイアウトを作成する必要があります。
+</p>
+
+<p>
+  このレッスンでは、TV アプリ用の効果的なレイアウトをビルドするための最低限の要件と実装の詳細を説明します。
+</p>
+
+<h2 id="themes">TV 向けのレイアウト テーマを使用する</h2>
+
+<p>
+  Android の<a href="{@docRoot}guide/topics/ui/themes.html">テーマ</a>は、TV アプリのレイアウトの基礎を提供しています。TV 端末上で動作するよう設計されたアプリのアクティビティに関しては、テーマを使用して表示を変更する必要があります。このセクションでは、どのテーマを使用したらよいかについて説明します。
+</p>
+
+<h3 id="leanback-theme">Leanback テーマ</h3>
+
+<p>
+  TV ユーザー インターフェースのサポート ライブラリである <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 leanback ライブラリ</a> は、{@code Theme.Leanback} という TV アクティビティに関する標準的なテーマを提供しています。このテーマは、TV アプリに一貫性のある視覚的なスタイルを与えます。ほとんどの TV アプリにはこのテーマをお勧めします。このテーマは v17 leanback クラスを使用するすべての TV アプリに最適です。次のコード例では、アプリ内にあるアクティビティにこのテーマを適用する方法を示します。
+</p>
+
+<pre>
+&lt;activity
+  android:name="com.example.android.TvActivity"
+  android:label="&#64;string/app_name"
+  <strong>android:theme="&#64;style/Theme.Leanback"</strong>&gt;
+</pre>
+
+
+<h3 id="notitle-theme">NoTitleBar テーマ</h3>
+
+<p>
+  タイトル バーは、携帯電話やタブレットの Android アプリにとっては標準的なユーザー インターフェース エレメントですが、TV アプリには適していません。v17 leanback クラスを使用していない場合は、TV アクティビティにこのテーマを適用してタイトル バーの表示を控える必要があります。TV アプリのマニフェストに関する次のコード例では、このテーマを適用してタイトル バーの表示を削除する方法を示します。
+</p>
+
+<pre>
+&lt;application&gt;
+  ...
+
+  &lt;activity
+    android:name="com.example.android.TvActivity"
+    android:label="&#64;string/app_name"
+    <strong>android:theme="&#64;android:style/Theme.NoTitleBar"</strong>&gt;
+    ...
+
+  &lt;/activity&gt;
+&lt;/application&gt;
+</pre>
+
+
+<h2 id="structure">基本的な TV レイアウトをビルドする</h2>
+
+<p>TV 端末用のレイアウトが、大きなスクリーンでも使いやすく効果的になるように、参考となるガイドラインがいくつかあります。次のヒントに従って、TV スクリーン用に最適化された横長のレイアウトをビルドします。
+</p>
+
+<ul>
+  <li>横向きでレイアウトをビルドします。TV スクリーンは常に横表示になります。</li>
+  <li>スクリーンの左か右にナビゲーション コントロールを配置して、垂直方向にコンテンツ用のスペースを確保します。</li>
+  <li><a href="{@docRoot}guide/components/fragments.html">フラグメント</a>を使用してセクションごとに分割された UI を作成し、水平方向のスペースをより有効に活用するために、{@link android.widget.GridView} のようなビュー グループを {@link android.widget.ListView} の代わりに使用します。
+  </li>
+  <li>ビューの配置には、{@link android.widget.RelativeLayout} や {@link android.widget.LinearLayout} のようなビュー グループを使用します。これにより、システムで TV 画面のビューの位置を一定のサイズ、アラインメント、アスペクト比、画素密度に調整することができるようになります。</li>
+  <li>レイアウト コントロール間には十分なマージンを取り、UI が見やすくなるようにします。</li>
+</ul>
+
+
+<h3 id="overscan">オーバースキャン</h3>
+
+<p>TV 向けのレイアウトには、TV 規格の進化と、常に視聴者にフルスクリーン表示を提供したいという開発者側の意図に伴い、いくつかの特殊な要件があります。このため、TV 端末ではフルスクリーン表示の際にディスプレイ全体を埋められるように、アプリのレイアウト周囲がクリッピングされる場合があります。この動作を、一般に<em>オーバースキャン</em>と呼びます。
+</p>
+
+<p>
+  レイアウト周囲には 10%のマージンを与え、スクリーン エレメントがオーバースキャンによりクリッピングされないようにします。具体的には、アクティビティのベース レイアウトの左右には 27dp、上下には 48dp のマージンを設定します。次のレイアウト例では、TV アプリのルート レイアウト内でこれらのマージンを設定する方法を示します。
+</p>
+
+<pre>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/base_layout"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  android:layout_marginTop="27dp"
+  android:layout_marginLeft="48dp"
+  android:layout_marginRight="48dp"
+  android:layout_marginBottom="27dp" &gt;
+&lt;/LinearLayout&gt;
+</pre>
+
+<p class="caution">
+  <strong>警告:</strong>{@link android.support.v17.leanback.app.BrowseFragment} や関連ウィジェットなどの v17 leanback クラスを使用している場合、レイアウトには既にオーバースキャン用のマージンが設定されているため、重複して設定しないようにします。
+</p>
+
+<h2 id="visibility">使用可能なテキストとコントロールをビルドする</h2>
+
+<p>
+  TV アプリのレイアウト内のテキストやコントロールは、遠くからでも見やすく、操作内容を理解できるようにする必要があります。次のヒントに従って、遠くから見ても簡単に判別可能なユーザー インターフェース エレメントを作成します。
+</p>
+
+<ul>
+  <li>ユーザーが一目でわかる小さな単位にテキストを分割します。</li>
+  <li>暗い背景に対して明るい色のテキストを使用します。これにより、TV スクリーン上のテキストが読みやすくなります。</li>
+  <li>細いフォントや、狭すぎたり広すぎたりするストロークのフォントを使用しないようにします。シンプルなサンセリフ フォントやアンチ エイリアスを使用して、より読みやすくします。</li>
+  <li>次の Android の標準フォント サイズを使用します。 <pre>
+&lt;TextView
+      android:id="@+id/atext"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:gravity="center_vertical"
+      android:singleLine="true"
+      <strong>android:textAppearance="?android:attr/textAppearanceMedium"/&gt;</strong>
+</pre>
+  </li>
+  <li>すべてのビュー ウィジェットが、スクリーン位置から 10 フィート（スクリーンが大きくなると、この距離は長くなります）離れていてもはっきりと見えるように十分な大きさを確保します。これには、絶対的なサイズではなく相対レイアウトによるサイジングを、絶対的なピクセル単位ではなく密度に依存しないピクセル（dip）単位を使用します。たとえば、ウィジェットの幅を設定するには画素測定ではなく {@code wrap_content} を、ウィジェットのマージンを設定するにはピクセル値ではなくディップ値を使用します。</li>
+</ul>
+
+<p>
+  密度に依存しないピクセルと、スクリーン サイズが大きな場合のレイアウトのビルドについては、<a href="{@docRoot}guide/practices/screens_support.html">複数のスクリーンをサポートする</a>を参照してください。
+</p>
+
+<h2 id="density-resources">TV のレイアウト リソースを管理する</h2>
+
+<p>一般的なハイビジョン TV ディスプレイの解像度は 720p、1080i、1080p です。TV のレイアウトが 1920×1080 ピクセルのスクリーン サイズになるようにして、Android のシステムが必要に応じてアプリのレイアウト エレメントを 720p にダウンスケールできるようにします。通常は、ダウンスケーリング（ピクセル削除）してもレイアウトのプレゼンテーション品質が低下することはありません。ただし、アップスケーリングはレイアウトの品質を劣化させ、アプリのユーザー エクスペリエンスに悪影響を与えるアーチファクトを引き起こす可能性があります。</p>
+
+<p>
+  画像を最適な状態にスケーリングするには、可能であれば <a href="{@docRoot}tools/help/draw9patch.html">9patch 画像</a>のエレメントとして配置します。レイアウト内に低品質な画像や小さな画像を配置した場合、ピクセル化され、ぼやけた、粗い表示になり、ユーザー エクスペリエンスの低下につながります。それを避けるには、高品質の画像を使用します。
+</p>
+
+<p>
+  大きなスクリーン向けのレイアウトやリソースの最適化については、<a href="{@docRoot}training/multiscreen/index.html">複数のスクリーンをデザインする</a>を参照してください。
+</p>
+
+
+<h2 id="anti-patterns">レイアウトのアンチパターンを回避する</h2>
+
+<p>
+  TV 端末には不向きでユーザー エクスペリエンスの低下につながるため、レイアウトのビルドに際して避けたほうがよいアプローチがいくつかあります。ここでは、TV のレイアウト開発の際に特に使用し<em>ない</em>ほうがよい、ユーザー インターフェースに関するアプローチをいくつか説明します。
+</p>
+
+<ul>
+  <li><strong>携帯電話やタブレットのレイアウトの再利用</strong> 携帯電話やタブレット向けアプリのレイアウトをそのまま再利用しないようにします。他の Android 端末のフォーム ファクタ向けにビルドされたレイアウトは、TV 端末には不向きであり、TV 操作向けに簡略化する必要があります。</li>
+  <li><strong>ActionBar</strong> - このユーザー インターフェース規則は、携帯電話やタブレットでの使用は推奨できますが、TV のインターフェースには適していません。具体的には、TV リモコンではアクション バーのオプション メニュー（その他類似機能のプルダウン メニュー）をナビゲートすることが難しいため、使用しないことをお勧めします。</li>
+  <li><strong>ViewPager</strong> - スクリーン間のスライド操作は携帯電話やタブレット上では非常に有効ですが、TV では推奨できません。</li>
+</ul>
+
+<p>TV に適したレイアウトのデザインについては、<a href="{@docRoot}design/tv/index.html">TV 向けデザイン</a>ガイドを参照してください。</p>
+
+
+<h2 id="large-bitmaps">大容量のビットマップを処理する</h2>
+
+<p>他の Android 端末と同様に、TV 端末ではメモリ容量が限られています。超高解像度の画像を使用してアプリのレイアウトをビルドしたり、アプリの動作に多くの高解像度の画像を使用した場合、すぐにメモリの上限に達し、メモリ不足エラーが発生する可能性があります。次のヒントに従って、このタイプの問題を回避します。</p>
+
+<ul>
+  <li>スクリーン上に表示された場合にのみ画像をロードします。たとえば、{@link android.widget.GridView} や {@link android.widget.Gallery} で複数の画像を表示する場合、 {@link android.widget.Adapter#getView getView()} がビューの {@link android.widget.Adapter} で呼び出されたときのみ画像をロードします。
+  </li>
+  <li>{@link android.graphics.Bitmap#recycle()} を、不要になった {@link android.graphics.Bitmap} ビューで呼び出します。
+  </li>
+  <li> {@link java.lang.ref.WeakReference} を使用して、{@link android.graphics.Bitmap} オブジェクト（メモリ内の {@link java.util.Collection} にある）への参照を格納します。
+  </li>
+  <li>ネットワークから画像を取得する場合は{@link android.os.AsyncTask} を使用して取得し、端末に格納すると、アクセスを高速化できます。アプリのメイン ユーザー インターフェースのスレッドで、ネットワーク トランザクションを実行しないでください。
+  </li>
+  <li>ダウンロードの際は大きな画像をより適切なサイズにスケールダウンしてください。スケールダウンしない場合、メモリ不足により障害が発生する可能性があります。
+  </li>
+</ul>
+
+<p>
+  画像処理の際に最高のパフォーマンスを得るには、<a href="{@docRoot}training/displaying-bitmaps/index.html">ビットマップを効率的に表示する</a>を参照してください。
+</p>
