@@ -405,12 +405,10 @@ public abstract class MediaBrowserService extends Service {
      */
     private void addSubscription(String id, ConnectionRecord connection) {
         // Save the subscription
-        final boolean added = connection.subscriptions.add(id);
+        connection.subscriptions.add(id);
 
-        // If this is a new subscription, send the results
-        if (added) {
-            performLoadChildren(id, connection);
-        }
+        // send the results
+        performLoadChildren(id, connection);
     }
 
     /**
