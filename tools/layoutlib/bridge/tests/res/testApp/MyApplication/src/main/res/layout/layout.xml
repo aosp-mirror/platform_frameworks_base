@@ -8,4 +8,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Some text"/>
+    <DatePicker
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
+    <CalendarView
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
 </LinearLayout>
