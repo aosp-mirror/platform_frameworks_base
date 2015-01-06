@@ -113,7 +113,9 @@ public class MobileDataControllerImpl implements NetworkController.MobileDataCon
         if (session == null) {
             return warn("no stats session");
         }
-        final NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
+        NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(subscriberId);
+        template = NetworkTemplate.normalize(template, mTelephonyManager.getMergedSubscriberIds());
+
         final NetworkPolicy policy = findNetworkPolicy(template);
         try {
             final NetworkStatsHistory history = mSession.getHistoryForNetwork(template, FIELDS);
