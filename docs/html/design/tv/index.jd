@@ -38,7 +38,7 @@ see <a href="/distribute/googleplay/tv.html">Distributing to Android TV</a>.</p>
 <p>To learn more about searching within your app, see
   <a href="{@docRoot}training/tv/discovery/in-app-search.html">Searching within TV Apps</a>.
 
-<h2>Recommendations</h2>
+<h2 id="recommendations">Recommendations</h2>
 
 <p>The recommendations row on Android TV is a central feature of the Home Screen that allows
   users quick access to dynamic and relevant content for their media-consumption activities. The
