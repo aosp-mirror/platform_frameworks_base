@@ -74,6 +74,7 @@ import android.view.DisplayAdjustments;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.view.textservice.TextServicesManager;
 
 import java.io.File;
@@ -477,6 +478,10 @@ public final class BridgeContext extends Context {
             return mDisplayManager;
         }
 
+        if (ACCESSIBILITY_SERVICE.equals(service)) {
+            return AccessibilityManager.getInstance(this);
+        }
+
         throw new UnsupportedOperationException("Unsupported Service: " + service);
     }
 
@@ -492,19 +497,22 @@ public final class BridgeContext extends Context {
     @Override
     public final BridgeTypedArray obtainStyledAttributes(int resid, int[] attrs)
             throws Resources.NotFoundException {
+        StyleResourceValue style = null;
         // get the StyleResourceValue based on the resId;
-        StyleResourceValue style = getStyleByDynamicId(resid);
+        if (resid != 0) {
+            style = getStyleByDynamicId(resid);
 
-        if (style == null) {
-            // In some cases, style may not be a dynamic id, so we do a full search.
-            ResourceReference ref = resolveId(resid);
-            if (ref != null) {
-                style = mRenderResources.getStyle(ref.getName(), ref.isFramework());
+            if (style == null) {
+                // In some cases, style may not be a dynamic id, so we do a full search.
+                ResourceReference ref = resolveId(resid);
+                if (ref != null) {
+                    style = mRenderResources.getStyle(ref.getName(), ref.isFramework());
+                }
             }
-        }
 
-        if (style == null) {
-            throw new Resources.NotFoundException();
+            if (style == null) {
+                throw new Resources.NotFoundException();
+            }
         }
 
         if (mTypedArrayCache == null) {
