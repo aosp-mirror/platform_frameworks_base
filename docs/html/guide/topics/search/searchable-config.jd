@@ -32,26 +32,26 @@ Android uses the filename as the resource ID.</dd>
 <pre class="stx">
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;<a href="#searchable-element">searchable</a> xmlns:android="http://schemas.android.com/apk/res/android"
-    android:label="<em>string resource</em>"
-    android:hint="<em>string resource</em>"
-    android:searchMode=["queryRewriteFromData" | "queryRewriteFromText"]
-    android:searchButtonText="<em>string resource</em>"
-    android:inputType="<em>{@link android.R.attr#inputType}</em>"
-    android:imeOptions="<em>{@link android.R.attr#imeOptions}</em>"
-    android:searchSuggestAuthority="<em>string</em>"
-    android:searchSuggestPath="<em>string</em>"
-    android:searchSuggestSelection="<em>string</em>"
-    android:searchSuggestIntentAction="<em>string</em>"
-    android:searchSuggestIntentData="<em>string</em>"
-    android:searchSuggestThreshold="<em>int</em>"
-    android:includeInGlobalSearch=["true" | "false"]
-    android:searchSettingsDescription="<em>string resource</em>"
-    android:queryAfterZeroResults=["true" | "false"]
-    android:voiceSearchMode=["showVoiceSearchButton" | "launchWebSearch" | "launchRecognizer"]
-    android:voiceLanguageModel=["free-form" | "web_search"]
-    android:voicePromptText="<em>string resource</em>"
-    android:voiceLanguage="<em>string</em>"
-    android:voiceMaxResults="<em>int</em>"
+    android:<a href="#label">label</a>="<em>string resource</em>"
+    android:<a href="#hint">hint</a>="<em>string resource</em>"
+    android:<a href="#searchMode">searchMode</a>=["queryRewriteFromData" | "queryRewriteFromText"]
+    android:<a href="#searchButtonText">searchButtonText</a>="<em>string resource</em>"
+    android:<a href="#inputType">inputType</a>="<em>{@link android.R.attr#inputType}</em>"
+    android:<a href="#imeOptions">imeOptions</a>="<em>{@link android.R.attr#imeOptions}</em>"
+    android:<a href="#searchSuggestAuthority">searchSuggestAuthority</a>="<em>string</em>"
+    android:<a href="#searchSuggestPath">searchSuggestPath</a>="<em>string</em>"
+    android:<a href="#searchSuggestSelection">searchSuggestSelection</a>="<em>string</em>"
+    android:<a href="#searchSuggestIntentAction">searchSuggestIntentAction</a>="<em>string</em>"
+    android:<a href="#searchSuggestIntentData">searchSuggestIntentData</a>="<em>string</em>"
+    android:<a href="#searchSuggestThreshold">searchSuggestThreshold</a>="<em>int</em>"
+    android:<a href="#includeInGlobalSearch">includeInGlobalSearch</a>=["true" | "false"]
+    android:<a href="#searchSettingsDescription">searchSettingsDescription</a>="<em>string resource</em>"
+    android:<a href="#queryAfterZeroResults">queryAfterZeroResults</a>=["true" | "false"]
+    android:<a href="#voiceSearchMode">voiceSearchMode</a>=["showVoiceSearchButton" | "launchWebSearch" | "launchRecognizer"]
+    android:<a href="#voiceLanguageModel">voiceLanguageModel</a>=["free-form" | "web_search"]
+    android:<a href="#voicePromptText">voicePromptText</a>="<em>string resource</em>"
+    android:<a href="#voiceLanguage">voiceLanguage</a>="<em>string</em>"
+    android:<a href="#voiceMaxResults">voiceMaxResults</a>="<em>int</em>"
     &gt;
     &lt;<a href="#actionkey-element">actionkey</a>
         android:keycode="<em>{@link android.view.KeyEvent KEYCODE}</em>"
@@ -69,7 +69,7 @@ Android uses the filename as the resource ID.</dd>
   <dd>Defines all search configurations used by the Android system to provide assisted search.
     <p class="caps">attributes:</p>
       <dl class="atn-list">
-      <dt><code>android:label</code></dt>
+      <dt><a name="label"></a><code>android:label</code></dt>
       <dd><em>String resource</em>. (Required.) The name of your application.
 It should be the same as the name applied to the {@code android:label} attribute of your <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#label">{@code &lt;activity&gt;}</a> or
@@ -78,14 +78,14 @@ href="{@docRoot}guide/topics/manifest/activity-element.html#label">{@code &lt;ac
 <code>android:includeInGlobalSearch</code> to "true", in which case, this label is used to identify
 your application as a searchable item in the system's search settings.</dd>
 
-      <dt><code>android:hint</code></dt>
+      <dt><a name="hint"></a><code>android:hint</code></dt>
       <dd><em>String resource</em>. (Recommended.) The text to display in the search text field when
 no text has been entered. It provides a hint to the user about what
 content is searchable. For consistency with other Android applications, you should format the
 string for {@code android:hint} as "Search <em>&lt;content-or-product&gt;</em>". For example,
 "Search songs and artists" or "Search YouTube".</dd>
 
-      <dt><code>android:searchMode</code></dt>
+      <dt><a name="searchMode"></a><code>android:searchMode</code></dt>
       <dd><em>Keyword</em>. Sets additional modes that control the search presentation.
 Currently available modes define how the query text should be rewritten when a custom suggestion
 receives focus. The following mode values are accepted:
@@ -109,19 +109,19 @@ inspection and editing, typically HTTP URI's.</td>
 href="adding-custom-suggestions.html#RewritingQueryText">Adding Custom Suggestions</a>.</p>
       </dd>
 
-      <dt><code>android:searchButtonText</code></dt>
+      <dt><a name="searchButtonText"></a><code>android:searchButtonText</code></dt>
       <dd><em>String resource</em>. The text to display in the button that executes search. By
 default, the button shows a search icon (a magnifying glass), which is ideal for
 internationalization, so you should not use this attribute to change the button unless the
 behavior is something other than a search (such as a URL request in a web browser).</dd>
 
-      <dt><code>android:inputType</code></dt>
+      <dt><a name="inputType"></a><code>android:inputType</code></dt>
       <dd><em>Keyword</em>. Defines the type of input method (such as the type of soft keyboard)
-to use. For most searches, in which free-form text is expected, you don't 
+to use. For most searches, in which free-form text is expected, you don't
 need this attribute. See {@link android.R.attr#inputType} for a list of suitable values for this
 attribute.</dd>
 
-      <dt><code>android:imeOptions</code></dt>
+      <dt><a name="imeOptions"></a><code>android:imeOptions</code></dt>
       <dd><em>Keyword</em>. Supplies additional options for the input method.
         For most searches, in  which free-form text is expected, you don't need this attribute. The
 default IME is "actionSearch" (provides the "search" button instead of a carriage
@@ -139,12 +139,12 @@ for this attribute.
     {@code &lt;searchable>} attributes:</p><br/>
 
       <dl class="atn-list">
-      <dt><code>android:searchSuggestAuthority</code></dt>
+      <dt><a name="searchSuggestAuthority"></a><code>android:searchSuggestAuthority</code></dt>
         <dd><em>String</em>. (Required to provide search suggestions.)
         This value must match the authority string provided in the {@code android:authorities}
 attribute of the Android manifest {@code &lt;provider>} element.</dd>
 
-      <dt><code>android:searchSuggestPath</code></dt>
+      <dt><a name="searchSuggestPath"></a><code>android:searchSuggestPath</code></dt>
         <dd><em>String</em>. This path is used as a portion of the suggestions
         query {@link android.net.Uri}, after the prefix and authority, but before
 the standard suggestions path.
@@ -152,7 +152,7 @@ the standard suggestions path.
         of suggestions (such as for different data types) and you need
         a way to disambiguate the suggestions queries when you receive them.</dd>
 
-      <dt><code>android:searchSuggestSelection</code></dt>
+      <dt><a name="searchSuggestSelection"></a><code>android:searchSuggestSelection</code></dt>
         <dd><em>String</em>. This value is passed into your
         query function as the {@code selection} parameter. Typically this is a WHERE clause
 for your database, and should contain a single question mark, which is a placeholder for the
@@ -160,22 +160,22 @@ actual query string that has been typed by the user (for example, {@code "query=
 can also use any non-null value to trigger the delivery of the query text via the {@code
 selectionArgs} parameter (and then ignore the {@code selection} parameter).</dd>
 
-      <dt><code>android:searchSuggestIntentAction</code></dt>
+      <dt><a name="searchSuggestIntentAction"></a><code>android:searchSuggestIntentAction</code></dt>
         <dd><em>String</em>. The default intent action to be used when a user
         clicks on a custom search suggestion (such as {@code "android.intent.action.VIEW"}).
         If this is not overridden by the selected suggestion (via the {@link
 android.app.SearchManager#SUGGEST_COLUMN_INTENT_ACTION} column), this value is placed in the action
 field of the {@link android.content.Intent} when the user clicks a suggestion.</dd>
 
-      <dt><code>android:searchSuggestIntentData</code></dt>
+      <dt><a name="searchSuggestIntentData"></a><code>android:searchSuggestIntentData</code></dt>
         <dd><em>String</em>. The default intent data to be used when a user
         clicks on a custom search suggestion.
         If not overridden by the selected suggestion (via the {@link
 android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column), this value is
-        placed in the data field of the {@link android.content.Intent} when the user clicks 
+        placed in the data field of the {@link android.content.Intent} when the user clicks
         a suggestion.</dd>
 
-      <dt><code>android:searchSuggestThreshold</code></dt>
+      <dt><a name="searchSuggestThreshold"></a><code>android:searchSuggestThreshold</code></dt>
         <dd><em>Integer</em>. The minimum number of characters needed to
         trigger a suggestion look-up. Only guarantees that the system will not query your
         content provider for anything shorter than the threshold. The default value is 0.</dd>
@@ -192,20 +192,20 @@ android.app.SearchManager#SUGGEST_COLUMN_INTENT_DATA} column), this value is
     following {@code &lt;searchable>} attributes:</p><br/>
 
       <dl class="atn-list">
-      <dt><code>android:includeInGlobalSearch</code></dt>
+      <dt><a name="includeInGlobalSearch"></a><code>android:includeInGlobalSearch</code></dt>
         <dd><em>Boolean</em>. (Required to provide search suggestions in
         Quick Search Box.) Set to "true" if you want your suggestions to be
         included in the globally accessible Quick Search Box. The user must
         still enable your application as a searchable item in the system search settings before
         your suggestions will appear in Quick Search Box.</dd>
 
-      <dt><code>android:searchSettingsDescription</code></dt>
+      <dt><a name="searchSettingsDescription"></a><code>android:searchSettingsDescription</code></dt>
         <dd><em>String</em>. Provides a brief description of the search suggestions that you provide
 to Quick Search Box, which is displayed in the searchable items entry for your application.
 Your description should concisely describe the content that is searchable. For example, "Artists,
 albums, and tracks" for a music application, or "Saved notes" for a notepad application.</dd>
 
-      <dt><code>android:queryAfterZeroResults</code></dt>
+      <dt><a name="queryAfterZeroResults"></a><code>android:queryAfterZeroResults</code></dt>
         <dd><em>Boolean</em>. Set to "true" if you want your content provider to be invoked for
         supersets of queries that have returned zero results in the past. For example, if
 your content provider returned zero results for "bo", it should be requiried for "bob". If set to
@@ -222,7 +222,7 @@ content provider again). The default value is false.</dd>
     following {@code &lt;searchable>} attributes:</p><br/>
 
       <dl class="atn-list">
-        <dt><code>android:voiceSearchMode</code></dt>
+        <dt><a name="voiceSearchMode"></a><code>android:voiceSearchMode</code></dt>
         <dd><em>Keyword</em>. (Required to provide voice search capabilities.)
           Enables voice search, with a specific mode for voice search.
           (Voice search may not be provided by the device, in which case these flags
@@ -252,7 +252,7 @@ then either {@code "launchWebSearch"} or {@code "launchRecognizer"} must also be
           </table>
         </dd>
 
-        <dt><code>android:voiceLanguageModel</code></dt>
+        <dt><a name="voiceLanguageModel"></a><code>android:voiceLanguageModel</code></dt>
           <dd><em>Keyword</em>. The language model that
           should be used by the voice recognition system. The following values are accepted:
           <table>
@@ -268,20 +268,20 @@ optimized for English. This is the default.</td>
 available in more languages than "free_form".</td>
             </tr>
           </table>
-          <p>Also see 
+          <p>Also see
           {@link android.speech.RecognizerIntent#EXTRA_LANGUAGE_MODEL} for more
           information.</p></dd>
 
-        <dt><code>android:voicePromptText</code></dt>
+        <dt><a name="voicePromptText"></a><code>android:voicePromptText</code></dt>
           <dd><em>String</em>. An additional message to display in the voice input dialog.</dd>
 
-        <dt><code>android:voiceLanguage</code></dt>
+        <dt><a name="voiceLanguage"></a><code>android:voiceLanguage</code></dt>
           <dd><em>String</em>. The spoken language to be expected, expressed as the string value of
 a constants in {@link java.util.Locale} (such as {@code "de"} for German or {@code "fr"} for
 French). This is needed only if it is different from the current value of {@link
 java.util.Locale#getDefault() Locale.getDefault()}.</dd>
 
-        <dt><code>android:voiceMaxResults</code></dt>
+        <dt><a name="voiceMaxResults"></a><code>android:voiceMaxResults</code></dt>
           <dd><em>Integer</em>. Forces the maximum number of results to return,
           including the "best" result which is always provided as the {@link
 android.content.Intent#ACTION_SEARCH} intent's primary
@@ -308,7 +308,7 @@ keys are not generally discoverable, so you should not provide them as a core us
 other three attributes in order to define the search action.</p>
       <p class="caps">attributes:</p>
       <dl class="atn-list">
-      <dt><code>android:keycode</code></dt>
+      <dt><a name="keycode"></a><code>android:keycode</code></dt>
         <dd><em>String</em>. (Required.) A key code from {@link
 android.view.KeyEvent} that represents the action key
         you wish to respond to (for example {@code "KEYCODE_CALL"}). This is added to the
@@ -318,7 +318,7 @@ android.view.KeyEvent} that represents the action key
 keys are supported for a search action, as many of them are used for typing, navigation, or system
 functions.</dd>
 
-      <dt><code>android:queryActionMsg</code></dt>
+      <dt><a name="queryActionMsg"></a><code>android:queryActionMsg</code></dt>
         <dd><em>String</em>. An action message to be sent if the action key is pressed while the
 user is entering query text. This is added to the
         {@link android.content.Intent#ACTION_SEARCH ACTION_SEARCH} intent that the system
@@ -326,17 +326,17 @@ user is entering query text. This is added to the
         {@link android.content.Intent#getStringExtra
         getStringExtra(SearchManager.ACTION_MSG)}.</dd>
 
-      <dt><code>android:suggestActionMsg</code></dt>
+      <dt><a name="suggestActionMsg"></a><code>android:suggestActionMsg</code></dt>
         <dd><em>String</em>. An action message to be sent if the action key is pressed while a
         suggestion is in focus. This is added to the
         intent that that the system passes to your searchable activity (using the action
 you've defined for the suggestion). To examine the string,
-        use {@link android.content.Intent#getStringExtra 
+        use {@link android.content.Intent#getStringExtra
         getStringExtra(SearchManager.ACTION_MSG)}. This should only be used if all your
 suggestions support this action key. If not all suggestions can handle the same action key, then
 you must instead use the following {@code android:suggestActionMsgColumn} attribute.</dd>
 
-      <dt><code>android:suggestActionMsgColumn</code></dt>
+      <dt><a name="suggestActionMsgColumn"></a><code>android:suggestActionMsgColumn</code></dt>
         <dd><em>String</em>. The name of the column in your content provider that defines the
 action message for this action key, which is to be sent if the user presses the action key while a
         suggestion is in focus. This attribute lets you control the
