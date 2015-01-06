@@ -935,10 +935,8 @@ public class ConnectivityManager {
             return -1;
         }
 
-        NetworkCallback networkCallback = removeRequestForFeature(netCap);
-        if (networkCallback != null) {
+        if (removeRequestForFeature(netCap)) {
             Log.d(TAG, "stopUsingNetworkFeature for " + networkType + ", " + feature);
-            unregisterNetworkCallback(networkCallback);
         }
         return 1;
     }
@@ -1105,6 +1103,14 @@ public class ConnectivityManager {
         int expireSequenceNumber;
         Network currentNetwork;
         int delay = -1;
+
+        private void clearDnsBinding() {
+            if (currentNetwork != null) {
+                currentNetwork = null;
+                setProcessDefaultNetworkForHostResolution(null);
+            }
+        }
+
         NetworkCallback networkCallback = new NetworkCallback() {
             @Override
             public void onAvailable(Network network) {
@@ -1114,10 +1120,7 @@ public class ConnectivityManager {
             }
             @Override
             public void onLost(Network network) {
-                if (network.equals(currentNetwork)) {
-                    currentNetwork = null;
-                    setProcessDefaultNetworkForHostResolution(null);
-                }
+                if (network.equals(currentNetwork)) clearDnsBinding();
                 Log.d(TAG, "startUsingNetworkFeature lost Network:" + network);
             }
         };
@@ -1146,10 +1149,7 @@ public class ConnectivityManager {
             LegacyRequest l = sLegacyRequests.get(netCap);
             if (l == null) return;
             ourSeqNum = l.expireSequenceNumber;
-            if (l.expireSequenceNumber == sequenceNum) {
-                unregisterNetworkCallback(l.networkCallback);
-                sLegacyRequests.remove(netCap);
-            }
+            if (l.expireSequenceNumber == sequenceNum) removeRequestForFeature(netCap);
         }
         Log.d(TAG, "expireRequest with " + ourSeqNum + ", " + sequenceNum);
     }
@@ -1180,12 +1180,15 @@ public class ConnectivityManager {
         }
     }
 
-    private NetworkCallback removeRequestForFeature(NetworkCapabilities netCap) {
+    private boolean removeRequestForFeature(NetworkCapabilities netCap) {
+        final LegacyRequest l;
         synchronized (sLegacyRequests) {
-            LegacyRequest l = sLegacyRequests.remove(netCap);
-            if (l == null) return null;
-            return l.networkCallback;
+            l = sLegacyRequests.remove(netCap);
         }
+        if (l == null) return false;
+        unregisterNetworkCallback(l.networkCallback);
+        l.clearDnsBinding();
+        return true;
     }
 
     /**
