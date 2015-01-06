@@ -235,15 +235,16 @@ final class ProcessList {
             Slog.i("XXXXXX", "minfree_adj=" + minfree_adj + " minfree_abs=" + minfree_abs);
         }
 
-        if (Build.SUPPORTED_64_BIT_ABIS.length > 0) {
-            // Increase the high min-free levels for cached processes for 64-bit
-            mOomMinFreeHigh[4] = (mOomMinFreeHigh[4]*3)/2;
-            mOomMinFreeHigh[5] = (mOomMinFreeHigh[5]*7)/4;
-        }
+        final boolean is64bit = Build.SUPPORTED_64_BIT_ABIS.length > 0;
 
         for (int i=0; i<mOomAdj.length; i++) {
             int low = mOomMinFreeLow[i];
             int high = mOomMinFreeHigh[i];
+            if (is64bit) {
+                // Increase the high min-free levels for cached processes for 64-bit
+                if (i == 4) high = (high*3)/2;
+                else if (i == 5) high = (high*7)/4;
+            }
             mOomMinFree[i] = (int)(low + ((high-low)*scale));
         }
 
