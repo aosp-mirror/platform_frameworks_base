@@ -44,7 +44,7 @@ at the module level. For example, the build file for the app module in the
 <code>BuildSystemExample</code> project looks like this:</p>
 
 <pre>
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 19
@@ -72,7 +72,7 @@ dependencies {
 }
 </pre>
 
-<p><code>apply plugin: 'android'</code> applies the Android plugin for Gradle to this build.
+<p><code>apply plugin: 'com.android.application'</code> applies the Android plugin for Gradle to this build.
 This adds Android-specific build tasks to the top-level build tasks and makes the
 <code>android {...}</code> element available to specify Android-specific build options.</p>
 
