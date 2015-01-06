@@ -22544,6 +22544,7 @@ package android.os {
     method public android.os.StrictMode.ThreadPolicy.Builder detectDiskReads();
     method public android.os.StrictMode.ThreadPolicy.Builder detectDiskWrites();
     method public android.os.StrictMode.ThreadPolicy.Builder detectNetwork();
+    method public android.os.StrictMode.ThreadPolicy.Builder detectResourceMismatches();
     method public android.os.StrictMode.ThreadPolicy.Builder penaltyDeath();
     method public android.os.StrictMode.ThreadPolicy.Builder penaltyDeathOnNetwork();
     method public android.os.StrictMode.ThreadPolicy.Builder penaltyDialog();
@@ -22555,6 +22556,7 @@ package android.os {
     method public android.os.StrictMode.ThreadPolicy.Builder permitDiskReads();
     method public android.os.StrictMode.ThreadPolicy.Builder permitDiskWrites();
     method public android.os.StrictMode.ThreadPolicy.Builder permitNetwork();
+    method public android.os.StrictMode.ThreadPolicy.Builder permitResourceMismatches();
   }
 
   public static final class StrictMode.VmPolicy {
