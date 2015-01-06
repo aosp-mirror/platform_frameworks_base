@@ -23,7 +23,7 @@ Building and Running from Android Studio</a></li>
 <h2>Download</h2>
 <div class="download-box">
   <a href="{@docRoot}shareables/sdk-tools/android-gradle-plugin-dsl.zip"
-    class="button">Plugin Command Reference</a>
+    class="button">Plugin Language Reference</a>
   <p class="filename">android-gradle-plugin-dsl.zip</p>
 </div>
 
