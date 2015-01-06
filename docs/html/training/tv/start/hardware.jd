@@ -1,6 +1,5 @@
 page.title=Handling TV Hardware
-page.tags=tv
-helpoutsWidget=true
+page.tags="unsupported"
 trainingnavtop=true
 
 @jd:body
@@ -89,12 +88,20 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
     <td>{@code android.hardware.touchscreen}</td>
   </tr>
   <tr>
+    <td>Touchscreen emulator</td>
+    <td>{@code android.hardware.faketouch}</td>
+  </tr>
+  <tr>
     <td>Telephony</td>
     <td>{@code android.hardware.telephony}</td>
   </tr>
   <tr>
     <td>Camera</td>
     <td>{@code android.hardware.camera}</td>
+  </tr>
+  <tr>
+    <td>Bluetooth</td>
+    <td>{@code android.hardware.bluetooth}</td>
   </tr>
   <tr>
     <td>Near Field Communications (NFC)</td>
@@ -105,10 +112,25 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
     <td>{@code android.hardware.location.gps}</td>
   </tr>
   <tr>
-    <td>Microphone</td>
+    <td>Microphone <sup><a href="#cont-mic">[1]</a></sup></td>
     <td>{@code android.hardware.microphone}</td>
   </tr>
+  <tr>
+    <td>Sensors</td>
+    <td>{@code android.hardware.sensor}</td>
+  </tr>
 </table>
+
+<p id="cont-mic" class="note">
+  <strong>[1]</strong> Some TV controllers have a microphone, which is
+  not the same as the microphone hardware feature described here. The controller microphone is fully
+  supported.
+</p>
+
+<p>
+  See the <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#features-reference">
+  Features Reference</a> for a complete list of features, subfeatures, and their descriptors.
+</p>
 
 
 <h3 id="declare-hardware-requirements">Declaring hardware requirements for TV</h3>
@@ -131,9 +153,13 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
 <pre>
 &lt;uses-feature android:name="android.hardware.touchscreen"
         android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.faketouch"
+        android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.telephony"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.camera"
+        android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.bluetooth"
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.nfc"
         android:required="false"/&gt;
@@ -141,7 +167,14 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
         android:required="false"/&gt;
 &lt;uses-feature android:name="android.hardware.microphone"
         android:required="false"/&gt;
+&lt;uses-feature android:name="android.hardware.sensor"
+        android:required="false"/&gt;
 </pre>
+
+<p class="note"><strong>Note:</strong> Some features have subfeatures like {@code android.hardware.camera.front},
+  as described in the <a href="guide/topics/manifest/uses-feature-element.html#features-reference">
+  Feature Reference</a>. Be sure to mark as {@code required="false"} any subfeatures also used in
+  your app.</p>
 
 <p>
   All apps intended for use on TV devices must declare that the touch screen feature is not required
@@ -207,7 +240,7 @@ if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION)
 </table>
 
 <p>
-  For a complete list of permission requests that imply a hardware feature requirement, see
+  For a complete list of permission requests that imply a hardware feature requirement, see the
   <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html#permissions-features">{@code
   uses-feature}</a> guide. If your app requests one of the features listed above, include a
   <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code uses-feature}</a>
@@ -246,7 +279,8 @@ if (getPackageManager().hasSystemFeature("android.hardware.touchscreen")) {
 <p>
   Since most TVs do not have touch screens, Android does not support touch screen interaction for
   TV devices. Furthermore, using a touch screen is not consistent with a viewing environment where
-  the user is seated 10 feet away from the display.
+  the user is seated 10 feet away from the display. Make sure that your UI elements and text do not
+  require or imply the use of a touchscreen.
 </p>
 
 <p>
