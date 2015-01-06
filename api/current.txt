@@ -28541,6 +28541,7 @@ package android.telephony {
     field public static final int MMS_ERROR_HTTP_FAILURE = 4; // 0x4
     field public static final int MMS_ERROR_INVALID_APN = 2; // 0x2
     field public static final int MMS_ERROR_IO_ERROR = 5; // 0x5
+    field public static final int MMS_ERROR_NO_DATA_NETWORK = 8; // 0x8
     field public static final int MMS_ERROR_RETRY = 6; // 0x6
     field public static final int MMS_ERROR_UNABLE_CONNECT_MMS = 3; // 0x3
     field public static final int MMS_ERROR_UNSPECIFIED = 1; // 0x1
