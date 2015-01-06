@@ -66,7 +66,7 @@ Extensions::Extensions(): Singleton<Extensions>() {
     findExtensions(eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS), mEglExtensionList);
 
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DEBUG_NV_PROFILING, property, NULL) > 0) {
+    if (property_get(PROPERTY_DEBUG_NV_PROFILING, property, nullptr) > 0) {
         mHasNvSystemTime = !strcmp(property, "true") && hasEglExtension("EGL_NV_system_time");
     } else {
         mHasNvSystemTime = false;

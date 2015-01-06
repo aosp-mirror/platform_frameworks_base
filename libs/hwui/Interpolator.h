@@ -38,13 +38,13 @@ protected:
 
 class ANDROID_API AccelerateDecelerateInterpolator : public Interpolator {
 public:
-    virtual float interpolate(float input);
+    virtual float interpolate(float input) override;
 };
 
 class ANDROID_API AccelerateInterpolator : public Interpolator {
 public:
     AccelerateInterpolator(float factor) : mFactor(factor), mDoubleFactor(factor*2) {}
-    virtual float interpolate(float input);
+    virtual float interpolate(float input) override;
 private:
     const float mFactor;
     const float mDoubleFactor;
@@ -53,7 +53,7 @@ private:
 class ANDROID_API AnticipateInterpolator : public Interpolator {
 public:
     AnticipateInterpolator(float tension) : mTension(tension) {}
-    virtual float interpolate(float input);
+    virtual float interpolate(float input) override;
 private:
     const float mTension;
 };
@@ -61,20 +61,20 @@ private:
 class ANDROID_API AnticipateOvershootInterpolator : public Interpolator {
 public:
     AnticipateOvershootInterpolator(float tension) : mTension(tension) {}
-    virtual float interpolate(float input);
+    virtual float interpolate(float input) override;
 private:
     const float mTension;
 };
 
 class ANDROID_API BounceInterpolator : public Interpolator {
 public:
-    virtual float interpolate(float input);
+    virtual float interpolate(float input) override;
 };
 
 class ANDROID_API CycleInterpolator : public Interpolator {
 public:
     CycleInterpolator(float cycles) : mCycles(cycles) {}
-    virtual float interpolate(float input);
+    virtual float interpolate(float input) override;
 private:
     const float mCycles;
 };
@@ -82,20 +82,20 @@ private:
 class ANDROID_API DecelerateInterpolator : public Interpolator {
 public:
     DecelerateInterpolator(float factor) : mFactor(factor) {}
-    virtual float interpolate(float input);
+    virtual float interpolate(float input) override;
 private:
     const float mFactor;
 };
 
 class ANDROID_API LinearInterpolator : public Interpolator {
 public:
-    virtual float interpolate(float input) { return input; }
+    virtual float interpolate(float input) override { return input; }
 };
 
 class ANDROID_API OvershootInterpolator : public Interpolator {
 public:
     OvershootInterpolator(float tension) : mTension(tension) {}
-    virtual float interpolate(float input);
+    virtual float interpolate(float input) override;
 private:
     const float mTension;
 };
@@ -105,7 +105,7 @@ public:
     LUTInterpolator(float* values, size_t size);
     ~LUTInterpolator();
 
-    virtual float interpolate(float input);
+    virtual float interpolate(float input) override;
 
 private:
     std::unique_ptr<float[]> mValues;

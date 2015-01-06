@@ -59,7 +59,7 @@ void AnimationContext::startFrame(TreeInfo::TraversalMode mode) {
             "Missed running animations last frame!");
     AnimationHandle* head = mNextFrameAnimations.mNextHandle;
     if (head) {
-        mNextFrameAnimations.mNextHandle = NULL;
+        mNextFrameAnimations.mNextHandle = nullptr;
         mCurrentFrameAnimations.mNextHandle = head;
         head->mPreviousHandle = &mCurrentFrameAnimations;
     }
@@ -84,15 +84,15 @@ void AnimationContext::callOnFinished(BaseRenderNodeAnimator* animator,
 
 AnimationHandle::AnimationHandle(AnimationContext& context)
         : mContext(context)
-        , mPreviousHandle(NULL)
-        , mNextHandle(NULL) {
+        , mPreviousHandle(nullptr)
+        , mNextHandle(nullptr) {
 }
 
 AnimationHandle::AnimationHandle(RenderNode& animatingNode, AnimationContext& context)
         : mRenderNode(&animatingNode)
         , mContext(context)
-        , mPreviousHandle(NULL)
-        , mNextHandle(NULL) {
+        , mPreviousHandle(nullptr)
+        , mNextHandle(nullptr) {
     mRenderNode->animators().setAnimationHandle(this);
 }
 
@@ -114,7 +114,7 @@ void AnimationHandle::release() {
     LOG_ALWAYS_FATAL_IF(mRenderNode->animators().hasAnimators(),
             "Releasing the handle for an RenderNode with outstanding animators!");
     removeFromList();
-    mRenderNode->animators().setAnimationHandle(NULL);
+    mRenderNode->animators().setAnimationHandle(nullptr);
     delete this;
 }
 
@@ -135,8 +135,8 @@ void AnimationHandle::removeFromList() {
     if (mNextHandle) {
         mNextHandle->mPreviousHandle = mPreviousHandle;
     }
-    mPreviousHandle = NULL;
-    mNextHandle = NULL;
+    mPreviousHandle = nullptr;
+    mNextHandle = nullptr;
 }
 
 } /* namespace uirenderer */

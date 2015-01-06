@@ -49,7 +49,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Caches::Caches(): Singleton<Caches>(),
-        mExtensions(Extensions::getInstance()), mInitialized(false), mRenderState(NULL) {
+        mExtensions(Extensions::getInstance()), mInitialized(false), mRenderState(nullptr) {
     init();
     initFont();
     initConstraints();
@@ -87,13 +87,13 @@ bool Caches::init() {
     glActiveTexture(gTextureUnits[0]);
     mTextureUnit = 0;
 
-    mRegionMesh = NULL;
+    mRegionMesh = nullptr;
     mMeshIndices = 0;
     mShadowStripsIndices = 0;
     blend = false;
     lastSrcMode = GL_ZERO;
     lastDstMode = GL_ZERO;
-    currentProgram = NULL;
+    currentProgram = nullptr;
 
     mFunctorsCount = 0;
 
@@ -163,7 +163,7 @@ bool Caches::initProperties() {
     StencilClipDebug prevDebugStencilClip = debugStencilClip;
 
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_DEBUG_LAYERS_UPDATES, property, NULL) > 0) {
+    if (property_get(PROPERTY_DEBUG_LAYERS_UPDATES, property, nullptr) > 0) {
         INIT_LOGD("  Layers updates debug enabled: %s", property);
         debugLayersUpdates = !strcmp(property, "true");
     } else {
@@ -171,7 +171,7 @@ bool Caches::initProperties() {
     }
 
     debugOverdraw = false;
-    if (property_get(PROPERTY_DEBUG_OVERDRAW, property, NULL) > 0) {
+    if (property_get(PROPERTY_DEBUG_OVERDRAW, property, nullptr) > 0) {
         INIT_LOGD("  Overdraw debug enabled: %s", property);
         if (!strcmp(property, "show")) {
             debugOverdraw = true;
@@ -183,7 +183,7 @@ bool Caches::initProperties() {
     }
 
     // See Properties.h for valid values
-    if (property_get(PROPERTY_DEBUG_STENCIL_CLIP, property, NULL) > 0) {
+    if (property_get(PROPERTY_DEBUG_STENCIL_CLIP, property, nullptr) > 0) {
         INIT_LOGD("  Stencil clip debug enabled: %s", property);
         if (!strcmp(property, "hide")) {
             debugStencilClip = kStencilHide;
@@ -233,7 +233,7 @@ void Caches::terminate() {
     fboCache.clear();
 
     programCache.clear();
-    currentProgram = NULL;
+    currentProgram = nullptr;
 
     patchCache.clear();
 

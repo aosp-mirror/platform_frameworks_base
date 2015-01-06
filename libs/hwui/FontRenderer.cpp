@@ -104,10 +104,10 @@ FontRenderer::FontRenderer() :
         INIT_LOGD("Creating FontRenderer");
     }
 
-    mGammaTable = NULL;
+    mGammaTable = nullptr;
     mInitialized = false;
 
-    mCurrentCacheTexture = NULL;
+    mCurrentCacheTexture = nullptr;
 
     mLinearFiltering = false;
 
@@ -117,19 +117,19 @@ FontRenderer::FontRenderer() :
     mLargeCacheHeight = DEFAULT_TEXT_LARGE_CACHE_HEIGHT;
 
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_TEXT_SMALL_CACHE_WIDTH, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_SMALL_CACHE_WIDTH, property, nullptr) > 0) {
         mSmallCacheWidth = atoi(property);
     }
 
-    if (property_get(PROPERTY_TEXT_SMALL_CACHE_HEIGHT, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_SMALL_CACHE_HEIGHT, property, nullptr) > 0) {
         mSmallCacheHeight = atoi(property);
     }
 
-    if (property_get(PROPERTY_TEXT_LARGE_CACHE_WIDTH, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_LARGE_CACHE_WIDTH, property, nullptr) > 0) {
         mLargeCacheWidth = atoi(property);
     }
 
-    if (property_get(PROPERTY_TEXT_LARGE_CACHE_HEIGHT, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXT_LARGE_CACHE_HEIGHT, property, nullptr) > 0) {
         mLargeCacheHeight = atoi(property);
     }
 
@@ -213,7 +213,7 @@ CacheTexture* FontRenderer::cacheBitmapInTexture(Vector<CacheTexture*>& cacheTex
         }
     }
     // Could not fit glyph into current cache textures
-    return NULL;
+    return nullptr;
 }
 
 void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyph,
@@ -224,7 +224,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     // so we can avoid doing extra work later on
     if (glyph.fWidth == 0 || glyph.fHeight == 0) {
         cachedGlyph->mIsValid = true;
-        cachedGlyph->mCacheTexture = NULL;
+        cachedGlyph->mCacheTexture = nullptr;
         return;
     }
 
@@ -232,7 +232,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 
     // choose an appropriate cache texture list for this glyph format
     SkMask::Format format = static_cast<SkMask::Format>(glyph.fMaskFormat);
-    Vector<CacheTexture*>* cacheTextures = NULL;
+    Vector<CacheTexture*>* cacheTextures = nullptr;
     switch (format) {
         case SkMask::kA8_Format:
         case SkMask::kBW_Format:
@@ -598,7 +598,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
     DropShadow image;
     image.width = 0;
     image.height = 0;
-    image.image = NULL;
+    image.image = nullptr;
     image.penX = 0;
     image.penY = 0;
 
@@ -607,8 +607,8 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
     }
 
     mDrawn = false;
-    mClip = NULL;
-    mBounds = NULL;
+    mClip = nullptr;
+    mBounds = nullptr;
 
     Rect bounds;
     mCurrentFont->measure(paint, text, startIndex, len, numGlyphs, &bounds, positions);
@@ -644,7 +644,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(const SkPaint* paint, co
         // NOTE: bounds.isEmpty() can't be used here, since vertical coordinates are inverted
         // TODO: don't draw pure whitespace in the first place, and avoid needing this check
         mCurrentFont->render(paint, text, startIndex, len, numGlyphs, penX, penY,
-                Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, NULL, positions);
+                Font::BITMAP, dataBuffer, paddedWidth, paddedHeight, nullptr, positions);
 
         // Unbind any PBO we might have used
         Caches::getInstance().unbindPixelBuffer();
@@ -671,8 +671,8 @@ void FontRenderer::initRender(const Rect* clip, Rect* bounds, Functor* functor) 
 }
 
 void FontRenderer::finishRender() {
-    mBounds = NULL;
-    mClip = NULL;
+    mBounds = nullptr;
+    mClip = nullptr;
 
     issueDrawCommand();
 }
@@ -724,7 +724,7 @@ void FontRenderer::removeFont(const Font* font) {
     mActiveFonts.remove(font->getDescription());
 
     if (mCurrentFont == font) {
-        mCurrentFont = NULL;
+        mCurrentFont = nullptr;
     }
 }
 
@@ -734,7 +734,7 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, flo
     if (width * height * intRadius >= RS_MIN_INPUT_CUTOFF) {
         uint8_t* outImage = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
 
-        if (mRs == 0) {
+        if (mRs == nullptr) {
             mRs = new RSC::RS();
             // a null path is OK because there are no custom kernels used
             // hence nothing gets cached by RS
@@ -746,7 +746,7 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, flo
                 mRsScript = RSC::ScriptIntrinsicBlur::create(mRs, mRsElement);
             }
         }
-        if (mRs != 0) {
+        if (mRs != nullptr) {
             RSC::sp<const RSC::Type> t = RSC::Type::create(mRs, mRsElement, width, height, 0);
             RSC::sp<RSC::Allocation> ain = RSC::Allocation::createTyped(mRs, t,
                     RS_ALLOCATION_MIPMAP_NONE,

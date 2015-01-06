@@ -76,7 +76,7 @@ void TessellationCache::Description::setupMatrixAndPaint(Matrix4* matrix, SkPain
 }
 
 TessellationCache::ShadowDescription::ShadowDescription()
-        : nodeKey(NULL) {
+        : nodeKey(nullptr) {
     memset(&matrixData, 0, 16 * sizeof(float));
 }
 
@@ -114,7 +114,7 @@ public:
             : TaskProcessor<VertexBuffer*>(&caches.tasks) {}
     ~TessellationProcessor() {}
 
-    virtual void onProcess(const sp<Task<VertexBuffer*> >& task) {
+    virtual void onProcess(const sp<Task<VertexBuffer*> >& task) override {
         TessellationTask* t = static_cast<TessellationTask*>(task.get());
         ATRACE_NAME("shape tessellation");
         VertexBuffer* buffer = t->tessellator(t->description);
@@ -126,7 +126,7 @@ class TessellationCache::Buffer {
 public:
     Buffer(const sp<Task<VertexBuffer*> >& task)
             : mTask(task)
-            , mBuffer(NULL) {
+            , mBuffer(nullptr) {
     }
 
     ~Buffer() {
@@ -146,9 +146,9 @@ public:
 
 private:
     void blockOnPrecache() {
-        if (mTask != NULL) {
+        if (mTask != nullptr) {
             mBuffer = mTask->getResult();
-            LOG_ALWAYS_FATAL_IF(mBuffer == NULL, "Failed to precache");
+            LOG_ALWAYS_FATAL_IF(mBuffer == nullptr, "Failed to precache");
             mTask.clear();
         }
     }
@@ -278,7 +278,7 @@ public:
             : TaskProcessor<TessellationCache::vertexBuffer_pair_t*>(&caches.tasks) {}
     ~ShadowProcessor() {}
 
-    virtual void onProcess(const sp<Task<TessellationCache::vertexBuffer_pair_t*> >& task) {
+    virtual void onProcess(const sp<Task<TessellationCache::vertexBuffer_pair_t*> >& task) override {
         ShadowTask* t = static_cast<ShadowTask*>(task.get());
         ATRACE_NAME("shadow tessellation");
 
@@ -302,7 +302,7 @@ TessellationCache::TessellationCache()
         , mCache(LruCache<Description, Buffer*>::kUnlimitedCapacity)
         , mShadowCache(LruCache<ShadowDescription, Task<vertexBuffer_pair_t*>*>::kUnlimitedCapacity) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_VERTEX_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_VERTEX_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting %s cache size to %sMB", name, property);
         setMaxSize(MB(atof(property)));
     } else {
@@ -382,12 +382,12 @@ void TessellationCache::precacheShadows(const Matrix4* drawTransform, const Rect
 
     sp<ShadowTask> task = new ShadowTask(drawTransform, localClip, opaque,
             casterPerimeter, transformXY, transformZ, lightCenter, lightRadius);
-    if (mShadowProcessor == NULL) {
+    if (mShadowProcessor == nullptr) {
         mShadowProcessor = new ShadowProcessor(Caches::getInstance());
     }
     mShadowProcessor->add(task);
 
-    task->incStrong(NULL); // not using sp<>s, so manually ref while in the cache
+    task->incStrong(nullptr); // not using sp<>s, so manually ref while in the cache
     mShadowCache.put(key, task.get());
 }
 
@@ -402,7 +402,7 @@ void TessellationCache::getShadowBuffers(const Matrix4* drawTransform, const Rec
                 transformXY, transformZ, lightCenter, lightRadius);
         task = static_cast<ShadowTask*>(mShadowCache.get(key));
     }
-    LOG_ALWAYS_FATAL_IF(task == NULL, "shadow not precached");
+    LOG_ALWAYS_FATAL_IF(task == nullptr, "shadow not precached");
     outBuffers = *(task->getResult());
 }
 
@@ -418,7 +418,7 @@ TessellationCache::Buffer* TessellationCache::getOrCreateBuffer(
         sp<TessellationTask> task = new TessellationTask(tessellator, entry);
         buffer = new Buffer(task);
 
-        if (mProcessor == NULL) {
+        if (mProcessor == nullptr) {
             mProcessor = new TessellationProcessor(Caches::getInstance());
         }
         mProcessor->add(task);

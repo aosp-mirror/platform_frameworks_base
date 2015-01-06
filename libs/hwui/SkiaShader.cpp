@@ -87,7 +87,7 @@ static bool bitmapAndGradient(SkiaShaderType type1, SkiaShaderType type2) {
 
 SkiaShaderType SkiaShader::getType(const SkShader& shader) {
     // First check for a gradient shader.
-    switch (shader.asAGradient(NULL)) {
+    switch (shader.asAGradient(nullptr)) {
         case SkShader::kNone_GradientType:
             // Not a gradient shader. Fall through to check for other types.
             break;
@@ -101,7 +101,7 @@ SkiaShaderType SkiaShader::getType(const SkShader& shader) {
     }
 
     // The shader is not a gradient. Check for a bitmap shader.
-    if (shader.asABitmap(NULL, NULL, NULL) == SkShader::kDefault_BitmapType) {
+    if (shader.asABitmap(nullptr, nullptr, nullptr) == SkShader::kDefault_BitmapType) {
         return kBitmap_SkiaShaderType;
     }
 
@@ -119,7 +119,7 @@ SkiaShaderType SkiaShader::getType(const SkShader& shader) {
         return kCompose_SkiaShaderType;
     }
 
-    if (shader.asACustomShader(NULL)) {
+    if (shader.asACustomShader(nullptr)) {
         return kLayer_SkiaShaderType;
     }
 
@@ -255,17 +255,17 @@ void SkiaBitmapShader::describe(Caches* caches, ProgramDescription& description,
         const Extensions& extensions, const SkShader& shader) {
     SkBitmap bitmap;
     SkShader::TileMode xy[2];
-    if (shader.asABitmap(&bitmap, NULL, xy) != SkShader::kDefault_BitmapType) {
+    if (shader.asABitmap(&bitmap, nullptr, xy) != SkShader::kDefault_BitmapType) {
         LOG_ALWAYS_FATAL("SkiaBitmapShader::describe called with a different kind of shader!");
     }
-    bitmapShaderHelper(caches, &description, NULL, extensions, bitmap, xy);
+    bitmapShaderHelper(caches, &description, nullptr, extensions, bitmap, xy);
 }
 
 void SkiaBitmapShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
         GLuint* textureUnit, const Extensions& extensions, const SkShader& shader) {
     SkBitmap bitmap;
     SkShader::TileMode xy[2];
-    if (shader.asABitmap(&bitmap, NULL, xy) != SkShader::kDefault_BitmapType) {
+    if (shader.asABitmap(&bitmap, nullptr, xy) != SkShader::kDefault_BitmapType) {
         LOG_ALWAYS_FATAL("SkiaBitmapShader::setupProgram called with a different kind of shader!");
     }
 
@@ -273,7 +273,7 @@ void SkiaBitmapShader::setupProgram(Caches* caches, const mat4& modelViewMatrix,
     Caches::getInstance().activeTexture(textureSlot);
 
     BitmapShaderInfo shaderInfo;
-    if (!bitmapShaderHelper(caches, NULL, &shaderInfo, extensions, bitmap, xy)) {
+    if (!bitmapShaderHelper(caches, nullptr, &shaderInfo, extensions, bitmap, xy)) {
         return;
     }
 
@@ -343,8 +343,8 @@ void SkiaGradientShader::describe(Caches*, ProgramDescription& description,
         const Extensions& extensions, const SkShader& shader) {
     SkShader::GradientInfo gradInfo;
     gradInfo.fColorCount = 0;
-    gradInfo.fColors = NULL;
-    gradInfo.fColorOffsets = NULL;
+    gradInfo.fColors = nullptr;
+    gradInfo.fColorOffsets = nullptr;
 
     switch (shader.asAGradient(&gradInfo)) {
         case SkShader::kLinear_GradientType:

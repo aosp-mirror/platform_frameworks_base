@@ -41,16 +41,16 @@ namespace uirenderer {
 TextureCache::TextureCache():
         mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXTURE_CACHE_SIZE)),
-        mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE), mAssetAtlas(0) {
+        mFlushRate(DEFAULT_TEXTURE_CACHE_FLUSH_RATE), mAssetAtlas(nullptr) {
     char property[PROPERTY_VALUE_MAX];
-    if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXTURE_CACHE_SIZE, property, nullptr) > 0) {
         INIT_LOGD("  Setting texture cache size to %sMB", property);
         setMaxSize(MB(atof(property)));
     } else {
         INIT_LOGD("  Using default texture cache size of %.2fMB", DEFAULT_TEXTURE_CACHE_SIZE);
     }
 
-    if (property_get(PROPERTY_TEXTURE_CACHE_FLUSH_RATE, property, NULL) > 0) {
+    if (property_get(PROPERTY_TEXTURE_CACHE_FLUSH_RATE, property, nullptr) > 0) {
         float flushRate = atof(property);
         INIT_LOGD("  Setting texture cache flush rate to %.2f%%", flushRate * 100.0f);
         setFlushRate(flushRate);
@@ -64,7 +64,7 @@ TextureCache::TextureCache():
 
 TextureCache::TextureCache(uint32_t maxByteSize):
         mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity),
-        mSize(0), mMaxSize(maxByteSize), mAssetAtlas(0) {
+        mSize(0), mMaxSize(maxByteSize), mAssetAtlas(nullptr) {
     init();
 }
 
@@ -160,7 +160,7 @@ Texture* TextureCache::getCachedTexture(const SkBitmap* bitmap) {
 
     if (!texture) {
         if (!canMakeTextureFromBitmap(bitmap)) {
-            return NULL;
+            return nullptr;
         }
 
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
@@ -210,7 +210,7 @@ Texture* TextureCache::get(const SkBitmap* bitmap) {
 
     if (!texture) {
         if (!canMakeTextureFromBitmap(bitmap)) {
-            return NULL;
+            return nullptr;
         }
 
         const uint32_t size = bitmap->rowBytes() * bitmap->height();
@@ -352,7 +352,7 @@ void TextureCache::uploadLoFiTexture(bool resize, const SkBitmap* bitmap,
     rgbaBitmap.eraseColor(0);
 
     SkCanvas canvas(rgbaBitmap);
-    canvas.drawBitmap(*bitmap, 0.0f, 0.0f, NULL);
+    canvas.drawBitmap(*bitmap, 0.0f, 0.0f, nullptr);
 
     uploadToTexture(resize, GL_RGBA, rgbaBitmap.rowBytesAsPixels(), rgbaBitmap.bytesPerPixel(),
             width, height, GL_UNSIGNED_BYTE, rgbaBitmap.getPixels());

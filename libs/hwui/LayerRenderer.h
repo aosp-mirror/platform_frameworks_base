@@ -49,10 +49,11 @@ public:
     LayerRenderer(RenderState& renderState, Layer* layer);
     virtual ~LayerRenderer();
 
-    virtual void onViewportInitialized() { /* do nothing */ }
-    virtual void prepareDirty(float left, float top, float right, float bottom, bool opaque);
-    virtual void clear(float left, float top, float right, float bottom, bool opaque);
-    virtual bool finish();
+    virtual void onViewportInitialized() override { /* do nothing */ }
+    virtual void prepareDirty(float left, float top, float right, float bottom,
+            bool opaque) override;
+    virtual void clear(float left, float top, float right, float bottom, bool opaque) override;
+    virtual bool finish() override;
 
     static Layer* createTextureLayer(RenderState& renderState);
     static Layer* createRenderLayer(RenderState& renderState, uint32_t width, uint32_t height);
@@ -65,11 +66,11 @@ public:
     static void flushLayer(RenderState& renderState, Layer* layer);
 
 protected:
-    virtual void ensureStencilBuffer();
-    virtual bool hasLayer() const;
-    virtual Region* getRegion() const;
-    virtual GLuint onGetTargetFbo() const;
-    virtual bool suppressErrorChecks() const;
+    virtual void ensureStencilBuffer() override;
+    virtual bool hasLayer() const override;
+    virtual Region* getRegion() const override;
+    virtual GLuint onGetTargetFbo() const override;
+    virtual bool suppressErrorChecks() const override;
 
 private:
     void generateMesh();

@@ -29,12 +29,12 @@ using namespace std;
 
 static void unref(BaseRenderNodeAnimator* animator) {
     animator->detach();
-    animator->decStrong(0);
+    animator->decStrong(nullptr);
 }
 
 AnimatorManager::AnimatorManager(RenderNode& parent)
         : mParent(parent)
-        , mAnimationHandle(NULL) {
+        , mAnimationHandle(nullptr) {
 }
 
 AnimatorManager::~AnimatorManager() {
@@ -43,7 +43,7 @@ AnimatorManager::~AnimatorManager() {
 }
 
 void AnimatorManager::addAnimator(const sp<BaseRenderNodeAnimator>& animator) {
-    animator->incStrong(0);
+    animator->incStrong(nullptr);
     animator->attach(&mParent);
     mNewAnimators.push_back(animator.get());
 }
@@ -87,7 +87,7 @@ public:
         dirtyMask |= animator->dirtyMask();
         bool remove = animator->animate(mContext);
         if (remove) {
-            animator->decStrong(0);
+            animator->decStrong(nullptr);
         } else {
             if (animator->isRunning()) {
                 mInfo.out.hasAnimations = true;
@@ -144,7 +144,7 @@ static void endStagingAnimator(BaseRenderNodeAnimator* animator) {
     if (animator->listener()) {
         animator->listener()->onAnimationFinished(animator);
     }
-    animator->decStrong(0);
+    animator->decStrong(nullptr);
 }
 
 void AnimatorManager::endAllStagingAnimators() {
@@ -161,7 +161,7 @@ public:
 
     void operator() (BaseRenderNodeAnimator* animator) {
         animator->forceEndNow(mContext);
-        animator->decStrong(0);
+        animator->decStrong(nullptr);
     }
 
 private:

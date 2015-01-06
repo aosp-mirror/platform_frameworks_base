@@ -48,7 +48,7 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int64_t* map, int count) {
     } else {
         ALOGW("Could not create atlas image");
         delete mImage;
-        mImage = NULL;
+        mImage = nullptr;
     }
 
     updateTextureId();
@@ -57,7 +57,7 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int64_t* map, int count) {
 void AssetAtlas::terminate() {
     if (mImage) {
         delete mImage;
-        mImage = NULL;
+        mImage = nullptr;
         updateTextureId();
     }
 }
@@ -83,12 +83,12 @@ void AssetAtlas::updateTextureId() {
 
 AssetAtlas::Entry* AssetAtlas::getEntry(const SkBitmap* bitmap) const {
     ssize_t index = mEntries.indexOfKey(bitmap);
-    return index >= 0 ? mEntries.valueAt(index) : NULL;
+    return index >= 0 ? mEntries.valueAt(index) : nullptr;
 }
 
 Texture* AssetAtlas::getEntryTexture(const SkBitmap* bitmap) const {
     ssize_t index = mEntries.indexOfKey(bitmap);
-    return index >= 0 ? mEntries.valueAt(index)->texture : NULL;
+    return index >= 0 ? mEntries.valueAt(index)->texture : nullptr;
 }
 
 /**
@@ -99,12 +99,12 @@ struct DelegateTexture: public Texture {
     DelegateTexture(Caches& caches, Texture* delegate): Texture(caches), mDelegate(delegate) { }
 
     virtual void setWrapST(GLenum wrapS, GLenum wrapT, bool bindTexture = false,
-            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) override {
         mDelegate->setWrapST(wrapS, wrapT, bindTexture, force, renderTarget);
     }
 
     virtual void setFilterMinMag(GLenum min, GLenum mag, bool bindTexture = false,
-            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
+            bool force = false, GLenum renderTarget = GL_TEXTURE_2D) override {
         mDelegate->setFilterMinMag(min, mag, bindTexture, force, renderTarget);
     }
 

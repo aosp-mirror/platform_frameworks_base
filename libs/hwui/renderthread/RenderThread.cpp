@@ -42,16 +42,16 @@ static const size_t EVENT_BUFFER_SIZE = 100;
 // Slight delay to give the UI time to push us a new frame before we replay
 static const nsecs_t DISPATCH_FRAME_CALLBACKS_DELAY = milliseconds_to_nanoseconds(4);
 
-TaskQueue::TaskQueue() : mHead(0), mTail(0) {}
+TaskQueue::TaskQueue() : mHead(nullptr), mTail(nullptr) {}
 
 RenderTask* TaskQueue::next() {
     RenderTask* ret = mHead;
     if (ret) {
         mHead = ret->mNext;
         if (!mHead) {
-            mTail = 0;
+            mTail = nullptr;
         }
-        ret->mNext = 0;
+        ret->mNext = nullptr;
     }
     return ret;
 }
@@ -71,7 +71,7 @@ void TaskQueue::queue(RenderTask* task) {
             mTail = task;
         } else {
             // Need to find the proper insertion point
-            RenderTask* previous = 0;
+            RenderTask* previous = nullptr;
             RenderTask* next = mHead;
             while (next && next->mRunAt <= task->mRunAt) {
                 previous = next;
@@ -131,19 +131,19 @@ private:
 public:
     DispatchFrameCallbacks(RenderThread* rt) : mRenderThread(rt) {}
 
-    virtual void run() {
+    virtual void run() override {
         mRenderThread->dispatchFrameCallbacks();
     }
 };
 
 RenderThread::RenderThread() : Thread(true), Singleton<RenderThread>()
         , mNextWakeup(LLONG_MAX)
-        , mDisplayEventReceiver(0)
+        , mDisplayEventReceiver(nullptr)
         , mVsyncRequested(false)
         , mFrameCallbackTaskPending(false)
-        , mFrameCallbackTask(0)
-        , mRenderState(NULL)
-        , mEglManager(NULL) {
+        , mFrameCallbackTask(nullptr)
+        , mRenderState(nullptr)
+        , mEglManager(nullptr) {
     mFrameCallbackTask = new DispatchFrameCallbacks(this);
     mLooper = new Looper(false);
     run("RenderThread");
@@ -342,7 +342,7 @@ RenderTask* RenderThread::nextTask(nsecs_t* nextWakeup) {
         if (next->mRunAt <= 0 || next->mRunAt <= systemTime(SYSTEM_TIME_MONOTONIC)) {
             next = mQueue.next();
         } else {
-            next = 0;
+            next = nullptr;
         }
     }
     if (nextWakeup) {

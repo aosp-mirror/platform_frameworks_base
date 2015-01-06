@@ -140,109 +140,109 @@ public:
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas interface
 // ----------------------------------------------------------------------------
-    virtual SkCanvas* getSkCanvas() {
+    virtual SkCanvas* getSkCanvas() override {
         LOG_ALWAYS_FATAL("DisplayListRenderer has no SkCanvas");
-        return NULL;
+        return nullptr;
     }
-    virtual void setBitmap(SkBitmap* bitmap, bool copyState) {
+    virtual void setBitmap(SkBitmap* bitmap, bool copyState) override {
         LOG_ALWAYS_FATAL("DisplayListRenderer is not backed by a bitmap.");
     }
 
-    virtual bool isOpaque() { return false; }
-    virtual int width() { return mState.getWidth(); }
-    virtual int height() { return mState.getHeight(); }
+    virtual bool isOpaque() override { return false; }
+    virtual int width() override { return mState.getWidth(); }
+    virtual int height() override { return mState.getHeight(); }
 
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas state operations
 // ----------------------------------------------------------------------------
     // Save (layer)
-    virtual int getSaveCount() const { return mState.getSaveCount(); }
-    virtual int save(SkCanvas::SaveFlags flags);
-    virtual void restore();
-    virtual void restoreToCount(int saveCount);
+    virtual int getSaveCount() const override { return mState.getSaveCount(); }
+    virtual int save(SkCanvas::SaveFlags flags) override;
+    virtual void restore() override;
+    virtual void restoreToCount(int saveCount) override;
 
     virtual int saveLayer(float left, float top, float right, float bottom, const SkPaint* paint,
-        SkCanvas::SaveFlags flags);
+        SkCanvas::SaveFlags flags) override;
     virtual int saveLayerAlpha(float left, float top, float right, float bottom,
-            int alpha, SkCanvas::SaveFlags flags) {
+            int alpha, SkCanvas::SaveFlags flags) override {
         SkPaint paint;
         paint.setAlpha(alpha);
         return saveLayer(left, top, right, bottom, &paint, flags);
     }
 
     // Matrix
-    virtual void getMatrix(SkMatrix* outMatrix) const { mState.getMatrix(outMatrix); }
-    virtual void setMatrix(const SkMatrix& matrix);
+    virtual void getMatrix(SkMatrix* outMatrix) const override { mState.getMatrix(outMatrix); }
+    virtual void setMatrix(const SkMatrix& matrix) override;
 
-    virtual void concat(const SkMatrix& matrix);
-    virtual void rotate(float degrees);
-    virtual void scale(float sx, float sy);
-    virtual void skew(float sx, float sy);
-    virtual void translate(float dx, float dy);
+    virtual void concat(const SkMatrix& matrix) override;
+    virtual void rotate(float degrees) override;
+    virtual void scale(float sx, float sy) override;
+    virtual void skew(float sx, float sy) override;
+    virtual void translate(float dx, float dy) override;
 
     // Clip
-    virtual bool getClipBounds(SkRect* outRect) const;
-    virtual bool quickRejectRect(float left, float top, float right, float bottom) const;
-    virtual bool quickRejectPath(const SkPath& path) const;
+    virtual bool getClipBounds(SkRect* outRect) const override;
+    virtual bool quickRejectRect(float left, float top, float right, float bottom) const override;
+    virtual bool quickRejectPath(const SkPath& path) const override;
 
-    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
-    virtual bool clipPath(const SkPath* path, SkRegion::Op op);
-    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op);
+    virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op) override;
+    virtual bool clipPath(const SkPath* path, SkRegion::Op op) override;
+    virtual bool clipRegion(const SkRegion* region, SkRegion::Op op) override;
 
     // Misc
-    virtual SkDrawFilter* getDrawFilter() { return mDrawFilter.get(); }
-    virtual void setDrawFilter(SkDrawFilter* filter);
+    virtual SkDrawFilter* getDrawFilter() override { return mDrawFilter.get(); }
+    virtual void setDrawFilter(SkDrawFilter* filter) override;
 
 // ----------------------------------------------------------------------------
 // android/graphics/Canvas draw operations
 // ----------------------------------------------------------------------------
-    virtual void drawColor(int color, SkXfermode::Mode mode);
-    virtual void drawPaint(const SkPaint& paint);
+    virtual void drawColor(int color, SkXfermode::Mode mode) override;
+    virtual void drawPaint(const SkPaint& paint) override;
 
     // Geometry
-    virtual void drawPoint(float x, float y, const SkPaint& paint) {
+    virtual void drawPoint(float x, float y, const SkPaint& paint) override {
         float points[2] = { x, y };
         drawPoints(points, 2, paint);
     }
-    virtual void drawPoints(const float* points, int count, const SkPaint& paint);
+    virtual void drawPoints(const float* points, int count, const SkPaint& paint) override;
     virtual void drawLine(float startX, float startY, float stopX, float stopY,
-            const SkPaint& paint) {
+            const SkPaint& paint) override {
         float points[4] = { startX, startY, stopX, stopY };
         drawLines(points, 4, paint);
     }
-    virtual void drawLines(const float* points, int count, const SkPaint& paint);
-    virtual void drawRect(float left, float top, float right, float bottom, const SkPaint& paint);
+    virtual void drawLines(const float* points, int count, const SkPaint& paint) override;
+    virtual void drawRect(float left, float top, float right, float bottom, const SkPaint& paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom,
-            float rx, float ry, const SkPaint& paint);
-    virtual void drawCircle(float x, float y, float radius, const SkPaint& paint);
-    virtual void drawOval(float left, float top, float right, float bottom, const SkPaint& paint);
+            float rx, float ry, const SkPaint& paint) override;
+    virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
+    virtual void drawOval(float left, float top, float right, float bottom, const SkPaint& paint) override;
     virtual void drawArc(float left, float top, float right, float bottom,
-            float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint);
-    virtual void drawPath(const SkPath& path, const SkPaint& paint);
+            float startAngle, float sweepAngle, bool useCenter, const SkPaint& paint) override;
+    virtual void drawPath(const SkPath& path, const SkPaint& paint) override;
     virtual void drawVertices(SkCanvas::VertexMode vertexMode, int vertexCount,
             const float* verts, const float* tex, const int* colors,
-            const uint16_t* indices, int indexCount, const SkPaint& paint)
+            const uint16_t* indices, int indexCount, const SkPaint& paint) override
         { LOG_ALWAYS_FATAL("DisplayListRenderer does not support drawVertices()"); }
 
     // Bitmap-based
-    virtual void drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint);
+    virtual void drawBitmap(const SkBitmap& bitmap, float left, float top, const SkPaint* paint) override;
     virtual void drawBitmap(const SkBitmap& bitmap, const SkMatrix& matrix,
-                            const SkPaint* paint);
+                            const SkPaint* paint) override;
     virtual void drawBitmap(const SkBitmap& bitmap, float srcLeft, float srcTop,
             float srcRight, float srcBottom, float dstLeft, float dstTop,
-            float dstRight, float dstBottom, const SkPaint* paint);
+            float dstRight, float dstBottom, const SkPaint* paint) override;
     virtual void drawBitmapMesh(const SkBitmap& bitmap, int meshWidth, int meshHeight,
-            const float* vertices, const int* colors, const SkPaint* paint);
+            const float* vertices, const int* colors, const SkPaint* paint) override;
 
     // Text
     virtual void drawText(const uint16_t* glyphs, const float* positions, int count,
             const SkPaint& paint, float x, float y, float boundsLeft, float boundsTop,
-            float boundsRight, float boundsBottom, float totalAdvance);
+            float boundsRight, float boundsBottom, float totalAdvance) override;
     virtual void drawPosText(const uint16_t* text, const float* positions, int count,
-            int posCount, const SkPaint& paint);
+            int posCount, const SkPaint& paint) override;
     virtual void drawTextOnPath(const uint16_t* glyphs, int count, const SkPath& path,
-            float hOffset, float vOffset, const SkPaint& paint);
-    virtual bool drawTextAbsolutePos() const { return false; }
+            float hOffset, float vOffset, const SkPaint& paint) override;
+    virtual bool drawTextAbsolutePos() const override { return false; }
 
 
 private:

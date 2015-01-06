@@ -33,7 +33,7 @@ using namespace android::uirenderer::renderthread;
 
 class ContextFactory : public IContextFactory {
 public:
-    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) {
+    virtual AnimationContext* createAnimationContext(renderthread::TimeLord& clock) override {
         return new AnimationContext(clock);
     }
 };
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
     sp<Surface> surface = control->getSurface();
 
     RenderNode* rootNode = new RenderNode();
-    rootNode->incStrong(0);
+    rootNode->incStrong(nullptr);
     rootNode->mutateStagingProperties().setLeftTopRightBottom(0, 0, width, height);
     rootNode->setPropertyFieldsDirty(RenderNode::X | RenderNode::Y);
     rootNode->mutateStagingProperties().setClipToBounds(false);
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
 
     sleep(5);
 
-    rootNode->decStrong(0);
+    rootNode->decStrong(nullptr);
 
     printf("Success!\n");
     return 0;

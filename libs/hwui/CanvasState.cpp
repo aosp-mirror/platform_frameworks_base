@@ -257,7 +257,7 @@ bool CanvasState::calculateQuickRejectForScissor(float left, float top,
 
     // round rect clip is required if RR clip exists, and geometry intersects its corners
     if (roundRectClipRequired) {
-        *roundRectClipRequired = mSnapshot->roundRectClipState != NULL
+        *roundRectClipRequired = mSnapshot->roundRectClipState != nullptr
                 && mSnapshot->roundRectClipState->areaRequiresRoundRectClip(r);
     }
     return false;

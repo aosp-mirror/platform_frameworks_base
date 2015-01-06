@@ -45,7 +45,7 @@ CanvasContext::CanvasContext(RenderThread& thread, bool translucent,
         , mBufferPreserved(false)
         , mSwapBehavior(kSwap_default)
         , mOpaque(!translucent)
-        , mCanvas(NULL)
+        , mCanvas(nullptr)
         , mHaveNewSurface(false)
         , mAnimationContext(contextFactory->createAnimationContext(mRenderThread.timeLord()))
         , mRootRenderNode(rootRenderNode) {
@@ -59,13 +59,13 @@ CanvasContext::~CanvasContext() {
 
 void CanvasContext::destroy() {
     stopDrawing();
-    setSurface(NULL);
+    setSurface(nullptr);
     freePrefetechedLayers();
     destroyHardwareResources();
     mAnimationContext->destroy();
     if (mCanvas) {
         delete mCanvas;
-        mCanvas = 0;
+        mCanvas = nullptr;
     }
 }
 
@@ -95,7 +95,7 @@ void CanvasContext::setSurface(ANativeWindow* window) {
 
 void CanvasContext::swapBuffers() {
     if (CC_UNLIKELY(!mEglManager.swapBuffers(mEglSurface))) {
-        setSurface(NULL);
+        setSurface(nullptr);
     }
     mHaveNewSurface = false;
 }
@@ -273,19 +273,19 @@ void CanvasContext::invokeFunctor(RenderThread& thread, Functor* functor) {
         mode = DrawGlInfo::kModeProcess;
     }
 
-    thread.renderState().invokeFunctor(functor, mode, NULL);
+    thread.renderState().invokeFunctor(functor, mode, nullptr);
 }
 
 void CanvasContext::markLayerInUse(RenderNode* node) {
     if (mPrefetechedLayers.erase(node)) {
-        node->decStrong(0);
+        node->decStrong(nullptr);
     }
 }
 
 static void destroyPrefetechedNode(RenderNode* node) {
     ALOGW("Incorrectly called buildLayer on View: %s, destroying layer...", node->getName());
     node->destroyHardwareResources();
-    node->decStrong(0);
+    node->decStrong(nullptr);
 }
 
 void CanvasContext::freePrefetechedLayers() {
@@ -319,7 +319,7 @@ void CanvasContext::buildLayer(RenderNode* node) {
     mCanvas->markLayersAsBuildLayers();
     mCanvas->flushLayerUpdates();
 
-    node->incStrong(0);
+    node->incStrong(nullptr);
     mPrefetechedLayers.insert(node);
 }
 

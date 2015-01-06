@@ -64,7 +64,7 @@ public:
     void setDensity(float density) { mDensity = density; }
     int drawFrame(nsecs_t frameTimeNanos, nsecs_t recordDurationNanos);
 
-    virtual void run();
+    virtual void run() override;
 
 private:
     void postAndWait();

@@ -298,13 +298,13 @@ CachedGlyphInfo* Font::getCachedGlyph(const SkPaint* paint, glyph_t textUnit, bo
 
 void Font::render(const SkPaint* paint, const char *text, uint32_t start, uint32_t len,
             int numGlyphs, int x, int y, const float* positions) {
-    render(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, NULL,
-            0, 0, NULL, positions);
+    render(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, nullptr,
+            0, 0, nullptr, positions);
 }
 
 void Font::render(const SkPaint* paint, const char *text, uint32_t start, uint32_t len,
         int numGlyphs, const SkPath* path, float hOffset, float vOffset) {
-    if (numGlyphs == 0 || text == NULL || len == 0) {
+    if (numGlyphs == 0 || text == nullptr || len == 0) {
         return;
     }
 
@@ -354,18 +354,18 @@ void Font::render(const SkPaint* paint, const char *text, uint32_t start, uint32
 
 void Font::measure(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, Rect *bounds, const float* positions) {
-    if (bounds == NULL) {
+    if (bounds == nullptr) {
         ALOGE("No return rectangle provided to measure text");
         return;
     }
     bounds->set(1e6, -1e6, -1e6, 1e6);
-    render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds, positions);
+    render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, nullptr, 0, 0, bounds, positions);
 }
 
 void Font::precache(const SkPaint* paint, const char* text, int numGlyphs) {
     ATRACE_NAME("Precache Glyphs");
 
-    if (numGlyphs == 0 || text == NULL) {
+    if (numGlyphs == 0 || text == nullptr) {
         return;
     }
 
@@ -386,7 +386,7 @@ void Font::precache(const SkPaint* paint, const char* text, int numGlyphs) {
 void Font::render(const SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
         uint32_t bitmapW, uint32_t bitmapH, Rect* bounds, const float* positions) {
-    if (numGlyphs == 0 || text == NULL || len == 0) {
+    if (numGlyphs == 0 || text == nullptr || len == 0) {
         return;
     }
 

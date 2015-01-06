@@ -35,7 +35,7 @@ namespace uirenderer {
 
 LayerProperties::LayerProperties()
         : mType(kLayerTypeNone)
-        , mColorFilter(NULL) {
+        , mColorFilter(nullptr) {
     reset();
 }
 
@@ -45,7 +45,7 @@ LayerProperties::~LayerProperties() {
 
 void LayerProperties::reset() {
     mOpaque = false;
-    setFromPaint(NULL);
+    setFromPaint(nullptr);
 }
 
 bool LayerProperties::setColorFilter(SkColorFilter* filter) {
@@ -61,7 +61,7 @@ bool LayerProperties::setFromPaint(const SkPaint* paint) {
     OpenGLRenderer::getAlphaAndModeDirect(paint, &alpha, &mode);
     changed |= setAlpha(static_cast<uint8_t>(alpha));
     changed |= setXferMode(mode);
-    changed |= setColorFilter(paint ? paint->getColorFilter() : NULL);
+    changed |= setColorFilter(paint ? paint->getColorFilter() : nullptr);
     return changed;
 }
 
@@ -92,7 +92,7 @@ RenderProperties::PrimitiveFields::PrimitiveFields()
 }
 
 RenderProperties::ComputedFields::ComputedFields()
-        : mTransformMatrix(NULL) {
+        : mTransformMatrix(nullptr) {
 }
 
 RenderProperties::ComputedFields::~ComputedFields() {
@@ -100,8 +100,8 @@ RenderProperties::ComputedFields::~ComputedFields() {
 }
 
 RenderProperties::RenderProperties()
-        : mStaticMatrix(NULL)
-        , mAnimationMatrix(NULL) {
+        : mStaticMatrix(nullptr)
+        , mAnimationMatrix(nullptr) {
 }
 
 RenderProperties::~RenderProperties() {

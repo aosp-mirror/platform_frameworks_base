@@ -23,7 +23,7 @@ namespace uirenderer {
 
 RenderState::RenderState(renderthread::RenderThread& thread)
         : mRenderThread(thread)
-        , mCaches(NULL)
+        , mCaches(nullptr)
         , mViewportWidth(0)
         , mViewportHeight(0)
         , mFramebuffer(0) {
@@ -105,7 +105,7 @@ void RenderState::interruptForFunctorInvoke() {
     if (mCaches->currentProgram) {
         if (mCaches->currentProgram->isInUse()) {
             mCaches->currentProgram->remove();
-            mCaches->currentProgram = NULL;
+            mCaches->currentProgram = nullptr;
         }
     }
     mCaches->resetActiveTexture();
@@ -165,9 +165,9 @@ class DecStrongTask : public renderthread::RenderTask {
 public:
     DecStrongTask(VirtualLightRefBase* object) : mObject(object) {}
 
-    virtual void run() {
-        mObject->decStrong(0);
-        mObject = 0;
+    virtual void run() override {
+        mObject->decStrong(nullptr);
+        mObject = nullptr;
         delete this;
     }
 
