@@ -2419,9 +2419,16 @@ class MountService extends IMountService.Stub
         final NativeDaemonEvent event;
         try {
             event = mConnector.execute("cryptfs", "getpw");
+            if ("-1".equals(event.getMessage())) {
+                // -1 equals no password
+                return null;
+            }
             return fromHex(event.getMessage());
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
+        } catch (IllegalArgumentException e) {
+            Slog.e(TAG, "Invalid response to getPassword");
+            return null;
         }
     }
 
