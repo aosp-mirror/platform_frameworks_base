@@ -315,16 +315,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * supported by this camera device.</p>
      * <p>This key lists the valid modes for {@link CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE android.colorCorrection.aberrationMode}.  If no
      * aberration correction modes are available for a device, this list will solely include
-     * OFF mode.</p>
-     * <p>For FULL capability device ({@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} <code>==</code> FULL), OFF is
-     * always included.</p>
+     * OFF mode. All camera devices will support either OFF or FAST mode.</p>
+     * <p>Camera devices that support the MANUAL_POST_PROCESSING capability will always list
+     * OFF mode. This includes all FULL level devices.</p>
      * <p>LEGACY devices will always only support FAST mode.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE android.colorCorrection.aberrationMode}</p>
      * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#COLOR_CORRECTION_ABERRATION_MODE
-     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      */
     @PublicKey
     public static final Key<int[]> COLOR_CORRECTION_AVAILABLE_ABERRATION_MODES =
