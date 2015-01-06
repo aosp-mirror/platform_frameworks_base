@@ -1,0 +1,207 @@
+page.title=TV Apps Checklist
+page.tags="tv", "checklist"
+page.article=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+  <h2>Checklist sections</h2>
+  <ul>
+    <li><a href="#leanback">TV Form Factor Support</a></li>
+    <li><a href="#design">User Interface Design</a></li>
+    <li><a href="#discovery">Search and Content Discovery</a></li>
+    <li><a href="#games">Games</a></li>
+  </ul>
+  <h2>You should also read</h2>
+  <ul>
+    <li><a href="{@docRoot}distribute/essentials/quality/tv.html">TV App Quality</a></li>
+    <li><a href="http://android-developers.blogspot.com/2014/10/material-design-on-android-checklist.html">
+      Material Design on Android Checklist</a></li>
+    <li><a href="{@docRoot}distribute/tools/launch-checklist.html">
+      Launch Checklist</a></li>
+  </ul>
+</div>
+</div>
+
+<p>
+  Users enjoy the TV app experience when it is consistent, logical, and predictable.
+  They should be able to navigate within your app and throughout Android TV without getting lost or
+  having to "reset" the UI and start over. Users appreciate clear, colorful, and functional interfaces
+  that make the experience magical. With these ideas in mind, you can create an app that fits nicely
+  in Android TV and performs as users expect.
+</p>
+
+<p>
+  This checklist covers the main aspects of development for both apps and games and provides
+  guidelines to ensure that your app provides the best possible experience. Additional considerations
+  for games only are covered in the <em>Games</em> section.
+</p>
+
+<p>
+  For criteria that qualify an Android TV app on Google Play, see
+  <a href="{@docRoot}distribute/essentials/quality/tv.html">TV App Quality</a>.
+</p>
+
+<h2 id="leanback">TV Form Factor Support</h2>
+
+<p>These checklist items apply to <strong>Games</strong> and <strong>Apps</strong>.</p>
+
+<ol>
+
+<li>
+  Identify the main TV activity with the {@link android.content.Intent#CATEGORY_LEANBACK_LAUNCHER}
+  filter in the manifest.
+  <p>See <a href="{@docRoot}training/tv/start/start.html#tv-activity">Declare a TV Activity</a>.</p>
+</li>
+
+<li>
+  Provide a home screen banner for each language supported by your app
+  <ul>
+    <li>Launcher app banner measures 320x180 px</li>
+    <li>Banner resource is located in the {@code drawables/xhdpi} directory</li>
+    <li>Banner image includes localized text to identify the app.</li>
+  </ul>
+  <p>See <a href="{@docRoot}training/tv/start/start.html#banner">Provide a home screen banner</a>.</p>
+</li>
+
+<li>
+  Eliminate requirements for unsupported hardware in your app.
+  <p>See <a href="training/tv/start/hardware.html#declare-hardware-requirements">Declaring hardware requirements for TV</a>.</p>
+</li>
+
+<li>
+  Ensure permissions do not imply hardware requirements
+  <p>See <a href="training/tv/start/hardware.html#hardware-permissions">Declaring permissions that imply hardware features</a>.</p>
+</li>
+
+</ol>
+
+
+<h2 id="design">User Interface Design</h2>
+
+<p>These checklist items apply to <strong>Games</strong> and <strong>Apps</strong>.</p>
+
+<ol>
+
+<li>
+  Provide appropriate layout resources for landscape mode.
+  <p>See <a href="{@docRoot}training/tv/start/layouts.html#structure">Build Basic TV Layouts</a>.</p>
+</li>
+
+<li>
+  Ensure that text and controls are large enough to be visible from a distance.
+  <p>See <a href="{@docRoot}training/tv/start/layouts.html#visibility">Build Useable Text and Controls</a>.</p>
+</li>
+
+<li>
+  Provide high-resolution bitmaps and icons for HDTV screens.
+  <p>See <a href="{@docRoot}training/tv/start/layouts.html#density-resources">Manage Layout Resources for TV</a>.</p>
+</li>
+
+<li>
+  Make sure your icons and logo conform to Android TV specifications.
+  <p>See <a href="{@docRoot}design/tv/patterns.html#icons">Manage Layout Resources for TV</a>.</p>
+</li>
+
+<li>
+  Allow for overscan in your layout.
+  <p>See <a href="{@docRoot}training/tv/start/layouts.html#overscan">Overscan</a>.</p>
+</li>
+
+<li>
+  Make every UI element work with both D-pad and game controllers.
+  <p>See <a href="{@docRoot}training/tv/start/navigation.html">Creating Navigation</a>
+    and <a href="{@docRoot}training/tv/start/hardware.html#controllers">Handling Controllers</a>.</p>
+</li>
+
+<li>
+  Change the background image as users browse through content.
+  <p>See <a href="{@docRoot}training/tv/playback/browse.html#background">Update the Background</a>.</p>
+</li>
+
+<li>
+  Customize the background color to match your branding in Leanback fragments.
+  <p>See <a href="{@docRoot}training/tv/playback/card.html#background">Customize the Card View</a>.</p>
+</li>
+
+<li>
+  Ensure that your UI does not require a touch screen.
+  <p>See <a href="{@docRoot}training/tv/start/hardware.html#no-touchscreen">Touch screen</a> and
+    <a href="{@docRoot}training/tv/start/start.html#no-touchscreen">Declare touch screen not
+    required</a>.</p>
+</li>
+
+<li>
+  Follow guidelines for effective advertising.
+  <p>See <a href="{@docRoot}training/tv/start/layouts.html#advertising">Provide Effective Advertising</a>.</p>
+</li>
+
+</ol>
+
+
+<h2 id="discovery">Search and Content Discovery</h2>
+
+<p>These checklist items apply to <strong>Games</strong> and <strong>Apps</strong>.</p>
+
+<ol>
+
+<li>
+  Provide search results from your app in the Android TV global search box.
+  <p>See <a href="{@docRoot}training/tv/discovery/searchable.html#provide">Provide Data</a>.</p>
+</li>
+
+<li>
+  Provide TV-specific data fields for search.
+  <p>See <a href="{@docRoot}training/tv/discovery/searchable.html#columns">Identify Columns</a>.</p>
+</li>
+
+<li>
+  Make sure your app presents discovered content in a details screen that lets the user start watching
+  the content immediately.
+  <p>See <a href="{@docRoot}training/tv/discovery/searchable.html#details">Display Your App in the
+    Details Screen</a>.</p>
+</li>
+
+<li>
+  Put relevant, actionable content and categories on the main screen, making it easy to discover content.
+  <p>See <a href="{@docRoot}training/tv/discovery/recommendations.html">Recommending TV Content</a>.</p>
+</li>
+
+</ol>
+
+
+<h2 id="games">Games</h2>
+
+<p>These checklist items apply to <strong>Games</strong>.</p>
+
+<ol>
+
+<li>
+  Show your game on the home screen with the {@code isGame} flag in the manifest.
+  <p>See <a href="{@docRoot}training/tv/games/index.html#Launcher">Show your game on the home screen</a>.</p>
+</li>
+
+<li>
+  Make sure game controller support does not depend upon the Start, Select, or Menu buttons (not all
+  controllers have these).
+  <p>See <a href="{@docRoot}training/tv/games/index.html#control">Input Devices</a>.</p>
+</li>
+
+<li>
+  Use a generic gamepad graphic (without specific controller branding) to show game button mappings.
+  <p>See <a href="{@docRoot}training/tv/games/index.html#ControllerHelp">Show controller instructions</a>.</p>
+</li>
+
+<li>
+  Check for both ethernet and WiFi connectivity.
+  <p>See <a href="{@docRoot}training/tv/games/index.html#networking">Networking</a>.</p>
+</li>
+
+<li>
+  Provide users with a clean exit.
+  <p>See <a href="{@docRoot}training/tv/games/index.html#exit">Exit</a>.</p>
+</li>
+
+
+</ol>
