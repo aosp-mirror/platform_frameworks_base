@@ -923,7 +923,7 @@ include the action bar on devices running Android 2.1 or higher."
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/tv/playback/index.html"
-             ja-lang="TV 再生アプリのビルド">
+             ja-lang="TV 再生アプリのビルド"
              description="How to build apps that provide media catalogs and play content.">
              Building TV Playback Apps</a>
         </div>
