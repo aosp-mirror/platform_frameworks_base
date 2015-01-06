@@ -672,6 +672,16 @@ public final class HdmiControlService extends SystemService {
         return tv() == null ? null : tv().getCecDeviceInfo(logicalAddress);
     }
 
+    @ServiceThreadOnly
+    HdmiDeviceInfo getDeviceInfoByPort(int port) {
+        assertRunOnServiceThread();
+        HdmiMhlLocalDeviceStub info = mMhlController.getLocalDevice(port);
+        if (info != null) {
+            return info.getInfo();
+        }
+        return null;
+    }
+
     /**
      * Returns version of CEC.
      */
