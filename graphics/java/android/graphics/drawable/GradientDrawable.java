@@ -143,7 +143,7 @@ public class GradientDrawable extends Drawable {
     private final RectF mRect = new RectF();
 
     private Paint mLayerPaint;    // internal, used if we use saveLayer()
-    private boolean mGradientIsDirty;   // internal state
+    private boolean mGradientIsDirty;
     private boolean mMutated;
     private Path mRingPath;
     private boolean mPathIsDirty = true;
@@ -174,7 +174,7 @@ public class GradientDrawable extends Drawable {
     }
 
     public GradientDrawable() {
-        this(new GradientState(Orientation.TOP_BOTTOM, null));
+        this(new GradientState(Orientation.TOP_BOTTOM, null), null);
     }
 
     /**
@@ -182,7 +182,7 @@ public class GradientDrawable extends Drawable {
      * of colors for the gradient.
      */
     public GradientDrawable(Orientation orientation, int[] colors) {
-        this(new GradientState(orientation, colors));
+        this(new GradientState(orientation, colors), null);
     }
 
     @Override
@@ -1018,7 +1018,7 @@ public class GradientDrawable extends Drawable {
 
         inflateChildElements(r, parser, attrs, theme);
 
-        mGradientState.computeOpacity();
+        updateLocalState(r);
     }
 
     @Override
@@ -1037,9 +1037,21 @@ public class GradientDrawable extends Drawable {
             a.recycle();
         }
 
+        if (state.mTint != null && state.mTint.canApplyTheme()) {
+            state.mTint.applyTheme(t);
+        }
+
+        if (state.mColorStateList != null && state.mColorStateList.canApplyTheme()) {
+            state.mColorStateList.applyTheme(t);
+        }
+
+        if (state.mStrokeColorStateList != null && state.mStrokeColorStateList.canApplyTheme()) {
+            state.mStrokeColorStateList.applyTheme(t);
+        }
+
         applyThemeChildElements(t);
 
-        state.computeOpacity();
+        updateLocalState(t.getResources());
     }
 
     /**
@@ -1087,8 +1099,6 @@ public class GradientDrawable extends Drawable {
         if (tint != null) {
             state.mTint = tint;
         }
-
-        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
     }
 
     @Override
@@ -1516,7 +1526,7 @@ public class GradientDrawable extends Drawable {
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
             mGradientState = new GradientState(mGradientState);
-            initializeWithState(mGradientState);
+            updateLocalState(null);
             mMutated = true;
         }
         return this;
@@ -1577,7 +1587,7 @@ public class GradientDrawable extends Drawable {
         int[] mAttrCorners;
         int[] mAttrPadding;
 
-        GradientState(Orientation orientation, int[] colors) {
+        public GradientState(Orientation orientation, int[] colors) {
             mOrientation = orientation;
             setColors(colors);
         }
@@ -1634,19 +1644,24 @@ public class GradientDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null || mAttrSize != null || mAttrGradient != null
-                    || mAttrSolid != null || mAttrStroke != null || mAttrCorners != null
-                    || mAttrPadding != null || super.canApplyTheme();
+            return mThemeAttrs != null
+                    || mAttrSize != null || mAttrGradient != null
+                    || mAttrSolid != null || mAttrStroke != null
+                    || mAttrCorners != null || mAttrPadding != null
+                    || (mTint != null && mTint.canApplyTheme())
+                    || (mStrokeColorStateList != null && mStrokeColorStateList.canApplyTheme())
+                    || (mColorStateList != null && mColorStateList.canApplyTheme())
+                    || super.canApplyTheme();
         }
 
         @Override
         public Drawable newDrawable() {
-            return new GradientDrawable(this);
+            return new GradientDrawable(this, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new GradientDrawable(this);
+            return new GradientDrawable(this, res);
         }
 
         @Override
@@ -1751,16 +1766,15 @@ public class GradientDrawable extends Drawable {
      *
      * @param state Constant state from which the drawable inherits
      */
-    private GradientDrawable(GradientState state) {
+    private GradientDrawable(GradientState state, Resources res) {
         mGradientState = state;
 
-        initializeWithState(mGradientState);
-
-        mGradientIsDirty = true;
-        mMutated = false;
+        updateLocalState(res);
     }
 
-    private void initializeWithState(GradientState state) {
+    private void updateLocalState(Resources res) {
+        final GradientState state = mGradientState;
+
         if (state.mColorStateList != null) {
             final int[] currentState = getState();
             final int stateColor = state.mColorStateList.getColorForState(currentState, 0);
@@ -1797,5 +1811,8 @@ public class GradientDrawable extends Drawable {
         }
 
         mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        mGradientIsDirty = true;
+
+        state.computeOpacity();
     }
 }

@@ -4890,6 +4890,14 @@
         <attr name="animation"/>
     </declare-styleable>
 
+    <!-- Attributes that can be assigned to a ColorStateList item. -->
+    <declare-styleable name="ColorStateListItem">
+        <!-- Base color for this state. -->
+        <attr name="color" />
+        <!-- Alpha multiplier applied to the base color. -->
+        <attr name="alpha" />
+    </declare-styleable>
+
     <!-- Drawable used to render a geometric shape, with a gradient or a solid color. -->
     <declare-styleable name="GradientDrawable">
         <!-- Indicates whether the drawable should intially be visible. -->

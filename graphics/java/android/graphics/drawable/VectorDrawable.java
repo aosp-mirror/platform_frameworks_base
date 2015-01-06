@@ -369,8 +369,13 @@ public class VectorDrawable extends Drawable {
         super.applyTheme(t);
 
         final VectorDrawableState state = mVectorState;
-        if (state != null && state.mThemeAttrs != null) {
-            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.VectorDrawable);
+        if (state == null) {
+            return;
+        }
+
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(
+                    state.mThemeAttrs, R.styleable.VectorDrawable);
             try {
                 state.mCacheDirty = true;
                 updateStateFromTypedArray(a);
@@ -379,14 +384,20 @@ public class VectorDrawable extends Drawable {
             } finally {
                 a.recycle();
             }
+        }
 
-            mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+        // Apply theme to contained color state list.
+        if (state.mTint != null && state.mTint.canApplyTheme()) {
+            state.mTint.applyTheme(t);
         }
 
         final VPathRenderer path = state.mVPathRenderer;
         if (path != null && path.canApplyTheme()) {
             path.applyTheme(t);
         }
+
+        // Update local state.
+        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
     }
 
     /**
@@ -750,7 +761,9 @@ public class VectorDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null || (mVPathRenderer != null && mVPathRenderer.canApplyTheme())
+            return mThemeAttrs != null
+                    || (mVPathRenderer != null && mVPathRenderer.canApplyTheme())
+                    || (mTint != null && mTint.canApplyTheme())
                     || super.canApplyTheme();
         }
 

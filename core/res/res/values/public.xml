@@ -2598,4 +2598,11 @@
     <public type="style" name="Theme.DeviceDefault.Dialog.Alert" />
     <public type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" />
 
+  <!-- ===============================================================
+       Resources added in version MNC of the platform
+       =============================================================== -->
+  <eat-comment />
+
+  <public type="style" name="Widget.Material.Button.Colored" />
+
 </resources>

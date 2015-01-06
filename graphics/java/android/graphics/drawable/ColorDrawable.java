@@ -70,7 +70,7 @@ public class ColorDrawable extends Drawable {
 
     @Override
     public int getChangingConfigurations() {
-        return super.getChangingConfigurations() | mColorState.mChangingConfigurations;
+        return super.getChangingConfigurations() | mColorState.getChangingConfigurations();
     }
 
     /**
@@ -233,6 +233,8 @@ public class ColorDrawable extends Drawable {
         final TypedArray a = obtainAttributes(r, theme, attrs, R.styleable.ColorDrawable);
         updateStateFromTypedArray(a);
         a.recycle();
+
+        updateLocalState(r);
     }
 
     /**
@@ -261,13 +263,21 @@ public class ColorDrawable extends Drawable {
         super.applyTheme(t);
 
         final ColorState state = mColorState;
-        if (state == null || state.mThemeAttrs == null) {
+        if (state == null) {
             return;
         }
 
-        final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.ColorDrawable);
-        updateStateFromTypedArray(a);
-        a.recycle();
+        if (state.mThemeAttrs != null) {
+            final TypedArray a = t.resolveAttributes(state.mThemeAttrs, R.styleable.ColorDrawable);
+            updateStateFromTypedArray(a);
+            a.recycle();
+        }
+
+        if (state.mTint != null && state.mTint.canApplyTheme()) {
+            state.mTint.applyTheme(t);
+        }
+
+        updateLocalState(t.getResources());
     }
 
     @Override
@@ -299,17 +309,18 @@ public class ColorDrawable extends Drawable {
 
         @Override
         public boolean canApplyTheme() {
-            return mThemeAttrs != null;
+            return mThemeAttrs != null
+                    || (mTint != null && mTint.canApplyTheme());
         }
 
         @Override
         public Drawable newDrawable() {
-            return new ColorDrawable(this);
+            return new ColorDrawable(this, null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new ColorDrawable(this);
+            return new ColorDrawable(this, res);
         }
 
         @Override
@@ -318,8 +329,18 @@ public class ColorDrawable extends Drawable {
         }
     }
 
-    private ColorDrawable(ColorState state) {
+    private ColorDrawable(ColorState state, Resources res) {
         mColorState = state;
-        mTintFilter = updateTintFilter(mTintFilter, state.mTint, state.mTintMode);
+
+        updateLocalState(res);
+    }
+
+    /**
+     * Initializes local dynamic properties from state. This should be called
+     * after significant state changes, e.g. from the One True Constructor and
+     * after inflating or applying a theme.
+     */
+    private void updateLocalState(Resources r) {
+        mTintFilter = updateTintFilter(mTintFilter, mColorState.mTint, mColorState.mTintMode);
     }
 }
