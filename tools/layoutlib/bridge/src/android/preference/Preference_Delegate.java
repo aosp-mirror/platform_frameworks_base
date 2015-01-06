@@ -40,29 +40,27 @@ import java.util.Map;
  */
 public class Preference_Delegate {
 
-    private static final Map<Preference, Object> sViewCookies = new HashMap<Preference, Object>();
-
     @LayoutlibDelegate
     /*package*/ static View getView(Preference pref, View convertView, ViewGroup parent) {
         Context context = pref.getContext();
         BridgeContext bc = context instanceof BridgeContext ? ((BridgeContext) context) : null;
         convertView = pref.getView_Original(convertView, parent);
-        Object cookie = sViewCookies.get(pref);
-        if (bc != null && cookie != null) {
-            bc.addViewKey(convertView, cookie);
+        if (bc != null) {
+            Object cookie = bc.getCookie(pref);
+            if (cookie != null) {
+                bc.addViewKey(convertView, cookie);
+            }
         }
         return convertView;
     }
 
     /**
-     * Inflates the parser and returns the ListView containing the Preferences. The caller must call
-     * {@link #clearCookiesMap()} when the rendering is complete.
+     * Inflates the parser and returns the ListView containing the Preferences.
      */
     public static View inflatePreference(Context context, XmlPullParser parser, ViewGroup root) {
-        assert sViewCookies.isEmpty();
         PreferenceManager pm = new PreferenceManager(context);
         PreferenceScreen ps = pm.getPreferenceScreen();
-        PreferenceInflater inflater = new BridgePreferenceInflater(context, pm, sViewCookies);
+        PreferenceInflater inflater = new BridgePreferenceInflater(context, pm);
         ps = (PreferenceScreen) inflater.inflate(parser, ps, true);
         ListView preferenceView = createContainerView(context, root);
         ps.bind(preferenceView);
@@ -81,9 +79,5 @@ public class Preference_Delegate {
         inflater.inflate(mLayoutResId, root, true);
 
         return (ListView) root.findViewById(android.R.id.list);
-    }
-
-    public static void clearCookiesMap() {
-        sViewCookies.clear();
     }
 }

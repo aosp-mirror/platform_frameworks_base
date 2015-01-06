@@ -16,35 +16,36 @@
 
 package android.preference;
 
+import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 
 import android.content.Context;
 import android.util.AttributeSet;
 
-import java.util.Map;
-
 public class BridgePreferenceInflater extends PreferenceInflater {
 
-    private final Map<Preference, Object> mViewCookieMap;
-
-    public BridgePreferenceInflater(Context context, PreferenceManager preferenceManager,
-            Map<Preference, Object> viewCookieMap) {
+    public BridgePreferenceInflater(Context context, PreferenceManager preferenceManager) {
         super(context, preferenceManager);
-        mViewCookieMap = viewCookieMap;
     }
 
     @Override
     protected Preference onCreateItem(String name, AttributeSet attrs)
             throws ClassNotFoundException {
-        Object viewKey;
+        Object viewKey = null;
+        BridgeContext bc = null;
+
+        Context context = getContext();
+        if (context instanceof BridgeContext) {
+            bc = (BridgeContext) context;
+        }
         if (attrs instanceof BridgeXmlBlockParser) {
             viewKey = ((BridgeXmlBlockParser) attrs).getViewCookie();
-        } else {
-            viewKey = null;
         }
+
         Preference preference = super.onCreateItem(name, attrs);
-        if (viewKey != null) {
-            mViewCookieMap.put(preference, viewKey);
+
+        if (viewKey != null && bc != null) {
+            bc.addCookie(preference, viewKey);
         }
         return preference;
     }
