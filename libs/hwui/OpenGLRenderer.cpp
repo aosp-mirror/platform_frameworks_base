@@ -354,7 +354,7 @@ void OpenGLRenderer::resumeAfterLayer() {
 void OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     if (mState.currentlyIgnored()) return;
 
-    Rect clip(*mState.currentClipRect());
+    Rect clip(mState.currentClipRect());
     clip.snapToPixelBoundaries();
 
     // Since we don't know what the functor will draw, let's dirty
@@ -619,7 +619,7 @@ void OpenGLRenderer::calculateLayerBoundsAndClip(Rect& bounds, Rect& clip, bool 
     currentTransform()->mapRect(bounds);
 
     // Layers only make sense if they are in the framebuffer's bounds
-    if (bounds.intersect(*mState.currentClipRect())) {
+    if (bounds.intersect(mState.currentClipRect())) {
         // We cannot work with sub-pixels in this case
         bounds.snapToPixelBoundaries();
 
@@ -1249,7 +1249,7 @@ void OpenGLRenderer::dirtyLayer(const float left, const float top,
 }
 
 void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
-    if (bounds.intersect(*mState.currentClipRect())) {
+    if (bounds.intersect(mState.currentClipRect())) {
         bounds.snapToPixelBoundaries();
         android::Rect dirty(bounds.left, bounds.top, bounds.right, bounds.bottom);
         if (!dirty.isEmpty()) {
@@ -1328,7 +1328,7 @@ void OpenGLRenderer::clearLayerRegions() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDeferFlags) {
-    const Rect* currentClip = mState.currentClipRect();
+    const Rect& currentClip = mState.currentClipRect();
     const mat4* currentMatrix = currentTransform();
 
     if (stateDeferFlags & kStateDeferFlag_Draw) {
@@ -1340,32 +1340,32 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
             // is used, it should more closely duplicate the quickReject logic (in how it uses
             // snapToPixelBoundaries)
 
-            if(!clippedBounds.intersect(*currentClip)) {
+            if (!clippedBounds.intersect(currentClip)) {
                 // quick rejected
                 return true;
             }
 
             state.mClipSideFlags = kClipSide_None;
-            if (!currentClip->contains(state.mBounds)) {
+            if (!currentClip.contains(state.mBounds)) {
                 int& flags = state.mClipSideFlags;
                 // op partially clipped, so record which sides are clipped for clip-aware merging
-                if (currentClip->left > state.mBounds.left) flags |= kClipSide_Left;
-                if (currentClip->top > state.mBounds.top) flags |= kClipSide_Top;
-                if (currentClip->right < state.mBounds.right) flags |= kClipSide_Right;
-                if (currentClip->bottom < state.mBounds.bottom) flags |= kClipSide_Bottom;
+                if (currentClip.left > state.mBounds.left) flags |= kClipSide_Left;
+                if (currentClip.top > state.mBounds.top) flags |= kClipSide_Top;
+                if (currentClip.right < state.mBounds.right) flags |= kClipSide_Right;
+                if (currentClip.bottom < state.mBounds.bottom) flags |= kClipSide_Bottom;
             }
             state.mBounds.set(clippedBounds);
         } else {
             // Empty bounds implies size unknown. Label op as conservatively clipped to disable
             // overdraw avoidance (since we don't know what it overlaps)
             state.mClipSideFlags = kClipSide_ConservativeFull;
-            state.mBounds.set(*currentClip);
+            state.mBounds.set(currentClip);
         }
     }
 
     state.mClipValid = (stateDeferFlags & kStateDeferFlag_Clip);
     if (state.mClipValid) {
-        state.mClip.set(*currentClip);
+        state.mClip.set(currentClip);
     }
 
     // Transform, drawModifiers, and alpha always deferred, since they are used by state operations
@@ -1414,7 +1414,7 @@ void OpenGLRenderer::setupMergedMultiDraw(const Rect* clipRect) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setScissorFromClip() {
-    Rect clip(*mState.currentClipRect());
+    Rect clip(mState.currentClipRect());
     clip.snapToPixelBoundaries();
 
     if (mCaches.setScissor(clip.left, getViewportHeight() - clip.bottom,
@@ -1448,9 +1448,74 @@ void OpenGLRenderer::attachStencilBufferToLayer(Layer* layer) {
     }
 }
 
+static void handlePoint(std::vector<Vertex>& rectangleVertices, const Matrix4& transform,
+        float x, float y) {
+    Vertex v;
+    v.x = x;
+    v.y = y;
+    transform.mapPoint(v.x, v.y);
+    rectangleVertices.push_back(v);
+}
+
+static void handlePointNoTransform(std::vector<Vertex>& rectangleVertices, float x, float y) {
+    Vertex v;
+    v.x = x;
+    v.y = y;
+    rectangleVertices.push_back(v);
+}
+
+void OpenGLRenderer::drawRectangleList(const RectangleList& rectangleList) {
+    int count = rectangleList.getTransformedRectanglesCount();
+    std::vector<Vertex> rectangleVertices(count * 4);
+    Rect scissorBox = rectangleList.calculateBounds();
+    scissorBox.snapToPixelBoundaries();
+    for (int i = 0; i < count; ++i) {
+        const TransformedRectangle& tr(rectangleList.getTransformedRectangle(i));
+        const Matrix4& transform = tr.getTransform();
+        Rect bounds = tr.getBounds();
+        if (transform.rectToRect()) {
+            transform.mapRect(bounds);
+            if (!bounds.intersect(scissorBox)) {
+                bounds.setEmpty();
+            } else {
+                handlePointNoTransform(rectangleVertices, bounds.left, bounds.top);
+                handlePointNoTransform(rectangleVertices, bounds.right, bounds.top);
+                handlePointNoTransform(rectangleVertices, bounds.left, bounds.bottom);
+                handlePointNoTransform(rectangleVertices, bounds.right, bounds.bottom);
+            }
+        } else {
+            handlePoint(rectangleVertices, transform, bounds.left, bounds.top);
+            handlePoint(rectangleVertices, transform, bounds.right, bounds.top);
+            handlePoint(rectangleVertices, transform, bounds.left, bounds.bottom);
+            handlePoint(rectangleVertices, transform, bounds.right, bounds.bottom);
+        }
+    }
+
+    mCaches.setScissor(scissorBox.left, getViewportHeight() - scissorBox.bottom,
+            scissorBox.getWidth(), scissorBox.getHeight());
+
+    const SkPaint* paint = nullptr;
+    setupDraw();
+    setupDrawNoTexture();
+    setupDrawColor(0, 0xff * currentSnapshot()->alpha);
+    setupDrawShader(getShader(paint));
+    setupDrawColorFilter(getColorFilter(paint));
+    setupDrawBlending(paint);
+    setupDrawProgram();
+    setupDrawDirtyRegionsDisabled();
+    setupDrawModelView(kModelViewMode_Translate, false,
+            0.0f, 0.0f, 0.0f, 0.0f, true);
+    setupDrawColorUniforms(getShader(paint));
+    setupDrawShaderUniforms(getShader(paint));
+    setupDrawColorFilterUniforms(getColorFilter(paint));
+
+    issueIndexedQuadDraw(&rectangleVertices[0], rectangleVertices.size() / 4);
+}
+
 void OpenGLRenderer::setStencilFromClip() {
     if (!mCaches.debugOverdraw) {
-        if (!currentSnapshot()->clipRegion->isEmpty()) {
+        if (!currentSnapshot()->clipIsSimple()) {
+            int incrementThreshold;
             EVENT_LOGD("setStencilFromClip - enabling");
 
             // NOTE: The order here is important, we must set dirtyClip to false
@@ -1459,15 +1524,25 @@ void OpenGLRenderer::setStencilFromClip() {
 
             ensureStencilBuffer();
 
-            mCaches.stencil.enableWrite();
+            const ClipArea& clipArea = currentSnapshot()->getClipArea();
 
-            // Clear and update the stencil, but first make sure we restrict drawing
+            bool isRectangleList = clipArea.isRectangleList();
+            if (isRectangleList) {
+                incrementThreshold = clipArea.getRectangleList().getTransformedRectanglesCount();
+            } else {
+                incrementThreshold = 0;
+            }
+
+            mCaches.stencil.enableWrite(incrementThreshold);
+
+            // Clean and update the stencil, but first make sure we restrict drawing
             // to the region's bounds
             bool resetScissor = mCaches.enableScissor();
             if (resetScissor) {
                 // The scissor was not set so we now need to update it
                 setScissorFromClip();
             }
+
             mCaches.stencil.clear();
 
             // stash and disable the outline clip state, since stencil doesn't account for outline
@@ -1478,24 +1553,30 @@ void OpenGLRenderer::setStencilFromClip() {
             paint.setColor(SK_ColorBLACK);
             paint.setXfermodeMode(SkXfermode::kSrc_Mode);
 
-            // NOTE: We could use the region contour path to generate a smaller mesh
-            //       Since we are using the stencil we could use the red book path
-            //       drawing technique. It might increase bandwidth usage though.
+            if (isRectangleList) {
+                drawRectangleList(clipArea.getRectangleList());
+            } else {
+                // NOTE: We could use the region contour path to generate a smaller mesh
+                //       Since we are using the stencil we could use the red book path
+                //       drawing technique. It might increase bandwidth usage though.
 
-            // The last parameter is important: we are not drawing in the color buffer
-            // so we don't want to dirty the current layer, if any
-            drawRegionRects(*(currentSnapshot()->clipRegion), paint, false);
+                // The last parameter is important: we are not drawing in the color buffer
+                // so we don't want to dirty the current layer, if any
+                drawRegionRects(clipArea.getClipRegion(), paint, false);
+            }
             if (resetScissor) mCaches.disableScissor();
             mSkipOutlineClip = storedSkipOutlineClip;
 
-            mCaches.stencil.enableTest();
+            mCaches.stencil.enableTest(incrementThreshold);
 
             // Draw the region used to generate the stencil if the appropriate debug
             // mode is enabled
-            if (mCaches.debugStencilClip == Caches::kStencilShowRegion) {
+            // TODO: Implement for rectangle list clip areas
+            if (mCaches.debugStencilClip == Caches::kStencilShowRegion &&
+                    !clipArea.isRectangleList()) {
                 paint.setColor(0x7f0000ff);
                 paint.setXfermodeMode(SkXfermode::kSrcOver_Mode);
-                drawRegionRects(*(currentSnapshot()->clipRegion), paint);
+                drawRegionRects(currentSnapshot()->getClipRegion(), paint);
             }
         } else {
             EVENT_LOGD("setStencilFromClip - disabling");
@@ -1913,7 +1994,7 @@ void OpenGLRenderer::drawRenderNode(RenderNode* renderNode, Rect& dirty, int32_t
         // Don't avoid overdraw when visualizing, since that makes it harder to
         // debug where it's coming from, and when the problem occurs.
         bool avoidOverdraw = !mCaches.debugOverdraw;
-        DeferredDisplayList deferredList(*mState.currentClipRect(), avoidOverdraw);
+        DeferredDisplayList deferredList(mState.currentClipRect(), avoidOverdraw);
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
         renderNode->defer(deferStruct, 0);
 
@@ -2450,7 +2531,7 @@ void OpenGLRenderer::drawColor(int color, SkXfermode::Mode mode) {
     // No need to check against the clip, we fill the clip region
     if (mState.currentlyIgnored()) return;
 
-    Rect clip(*mState.currentClipRect());
+    Rect clip(mState.currentClipRect());
     clip.snapToPixelBoundaries();
 
     SkPaint paint;
@@ -2704,13 +2785,13 @@ void OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
     }
     fontRenderer.setTextureFiltering(linearFilter);
 
-    const Rect* clip = pureTranslate ? writableSnapshot()->clipRect : &writableSnapshot()->getLocalClip();
+    const Rect& clip(pureTranslate ? writableSnapshot()->getClipRect() : writableSnapshot()->getLocalClip());
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     const bool hasActiveLayer = hasLayer();
 
     TextSetupFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
-    if (fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
+    if (fontRenderer.renderPosText(paint, &clip, text, 0, bytesCount, count, x, y,
             positions, hasActiveLayer ? &bounds : nullptr, &functor)) {
         if (hasActiveLayer) {
             if (!pureTranslate) {
@@ -2864,7 +2945,7 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count, float
     fontRenderer.setTextureFiltering(linearFilter);
 
     // TODO: Implement better clipping for scaled/rotated text
-    const Rect* clip = !pureTranslate ? nullptr : mState.currentClipRect();
+    const Rect* clip = !pureTranslate ? nullptr : &mState.currentClipRect();
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     bool status;

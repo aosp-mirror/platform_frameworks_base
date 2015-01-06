@@ -155,47 +155,18 @@ void CanvasState::concatMatrix(const Matrix4& matrix) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool CanvasState::clipRect(float left, float top, float right, float bottom, SkRegion::Op op) {
-    if (CC_LIKELY(currentTransform()->rectToRect())) {
-        mDirtyClip |= mSnapshot->clip(left, top, right, bottom, op);
-        return !mSnapshot->clipRect->isEmpty();
-    }
-
-    SkPath path;
-    path.addRect(left, top, right, bottom);
-
-    return CanvasState::clipPath(&path, op);
+    mDirtyClip |= mSnapshot->clip(left, top, right, bottom, op);
+    return !mSnapshot->clipIsEmpty();
 }
 
 bool CanvasState::clipPath(const SkPath* path, SkRegion::Op op) {
-    SkMatrix transform;
-    currentTransform()->copyTo(transform);
-
-    SkPath transformed;
-    path->transform(transform, &transformed);
-
-    SkRegion clip;
-    if (!mSnapshot->previous->clipRegion->isEmpty()) {
-        clip.setRegion(*mSnapshot->previous->clipRegion);
-    } else {
-        if (mSnapshot->previous == firstSnapshot()) {
-            clip.setRect(0, 0, getWidth(), getHeight());
-        } else {
-            Rect* bounds = mSnapshot->previous->clipRect;
-            clip.setRect(bounds->left, bounds->top, bounds->right, bounds->bottom);
-        }
-    }
-
-    SkRegion region;
-    region.setPath(transformed, clip);
-
-    // region is the transformed input path, masked by the previous clip
-    mDirtyClip |= mSnapshot->clipRegionTransformed(region, op);
-    return !mSnapshot->clipRect->isEmpty();
+    mDirtyClip |= mSnapshot->clipPath(*path, op);
+    return !mSnapshot->clipIsEmpty();
 }
 
 bool CanvasState::clipRegion(const SkRegion* region, SkRegion::Op op) {
     mDirtyClip |= mSnapshot->clipRegionTransformed(*region, op);
-    return !mSnapshot->clipRect->isEmpty();
+    return !mSnapshot->clipIsEmpty();
 }
 
 void CanvasState::setClippingOutline(LinearAllocator& allocator, const Outline* outline) {
@@ -245,7 +216,7 @@ bool CanvasState::calculateQuickRejectForScissor(float left, float top,
     currentTransform()->mapRect(r);
     r.snapGeometryToPixelBoundaries(snapOut);
 
-    Rect clipRect(*currentClipRect());
+    Rect clipRect(currentClipRect());
     clipRect.snapToPixelBoundaries();
 
     if (!clipRect.intersects(r)) return true;
@@ -273,7 +244,7 @@ bool CanvasState::quickRejectConservative(float left, float top,
     currentTransform()->mapRect(r);
     r.roundOut(); // rounded out to be conservative
 
-    Rect clipRect(*currentClipRect());
+    Rect clipRect(currentClipRect());
     clipRect.snapToPixelBoundaries();
 
     if (!clipRect.intersects(r)) return true;

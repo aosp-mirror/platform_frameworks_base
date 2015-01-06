@@ -120,10 +120,6 @@ public:
     bool clipPath(const SkPath* path, SkRegion::Op op);
     bool clipRegion(const SkRegion* region, SkRegion::Op op);
 
-    bool isCurrentClipSimple() const {
-        return currentSnapshot()->clipRegion->isEmpty();
-    }
-
     /**
      * Sets a "clipping outline", which is independent from the regular clip.
      * Currently only supports rectangles or rounded rectangles; passing in a
@@ -150,7 +146,7 @@ public:
     void setInvisible(bool value) { mSnapshot->invisible = value; }
 
     inline const mat4* currentTransform() const { return currentSnapshot()->transform; }
-    inline const Rect* currentClipRect() const { return currentSnapshot()->clipRect; }
+    inline const Rect& currentClipRect() const { return currentSnapshot()->getClipRect(); }
     inline Region* currentRegion() const { return currentSnapshot()->region; }
     inline int currentFlags() const { return currentSnapshot()->flags; }
     const Vector3& currentLightCenter() const { return currentSnapshot()->getRelativeLightCenter(); }

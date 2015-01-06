@@ -17,6 +17,8 @@
 #ifndef ANDROID_HWUI_PAIR_H
 #define ANDROID_HWUI_PAIR_H
 
+#include <utils/TypeHelpers.h>
+
 namespace android {
 namespace uirenderer {
 

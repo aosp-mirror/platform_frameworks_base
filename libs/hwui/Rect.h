@@ -111,6 +111,10 @@ public:
         set(r.left, r.top, r.right, r.bottom);
     }
 
+    inline void set(const SkIRect& r) {
+        set(r.left(), r.top(), r.right(), r.bottom());
+    }
+
     inline float getWidth() const {
         return right - left;
     }
@@ -246,6 +250,14 @@ public:
         top = fminf(top, y);
         right = fmaxf(right, x);
         bottom = fmaxf(bottom, y);
+    }
+
+    SkRect toSkRect() const {
+        return SkRect::MakeLTRB(left, top, right, bottom);
+    }
+
+    SkIRect toSkIRect() const {
+        return SkIRect::MakeLTRB(left, top, right, bottom);
     }
 
     void dump(const char* label = nullptr) const {

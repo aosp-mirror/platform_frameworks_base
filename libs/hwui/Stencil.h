@@ -53,17 +53,21 @@ public:
     void clear();
 
     /**
-     * Enables stencil test. When the stencil test is enabled the stencil
-     * buffer is not written into.
+     * Enables stencil test. When the stencil test is enabled the stencil buffer is not written
+     * into. An increment threshold of zero causes the stencil to use a constant reference value
+     * and GL_EQUAL for the test. A non-zero increment threshold causes the stencil to use that
+     * value as the reference value and GL_EQUAL for the test.
      */
-    void enableTest();
+    void enableTest(int incrementThreshold);
 
     /**
      * Enables stencil write. When stencil write is enabled, the stencil
      * test always succeeds and the value 0x1 is written in the stencil
-     * buffer for each fragment.
+     * buffer for each fragment. An increment threshold of zero causes the stencil to use a constant
+     * reference value and GL_EQUAL for the test. A non-zero increment threshold causes the stencil
+     * to use that value as the reference value and GL_EQUAL for the test.
      */
-    void enableWrite();
+    void enableWrite(int incrementThreshold);
 
     /**
      * The test passes only when equal to the specified value.
