@@ -47,4 +47,12 @@ for the enterprise.</p>
 Policies</a></b></dt>
     <dd>In this lesson, you will learn how to create a security-aware application that manages
 access to its content by enforcing device management policies</dd>
+
+  <dt><b><a href="app-compatibility.html">Ensuring Compatibility with Managed Profiles</a></b></dt>
+
+    <dd>In this lesson, you will learn the best practices to follow to ensure
+      that your app functions properly on devices that use <a
+      href="{@docRoot}about/versions/android-5.0.html#Enterprise">managed
+      profiles</a></dd>
+
 </dl>
