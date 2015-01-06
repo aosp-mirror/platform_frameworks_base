@@ -16,7 +16,7 @@ studio.mac_bundle_checksum=49506ba2cf6b56be4f7d07e6a00c4ec3ba2249d5
 
 studio.win_bundle_exe_download=android-studio-bundle-135.1641136.exe
 studio.win_bundle_exe_bytes=868344232
-studio.win_bundle_exe_checksum=1931dbaeadb52f5e0a8ba6e2ae60d9df20b2076b
+studio.win_bundle_exe_checksum=9c1c8ea6aa17fb74e0593c62fd48ee62a8950be7
 
 studio.win_notools_exe_download=android-studio-ide-135.1641136.exe
 studio.win_notools_exe_bytes=260272840
@@ -488,7 +488,7 @@ rendering. You can then configure your project to use Java Development Kit (JDK)
 <li>Oracle&reg;  Java Development Kit (JDK) 7 </li>
 </ul>
 <p>Tested on Ubuntu&reg;  12.04, Precise Pangolin (64-bit distribution capable of running
-32-bit applications.</p>
+32-bit applications).</p>
 
 
 
