@@ -1,0 +1,274 @@
+page.title=Ensuring Compatibility with Managed Profiles
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+ <li><a href="#prevent_failed_intents">Prevent Failed Intents</a></li>
+ <li><a href="#sharing_files">Share Files Across Profiles</a></li>
+ <li><a href="#testing_apps">Test your App for Compatibility with Managed
+    Profiles</a></li>
+</ol>
+
+<!-- related docs (NOT javadocs) -->
+<h2>Resources</h2>
+<ul>
+  <li><a href="{@docRoot}samples/BasicManagedProfile/index.html">BasicManagedProfile</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>The Android platform allows devices to have
+<a href="{@docRoot}about/versions/android-5.0.html#Enterprise">managed
+profiles</a>. A managed profile is controlled by an administrator, and the
+functionality available to it is set separately from the functionality of the
+user's primary profile. This approach lets enterprises control the environment
+where company-specific apps and data are running on a user's device, while still
+letting users use their personal apps and profiles.</p>
+
+<p>This lesson shows you how to modify your application so it functions
+reliably on a device with managed profiles. You don't need to do anything
+besides the ordinary app-development best practices. However, some of these best
+practices become especially important on devices with managed profiles. This
+document highlights the issues you need to be aware of.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>Users often want to use their personal devices in an enterprise setting. This
+situation can present enterprises with a dilemma. If the user can use their own
+device, the enterprise has to worry that confidential information (like employee
+emails and contacts) are on a device the enterprise does not control. </p>
+
+<p>To address this situation, Android 5.0 (API level 21) allows enterprises to
+set up <i>managed profiles</i>. If a device has a managed profile, the profile's
+settings are under the control of the enterprise administrator. The
+administrator can choose which apps are allowed for that profile, and can
+control just what device features are available to the profile.</p>
+
+<p>If a device has a managed profile, there are implications for apps
+running on the device, no matter which profile the app is running under:</p>
+
+<ul>
+
+<li>By default, most intents do not cross from one profile to the other. If an
+app running on profile fires an intent, there is no handler for the intent on
+that profile, and the intent is not allowed to cross to the other profile
+due to profile restrictions, the request fails and the app may shut down
+unexpectedly.</li>
+<li>The profile administrator can limit which system apps are available on the
+managed profile. This restriction can also result in there being no handler for
+some common intents on the managed profile.</li>
+<li>Since the managed and unmanaged profiles have separate storage areas, a
+file URI that is valid on one profile is not valid on the other. Any
+intent fired on one profile might be handled on the other (depending on profile
+settings), so it is not safe to attach file URIs to intents.</li>
+
+</ul>
+
+<h2 id="prevent_failed_intents">Prevent Failed Intents</h2>
+
+<p>On a device with a managed profile, there are restrictions on whether intents
+can cross from one profile to another.  In most cases, when an intent is fired
+off, it is handled on the same profile where it is fired. If there is no handler
+for the intent <em>on that profile</em>, the intent is not handled and the app
+that fired it may shut down unexpectedly&mdash;even if there's a handler for the
+intent on the other profile.</p>
+
+<p>The profile administrator can choose which intents are
+allowed to cross from one profile to another. Since the administrator makes
+this decision, there's no way for you
+to know in advance <em>which</em> intents are allowed to cross this boundary. The
+administrator sets this policy, and is free to change it at any time.</p>
+
+<p>Before your app starts an activity, you should verify that there is a
+suitable resolution. You
+can verify  that there is an acceptable resolution by calling {@link
+android.content.Intent#resolveActivity Intent.resolveActivity()}. If there is no
+way to resolve the intent, the method returns
+<code>null</code>. If the method returns non-null, there is at least one way to
+resolve the intent, and it is safe to fire off the intent. In this case, the
+intent could be resolvable either
+because there is a handler on the current profile, or because the intent is
+allowed to cross to a handler on the other profile. (For more information about
+resolving intents, see <a
+href="{@docRoot}guide/components/intents-common.html">Common Intents</a>.)</p>
+
+<p>For example, if your app needs to set timers,  it would need to check that
+there's a valid handler for the {@link
+android.provider.AlarmClock#ACTION_SET_TIMER} intent. If the app cannot resolve
+the intent, it should take an appropriate action (such as showing an error
+message).</p>
+
+<pre>public void startTimer(String message, int seconds) {
+
+    // Build the "set timer" intent
+    Intent timerIntent = new Intent(AlarmClock.ACTION_SET_TIMER)
+            .putExtra(AlarmClock.EXTRA_MESSAGE, message)
+            .putExtra(AlarmClock.EXTRA_LENGTH, seconds)
+            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
+
+    // Check if there's a handler for the intent
+    <strong>if (timerIntent.resolveActivity(getPackageManager()) == null)</strong> {
+
+        // Can't resolve the intent! Fail this operation cleanly
+        // (perhaps by showing an error message)
+
+    } else {
+        // Intent resolves, it's safe to fire it off
+        startActivity(timerIntent);
+
+    }
+}
+</pre>
+
+<h2 id="sharing_files">Share Files Across Profiles</h2>
+
+<p>Sometimes an app needs to provide other apps with access to its own files.
+For example, an image gallery app might want to share its images with image
+editors. There are two ways you would ordinarily share a file: with a <em>file
+URI</em> or a <em>content URI</em>.</p>
+
+<p>A file URI begins with the <code>file:</code> prefix, followed by the
+absolute path of the file on the device's storage. However, because the
+managed profile and the personal profile use separate storage areas, a file URI
+that is valid on one profile is not valid on the other. This situation
+means that if you
+attach a file URI to an intent, and the intent is handled on the other profile,
+the handler is not able to access the file.</p>
+
+<p>Instead, you should share files with <em>content URIs</em>. Content URIs
+identify the file in a more secure, shareable fashion. The content URI contains
+the file path, but also the authority that provides the file, and an ID number
+identifying the file. You can generate a content ID for any file by using a
+{@link android.support.v4.content.FileProvider}. You can then share that content
+ID with other apps (even on the other profile). The recipient can use the
+content ID to get access to the actual file.</p>
+
+<p>For example, here's how you would get the content URI for a specific file
+URI:</p>
+
+<pre>// Open File object from its file URI
+File fileToShare = new File(<em>fileUriToShare</em>);
+
+Uri contentUriToShare = FileProvider.getUriForFile(getContext(),
+        <em>"com.example.myapp.fileprovider"</em>, fileToShare);</pre>
+
+<p>When you call the {@link
+android.support.v4.content.FileProvider#getUriForFile getUriForFile()} method,
+you must include the file provider's authority (in this example,
+<code>"com.example.myapp.fileprovider"</code>), which is specified in the
+<a href="{@docRoot}guide/topics/manifest/provider-element.html"><code>&lt;provider&gt;</code></a>
+element of your app manifest.
+For more information about sharing files with content URIs, see
+<a href="{@docRoot}training/secure-file-sharing/index.html">Sharing
+Files</a>.</p>
+
+<h2 id="testing_apps">Test your App for Compatibility with Managed Profiles</h2>
+
+<p>You should test your app in a managed-profile environment to
+catch problems that would cause your app to fail on a device with
+managed profiles. In particular, testing on a managed-profile device is a good
+way to make sure that your app handles intents properly: not firing intents that
+can't be handled, not attaching URIs that don't work cross-profile, and so
+on.</p>
+
+<p>We have provided a sample app, <a
+href="{@docRoot}samples/BasicManagedProfile/index.html">BasicManagedProfile</a>,
+which you can use to set up a managed profile on an Android device that runs
+Android 5.0 (API level 21) and higher. This app offers you a simple way to test
+your app in a managed-profile environment. You can also use this app to
+configure the managed profile as follows:</p>
+
+<ul>
+
+  <li>Specify which default apps are available on the managed
+    profile</li>
+
+  <li>Configure which intents are allowed to cross from one profile to
+    the other</li>
+
+</ul>
+
+<p>If you manually install an app over a USB cable to a device which has a
+managed profile, the app is installed on both the managed and the unmanaged
+profile. Once you have installed the app, you can test the app under the
+following conditions:</p>
+
+<ul>
+
+  <li>If an intent would ordinarily be handled by a default app (for example,
+    the camera app), try disabling that default app on the managed profile, and
+    verify that the app handles this appropriately.</li>
+
+  <li>If you fire an intent expecting it to be handled by some other app, try
+enabling and disabling that   intent's permission to cross from one profile to
+another. Verify that the app behaves properly under both circumstances. If the
+intent is not allowed to cross between profiles, verify the app's behavior both
+when there is a suitable handler on the app's profile, and when there is not.
+For example, if your app fires a map-related intent, try each of the following
+scenarios:
+
+    <ul>
+
+<li>The device allows map intents to cross from one profile to the other, and
+there is a suitable handler on the other profile (the profile the app is not
+running on)</li>
+
+<li>The device does not allow map intents to cross between profiles, but there
+is a suitable handler on the app's profile</li>
+
+<li>The device does not allow map intents to cross between profiles, and there
+is no suitable handler for map intents on the device's profile</li>
+
+    </ul>
+  </li>
+
+<li>If you attach content to an intent, verify that the intent behaves properly
+both when it is handled on the app's profile, and when it crosses between
+profiles.</li>
+
+</ul>
+
+<h3 id="testing_tips">Testing on managed profiles: Tips and tricks</h3>
+
+<p>There are a few tricks that you may find helpful in testing on a
+managed-profile device.</p>
+
+<ul>
+
+<li>As noted,  when you side-load an app on a managed profile device, it is
+installed on both profiles. If you wish, you can delete the app from one profile
+and leave it on the other.</li>
+
+<li>Most of the activity manager commands available in the <a
+href="{@docRoot}tools/help/adb.html">Android Debug Bridge</a> (adb) shell
+support the <code>--user</code> flag, which lets you specify which user to run
+as. By specifying a user, you can choose whether to run as the unmanaged or
+managed profile. For
+more information, see <a href="{@docRoot}tools/help/adb.html#am">Android Debug
+Bridge: Using activity manager (am)</a>.</li>
+
+<li>To find the active users on a device, use the adb package manager's
+<code>list users</code> command. The first number in the output string is the
+user ID, which you can use with the <code>--user</code> flag.  For more
+information, see <a href="{@docRoot}tools/help/adb.html#pm">Android Debug
+Bridge: Using package manager (pm)</a>.</li>
+
+</ul>
+
+<p>For example, to find the users on a device, you would run this command:</p>
+
+<pre class="no-pretty-print">$ <strong>adb shell pm list users</strong>
+UserInfo{0:Drew:13} running
+UserInfo{10:Work profile:30} running</pre>
+
+<p>In this case, the unmanaged profile ("Drew") has the user ID 0, and the
+managed profile has the user  ID 10. To run an app in the work profile, you
+would use a command like this:</p>
+
+<pre class="no-pretty-print">$ adb shell am start --user 10 \
+-n "<em>com.example.myapp/com.example.myapp.testactivity</em>" \
+-a android.intent.action.MAIN -c android.intent.category.LAUNCHER</pre>
