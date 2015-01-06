@@ -1713,6 +1713,10 @@ results."
             Enhancing Security with Device Management Policies
           </a>
           </li>
+          <li><a href="<?cs var:toroot ?>training/enterprise/app-compatibility.html">
+            Ensuring Compatibility with Managed Profiles
+          </a>
+          </li>
         </ul>
       </li>
     </ul>
