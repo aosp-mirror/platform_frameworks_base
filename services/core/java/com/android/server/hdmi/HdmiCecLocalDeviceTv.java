@@ -326,8 +326,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             ActiveSource activeSource = getActiveSource();
             HdmiDeviceInfo info = getCecDeviceInfo(activeSource.logicalAddress);
             if (info == null) {
-                info = new HdmiDeviceInfo(Constants.ADDR_INVALID, path, getActivePortId(),
-                        HdmiDeviceInfo.DEVICE_RESERVED, 0, null);
+                info = mService.getDeviceInfoByPort(getActivePortId());
+                if (info == null) {
+                    // No CEC/MHL device is present at the port. Attempt to switch to
+                    // the hardware port itself for non-CEC devices that may be connected.
+                    info = new HdmiDeviceInfo(path, getActivePortId());
+                }
             }
             mService.invokeInputChangeListener(info);
         }
