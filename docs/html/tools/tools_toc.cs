@@ -52,7 +52,7 @@
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/projects/index.html"><span class="en">Managing Projects</span></a></div>
         <ul>
-	        <li><a href="<?cs var:toroot ?>tools/projects/projects-studio.html"><span class="en">From Android Studio</span></a></li>
+          <li><a href="<?cs var:toroot ?>sdk/installing/create-project.html"><span class="en">From Android Studio</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/projects/projects-cmdline.html"><span class="en">From the Command Line</span></a></li>
           <li><a href="<?cs var:toroot ?>tools/projects/templates.html"><span class="en">Using Code Templates</span></a></li>
         </ul>
