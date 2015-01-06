@@ -16235,6 +16235,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * If the view has a ColorDrawable background, returns the color of that
+     * drawable.
+     *
+     * @return The color of the ColorDrawable background, if set, otherwise 0.
+     */
+    public int getBackgroundColor() {
+        if (mBackground instanceof ColorDrawable) {
+            return ((ColorDrawable) mBackground).getColor();
+        }
+        return 0;
+    }
+
+    /**
      * Set the background to a given resource. The resource should refer to
      * a Drawable object or 0 to remove the background.
      * @param resid The identifier of the resource.
