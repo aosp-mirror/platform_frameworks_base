@@ -13,8 +13,8 @@ import javax.swing.text.Segment;
 
 /**
  * Delegate that provides implementation for native methods in {@link android.text.StaticLayout}
- *
- * Through the layoutlib_create tool, selected methods of Handler have been replaced
+ * <p/>
+ * Through the layoutlib_create tool, selected methods of StaticLayout have been replaced
  * by calls to methods of the same name in this delegate class.
  *
  */
