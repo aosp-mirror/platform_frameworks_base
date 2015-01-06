@@ -167,6 +167,11 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public boolean getDither() {
+        return mDrawableContainerState.mDither;
+    }
+
+    @Override
     public void setColorFilter(ColorFilter cf) {
         mDrawableContainerState.mHasColorFilter = (cf != null);
 

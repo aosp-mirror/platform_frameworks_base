@@ -11699,6 +11699,8 @@ package android.graphics.drawable {
     method public android.graphics.drawable.Drawable.ConstantState getConstantState();
     method public android.graphics.drawable.Drawable getCurrent();
     method public android.graphics.Rect getDirtyBounds();
+    method public boolean getDither();
+    method public boolean getFilterBitmap();
     method public int getIntrinsicHeight();
     method public int getIntrinsicWidth();
     method public final int getLevel();

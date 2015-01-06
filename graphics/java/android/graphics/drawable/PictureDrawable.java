@@ -88,12 +88,6 @@ public class PictureDrawable extends Drawable {
     }
 
     @Override
-    public void setFilterBitmap(boolean filter) {}
-
-    @Override
-    public void setDither(boolean dither) {}
-
-    @Override
     public void setColorFilter(ColorFilter colorFilter) {}
 
     @Override
