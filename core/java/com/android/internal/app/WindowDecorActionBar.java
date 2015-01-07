@@ -993,6 +993,13 @@ public class WindowDecorActionBar extends ActionBar implements
 
         @Override
         public void invalidate() {
+            if (mActionMode != this) {
+                // Not the active action mode - no-op. It's possible we are
+                // currently deferring onDestroy, so the app doesn't yet know we
+                // are going away and is trying to use us. That's also a no-op.
+                return;
+            }
+
             mMenu.stopDispatchingItemsChanged();
             try {
                 mCallback.onPrepareActionMode(this, mMenu);
