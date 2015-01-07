@@ -264,6 +264,7 @@ private:
     class NotifyHandler : public MessageHandler {
     public:
         NotifyHandler(JTvInputHal* hal, const tv_input_event_t* event);
+        ~NotifyHandler();
 
         virtual void handleMessage(const Message& message);
 
@@ -276,6 +277,9 @@ private:
 
     static void notify(
             tv_input_device_t* dev, tv_input_event_t* event, void* data);
+
+    static void cloneTvInputEvent(
+            tv_input_event_t* dstEvent, const tv_input_event_t* srcEvent);
 
     Mutex mLock;
     jweak mThiz;
@@ -447,6 +451,20 @@ void JTvInputHal::notify(
     thiz->mLooper->sendMessage(new NotifyHandler(thiz, event), event->type);
 }
 
+// static
+void JTvInputHal::cloneTvInputEvent(
+        tv_input_event_t* dstEvent, const tv_input_event_t* srcEvent) {
+    memcpy(dstEvent, srcEvent, sizeof(tv_input_event_t));
+    if ((srcEvent->type == TV_INPUT_EVENT_DEVICE_AVAILABLE ||
+            srcEvent->type == TV_INPUT_EVENT_DEVICE_UNAVAILABLE ||
+            srcEvent->type == TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED) &&
+            srcEvent->device_info.audio_address != NULL){
+        char* audio_address = new char[strlen(srcEvent->device_info.audio_address) + 1];
+        strcpy(audio_address, srcEvent->device_info.audio_address);
+        dstEvent->device_info.audio_address = audio_address;
+    }
+}
+
 void JTvInputHal::onDeviceAvailable(const tv_input_device_info_t& info) {
     {
         Mutex::Autolock autoLock(&mLock);
@@ -543,7 +561,16 @@ void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succ
 
 JTvInputHal::NotifyHandler::NotifyHandler(JTvInputHal* hal, const tv_input_event_t* event) {
     mHal = hal;
-    memcpy(&mEvent, event, sizeof(mEvent));
+    cloneTvInputEvent(&mEvent, event);
+}
+
+JTvInputHal::NotifyHandler::~NotifyHandler() {
+    if ((mEvent.type == TV_INPUT_EVENT_DEVICE_AVAILABLE ||
+            mEvent.type == TV_INPUT_EVENT_DEVICE_UNAVAILABLE ||
+            mEvent.type == TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED) &&
+            mEvent.device_info.audio_address != NULL) {
+        delete mEvent.device_info.audio_address;
+    }
 }
 
 void JTvInputHal::NotifyHandler::handleMessage(const Message& message) {
