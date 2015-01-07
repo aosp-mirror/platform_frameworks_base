@@ -76,7 +76,10 @@ public class Main {
 
     private static final String PLATFORM_DIR;
     private static final String TEST_RES_DIR;
-    private static final String APP_TEST_RES = "/testApp/MyApplication/src/main/res";
+    /** Location of the app to test inside {@link #TEST_RES_DIR}*/
+    private static final String APP_TEST_DIR = "/testApp/MyApplication";
+    /** Location of the app's res dir inside {@link #TEST_RES_DIR}*/
+    private static final String APP_TEST_RES = APP_TEST_DIR + "/src/main/res";
 
     private LayoutLog mLayoutLibLog;
     private FrameworkResources mFrameworkRepo;
@@ -281,10 +284,9 @@ public class Main {
             getLogger().error(session.getResult().getException(),
                     session.getResult().getErrorMessage());
         }
-        String goldenDataDir = APP_TEST_RES + "/../../../golden/";
         try {
-            goldenDataDir = new File(goldenDataDir).getAbsolutePath();
-            ImageUtils.requireSimilar(goldenDataDir + "activity.png", session.getImage());
+            String goldenImagePath = APP_TEST_DIR + "/golden/activity.png";
+            ImageUtils.requireSimilar(goldenImagePath, session.getImage());
         } catch (IOException e) {
             getLogger().error(e, e.getMessage());
         }
