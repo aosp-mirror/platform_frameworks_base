@@ -1251,7 +1251,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         } catch(IllegalArgumentException ex) {
             Log.w(TAG, "Unknown sim state: " + simState);
             state = State.UNKNOWN;
-	}
+        }
         mSimDatas.put(subId, new SimData(state, slotId, subId));
     }
 
