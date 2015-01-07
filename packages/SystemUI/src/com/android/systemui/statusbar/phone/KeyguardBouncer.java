@@ -29,7 +29,7 @@ import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 
-import static com.android.keyguard.KeyguardHostView.OnDismissAction;
+import static com.android.keyguard.KeyguardViewBase.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
 /**
