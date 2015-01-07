@@ -702,6 +702,11 @@ public class SyncManager {
         }
 
         for (AccountAndUser account : accounts) {
+            // If userId is specified, do not sync accounts of other users
+            if (userId >= UserHandle.USER_OWNER && account.userId >= UserHandle.USER_OWNER
+                    && userId != account.userId) {
+                continue;
+            }
             // Compile a list of authorities that have sync adapters.
             // For each authority sync each account that matches a sync adapter.
             final HashSet<String> syncableAuthorities = new HashSet<String>();
