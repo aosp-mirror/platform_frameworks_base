@@ -32,7 +32,7 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.AttributeSet;
 import android.util.IntArray;
-import android.util.MathUtils;
+import android.util.StateSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -44,7 +44,6 @@ import com.android.internal.widget.ExploreByTouchHelper;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Formatter;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -52,8 +51,7 @@ import java.util.Locale;
  * within the specified month.
  */
 class SimpleMonthView extends View {
-    private static final int DEFAULT_HEIGHT = 32;
-    private static final int MIN_HEIGHT = 10;
+    private static final int MIN_ROW_HEIGHT = 10;
 
     private static final int DEFAULT_SELECTED_DAY = -1;
     private static final int DEFAULT_WEEK_START = Calendar.SUNDAY;
@@ -61,18 +59,21 @@ class SimpleMonthView extends View {
     private static final int DEFAULT_NUM_ROWS = 6;
     private static final int MAX_NUM_ROWS = 6;
 
-    private static final int SELECTED_CIRCLE_ALPHA = 60;
-
     private static final int DAY_SEPARATOR_WIDTH = 1;
 
     private final Formatter mFormatter;
     private final StringBuilder mStringBuilder;
 
-    private final int mMiniDayNumberTextSize;
-    private final int mMonthLabelTextSize;
-    private final int mMonthDayLabelTextSize;
-    private final int mMonthHeaderSize;
-    private final int mDaySelectedCircleSize;
+    private final int mMonthTextSize;
+    private final int mDayOfWeekTextSize;
+    private final int mDayTextSize;
+
+    private final int mMonthHeaderHeight;
+
+    private final Paint mMonthPaint = new Paint();
+    private final Paint mDayOfWeekPaint = new Paint();
+    private final Paint mDayPaint = new Paint();
+    private final Paint mDayBackgroundPaint = new Paint();
 
     /** Single-letter (when available) formatter for the day of week label. */
     private SimpleDateFormat mDayFormatter = new SimpleDateFormat("EEEEE", Locale.getDefault());
@@ -81,14 +82,7 @@ class SimpleMonthView extends View {
     private int mPadding = 0;
 
     private String mDayOfWeekTypeface;
-    private String mMonthTitleTypeface;
-
-    private Paint mDayNumberPaint;
-    private Paint mDayNumberDisabledPaint;
-    private Paint mDayNumberSelectedPaint;
-
-    private Paint mMonthTitlePaint;
-    private Paint mMonthDayLabelPaint;
+    private String mMonthTypeface;
 
     private int mMonth;
     private int mYear;
@@ -97,13 +91,13 @@ class SimpleMonthView extends View {
     private int mWidth;
 
     // The height this view should draw at in pixels, set by height param
-    private int mRowHeight = DEFAULT_HEIGHT;
+    private final int mRowHeight;
 
     // If this view contains the today
     private boolean mHasToday = false;
 
     // Which day is selected [0-6] or -1 if no day is selected
-    private int mSelectedDay = -1;
+    private int mActivatedDay = -1;
 
     // Which day is today [0-6] or -1 if no day is today
     private int mToday = DEFAULT_SELECTED_DAY;
@@ -142,6 +136,8 @@ class SimpleMonthView extends View {
     private int mDisabledTextColor;
     private int mSelectedDayColor;
 
+    private ColorStateList mDayTextColor;
+
     public SimpleMonthView(Context context) {
         this(context, null);
     }
@@ -159,22 +155,21 @@ class SimpleMonthView extends View {
 
         final Resources res = context.getResources();
         mDayOfWeekTypeface = res.getString(R.string.day_of_week_label_typeface);
-        mMonthTitleTypeface = res.getString(R.string.sans_serif);
+        mMonthTypeface = res.getString(R.string.sans_serif);
 
         mStringBuilder = new StringBuilder(50);
         mFormatter = new Formatter(mStringBuilder, Locale.getDefault());
 
-        mMiniDayNumberTextSize = res.getDimensionPixelSize(R.dimen.datepicker_day_number_size);
-        mMonthLabelTextSize = res.getDimensionPixelSize(R.dimen.datepicker_month_label_size);
-        mMonthDayLabelTextSize = res.getDimensionPixelSize(
+        mDayTextSize = res.getDimensionPixelSize(R.dimen.datepicker_day_number_size);
+        mMonthTextSize = res.getDimensionPixelSize(R.dimen.datepicker_month_label_size);
+        mDayOfWeekTextSize = res.getDimensionPixelSize(
                 R.dimen.datepicker_month_day_label_text_size);
-        mMonthHeaderSize = res.getDimensionPixelOffset(
+        mMonthHeaderHeight = res.getDimensionPixelOffset(
                 R.dimen.datepicker_month_list_item_header_height);
-        mDaySelectedCircleSize = res.getDimensionPixelSize(
-                R.dimen.datepicker_day_number_select_circle_radius);
 
-        mRowHeight = (res.getDimensionPixelOffset(R.dimen.datepicker_view_animator_height)
-                - mMonthHeaderSize) / MAX_NUM_ROWS;
+        mRowHeight = Math.max(MIN_ROW_HEIGHT,
+                (res.getDimensionPixelOffset(R.dimen.datepicker_view_animator_height)
+                        - mMonthHeaderHeight) / MAX_NUM_ROWS);
 
         // Set up accessibility components.
         mTouchHelper = new MonthViewTouchHelper(this);
@@ -182,8 +177,32 @@ class SimpleMonthView extends View {
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
         mLockAccessibilityDelegate = true;
 
-        // Sets up any standard paints that will be used
-        initView();
+        initPaints();
+    }
+
+    /**
+     * Sets up the text and style properties for painting.
+     */
+    private void initPaints() {
+        mMonthPaint.setAntiAlias(true);
+        mMonthPaint.setTextSize(mMonthTextSize);
+        mMonthPaint.setTypeface(Typeface.create(mMonthTypeface, Typeface.BOLD));
+        mMonthPaint.setTextAlign(Align.CENTER);
+        mMonthPaint.setStyle(Style.FILL);
+
+        mDayOfWeekPaint.setAntiAlias(true);
+        mDayOfWeekPaint.setTextSize(mDayOfWeekTextSize);
+        mDayOfWeekPaint.setTypeface(Typeface.create(mDayOfWeekTypeface, Typeface.BOLD));
+        mDayOfWeekPaint.setTextAlign(Align.CENTER);
+        mDayOfWeekPaint.setStyle(Style.FILL);
+
+        mDayBackgroundPaint.setAntiAlias(true);
+        mDayBackgroundPaint.setStyle(Style.FILL);
+
+        mDayPaint.setAntiAlias(true);
+        mDayPaint.setTextSize(mDayTextSize);
+        mDayPaint.setTextAlign(Align.CENTER);
+        mDayPaint.setStyle(Style.FILL);
     }
 
     @Override
@@ -193,22 +212,28 @@ class SimpleMonthView extends View {
         mDayFormatter = new SimpleDateFormat("EEEEE", newConfig.locale);
     }
 
-    void setTextColor(ColorStateList colors) {
-        final Resources res = getContext().getResources();
+    void setMonthTextColor(ColorStateList monthTextColor) {
+        final int enabledColor = monthTextColor.getColorForState(ENABLED_STATE_SET, 0);
+        mMonthPaint.setColor(enabledColor);
+        invalidate();
+    }
 
-        mNormalTextColor = colors.getColorForState(ENABLED_STATE_SET,
-                res.getColor(R.color.datepicker_default_normal_text_color_holo_light));
-        mMonthTitlePaint.setColor(mNormalTextColor);
-        mMonthDayLabelPaint.setColor(mNormalTextColor);
+    void setDayOfWeekTextColor(ColorStateList dayOfWeekTextColor) {
+        final int enabledColor = dayOfWeekTextColor.getColorForState(ENABLED_STATE_SET, 0);
+        mDayOfWeekPaint.setColor(enabledColor);
+        invalidate();
+    }
 
-        mDisabledTextColor = colors.getColorForState(EMPTY_STATE_SET,
-                res.getColor(R.color.datepicker_default_disabled_text_color_holo_light));
-        mDayNumberDisabledPaint.setColor(mDisabledTextColor);
+    void setDayTextColor(ColorStateList dayTextColor) {
+        mDayTextColor = dayTextColor;
+        invalidate();
+    }
 
-        mSelectedDayColor = colors.getColorForState(ENABLED_SELECTED_STATE_SET,
-                res.getColor(R.color.holo_blue_light));
-        mDayNumberSelectedPaint.setColor(mSelectedDayColor);
-        mDayNumberSelectedPaint.setAlpha(SELECTED_CIRCLE_ALPHA);
+    void setDayBackgroundColor(ColorStateList daySelectorColor) {
+        final int activatedColor = daySelectorColor.getColorForState(
+                StateSet.get(StateSet.VIEW_STATE_ENABLED | StateSet.VIEW_STATE_ACTIVATED), 0);
+        mDayBackgroundPaint.setColor(activatedColor);
+        invalidate();
     }
 
     @Override
@@ -246,52 +271,6 @@ class SimpleMonthView extends View {
         return true;
     }
 
-    /**
-     * Sets up the text and style properties for painting.
-     */
-    private void initView() {
-        mMonthTitlePaint = new Paint();
-        mMonthTitlePaint.setAntiAlias(true);
-        mMonthTitlePaint.setColor(mNormalTextColor);
-        mMonthTitlePaint.setTextSize(mMonthLabelTextSize);
-        mMonthTitlePaint.setTypeface(Typeface.create(mMonthTitleTypeface, Typeface.BOLD));
-        mMonthTitlePaint.setTextAlign(Align.CENTER);
-        mMonthTitlePaint.setStyle(Style.FILL);
-        mMonthTitlePaint.setFakeBoldText(true);
-
-        mMonthDayLabelPaint = new Paint();
-        mMonthDayLabelPaint.setAntiAlias(true);
-        mMonthDayLabelPaint.setColor(mNormalTextColor);
-        mMonthDayLabelPaint.setTextSize(mMonthDayLabelTextSize);
-        mMonthDayLabelPaint.setTypeface(Typeface.create(mDayOfWeekTypeface, Typeface.NORMAL));
-        mMonthDayLabelPaint.setTextAlign(Align.CENTER);
-        mMonthDayLabelPaint.setStyle(Style.FILL);
-        mMonthDayLabelPaint.setFakeBoldText(true);
-
-        mDayNumberSelectedPaint = new Paint();
-        mDayNumberSelectedPaint.setAntiAlias(true);
-        mDayNumberSelectedPaint.setColor(mSelectedDayColor);
-        mDayNumberSelectedPaint.setAlpha(SELECTED_CIRCLE_ALPHA);
-        mDayNumberSelectedPaint.setTextAlign(Align.CENTER);
-        mDayNumberSelectedPaint.setStyle(Style.FILL);
-        mDayNumberSelectedPaint.setFakeBoldText(true);
-
-        mDayNumberPaint = new Paint();
-        mDayNumberPaint.setAntiAlias(true);
-        mDayNumberPaint.setTextSize(mMiniDayNumberTextSize);
-        mDayNumberPaint.setTextAlign(Align.CENTER);
-        mDayNumberPaint.setStyle(Style.FILL);
-        mDayNumberPaint.setFakeBoldText(false);
-
-        mDayNumberDisabledPaint = new Paint();
-        mDayNumberDisabledPaint.setAntiAlias(true);
-        mDayNumberDisabledPaint.setColor(mDisabledTextColor);
-        mDayNumberDisabledPaint.setTextSize(mMiniDayNumberTextSize);
-        mDayNumberDisabledPaint.setTextAlign(Align.CENTER);
-        mDayNumberDisabledPaint.setStyle(Style.FILL);
-        mDayNumberDisabledPaint.setFakeBoldText(false);
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         drawMonthTitle(canvas);
@@ -323,11 +302,7 @@ class SimpleMonthView extends View {
      */
     void setMonthParams(int selectedDay, int month, int year, int weekStart, int enabledDayStart,
             int enabledDayEnd) {
-        if (mRowHeight < MIN_HEIGHT) {
-            mRowHeight = MIN_HEIGHT;
-        }
-
-        mSelectedDay = selectedDay;
+        mActivatedDay = selectedDay;
 
         if (isValidMonth(month)) {
             mMonth = month;
@@ -415,7 +390,7 @@ class SimpleMonthView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), mRowHeight * mNumRows
-                + mMonthHeaderSize);
+                + mMonthHeaderHeight);
     }
 
     @Override
@@ -437,12 +412,12 @@ class SimpleMonthView extends View {
 
     private void drawMonthTitle(Canvas canvas) {
         final float x = (mWidth + 2 * mPadding) / 2f;
-        final float y = (mMonthHeaderSize - mMonthDayLabelTextSize) / 2f;
-        canvas.drawText(getMonthAndYearString(), x, y, mMonthTitlePaint);
+        final float y = (mMonthHeaderHeight - mDayOfWeekTextSize) / 2f;
+        canvas.drawText(getMonthAndYearString(), x, y, mMonthPaint);
     }
 
     private void drawWeekDayLabels(Canvas canvas) {
-        final int y = mMonthHeaderSize - (mMonthDayLabelTextSize / 2);
+        final int y = mMonthHeaderHeight - (mDayOfWeekTextSize / 2);
         final int dayWidthHalf = (mWidth - mPadding * 2) / (mNumDays * 2);
 
         for (int i = 0; i < mNumDays; i++) {
@@ -451,7 +426,7 @@ class SimpleMonthView extends View {
 
             final String dayLabel = mDayFormatter.format(mDayLabelCalendar.getTime());
             final int x = (2 * i + 1) * dayWidthHalf + mPadding;
-            canvas.drawText(dayLabel, x, y, mMonthDayLabelPaint);
+            canvas.drawText(dayLabel, x, y, mDayOfWeekPaint);
         }
     }
 
@@ -459,26 +434,37 @@ class SimpleMonthView extends View {
      * Draws the month days.
      */
     private void drawDays(Canvas canvas) {
-        int y = (((mRowHeight + mMiniDayNumberTextSize) / 2) - DAY_SEPARATOR_WIDTH)
-                + mMonthHeaderSize;
-        int dayWidthHalf = (mWidth - mPadding * 2) / (mNumDays * 2);
+        final int dayWidthHalf = (mWidth - mPadding * 2) / (mNumDays * 2);
+        int y = (((mRowHeight + mDayTextSize) / 2) - DAY_SEPARATOR_WIDTH)
+                + mMonthHeaderHeight;
         int j = findDayOffset();
+
         for (int day = 1; day <= mNumCells; day++) {
-            int x = (2 * j + 1) * dayWidthHalf + mPadding;
-            if (mSelectedDay == day) {
-                canvas.drawCircle(x, y - (mMiniDayNumberTextSize / 3), mDaySelectedCircleSize,
-                        mDayNumberSelectedPaint);
+            final int x = (2 * j + 1) * dayWidthHalf + mPadding;
+            int stateMask = 0;
+
+            if (day >= mEnabledDayStart && day <= mEnabledDayEnd) {
+                stateMask |= StateSet.VIEW_STATE_ENABLED;
             }
 
-            if (mHasToday && mToday == day) {
-                mDayNumberPaint.setColor(mSelectedDayColor);
-            } else {
-                mDayNumberPaint.setColor(mNormalTextColor);
+            if (mActivatedDay == day) {
+                stateMask |= StateSet.VIEW_STATE_ACTIVATED;
+
+                canvas.drawCircle(x, y - (mDayTextSize / 3), mRowHeight / 2,
+                        mDayBackgroundPaint);
             }
-            final Paint paint = (day < mEnabledDayStart || day > mEnabledDayEnd) ?
-                    mDayNumberDisabledPaint : mDayNumberPaint;
-            canvas.drawText(String.format("%d", day), x, y, paint);
+
+            final int[] stateSet = StateSet.get(stateMask);
+            final int dayTextColor = mDayTextColor.getColorForState(stateSet, 0);
+            mDayPaint.setColor(dayTextColor);
+
+            final boolean isDayToday = mHasToday && mToday == day;
+            mDayPaint.setFakeBoldText(isDayToday);
+
+            canvas.drawText(String.format("%d", day), x, y, mDayPaint);
+
             j++;
+
             if (j == mNumDays) {
                 j = 0;
                 y += mRowHeight;
@@ -504,7 +490,7 @@ class SimpleMonthView extends View {
             return -1;
         }
         // Selection is (x - start) / (pixels/day) == (x -s) * day / pixels
-        int row = (int) (y - mMonthHeaderSize) / mRowHeight;
+        int row = (int) (y - mMonthHeaderHeight) / mRowHeight;
         int column = (int) ((x - dayStart) * mNumDays / (mWidth - dayStart - mPadding));
 
         int day = column - findDayOffset() + 1;
@@ -628,7 +614,7 @@ class SimpleMonthView extends View {
             node.setBoundsInParent(mTempRect);
             node.addAction(AccessibilityNodeInfo.ACTION_CLICK);
 
-            if (virtualViewId == mSelectedDay) {
+            if (virtualViewId == mActivatedDay) {
                 node.setSelected(true);
             }
 
@@ -654,7 +640,7 @@ class SimpleMonthView extends View {
          */
         private void getItemBounds(int day, Rect rect) {
             final int offsetX = mPadding;
-            final int offsetY = mMonthHeaderSize;
+            final int offsetY = mMonthHeaderHeight;
             final int cellHeight = mRowHeight;
             final int cellWidth = ((mWidth - (2 * mPadding)) / mNumDays);
             final int index = ((day - 1) + findDayOffset());
@@ -679,7 +665,7 @@ class SimpleMonthView extends View {
             final CharSequence date = DateFormat.format(DATE_FORMAT,
                     mTempCalendar.getTimeInMillis());
 
-            if (day == mSelectedDay) {
+            if (day == mActivatedDay) {
                 return getContext().getString(R.string.item_is_selected, date);
             }
 

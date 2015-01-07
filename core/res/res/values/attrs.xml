@@ -4434,10 +4434,8 @@
         <attr name="yearListSelectorColor" format="color" />
         <!-- The text color list of the calendar. -->
         <attr name="calendarTextColor" format="color" />
-        <!-- @hide The selected text color for the calendar. Used as a backup
-             if the text color does not explicitly have a color set for the
-             selected state. -->
-        <attr name="calendarSelectedTextColor" format="color" />
+        <!-- @hide The activated background color for the calendar. -->
+        <attr name="calendarDayBackgroundColor" format="color" />
         <!-- Defines the look of the widget. Prior to the L release, the only choice was
              spinner. As of L, with the Material theme selected, the default layout is calendar,
              but this attribute can be used to force spinner to be used instead. -->

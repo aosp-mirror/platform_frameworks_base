@@ -305,6 +305,10 @@ class DayPickerView extends ListView implements AbsListView.OnScrollListener {
         mAdapter.setCalendarTextColor(colors);
     }
 
+    void setCalendarDayBackgroundColor(ColorStateList dayBackgroundColor) {
+        mAdapter.setCalendarDayBackgroundColor(dayBackgroundColor);
+    }
+
     void setCalendarTextAppearance(int resId) {
         mAdapter.setCalendarTextAppearance(resId);
     }

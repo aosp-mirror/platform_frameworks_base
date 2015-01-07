@@ -39,6 +39,7 @@ class SimpleMonthAdapter extends BaseAdapter {
 
     private Calendar mSelectedDay = Calendar.getInstance();
     private ColorStateList mCalendarTextColors = ColorStateList.valueOf(Color.BLACK);
+    private ColorStateList mCalendarDayBackgroundColor = ColorStateList.valueOf(Color.MAGENTA);
     private OnDaySelectedListener mOnDaySelectedListener;
 
     private int mFirstDayOfWeek;
@@ -86,6 +87,10 @@ class SimpleMonthAdapter extends BaseAdapter {
 
     void setCalendarTextColor(ColorStateList colors) {
         mCalendarTextColors = colors;
+    }
+
+    void setCalendarDayBackgroundColor(ColorStateList dayBackgroundColor) {
+        mCalendarDayBackgroundColor = dayBackgroundColor;
     }
 
     /**
@@ -144,9 +149,11 @@ class SimpleMonthAdapter extends BaseAdapter {
             v.setClickable(true);
             v.setOnDayClickListener(mOnDayClickListener);
 
-            if (mCalendarTextColors != null) {
-                v.setTextColor(mCalendarTextColors);
-            }
+            v.setMonthTextColor(mCalendarTextColors);
+            v.setDayOfWeekTextColor(mCalendarTextColors);
+            v.setDayTextColor(mCalendarTextColors);
+
+            v.setDayBackgroundColor(mCalendarDayBackgroundColor);
         }
 
         final int minMonth = mMinDate.get(Calendar.MONTH);
