@@ -168,10 +168,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
      */
     @Override
     public void finish() {
-        // If the alternate unlock was suppressed, it can now be safely
-        // enabled because the user has left keyguard.
-        KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
-
         // If there's a pending runnable because the user interacted with a widget
         // and we're leaving keyguard, then run it.
         boolean deferKeyguardDone = false;
@@ -207,9 +203,6 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
     public void onPause() {
         if (DEBUG) Log.d(TAG, String.format("screen off, instance %s at %s",
                 Integer.toHexString(hashCode()), SystemClock.uptimeMillis()));
-        // Once the screen turns off, we no longer consider this to be first boot and we want the
-        // biometric unlock to start next time keyguard is shown.
-        KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
         mSecurityContainer.showPrimarySecurityScreen(true);
         mSecurityContainer.onPause();
         clearFocus();

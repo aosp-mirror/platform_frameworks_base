@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -178,6 +179,31 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // No need to move the password / pattern files. They're already in the right place.
                 setString("migrated_user_specific", "true", 0);
                 Slog.i(TAG, "Migrated per-user lock settings to new location");
+            }
+
+            // Migrates biometric weak such that the fallback mechanism becomes the primary.
+            if (getString("migrated_biometric_weak", null, 0) == null) {
+                final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+                List<UserInfo> users = um.getUsers();
+                for (int i = 0; i < users.size(); i++) {
+                    int userId = users.get(i).id;
+                    long type = getLong(LockPatternUtils.PASSWORD_TYPE_KEY,
+                            DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
+                            userId);
+                    long alternateType = getLong(LockPatternUtils.PASSWORD_TYPE_ALTERNATE_KEY,
+                            DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
+                            userId);
+                    if (type == DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK) {
+                        setLong(LockPatternUtils.PASSWORD_TYPE_KEY,
+                                alternateType,
+                                userId);
+                    }
+                    setLong(LockPatternUtils.PASSWORD_TYPE_ALTERNATE_KEY,
+                            DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED,
+                            userId);
+                }
+                setString("migrated_biometric_weak", "true", 0);
+                Slog.i(TAG, "Migrated biometric weak to use the fallback instead");
             }
         } catch (RemoteException re) {
             Slog.e(TAG, "Unable to migrate old data", re);

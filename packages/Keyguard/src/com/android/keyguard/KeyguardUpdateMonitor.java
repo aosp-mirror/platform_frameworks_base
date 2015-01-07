@@ -86,7 +86,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final String TAG = "KeyguardUpdateMonitor";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
-    private static final int FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP = 3;
     private static final int LOW_BATTERY_THRESHOLD = 20;
 
     private static final String ACTION_FACE_UNLOCK_STARTED
@@ -139,9 +138,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     // Password attempts
     private int mFailedAttempts = 0;
-    private int mFailedBiometricUnlockAttempts = 0;
-
-    private boolean mAlternateUnlockEnabled;
 
     private boolean mClockVisible;
 
@@ -1181,7 +1177,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public void clearFailedUnlockAttempts() {
         mFailedAttempts = 0;
-        mFailedBiometricUnlockAttempts = 0;
     }
 
     public void clearFingerprintRecognized() {
@@ -1198,22 +1193,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public int getPhoneState() {
         return mPhoneState;
-    }
-
-    public void reportFailedBiometricUnlockAttempt() {
-        mFailedBiometricUnlockAttempts++;
-    }
-
-    public boolean getMaxBiometricUnlockAttemptsReached() {
-        return mFailedBiometricUnlockAttempts >= FAILED_BIOMETRIC_UNLOCK_ATTEMPTS_BEFORE_BACKUP;
-    }
-
-    public boolean isAlternateUnlockEnabled() {
-        return mAlternateUnlockEnabled;
-    }
-
-    public void setAlternateUnlockEnabled(boolean enabled) {
-        mAlternateUnlockEnabled = enabled;
     }
 
     public boolean isSimPinVoiceSecure() {

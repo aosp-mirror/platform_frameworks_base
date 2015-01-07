@@ -313,9 +313,6 @@ public class KeyguardViewMediator extends SystemUI {
                 resetKeyguardDonePendingLocked();
                 resetStateLocked();
                 adjustStatusBarLocked();
-                // When we switch users we want to bring the new user to the biometric unlock even
-                // if the current user has gone to the backup.
-                KeyguardUpdateMonitor.getInstance(mContext).setAlternateUnlockEnabled(true);
             }
         }
 
@@ -588,23 +585,6 @@ public class KeyguardViewMediator extends SystemUI {
             if (DEBUG) Log.d(TAG, "onSystemReady");
             mSystemReady = true;
             mUpdateMonitor.registerCallback(mUpdateCallback);
-
-            // Suppress biometric unlock right after boot until things have settled if it is the
-            // selected security method, otherwise unsuppress it.  It must be unsuppressed if it is
-            // not the selected security method for the following reason:  if the user starts
-            // without a screen lock selected, the biometric unlock would be suppressed the first
-            // time they try to use it.
-            //
-            // Note that the biometric unlock will still not show if it is not the selected method.
-            // Calling setAlternateUnlockEnabled(true) simply says don't suppress it if it is the
-            // selected method.
-            if (mLockPatternUtils.usingBiometricWeak()
-                    && mLockPatternUtils.isBiometricWeakInstalled()) {
-                if (DEBUG) Log.d(TAG, "suppressing biometric unlock during boot");
-                mUpdateMonitor.setAlternateUnlockEnabled(false);
-            } else {
-                mUpdateMonitor.setAlternateUnlockEnabled(true);
-            }
 
             doKeyguardLocked(null);
         }
