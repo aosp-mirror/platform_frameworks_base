@@ -90,23 +90,11 @@ public class DemoStatusIcons extends LinearLayout implements DemoMode {
                         : 0;
                 updateSlot("alarm_clock", null, iconId);
             }
-            String sync = args.getString("sync");
-            if (sync != null) {
-                int iconId = sync.equals("show") ? R.drawable.stat_sys_sync
-                        : 0;
-                updateSlot("sync_active", null, iconId);
-            }
             String tty = args.getString("tty");
             if (tty != null) {
                 int iconId = tty.equals("show") ? R.drawable.stat_sys_tty_mode
                         : 0;
                 updateSlot("tty", null, iconId);
-            }
-            String eri = args.getString("eri");
-            if (eri != null) {
-                int iconId = eri.equals("show") ? R.drawable.stat_sys_roaming_cdma_0
-                        : 0;
-                updateSlot("cdma_eri", null, iconId);
             }
             String mute = args.getString("mute");
             if (mute != null) {
