@@ -66,6 +66,7 @@ import android.util.LongSparseLongArray;
 import android.util.Pools.SynchronizedPool;
 import android.util.Property;
 import android.util.SparseArray;
+import android.util.StateSet;
 import android.util.SuperNotCalledException;
 import android.util.TypedValue;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -1438,140 +1439,87 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
 
-    /**
-     * The order here is very important to {@link #getDrawableState()}
-     */
-    private static final int[][] VIEW_STATE_SETS;
-
-    static final int VIEW_STATE_WINDOW_FOCUSED = 1;
-    static final int VIEW_STATE_SELECTED = 1 << 1;
-    static final int VIEW_STATE_FOCUSED = 1 << 2;
-    static final int VIEW_STATE_ENABLED = 1 << 3;
-    static final int VIEW_STATE_PRESSED = 1 << 4;
-    static final int VIEW_STATE_ACTIVATED = 1 << 5;
-    static final int VIEW_STATE_ACCELERATED = 1 << 6;
-    static final int VIEW_STATE_HOVERED = 1 << 7;
-    static final int VIEW_STATE_DRAG_CAN_ACCEPT = 1 << 8;
-    static final int VIEW_STATE_DRAG_HOVERED = 1 << 9;
-
-    static final int[] VIEW_STATE_IDS = new int[] {
-        R.attr.state_window_focused,    VIEW_STATE_WINDOW_FOCUSED,
-        R.attr.state_selected,          VIEW_STATE_SELECTED,
-        R.attr.state_focused,           VIEW_STATE_FOCUSED,
-        R.attr.state_enabled,           VIEW_STATE_ENABLED,
-        R.attr.state_pressed,           VIEW_STATE_PRESSED,
-        R.attr.state_activated,         VIEW_STATE_ACTIVATED,
-        R.attr.state_accelerated,       VIEW_STATE_ACCELERATED,
-        R.attr.state_hovered,           VIEW_STATE_HOVERED,
-        R.attr.state_drag_can_accept,   VIEW_STATE_DRAG_CAN_ACCEPT,
-        R.attr.state_drag_hovered,      VIEW_STATE_DRAG_HOVERED
-    };
-
     static {
-        if ((VIEW_STATE_IDS.length/2) != R.styleable.ViewDrawableStates.length) {
-            throw new IllegalStateException(
-                    "VIEW_STATE_IDs array length does not match ViewDrawableStates style array");
-        }
-        int[] orderedIds = new int[VIEW_STATE_IDS.length];
-        for (int i = 0; i < R.styleable.ViewDrawableStates.length; i++) {
-            int viewState = R.styleable.ViewDrawableStates[i];
-            for (int j = 0; j<VIEW_STATE_IDS.length; j += 2) {
-                if (VIEW_STATE_IDS[j] == viewState) {
-                    orderedIds[i * 2] = viewState;
-                    orderedIds[i * 2 + 1] = VIEW_STATE_IDS[j + 1];
-                }
-            }
-        }
-        final int NUM_BITS = VIEW_STATE_IDS.length / 2;
-        VIEW_STATE_SETS = new int[1 << NUM_BITS][];
-        for (int i = 0; i < VIEW_STATE_SETS.length; i++) {
-            int numBits = Integer.bitCount(i);
-            int[] set = new int[numBits];
-            int pos = 0;
-            for (int j = 0; j < orderedIds.length; j += 2) {
-                if ((i & orderedIds[j+1]) != 0) {
-                    set[pos++] = orderedIds[j];
-                }
-            }
-            VIEW_STATE_SETS[i] = set;
-        }
+        EMPTY_STATE_SET = StateSet.get(0);
 
-        EMPTY_STATE_SET = VIEW_STATE_SETS[0];
-        WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_WINDOW_FOCUSED];
-        SELECTED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_SELECTED];
-        SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED];
-        FOCUSED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_FOCUSED];
-        FOCUSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_FOCUSED];
-        FOCUSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_SELECTED | VIEW_STATE_FOCUSED];
-        FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
-                | VIEW_STATE_FOCUSED];
-        ENABLED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_ENABLED];
-        ENABLED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_ENABLED];
-        ENABLED_SELECTED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_SELECTED | VIEW_STATE_ENABLED];
-        ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
-                | VIEW_STATE_ENABLED];
-        ENABLED_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_FOCUSED | VIEW_STATE_ENABLED];
-        ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_FOCUSED
-                | VIEW_STATE_ENABLED];
-        ENABLED_FOCUSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_SELECTED | VIEW_STATE_FOCUSED
-                | VIEW_STATE_ENABLED];
-        ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
-                | VIEW_STATE_FOCUSED| VIEW_STATE_ENABLED];
+        WINDOW_FOCUSED_STATE_SET = StateSet.get(StateSet.VIEW_STATE_WINDOW_FOCUSED);
 
-        PRESSED_STATE_SET = VIEW_STATE_SETS[VIEW_STATE_PRESSED];
-        PRESSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_PRESSED];
-        PRESSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_SELECTED | VIEW_STATE_PRESSED];
-        PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
-                | VIEW_STATE_PRESSED];
-        PRESSED_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_FOCUSED | VIEW_STATE_PRESSED];
-        PRESSED_FOCUSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_FOCUSED
-                | VIEW_STATE_PRESSED];
-        PRESSED_FOCUSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_SELECTED | VIEW_STATE_FOCUSED
-                | VIEW_STATE_PRESSED];
-        PRESSED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
-                | VIEW_STATE_FOCUSED | VIEW_STATE_PRESSED];
-        PRESSED_ENABLED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_ENABLED | VIEW_STATE_PRESSED];
-        PRESSED_ENABLED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_ENABLED
-                | VIEW_STATE_PRESSED];
-        PRESSED_ENABLED_SELECTED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_SELECTED | VIEW_STATE_ENABLED
-                | VIEW_STATE_PRESSED];
-        PRESSED_ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
-                | VIEW_STATE_ENABLED | VIEW_STATE_PRESSED];
-        PRESSED_ENABLED_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_FOCUSED | VIEW_STATE_ENABLED
-                | VIEW_STATE_PRESSED];
-        PRESSED_ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_FOCUSED
-                | VIEW_STATE_ENABLED | VIEW_STATE_PRESSED];
-        PRESSED_ENABLED_FOCUSED_SELECTED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_SELECTED | VIEW_STATE_FOCUSED
-                | VIEW_STATE_ENABLED | VIEW_STATE_PRESSED];
-        PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = VIEW_STATE_SETS[
-                VIEW_STATE_WINDOW_FOCUSED | VIEW_STATE_SELECTED
-                | VIEW_STATE_FOCUSED| VIEW_STATE_ENABLED
-                | VIEW_STATE_PRESSED];
+        SELECTED_STATE_SET = StateSet.get(StateSet.VIEW_STATE_SELECTED);
+        SELECTED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED);
+
+        FOCUSED_STATE_SET = StateSet.get(StateSet.VIEW_STATE_FOCUSED);
+        FOCUSED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_FOCUSED);
+        FOCUSED_SELECTED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_SELECTED | StateSet.VIEW_STATE_FOCUSED);
+        FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED
+                        | StateSet.VIEW_STATE_FOCUSED);
+
+        ENABLED_STATE_SET = StateSet.get(StateSet.VIEW_STATE_ENABLED);
+        ENABLED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_ENABLED);
+        ENABLED_SELECTED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_SELECTED | StateSet.VIEW_STATE_ENABLED);
+        ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED
+                        | StateSet.VIEW_STATE_ENABLED);
+        ENABLED_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_FOCUSED | StateSet.VIEW_STATE_ENABLED);
+        ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_FOCUSED
+                        | StateSet.VIEW_STATE_ENABLED);
+        ENABLED_FOCUSED_SELECTED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_SELECTED | StateSet.VIEW_STATE_FOCUSED
+                        | StateSet.VIEW_STATE_ENABLED);
+        ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED
+                        | StateSet.VIEW_STATE_FOCUSED| StateSet.VIEW_STATE_ENABLED);
+
+        PRESSED_STATE_SET = StateSet.get(StateSet.VIEW_STATE_PRESSED);
+        PRESSED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_SELECTED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_SELECTED | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED
+                        | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_FOCUSED | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_FOCUSED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_FOCUSED
+                        | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_FOCUSED_SELECTED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_SELECTED | StateSet.VIEW_STATE_FOCUSED
+                        | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED
+                        | StateSet.VIEW_STATE_FOCUSED | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_ENABLED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_ENABLED | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_ENABLED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_ENABLED
+                        | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_ENABLED_SELECTED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_SELECTED | StateSet.VIEW_STATE_ENABLED
+                        | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_ENABLED_SELECTED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED
+                        | StateSet.VIEW_STATE_ENABLED | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_ENABLED_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_FOCUSED | StateSet.VIEW_STATE_ENABLED
+                        | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_ENABLED_FOCUSED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_FOCUSED
+                        | StateSet.VIEW_STATE_ENABLED | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_ENABLED_FOCUSED_SELECTED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_SELECTED | StateSet.VIEW_STATE_FOCUSED
+                        | StateSet.VIEW_STATE_ENABLED | StateSet.VIEW_STATE_PRESSED);
+        PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET = StateSet.get(
+                StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED
+                        | StateSet.VIEW_STATE_FOCUSED| StateSet.VIEW_STATE_ENABLED
+                        | StateSet.VIEW_STATE_PRESSED);
     }
 
     /**
@@ -16162,26 +16110,30 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int privateFlags = mPrivateFlags;
 
         int viewStateIndex = 0;
-        if ((privateFlags & PFLAG_PRESSED) != 0) viewStateIndex |= VIEW_STATE_PRESSED;
-        if ((mViewFlags & ENABLED_MASK) == ENABLED) viewStateIndex |= VIEW_STATE_ENABLED;
-        if (isFocused()) viewStateIndex |= VIEW_STATE_FOCUSED;
-        if ((privateFlags & PFLAG_SELECTED) != 0) viewStateIndex |= VIEW_STATE_SELECTED;
-        if (hasWindowFocus()) viewStateIndex |= VIEW_STATE_WINDOW_FOCUSED;
-        if ((privateFlags & PFLAG_ACTIVATED) != 0) viewStateIndex |= VIEW_STATE_ACTIVATED;
+        if ((privateFlags & PFLAG_PRESSED) != 0) viewStateIndex |= StateSet.VIEW_STATE_PRESSED;
+        if ((mViewFlags & ENABLED_MASK) == ENABLED) viewStateIndex |= StateSet.VIEW_STATE_ENABLED;
+        if (isFocused()) viewStateIndex |= StateSet.VIEW_STATE_FOCUSED;
+        if ((privateFlags & PFLAG_SELECTED) != 0) viewStateIndex |= StateSet.VIEW_STATE_SELECTED;
+        if (hasWindowFocus()) viewStateIndex |= StateSet.VIEW_STATE_WINDOW_FOCUSED;
+        if ((privateFlags & PFLAG_ACTIVATED) != 0) viewStateIndex |= StateSet.VIEW_STATE_ACTIVATED;
         if (mAttachInfo != null && mAttachInfo.mHardwareAccelerationRequested &&
                 HardwareRenderer.isAvailable()) {
             // This is set if HW acceleration is requested, even if the current
             // process doesn't allow it.  This is just to allow app preview
             // windows to better match their app.
-            viewStateIndex |= VIEW_STATE_ACCELERATED;
+            viewStateIndex |= StateSet.VIEW_STATE_ACCELERATED;
         }
-        if ((privateFlags & PFLAG_HOVERED) != 0) viewStateIndex |= VIEW_STATE_HOVERED;
+        if ((privateFlags & PFLAG_HOVERED) != 0) viewStateIndex |= StateSet.VIEW_STATE_HOVERED;
 
         final int privateFlags2 = mPrivateFlags2;
-        if ((privateFlags2 & PFLAG2_DRAG_CAN_ACCEPT) != 0) viewStateIndex |= VIEW_STATE_DRAG_CAN_ACCEPT;
-        if ((privateFlags2 & PFLAG2_DRAG_HOVERED) != 0) viewStateIndex |= VIEW_STATE_DRAG_HOVERED;
+        if ((privateFlags2 & PFLAG2_DRAG_CAN_ACCEPT) != 0) {
+            viewStateIndex |= StateSet.VIEW_STATE_DRAG_CAN_ACCEPT;
+        }
+        if ((privateFlags2 & PFLAG2_DRAG_HOVERED) != 0) {
+            viewStateIndex |= StateSet.VIEW_STATE_DRAG_HOVERED;
+        }
 
-        drawableState = VIEW_STATE_SETS[viewStateIndex];
+        drawableState = StateSet.get(viewStateIndex);
 
         //noinspection ConstantIfStatement
         if (false) {

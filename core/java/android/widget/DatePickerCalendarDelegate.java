@@ -199,10 +199,11 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         final ColorStateList calendarTextColor = a.getColorStateList(
                 R.styleable.DatePicker_calendarTextColor);
-        final int calendarSelectedTextColor = a.getColor(
-                R.styleable.DatePicker_calendarSelectedTextColor, defaultHighlightColor);
-        mDayPickerView.setCalendarTextColor(ColorStateList.addFirstIfMissing(
-                calendarTextColor, R.attr.state_selected, calendarSelectedTextColor));
+        mDayPickerView.setCalendarTextColor(calendarTextColor);
+
+        final ColorStateList calendarDayBackgroundColor = a.getColorStateList(
+                R.styleable.DatePicker_calendarDayBackgroundColor);
+        mDayPickerView.setCalendarDayBackgroundColor(calendarDayBackgroundColor);
 
         mDayPickerDescription = res.getString(R.string.day_picker_description);
         mSelectDay = res.getString(R.string.select_day);

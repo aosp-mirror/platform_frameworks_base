@@ -496,7 +496,7 @@ please see styles_device_defaults.xml.
         <item name="yearListItemTextAppearance">@style/TextAppearance.Holo.DatePicker.List.YearLabel</item>
         <item name="yearListSelectorColor">@color/datepicker_default_circle_background_color_holo_dark</item>
         <item name="calendarTextColor">@color/date_picker_calendar_holo_dark</item>
-        <item name="calendarSelectedTextColor">@color/holo_blue_light</item>
+        <item name="calendarDayBackgroundColor">@color/holo_blue_dark</item>
     </style>
 
     <style name="Widget.Holo.ActivityChooserView" parent="Widget.ActivityChooserView" />
@@ -921,7 +921,7 @@ please see styles_device_defaults.xml.
         <item name="yearListItemTextAppearance">@style/TextAppearance.Holo.Light.DatePicker.List.YearLabel</item>
         <item name="yearListSelectorColor">@color/datepicker_default_circle_background_color_holo_light</item>
         <item name="calendarTextColor">@color/date_picker_calendar_holo_light</item>
-        <item name="calendarSelectedTextColor">@color/holo_blue_light</item>
+        <item name="calendarDayBackgroundColor">@color/holo_blue_light</item>
     </style>
 
     <style name="Widget.Holo.Light.ActivityChooserView" parent="Widget.Holo.ActivityChooserView">

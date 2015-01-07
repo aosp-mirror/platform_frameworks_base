@@ -675,8 +675,8 @@ please see styles_device_defaults.xml.
         <item name="headerBackground">?attr/colorAccent</item>
         <item name="yearListItemTextAppearance">@style/TextAppearance.Material.DatePicker.List.YearLabel</item>
         <item name="yearListSelectorColor">?attr/colorControlActivated</item>
-        <item name="calendarTextColor">?attr/textColorSecondary</item>
-        <item name="calendarSelectedTextColor">?attr/colorControlActivated</item>
+        <item name="calendarTextColor">?attr/textColorSecondaryActivated</item>
+        <item name="calendarDayBackgroundColor">?attr/colorControlActivated</item>
     </style>
 
     <style name="Widget.Material.ActivityChooserView" parent="Widget.ActivityChooserView">
