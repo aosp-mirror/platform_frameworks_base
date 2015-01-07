@@ -16,6 +16,7 @@ trainingnavtop=true
     <li><a href="#density-resources">Manage Layout Resources for TV</a></li>
     <li><a href="#anti-patterns">Avoid Layout Anti-Patterns</a></li>
     <li><a href="#large-bitmaps">Handle Large Bitmaps</a></li>
+    <li><a href="#advertising">Provide Effective Advertising</a></li>
   </ol>
   <h2>You should also read</h2>
   <ol>
@@ -257,4 +258,18 @@ trainingnavtop=true
 <p>
   For more information on getting the best performance when working with images, see
   <a href="{@docRoot}training/displaying-bitmaps/index.html">Displaying Bitmaps Efficiently</a>.
+</p>
+
+<h2 id="advertising">Provide Effective Advertising</h2>
+
+<p>Advertising on Android TV must always be full-screen. Ads must not appear alongside or over
+content. The user must be able to dismiss an advertisement with the D-pad controller. Video ads must
+be dismissible within 30 seconds of their start time.</p>
+
+<p>Android TV does not provide a web browser. Your ads must not attempt to launch a web browser or
+redirect to the Google Play Store.</p>
+
+<p class="note">
+  <strong>Note:</strong> You can use the {@link android.webkit.WebView} class for logins to
+  services like Google+ and Facebook.
 </p>
