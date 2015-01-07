@@ -267,14 +267,6 @@ public class LockPatternUtils {
         }
     }
 
-    public void removeUser(int userId) {
-        try {
-            getLockSettings().removeUser(userId);
-        } catch (RemoteException re) {
-            Log.e(TAG, "Couldn't remove lock settings for user " + userId);
-        }
-    }
-
     private int getCurrentOrCallingUserId() {
         if (mMultiUserMode) {
             // TODO: This is a little inefficient. See if all users of this are able to

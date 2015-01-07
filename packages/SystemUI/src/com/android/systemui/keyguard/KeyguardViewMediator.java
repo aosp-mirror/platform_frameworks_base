@@ -329,11 +329,6 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
-        public void onUserRemoved(int userId) {
-            mLockPatternUtils.removeUser(userId);
-        }
-
-        @Override
         public void onUserInfoChanged(int userId) {
         }
 
