@@ -2214,6 +2214,16 @@ public final class ContactsContract {
         public static final String CONTACT_ID = "contact_id";
 
         /**
+         * Persistent unique id for each raw_contact within its account.
+         * This id is provided by its own data source, and can be used to backup metadata
+         * to the server.
+         * This should be unique within each set of account_name/account_type/data_set
+         *
+         * @hide
+         */
+        public static final String BACKUP_ID = "backup_id";
+
+        /**
          * The data set within the account that this row belongs to.  This allows
          * multiple sync adapters for the same account type to distinguish between
          * each others' data.
@@ -4004,6 +4014,13 @@ public final class ContactsContract {
          * The MIME type of the item represented by this row.
          */
         public static final String MIMETYPE = "mimetype";
+
+        /**
+         * Hash id on the data fields, used for backup and restore.
+         *
+         * @hide
+         */
+        public static final String HASH_ID = "hash_id";
 
         /**
          * A reference to the {@link RawContacts#_ID}
