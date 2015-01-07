@@ -115,6 +115,29 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
     }
 
     /**
+     * Sets the gravity used to align the popup window to its anchor view.
+     * <p>
+     * If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown.
+     *
+     * @param gravity the gravity used to align the popup window
+     *
+     * @see #getGravity()
+     */
+    public void setGravity(int gravity) {
+        mPopup.setGravity(gravity);
+    }
+
+    /**
+     * @return the gravity used to align the popup window to its anchor view
+     *
+     * @see #setGravity(int)
+     */
+    public int getGravity() {
+        return mPopup.getGravity();
+    }
+
+    /**
      * Returns an {@link OnTouchListener} that can be added to the anchor view
      * to implement drag-to-open behavior.
      * <p>

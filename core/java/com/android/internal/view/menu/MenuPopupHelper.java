@@ -118,6 +118,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mDropDownGravity = gravity;
     }
 
+    public int getGravity() {
+        return mDropDownGravity;
+    }
+
     public void show() {
         if (!tryShow()) {
             throw new IllegalStateException("MenuPopupHelper cannot be used without an anchor");
@@ -135,7 +139,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mPopup.setAdapter(mAdapter);
         mPopup.setModal(true);
 
-        View anchor = mAnchorView;
+        final View anchor = mAnchorView;
         if (anchor != null) {
             final boolean addGlobalListener = mTreeObserver == null;
             mTreeObserver = anchor.getViewTreeObserver(); // Refresh to latest
