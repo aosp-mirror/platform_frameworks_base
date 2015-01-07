@@ -22,8 +22,4 @@
     <!-- Height of the sliding KeyguardSecurityContainer (includes 2x
          keyguard_security_view_margin) -->
     <dimen name="keyguard_security_height">400dp</dimen>
-
-    <!-- The bottom margin for the GlowPadView container -->
-    <dimen name="glowpadcontainer_bottom_margin">-48dp</dimen>
-
 </resources>

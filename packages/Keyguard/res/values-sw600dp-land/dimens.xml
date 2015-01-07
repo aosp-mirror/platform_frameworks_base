@@ -18,11 +18,6 @@
 */
 -->
 <resources>
-    <!-- Top margin for the clock view --> 
-    <dimen name="kg_clock_top_margin">85dp</dimen>
-
-    <!-- Size of margin on the right of keyguard's status view -->
-    <dimen name="kg_status_line_font_right_margin">16dp</dimen>
 
     <!-- Overload default clock widget parameters -->
     <dimen name="widget_big_font_size">100dp</dimen>

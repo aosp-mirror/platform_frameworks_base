@@ -22,18 +22,6 @@
     <!-- Alias used to reference framework color for transparency. -->
     <item type="color" name="transparent">@android:color/transparent</item>
 
-    <!-- Alias used to reference framework drawable in keyguard. -->
-    <item type="drawable" name="stat_sys_warning">@android:drawable/stat_sys_warning</item>
-
-    <!-- Alias used to reference framework drawable in keyguard. -->
-    <item type="drawable" name="ic_media_pause">@android:drawable/ic_media_pause</item>
-
-    <!-- Alias used to reference framework drawable in keyguard. -->
-    <item type="drawable" name="ic_media_stop">@*android:drawable/ic_media_stop</item>
-
-    <!-- Alias used to reference framework drawable in keyguard. -->
-    <item type="drawable" name="ic_contact_picture">@*android:drawable/ic_contact_picture</item>
-
     <!-- Alias used to reference framework "OK" string in keyguard.  -->
     <item type="string" name="ok">@*android:string/ok</item>
 

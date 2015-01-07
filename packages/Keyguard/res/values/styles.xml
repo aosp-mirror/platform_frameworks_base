@@ -35,36 +35,13 @@
         <item name="android:paddingBottom">0dp</item>
     </style>
 
-    <!-- Standard animations for a non-full-screen window or activity. -->
-    <style name="Animation.LockScreen" parent="@android:style/Animation">
-        <item name="android:windowEnterAnimation">@anim/lock_screen_enter</item>
-        <item name="android:windowExitAnimation">@anim/lock_screen_exit</item>
-    </style>
-
     <!-- Built-in clock widget stuff -->
     <style name="widget_label">
         <item name="android:textSize">@dimen/widget_label_font_size</item>
     </style>
-    <style name="big_thin">
-        <item name="android:textSize">@dimen/big_font_size</item>
-        <item name="android:fontFamily">sans-serif-thin</item>
-    </style>
-    <style name="widget_big_thin" parent="big_thin">
+    <style name="widget_big_thin">
         <item name="android:textSize">@dimen/widget_big_font_size</item>
-    </style>
-
-    <style name="Widget.TransportControl.SeekBar" parent="@android:style/Widget.DeviceDefault.Light.SeekBar">
-        <item name="android:indeterminateOnly">false</item>
-        <item name="android:progressDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
-        <item name="android:indeterminateDrawable">@drawable/scrubber_progress_horizontal_holo_light</item>
-        <item name="android:minHeight">13dip</item>
-        <item name="android:maxHeight">13dip</item>
-        <item name="android:thumb">@drawable/scrubber_control_selector_holo</item>
-        <item name="android:thumbOffset">16dip</item>
-        <item name="android:focusable">true</item>
-        <item name="android:paddingStart">16dip</item>
-        <item name="android:paddingEnd">16dip</item>
-        <item name="android:mirrorForRtl">true</item>
+        <item name="android:fontFamily">sans-serif-thin</item>
     </style>
 
     <style name="BouncerSecurityContainer">

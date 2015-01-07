@@ -15,7 +15,5 @@
 -->
 
 <resources>
-    <bool name="action_bar_embed_tabs">false</bool>
-    <bool name="kg_share_status_area">true</bool>
     <bool name="kg_sim_puk_account_full_screen">true</bool>
 </resources>

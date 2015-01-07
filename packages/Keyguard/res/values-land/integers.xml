@@ -20,7 +20,4 @@
     <!-- Gravity to make KeyguardSelectorView work in multiple orientations
         0x13 == "left|center_vertical" -->
     <integer name="kg_selector_gravity">0x13</integer>
-    <integer name="kg_widget_region_weight">45</integer>
-    <integer name="kg_security_flipper_weight">55</integer>
-    <integer name="kg_glowpad_rotation_offset">-90</integer>
 </resources>
