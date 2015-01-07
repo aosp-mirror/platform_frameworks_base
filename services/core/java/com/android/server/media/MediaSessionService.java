@@ -77,6 +77,8 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private static final int WAKELOCK_TIMEOUT = 5000;
 
+    /* package */final IBinder mICallback = new Binder();
+
     private final SessionManagerImpl mSessionManagerImpl;
     private final MediaSessionStack mPriorityStack;
 
@@ -91,6 +93,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private KeyguardManager mKeyguardManager;
     private IAudioService mAudioService;
+    private AudioManager mAudioManager;
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
 
@@ -118,6 +121,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mKeyguardManager =
                 (KeyguardManager) getContext().getSystemService(Context.KEYGUARD_SERVICE);
         mAudioService = getAudioService();
+        mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         mContentResolver = getContext().getContentResolver();
         mSettingsObserver = new SettingsObserver();
         mSettingsObserver.observe();
@@ -589,8 +593,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 "android.media.AudioService.WAKELOCK_ACQUIRED";
         private static final int WAKELOCK_RELEASE_ON_FINISHED = 1980; // magic number
 
-        private final IBinder mICallback = new Binder();
-
         private boolean mVoiceButtonDown = false;
         private boolean mVoiceButtonHandled = false;
 
@@ -845,14 +847,14 @@ public class MediaSessionService extends SystemService implements Monitor {
                     } else {
                         boolean isStreamMute = mAudioService.isStreamMute(suggestedStream);
                         if (direction == MediaSessionManager.DIRECTION_MUTE) {
-                            mAudioService.setStreamMute(suggestedStream, !isStreamMute, mICallback);
+                            mAudioManager.setStreamMute(suggestedStream, !isStreamMute);
                         } else {
                             mAudioService.adjustSuggestedStreamVolume(direction, suggestedStream,
                                     flags, packageName);
                             // Do not call setStreamMute when direction = 0 which is used just to
                             // show the UI.
                             if (isStreamMute && direction != 0) {
-                                mAudioService.setStreamMute(suggestedStream, false, mICallback);
+                                mAudioManager.setStreamMute(suggestedStream, false);
                             }
                         }
                     }

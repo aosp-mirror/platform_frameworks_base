@@ -93,7 +93,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
     private final MediaSessionService mService;
     private final boolean mUseMasterVolume;
 
-    private final IBinder mICallback = new Binder();
     private final Object mLock = new Object();
     private final ArrayList<ISessionControllerCallback> mControllerCallbacks =
             new ArrayList<ISessionControllerCallback>();
@@ -260,13 +259,13 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 boolean isMasterMute = mAudioManager.isMasterMute();
                 if (isMute) {
                     mAudioManagerInternal.setMasterMuteForUid(!isMasterMute,
-                            flags, packageName, mICallback, uid);
+                            flags, packageName, mService.mICallback, uid);
                 } else {
                     mAudioManagerInternal.adjustMasterVolumeForUid(direction, flags, packageName,
                             uid);
                     if (isMasterMute) {
                         mAudioManagerInternal.setMasterMuteForUid(false,
-                                flags, packageName, mICallback, uid);
+                                flags, packageName, mService.mICallback, uid);
                     }
                 }
                 return;
@@ -280,7 +279,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                     } else {
                         mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream, direction,
                                 flags, packageName, uid);
-                        if (isStreamMute) {
+                        if (isStreamMute && direction != 0) {
                             mAudioManager.setStreamMute(stream, false);
                         }
                     }
@@ -295,7 +294,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                         mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
                                 AudioManager.USE_DEFAULT_STREAM_TYPE, direction, flags, packageName,
                                 uid);
-                        if (isStreamMute) {
+                        if (isStreamMute && direction != 0) {
                             mAudioManager.setStreamMute(AudioManager.USE_DEFAULT_STREAM_TYPE,
                                     false);
                         }
@@ -307,7 +306,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 } else {
                     mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
                             packageName, uid);
-                    if (isStreamMute) {
+                    if (isStreamMute && direction != 0) {
                         mAudioManager.setStreamMute(stream, false);
                     }
                 }
