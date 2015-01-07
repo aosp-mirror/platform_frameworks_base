@@ -222,7 +222,7 @@ public class NotificationUsageStats {
 
         public void collect(SingleNotificationStats singleNotificationStats) {
             posttimeMs.addSample(
-	            SystemClock.elapsedRealtime() - singleNotificationStats.posttimeElapsedMs);
+                    SystemClock.elapsedRealtime() - singleNotificationStats.posttimeElapsedMs);
             if (singleNotificationStats.posttimeToDismissMs >= 0) {
                 posttimeToDismissMs.addSample(singleNotificationStats.posttimeToDismissMs);
             }
