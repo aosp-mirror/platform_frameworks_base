@@ -274,12 +274,28 @@ public abstract class Drawable {
     public void setDither(boolean dither) {}
 
     /**
+     * @return whether this drawable dither its colors
+     * @see #setDither(boolean)
+     */
+    public boolean getDither() {
+        return false;
+    }
+
+    /**
      * Set to true to have the drawable filter its bitmap when scaled or rotated
      * (for drawables that use bitmaps). If the drawable does not use bitmaps,
      * this call is ignored. This can improve the look when scaled or rotated,
      * but also slows down the drawing.
      */
     public void setFilterBitmap(boolean filter) {}
+
+    /**
+     * @return whether this drawable filters its bitmap
+     * @see #setFilterBitmap(boolean)
+     */
+    public boolean getFilterBitmap() {
+        return false;
+    }
 
     /**
      * Implement this interface if you want to create an animated drawable that

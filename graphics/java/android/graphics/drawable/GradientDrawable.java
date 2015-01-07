@@ -822,6 +822,11 @@ public class GradientDrawable extends Drawable {
     }
 
     @Override
+    public boolean getDither() {
+        return mGradientState.mDither;
+    }
+
+    @Override
     public ColorFilter getColorFilter() {
         return mColorFilter;
     }

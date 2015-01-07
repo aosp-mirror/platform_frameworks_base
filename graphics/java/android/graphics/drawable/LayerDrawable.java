@@ -648,6 +648,18 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public boolean getDither() {
+        final ChildDrawable[] array = mLayerState.mChildren;
+        if (mLayerState.mNum > 0) {
+            // All layers should have the same dither set on them - just return
+            // the first one
+            return array[0].mDrawable.getDither();
+        } else {
+            return super.getDither();
+        }
+    }
+
+    @Override
     public void setAlpha(int alpha) {
         final ChildDrawable[] array = mLayerState.mChildren;
         final int N = mLayerState.mNum;
