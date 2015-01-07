@@ -118,10 +118,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected void updateExpandedViewPos(int expandedPosition) {
-    }
-
-    @Override
     protected boolean shouldDisableNavbarGestures() {
         return true;
     }

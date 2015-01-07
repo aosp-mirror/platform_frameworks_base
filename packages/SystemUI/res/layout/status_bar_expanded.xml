@@ -28,27 +28,9 @@
     >
 
     <include
-        layout="@layout/carrier_label"
-        android:layout_height="@dimen/carrier_label_height"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="@dimen/close_handle_height"
-        android:layout_gravity="bottom"
-        />
-
-    <include
         layout="@layout/keyguard_status_view"
         android:layout_height="wrap_content"
         android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/emergency_calls_only"
-        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Network.EmergencyOnly"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:padding="4dp"
-        android:gravity="center"
-        android:visibility="gone"
-        />
 
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"

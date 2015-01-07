@@ -109,13 +109,6 @@
     <style name="TextAppearance.StatusBar.Expanded.ChargingInfo"
             parent="TextAppearance.StatusBar.Expanded.AboveDateTime" />
 
-    <style name="TextAppearance.StatusBar.Expanded.Network" parent="@style/TextAppearance.StatusBar.Expanded.Date">
-        <item name="android:textColor">#999999</item>
-	</style>
-
-    <style name="TextAppearance.StatusBar.Expanded.Network.EmergencyOnly">
-    </style>
-
     <style name="TextAppearance.StatusBar.Expanded.UserSwitcher">
         <item name="android:textSize">16sp</item>
         <item name="android:textStyle">normal</item>
