@@ -213,8 +213,9 @@ public class BackupTransport {
 
     /**
      * Send one application's key/value data update to the backup destination.  The
-     * transport may send the data immediately, or may buffer it.  After this is called,
-     * {@link #finishBackup} will be called to ensure the data is sent and recorded successfully.
+     * transport may send the data immediately, or may buffer it.  If this method returns
+     * {@link #TRANSPORT_OK}, {@link #finishBackup} will then be called to ensure the data
+     * is sent and recorded successfully.
      *
      * @param packageInfo The identity of the application whose data is being backed up.
      *   This specifically includes the signature list for the package.
@@ -226,6 +227,8 @@ public class BackupTransport {
      *   is to provide a guarantee that no stale data exists in the restore set when the
      *   device begins providing incremental backups.
      * @return one of {@link BackupTransport#TRANSPORT_OK} (OK so far),
+     *  {@link BackupTransport#TRANSPORT_PACKAGE_REJECTED} (to suppress backup of this
+     *  specific package, but allow others to proceed),
      *  {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure), or
      *  {@link BackupTransport#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has
      *  become lost due to inactivity purge or some other reason and needs re-initializing)
