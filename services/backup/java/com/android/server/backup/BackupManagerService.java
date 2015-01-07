@@ -2786,21 +2786,30 @@ public class BackupManagerService {
                         addBackupTrace("finishing op on transport");
                         mStatus = mTransport.finishBackup();
                         addBackupTrace("finished: " + mStatus);
+                    } else if (mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+                        addBackupTrace("transport rejected package");
                     }
                 } else {
                     if (DEBUG) Slog.i(TAG, "no backup data written; not calling transport");
                     addBackupTrace("no data to send");
                 }
 
-                // After successful transport, delete the now-stale data
-                // and juggle the files so that next time we supply the agent
-                // with the new state file it just created.
                 if (mStatus == BackupTransport.TRANSPORT_OK) {
+                    // After successful transport, delete the now-stale data
+                    // and juggle the files so that next time we supply the agent
+                    // with the new state file it just created.
                     mBackupDataName.delete();
                     mNewStateName.renameTo(mSavedStateName);
                     EventLog.writeEvent(EventLogTags.BACKUP_PACKAGE, pkgName, size);
                     logBackupComplete(pkgName);
+                } else if (mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+                    // The transport has rejected backup of this specific package.  Roll it
+                    // back but proceed with running the rest of the queue.
+                    mBackupDataName.delete();
+                    mNewStateName.delete();
+                    EventLogTags.writeBackupAgentFailure(pkgName, "Transport rejected");
                 } else {
+                    // Actual transport-level failure to communicate the data to the backend
                     EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, pkgName);
                 }
             } catch (Exception e) {
@@ -2811,15 +2820,17 @@ public class BackupManagerService {
                 try { if (backupData != null) backupData.close(); } catch (IOException e) {}
             }
 
-            // If we encountered an error here it's a transport-level failure.  That
-            // means we need to halt everything and reschedule everything for next time.
             final BackupState nextState;
-            if (mStatus != BackupTransport.TRANSPORT_OK) {
+            if (mStatus == BackupTransport.TRANSPORT_OK
+                    || mStatus == BackupTransport.TRANSPORT_PACKAGE_REJECTED) {
+                // Success or single-package rejection.  Proceed with the next app if any,
+                // otherwise we're done.
+                nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
+            } else {
+                // Any other error here indicates a transport-level failure.  That means
+                // we need to halt everything and reschedule everything for next time.
                 revertAndEndBackup();
                 nextState = BackupState.FINAL;
-            } else {
-                // Success!  Proceed with the next app if any, otherwise we're done.
-                nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
             }
 
             executeNextState(nextState);
