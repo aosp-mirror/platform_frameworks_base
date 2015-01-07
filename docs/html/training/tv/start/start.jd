@@ -1,6 +1,5 @@
 page.title=Get Started with TV Apps
-page.tags=tv, leanback, recyclerview
-helpoutsWidget=true
+page.tags="leanback","recyclerview","launcher"
 
 trainingnavtop=true
 startpage=true
@@ -145,6 +144,22 @@ startpage=true
   "{@docRoot}training/tv/start/layouts.html">Building TV Layouts</a>.
 </p>
 
+<h3 id="leanback-req">Declare Leanback support</h3>
+
+<p>
+  Declare that your app uses the Leanback user interface required by Android TV. If you are developing
+  an app that runs on mobile (phones, wearables, tablets, etc.) as well as Android TV, set the
+  {@code required} attribute value to {@code false}. If you set the {@code required} attribute value
+  to {@code true}, your app will run only on devices that use the Leanback UI.
+</p>
+
+<pre>
+&lt;manifest&gt;
+    &lt;uses-feature android:name="android.software.leanback"
+        android:required="false" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
 
 <h3 id="no-touchscreen">Declare touchscreen not required</h3>
 
@@ -158,8 +173,8 @@ startpage=true
 
 <pre>
 &lt;manifest&gt;
-    <strong>&lt;uses-feature android:name="android.hardware.touchscreen"
-              android:required="false" /&gt;</strong>
+    &lt;uses-feature android:name="android.hardware.touchscreen"
+              android:required="false" /&gt;
     ...
 &lt;/manifest&gt;
 </pre>
@@ -173,9 +188,9 @@ startpage=true
 <h3 id="banner">Provide a home screen banner</h3>
 
 <p>
-  An application must provide a home screen banner if it includes a Leanback launcher intent
-  filter. The banner is the app launch point that appears on the home screen in the apps and
-  games rows. Desribe the banner in the manifest as follows:
+  An application must provide a home screen banner for each localization if it includes a Leanback
+  launcher intent filter. The banner is the app launch point that appears on the home screen in the
+  apps and games rows. Desribe the banner in the manifest as follows:
 </p>
 
 <pre>
@@ -263,9 +278,10 @@ startpage=true
     TV apps that play videos and music, and let users browse for the content they want.
   </li>
   <li>
-    <a href="{@docRoot}training/tv/search/index.html">Surfacing Content on TV</a> - With all the
-    content choices at users' fingertips, helping them find content they enjoy is almost as important
-    as providing that content. This training discusses how to surface your content on TV devices.
+    <a href="{@docRoot}training/tv/discovery/index.html">Helping Users Find Your Content on TV</a> -
+    With all the content choices at users' fingertips, helping them find content they enjoy is almost
+    as important as providing that content. This training discusses how to surface your content on
+    TV devices.
   </li>
   <li>
     <a href="{@docRoot}training/tv/games/index.html">Games for TV</a> - TV devices are a great
