@@ -46,16 +46,12 @@ public class PhoneStatusBarPolicy {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final boolean SHOW_SYNC_ICON = false;
-
-    private static final String SLOT_SYNC_ACTIVE = "sync_active";
     private static final String SLOT_CAST = "cast";
     private static final String SLOT_HOTSPOT = "hotspot";
     private static final String SLOT_BLUETOOTH = "bluetooth";
     private static final String SLOT_TTY = "tty";
     private static final String SLOT_ZEN = "zen";
     private static final String SLOT_VOLUME = "volume";
-    private static final String SLOT_CDMA_ERI = "cdma_eri";
     private static final String SLOT_ALARM_CLOCK = "alarm_clock";
 
     private final Context mContext;
@@ -82,9 +78,6 @@ public class PhoneStatusBarPolicy {
             String action = intent.getAction();
             if (action.equals(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED)) {
                 updateAlarm();
-            }
-            else if (action.equals(Intent.ACTION_SYNC_STATE_CHANGED)) {
-                updateSyncState(intent);
             }
             else if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED) ||
                     action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
@@ -115,7 +108,6 @@ public class PhoneStatusBarPolicy {
         // listen for broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-        filter.addAction(Intent.ACTION_SYNC_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
         filter.addAction(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
@@ -129,21 +121,12 @@ public class PhoneStatusBarPolicy {
         mService.setIcon(SLOT_TTY,  R.drawable.stat_sys_tty_mode, 0, null);
         mService.setIconVisibility(SLOT_TTY, false);
 
-        // Cdma Roaming Indicator, ERI
-        mService.setIcon(SLOT_CDMA_ERI, R.drawable.stat_sys_roaming_cdma_0, 0, null);
-        mService.setIconVisibility(SLOT_CDMA_ERI, false);
-
         // bluetooth status
         updateBluetooth();
 
         // Alarm clock
         mService.setIcon(SLOT_ALARM_CLOCK, R.drawable.stat_sys_alarm, 0, null);
         mService.setIconVisibility(SLOT_ALARM_CLOCK, false);
-
-        // Sync state
-        mService.setIcon(SLOT_SYNC_ACTIVE, R.drawable.stat_sys_sync, 0, null);
-        mService.setIconVisibility(SLOT_SYNC_ACTIVE, false);
-        // "sync_failing" is obsolete: b/1297963
 
         // zen
         mService.setIcon(SLOT_ZEN, R.drawable.stat_sys_zen_important, 0, null);
@@ -174,12 +157,6 @@ public class PhoneStatusBarPolicy {
         AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         boolean alarmSet = alarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
         mService.setIconVisibility(SLOT_ALARM_CLOCK, alarmSet);
-    }
-
-    private final void updateSyncState(Intent intent) {
-        if (!SHOW_SYNC_ICON) return;
-        boolean isActive = intent.getBooleanExtra("active", false);
-        mService.setIconVisibility(SLOT_SYNC_ACTIVE, isActive);
     }
 
     private final void updateSimState(Intent intent) {
