@@ -71,7 +71,7 @@ public:
         mCurrentPage = page;
 
         SkCanvas* canvas = page->mPictureRecorder->beginRecording(
-                contentRect.width(), contentRect.height(), NULL, 0);
+                SkRect::MakeWH(contentRect.width(), contentRect.height()));
 
         return canvas;
     }

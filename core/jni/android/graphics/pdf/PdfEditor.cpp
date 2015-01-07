@@ -201,7 +201,11 @@ static void nativeSetTransformAndClip(JNIEnv* env, jclass thiz, jlong documentPt
     SkMatrix* skTransform = reinterpret_cast<SkMatrix*>(transformPtr);
 
     SkScalar transformValues[6];
-    skTransform->asAffine(transformValues);
+    if (!skTransform->asAffine(transformValues)) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "transform matrix has perspective. Only affine matrices are allowed.");
+        return;
+    }
 
     // PDF's coordinate system origin is left-bottom while in graphics it
     // is the top-left. So, translate the PDF coordinates to ours.

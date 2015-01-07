@@ -219,11 +219,16 @@ static void renderPageBitmap(FPDF_BITMAP bitmap, FPDF_PAGE page, int destLeft, i
         matrix.Set(1, 0, 0, -1, 0, pPage->GetPageHeight());
 
         SkScalar transformValues[6];
-        transform->asAffine(transformValues);
+        if (transform->asAffine(transformValues)) {
+            matrix.Concat(transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
+                    transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
+                    transformValues[SkMatrix::kATransX], transformValues[SkMatrix::kATransY]);
+        } else {
+            // Already checked for a return value of false in the caller, so this should never
+            // happen.
+            ALOGE("Error rendering page!");
+        }
 
-        matrix.Concat(transformValues[SkMatrix::kAScaleX], transformValues[SkMatrix::kASkewY],
-                transformValues[SkMatrix::kASkewX], transformValues[SkMatrix::kAScaleY],
-                transformValues[SkMatrix::kATransX], transformValues[SkMatrix::kATransY]);
     }
     pageContext->AppendObjectList(pPage, &matrix);
 
@@ -262,6 +267,12 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
         renderFlags |= FPDF_LCD_TEXT;
     } else if (renderMode == RENDER_MODE_FOR_PRINT) {
         renderFlags |= FPDF_PRINTING;
+    }
+
+    if (skMatrix && !skMatrix->asAffine(NULL)) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "transform matrix has perspective. Only affine matrices are allowed.");
+        return;
     }
 
     renderPageBitmap(bitmap, page, destLeft, destTop, destRight,

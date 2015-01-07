@@ -8,7 +8,6 @@
 #include "SkCanvas.h"
 #include "SkDevice.h"
 #include "SkMath.h"
-#include "SkPicture.h"
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
 
