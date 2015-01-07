@@ -18,6 +18,7 @@
 
 //#define LOG_NDEBUG 0
 
+#include "android_os_MessageQueue.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_view_Surface.h"
 #include "JNIHelp.h"
@@ -27,6 +28,7 @@
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/Log.h>
+#include <utils/Looper.h>
 #include <utils/NativeHandle.h>
 #include <hardware/tv_input.h>
 
@@ -233,11 +235,16 @@ class JTvInputHal {
 public:
     ~JTvInputHal();
 
-    static JTvInputHal* createInstance(JNIEnv* env, jobject thiz);
+    static JTvInputHal* createInstance(JNIEnv* env, jobject thiz, const sp<Looper>& looper);
 
     int addOrUpdateStream(int deviceId, int streamId, const sp<Surface>& surface);
     int removeStream(int deviceId, int streamId);
     const tv_stream_config_t* getStreamConfigs(int deviceId, int* numConfigs);
+
+    void onDeviceAvailable(const tv_input_device_info_t& info);
+    void onDeviceUnavailable(int deviceId);
+    void onStreamConfigurationsChanged(int deviceId);
+    void onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded);
 
 private:
     // Connection between a surface and a stream.
@@ -254,28 +261,37 @@ private:
         sp<BufferProducerThread> mThread;
     };
 
-    JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* dev);
+    class NotifyHandler : public MessageHandler {
+    public:
+        NotifyHandler(JTvInputHal* hal, const tv_input_event_t* event);
+
+        virtual void handleMessage(const Message& message);
+
+    private:
+        tv_input_event_t mEvent;
+        JTvInputHal* mHal;
+    };
+
+    JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* dev, const sp<Looper>& looper);
 
     static void notify(
             tv_input_device_t* dev, tv_input_event_t* event, void* data);
-
-    void onDeviceAvailable(const tv_input_device_info_t& info);
-    void onDeviceUnavailable(int deviceId);
-    void onStreamConfigurationsChanged(int deviceId);
-    void onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded);
 
     Mutex mLock;
     jweak mThiz;
     tv_input_device_t* mDevice;
     tv_input_callback_ops_t mCallback;
+    sp<Looper> mLooper;
 
     KeyedVector<int, KeyedVector<int, Connection> > mConnections;
 };
 
-JTvInputHal::JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* device) {
+JTvInputHal::JTvInputHal(JNIEnv* env, jobject thiz, tv_input_device_t* device,
+        const sp<Looper>& looper) {
     mThiz = env->NewWeakGlobalRef(thiz);
     mDevice = device;
     mCallback.notify = &JTvInputHal::notify;
+    mLooper = looper;
 
     mDevice->initialize(mDevice, &mCallback, this);
 }
@@ -288,7 +304,7 @@ JTvInputHal::~JTvInputHal() {
     mThiz = NULL;
 }
 
-JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz) {
+JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz, const sp<Looper>& looper) {
     tv_input_module_t* module = NULL;
     status_t err = hw_get_module(TV_INPUT_HARDWARE_MODULE_ID,
             (hw_module_t const**)&module);
@@ -309,7 +325,7 @@ JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz) {
         return 0;
     }
 
-    return new JTvInputHal(env, thiz, device);
+    return new JTvInputHal(env, thiz, device, looper);
 }
 
 int JTvInputHal::addOrUpdateStream(int deviceId, int streamId, const sp<Surface>& surface) {
@@ -428,31 +444,7 @@ const tv_stream_config_t* JTvInputHal::getStreamConfigs(int deviceId, int* numCo
 void JTvInputHal::notify(
         tv_input_device_t* dev, tv_input_event_t* event, void* data) {
     JTvInputHal* thiz = (JTvInputHal*)data;
-    switch (event->type) {
-        case TV_INPUT_EVENT_DEVICE_AVAILABLE: {
-            thiz->onDeviceAvailable(event->device_info);
-        } break;
-        case TV_INPUT_EVENT_DEVICE_UNAVAILABLE: {
-            thiz->onDeviceUnavailable(event->device_info.device_id);
-        } break;
-        case TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED: {
-            thiz->onStreamConfigurationsChanged(event->device_info.device_id);
-        } break;
-        case TV_INPUT_EVENT_CAPTURE_SUCCEEDED: {
-            thiz->onCaptured(event->capture_result.device_id,
-                             event->capture_result.stream_id,
-                             event->capture_result.seq,
-                             true /* succeeded */);
-        } break;
-        case TV_INPUT_EVENT_CAPTURE_FAILED: {
-            thiz->onCaptured(event->capture_result.device_id,
-                             event->capture_result.stream_id,
-                             event->capture_result.seq,
-                             false /* succeeded */);
-        } break;
-        default:
-            ALOGE("Unrecognizable event");
-    }
+    thiz->mLooper->sendMessage(new NotifyHandler(thiz, event), event->type);
 }
 
 void JTvInputHal::onDeviceAvailable(const tv_input_device_info_t& info) {
@@ -549,10 +541,45 @@ void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succ
     }
 }
 
+JTvInputHal::NotifyHandler::NotifyHandler(JTvInputHal* hal, const tv_input_event_t* event) {
+    mHal = hal;
+    memcpy(&mEvent, event, sizeof(mEvent));
+}
+
+void JTvInputHal::NotifyHandler::handleMessage(const Message& message) {
+    switch (mEvent.type) {
+        case TV_INPUT_EVENT_DEVICE_AVAILABLE: {
+            mHal->onDeviceAvailable(mEvent.device_info);
+        } break;
+        case TV_INPUT_EVENT_DEVICE_UNAVAILABLE: {
+            mHal->onDeviceUnavailable(mEvent.device_info.device_id);
+        } break;
+        case TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED: {
+            mHal->onStreamConfigurationsChanged(mEvent.device_info.device_id);
+        } break;
+        case TV_INPUT_EVENT_CAPTURE_SUCCEEDED: {
+            mHal->onCaptured(mEvent.capture_result.device_id,
+                             mEvent.capture_result.stream_id,
+                             mEvent.capture_result.seq,
+                             true /* succeeded */);
+        } break;
+        case TV_INPUT_EVENT_CAPTURE_FAILED: {
+            mHal->onCaptured(mEvent.capture_result.device_id,
+                             mEvent.capture_result.stream_id,
+                             mEvent.capture_result.seq,
+                             false /* succeeded */);
+        } break;
+        default:
+            ALOGE("Unrecognizable event");
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-static jlong nativeOpen(JNIEnv* env, jobject thiz) {
-    return (jlong)JTvInputHal::createInstance(env, thiz);
+static jlong nativeOpen(JNIEnv* env, jobject thiz, jobject messageQueueObj) {
+    sp<MessageQueue> messageQueue =
+            android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
+    return (jlong)JTvInputHal::createInstance(env, thiz, messageQueue->getLooper());
 }
 
 static int nativeAddOrUpdateStream(JNIEnv* env, jclass clazz,
@@ -610,7 +637,7 @@ static void nativeClose(JNIEnv* env, jclass clazz, jlong ptr) {
 
 static JNINativeMethod gTvInputHalMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeOpen", "()J",
+    { "nativeOpen", "(Landroid/os/MessageQueue;)J",
             (void*) nativeOpen },
     { "nativeAddOrUpdateStream", "(JIILandroid/view/Surface;)I",
             (void*) nativeAddOrUpdateStream },
