@@ -113,14 +113,6 @@
     <!-- Accessibility description of the SIM PUK password view. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_sim_puk_area">SIM PUK area</string>
 
-    <!-- Accessibility description for when the device prompts the user to dismiss keyguard
-         in order to complete an action. This will be followed by a message about the current
-         security option (e.g. "Pattern unlock."). [CHAR LIMIT=NONE] -->
-    <string name="keyguard_accessibility_show_bouncer">Unlock to continue</string>
-
-    <!-- Accessibility description for when the bouncer prompt is dismissed. [CHAR LIMIT=NONE] -->
-    <string name="keyguard_accessibility_hide_bouncer">Launch canceled</string>
-
     <!-- Accessibility description for the text view that indicates when the next alarm is set (not shown on screen). [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_next_alarm">Next alarm set for <xliff:g id="alarm" example="Fri 8:30 AM">%1$s</xliff:g></string>
 

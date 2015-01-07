@@ -29,7 +29,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
     private final AppearAnimationUtils mAppearAnimationUtils;
     private final DisappearAnimationUtils mDisappearAnimationUtils;
-    private ViewGroup mKeyguardBouncerFrame;
+    private ViewGroup mContainer;
     private ViewGroup mRow0;
     private ViewGroup mRow1;
     private ViewGroup mRow2;
@@ -67,7 +67,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        mKeyguardBouncerFrame = (ViewGroup) findViewById(R.id.keyguard_bouncer_frame);
+        mContainer = (ViewGroup) findViewById(R.id.container);
         mRow0 = (ViewGroup) findViewById(R.id.row0);
         mRow1 = (ViewGroup) findViewById(R.id.row1);
         mRow2 = (ViewGroup) findViewById(R.id.row2);
@@ -146,8 +146,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
     }
 
     private void enableClipping(boolean enable) {
-        mKeyguardBouncerFrame.setClipToPadding(enable);
-        mKeyguardBouncerFrame.setClipChildren(enable);
+        mContainer.setClipToPadding(enable);
+        mContainer.setClipChildren(enable);
         mRow1.setClipToPadding(enable);
         mRow2.setClipToPadding(enable);
         mRow3.setClipToPadding(enable);

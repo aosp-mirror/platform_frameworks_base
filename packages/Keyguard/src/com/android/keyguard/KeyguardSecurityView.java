@@ -72,20 +72,6 @@ public interface KeyguardSecurityView {
     void showUsabilityHint();
 
     /**
-     * Place the security view into bouncer mode.
-     * Animate transisiton if duration is non-zero.
-     * @param duration millisends for the transisiton animation.
-     */
-    void showBouncer(int duration);
-
-    /**
-     * Place the security view into non-bouncer mode.
-     * Animate transisiton if duration is non-zero.
-     * @param duration millisends for the transisiton animation.
-     */
-    void hideBouncer(int duration);
-
-    /**
      * Starts the animation which should run when the security view appears.
      */
     void startAppearAnimation();

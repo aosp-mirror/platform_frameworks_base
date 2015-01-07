@@ -41,6 +41,7 @@
         android:clipToPadding="false">
 
         <LinearLayout
+            android:id="@+id/container"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:orientation="vertical"
@@ -53,18 +54,10 @@
                 android:layout_height="wrap_content"
                />
 
-          <FrameLayout
-             android:id="@+id/keyguard_bouncer_frame"
-             android:layout_width="match_parent"
-             android:layout_height="0dp"
-             android:layout_weight="1"
-             android:clipChildren="false"
-             android:clipToPadding="false"
-             >
             <com.android.internal.widget.LockPatternView
                 android:id="@+id/lockPatternView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dip"
                 android:layout_marginBottom="4dip"
@@ -74,7 +67,7 @@
                 android:contentDescription="@string/keyguard_accessibility_pattern_area"
                 android:clipChildren="false"
                 android:clipToPadding="false" />
-          </FrameLayout>
+
           <include layout="@layout/keyguard_eca"
               android:id="@+id/keyguard_selector_fade_container"
               android:layout_width="match_parent"

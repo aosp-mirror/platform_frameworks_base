@@ -20,7 +20,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.text.TextUtils;
@@ -81,8 +80,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     private Rect mTempRect = new Rect();
     private SecurityMessageDisplay mSecurityMessageDisplay;
     private View mEcaView;
-    private Drawable mBouncerFrame;
-    private ViewGroup mKeyguardBouncerFrame;
+    private ViewGroup mContainer;
     private KeyguardMessageArea mHelpMessage;
     private int mDisappearYTranslation;
 
@@ -140,12 +138,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
         mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
-        View bouncerFrameView = findViewById(R.id.keyguard_bouncer_frame);
-        if (bouncerFrameView != null) {
-            mBouncerFrame = bouncerFrameView.getBackground();
-        }
-
-        mKeyguardBouncerFrame = (ViewGroup) findViewById(R.id.keyguard_bouncer_frame);
+        mContainer = (ViewGroup) findViewById(R.id.container);
         mHelpMessage = (KeyguardMessageArea) findViewById(R.id.keyguard_message_area);
     }
 
@@ -284,18 +277,6 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     @Override
-    public void showBouncer(int duration) {
-        KeyguardSecurityViewHelper.
-                showBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
-    }
-
-    @Override
-    public void hideBouncer(int duration) {
-        KeyguardSecurityViewHelper.
-                hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
-    }
-
-    @Override
     public void startAppearAnimation() {
         enableClipping(false);
         setAlpha(1f);
@@ -355,8 +336,8 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
 
     private void enableClipping(boolean enable) {
         setClipChildren(enable);
-        mKeyguardBouncerFrame.setClipToPadding(enable);
-        mKeyguardBouncerFrame.setClipChildren(enable);
+        mContainer.setClipToPadding(enable);
+        mContainer.setClipChildren(enable);
     }
 
     @Override

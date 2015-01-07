@@ -19,7 +19,7 @@
 
 <!-- This is the host view that generally contains two sub views: the widget view
     and the security view. -->
-<com.android.keyguard.KeyguardSimpleHostView
+<com.android.keyguard.KeyguardHostView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/res-auto"
     android:id="@+id/keyguard_host_view"
@@ -48,5 +48,5 @@
         </com.android.keyguard.KeyguardSecurityViewFlipper>
     </com.android.keyguard.KeyguardSecurityContainer>
 
-</com.android.keyguard.KeyguardSimpleHostView>
+</com.android.keyguard.KeyguardHostView>
 

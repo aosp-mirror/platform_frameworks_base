@@ -37,7 +37,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     protected LockPatternUtils mLockPatternUtils;
     protected SecurityMessageDisplay mSecurityMessageDisplay;
     protected View mEcaView;
-    private Drawable mBouncerFrame;
     protected boolean mEnableHaptics;
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
@@ -86,10 +85,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
         mLockPatternUtils = new LockPatternUtils(mContext);
         mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
         mEcaView = findViewById(R.id.keyguard_selector_fade_container);
-        View bouncerFrameView = findViewById(R.id.keyguard_bouncer_frame);
-        if (bouncerFrameView != null) {
-            mBouncerFrame = bouncerFrameView.getBackground();
-        }
     }
 
     /*
@@ -180,18 +175,6 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
                     HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
                     | HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
         }
-    }
-
-    @Override
-    public void showBouncer(int duration) {
-        KeyguardSecurityViewHelper.
-                showBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
-    }
-
-    @Override
-    public void hideBouncer(int duration) {
-        KeyguardSecurityViewHelper.
-                hideBouncer(mSecurityMessageDisplay, mEcaView, mBouncerFrame, duration);
     }
 
     @Override

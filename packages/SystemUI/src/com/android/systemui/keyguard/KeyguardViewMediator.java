@@ -474,11 +474,6 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
-        public void onUserActivityTimeoutChanged() {
-            mStatusBarKeyguardViewManager.updateUserActivityTimeout();
-        }
-
-        @Override
         public void keyguardDonePending() {
             mKeyguardDonePending = true;
             mHideAnimationRun = true;

@@ -46,7 +46,7 @@ import java.io.File;
  * Handles intercepting of media keys that still work when the keyguard is
  * showing.
  */
-public abstract class KeyguardViewBase extends FrameLayout implements SecurityCallback {
+public class KeyguardHostView extends FrameLayout implements SecurityCallback {
 
     public interface OnDismissAction {
         /**
@@ -61,6 +61,27 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     protected LockPatternUtils mLockPatternUtils;
     private OnDismissAction mDismissAction;
 
+    private final KeyguardUpdateMonitorCallback mUpdateCallback =
+            new KeyguardUpdateMonitorCallback() {
+
+        @Override
+        public void onUserSwitchComplete(int userId) {
+            getSecurityContainer().showPrimarySecurityScreen(false /* turning off */);
+        }
+
+        @Override
+        public void onTrustInitiatedByUser(int userId) {
+            if (userId != mLockPatternUtils.getCurrentUser()) return;
+            if (!isAttachedToWindow()) return;
+
+            if (isVisibleToUser()) {
+                dismiss(false /* authenticated */);
+            } else {
+                mViewMediatorCallback.playTrustedSound();
+            }
+        }
+    };
+
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
     // the audio service will bring up the volume dialog.
@@ -70,12 +91,13 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
 
     private KeyguardSecurityContainer mSecurityContainer;
 
-    public KeyguardViewBase(Context context) {
+    public KeyguardHostView(Context context) {
         this(context, null);
     }
 
-    public KeyguardViewBase(Context context, AttributeSet attrs) {
+    public KeyguardHostView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateCallback);
     }
 
     @Override
@@ -123,24 +145,12 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         return dismiss(false);
     }
 
-    protected void showBouncer(boolean show) {
-        CharSequence what = getContext().getResources().getText(
-                show ? R.string.keyguard_accessibility_show_bouncer
-                        : R.string.keyguard_accessibility_hide_bouncer);
-        announceForAccessibility(what);
-        announceCurrentSecurityMethod();
-    }
-
     public boolean handleBackKey() {
         if (mSecurityContainer.getCurrentSecuritySelection() != SecurityMode.None) {
             mSecurityContainer.dismiss(false);
             return true;
         }
         return false;
-    }
-
-    protected void announceCurrentSecurityMethod() {
-        mSecurityContainer.announceCurrentSecurityMethod();
     }
 
     protected KeyguardSecurityContainer getSecurityContainer() {
@@ -188,12 +198,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     public void userActivity() {
         if (mViewMediatorCallback != null) {
             mViewMediatorCallback.userActivity();
-        }
-    }
-
-    protected void onUserActivityTimeoutChanged() {
-        if (mViewMediatorCallback != null) {
-            mViewMediatorCallback.onUserActivityTimeoutChanged();
         }
     }
 
@@ -262,13 +266,9 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     /**
      * Called before this view is being removed.
      */
-    abstract public void cleanUp();
-
-    /**
-     * Gets the desired user activity timeout in milliseconds, or -1 if the
-     * default should be used.
-     */
-    abstract public long getUserActivityTimeout();
+    public void cleanUp() {
+        getSecurityContainer().onPause();
+    }
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
@@ -424,10 +424,5 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
         return mSecurityContainer.getCurrentSecurityMode();
     }
 
-    protected abstract void onUserSwitching(boolean switching);
-
-    protected abstract void onCreateOptions(Bundle options);
-
-    protected abstract void onExternalMotionEvent(MotionEvent event);
 
 }

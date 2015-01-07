@@ -24,12 +24,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardViewBase;
+import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.R;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.keyguard.KeyguardViewMediator;
 
-import static com.android.keyguard.KeyguardViewBase.OnDismissAction;
+import static com.android.keyguard.KeyguardHostView.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
 /**
@@ -42,7 +41,7 @@ public class KeyguardBouncer {
     private LockPatternUtils mLockPatternUtils;
     private ViewGroup mContainer;
     private StatusBarWindowManager mWindowManager;
-    private KeyguardViewBase mKeyguardView;
+    private KeyguardHostView mKeyguardView;
     private ViewGroup mRoot;
     private boolean mShowingSoon;
     private Choreographer mChoreographer = Choreographer.getInstance();
@@ -138,16 +137,6 @@ public class KeyguardBouncer {
         }
     }
 
-    public long getUserActivityTimeout() {
-        if (mKeyguardView != null) {
-            long timeout = mKeyguardView.getUserActivityTimeout();
-            if (timeout >= 0) {
-                return timeout;
-            }
-        }
-        return KeyguardViewMediator.AWAKE_INTERVAL_DEFAULT_MS;
-    }
-
     public boolean isShowing() {
         return mShowingSoon || (mRoot != null && mRoot.getVisibility() == View.VISIBLE);
     }
@@ -169,7 +158,7 @@ public class KeyguardBouncer {
     private void inflateView() {
         removeView();
         mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
-        mKeyguardView = (KeyguardViewBase) mRoot.findViewById(R.id.keyguard_host_view);
+        mKeyguardView = (KeyguardHostView) mRoot.findViewById(R.id.keyguard_host_view);
         mKeyguardView.setLockPatternUtils(mLockPatternUtils);
         mKeyguardView.setViewMediatorCallback(mCallback);
         mContainer.addView(mRoot, mContainer.getChildCount());
