@@ -158,6 +158,8 @@
     <string name="low_memory" product="default" msgid="3475999286680000541">"端末のストレージに空き領域がありません。ファイルを削除して空き領域を確保してください。"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ネットワークが監視される場合があります"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"不明な第三者"</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_administrator (550758088185764312) -->
+    <skip />
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>によって監視される場合があります"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"ワークプロフィールが削除されました"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"管理アプリがないためワークプロフィールが削除されました。"</string>
@@ -535,11 +537,11 @@
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"ユーザーがテレビから編集できる予定（友だちや同僚の予定も含む）を追加、削除、変更することをアプリに許可します。これによりアプリは、カレンダーの所有者から発信されたかのようなメッセージを送信したり、所有者の知らないうちに予定を変更したりできるようになる可能性があります。"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ユーザーが携帯端末から編集できる予定（友だちや同僚の予定も含む）を追加、削除、変更することをアプリに許可します。これによりアプリは、カレンダーの所有者から発信されたかのようなメッセージを送信したり、所有者の知らないうちに予定を変更したりできるようになる可能性があります。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"仮の位置情報でテスト"</string>
-    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"テスト用に仮の位置情報源を作成するか、新しい位置情報提供元をインストールします。これにより、他の位置情報源（GPS、位置情報提供元など）から返された位置情報やステータスの上書きをアプリに許可することになります。"</string>
+    <string name="permdesc_accessMockLocation" msgid="5808711039482051824">"テスト用に仮の位置情報源を作成するか、新しい位置情報提供元をインストールします。これにより、他の位置情報源（GPS、位置情報提供元など）から返された位置情報やステータスのオーバーライドをアプリに許可することになります。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"位置情報提供元のインストールを許可する"</string>
-    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"テスト用に仮の位置情報源を作成するか、新しい位置情報提供元をインストールします。これにより、他の位置情報源（GPS、位置情報提供元など）から返された位置情報やステータスをアプリが上書きできるようになる可能性があります。"</string>
+    <string name="permdesc_installLocationProvider" msgid="9066146120470591509">"テスト用に仮の位置情報源を作成するか、新しい位置情報提供元をインストールします。これにより、他の位置情報源（GPS、位置情報提供元など）から返された位置情報やステータスをアプリがオーバーライドできるようになる可能性があります。"</string>
     <string name="permlab_accessFineLocation" msgid="1191898061965273372">"正確な位置情報（GPSとネットワーク基地局）"</string>
     <string name="permdesc_accessFineLocation" msgid="5295047563564981250">"グローバルポジショニングシステム（GPS）またはネットワーク位置情報源（携帯基地局やWi-Fiなど）を利用して正確な位置情報を取得することをアプリに許可します。これらの位置情報サービスはONの状態にして、端末でアプリがサービスを利用できるようにする必要があります。アプリはこの位置情報を利用してユーザーの現在地を特定できます。また、これにより電池の消費量が増える可能性があります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="4887895362354239628">"おおよその位置情報（ネットワーク基地局）"</string>
@@ -561,7 +563,7 @@
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"注目ワード検出"</string>
     <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"注目ワード検出での音声キャプチャをアプリに許可します。キャプチャはバックグラウンドで発生しますが、その他の音声キャプチャ（例: ビデオ録画）を妨げることはありません。"</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"オーディオルーティング"</string>
-    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"オーディオルーティングの直接制御とオーディオポリシー決定の上書きをアプリに許可します。"</string>
+    <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"オーディオルーティングの直接制御とオーディオポリシー決定のオーバーライドをアプリに許可します。"</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"動画出力のキャプチャ"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"動画出力のキャプチャとリダイレクトをアプリに許可します。"</string>
     <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"セキュリティ保護された動画出力のキャプチャ"</string>
@@ -1116,7 +1118,8 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"Enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"Del"</string>
     <string name="search_go" msgid="8298016669822141719">"検索"</string>
-    <string name="search_hint" msgid="1733947260773056054">"検索…"</string>
+    <!-- no translation found for search_hint (6478518958261830568) -->
+    <skip />
     <string name="searchview_description_search" msgid="6749826639098512120">"検索"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"検索キーワード"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"検索キーワードを削除"</string>
@@ -1840,7 +1843,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"オフライン再生を解除する前にPINの入力を求める"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"画面固定を解除する前にロック解除パターンの入力を求める"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"オフライン再生を解除する前にパスワードの入力を求める"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使用するその他のアプリは、起動しても更新されないことがあります。\n\nバッテリーセーバーは端末の充電中は自動的にOFFになります。"</string>
+    <!-- no translation found for battery_saver_description (8827793659456917683) -->
+    <skip />
     <string name="downtime_condition_summary" msgid="8761776337475705749">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>にダウンロードが終わるまで"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"ダウンタイム終了まで"</string>
   <plurals name="zen_mode_duration_minutes_summary">

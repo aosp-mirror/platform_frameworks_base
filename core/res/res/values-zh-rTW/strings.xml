@@ -158,6 +158,8 @@
     <string name="low_memory" product="default" msgid="3475999286680000541">"手機儲存空間已滿。請刪除一些檔案，以釋放可用空間。"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"網路可能會受到監控"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"受到不明的第三方監控"</string>
+    <!-- no translation found for ssl_ca_cert_noti_by_administrator (550758088185764312) -->
+    <skip />
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"受到 <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> 監控"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Work 設定檔已遭刪除"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Work 設定檔因管理員應用程式遺失而遭到刪除。"</string>
@@ -169,8 +171,8 @@
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"電視選項"</string>
     <string name="power_dialog" product="default" msgid="1319919075463988638">"電話選項"</string>
     <string name="silent_mode" msgid="7167703389802618663">"靜音模式"</string>
-    <string name="turn_on_radio" msgid="3912793092339962371">"開啟無線網路"</string>
-    <string name="turn_off_radio" msgid="8198784949987062346">"關閉無線網路"</string>
+    <string name="turn_on_radio" msgid="3912793092339962371">"開啟無線電"</string>
+    <string name="turn_off_radio" msgid="8198784949987062346">"關閉無線電"</string>
     <string name="screen_lock" msgid="799094655496098153">"螢幕鎖定"</string>
     <string name="power_off" msgid="4266614107412865048">"關機"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"鈴聲關閉"</string>
@@ -1116,7 +1118,8 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"輸入"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"刪除"</string>
     <string name="search_go" msgid="8298016669822141719">"搜尋"</string>
-    <string name="search_hint" msgid="1733947260773056054">"搜尋…"</string>
+    <!-- no translation found for search_hint (6478518958261830568) -->
+    <skip />
     <string name="searchview_description_search" msgid="6749826639098512120">"搜尋"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"搜尋查詢"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"清除查詢"</string>
@@ -1840,7 +1843,8 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖形"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"節約耗電量模式會透過降低裝置效能、震動限制、定位服務限制和大多數背景資料運作限制等方式，延長電池續航力。此外，如果未開啟電子郵件、簡訊和其他需要使用同步功能的應用程式，系統將不會自動更新這些應用程式。\n\n當您為裝置充電時，節約耗電量模式會自動關閉。"</string>
+    <!-- no translation found for battery_saver_description (8827793659456917683) -->
+    <skip />
     <string name="downtime_condition_summary" msgid="8761776337475705749">"直到 <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> 停機時間結束"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"直到停機時間結束"</string>
   <plurals name="zen_mode_duration_minutes_summary">
