@@ -99,6 +99,7 @@ public class TaskPersister {
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
+    private final RecentTasks mRecentTasks;
 
     /** Value determines write delay mode as follows:
      *    < 0 We are Flushing. No delays between writes until the image queue is drained and all
@@ -138,7 +139,8 @@ public class TaskPersister {
     // tasks.
     private long mExpiredTasksCleanupTime = Long.MAX_VALUE;
 
-    TaskPersister(File systemDir, ActivityStackSupervisor stackSupervisor) {
+    TaskPersister(File systemDir, ActivityStackSupervisor stackSupervisor,
+            RecentTasks recentTasks) {
         sTasksDir = new File(systemDir, TASKS_DIRNAME);
         if (!sTasksDir.exists()) {
             if (DEBUG_PERSISTER) Slog.d(TAG, "Creating tasks directory " + sTasksDir);
@@ -159,12 +161,14 @@ public class TaskPersister {
 
         mStackSupervisor = stackSupervisor;
         mService = stackSupervisor.mService;
-
+        mRecentTasks = recentTasks;
         mLazyTaskWriterThread = new LazyTaskWriterThread("LazyTaskWriterThread");
     }
 
     void startPersisting() {
-        mLazyTaskWriterThread.start();
+        if (!mLazyTaskWriterThread.isAlive()) {
+            mLazyTaskWriterThread.start();
+        }
     }
 
     private void removeThumbnails(TaskRecord task) {
@@ -704,10 +708,9 @@ public class TaskPersister {
                     // {@link TaskRecord.mLastTimeMoved} and drop the oldest recent's vs. just
                     // adding to the back of the list.
                     int spaceLeft =
-                            ActivityManager.getMaxRecentTasksStatic()
-                            - mService.mRecentTasks.size();
+                            ActivityManager.getMaxRecentTasksStatic() - mRecentTasks.size();
                     if (spaceLeft >= tasks.size()) {
-                        mService.mRecentTasks.addAll(mService.mRecentTasks.size(), tasks);
+                        mRecentTasks.addAll(mRecentTasks.size(), tasks);
                         for (int k = tasks.size() - 1; k >= 0; k--) {
                             // Persist new tasks.
                             wakeup(tasks.get(k), false);
@@ -860,10 +863,9 @@ public class TaskPersister {
                     if (DEBUG_PERSISTER) Slog.d(TAG, "Looking for obsolete files.");
                     persistentTaskIds.clear();
                     synchronized (mService) {
-                        final ArrayList<TaskRecord> tasks = mService.mRecentTasks;
-                        if (DEBUG_PERSISTER) Slog.d(TAG, "mRecents=" + tasks);
-                        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-                            final TaskRecord task = tasks.get(taskNdx);
+                        if (DEBUG_PERSISTER) Slog.d(TAG, "mRecents=" + mRecentTasks);
+                        for (int taskNdx = mRecentTasks.size() - 1; taskNdx >= 0; --taskNdx) {
+                            final TaskRecord task = mRecentTasks.get(taskNdx);
                             if (DEBUG_PERSISTER) Slog.d(TAG, "LazyTaskWriter: task=" + task +
                                     " persistable=" + task.isPersistable);
                             if ((task.isPersistable || task.inRecents)

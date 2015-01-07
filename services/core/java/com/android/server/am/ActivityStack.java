@@ -146,6 +146,7 @@ final class ActivityStack {
 
     final ActivityManagerService mService;
     final WindowManagerService mWindowManager;
+    private final RecentTasks mRecentTasks;
 
     /**
      * The back history of all previous (and possibly still
@@ -337,7 +338,8 @@ final class ActivityStack {
         return count;
     }
 
-    ActivityStack(ActivityStackSupervisor.ActivityContainer activityContainer) {
+    ActivityStack(ActivityStackSupervisor.ActivityContainer activityContainer,
+            RecentTasks recentTasks) {
         mActivityContainer = activityContainer;
         mStackSupervisor = activityContainer.getOuter();
         mService = mStackSupervisor.mService;
@@ -345,6 +347,7 @@ final class ActivityStack {
         mWindowManager = mService.mWindowManager;
         mStackId = activityContainer.mStackId;
         mCurrentUser = mService.mCurrentUserId;
+        mRecentTasks = recentTasks;
     }
 
     /**
@@ -643,7 +646,7 @@ final class ActivityStack {
         r.stopped = false;
         mResumedActivity = r;
         r.task.touchActiveTime();
-        mService.addRecentTaskLocked(r.task);
+        mRecentTasks.addLocked(r.task);
         completeResumeLocked(r);
         mStackSupervisor.checkReadyForSleepLocked();
         setLaunchTime(r);
@@ -1760,7 +1763,7 @@ final class ActivityStack {
             next.state = ActivityState.RESUMED;
             mResumedActivity = next;
             next.task.touchActiveTime();
-            mService.addRecentTaskLocked(next.task);
+            mRecentTasks.addLocked(next.task);
             mService.updateLruProcessLocked(next.app, true, null);
             updateLRUListLocked(next);
             mService.updateOomAdjLocked();
@@ -4075,7 +4078,7 @@ final class ActivityStack {
             if (task.autoRemoveFromRecents() || isVoiceSession) {
                 // Task creator asked to remove this when done, or this task was a voice
                 // interaction, so it should not remain on the recent tasks list.
-                mService.mRecentTasks.remove(task);
+                mRecentTasks.remove(task);
                 task.removedFromRecents();
             }
         }
