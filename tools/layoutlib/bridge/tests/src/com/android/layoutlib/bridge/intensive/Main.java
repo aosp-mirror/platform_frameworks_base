@@ -283,6 +283,7 @@ public class Main {
         }
         String goldenDataDir = APP_TEST_RES + "/../../../golden/";
         try {
+            goldenDataDir = new File(goldenDataDir).getAbsolutePath();
             ImageUtils.requireSimilar(goldenDataDir + "activity.png", session.getImage());
         } catch (IOException e) {
             getLogger().error(e, e.getMessage());
