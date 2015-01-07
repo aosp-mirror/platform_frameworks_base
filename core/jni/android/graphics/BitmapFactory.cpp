@@ -63,7 +63,7 @@ jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format) {
         { SkImageDecoder::kWBMP_Format, "image/vnd.wap.wbmp" }
     };
 
-    const char* cstr = NULL;
+    const char* cstr = nullptr;
     for (size_t i = 0; i < SK_ARRAY_COUNT(gMimeTypes); i++) {
         if (gMimeTypes[i].fFormat == format) {
             cstr = gMimeTypes[i].fMimeType;
@@ -71,8 +71,10 @@ jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format) {
         }
     }
 
-    jstring jstr = 0;
-    if (NULL != cstr) {
+    jstring jstr = nullptr;
+    if (cstr != nullptr) {
+        // NOTE: Caller should env->ExceptionCheck() for OOM
+        // (can't check for nullptr as it's a valid return value)
         jstr = env->NewStringUTF(cstr);
     }
     return jstr;
@@ -324,10 +326,13 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     // update options (if any)
     if (options != NULL) {
+        jstring mimeType = getMimeTypeString(env, decoder->getFormat());
+        if (env->ExceptionCheck()) {
+            return nullObjectReturn("OOM in getMimeTypeString()");
+        }
         env->SetIntField(options, gOptions_widthFieldID, scaledWidth);
         env->SetIntField(options, gOptions_heightFieldID, scaledHeight);
-        env->SetObjectField(options, gOptions_mimeFieldID,
-                getMimeTypeString(env, decoder->getFormat()));
+        env->SetObjectField(options, gOptions_mimeFieldID, mimeType);
     }
 
     // if we're in justBounds mode, return now (skip the java bitmap)
