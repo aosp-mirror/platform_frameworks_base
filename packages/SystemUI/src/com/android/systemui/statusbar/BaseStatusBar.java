@@ -1808,10 +1808,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         setShowLockscreenNotifications(show && allowedByDpm);
     }
 
-    protected abstract void haltTicker();
     protected abstract void setAreThereNotifications();
     protected abstract void updateNotifications();
-    protected abstract void tick(StatusBarNotification n, boolean firstTime);
     protected abstract void updateExpandedViewPos(int expandedPosition);
     protected abstract boolean shouldDisableNavbarGestures();
 
@@ -1897,9 +1895,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                         && oldPublicContentView.getPackage() != null
                         && oldPublicContentView.getPackage().equals(publicContentView.getPackage())
                         && oldPublicContentView.getLayoutId() == publicContentView.getLayoutId());
-        boolean updateTicker = n.tickerText != null
-                && !TextUtils.equals(n.tickerText,
-                oldEntry.notification.getNotification().tickerText);
 
         final boolean shouldInterrupt = shouldInterrupt(notification);
         final boolean alertAgain = alertAgain(oldEntry, n);
@@ -2004,12 +1999,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Is this for you?
         boolean isForCurrentUser = isNotificationForCurrentProfiles(notification);
         if (DEBUG) Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
-
-        // Restart the ticker if it's still running
-        if (updateTicker && isForCurrentUser) {
-            haltTicker();
-            tick(notification, false);
-        }
 
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();

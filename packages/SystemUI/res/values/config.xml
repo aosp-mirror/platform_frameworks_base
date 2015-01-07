@@ -222,11 +222,6 @@
          be 'platform' or 'noisy' (i.e. for noisy touch screens). -->
     <string name="velocity_tracker_impl" translatable="false">platform</string>
 
-    <!-- Set to true to enable the classic notification ticker that scrolls
-         Notification.tickerText across the status bar for what seems like an
-         eternity. -->
-    <bool name="enable_ticker">false</bool>
-
     <!-- Set to true to enable the user switcher on the keyguard. -->
     <bool name="config_keyguardUserSwitcher">false</bool>
 

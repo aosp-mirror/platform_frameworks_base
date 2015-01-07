@@ -342,12 +342,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // the tracker view
     int mTrackingPosition; // the position of the top of the tracking view.
 
-    // ticker
-    private boolean mTickerEnabled;
-    private Ticker mTicker;
-    private View mTickerView;
-    private boolean mTicking;
-
     // Tracking finger for opening/closing.
     int mEdgeBorder; // corresponds to R.dimen.status_bar_edge_ignore
     boolean mTracking;
@@ -773,18 +767,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 (KeyguardIndicationTextView) mStatusBarWindow.findViewById(
                         R.id.keyguard_indication_text));
         mKeyguardBottomArea.setKeyguardIndicationController(mKeyguardIndicationController);
-
-        mTickerEnabled = res.getBoolean(R.bool.enable_ticker);
-        if (mTickerEnabled) {
-            final ViewStub tickerStub = (ViewStub) mStatusBarView.findViewById(R.id.ticker_stub);
-            if (tickerStub != null) {
-                mTickerView = tickerStub.inflate();
-                mTicker = new MyTicker(context, mStatusBarView);
-
-                TickerView tickerView = (TickerView) mStatusBarView.findViewById(R.id.tickerText);
-                tickerView.mTicker = mTicker;
-            }
-        }
 
         mEdgeBorder = res.getDimensionPixelSize(R.dimen.status_bar_edge_ignore);
 
@@ -1341,13 +1323,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 notification.getNotification().fullScreenIntent.send();
             } catch (PendingIntent.CanceledException e) {
             }
-        } else {
-            // usual case: status bar visible & not immersive
-
-            // show the ticker if there isn't already a heads up
-            if (mHeadsUpNotificationView.getEntry() == null) {
-                tick(notification, true);
-            }
         }
         addNotificationViews(shadeEntry, ranking);
         // Recalculate the position of the sliding windows and the titles.
@@ -1412,10 +1387,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         if (SPEW) Log.d(TAG, "removeNotification key=" + key + " old=" + old);
 
         if (old != null) {
-            // Cancel the ticker if it's still running
-            if (mTickerEnabled) {
-                mTicker.removeEntry(old);
-            }
 
             // Recalculate the position of the sliding windows and the titles.
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
@@ -2063,9 +2034,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-                if (mTicking) {
-                    haltTicker();
-                }
                 animateStatusBarHide(mNotificationIconArea, animate);
             } else {
                 animateStatusBarShow(mNotificationIconArea, animate);
@@ -2588,9 +2556,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 final boolean lightsOut = (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0;
                 if (lightsOut) {
                     animateCollapsePanels();
-                    if (mTicking) {
-                        haltTicker();
-                    }
                 }
 
                 setAreThereNotifications();
@@ -2806,90 +2771,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         setNavigationIconHints(flags);
     }
 
-    @Override
-    protected void tick(StatusBarNotification n, boolean firstTime) {
-        if (!mTickerEnabled) return;
-
-        // no ticking in lights-out mode
-        if (!areLightsOn()) return;
-
-        // no ticking in Setup
-        if (!isDeviceProvisioned()) return;
-
-        // not for you
-        if (!isNotificationForCurrentProfiles(n)) return;
-
-        // Show the ticker if one is requested. Also don't do this
-        // until status bar window is attached to the window manager,
-        // because...  well, what's the point otherwise?  And trying to
-        // run a ticker without being attached will crash!
-        if (n.getNotification().tickerText != null && mStatusBarWindow != null
-                && mStatusBarWindow.getWindowToken() != null) {
-            if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
-                    | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
-                mTicker.addEntry(n);
-            }
-        }
-    }
-
-    private class MyTicker extends Ticker {
-        MyTicker(Context context, View sb) {
-            super(context, sb);
-            if (!mTickerEnabled) {
-                Log.w(TAG, "MyTicker instantiated with mTickerEnabled=false", new Throwable());
-            }
-        }
-
-        @Override
-        public void tickerStarting() {
-            if (!mTickerEnabled) return;
-            mTicking = true;
-            mStatusBarContents.setVisibility(View.GONE);
-            mTickerView.setVisibility(View.VISIBLE);
-            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_up_in, null));
-            mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_up_out, null));
-        }
-
-        @Override
-        public void tickerDone() {
-            if (!mTickerEnabled) return;
-            mStatusBarContents.setVisibility(View.VISIBLE);
-            mTickerView.setVisibility(View.GONE);
-            mStatusBarContents.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
-            mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_down_out,
-                        mTickingDoneListener));
-        }
-
-        public void tickerHalting() {
-            if (!mTickerEnabled) return;
-            if (mStatusBarContents.getVisibility() != View.VISIBLE) {
-                mStatusBarContents.setVisibility(View.VISIBLE);
-                mStatusBarContents
-                        .startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
-            }
-            mTickerView.setVisibility(View.GONE);
-            // we do not animate the ticker away at this point, just get rid of it (b/6992707)
-        }
-    }
-
-    Animation.AnimationListener mTickingDoneListener = new Animation.AnimationListener() {;
-        public void onAnimationEnd(Animation animation) {
-            mTicking = false;
-        }
-        public void onAnimationRepeat(Animation animation) {
-        }
-        public void onAnimationStart(Animation animation) {
-        }
-    };
-
-    private Animation loadAnim(int id, Animation.AnimationListener listener) {
-        Animation anim = AnimationUtils.loadAnimation(mContext, id);
-        if (listener != null) {
-            anim.setAnimationListener(listener);
-        }
-        return anim;
-    }
-
     public static String viewInfo(View v) {
         return "[(" + v.getLeft() + "," + v.getTop() + ")(" + v.getRight() + "," + v.getBottom()
                 + ") " + v.getWidth() + "x" + v.getHeight() + "]";
@@ -2900,11 +2781,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             pw.println("Current Status Bar state:");
             pw.println("  mExpandedVisible=" + mExpandedVisible
                     + ", mTrackingPosition=" + mTrackingPosition);
-            pw.println("  mTickerEnabled=" + mTickerEnabled);
-            if (mTickerEnabled) {
-                pw.println("  mTicking=" + mTicking);
-                pw.println("  mTickerView: " + viewInfo(mTickerView));
-            }
             pw.println("  mTracking=" + mTracking);
             pw.println("  mDisplayMetrics=" + mDisplayMetrics);
             pw.println("  mStackScroller: " + viewInfo(mStackScroller));
@@ -3442,13 +3318,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             vibrate();
         }
     };
-
-    @Override
-    protected void haltTicker() {
-        if (mTickerEnabled) {
-            mTicker.halt();
-        }
-    }
 
     @Override
     protected boolean shouldDisableNavbarGestures() {

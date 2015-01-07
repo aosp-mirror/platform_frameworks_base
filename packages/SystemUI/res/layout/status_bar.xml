@@ -97,12 +97,4 @@
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
 
-    <ViewStub
-        android:id="@+id/ticker_stub"
-        android:inflatedId="@+id/ticker"
-        android:layout="@layout/status_bar_ticker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
-
 </com.android.systemui.statusbar.phone.PhoneStatusBarView>
