@@ -25,6 +25,7 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.IccCardConstants;
+import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.R;
 
@@ -254,16 +255,6 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         setCdmaRoaming(false);
     }
 
-    public void testOnReceive_updateSimState_noSim() {
-        Intent intent = new Intent();
-        intent.setAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-        intent.putExtra(IccCardConstants.INTENT_KEY_ICC_STATE, IccCardConstants.INTENT_VALUE_ICC_ABSENT);
-
-        mNetworkController.onReceive(mContext, intent);
-
-        assertSimStateEquals(IccCardConstants.State.ABSENT);
-    }
-
     public void testOnReceive_stringsUpdatedAction_spn() {
         String expectedMNetworkName = "Test";
         Intent intent = createStringsUpdatedIntent(true /* showSpn */,
@@ -344,6 +335,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
         intent.putExtra(TelephonyIntents.EXTRA_SHOW_PLMN, showPlmn);
         intent.putExtra(TelephonyIntents.EXTRA_PLMN, plmn);
+        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, mSubId);
 
         return intent;
     }

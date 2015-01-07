@@ -69,6 +69,8 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
     protected TelephonyManager mMockTm;
     protected Config mConfig;
 
+    protected int mSubId;
+
     private NetworkCapabilities mNetCapabilities;
 
     @Override
@@ -100,13 +102,13 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
 
     protected void setupNetworkController() {
         // For now just pretend to be the data sim, so we can test that too.
-        final int subId = SubscriptionManager.getDefaultDataSubId();
+        mSubId = SubscriptionManager.getDefaultDataSubId();
         SubscriptionInfo subscription = mock(SubscriptionInfo.class);
         List<SubscriptionInfo> subs = new ArrayList<SubscriptionInfo>();
-        when(subscription.getSubscriptionId()).thenReturn(subId);
+        when(subscription.getSubscriptionId()).thenReturn(mSubId);
         subs.add(subscription);
         mNetworkController.setCurrentSubscriptions(subs);
-        mMobileSignalController = mNetworkController.mMobileSignalControllers.get(subId);
+        mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
         mPhoneStateListener = mMobileSignalController.mPhoneStateListener;
         mSignalCluster = mock(SignalCluster.class);
         mNetworkSignalChangedCallback = mock(NetworkSignalChangedCallback.class);
@@ -290,10 +292,6 @@ public class NetworkControllerBaseTest extends AndroidTestCase {
         assertEquals("Data icon in status bar", typeIcon, (int) typeIconArg.getValue());
         assertEquals("Visibility in status bar", visible, (boolean) visibleArg.getValue());
     }
-
-   protected void assertSimStateEquals(IccCardConstants.State expected) {
-       assertEquals("Sim state", expected, mMobileSignalController.getSimState());
-   }
 
    protected void assertNetworkNameEquals(String expected) {
        assertEquals("Network name", expected, mNetworkController.getMobileNetworkName());

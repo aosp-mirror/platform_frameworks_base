@@ -57,7 +57,6 @@ public class MobileSignalController extends SignalController<
     // Since some pieces of the phone state are interdependent we store it locally,
     // this could potentially become part of MobileState for simplification/complication
     // of code.
-    private IccCardConstants.State mSimState = IccCardConstants.State.READY;
     private int mDataNetType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     private int mDataState = TelephonyManager.DATA_DISCONNECTED;
     private ServiceState mServiceState;
@@ -144,11 +143,6 @@ public class MobileSignalController extends SignalController<
 
     public int getDataContentDescription() {
         return getIcons().mDataContentDescription;
-    }
-
-    @VisibleForTesting
-    protected IccCardConstants.State getSimState() {
-        return mSimState;
     }
 
     public void setAirplaneMode(boolean airplaneMode) {
