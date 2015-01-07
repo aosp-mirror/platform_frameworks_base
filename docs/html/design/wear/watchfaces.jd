@@ -112,17 +112,17 @@ designs should take these modes into account. Generally, if your watch face desi
 in ambient mode, it will look even better in interactive mode. The opposite is not always
 true.</p>
 
-<p>In ambient mode, the screen is only updated once every minute. Only show hours and minutes
-in ambient mode; do not show seconds in this mode.</p>
-
 <h3>Interactive mode</h3>
 <p>When the user moves their wrist to glance at their watch, the screen goes into interactive
 mode. Your design can use full color with fluid animation in this mode.</p>
 
 <h3>Ambient mode</h3>
-<p>Ambient mode helps the device conserve power. In this mode, the screen only displays shades
-of grey, black, and white. Your watch face is notified when the device switches to ambient mode,
-and you should thoughtfully design for it.</p>
+<p>Ambient mode helps the device conserve power. Your design should make clear to the user that
+the screen is in ambient mode by using only grayscale colors. Do not use a lot of white in ambient
+mode, since this distracting and hurts battery life on some screens. In this mode, the screen
+is only updated once every minute. Only show hours and minutes in ambient mode; do not show
+seconds. Your watch face is notified when the device switches to ambient mode, and you should
+thoughtfully design for it.</p>
 
 
 
