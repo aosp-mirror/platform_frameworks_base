@@ -182,11 +182,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     private void displayDefaultSecurityMessage() {
-        if (mKeyguardUpdateMonitor.getMaxBiometricUnlockAttemptsReached()) {
-            mSecurityMessageDisplay.setMessage(R.string.faceunlock_multiple_failures, true);
-        } else {
-            mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions, false);
-        }
+        mSecurityMessageDisplay.setMessage(R.string.kg_pattern_instructions, false);
     }
 
     @Override
