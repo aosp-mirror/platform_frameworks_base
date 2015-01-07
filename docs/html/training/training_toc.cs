@@ -978,6 +978,12 @@ include the action bar on devices running Android 2.1 or higher."
            description="How to build Live TV apps.">
            Building Live TV Apps</a>
       </li>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/tv/publishing/checklist.html"
+           description="An itemized list of requirements for TV apps.">
+           TV Apps Checklist</a>
+      </li>
     </ul>
   </li>
   <!-- End: Building for TV -->
