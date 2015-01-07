@@ -183,7 +183,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *   Then obtain the Surface with
      *   {@link android.renderscript.Allocation#getSurface}.</li>
      *
-     * <li>For access to raw, uncompressed JPEG data in the application: Create an
+     * <li>For access to RAW, uncompressed YUV, or compressed JPEG data in the application: Create an
      *   {@link android.media.ImageReader} object with one of the supported output formats given by
      *   {@link StreamConfigurationMap#getOutputFormats()}, setting its size to one of the
      *   corresponding supported sizes by passing the chosen output format into
