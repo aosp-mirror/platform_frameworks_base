@@ -262,6 +262,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"भयो"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"जोडिएको"</string>
     <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"Wi-Fi सहायक द्वारा जोडिएको"</string>
+    <string name="quick_settings_saved" msgid="4758747300943481411">"सुरक्षित गरियो"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"जडान हुँदै..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"टेदर गर्दै"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"हटस्पट"</string>

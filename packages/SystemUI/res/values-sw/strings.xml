@@ -262,6 +262,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Nimemaliza"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Imeunganishwa"</string>
     <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"Imeunganishwa kupitia Kisaidizi cha Wi-Fi"</string>
+    <string name="quick_settings_saved" msgid="4758747300943481411">"Kilichohifadhiwa"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Inaunganisha..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Kusambaza mtandao"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Mtandao-hewa"</string>
