@@ -132,11 +132,6 @@ public abstract class KeyguardViewBase extends FrameLayout implements SecurityCa
     }
 
     public boolean handleBackKey() {
-        if (mSecurityContainer.getCurrentSecuritySelection() == SecurityMode.Account) {
-            // go back to primary screen
-            mSecurityContainer.showPrimarySecurityScreen(false /*turningOff*/);
-            return true;
-        }
         if (mSecurityContainer.getCurrentSecuritySelection() != SecurityMode.None) {
             mSecurityContainer.dismiss(false);
             return true;

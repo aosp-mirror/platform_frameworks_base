@@ -41,7 +41,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private static final int USER_TYPE_SECONDARY_USER = 3;
 
     private KeyguardSecurityModel mSecurityModel;
-    private boolean mEnableFallback; // TODO: This should get the value from KeyguardPatternView
     private LockPatternUtils mLockPatternUtils;
 
     private KeyguardSecurityViewFlipper mSecurityViewFlipper;
@@ -198,7 +197,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 messageId = R.string.kg_too_many_failed_password_attempts_dialog_message;
                 break;
             // These don't have timeout dialogs.
-            case Account:
             case Invalid:
             case None:
             case SimPin:
@@ -305,17 +303,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
         } else {
             showTimeout =
                 (failedAttempts % LockPatternUtils.FAILED_ATTEMPTS_BEFORE_TIMEOUT) == 0;
-            if (usingPattern && mEnableFallback) {
-                if (failedAttempts == failedAttemptWarning) {
-                    showAlmostAtAccountLoginDialog();
-                    showTimeout = false; // don't show both dialogs
-                } else if (failedAttempts >= LockPatternUtils.FAILED_ATTEMPTS_BEFORE_RESET) {
-                    mLockPatternUtils.setPermanentlyLocked(true);
-                    showSecurityScreen(SecurityMode.Account);
-                    // don't show timeout dialog because we show account unlock screen next
-                    showTimeout = false;
-                }
-            }
         }
         monitor.reportFailedUnlockAttempt();
         mLockPatternUtils.reportFailedPasswordAttempt();
@@ -377,7 +364,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 case Pattern:
                 case Password:
                 case PIN:
-                case Account:
                     finish = true;
                     break;
 
@@ -522,7 +508,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             case Pattern: return R.id.keyguard_pattern_view;
             case PIN: return R.id.keyguard_pin_view;
             case Password: return R.id.keyguard_password_view;
-            case Account: return R.id.keyguard_account_view;
             case SimPin: return R.id.keyguard_sim_pin_view;
             case SimPuk: return R.id.keyguard_sim_puk_view;
         }
@@ -534,7 +519,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             case Pattern: return R.layout.keyguard_pattern_view;
             case PIN: return R.layout.keyguard_pin_view;
             case Password: return R.layout.keyguard_password_view;
-            case Account: return R.layout.keyguard_account_view;
             case SimPin: return R.layout.keyguard_sim_pin_view;
             case SimPuk: return R.layout.keyguard_sim_puk_view;
             default:
