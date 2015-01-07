@@ -696,6 +696,14 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     if (skip_compilation) {
         addOption("-Xcompiler-option");
         addOption("--compiler-filter=verify-none");
+
+        // We skip compilation when a minimal runtime is brought up for decryption. In that case
+        // /data is temporarily backed by a tmpfs, which is usually small.
+        // If the system image contains prebuilts, they will be relocated into the tmpfs. In this
+        // specific situation it is acceptable to *not* relocate and run out of the prebuilts
+        // directly instead.
+        addOption("--runtime-arg");
+        addOption("-Xnorelocate");
     } else {
         parseCompilerOption("dalvik.vm.dex2oat-filter", dex2oatCompilerFilterBuf,
                             "--compiler-filter=", "-Xcompiler-option");
