@@ -945,7 +945,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         List<ResolveInfo> installedServices = mPackageManager.queryIntentServicesAsUser(
                 new Intent(AccessibilityService.SERVICE_INTERFACE),
-                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA,
+                PackageManager.GET_SERVICES 
+                  | PackageManager.GET_META_DATA 
+                  | PackageManager.GET_DISABLED_UNTIL_USED_COMPONENTS,
                 mCurrentUserId);
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {
