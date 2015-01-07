@@ -7034,73 +7034,14 @@
     <!-- =============================== -->
     <eat-comment />
     <declare-styleable name="GlowPadView">
-        <!-- Reference to an array resource that be shown as targets around a circle. -->
-        <attr name="targetDrawables" format="reference" />
-
-        <!-- Reference to an array resource that be used as description for the targets around the circle. -->
+        <!-- Reference to an array resource that be used as description for the targets around the circle.
+             {@deprecated Removed.} -->
         <attr name="targetDescriptions" format="reference" />
 
-        <!-- Reference to an array resource that be used to announce the directions with targets around the circle. -->
+        <!-- Reference to an array resource that be used to announce the directions with targets around the circle.
+             {@deprecated Removed.}-->
         <attr name="directionDescriptions" format="reference" />
-
-        <!-- Sets a drawable as the center. -->
-        <attr name="handleDrawable" format="reference" />
-
-        <!-- Drawable to use for wave ripple animation. -->
-        <attr name="outerRingDrawable" format="reference"/>
-
-        <!-- Drawble used for drawing points -->
-        <attr name="pointDrawable" format="reference" />
-
-        <!-- Inner radius of glow area. -->
-        <attr name="innerRadius"/>
-
-        <!-- Outer radius of glow area. Target icons will be drawn on this circle. -->
-        <attr name="outerRadius" format="dimension" />
-
-        <!-- Radius of glow under finger. -->
-        <attr name="glowRadius" format="dimension" />
-
-        <!-- Tactile feedback duration for actions. Set to '0' for no vibration. -->
-        <attr name="vibrationDuration" format="integer" />
-
-        <!-- How close we need to be before snapping to a target. -->
-        <attr name="snapMargin" format="dimension" />
-
-        <!-- Number of waves/chevrons to show in animation. -->
-        <attr name="feedbackCount" format="integer" />
-
-        <!-- Used when the handle shouldn't wait to be hit before following the finger -->
-        <attr name="alwaysTrackFinger" format="boolean" />
-
-        <!-- Location along the circle of the first item, in degrees.-->
-        <attr name="firstItemOffset" format="float" />
-
-        <!-- Causes targets to snap to the finger location on activation. -->
-        <attr name="magneticTargets" format="boolean" />
-
-        <attr name="gravity" />
-
-        <!-- Determine whether the glow pad is allowed to scale to fit the bounds indicated
-            by its parent. If this is set to false, no scaling will occur. If this is set to true
-            scaling will occur to fit for any axis in which gravity is set to center. -->
-        <attr name="allowScaling" format="boolean" />
     </declare-styleable>
-
-    <!-- =============================== -->
-    <!-- SizeAdaptiveLayout class attributes -->
-    <!-- =============================== -->
-    <eat-comment />
-    <declare-styleable name="SizeAdaptiveLayout_Layout">
-      <!-- The maximum valid height for this item. -->
-      <attr name="layout_maxHeight" format="dimension">
-        <!-- Indicates that the view may be resized arbitrarily large. -->
-        <enum name="unbounded" value="-1" />
-      </attr>
-      <!-- The minimum valid height for this item. -->
-      <attr name="layout_minHeight" format="dimension" />
-    </declare-styleable>
-    <declare-styleable name="SizeAdaptiveLayout" />
 
     <!-- =============================== -->
     <!-- Location package class attributes -->
@@ -7509,38 +7450,12 @@
         <enum name="pageDeleteDropTarget" value="7" />
     </attr>
 
-    <declare-styleable name="SlidingChallengeLayout_Layout">
-        <attr name="layout_childType" />
-        <attr name="layout_maxHeight" />
-    </declare-styleable>
-
     <!-- Attributes that can be used with <code>&lt;FragmentBreadCrumbs&gt;</code>
     tags. -->
     <declare-styleable name="FragmentBreadCrumbs">
         <attr name="gravity" />
         <attr name="itemLayout" format="reference" />
         <attr name="itemColor" format="color|reference" />
-    </declare-styleable>
-
-    <declare-styleable name="MultiPaneChallengeLayout">
-        <!-- Influences how layout_centerWithinArea behaves -->
-        <attr name="orientation" />
-    </declare-styleable>
-
-    <declare-styleable name="MultiPaneChallengeLayout_Layout">
-        <!-- Percentage of the screen this child should consume or center within.
-             If 0/default, the view will be measured by standard rules
-             as if this were a FrameLayout. -->
-        <attr name="layout_centerWithinArea" format="float" />
-        <attr name="layout_childType" />
-        <attr name="layout_gravity" />
-        <attr name="layout_maxWidth" format="dimension" />
-        <attr name="layout_maxHeight" />
-    </declare-styleable>
-
-    <declare-styleable name="KeyguardSecurityViewFlipper_Layout">
-        <attr name="layout_maxWidth" />
-        <attr name="layout_maxHeight" />
     </declare-styleable>
 
     <declare-styleable name="Toolbar">

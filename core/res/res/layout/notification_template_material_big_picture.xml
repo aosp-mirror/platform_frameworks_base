@@ -16,12 +16,9 @@
   -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:internal="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/status_bar_latest_event_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    internal:layout_minHeight="65dp"
-    internal:layout_maxHeight="unbounded"
     >
     <ImageView
         android:id="@+id/big_picture"
