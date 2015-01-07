@@ -3619,6 +3619,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (task == null) {
                 throw new IllegalArgumentException("Task " + taskId + " not found.");
             }
+            if (task.getRootActivity() != null) {
+                moveTaskToFrontLocked(task.taskId, 0, null);
+                return ActivityManager.START_TASK_TO_FRONT;
+            }
             callingUid = task.mCallingUid;
             callingPackage = task.mCallingPackage;
             intent = task.intent;
@@ -19445,20 +19449,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public void moveToFront() {
             checkCaller();
-
-            final TaskRecord tr;
-            synchronized (ActivityManagerService.this) {
-                tr = recentTaskForIdLocked(mTaskId);
-                if (tr == null) {
-                    throw new IllegalArgumentException("Unable to find task ID " + mTaskId);
-                }
-                if (tr.getRootActivity() != null) {
-                    moveTaskToFrontLocked(tr.taskId, 0, null);
-                    return;
-                }
-            }
-
-            startActivityFromRecentsInner(tr.taskId, null);
+            // Will bring task to front if it already has a root activity.
+            startActivityFromRecentsInner(mTaskId, null);
         }
 
         @Override
