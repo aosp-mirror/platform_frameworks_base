@@ -90,7 +90,6 @@ enhancements. </p>
     <p>The <em>Ctrl + D</em> key binding is great for quickly duplicating code lines or fragments.
     Simply select the desired line or fragment and enter this key binding. </p>
 
-
     <h3>Navigate menu</h3>
     <p>In case you're not familiar with an API class, file or symbol, the <em>Navigate</em> menu lets
     you jump directly to the class of a method or field name without having to search through
@@ -157,12 +156,9 @@ enhancements. </p>
 
 <p class="note"><strong>Note:</strong> This section lists Android Studio keyboard shortcuts
 for the default keymap. To change the default keymap on Windows and Linux, go to
-<strong>File</strong> &gt; <strong>Settings</strong> &gt; <strong>Keymap</strong>. To change
-the default keymap on Mac OS X, go to <strong>Android Studio</strong> &gt;
-<strong>Preferences</strong> &gt; <strong>Keymap</strong>.</p>
-
-<p class="note"><strong>Note:</strong> If you're using Mac OS X, update your keymap to use
-the Mac OS X 10.5+ version keymaps under <strong>Android Studio > Preferences > Keymap</strong>.</p>
+<strong>File</strong> &gt; <strong>Settings</strong> &gt; <strong>Keymap</strong>. If you're
+using Mac OS X, update your keymap to use the Mac OS X 10.5+ version keymaps under
+<strong>Android Studio > Preferences > Keymap</strong>.</p>
 
 
 <p class="table-caption"><strong>Table 1.</strong> Programming key commands</p>
