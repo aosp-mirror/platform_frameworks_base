@@ -540,11 +540,6 @@ public class SearchManager
 
     private final Context mContext;
 
-    /**
-     * The package associated with this seach manager.
-     */
-    private String mAssociatedPackage;
-
     // package private since they are used by the inner class SearchManagerCallback
     /* package */ final Handler mHandler;
     /* package */ OnDismissListener mDismissListener = null;
@@ -742,10 +737,6 @@ public class SearchManager
     public void triggerSearch(String query,
                               ComponentName launchActivity,
                               Bundle appSearchData) {
-        if (!mAssociatedPackage.equals(launchActivity.getPackageName())) {
-            throw new IllegalArgumentException("invoking app search on a different package " +
-                    "not associated with this search manager");
-        }
         if (query == null || TextUtils.getTrimmedLength(query) == 0) {
             Log.w(TAG, "triggerSearch called with empty query, ignoring.");
             return;
