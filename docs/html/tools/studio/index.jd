@@ -211,7 +211,7 @@ to refer to your R class and to resolve any relative activity/service registrati
    <strong>package="com.example.app"</strong>>
    </pre>
 
-<p class="note"><strong>Note:</strong> If you have multiple manifests (for exmample, a product
+<p class="note"><strong>Note:</strong> If you have multiple manifests (for example, a product
 flavor specific manifest and a build type manifest), the package name is optional in those manifests.
 If it is specified in those manifests, the package name must be identical to the package name
 specified in the manifest in the <code>src/main/</code> folder. </p>
@@ -317,7 +317,7 @@ the device display. </p>
 (logcat) in the DDMS pane by clicking <strong>Android</strong> at the bottom of the window.</p>
 
 <p>If you want to debug your app with the
-<ahref="{@docRoot}tools/help/monitor.html">Android Debug Monitor</a>, you can launch it by
+<a href="{@docRoot}tools/help/monitor.html">Android Debug Monitor</a>, you can launch it by
 clicking <strong>Monitor</strong>
 <img src="{@docRoot}images/tools/monitor-studio.png" style="vertical-align:bottom;margin:0;height:19px"/>
 in the toolbar. The Debug Monitor is where you can find the complete set of
@@ -345,7 +345,7 @@ reliable emulation. </p>
 
 
 <h3>Expanded template and form factor support</h3>
-<p>Android Studio supports new templates for Google Services and expands the availabe device
+<p>Android Studio supports new templates for Google Services and expands the available device
 types. </p>
 
     <h4> Android Wear and TV support</h4>
