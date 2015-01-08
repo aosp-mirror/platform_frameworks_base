@@ -197,12 +197,15 @@ public final class ContactsContract {
      * API for obtaining a pre-authorized version of a URI that normally requires special
      * permission (beyond READ_CONTACTS) to read.  The caller obtaining the pre-authorized URI
      * must already have the necessary permissions to access the URI; otherwise a
-     * {@link SecurityException} will be thrown.
+     * {@link SecurityException} will be thrown. Unlike {@link Context#grantUriPermission},
+     * this can be used to grant permissions that aren't explicitly required for the URI inside
+     * AndroidManifest.xml. For example, permissions that are only required when reading URIs
+     * that refer to the user's profile.
      * </p>
      * <p>
      * The authorized URI returned in the bundle contains an expiring token that allows the
      * caller to execute the query without having the special permissions that would normally
-     * be required.
+     * be required. The token expires in five minutes.
      * </p>
      * <p>
      * This API does not access disk, and should be safe to invoke from the UI thread.
@@ -226,7 +229,6 @@ public final class ContactsContract {
      * }
      * </pre>
      * </p>
-     * @hide
      */
     public static final class Authorization {
         /**
@@ -7839,9 +7841,7 @@ public final class ContactsContract {
     }
 
     /**
-     * Private API for inquiring about the general status of the provider.
-     *
-     * @hide
+     * API for inquiring about the general status of the provider.
      */
     public static final class ProviderStatus {
 
@@ -7854,8 +7854,6 @@ public final class ContactsContract {
         /**
          * The content:// style URI for this table.  Requests to this URI can be
          * performed on the UI thread because they are always unblocking.
-         *
-         * @hide
          */
         public static final Uri CONTENT_URI =
                 Uri.withAppendedPath(AUTHORITY_URI, "provider_status");
@@ -7863,64 +7861,35 @@ public final class ContactsContract {
         /**
          * The MIME-type of {@link #CONTENT_URI} providing a directory of
          * settings.
-         *
-         * @hide
          */
         public static final String CONTENT_TYPE = "vnd.android.cursor.dir/provider_status";
 
         /**
          * An integer representing the current status of the provider.
-         *
-         * @hide
          */
         public static final String STATUS = "status";
 
         /**
          * Default status of the provider.
-         *
-         * @hide
          */
         public static final int STATUS_NORMAL = 0;
 
         /**
          * The status used when the provider is in the process of upgrading.  Contacts
          * are temporarily unaccessible.
-         *
-         * @hide
          */
         public static final int STATUS_UPGRADING = 1;
 
         /**
-         * The status used if the provider was in the process of upgrading but ran
-         * out of storage. The DATA1 column will contain the estimated amount of
-         * storage required (in bytes). Update status to STATUS_NORMAL to force
-         * the provider to retry the upgrade.
-         *
-         * @hide
-         */
-        public static final int STATUS_UPGRADE_OUT_OF_MEMORY = 2;
-
-        /**
          * The status used during a locale change.
-         *
-         * @hide
          */
         public static final int STATUS_CHANGING_LOCALE = 3;
 
         /**
          * The status that indicates that there are no accounts and no contacts
          * on the device.
-         *
-         * @hide
          */
         public static final int STATUS_NO_ACCOUNTS_NO_CONTACTS = 4;
-
-        /**
-         * Additional data associated with the status.
-         *
-         * @hide
-         */
-        public static final String DATA1 = "data1";
     }
 
     /**
@@ -8536,102 +8505,6 @@ public final class ContactsContract {
          */
         @Deprecated
         public static final String EXTRA_EXCLUDE_MIMES = "exclude_mimes";
-
-        /**
-         * Intents related to the Contacts app UI.
-         *
-         * @hide
-         */
-        public static final class UI {
-            /**
-             * The action for the default contacts list tab.
-             */
-            public static final String LIST_DEFAULT =
-                    "com.android.contacts.action.LIST_DEFAULT";
-
-            /**
-             * The action for the contacts list tab.
-             */
-            public static final String LIST_GROUP_ACTION =
-                    "com.android.contacts.action.LIST_GROUP";
-
-            /**
-             * When in LIST_GROUP_ACTION mode, this is the group to display.
-             */
-            public static final String GROUP_NAME_EXTRA_KEY = "com.android.contacts.extra.GROUP";
-
-            /**
-             * The action for the all contacts list tab.
-             */
-            public static final String LIST_ALL_CONTACTS_ACTION =
-                    "com.android.contacts.action.LIST_ALL_CONTACTS";
-
-            /**
-             * The action for the contacts with phone numbers list tab.
-             */
-            public static final String LIST_CONTACTS_WITH_PHONES_ACTION =
-                    "com.android.contacts.action.LIST_CONTACTS_WITH_PHONES";
-
-            /**
-             * The action for the starred contacts list tab.
-             */
-            public static final String LIST_STARRED_ACTION =
-                    "com.android.contacts.action.LIST_STARRED";
-
-            /**
-             * The action for the frequent contacts list tab.
-             */
-            public static final String LIST_FREQUENT_ACTION =
-                    "com.android.contacts.action.LIST_FREQUENT";
-
-            /**
-             * The action for the "Join Contact" picker.
-             */
-            public static final String PICK_JOIN_CONTACT_ACTION =
-                    "com.android.contacts.action.JOIN_CONTACT";
-
-            /**
-             * The action for the "strequent" contacts list tab. It first lists the starred
-             * contacts in alphabetical order and then the frequent contacts in descending
-             * order of the number of times they have been contacted.
-             */
-            public static final String LIST_STREQUENT_ACTION =
-                    "com.android.contacts.action.LIST_STREQUENT";
-
-            /**
-             * A key for to be used as an intent extra to set the activity
-             * title to a custom String value.
-             */
-            public static final String TITLE_EXTRA_KEY =
-                    "com.android.contacts.extra.TITLE_EXTRA";
-
-            /**
-             * Activity Action: Display a filtered list of contacts
-             * <p>
-             * Input: Extra field {@link #FILTER_TEXT_EXTRA_KEY} is the text to use for
-             * filtering
-             * <p>
-             * Output: Nothing.
-             */
-            public static final String FILTER_CONTACTS_ACTION =
-                    "com.android.contacts.action.FILTER_CONTACTS";
-
-            /**
-             * Used as an int extra field in {@link #FILTER_CONTACTS_ACTION}
-             * intents to supply the text on which to filter.
-             */
-            public static final String FILTER_TEXT_EXTRA_KEY =
-                    "com.android.contacts.extra.FILTER_TEXT";
-
-            /**
-             * Used with JOIN_CONTACT action to set the target for aggregation. This action type
-             * uses contact ids instead of contact uris for the sake of backwards compatibility.
-             * <p>
-             * Type: LONG
-             */
-            public static final String TARGET_CONTACT_ID_EXTRA_KEY
-                    = "com.android.contacts.action.CONTACT_ID";
-        }
 
         /**
          * Convenience class that contains string constants used
