@@ -20,6 +20,7 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -31,6 +32,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.OverScroller;
@@ -367,8 +370,14 @@ public class ResolverDrawerLayout extends ViewGroup {
                     child.offsetTopAndBottom((int) dy);
                 }
             }
+            final boolean isCollapsedOld = mCollapseOffset != 0;
             mCollapseOffset = newPos;
             mTopOffset += dy;
+            final boolean isCollapsedNew = newPos != 0;
+            if (isCollapsedOld != isCollapsedNew) {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+            }
             postInvalidateOnAnimation();
             return dy;
         }
@@ -571,6 +580,50 @@ public class ResolverDrawerLayout extends ViewGroup {
     }
 
     @Override
+    public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle args) {
+        if (super.onNestedPrePerformAccessibilityAction(target, action, args)) {
+            return true;
+        }
+
+        if (action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD && mCollapseOffset != 0) {
+            smoothScrollTo(0, 0);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setClassName(ResolverDrawerLayout.class.getName());
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setClassName(ResolverDrawerLayout.class.getName());
+        if (isEnabled()) {
+            if (mCollapseOffset != 0) {
+                info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                info.setScrollable(true);
+            }
+        }
+    }
+
+    @Override
+    public boolean performAccessibilityAction(int action, Bundle arguments) {
+        if (super.performAccessibilityAction(action, arguments)) {
+            return true;
+        }
+
+        if (action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD && mCollapseOffset != 0) {
+            smoothScrollTo(0, 0);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int sourceWidth = MeasureSpec.getSize(widthMeasureSpec);
         int widthSize = sourceWidth;
@@ -615,7 +668,13 @@ public class ResolverDrawerLayout extends ViewGroup {
         mUncollapsibleHeight = heightUsed - mCollapsibleHeight;
 
         if (isLaidOut()) {
+            final boolean isCollapsedOld = mCollapseOffset != 0;
             mCollapseOffset = Math.min(mCollapseOffset, mCollapsibleHeight);
+            final boolean isCollapsedNew = mCollapseOffset != 0;
+            if (isCollapsedOld != isCollapsedNew) {
+                notifyViewAccessibilityStateChangedIfNeeded(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+            }
         } else {
             // Start out collapsed at first unless we restored state for otherwise
             mCollapseOffset = mOpenOnLayout ? 0 : mCollapsibleHeight;

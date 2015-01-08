@@ -6413,6 +6413,11 @@ public final class ViewRootImpl implements ViewParent,
         return false;
     }
 
+    @Override
+    public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle args) {
+        return false;
+    }
+
     void changeCanvasOpacity(boolean opaque) {
         Log.d(TAG, "changeCanvasOpacity: opaque=" + opaque);
         if (mAttachInfo.mHardwareRenderer != null) {

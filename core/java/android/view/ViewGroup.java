@@ -32,6 +32,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
@@ -2919,6 +2920,22 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < childCount; i++) {
             children[i].resetSubtreeAccessibilityStateChanged();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Subclasses should always call <code>super.onNestedPrePerformAccessibilityAction</code></p>
+     *
+     * @param target The target view dispatching this action
+     * @param action Action being performed; see
+     *               {@link android.view.accessibility.AccessibilityNodeInfo}
+     * @param args Optional action arguments
+     * @return false by default. Subclasses should return true if they handle the event.
+     */
+    @Override
+    public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle args) {
+        return false;
     }
 
     /**
