@@ -749,6 +749,38 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final ActiveServices mServices;
 
+    final static class Association {
+        final int mSourceUid;
+        final String mSourceProcess;
+        final int mTargetUid;
+        final ComponentName mTargetComponent;
+        final String mTargetProcess;
+
+        int mCount;
+        long mTime;
+
+        int mNesting;
+        long mStartTime;
+
+        Association(int sourceUid, String sourceProcess, int targetUid,
+                ComponentName targetComponent, String targetProcess) {
+            mSourceUid = sourceUid;
+            mSourceProcess = sourceProcess;
+            mTargetUid = targetUid;
+            mTargetComponent = targetComponent;
+            mTargetProcess = targetProcess;
+        }
+    }
+
+    /**
+     * When service association tracking is enabled, this is all of the associations we
+     * have seen.  Mapping is target uid -> target component -> source uid -> source process name
+     * -> association data.
+     */
+    final SparseArray<ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>>>
+            mAssociations = new SparseArray<>();
+    boolean mTrackingAssociations;
+
     /**
      * Backup/restore process management
      */
@@ -2070,6 +2102,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
+
+        mTrackingAssociations = "1".equals(SystemProperties.get("debug.track-associations"));
 
         mConfiguration.setToDefaults();
         mConfiguration.setLocale(Locale.getDefault());
@@ -9082,6 +9116,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             cpr.connections.add(conn);
             r.conProviders.add(conn);
+            startAssociationLocked(r.uid, r.processName, cpr.uid, cpr.name, cpr.info.processName);
             return conn;
         }
         cpr.addExternalProcessHandleLocked(externalProcessToken);
@@ -9105,6 +9140,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (conn.stableCount == 0 && conn.unstableCount == 0) {
                 cpr.connections.remove(conn);
                 conn.client.conProviders.remove(conn);
+                stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid, cpr.name);
                 return true;
             }
             return false;
@@ -12321,9 +12357,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dumpAll = true;
             } else if ("-c".equals(opt)) {
                 dumpClient = true;
+            } else if ("-p".equals(opt)) {
+                if (opti < args.length) {
+                    dumpPackage = args[opti];
+                    opti++;
+                } else {
+                    pw.println("Error: -p option requires package argument");
+                    return;
+                }
+                dumpClient = true;
             } else if ("-h".equals(opt)) {
                 pw.println("Activity manager dump options:");
-                pw.println("  [-a] [-c] [-h] [cmd] ...");
+                pw.println("  [-a] [-c] [-p package] [-h] [cmd] ...");
                 pw.println("  cmd may be one of:");
                 pw.println("    a[ctivities]: activity stack state");
                 pw.println("    r[recents]: recent activities state");
@@ -12334,17 +12379,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("    prov[iders] [COMP_SPEC ...]: content provider state");
                 pw.println("    provider [COMP_SPEC]: provider client-side state");
                 pw.println("    s[ervices] [COMP_SPEC ...]: service state");
+                pw.println("    as[sociations]: tracked app associations");
                 pw.println("    service [COMP_SPEC]: service client-side state");
                 pw.println("    package [PACKAGE_NAME]: all state related to given package");
                 pw.println("    all: dump all activities");
                 pw.println("    top: dump the top activity");
                 pw.println("    write: write all pending state to storage");
+                pw.println("    track-associations: enable association tracking");
+                pw.println("    untrack-associations: disable and clear association tracking");
                 pw.println("  cmd may also be a COMP_SPEC to dump activities.");
                 pw.println("  COMP_SPEC may be a component name (com.foo/.myApp),");
                 pw.println("    a partial substring in a component name, a");
                 pw.println("    hex object identifier.");
                 pw.println("  -a: include all available server state.");
                 pw.println("  -c: include client state.");
+                pw.println("  -p: limit output to given package.");
                 return;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
@@ -12359,11 +12408,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             opti++;
             if ("activities".equals(cmd) || "a".equals(cmd)) {
                 synchronized (this) {
-                    dumpActivitiesLocked(fd, pw, args, opti, true, dumpClient, null);
+                    dumpActivitiesLocked(fd, pw, args, opti, true, dumpClient, dumpPackage);
                 }
             } else if ("recents".equals(cmd) || "r".equals(cmd)) {
                 synchronized (this) {
-                    dumpRecentsLocked(fd, pw, args, opti, true, null);
+                    dumpRecentsLocked(fd, pw, args, opti, true, dumpPackage);
                 }
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
                 String[] newArgs;
@@ -12372,14 +12421,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                     name = null;
                     newArgs = EMPTY_STRING_ARRAY;
                 } else {
-                    name = args[opti];
+                    dumpPackage = args[opti];
                     opti++;
                     newArgs = new String[args.length - opti];
                     if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
                             args.length - opti);
                 }
                 synchronized (this) {
-                    dumpBroadcastsLocked(fd, pw, args, opti, true, name);
+                    dumpBroadcastsLocked(fd, pw, args, opti, true, dumpPackage);
                 }
             } else if ("intents".equals(cmd) || "i".equals(cmd)) {
                 String[] newArgs;
@@ -12388,14 +12437,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                     name = null;
                     newArgs = EMPTY_STRING_ARRAY;
                 } else {
-                    name = args[opti];
+                    dumpPackage = args[opti];
                     opti++;
                     newArgs = new String[args.length - opti];
                     if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
                             args.length - opti);
                 }
                 synchronized (this) {
-                    dumpPendingIntentsLocked(fd, pw, args, opti, true, name);
+                    dumpPendingIntentsLocked(fd, pw, args, opti, true, dumpPackage);
                 }
             } else if ("processes".equals(cmd) || "p".equals(cmd)) {
                 String[] newArgs;
@@ -12404,14 +12453,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                     name = null;
                     newArgs = EMPTY_STRING_ARRAY;
                 } else {
-                    name = args[opti];
+                    dumpPackage = args[opti];
                     opti++;
                     newArgs = new String[args.length - opti];
                     if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
                             args.length - opti);
                 }
                 synchronized (this) {
-                    dumpProcessesLocked(fd, pw, args, opti, true, name);
+                    dumpProcessesLocked(fd, pw, args, opti, true, dumpPackage);
                 }
             } else if ("oom".equals(cmd) || "o".equals(cmd)) {
                 synchronized (this) {
@@ -12469,13 +12518,38 @@ public final class ActivityManagerService extends ActivityManagerNative
                     opti = 0;
                     more = true;
                 }
+            } else if ("associations".equals(cmd) || "as".equals(cmd)) {
+                synchronized (this) {
+                    dumpAssociationsLocked(fd, pw, args, opti, true, dumpClient, dumpPackage);
+                }
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 synchronized (this) {
-                    mServices.dumpServicesLocked(fd, pw, args, opti, true, dumpClient, null);
+                    mServices.dumpServicesLocked(fd, pw, args, opti, true, dumpClient, dumpPackage);
                 }
             } else if ("write".equals(cmd)) {
                 mTaskPersister.flush();
                 pw.println("All tasks persisted.");
+                return;
+            } else if ("track-associations".equals(cmd)) {
+                synchronized (this) {
+                    if (!mTrackingAssociations) {
+                        mTrackingAssociations = true;
+                        pw.println("Association tracking started.");
+                    } else {
+                        pw.println("Association tracking already enabled.");
+                    }
+                }
+                return;
+            } else if ("untrack-associations".equals(cmd)) {
+                synchronized (this) {
+                    if (mTrackingAssociations) {
+                        mTrackingAssociations = false;
+                        mAssociations.clear();
+                        pw.println("Association tracking stopped.");
+                    } else {
+                        pw.println("Association tracking not running.");
+                    }
+                }
                 return;
             } else {
                 // Dumping a single activity?
@@ -12518,6 +12592,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+            if (mAssociations.size() > 0) {
+                pw.println();
+                if (dumpAll) {
+                    pw.println("-------------------------------------------------------------------------------");
+                }
+                dumpAssociationsLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+            }
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
@@ -12585,6 +12666,78 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mRecentTasks.get(i).dump(pw, "    ");
                 }
             }
+        }
+
+        if (!printedAnything) {
+            pw.println("  (nothing)");
+        }
+    }
+
+    void dumpAssociationsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
+        pw.println("ACTIVITY MANAGER ASSOCIATIONS (dumpsys activity associations)");
+
+        int dumpUid = 0;
+        if (dumpPackage != null) {
+            IPackageManager pm = AppGlobals.getPackageManager();
+            try {
+                dumpUid = pm.getPackageUid(dumpPackage, 0);
+            } catch (RemoteException e) {
+            }
+        }
+
+        boolean printedAnything = false;
+
+        final long now = SystemClock.uptimeMillis();
+
+        for (int i1=0, N1=mAssociations.size(); i1<N1; i1++) {
+            ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> targetComponents
+                    = mAssociations.valueAt(i1);
+            for (int i2=0, N2=targetComponents.size(); i2<N2; i2++) {
+                SparseArray<ArrayMap<String, Association>> sourceUids
+                        = targetComponents.valueAt(i2);
+                for (int i3=0, N3=sourceUids.size(); i3<N3; i3++) {
+                    ArrayMap<String, Association> sourceProcesses = sourceUids.valueAt(i3);
+                    for (int i4=0, N4=sourceProcesses.size(); i4<N4; i4++) {
+                        Association ass = sourceProcesses.valueAt(i4);
+                        if (dumpPackage != null) {
+                            if (!ass.mTargetComponent.getPackageName().equals(dumpPackage)
+                                    && UserHandle.getAppId(ass.mSourceUid) != dumpUid) {
+                                continue;
+                            }
+                        }
+                        printedAnything = true;
+                        pw.print("  ");
+                        pw.print(ass.mTargetProcess);
+                        pw.print("/");
+                        UserHandle.formatUid(pw, ass.mTargetUid);
+                        pw.print(" <- ");
+                        pw.print(ass.mSourceProcess);
+                        pw.print("/");
+                        UserHandle.formatUid(pw, ass.mSourceUid);
+                        pw.println();
+                        pw.print("    via ");
+                        pw.print(ass.mTargetComponent.flattenToShortString());
+                        pw.println();
+                        pw.print("    ");
+                        long dur = ass.mTime;
+                        if (ass.mNesting > 0) {
+                            dur += now - ass.mStartTime;
+                        }
+                        TimeUtils.formatDuration(dur, pw);
+                        pw.print(" (");
+                        pw.print(ass.mCount);
+                        pw.println(" times)");
+                        if (ass.mNesting > 0) {
+                            pw.print("    ");
+                            pw.print(" Currently active: ");
+                            TimeUtils.formatDuration(now - ass.mStartTime, pw);
+                            pw.println();
+                        }
+                    }
+                }
+            }
+
         }
 
         if (!printedAnything) {
@@ -14688,7 +14841,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // In the protocol here, we don't expect the client to correctly
                 // clean up this connection, we'll just remove it.
                 cpr.connections.remove(i);
-                conn.client.conProviders.remove(conn);
+                if (conn.client.conProviders.remove(conn)) {
+                    stopAssociationLocked(capp.uid, capp.processName, cpr.uid, cpr.name);
+                }
             }
         }
 
@@ -14774,6 +14929,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<app.conProviders.size(); i++) {
                 ContentProviderConnection conn = app.conProviders.get(i);
                 conn.provider.connections.remove(conn);
+                stopAssociationLocked(app.uid, app.processName, conn.provider.uid,
+                        conn.provider.name);
             }
             app.conProviders.clear();
         }
@@ -16714,6 +16871,69 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         return null;
+    }
+
+    Association startAssociationLocked(int sourceUid, String sourceProcess, int targetUid,
+            ComponentName targetComponent, String targetProcess) {
+        if (!mTrackingAssociations) {
+            return null;
+        }
+        ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> components
+                = mAssociations.get(targetUid);
+        if (components == null) {
+            components = new ArrayMap<>();
+            mAssociations.put(targetUid, components);
+        }
+        SparseArray<ArrayMap<String, Association>> sourceUids = components.get(targetComponent);
+        if (sourceUids == null) {
+            sourceUids = new SparseArray<>();
+            components.put(targetComponent, sourceUids);
+        }
+        ArrayMap<String, Association> sourceProcesses = sourceUids.get(sourceUid);
+        if (sourceProcesses == null) {
+            sourceProcesses = new ArrayMap<>();
+            sourceUids.put(sourceUid, sourceProcesses);
+        }
+        Association ass = sourceProcesses.get(sourceProcess);
+        if (ass == null) {
+            ass = new Association(sourceUid, sourceProcess, targetUid, targetComponent,
+                    targetProcess);
+            sourceProcesses.put(sourceProcess, ass);
+        }
+        ass.mCount++;
+        ass.mNesting++;
+        if (ass.mNesting == 1) {
+            ass.mStartTime = SystemClock.uptimeMillis();
+        }
+        return ass;
+    }
+
+    void stopAssociationLocked(int sourceUid, String sourceProcess, int targetUid,
+            ComponentName targetComponent) {
+        if (!mTrackingAssociations) {
+            return;
+        }
+        ArrayMap<ComponentName, SparseArray<ArrayMap<String, Association>>> components
+                = mAssociations.get(targetUid);
+        if (components == null) {
+            return;
+        }
+        SparseArray<ArrayMap<String, Association>> sourceUids = components.get(targetComponent);
+        if (sourceUids == null) {
+            return;
+        }
+        ArrayMap<String, Association> sourceProcesses = sourceUids.get(sourceUid);
+        if (sourceProcesses == null) {
+            return;
+        }
+        Association ass = sourceProcesses.get(sourceProcess);
+        if (ass == null || ass.mNesting <= 0) {
+            return;
+        }
+        ass.mNesting--;
+        if (ass.mNesting == 0) {
+            ass.mTime += SystemClock.uptimeMillis() - ass.mStartTime;
+        }
     }
 
     private final int computeOomAdjLocked(ProcessRecord app, int cachedAdj, ProcessRecord TOP_APP,
