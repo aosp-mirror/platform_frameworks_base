@@ -69,7 +69,7 @@ void usage(void)
         "        [-S resource-sources [-S resource-sources ...]] \\\n"
         "        [-F apk-file] [-J R-file-dir] \\\n"
         "        [--product product1,product2,...] \\\n"
-        "        [-c CONFIGS] [--preferred-configurations CONFIGS] \\\n"
+        "        [-c CONFIGS] [--preferred-density DENSITY] \\\n"
         "        [--split CONFIGS [--split CONFIGS]] \\\n"
         "        [--feature-of package [--feature-after package]] \\\n"
         "        [raw-files-dir [raw-files-dir] ...] \\\n"
