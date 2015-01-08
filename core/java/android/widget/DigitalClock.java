@@ -115,16 +115,18 @@ public class DigitalClock extends TextView {
         }
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         //noinspection deprecation
         event.setClassName(DigitalClock.class.getName());
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         //noinspection deprecation
         info.setClassName(DigitalClock.class.getName());
     }

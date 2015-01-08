@@ -193,8 +193,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView {
     }
 
     @Override
-    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
-        if (super.onRequestSendAccessibilityEvent(child, event)) {
+    public boolean onRequestSendAccessibilityEventInternal(View child, AccessibilityEvent event) {
+        if (super.onRequestSendAccessibilityEventInternal(child, event)) {
             // Add a record for the entire layout since its content is somehow small.
             // The event comes from a leaf view that is interacted with.
             AccessibilityEvent record = AccessibilityEvent.obtain();

@@ -121,7 +121,7 @@ public class KeyButtonView extends ImageView {
     }
 
     @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
         if (action == ACTION_CLICK && mCode != 0) {
             sendEvent(KeyEvent.ACTION_DOWN, 0, SystemClock.uptimeMillis());
             sendEvent(KeyEvent.ACTION_UP, 0);
@@ -134,7 +134,7 @@ public class KeyButtonView extends ImageView {
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
             return true;
         }
-        return super.performAccessibilityAction(action, arguments);
+        return super.performAccessibilityActionInternal(action, arguments);
     }
 
     public void setQuiescentAlpha(float alpha, boolean animate) {

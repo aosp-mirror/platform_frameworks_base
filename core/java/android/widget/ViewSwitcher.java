@@ -68,15 +68,17 @@ public class ViewSwitcher extends ViewAnimator {
         super.addView(child, index, params);
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         event.setClassName(ViewSwitcher.class.getName());
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setClassName(ViewSwitcher.class.getName());
     }
 

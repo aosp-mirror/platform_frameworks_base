@@ -1558,9 +1558,10 @@ public class NumberPicker extends LinearLayout {
         }
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         event.setClassName(NumberPicker.class.getName());
         event.setScrollable(true);
         event.setScrollY((mMinValue + mValue) * mSelectorElementHeight);

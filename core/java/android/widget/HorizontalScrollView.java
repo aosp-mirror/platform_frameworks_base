@@ -774,9 +774,10 @@ public class HorizontalScrollView extends FrameLayout {
         outRects.add(bounds);
     }
 
+    /** @hide */
     @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        if (super.performAccessibilityAction(action, arguments)) {
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
             return true;
         }
         switch (action) {
@@ -806,9 +807,10 @@ public class HorizontalScrollView extends FrameLayout {
         return false;
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setClassName(HorizontalScrollView.class.getName());
         final int scrollRange = getScrollRange();
         if (scrollRange > 0) {
@@ -822,9 +824,10 @@ public class HorizontalScrollView extends FrameLayout {
         }
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         event.setClassName(HorizontalScrollView.class.getName());
         event.setScrollable(getScrollRange() > 0);
         event.setScrollX(mScrollX);

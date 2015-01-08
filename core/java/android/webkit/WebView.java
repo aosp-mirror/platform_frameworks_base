@@ -2069,8 +2069,8 @@ public class WebView extends AbsoluteLayout
             return WebView.super.onHoverEvent(event);
         }
 
-        public boolean super_performAccessibilityAction(int action, Bundle arguments) {
-            return WebView.super.performAccessibilityAction(action, arguments);
+        public boolean super_performAccessibilityActionInternal(int action, Bundle arguments) {
+            return WebView.super.performAccessibilityActionInternal(action, arguments);
         }
 
         public boolean super_performLongClick() {
@@ -2378,23 +2378,26 @@ public class WebView extends AbsoluteLayout
         return mProvider.getViewDelegate().shouldDelayChildPressedState();
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setClassName(WebView.class.getName());
-        mProvider.getViewDelegate().onInitializeAccessibilityNodeInfo(info);
+        mProvider.getViewDelegate().onInitializeAccessibilityNodeInfoInternal(info);
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         event.setClassName(WebView.class.getName());
-        mProvider.getViewDelegate().onInitializeAccessibilityEvent(event);
+        mProvider.getViewDelegate().onInitializeAccessibilityEventInternal(event);
     }
 
+    /** @hide */
     @Override
-    public boolean performAccessibilityAction(int action, Bundle arguments) {
-        return mProvider.getViewDelegate().performAccessibilityAction(action, arguments);
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        return mProvider.getViewDelegate().performAccessibilityActionInternal(action, arguments);
     }
 
     /** @hide */

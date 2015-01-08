@@ -217,7 +217,7 @@ public class SignalClusterView
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         // Standard group layout onPopulateAccessibilityEvent() implementations
         // ignore content description, so populate manually
         if (mWifiVisible && mWifiGroup != null && mWifiGroup.getContentDescription() != null)
@@ -225,7 +225,7 @@ public class SignalClusterView
         for (PhoneState state : mPhoneStates) {
             state.populateAccessibilityEvent(event);
         }
-        return super.dispatchPopulateAccessibilityEvent(event);
+        return super.dispatchPopulateAccessibilityEventInternal(event);
     }
 
     @Override

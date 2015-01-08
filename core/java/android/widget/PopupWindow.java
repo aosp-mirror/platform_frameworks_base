@@ -1748,13 +1748,14 @@ public class PopupWindow {
             }
         }
 
+    /** @hide */
         @Override
-        public void sendAccessibilityEvent(int eventType) {
+        public void sendAccessibilityEventInternal(int eventType) {
             // clinets are interested in the content not the container, make it event source
             if (mContentView != null) {
                 mContentView.sendAccessibilityEvent(eventType);
             } else {
-                super.sendAccessibilityEvent(eventType);
+                super.sendAccessibilityEventInternal(eventType);
             }
         }
     }

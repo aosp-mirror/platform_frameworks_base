@@ -483,14 +483,14 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             event.getText().add(getKeyguardOrLockScreenString());
             mLastAnnouncementWasQuickSettings = false;
             return true;
         }
 
-        return super.dispatchPopulateAccessibilityEvent(event);
+        return super.dispatchPopulateAccessibilityEventInternal(event);
     }
 
     @Override

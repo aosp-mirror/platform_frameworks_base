@@ -1104,8 +1104,9 @@ public class RelativeLayout extends ViewGroup {
         return new LayoutParams(p);
     }
 
+    /** @hide */
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         if (mTopToBottomLeftToRightSet == null) {
             mTopToBottomLeftToRightSet = new TreeSet<View>(new TopToBottomLeftToRightComparator());
         }
@@ -1127,15 +1128,17 @@ public class RelativeLayout extends ViewGroup {
         return false;
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         event.setClassName(RelativeLayout.class.getName());
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setClassName(RelativeLayout.class.getName());
     }
 
