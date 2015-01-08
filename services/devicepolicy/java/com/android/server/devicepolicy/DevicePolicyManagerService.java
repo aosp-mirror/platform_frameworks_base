@@ -3983,15 +3983,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + " for device owner");
         }
         synchronized (this) {
-            if (!allowedToSetDeviceOwnerOnDevice()) {
-                throw new IllegalStateException(
-                        "Trying to set device owner but device is already provisioned.");
-            }
-
-            if (mDeviceOwner != null && mDeviceOwner.hasDeviceOwner()) {
-                throw new IllegalStateException(
-                        "Trying to set device owner but device owner is already set.");
-            }
+            enforceCanSetDeviceOwner();
 
             // Shutting down backup manager service permanently.
             long ident = Binder.clearCallingIdentity();
@@ -4009,7 +4001,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 // Device owner is not set and does not exist, set it.
                 mDeviceOwner = DeviceOwner.createWithDeviceOwner(packageName, ownerName);
             } else {
-                // Device owner is not set but a profile owner exists, update Device owner state.
+                // Device owner state already exists, update it.
                 mDeviceOwner.setDeviceOwner(packageName, ownerName);
             }
             mDeviceOwner.writeOwnerFile();
@@ -4225,43 +4217,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mHasFeature) {
             return false;
         }
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
-
-        UserInfo info = mUserManager.getUserInfo(userHandle);
-        if (info == null) {
-            // User doesn't exist.
-            throw new IllegalArgumentException(
-                    "Attempted to set profile owner for invalid userId: " + userHandle);
-        }
-        if (info.isGuest()) {
-            throw new IllegalStateException("Cannot set a profile owner on a guest");
-        }
-
         if (who == null
                 || !DeviceOwner.isInstalledForUser(who.getPackageName(), userHandle)) {
             throw new IllegalArgumentException("Component " + who
                     + " not installed for userId:" + userHandle);
         }
         synchronized (this) {
-            // Only SYSTEM_UID can override the userSetupComplete
-            if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID
-                    && hasUserSetupCompleted(userHandle)) {
-                throw new IllegalStateException(
-                        "Trying to set profile owner but user is already set-up.");
-            }
-
+            enforceCanSetProfileOwner(userHandle);
             if (mDeviceOwner == null) {
                 // Device owner state does not exist, create it.
                 mDeviceOwner = DeviceOwner.createWithProfileOwner(who, ownerName,
                         userHandle);
-                mDeviceOwner.writeOwnerFile();
-                return true;
             } else {
-                // Device owner already exists, update it.
+                // Device owner state already exists, update it.
                 mDeviceOwner.setProfileOwner(who, ownerName, userHandle);
-                mDeviceOwner.writeOwnerFile();
-                return true;
             }
+            mDeviceOwner.writeOwnerFile();
+            return true;
         }
     }
 
@@ -4451,18 +4423,77 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
-     * Device owner can only be set on an unprovisioned device. However, if initiated via "adb",
-     * we also allow it if no accounts or additional users are present on the device.
+     * The profile owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
+     * permission.
+     * The profile owner can only be set before the user setup phase has completed,
+     * except for:
+     * - SYSTEM_UID
+     * - adb if there are not accounts.
      */
-    private boolean allowedToSetDeviceOwnerOnDevice() {
-        if (!hasUserSetupCompleted(UserHandle.USER_OWNER)) {
-            return true;
+    private void enforceCanSetProfileOwner(int userHandle) {
+        UserInfo info = mUserManager.getUserInfo(userHandle);
+        if (info == null) {
+            // User doesn't exist.
+            throw new IllegalArgumentException(
+                    "Attempted to set profile owner for invalid userId: " + userHandle);
         }
+        if (info.isGuest()) {
+            throw new IllegalStateException("Cannot set a profile owner on a guest");
+        }
+        if (getProfileOwner(userHandle) != null) {
+            throw new IllegalStateException("Trying to set the profile owner, but profile owner "
+                    + "is already set.");
+        }
+        int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+            if (hasUserSetupCompleted(userHandle) &&
+                    AccountManager.get(mContext).getAccountsAsUser(userHandle).length > 0) {
+                throw new IllegalStateException("Not allowed to set the profile owner because "
+                        + "there are already some accounts on the profile");
+            }
+            return;
+        }
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
+        if (hasUserSetupCompleted(userHandle)
+                && UserHandle.getAppId(callingUid) != Process.SYSTEM_UID) {
+            throw new IllegalStateException("Cannot set the profile owner on a user which is "
+                    + "already set-up");
+        }
+    }
 
-        int callingId = Binder.getCallingUid();
-        return (callingId == Process.SHELL_UID || callingId == Process.ROOT_UID)
-                && mUserManager.getUserCount() == 1
-                && AccountManager.get(mContext).getAccounts().length == 0;
+    /**
+     * The Device owner can only be set by adb or an app with the MANAGE_PROFILE_AND_DEVICE_OWNERS
+     * permission.
+     * The device owner can only be set before the setup phase of the primary user has completed,
+     * except for adb if no accounts or additional users are present on the device.
+     */
+    private void enforceCanSetDeviceOwner() {
+        if (mDeviceOwner != null && mDeviceOwner.hasDeviceOwner()) {
+            throw new IllegalStateException("Trying to set the device owner, but device owner "
+                    + "is already set.");
+        }
+        int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+            if (!hasUserSetupCompleted(UserHandle.USER_OWNER)) {
+                return;
+            }
+            if (mUserManager.getUserCount() > 1) {
+                throw new IllegalStateException("Not allowed to set the device owner because there "
+                        + "are already several users on the device");
+            }
+            if (AccountManager.get(mContext).getAccounts().length > 0) {
+                throw new IllegalStateException("Not allowed to set the device owner because there "
+                        + "are already some accounts on the device");
+            }
+            return;
+        }
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS, null);
+        if (hasUserSetupCompleted(UserHandle.USER_OWNER)) {
+            throw new IllegalStateException("Cannot set the device owner if the device is "
+                    + "already set-up");
+        }
     }
 
     private void enforceCrossUserPermission(int userHandle) {
