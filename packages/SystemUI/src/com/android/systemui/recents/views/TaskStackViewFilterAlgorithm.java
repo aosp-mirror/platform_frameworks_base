@@ -22,6 +22,7 @@ import com.android.systemui.recents.model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /* The layout logic for a TaskStackView */
 public class TaskStackViewFilterAlgorithm {
@@ -142,9 +143,10 @@ public class TaskStackViewFilterAlgorithm {
         // the new stack) or to their final positions in the new stack
         int offset = 0;
         int movement = 0;
-        int childCount = mStackView.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            TaskView tv = (TaskView) mStackView.getChildAt(i);
+        List<TaskView> taskViews = mStackView.getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = 0; i < taskViewCount; i++) {
+            TaskView tv = taskViews.get(i);
             Task task = tv.getTask();
             int taskIndex = tasks.indexOf(task);
             TaskViewTransform toTransform;

@@ -29,12 +29,10 @@ public class Constants {
             public static final boolean EnableTransitionThumbnailDebugMode = false;
             // Enables the filtering of tasks according to their grouping
             public static final boolean EnableTaskFiltering = false;
-            // Enables clipping of tasks against each other
-            public static final boolean EnableTaskStackClipping = true;
-            // Enables tapping on the TaskBar to launch the task
-            public static final boolean EnableTaskBarTouchEvents = true;
             // Enables app-info pane on long-pressing the icon
             public static final boolean EnableDevAppInfoOnLongPress = true;
+            // Enables dismiss-all
+            public static final boolean EnableDismissAll = false;
             // Enables debug mode
             public static final boolean EnableDebugMode = false;
             // Enables the search bar layout

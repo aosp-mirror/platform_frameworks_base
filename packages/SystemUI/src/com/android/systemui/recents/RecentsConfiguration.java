@@ -24,7 +24,6 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
-import android.util.TypedValue;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import com.android.systemui.R;
@@ -49,9 +48,6 @@ public class RecentsConfiguration {
     public static final int SVELTE_DISABLE_CACHE = 2;
     // Disable all thumbnail loading.
     public static final int SVELTE_DISABLE_LOADING = 3;
-
-    /** Animations */
-    public float animationPxMovementPerSecond;
 
     /** Interpolators */
     public Interpolator fastOutSlowInInterpolator;
@@ -83,6 +79,7 @@ public class RecentsConfiguration {
     public int taskStackScrollDuration;
     public int taskStackMaxDim;
     public int taskStackTopPaddingPx;
+    public int dismissAllButtonSizePx;
     public float taskStackWidthPaddingPct;
     public float taskStackOverscrollPct;
 
@@ -197,10 +194,6 @@ public class RecentsConfiguration {
         // Insets
         displayRect.set(0, 0, dm.widthPixels, dm.heightPixels);
 
-        // Animations
-        animationPxMovementPerSecond =
-                res.getDimensionPixelSize(R.dimen.recents_animation_movement_in_dps_per_second);
-
         // Filtering
         filteringCurrentViewsAnimDuration =
                 res.getInteger(R.integer.recents_filter_animate_current_views_duration);
@@ -217,14 +210,11 @@ public class RecentsConfiguration {
         // Task stack
         taskStackScrollDuration =
                 res.getInteger(R.integer.recents_animate_task_stack_scroll_duration);
-        TypedValue widthPaddingPctValue = new TypedValue();
-        res.getValue(R.dimen.recents_stack_width_padding_percentage, widthPaddingPctValue, true);
-        taskStackWidthPaddingPct = widthPaddingPctValue.getFloat();
-        TypedValue stackOverscrollPctValue = new TypedValue();
-        res.getValue(R.dimen.recents_stack_overscroll_percentage, stackOverscrollPctValue, true);
-        taskStackOverscrollPct = stackOverscrollPctValue.getFloat();
+        taskStackWidthPaddingPct = res.getFloat(R.dimen.recents_stack_width_padding_percentage);
+        taskStackOverscrollPct = res.getFloat(R.dimen.recents_stack_overscroll_percentage);
         taskStackMaxDim = res.getInteger(R.integer.recents_max_task_stack_view_dim);
         taskStackTopPaddingPx = res.getDimensionPixelSize(R.dimen.recents_stack_top_padding);
+        dismissAllButtonSizePx = res.getDimensionPixelSize(R.dimen.recents_dismiss_all_button_size);
 
         // Transition
         transitionEnterFromAppDelay =
@@ -254,22 +244,19 @@ public class RecentsConfiguration {
         taskViewTranslationZMaxPx = res.getDimensionPixelSize(R.dimen.recents_task_view_z_max);
         taskViewAffiliateGroupEnterOffsetPx =
                 res.getDimensionPixelSize(R.dimen.recents_task_view_affiliate_group_enter_offset);
-        TypedValue thumbnailAlphaValue = new TypedValue();
-        res.getValue(R.dimen.recents_task_view_thumbnail_alpha, thumbnailAlphaValue, true);
-        taskViewThumbnailAlpha = thumbnailAlphaValue.getFloat();
+        taskViewThumbnailAlpha = res.getFloat(R.dimen.recents_task_view_thumbnail_alpha);
 
         // Task bar colors
         taskBarViewDefaultBackgroundColor =
-                res.getColor(R.color.recents_task_bar_default_background_color);
+                res.getColor(R.color.recents_task_bar_default_background_color, null);
         taskBarViewLightTextColor =
-                res.getColor(R.color.recents_task_bar_light_text_color);
+                res.getColor(R.color.recents_task_bar_light_text_color, null);
         taskBarViewDarkTextColor =
-                res.getColor(R.color.recents_task_bar_dark_text_color);
+                res.getColor(R.color.recents_task_bar_dark_text_color, null);
         taskBarViewHighlightColor =
-                res.getColor(R.color.recents_task_bar_highlight_color);
-        TypedValue affMinAlphaPctValue = new TypedValue();
-        res.getValue(R.dimen.recents_task_affiliation_color_min_alpha_percentage, affMinAlphaPctValue, true);
-        taskBarViewAffiliationColorMinAlpha = affMinAlphaPctValue.getFloat();
+                res.getColor(R.color.recents_task_bar_highlight_color, null);
+        taskBarViewAffiliationColorMinAlpha = res.getFloat(
+                R.dimen.recents_task_affiliation_color_min_alpha_percentage);
 
         // Task bar size & animations
         taskBarHeight = res.getDimensionPixelSize(R.dimen.recents_task_bar_height);
@@ -342,11 +329,6 @@ public class RecentsConfiguration {
     public boolean hasNavBarScrim() {
         // Only show the scrim if we have recent tasks, and if the nav bar is not transposed
         return !launchedWithNoRecentTasks && (!hasTransposedNavBar || !isLandscape);
-    }
-
-    /** Returns whether the current layout is horizontal. */
-    public boolean hasHorizontalLayout() {
-        return isLandscape && hasTransposedSearchBar;
     }
 
     /**

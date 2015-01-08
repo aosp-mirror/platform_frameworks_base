@@ -47,18 +47,6 @@ class TaskResourceLoadQueue {
     ConcurrentLinkedQueue<Task> mQueue = new ConcurrentLinkedQueue<Task>();
 
     /** Adds a new task to the load queue */
-    void addTasks(Collection<Task> tasks) {
-        for (Task t : tasks) {
-            if (!mQueue.contains(t)) {
-                mQueue.add(t);
-            }
-        }
-        synchronized(this) {
-            notifyAll();
-        }
-    }
-
-    /** Adds a new task to the load queue */
     void addTask(Task t) {
         if (!mQueue.contains(t)) {
             mQueue.add(t);

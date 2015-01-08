@@ -121,14 +121,6 @@ public class TaskViewHeader extends FrameLayout {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // We ignore taps on the task bar except on the filter and dismiss buttons
-        if (!Constants.DebugFlags.App.EnableTaskBarTouchEvents) return true;
-
-        return super.onTouchEvent(event);
-    }
-
-    @Override
     protected void onFinishInflate() {
         // Initialize the icon and description views
         mApplicationIcon = (ImageView) findViewById(R.id.application_icon);
@@ -200,8 +192,7 @@ public class TaskViewHeader extends FrameLayout {
             mActivityDescription.setText(t.activityLabel);
         }
         // Try and apply the system ui tint
-        int existingBgColor = (getBackground() instanceof ColorDrawable) ?
-                ((ColorDrawable) getBackground()).getColor() : 0;
+        int existingBgColor = getBackgroundColor();
         if (existingBgColor != t.colorPrimary) {
             mBackgroundColorDrawable.setColor(t.colorPrimary);
             mBackgroundColor = t.colorPrimary;

@@ -17,6 +17,7 @@
 package com.android.systemui.recents.views;
 
 import android.graphics.Rect;
+import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 import com.android.systemui.recents.misc.Utilities;
 import com.android.systemui.recents.model.Task;
@@ -131,6 +132,11 @@ public class TaskStackViewLayoutAlgorithm {
         float pNavBarOffset = pAtBottomOfStackRect -
                 screenYToCurveProgress(mStackVisibleRect.bottom - (mStackVisibleRect.bottom -
                         mStackRect.bottom));
+        float pDismissAllButtonOffset = 0f;
+        if (Constants.DebugFlags.App.EnableDismissAll) {
+            pDismissAllButtonOffset = pAtBottomOfStackRect -
+                screenYToCurveProgress(mStackVisibleRect.bottom - mConfig.dismissAllButtonSizePx);
+        }
 
         // Update the task offsets
         float pAtBackMostCardTop = 0.5f;
@@ -148,7 +154,8 @@ public class TaskStackViewLayoutAlgorithm {
             }
         }
 
-        mMaxScrollP = pAtFrontMostCardTop - ((1f - pTaskHeightOffset - pNavBarOffset));
+        mMaxScrollP = pAtFrontMostCardTop + pDismissAllButtonOffset -
+                ((1f - pTaskHeightOffset - pNavBarOffset));
         mMinScrollP = tasks.size() == 1 ? Math.max(mMaxScrollP, 0f) : 0f;
         if (launchedWithAltTab && launchedFromHome) {
             // Center the top most task, since that will be focused first

@@ -112,7 +112,7 @@ public class TaskStackViewScroller {
         return Math.max(mLayoutAlgorithm.mMinScrollP, Math.min(mLayoutAlgorithm.mMaxScrollP, scroll));
     }
 
-    /** Returns the amount that the aboslute value of how much the scroll is out of bounds. */
+    /** Returns the amount that the absolute value of how much the scroll is out of bounds. */
     float getScrollAmountOutOfBounds(float scroll) {
         if (scroll < mLayoutAlgorithm.mMinScrollP) {
             return Math.abs(scroll - mLayoutAlgorithm.mMinScrollP);

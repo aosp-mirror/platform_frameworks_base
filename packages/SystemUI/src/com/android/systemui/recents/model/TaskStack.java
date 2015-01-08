@@ -165,6 +165,8 @@ public class TaskStack {
         public void onStackTaskAdded(TaskStack stack, Task t);
         /* Notifies when a task has been removed from the stack */
         public void onStackTaskRemoved(TaskStack stack, Task removedTask, Task newFrontMostTask);
+        /* Notifies when all task has been removed from the stack */
+        public void onStackAllTasksRemoved(TaskStack stack, ArrayList<Task> removedTasks);
         /** Notifies when the stack was filtered */
         public void onStackFiltered(TaskStack newStack, ArrayList<Task> curTasks, Task t);
         /** Notifies when the stack was un-filtered */
@@ -214,19 +216,24 @@ public class TaskStack {
         }
     }
 
+    /** Does the actual work associated with removing the task. */
+    void removeTaskImpl(Task t) {
+        // Remove the task from the list
+        mTaskList.remove(t);
+        // Remove it from the group as well, and if it is empty, remove the group
+        TaskGrouping group = t.group;
+        group.removeTask(t);
+        if (group.getTaskCount() == 0) {
+            removeGroup(group);
+        }
+        // Update the lock-to-app state
+        t.lockToThisTask = false;
+    }
+
     /** Removes a task */
     public void removeTask(Task t) {
         if (mTaskList.contains(t)) {
-            // Remove the task from the list
-            mTaskList.remove(t);
-            // Remove it from the group as well, and if it is empty, remove the group
-            TaskGrouping group = t.group;
-            group.removeTask(t);
-            if (group.getTaskCount() == 0) {
-                removeGroup(group);
-            }
-            // Update the lock-to-app state
-            t.lockToThisTask = false;
+            removeTaskImpl(t);
             Task newFrontMostTask = getFrontMostTask();
             if (newFrontMostTask != null && newFrontMostTask.lockToTaskEnabled) {
                 newFrontMostTask.lockToThisTask = true;
@@ -238,22 +245,27 @@ public class TaskStack {
         }
     }
 
+    /** Removes all tasks */
+    public void removeAllTasks() {
+        ArrayList<Task> taskList = new ArrayList<Task>(mTaskList.getTasks());
+        int taskCount = taskList.size();
+        for (int i = taskCount - 1; i >= 0; i--) {
+            Task t = taskList.get(i);
+            removeTaskImpl(t);
+        }
+        if (mCb != null) {
+            // Notify that all tasks have been removed
+            mCb.onStackAllTasksRemoved(this, taskList);
+        }
+    }
+
     /** Sets a few tasks in one go */
     public void setTasks(List<Task> tasks) {
         ArrayList<Task> taskList = mTaskList.getTasks();
         int taskCount = taskList.size();
-        for (int i = 0; i < taskCount; i++) {
+        for (int i = taskCount - 1; i >= 0; i--) {
             Task t = taskList.get(i);
-            // Remove the task from the list
-            mTaskList.remove(t);
-            // Remove it from the group as well, and if it is empty, remove the group
-            TaskGrouping group = t.group;
-            group.removeTask(t);
-            if (group.getTaskCount() == 0) {
-                removeGroup(group);
-            }
-            // Update the lock-to-app state
-            t.lockToThisTask = false;
+            removeTaskImpl(t);
             if (mCb != null) {
                 // Notify that a task has been removed
                 mCb.onStackTaskRemoved(this, t, null);

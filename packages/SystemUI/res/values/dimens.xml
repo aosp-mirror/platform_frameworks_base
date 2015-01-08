@@ -257,9 +257,8 @@
     <!-- The top offset for the task stack. -->
     <dimen name="recents_stack_top_padding">16dp</dimen>
 
-    <!-- Used to calculate the translation animation duration, the expected amount of movement 
-         in dps over one second of time. -->
-    <dimen name="recents_animation_movement_in_dps_per_second">800dp</dimen>
+    <!-- The dimesnsions of the dismiss all recents button. -->
+    <dimen name="recents_dismiss_all_button_size">48dp</dimen>
 
     <!-- The min alpha to apply to a task affiliation group color. -->
     <item name="recents_task_affiliation_color_min_alpha_percentage" format="float" type="dimen">0.6</item>

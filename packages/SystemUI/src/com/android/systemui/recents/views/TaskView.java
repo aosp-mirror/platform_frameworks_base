@@ -381,6 +381,11 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
         ctx.postAnimationTrigger.increment();
     }
 
+    /** Animates this task view away when dismissing all tasks. */
+    void startDismissAllAnimation() {
+        dismissTask();
+    }
+
     /** Animates this task view as it exits recents */
     void startLaunchTaskAnimation(final Runnable postAnimRunnable, boolean isLaunchingTask,
             boolean occludesLaunchTarget, boolean lockToTask) {
@@ -428,25 +433,22 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
     }
 
     /** Animates the deletion of this task view */
-    void startDeleteTaskAnimation(final Runnable r) {
+    void startDeleteTaskAnimation(final Runnable r, int delay) {
         // Disabling clipping with the stack while the view is animating away
         setClipViewInStack(false);
 
         animate().translationX(mConfig.taskViewRemoveAnimTranslationXPx)
             .alpha(0f)
-            .setStartDelay(0)
+            .setStartDelay(delay)
             .setUpdateListener(null)
             .setInterpolator(mConfig.fastOutSlowInInterpolator)
             .setDuration(mConfig.taskViewRemoveAnimDuration)
             .withEndAction(new Runnable() {
                 @Override
                 public void run() {
-                    // We just throw this into a runnable because starting a view property
-                    // animation using layers can cause inconsisten results if we try and
-                    // update the layers while the animation is running.  In some cases,
-                    // the runnabled passed in may start an animation which also uses layers
-                    // so we defer all this by posting this.
-                    r.run();
+                    if (r != null) {
+                        r.run();
+                    }
 
                     // Re-enable clipping with the stack (we will reuse this view)
                     setClipViewInStack(true);
@@ -481,7 +483,7 @@ public class TaskView extends FrameLayout implements Task.TaskCallbacks,
                     mCb.onTaskViewDismissed(tv);
                 }
             }
-        });
+        }, 0);
     }
 
     /**

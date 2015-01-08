@@ -26,6 +26,8 @@ import android.view.ViewParent;
 import com.android.systemui.recents.Constants;
 import com.android.systemui.recents.RecentsConfiguration;
 
+import java.util.List;
+
 /* Handles touch events for a TaskStackView. */
 class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     static int INACTIVE_POINTER_ID = -1;
@@ -93,9 +95,10 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
 
     /** Returns the view at the specified coordinates */
     TaskView findViewAtPoint(int x, int y) {
-        int childCount = mSv.getChildCount();
-        for (int i = childCount - 1; i >= 0; i--) {
-            TaskView tv = (TaskView) mSv.getChildAt(i);
+        List<TaskView> taskViews = mSv.getTaskViews();
+        int taskViewCount = taskViews.size();
+        for (int i = taskViewCount - 1; i >= 0; i--) {
+            TaskView tv = taskViews.get(i);
             if (tv.getVisibility() == View.VISIBLE) {
                 if (mSv.isTransformedTouchPointInView(x, y, tv)) {
                     return tv;
@@ -115,8 +118,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     /** Touch preprocessing for handling below */
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         // Return early if we have no children
-        boolean hasChildren = (mSv.getChildCount() > 0);
-        if (!hasChildren) {
+        boolean hasTaskViews = (mSv.getTaskViews().size() > 0);
+        if (!hasTaskViews) {
             return false;
         }
 
@@ -190,8 +193,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
     /** Handles touch events once we have intercepted them */
     public boolean onTouchEvent(MotionEvent ev) {
         // Short circuit if we have no children
-        boolean hasChildren = (mSv.getChildCount() > 0);
-        if (!hasChildren) {
+        boolean hasTaskViews = (mSv.getTaskViews().size() > 0);
+        if (!hasTaskViews) {
             return false;
         }
 
@@ -378,6 +381,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         if (parent != null) {
             parent.requestDisallowInterceptTouchEvent(true);
         }
+        // Fade out the dismiss button
+        mSv.hideDismissAllButton(null);
     }
 
     @Override
@@ -403,6 +408,8 @@ class TaskStackViewTouchHandler implements SwipeHelper.Callback {
         tv.setClipViewInStack(true);
         // Re-enable touch events from this task view
         tv.setTouchEnabled(true);
+        // Restore the dismiss button
+        mSv.showDismissAllButton();
     }
 
     @Override
