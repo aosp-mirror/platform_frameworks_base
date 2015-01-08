@@ -63,6 +63,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.HashMap;
 
 /**
  * Represent a logical device of type TV residing in Android system.
@@ -143,11 +144,43 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         public void onInputAdded(String inputId) {
             TvInputInfo tvInfo = mService.getTvInputManager().getTvInputInfo(inputId);
             HdmiDeviceInfo info = tvInfo.getHdmiDeviceInfo();
-            if (info != null && info.isCecDevice()) {
-                mDelayedMessageBuffer.processActiveSource(info.getLogicalAddress());
+            if (info == null) return;
+            addTvInput(inputId, info.getId());
+            if (info.isCecDevice()) {
+                processDelayedActiveSource(info.getLogicalAddress());
             }
         }
+
+        @Override
+        public void onInputRemoved(String inputId) {
+            removeTvInput(inputId);
+        }
     };
+
+    // Keeps the mapping (TV input ID, HDMI device ID) to keep track of the TV inputs ready to
+    // accept input switching request from HDMI devices. Requests for which the corresponding
+    // input ID is not yet registered by TV input framework need to be buffered for delayed
+    // processing.
+    private final HashMap<String, Integer> mTvInputs = new HashMap<>();
+
+    @ServiceThreadOnly
+    private void addTvInput(String inputId, int deviceId) {
+        assertRunOnServiceThread();
+        mTvInputs.put(inputId, deviceId);
+    }
+
+    @ServiceThreadOnly
+    private void removeTvInput(String inputId) {
+        assertRunOnServiceThread();
+        mTvInputs.remove(inputId);
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean isInputReady(int deviceId) {
+        assertRunOnServiceThread();
+        return mTvInputs.containsValue(deviceId);
+    }
 
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_TV);
@@ -168,6 +201,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mService.sendCecCommand(HdmiCecMessageBuilder.buildDeviceVendorIdCommand(
                 mAddress, mService.getVendorId()));
         mCecSwitches.add(mService.getPhysicalAddress());  // TV is a CEC switch too.
+        mTvInputs.clear();
         mSkipRoutingControl = (reason == HdmiControlService.INITIATED_BY_WAKE_UP_MESSAGE);
         launchRoutingControl(reason != HdmiControlService.INITIATED_BY_ENABLE_CEC &&
                 reason != HdmiControlService.INITIATED_BY_BOOT_UP);
@@ -447,8 +481,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         HdmiDeviceInfo info = getCecDeviceInfo(logicalAddress);
         if (info == null) {
             if (!handleNewDeviceAtTheTailOfActivePath(physicalAddress)) {
+                HdmiLogger.debug("Device info not found: %X; buffering the command", logicalAddress);
                 mDelayedMessageBuffer.add(message);
             }
+        } else if (!isInputReady(info.getId())) {
+            HdmiLogger.debug("Input not ready for device: %X; buffering the command", info.getId());
+            mDelayedMessageBuffer.add(message);
         } else {
             ActiveSource activeSource = ActiveSource.of(logicalAddress, physicalAddress);
             ActiveSourceHandler.create(this, null).process(activeSource, info.getDeviceType());
@@ -1774,6 +1812,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     void processDelayedMessages(int address) {
         assertRunOnServiceThread();
         mDelayedMessageBuffer.processMessagesForDevice(address);
+    }
+
+    @ServiceThreadOnly
+    void processDelayedActiveSource(int address) {
+        assertRunOnServiceThread();
+        mDelayedMessageBuffer.processActiveSource(address);
     }
 
     @Override
