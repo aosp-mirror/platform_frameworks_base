@@ -277,6 +277,9 @@ public final class HdmiControlService extends SystemService {
     @Nullable
     private TvInputManager mTvInputManager;
 
+    @Nullable
+    private PowerManager mPowerManager;
+
     // Last input port before switching to the MHL port. Should switch back to this port
     // when the mobile device sends the request one touch play with off.
     // Gets invalidated if we go to other port/input.
@@ -353,6 +356,7 @@ public final class HdmiControlService extends SystemService {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
             mTvInputManager = (TvInputManager) getContext().getSystemService(
                     Context.TV_INPUT_SERVICE);
+            mPowerManager = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
         }
     }
 
@@ -368,6 +372,10 @@ public final class HdmiControlService extends SystemService {
     void unregisterTvInputCallback(TvInputCallback callback) {
         if (mTvInputManager == null) return;
         mTvInputManager.unregisterCallback(callback);
+    }
+
+    PowerManager getPowerManager() {
+        return mPowerManager;
     }
 
     /**
@@ -1859,8 +1867,7 @@ public final class HdmiControlService extends SystemService {
     void wakeUp() {
         assertRunOnServiceThread();
         mWakeUpMessageReceived = true;
-        PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
-        pm.wakeUp(SystemClock.uptimeMillis());
+        mPowerManager.wakeUp(SystemClock.uptimeMillis());
         // PowerManger will send the broadcast Intent.ACTION_SCREEN_ON and after this gets
         // the intent, the sequence will continue at onWakeUp().
     }
@@ -1869,8 +1876,7 @@ public final class HdmiControlService extends SystemService {
     void standby() {
         assertRunOnServiceThread();
         mStandbyMessageReceived = true;
-        PowerManager pm = (PowerManager) getContext().getSystemService(Context.POWER_SERVICE);
-        pm.goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_HDMI, 0);
+        mPowerManager.goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_HDMI, 0);
         // PowerManger will send the broadcast Intent.ACTION_SCREEN_OFF and after this gets
         // the intent, the sequence will continue at onStandby().
     }
@@ -1896,6 +1902,7 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private void onStandby() {
         assertRunOnServiceThread();
+        if (!canGoToStandby()) return;
         mPowerStatus = HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
         invokeVendorCommandListenersOnControlStateChanged(false,
                 HdmiControlManager.CONTROL_STATE_CHANGED_REASON_STANDBY);
@@ -1914,6 +1921,13 @@ public final class HdmiControlService extends SystemService {
                 }
             }
         });
+    }
+
+    private boolean canGoToStandby() {
+        for (HdmiCecLocalDevice device : mCecController.getLocalDeviceList()) {
+            if (!device.canGoToStandby()) return false;
+        }
+        return true;
     }
 
     @ServiceThreadOnly
