@@ -191,7 +191,7 @@ class ZygoteConnection {
                 rlimits = parsedArgs.rlimits.toArray(intArray2d);
             }
 
-            if (parsedArgs.runtimeInit && parsedArgs.invokeWith != null) {
+            if (parsedArgs.invokeWith != null) {
                 FileDescriptor[] pipeFds = Os.pipe2(O_CLOEXEC);
                 childPipeFd = pipeFds[1];
                 serverPipeFd = pipeFds[0];
@@ -303,20 +303,13 @@ class ZygoteConnection {
      *   <li> --rlimit=r,c,m<i>tuple of values for setrlimit() call.
      *    <code>r</code> is the resource, <code>c</code> and <code>m</code>
      *    are the settings for current and max value.</i>
-     *   <li> --classpath=<i>colon-separated classpath</i> indicates
-     * that the specified class (which must b first non-flag argument) should
-     * be loaded from jar files in the specified classpath. Incompatible with
-     * --runtime-init
-     *   <li> --runtime-init indicates that the remaining arg list should
-     * be handed off to com.android.internal.os.RuntimeInit, rather than
-     * processed directly
-     * Android runtime startup (eg, Binder initialization) is also eschewed.
-     *   <li> --nice-name=<i>nice name to appear in ps</i>
-     *   <li> If <code>--runtime-init</code> is present:
-     *      [--] &lt;args for RuntimeInit &gt;
-     *   <li> If <code>--runtime-init</code> is absent:
-     *      [--] &lt;classname&gt; [args...]
      *   <li> --instruction-set=<i>instruction-set-string</i> which instruction set to use/emulate.
+     *   <li> --nice-name=<i>nice name to appear in ps</i>
+     *   <li> --runtime-args indicates that the remaining arg list should
+     * be handed off to com.android.internal.os.RuntimeInit, rather than
+     * processed directly.
+     * Android runtime startup (eg, Binder initialization) is also eschewed.
+     *   <li> [--] &lt;args for RuntimeInit &gt;
      * </ul>
      */
     static class Arguments {
@@ -343,12 +336,6 @@ class ZygoteConnection {
         /** from --target-sdk-version. */
         int targetSdkVersion;
         boolean targetSdkVersionSpecified;
-
-        /** from --classpath */
-        String classpath;
-
-        /** from --runtime-init */
-        boolean runtimeInit;
 
         /** from --nice-name */
         String niceName;
@@ -411,6 +398,8 @@ class ZygoteConnection {
                 throws IllegalArgumentException {
             int curArg = 0;
 
+            boolean seenRuntimeArgs = true;
+
             for ( /* curArg */ ; curArg < args.length; curArg++) {
                 String arg = args[curArg];
 
@@ -451,8 +440,8 @@ class ZygoteConnection {
                     debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
                 } else if (arg.equals("--enable-assert")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
-                } else if (arg.equals("--runtime-init")) {
-                    runtimeInit = true;
+                } else if (arg.equals("--runtime-args")) {
+                    seenRuntimeArgs = true;
                 } else if (arg.startsWith("--seinfo=")) {
                     if (seInfoSpecified) {
                         throw new IllegalArgumentException(
@@ -497,17 +486,6 @@ class ZygoteConnection {
                     }
 
                     rlimits.add(rlimitTuple);
-                } else if (arg.equals("-classpath")) {
-                    if (classpath != null) {
-                        throw new IllegalArgumentException(
-                                "Duplicate arg specified");
-                    }
-                    try {
-                        classpath = args[++curArg];
-                    } catch (IndexOutOfBoundsException ex) {
-                        throw new IllegalArgumentException(
-                                "-classpath requires argument");
-                    }
                 } else if (arg.startsWith("--setgroups=")) {
                     if (gids != null) {
                         throw new IllegalArgumentException(
@@ -554,9 +532,8 @@ class ZygoteConnection {
                 }
             }
 
-            if (runtimeInit && classpath != null) {
-                throw new IllegalArgumentException(
-                        "--runtime-init and -classpath are incompatible");
+            if (!seenRuntimeArgs) {
+                throw new IllegalArgumentException("Unexpected argument : " + args[curArg]);
             }
 
             remainingArgs = new String[args.length - curArg];
@@ -878,47 +855,13 @@ class ZygoteConnection {
             Process.setArgV0(parsedArgs.niceName);
         }
 
-        if (parsedArgs.runtimeInit) {
-            if (parsedArgs.invokeWith != null) {
-                WrapperInit.execApplication(parsedArgs.invokeWith,
-                        parsedArgs.niceName, parsedArgs.targetSdkVersion,
-                        pipeFd, parsedArgs.remainingArgs);
-            } else {
-                RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion,
-                        parsedArgs.remainingArgs, null /* classLoader */);
-            }
+        if (parsedArgs.invokeWith != null) {
+            WrapperInit.execApplication(parsedArgs.invokeWith,
+                    parsedArgs.niceName, parsedArgs.targetSdkVersion,
+                    pipeFd, parsedArgs.remainingArgs);
         } else {
-            String className;
-            try {
-                className = parsedArgs.remainingArgs[0];
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                logAndPrintError(newStderr,
-                        "Missing required class name argument", null);
-                return;
-            }
-
-            String[] mainArgs = new String[parsedArgs.remainingArgs.length - 1];
-            System.arraycopy(parsedArgs.remainingArgs, 1,
-                    mainArgs, 0, mainArgs.length);
-
-            if (parsedArgs.invokeWith != null) {
-                WrapperInit.execStandalone(parsedArgs.invokeWith,
-                        parsedArgs.classpath, className, mainArgs);
-            } else {
-                ClassLoader cloader;
-                if (parsedArgs.classpath != null) {
-                    cloader = new PathClassLoader(parsedArgs.classpath,
-                            ClassLoader.getSystemClassLoader());
-                } else {
-                    cloader = ClassLoader.getSystemClassLoader();
-                }
-
-                try {
-                    ZygoteInit.invokeStaticMain(cloader, className, mainArgs);
-                } catch (RuntimeException ex) {
-                    logAndPrintError(newStderr, "Error starting.", ex);
-                }
-            }
+            RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion,
+                    parsedArgs.remainingArgs, null /* classLoader */);
         }
     }
 
