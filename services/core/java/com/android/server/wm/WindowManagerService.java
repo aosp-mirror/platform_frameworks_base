@@ -5220,8 +5220,17 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + taskId);
         EventLog.writeEvent(EventLogTags.WM_TASK_REMOVED, taskId, "removeTask");
         task.mDeferRemoval = false;
-        task.mStack.removeTask(task);
+        stack.removeTask(task);
         mTaskIdToTask.delete(task.taskId);
+
+        final ArrayList<AppWindowToken> exitingApps = stack.mExitingAppTokens;
+        for (int appNdx = exitingApps.size() - 1; appNdx >= 0; --appNdx) {
+            final AppWindowToken wtoken = exitingApps.get(appNdx);
+            if (wtoken.groupId == taskId) {
+                wtoken.mDeferRemoval = false;
+                exitingApps.remove(appNdx);
+            }
+        }
     }
 
     public void removeTask(int taskId) {

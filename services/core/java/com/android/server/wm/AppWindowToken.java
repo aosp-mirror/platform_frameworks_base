@@ -304,10 +304,11 @@ class AppWindowToken extends WindowToken {
             pw.print(prefix); pw.print("inPendingTransaction=");
                     pw.println(inPendingTransaction);
         }
-        if (startingData != null || removed || firstWindowDrawn) {
+        if (startingData != null || removed || firstWindowDrawn || mDeferRemoval) {
             pw.print(prefix); pw.print("startingData="); pw.print(startingData);
                     pw.print(" removed="); pw.print(removed);
-                    pw.print(" firstWindowDrawn="); pw.println(firstWindowDrawn);
+                    pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
+                    pw.print(" mDeferRemoval="); pw.println(mDeferRemoval);
         }
         if (startingWindow != null || startingView != null
                 || startingDisplayed || startingMoved) {
