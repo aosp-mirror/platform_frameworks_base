@@ -27,6 +27,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.TextPaint;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -59,8 +60,6 @@ class SimpleMonthView extends View {
     private static final int DEFAULT_NUM_ROWS = 6;
     private static final int MAX_NUM_ROWS = 6;
 
-    private static final int DAY_SEPARATOR_WIDTH = 1;
-
     private final Formatter mFormatter;
     private final StringBuilder mStringBuilder;
 
@@ -68,11 +67,13 @@ class SimpleMonthView extends View {
     private final int mDayOfWeekTextSize;
     private final int mDayTextSize;
 
+    /** Height of the header containing the month and day of week labels. */
     private final int mMonthHeaderHeight;
 
-    private final Paint mMonthPaint = new Paint();
-    private final Paint mDayOfWeekPaint = new Paint();
-    private final Paint mDayPaint = new Paint();
+    private final TextPaint mMonthPaint = new TextPaint();
+    private final TextPaint mDayOfWeekPaint = new TextPaint();
+    private final TextPaint mDayPaint = new TextPaint();
+
     private final Paint mDayBackgroundPaint = new Paint();
 
     /** Single-letter (when available) formatter for the day of week label. */
@@ -229,8 +230,8 @@ class SimpleMonthView extends View {
         invalidate();
     }
 
-    void setDayBackgroundColor(ColorStateList daySelectorColor) {
-        final int activatedColor = daySelectorColor.getColorForState(
+    void setDayBackgroundColor(ColorStateList dayBackgroundColor) {
+        final int activatedColor = dayBackgroundColor.getColorForState(
                 StateSet.get(StateSet.VIEW_STATE_ENABLED | StateSet.VIEW_STATE_ACTIVATED), 0);
         mDayBackgroundPaint.setColor(activatedColor);
         invalidate();
@@ -412,20 +413,27 @@ class SimpleMonthView extends View {
 
     private void drawMonthTitle(Canvas canvas) {
         final float x = (mWidth + 2 * mPadding) / 2f;
-        final float y = (mMonthHeaderHeight - mDayOfWeekTextSize) / 2f;
+
+        // Centered on the upper half of the month header.
+        final float lineHeight = mMonthPaint.ascent() + mMonthPaint.descent();
+        final float y = mMonthHeaderHeight * 0.25f - lineHeight / 2f;
+
         canvas.drawText(getMonthAndYearString(), x, y, mMonthPaint);
     }
 
     private void drawWeekDayLabels(Canvas canvas) {
-        final int y = mMonthHeaderHeight - (mDayOfWeekTextSize / 2);
-        final int dayWidthHalf = (mWidth - mPadding * 2) / (mNumDays * 2);
+        final float dayWidthHalf = (mWidth - mPadding * 2) / (mNumDays * 2);
+
+        // Centered on the lower half of the month header.
+        final float lineHeight = mDayOfWeekPaint.ascent() + mDayOfWeekPaint.descent();
+        final float y = mMonthHeaderHeight * 0.75f - lineHeight / 2f;
 
         for (int i = 0; i < mNumDays; i++) {
             final int calendarDay = (i + mWeekStart) % mNumDays;
             mDayLabelCalendar.set(Calendar.DAY_OF_WEEK, calendarDay);
 
             final String dayLabel = mDayFormatter.format(mDayLabelCalendar.getTime());
-            final int x = (2 * i + 1) * dayWidthHalf + mPadding;
+            final float x = (2 * i + 1) * dayWidthHalf + mPadding;
             canvas.drawText(dayLabel, x, y, mDayOfWeekPaint);
         }
     }
@@ -435,11 +443,12 @@ class SimpleMonthView extends View {
      */
     private void drawDays(Canvas canvas) {
         final int dayWidthHalf = (mWidth - mPadding * 2) / (mNumDays * 2);
-        int y = (((mRowHeight + mDayTextSize) / 2) - DAY_SEPARATOR_WIDTH)
-                + mMonthHeaderHeight;
-        int j = findDayOffset();
 
-        for (int day = 1; day <= mNumCells; day++) {
+        // Centered within the row.
+        final float lineHeight = mDayOfWeekPaint.ascent() + mDayOfWeekPaint.descent();
+        float y = mMonthHeaderHeight + (mRowHeight - lineHeight) / 2f;
+
+        for (int day = 1, j = findDayOffset(); day <= mNumCells; day++) {
             final int x = (2 * j + 1) * dayWidthHalf + mPadding;
             int stateMask = 0;
 
@@ -450,7 +459,9 @@ class SimpleMonthView extends View {
             if (mActivatedDay == day) {
                 stateMask |= StateSet.VIEW_STATE_ACTIVATED;
 
-                canvas.drawCircle(x, y - (mDayTextSize / 3), mRowHeight / 2,
+                // Adjust the circle to be centered the row.
+                final float rowCenterY = y + lineHeight / 2;
+                canvas.drawCircle(x, rowCenterY, mRowHeight / 2,
                         mDayBackgroundPaint);
             }
 
