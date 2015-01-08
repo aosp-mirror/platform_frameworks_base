@@ -1829,7 +1829,7 @@ public class NotificationManagerService extends SystemService {
                     // can to avoid extracting signals.
                     handleGroupedNotificationLocked(r, old, callingUid, callingPid);
                     boolean ignoreNotification =
-                            removeUnusedGroupedNotificationLocked(r, callingUid, callingPid);
+                            removeUnusedGroupedNotificationLocked(r, old, callingUid, callingPid);
 
                     // This conditional is a dirty hack to limit the logging done on
                     //     behalf of the download manager without affecting other apps.
@@ -1966,7 +1966,8 @@ public class NotificationManagerService extends SystemService {
      *
      * <p>Returns true if the given notification is a child of a group with a
      * summary, which means that SysUI will never show it, and hence the new
-     * notification can be safely ignored.</p>
+     * notification can be safely ignored. Also cancels any previous instance
+     * of the ignored notification.</p>
      *
      * <p>For summaries, cancels all children of that group, as SysUI will
      * never show them anymore.</p>
@@ -1974,7 +1975,7 @@ public class NotificationManagerService extends SystemService {
      * @return true if the given notification can be ignored as an optimization
      */
     private boolean removeUnusedGroupedNotificationLocked(NotificationRecord r,
-            int callingUid, int callingPid) {
+            NotificationRecord old, int callingUid, int callingPid) {
         // No optimizations are possible if listeners want groups.
         if (mListeners.notificationGroupsDesired()) {
             return false;
@@ -1991,6 +1992,13 @@ public class NotificationManagerService extends SystemService {
             if (DBG) {
                 Slog.d(TAG, "Ignoring group child " + sbn.getKey() + " due to existing summary "
                         + summary.getKey());
+            }
+            // Make sure we don't leave an old version of the notification around.
+            if (old != null) {
+                if (DBG) {
+                    Slog.d(TAG, "Canceling old version of ignored group child " + sbn.getKey());
+                }
+                cancelNotificationLocked(old, false, REASON_GROUP_OPTIMIZATION);
             }
             return true;
         } else if (isSummary) {
