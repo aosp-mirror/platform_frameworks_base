@@ -191,6 +191,17 @@ abstract class HdmiCecLocalDevice {
     protected abstract void setPreferredAddress(int addr);
 
     /**
+     * Returns true if the TV input associated with the CEC device is ready
+     * to accept further processing such as input switching. This is used
+     * to buffer certain CEC commands and process it later if the input is not
+     * ready yet. For other types of local devices(non-TV), this method returns
+     * true by default to let the commands be processed right away.
+     */
+    protected boolean isInputReady(int deviceId) {
+        return true;
+    }
+
+    /**
      * Dispatch incoming message.
      *
      * @param message incoming message

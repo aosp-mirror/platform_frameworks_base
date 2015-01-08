@@ -88,24 +88,22 @@ final class DelayedMessageBuffer {
      * Process messages from a given logical device. Called by
      * {@link NewDeviceAction} actions when they finish adding the device
      * information.
-     * <p>&lt;Active Source&gt; is not processed in this method but processed
-     * separately via {@link #processActiveSource()}.
+     * <p>&lt;Active Source&gt; is processed only when the TV input is ready.
+     * If not, {@link #processActiveSource()} will be invoked later to handle it.
      *
      * @param address logical address of CEC device which the messages to process
      *        are associated with
      */
     void processMessagesForDevice(int address) {
-        HdmiLogger.debug("Processing message for address:" + address);
+        HdmiLogger.debug("Checking message for address:" + address);
         for (Iterator<HdmiCecMessage> iter = mBuffer.iterator(); iter.hasNext(); ) {
             HdmiCecMessage message = iter.next();
-            if (message.getOpcode() == Constants.MESSAGE_ACTIVE_SOURCE) {
-                continue;
-            }
-            if (message.getSource() == address) {
-                mDevice.onMessage(message);
-                HdmiLogger.debug("Processing message:" + message);
-                iter.remove();
-            }
+            if (message.getSource() != address) continue;
+            if (message.getOpcode() == Constants.MESSAGE_ACTIVE_SOURCE
+                    && !mDevice.isInputReady(HdmiDeviceInfo.idForCecDevice(address))) continue;
+            mDevice.onMessage(message);
+            HdmiLogger.debug("Processing message:" + message);
+            iter.remove();
         }
     }
 
