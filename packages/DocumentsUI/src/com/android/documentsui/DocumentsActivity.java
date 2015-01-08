@@ -310,7 +310,6 @@ public class DocumentsActivity extends Activity {
             } else if (mState.action == ACTION_STANDALONE) {
                 mState.allowMultiple = true;
             }
-        }
 
         if (mState.action == ACTION_MANAGE) {
             mState.acceptMimes = new String[] { "*/*" };
@@ -485,7 +484,7 @@ public class DocumentsActivity extends Activity {
             } else if (mState.action == ACTION_CREATE) {
                 mRootsToolbar.setTitle(R.string.title_save);
             } else if (mState.action == ACTION_STANDALONE) {
-                actionBar.setTitle(R.string.title_standalone);
+                mRootsToolbar.setTitle(R.string.title_standalone);
             }
         }
 
