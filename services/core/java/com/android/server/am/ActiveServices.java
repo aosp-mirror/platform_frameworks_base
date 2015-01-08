@@ -751,6 +751,9 @@ public final class ActiveServices {
                 }
             }
 
+            mAm.startAssociationLocked(callerApp.uid, callerApp.processName,
+                    s.appInfo.uid, s.name, s.processName);
+
             AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
             ConnectionRecord c = new ConnectionRecord(b, activity,
                     connection, flags, clientLabel, clientIntent);
@@ -1445,10 +1448,10 @@ public final class ActiveServices {
 
         boolean created = false;
         try {
-            String nameTerm;
-            int lastPeriod = r.shortName.lastIndexOf('.');
-            nameTerm = lastPeriod >= 0 ? r.shortName.substring(lastPeriod) : r.shortName;
             if (LOG_SERVICE_START_STOP) {
+                String nameTerm;
+                int lastPeriod = r.shortName.lastIndexOf('.');
+                nameTerm = lastPeriod >= 0 ? r.shortName.substring(lastPeriod) : r.shortName;
                 EventLogTags.writeAmCreateService(
                         r.userId, System.identityHashCode(r), nameTerm, r.app.uid, r.app.pid);
             }
@@ -1745,6 +1748,8 @@ public final class ActiveServices {
                 mServiceConnections.remove(binder);
             }
         }
+
+        mAm.stopAssociationLocked(b.client.uid, b.client.processName, s.appInfo.uid, s.name);
 
         if (b.connections.size() == 0) {
             b.intent.apps.remove(b.client);
@@ -2367,7 +2372,8 @@ public final class ActiveServices {
             if (proc.executingServices.size() == 0 || proc.thread == null) {
                 return;
             }
-            long maxTime = SystemClock.uptimeMillis() -
+            final long now = SystemClock.uptimeMillis();
+            final long maxTime =  now -
                     (proc.execServicesFg ? SERVICE_TIMEOUT : SERVICE_BACKGROUND_TIMEOUT);
             ServiceRecord timeout = null;
             long nextTime = 0;
@@ -2383,7 +2389,21 @@ public final class ActiveServices {
             }
             if (timeout != null && mAm.mLruProcesses.contains(proc)) {
                 Slog.w(TAG, "Timeout executing service: " + timeout);
-                anrMessage = "Executing service " + timeout.shortName;
+                StringBuilder sb = new StringBuilder();
+                sb.append("sxecuting service ");
+                sb.append(timeout.shortName);
+                sb.append(" (execStart=");
+                TimeUtils.formatDuration(now-timeout.executingStart, sb);
+                sb.append(", nesting=");
+                sb.append(timeout.executeNesting);
+                sb.append(", fg=");
+                sb.append(proc.execServicesFg);
+                sb.append(", create=");
+                TimeUtils.formatDuration(now-timeout.createTime, sb);
+                sb.append(", proc=");
+                sb.append(timeout.app != null ? timeout.app.toShortString() : "null");
+                sb.append(")");
+                anrMessage = sb.toString();
             } else {
                 Message msg = mAm.mHandler.obtainMessage(
                         ActivityManagerService.SERVICE_TIMEOUT_MSG);
