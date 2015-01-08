@@ -17,17 +17,39 @@
 #ifndef TESTCONTEXT_H
 #define TESTCONTEXT_H
 
-#include <ui/DisplayInfo.h>
+#include <gui/DisplayEventReceiver.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceControl.h>
+#include <gui/Surface.h>
+#include <ui/DisplayInfo.h>
+#include <utils/Looper.h>
 
-extern android::DisplayInfo gDisplay;
-#define dp(x) ((x) * gDisplay.density)
+namespace android {
+namespace uirenderer {
+namespace test {
 
-// Initializes all the static globals that are shared across all contexts
-// such as display info
-void createTestEnvironment();
+extern DisplayInfo gDisplay;
+#define dp(x) ((x) * android::uirenderer::test::gDisplay.density)
 
-// Defaults to fullscreen
-android::sp<android::SurfaceControl> createWindow(int width = -1, int height = -1);
+class TestContext {
+public:
+    TestContext();
+    ~TestContext();
+
+    sp<Surface> surface();
+
+    void waitForVsync();
+
+private:
+    sp<SurfaceComposerClient> mSurfaceComposerClient;
+    sp<SurfaceControl> mSurfaceControl;
+    DisplayEventReceiver mDisplayEventReceiver;
+    sp<Looper> mLooper;
+};
+
+} // namespace test
+} // namespace uirenderer
+} // namespace android
 
 #endif
