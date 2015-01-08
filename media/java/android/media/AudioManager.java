@@ -295,38 +295,6 @@ public class AudioManager {
      */
     public static final String EXTRA_ENCODINGS = "android.media.extra.ENCODINGS";
 
-    /**
-     * Broadcast Action: A USB audio accessory was plugged in or unplugged.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>card</em> - ALSA card number (integer) </li>
-     *   <li><em>device</em> - ALSA device number (integer) </li>
-     * </ul>
-     * </ul>
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_USB_AUDIO_ACCESSORY_PLUG =
-            "android.media.action.USB_AUDIO_ACCESSORY_PLUG";
-
-    /**
-     * Broadcast Action: A USB audio device was plugged in or unplugged.
-     *
-     * <p>The intent will have the following extra values:
-     * <ul>
-     *   <li><em>state</em> - 0 for unplugged, 1 for plugged. </li>
-     *   <li><em>card</em> - ALSA card number (integer) </li>
-     *   <li><em>device</em> - ALSA device number (integer) </li>
-     * </ul>
-     * </ul>
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_USB_AUDIO_DEVICE_PLUG =
-            "android.media.action.USB_AUDIO_DEVICE_PLUG";
-
     /** The audio stream for phone calls */
     public static final int STREAM_VOICE_CALL = AudioSystem.STREAM_VOICE_CALL;
     /** The audio stream for system sounds */

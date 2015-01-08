@@ -127,6 +127,7 @@ public class UsbDeviceManager {
     private Map<String, List<Pair<String, String>>> mOemModeMap;
     private String[] mAccessoryStrings;
     private UsbDebuggingManager mDebuggingManager;
+    private final UsbAlsaManager mUsbAlsaManager;
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -159,8 +160,9 @@ public class UsbDeviceManager {
         }
     };
 
-    public UsbDeviceManager(Context context) {
+    public UsbDeviceManager(Context context, UsbAlsaManager alsaManager) {
         mContext = context;
+        mUsbAlsaManager = alsaManager;
         mContentResolver = context.getContentResolver();
         PackageManager pm = mContext.getPackageManager();
         mHasUsbAccessory = pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY);
@@ -594,19 +596,15 @@ public class UsbDeviceManager {
             boolean enabled = containsFunction(mCurrentFunctions,
                     UsbManager.USB_FUNCTION_AUDIO_SOURCE);
             if (enabled != mAudioSourceEnabled) {
-                // send a sticky broadcast containing current USB state
-                Intent intent = new Intent(AudioManager.ACTION_USB_AUDIO_ACCESSORY_PLUG);
-                intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                intent.putExtra("state", (enabled ? 1 : 0));
+                int card = -1;
+                int device = -1;
+
                 if (enabled) {
                     Scanner scanner = null;
                     try {
                         scanner = new Scanner(new File(AUDIO_SOURCE_PCM_PATH));
-                        int card = scanner.nextInt();
-                        int device = scanner.nextInt();
-                        intent.putExtra("card", card);
-                        intent.putExtra("device", device);
+                        card = scanner.nextInt();
+                        device = scanner.nextInt();
                     } catch (FileNotFoundException e) {
                         Slog.e(TAG, "could not open audio source PCM file", e);
                     } finally {
@@ -615,7 +613,7 @@ public class UsbDeviceManager {
                         }
                     }
                 }
-                mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+                mUsbAlsaManager.setAccessoryAudioState(enabled, card, device);
                 mAudioSourceEnabled = enabled;
             }
         }

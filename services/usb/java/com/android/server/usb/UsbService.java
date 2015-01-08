@@ -73,6 +73,7 @@ public class UsbService extends IUsbManager.Stub {
 
     private UsbDeviceManager mDeviceManager;
     private UsbHostManager mHostManager;
+    private final UsbAlsaManager mAlsaManager;
 
     private final Object mLock = new Object();
 
@@ -95,12 +96,14 @@ public class UsbService extends IUsbManager.Stub {
     public UsbService(Context context) {
         mContext = context;
 
+        mAlsaManager = new UsbAlsaManager(context);
+
         final PackageManager pm = mContext.getPackageManager();
         if (pm.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
-            mHostManager = new UsbHostManager(context);
+            mHostManager = new UsbHostManager(context, mAlsaManager);
         }
         if (new File("/sys/class/android_usb").exists()) {
-            mDeviceManager = new UsbDeviceManager(context);
+            mDeviceManager = new UsbDeviceManager(context, mAlsaManager);
         }
 
         setCurrentUser(UserHandle.USER_OWNER);
@@ -137,6 +140,8 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     public void systemReady() {
+        mAlsaManager.systemReady();
+
         if (mDeviceManager != null) {
             mDeviceManager.systemReady();
         }
@@ -305,6 +310,7 @@ public class UsbService extends IUsbManager.Stub {
         if (mHostManager != null) {
             mHostManager.dump(fd, pw);
         }
+        mAlsaManager.dump(fd, pw);
 
         synchronized (mLock) {
             for (int i = 0; i < mSettingsByUser.size(); i++) {

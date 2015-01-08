@@ -633,8 +633,6 @@ public class AudioService extends IAudioService.Stub {
                 new IntentFilter(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED);
         intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
         intentFilter.addAction(Intent.ACTION_DOCK_EVENT);
-        intentFilter.addAction(AudioManager.ACTION_USB_AUDIO_ACCESSORY_PLUG);
-        intentFilter.addAction(AudioManager.ACTION_USB_AUDIO_DEVICE_PLUG);
         intentFilter.addAction(Intent.ACTION_SCREEN_ON);
         intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -4953,56 +4951,6 @@ public class AudioService extends IAudioService.Stub {
                             resetBluetoothSco();
                         }
                     }
-                }
-            } else if (action.equals(AudioManager.ACTION_USB_AUDIO_ACCESSORY_PLUG)) {
-                state = intent.getIntExtra("state", 0);
-
-                int alsaCard = intent.getIntExtra("card", -1);
-                int alsaDevice = intent.getIntExtra("device", -1);
-
-                String params = (alsaCard == -1 && alsaDevice == -1 ? ""
-                                    : "card=" + alsaCard + ";device=" + alsaDevice);
-
-                // Playback Device
-                outDevice = AudioSystem.DEVICE_OUT_USB_ACCESSORY;
-                setWiredDeviceConnectionState(outDevice, state, params);
-            } else if (action.equals(AudioManager.ACTION_USB_AUDIO_DEVICE_PLUG)) {
-                // FIXME Does not yet handle the case where the setting is changed
-                // after device connection.  Ideally we should handle the settings change
-                // in SettingsObserver. Here we should log that a USB device is connected
-                // and disconnected with its address (card , device) and force the
-                // connection or disconnection when the setting changes.
-                int isDisabled = Settings.Secure.getInt(mContentResolver,
-                        Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED, 0);
-                if (isDisabled != 0) {
-                    return;
-                }
-
-                state = intent.getIntExtra("state", 0);
-
-                int alsaCard = intent.getIntExtra("card", -1);
-                int alsaDevice = intent.getIntExtra("device", -1);
-                boolean hasPlayback = intent.getBooleanExtra("hasPlayback", false);
-                boolean hasCapture = intent.getBooleanExtra("hasCapture", false);
-                boolean hasMIDI = intent.getBooleanExtra("hasMIDI", false);
-                int deviceClass = intent.getIntExtra("class", 0);
-
-                String params = (alsaCard == -1 && alsaDevice == -1
-                        ? ""
-                        : "card=" + alsaCard +
-                          ";device=" + alsaDevice +
-                          ";class=" + Integer.toHexString(deviceClass));
-
-                // Playback Device
-                if (hasPlayback) {
-                    outDevice = AudioSystem.DEVICE_OUT_USB_DEVICE;
-                    setWiredDeviceConnectionState(outDevice, state, params);
-                }
-
-                // Capture Device
-                if (hasCapture) {
-                    inDevice = AudioSystem.DEVICE_IN_USB_DEVICE;
-                    setWiredDeviceConnectionState(inDevice, state, params);
                 }
             } else if (action.equals(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)) {
                 boolean broadcast = false;
