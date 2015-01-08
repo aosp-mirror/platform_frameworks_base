@@ -291,15 +291,17 @@ public final class MediaBrowser {
      * the specified id and subscribes to receive updates when they change.
      * <p>
      * The list of subscriptions is maintained even when not connected and is
-     * restored after reconnection.  It is ok to subscribe while not connected
+     * restored after reconnection. It is ok to subscribe while not connected
      * but the results will not be returned until the connection completes.
-     * </p><p>
+     * </p>
+     * <p>
      * If the id is already subscribed with a different callback then the new
-     * callback will replace the previous one.
+     * callback will replace the previous one and the child data will be
+     * reloaded.
      * </p>
      *
      * @param parentId The id of the parent media item whose list of children
-     * will be subscribed.
+     *            will be subscribed.
      * @param callback The callback to receive the list of children.
      */
     public void subscribe(@NonNull String parentId, @NonNull SubscriptionCallback callback) {
@@ -322,7 +324,7 @@ public final class MediaBrowser {
 
         // If we are connected, tell the service that we are watching.  If we aren't
         // connected, the service will be told when we connect.
-        if (mState == CONNECT_STATE_CONNECTED && newSubscription) {
+        if (mState == CONNECT_STATE_CONNECTED) {
             try {
                 mServiceBinder.addSubscription(parentId, mServiceCallbacks);
             } catch (RemoteException ex) {
