@@ -18,11 +18,9 @@ package android.widget;
 
 import com.android.internal.R;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -195,7 +193,7 @@ public class PopupWindow {
      */
     public PopupWindow(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         mContext = context;
-        mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.PopupWindow, defStyleAttr, defStyleRes);
@@ -871,6 +869,34 @@ public class PopupWindow {
     }
 
     /**
+     * Sets whether the popup window should overlap its anchor view when
+     * displayed as a drop-down.
+     * <p>
+     * If the popup is showing, calling this method will take effect only
+     * the next time the popup is shown.
+     *
+     * @param overlapAnchor Whether the popup should overlap its anchor.
+     *
+     * @see #getOverlapAnchor()
+     * @see #isShowing()
+     */
+    public void setOverlapAnchor(boolean overlapAnchor) {
+        mOverlapAnchor = overlapAnchor;
+    }
+
+    /**
+     * Returns whether the popup window should overlap its anchor view when
+     * displayed as a drop-down.
+     *
+     * @return Whether the popup should overlap its anchor.
+     *
+     * @see #setOverlapAnchor(boolean)
+     */
+    public boolean getOverlapAnchor() {
+        return mOverlapAnchor;
+    }
+
+    /**
      * <p>Indicate whether this popup window is showing on screen.</p>
      *
      * @return true if the popup is showing, false otherwise
@@ -934,11 +960,12 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Display the content view in a popup window anchored to the bottom-left
+     * Display the content view in a popup window anchored to the bottom-left
      * corner of the anchor view. If there is not enough room on screen to show
      * the popup in its entirety, this method tries to find a parent scroll
-     * view to scroll. If no parent scroll view can be scrolled, the bottom-left
-     * corner of the popup is pinned at the top left corner of the anchor view.</p>
+     * view to scroll. If no parent scroll view can be scrolled, the
+     * bottom-left corner of the popup is pinned at the top left corner of the
+     * anchor view.
      *
      * @param anchor the view on which to pin the popup window
      *
@@ -949,14 +976,15 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Display the content view in a popup window anchored to the bottom-left
+     * Display the content view in a popup window anchored to the bottom-left
      * corner of the anchor view offset by the specified x and y coordinates.
-     * If there is not enough room on screen to show
-     * the popup in its entirety, this method tries to find a parent scroll
-     * view to scroll. If no parent scroll view can be scrolled, the bottom-left
-     * corner of the popup is pinned at the top left corner of the anchor view.</p>
-     * <p>If the view later scrolls to move <code>anchor</code> to a different
-     * location, the popup will be moved correspondingly.</p>
+     * If there is not enough room on screen to show the popup in its entirety,
+     * this method tries to find a parent scroll view to scroll. If no parent
+     * scroll view can be scrolled, the bottom-left corner of the popup is
+     * pinned at the top left corner of the anchor view.
+     * <p>
+     * If the view later scrolls to move <code>anchor</code> to a different
+     * location, the popup will be moved correspondingly.
      *
      * @param anchor the view on which to pin the popup window
      * @param xoff A horizontal offset from the anchor in pixels
@@ -969,14 +997,17 @@ public class PopupWindow {
     }
 
     /**
-     * <p>Display the content view in a popup window anchored to the bottom-left
-     * corner of the anchor view offset by the specified x and y coordinates.
-     * If there is not enough room on screen to show
-     * the popup in its entirety, this method tries to find a parent scroll
-     * view to scroll. If no parent scroll view can be scrolled, the bottom-left
-     * corner of the popup is pinned at the top left corner of the anchor view.</p>
-     * <p>If the view later scrolls to move <code>anchor</code> to a different
-     * location, the popup will be moved correspondingly.</p>
+     * Displays the content view in a popup window anchored to the corner of
+     * another view. The window is positioned according to the specified
+     * gravity and offset by the specified x and y coordinates.
+     * <p>
+     * If there is not enough room on screen to show the popup in its entirety,
+     * this method tries to find a parent scroll view to scroll. If no parent
+     * view can be scrolled, the specified vertical gravity will be ignored and
+     * the popup will anchor itself such that it is visible.
+     * <p>
+     * If the view later scrolls to move <code>anchor</code> to a different
+     * location, the popup will be moved correspondingly.
      *
      * @param anchor the view on which to pin the popup window
      * @param xoff A horizontal offset from the anchor in pixels
@@ -1571,7 +1602,7 @@ public class PopupWindow {
      * @param height the new height, can be -1 to ignore
      */
     public void update(View anchor, int width, int height) {
-        update(anchor, false, 0, 0, true, width, height, mAnchoredGravity);
+        update(anchor, false, 0, 0, true, width, height);
     }
 
     /**
@@ -1590,29 +1621,25 @@ public class PopupWindow {
      * @param height the new height, can be -1 to ignore
      */
     public void update(View anchor, int xoff, int yoff, int width, int height) {
-        update(anchor, true, xoff, yoff, true, width, height, mAnchoredGravity);
+        update(anchor, true, xoff, yoff, true, width, height);
     }
 
     private void update(View anchor, boolean updateLocation, int xoff, int yoff,
-            boolean updateDimension, int width, int height, int gravity) {
+            boolean updateDimension, int width, int height) {
 
         if (!isShowing() || mContentView == null) {
             return;
         }
 
-        WeakReference<View> oldAnchor = mAnchor;
-        final boolean needsUpdate = updateLocation
-                && (mAnchorXoff != xoff || mAnchorYoff != yoff);
+        final WeakReference<View> oldAnchor = mAnchor;
+        final boolean needsUpdate = updateLocation && (mAnchorXoff != xoff || mAnchorYoff != yoff);
         if (oldAnchor == null || oldAnchor.get() != anchor || (needsUpdate && !mIsDropdown)) {
-            registerForScrollChanged(anchor, xoff, yoff, gravity);
+            registerForScrollChanged(anchor, xoff, yoff, mAnchoredGravity);
         } else if (needsUpdate) {
             // No need to register again if this is a DropDown, showAsDropDown already did.
             mAnchorXoff = xoff;
             mAnchorYoff = yoff;
-            mAnchoredGravity = gravity;
         }
-
-        WindowManager.LayoutParams p = (WindowManager.LayoutParams) mPopupView.getLayoutParams();
 
         if (updateDimension) {
             if (width == -1) {
@@ -1627,11 +1654,12 @@ public class PopupWindow {
             }
         }
 
-        int x = p.x;
-        int y = p.y;
-
+        final WindowManager.LayoutParams p =
+                (WindowManager.LayoutParams) mPopupView.getLayoutParams();
+        final int x = p.x;
+        final int y = p.y;
         if (updateLocation) {
-            updateAboveAnchor(findDropDownPosition(anchor, p, xoff, yoff, gravity));
+            updateAboveAnchor(findDropDownPosition(anchor, p, xoff, yoff, mAnchoredGravity));
         } else {
             updateAboveAnchor(findDropDownPosition(anchor, p, mAnchorXoff, mAnchorYoff,
                     mAnchoredGravity));

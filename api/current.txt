@@ -38207,9 +38207,11 @@ package android.widget {
     ctor public PopupMenu(android.content.Context, android.view.View, int, int, int);
     method public void dismiss();
     method public android.view.View.OnTouchListener getDragToOpenListener();
+    method public int getGravity();
     method public android.view.Menu getMenu();
     method public android.view.MenuInflater getMenuInflater();
     method public void inflate(int);
+    method public void setGravity(int);
     method public void setOnDismissListener(android.widget.PopupMenu.OnDismissListener);
     method public void setOnMenuItemClickListener(android.widget.PopupMenu.OnMenuItemClickListener);
     method public void show();
@@ -38242,6 +38244,7 @@ package android.widget {
     method public int getInputMethodMode();
     method public int getMaxAvailableHeight(android.view.View);
     method public int getMaxAvailableHeight(android.view.View, int);
+    method public boolean getOverlapAnchor();
     method public int getSoftInputMode();
     method public int getWidth();
     method public boolean isAboveAnchor();
@@ -38264,6 +38267,7 @@ package android.widget {
     method public void setInputMethodMode(int);
     method public void setOnDismissListener(android.widget.PopupWindow.OnDismissListener);
     method public void setOutsideTouchable(boolean);
+    method public void setOverlapAnchor(boolean);
     method public void setSoftInputMode(int);
     method public void setSplitTouchEnabled(boolean);
     method public void setTouchInterceptor(android.view.View.OnTouchListener);
