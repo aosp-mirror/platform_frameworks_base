@@ -1694,10 +1694,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             int smallIconId;
             String contentText;
             final String ownerName = getDeviceOwnerName();
-            if (isManagedProfile(userHandle.getIdentifier())) {
-                contentText = mContext.getString(R.string.ssl_ca_cert_noti_by_administrator);
-                smallIconId = R.drawable.stat_sys_certificate_info;
-            } else if (ownerName != null) {
+            if (ownerName != null) {
                 contentText = mContext.getString(R.string.ssl_ca_cert_noti_managed, ownerName);
                 smallIconId = R.drawable.stat_sys_certificate_info;
             } else {
