@@ -37,14 +37,15 @@ public class Movie {
 
     public native boolean setTime(int relativeMilliseconds);
 
-    private native void nDraw(Canvas canvas, float x, float y, long paintHandle);
+    private native void nDraw(long nativeCanvas, float x, float y, long paintHandle);
 
     public void draw(Canvas canvas, float x, float y, Paint paint) {
-        nDraw(canvas, x, y, paint != null ? paint.getNativeInstance() : 0);
+        nDraw(canvas.getNativeCanvasWrapper(), x, y,
+                paint != null ? paint.getNativeInstance() : 0);
     }
 
     public void draw(Canvas canvas, float x, float y) {
-        nDraw(canvas, x, y, 0);
+        nDraw(canvas.getNativeCanvasWrapper(), x, y, 0);
     }
 
     public static Movie decodeStream(InputStream is) {

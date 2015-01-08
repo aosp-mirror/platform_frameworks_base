@@ -1,3 +1,4 @@
+#include "Canvas.h"
 #include "ScopedLocalRef.h"
 #include "SkFrontBufferedStream.h"
 #include "SkMovie.h"
@@ -63,16 +64,19 @@ static jboolean movie_setTime(JNIEnv* env, jobject movie, jint ms) {
     return J2Movie(env, movie)->setTime(ms) ? JNI_TRUE : JNI_FALSE;
 }
 
-static void movie_draw(JNIEnv* env, jobject movie, jobject canvas,
+static void movie_draw(JNIEnv* env, jobject movie, jlong canvasHandle,
                        jfloat fx, jfloat fy, jlong paintHandle) {
     NPE_CHECK_RETURN_VOID(env, movie);
-    NPE_CHECK_RETURN_VOID(env, canvas);
-    // its OK for paint to be null
+
+    android::Canvas* c = reinterpret_cast<android::Canvas*>(canvasHandle);
+    const android::Paint* p = reinterpret_cast<android::Paint*>(paintHandle);
+
+    // Canvas should never be NULL. However paint is an optional parameter and
+    // therefore may be NULL.
+    SkASSERT(c != NULL);
 
     SkMovie* m = J2Movie(env, movie);
-    SkCanvas* c = GraphicsJNI::getNativeCanvas(env, canvas);
     const SkBitmap& b = m->bitmap();
-    const android::Paint* p = reinterpret_cast<android::Paint*>(paintHandle);
 
     c->drawBitmap(b, fx, fy, p);
 }
@@ -140,7 +144,7 @@ static JNINativeMethod gMethods[] = {
     {   "isOpaque", "()Z",  (void*)movie_isOpaque  },
     {   "duration", "()I",  (void*)movie_duration  },
     {   "setTime",  "(I)Z", (void*)movie_setTime  },
-    {   "nDraw",    "(Landroid/graphics/Canvas;FFJ)V",
+    {   "nDraw",    "(JFFJ)V",
                             (void*)movie_draw  },
     { "nativeDecodeAsset", "(J)Landroid/graphics/Movie;",
                             (void*)movie_decodeAsset },
