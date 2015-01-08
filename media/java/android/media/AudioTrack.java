@@ -512,7 +512,7 @@ public class AudioTrack
                 throw new IllegalArgumentException("Unsupported channel configuration.");
             }
             mChannels = channelConfig;
-            mChannelCount = Integer.bitCount(channelConfig);
+            mChannelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
         }
 
         //--------------
@@ -546,7 +546,7 @@ public class AudioTrack
             loge("Channel configuration features unsupported channels");
             return false;
         }
-        final int channelCount = Integer.bitCount(channelConfig);
+        final int channelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
         if (channelCount > CHANNEL_COUNT_MAX) {
             loge("Channel configuration contains too many channels " +
                     channelCount + ">" + CHANNEL_COUNT_MAX);
@@ -828,7 +828,7 @@ public class AudioTrack
                 loge("getMinBufferSize(): Invalid channel configuration.");
                 return ERROR_BAD_VALUE;
             } else {
-                channelCount = Integer.bitCount(channelConfig);
+                channelCount = AudioFormat.channelCountFromOutChannelMask(channelConfig);
             }
         }
 
