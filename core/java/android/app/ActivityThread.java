@@ -4481,6 +4481,10 @@ public final class ActivityThread {
 
         if ((data.appInfo.flags&ApplicationInfo.FLAG_LARGE_HEAP) != 0) {
             dalvik.system.VMRuntime.getRuntime().clearGrowthLimit();
+        } else {
+            // Small heap, clamp to the current growth limit and let the heap release
+            // pages after the growth limit to the non growth limit capacity. b/18387825
+            dalvik.system.VMRuntime.getRuntime().clampGrowthLimit();
         }
 
         // Allow disk access during application and provider setup. This could
