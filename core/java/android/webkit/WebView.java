@@ -2070,7 +2070,7 @@ public class WebView extends AbsoluteLayout
             return WebView.super.onHoverEvent(event);
         }
 
-        public boolean super_performAccessibilityActionInternal(int action, Bundle arguments) {
+        public boolean super_performAccessibilityAction(int action, Bundle arguments) {
             return WebView.super.performAccessibilityActionInternal(action, arguments);
         }
 
@@ -2384,7 +2384,7 @@ public class WebView extends AbsoluteLayout
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setClassName(WebView.class.getName());
-        mProvider.getViewDelegate().onInitializeAccessibilityNodeInfoInternal(info);
+        mProvider.getViewDelegate().onInitializeAccessibilityNodeInfo(info);
     }
 
     /** @hide */
@@ -2392,13 +2392,13 @@ public class WebView extends AbsoluteLayout
     public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
         super.onInitializeAccessibilityEventInternal(event);
         event.setClassName(WebView.class.getName());
-        mProvider.getViewDelegate().onInitializeAccessibilityEventInternal(event);
+        mProvider.getViewDelegate().onInitializeAccessibilityEvent(event);
     }
 
     /** @hide */
     @Override
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
-        return mProvider.getViewDelegate().performAccessibilityActionInternal(action, arguments);
+        return mProvider.getViewDelegate().performAccessibilityAction(action, arguments);
     }
 
     /** @hide */
