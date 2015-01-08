@@ -103,7 +103,17 @@ public class PersistentDataBlockService extends SystemService {
     @Override
     public void onStart() {
         enforceChecksumValidity();
+        formatIfOemUnlockEnabled();
         publishBinderService(Context.PERSISTENT_DATA_BLOCK_SERVICE, mService);
+    }
+
+    private void formatIfOemUnlockEnabled() {
+        if (doGetOemUnlockEnabled()) {
+            synchronized (mLock) {
+                formatPartitionLocked();
+                doSetOemUnlockEnabledLocked(true);
+            }
+        }
     }
 
     private void enforceOemUnlockPermission() {
@@ -285,6 +295,28 @@ public class PersistentDataBlockService extends SystemService {
         }
     }
 
+    private boolean doGetOemUnlockEnabled() {
+        DataInputStream inputStream;
+        try {
+            inputStream = new DataInputStream(new FileInputStream(new File(mDataBlockFile)));
+        } catch (FileNotFoundException e) {
+            Slog.e(TAG, "partition not available");
+            return false;
+        }
+
+        try {
+            synchronized (mLock) {
+                inputStream.skip(getBlockDeviceSize() - 1);
+                return inputStream.readByte() != 0;
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "unable to access persistent partition", e);
+            return false;
+        } finally {
+            IoUtils.closeQuietly(inputStream);
+        }
+    }
+
     private native long nativeGetBlockDeviceSize(String path);
     private native int nativeWipe(String path);
 
@@ -410,25 +442,7 @@ public class PersistentDataBlockService extends SystemService {
         @Override
         public boolean getOemUnlockEnabled() {
             enforceOemUnlockPermission();
-            DataInputStream inputStream;
-            try {
-                inputStream = new DataInputStream(new FileInputStream(new File(mDataBlockFile)));
-            } catch (FileNotFoundException e) {
-                Slog.e(TAG, "partition not available");
-                return false;
-            }
-
-            try {
-                synchronized (mLock) {
-                    inputStream.skip(getBlockDeviceSize() - 1);
-                    return inputStream.readByte() != 0;
-                }
-            } catch (IOException e) {
-                Slog.e(TAG, "unable to access persistent partition", e);
-                return false;
-            } finally {
-                IoUtils.closeQuietly(inputStream);
-            }
+            return doGetOemUnlockEnabled();
         }
 
         @Override
