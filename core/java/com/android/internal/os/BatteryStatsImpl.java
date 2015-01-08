@@ -6955,6 +6955,17 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    private void recordShutdownLocked(final long elapsedRealtimeMs, final long uptimeMs) {
+        if (mRecordingHistory) {
+            mHistoryCur.currentTime = System.currentTimeMillis();
+            mLastRecordedClockTime = mHistoryCur.currentTime;
+            mLastRecordedClockRealtime = elapsedRealtimeMs;
+            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_SHUTDOWN,
+                    mHistoryCur);
+            mHistoryCur.currentTime = 0;
+        }
+    }
+
     // This should probably be exposed in the API, though it's not critical
     private static final int BATTERY_PLUGGED_NONE = 0;
 
@@ -7627,6 +7638,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     public void shutdownLocked() {
+        recordShutdownLocked(SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
         writeSyncLocked();
         mShuttingDown = true;
     }
