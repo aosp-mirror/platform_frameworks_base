@@ -18,15 +18,11 @@ apply plugin: 'java'
 apply plugin:'application'
 apply plugin: 'maven'
 
-sourceCompatibility = 1.5
+sourceCompatibility = 1.7
 mainClassName = "org.antlr.v4.Tool"
 
 run {
-    args "DataBinder.g4", "-visitor", "-o", "src/main/java-gen/com/android/databinding", "-package", "com.android.databinding"
-}
-
-dependencies {
-    compile 'com.tunnelvisionlabs:antlr4:4.4'
+    args "BindingExpression.g4", "-visitor", "-o", "src/main/java-gen/com/android/databinding", "-package", "com.android.databinding"
 }
 
 sourceSets {
@@ -36,6 +32,16 @@ sourceSets {
             srcDir 'src/main/java-gen'
         }
     }
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+    }
+}
+
+dependencies {
+    compile 'com.tunnelvisionlabs:antlr4:4.4'
+    testCompile 'junit:junit:4.11'
 }
 
 uploadArchives {

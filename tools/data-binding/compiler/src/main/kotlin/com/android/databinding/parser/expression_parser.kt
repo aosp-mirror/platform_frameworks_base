@@ -31,20 +31,23 @@ import com.android.databinding.parser.FieldExpr
 import com.android.databinding.parser.VariableRef
 import com.android.databinding.parser.SymbolExpr
 import com.android.databinding.util.Log
+import com.example.databinding.ExpressionVisitor
+import com.android.databinding.BindingExpressionLexer
+import com.android.databinding.BindingExpressionParser
 
 class ExpressionParser {
     val model = ExprModel()
-    val visitor = ExprVisitor(model)
+    val visitor = ExpressionVisitor(model)
     public fun parse(input : String) : Expr {
         val inputStream = ANTLRInputStream(input)
-        val lexer = DataBinderLexer(inputStream)
+        val lexer = BindingExpressionLexer(inputStream)
         val tokenStream = CommonTokenStream(lexer)
-        val parser = DataBinderParser(tokenStream)
-        val expr = parser.expr()
-        visitor.accessedVariables.clear()
+        val parser = BindingExpressionParser(tokenStream)
+        val expr = parser.bindingSyntax()
+        visitor.getAccessedVariables().clear()
         Log.d("exp tree: ${expr.toStringTree(parser)}")
         val parsedExpr = expr.accept(visitor)
-        parsedExpr.setReferencedVariables(visitor.accessedVariables)
+        parsedExpr.setReferencedVariables(visitor.getAccessedVariables())
         return parsedExpr
     }
 
