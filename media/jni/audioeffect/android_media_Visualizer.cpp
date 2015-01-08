@@ -329,7 +329,7 @@ static void android_media_visualizer_effect_callback(int32_t event,
             fields.midPostNativeEvent,
             callbackInfo->visualizer_ref,
             NATIVE_EVENT_SERVER_DIED,
-            0, 0, 0);
+            0, 0, NULL);
     }
 }
 
