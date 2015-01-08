@@ -604,6 +604,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final byte CMD_CURRENT_TIME = 5;
         public static final byte CMD_OVERFLOW = 6;
         public static final byte CMD_RESET = 7;
+        public static final byte CMD_SHUTDOWN = 8;
 
         public byte cmd = CMD_NULL;
         
@@ -3529,6 +3530,11 @@ public abstract class BatteryStats implements Parcelable {
                     pw.println(DateFormat.format("yyyy-MM-dd-HH-mm-ss",
                             rec.currentTime).toString());
                 }
+            } else if (rec.cmd == HistoryItem.CMD_SHUTDOWN) {
+                if (checkin) {
+                    pw.print(":");
+                }
+                pw.println("SHUTDOWN");
             } else if (rec.cmd == HistoryItem.CMD_OVERFLOW) {
                 if (checkin) {
                     pw.print(":");
@@ -3849,7 +3855,8 @@ public abstract class BatteryStats implements Parcelable {
                 if (histStart >= 0 && !printed) {
                     if (rec.cmd == HistoryItem.CMD_CURRENT_TIME
                             || rec.cmd == HistoryItem.CMD_RESET
-                            || rec.cmd == HistoryItem.CMD_START) {
+                            || rec.cmd == HistoryItem.CMD_START
+                            || rec.cmd == HistoryItem.CMD_SHUTDOWN) {
                         printed = true;
                         hprinter.printNextItem(pw, rec, baseTime, checkin,
                                 (flags&DUMP_VERBOSE) != 0);
