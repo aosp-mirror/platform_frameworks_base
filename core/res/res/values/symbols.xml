@@ -1041,7 +1041,6 @@
   <java-symbol type="string" name="write_fail_reason_cancelled" />
   <java-symbol type="string" name="write_fail_reason_cannot_write" />
   <java-symbol type="string" name="ssl_ca_cert_noti_by_unknown" />
-  <java-symbol type="string" name="ssl_ca_cert_noti_by_administrator" />
   <java-symbol type="string" name="ssl_ca_cert_noti_managed" />
   <java-symbol type="string" name="ssl_ca_cert_warning" />
   <java-symbol type="string" name="work_profile_deleted" />
