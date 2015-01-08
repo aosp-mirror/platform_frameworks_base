@@ -2594,6 +2594,8 @@
     <public type="attr" name="dialogPreferredPadding" id="0x010104d3" />
     <public type="attr" name="searchHintIcon" id="0x010104d4" />
     <public type="attr" name="revisionCode" />
+    <public type="attr" name="drawableTint" />
+    <public type="attr" name="drawableTintMode" />
 
     <public type="style" name="Theme.DeviceDefault.Dialog.Alert" />
     <public type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" />

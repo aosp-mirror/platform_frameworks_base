@@ -502,6 +502,8 @@ package android {
     field public static final int drawablePadding = 16843121; // 0x1010171
     field public static final int drawableRight = 16843120; // 0x1010170
     field public static final int drawableStart = 16843666; // 0x1010392
+    field public static final int drawableTint = 16843990; // 0x10104d6
+    field public static final int drawableTintMode = 16843991; // 0x10104d7
     field public static final int drawableTop = 16843117; // 0x101016d
     field public static final int drawingCacheQuality = 16842984; // 0x10100e8
     field public static final int dropDownAnchor = 16843363; // 0x1010263
@@ -39008,6 +39010,8 @@ package android.widget {
     method public boolean extractText(android.view.inputmethod.ExtractedTextRequest, android.view.inputmethod.ExtractedText);
     method public final int getAutoLinkMask();
     method public int getCompoundDrawablePadding();
+    method public android.content.res.ColorStateList getCompoundDrawableTintList();
+    method public android.graphics.PorterDuff.Mode getCompoundDrawableTintMode();
     method public android.graphics.drawable.Drawable[] getCompoundDrawables();
     method public android.graphics.drawable.Drawable[] getCompoundDrawablesRelative();
     method public int getCompoundPaddingBottom();
@@ -39107,6 +39111,8 @@ package android.widget {
     method public void setAllCaps(boolean);
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);
+    method public void setCompoundDrawableTintList(android.content.res.ColorStateList);
+    method public void setCompoundDrawableTintMode(android.graphics.PorterDuff.Mode);
     method public void setCompoundDrawables(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCompoundDrawablesRelative(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public void setCompoundDrawablesRelativeWithIntrinsicBounds(int, int, int, int);

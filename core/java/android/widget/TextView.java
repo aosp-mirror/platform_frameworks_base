@@ -32,6 +32,7 @@ import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -214,6 +215,8 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * @attr ref android.R.styleable#TextView_drawableStart
  * @attr ref android.R.styleable#TextView_drawableEnd
  * @attr ref android.R.styleable#TextView_drawablePadding
+ * @attr ref android.R.styleable#TextView_drawableTint
+ * @attr ref android.R.styleable#TextView_drawableTintMode
  * @attr ref android.R.styleable#TextView_lineSpacingExtra
  * @attr ref android.R.styleable#TextView_lineSpacingMultiplier
  * @attr ref android.R.styleable#TextView_marqueeRepeatLimit
@@ -298,7 +301,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private float mShadowRadius, mShadowDx, mShadowDy;
     private int mShadowColor;
 
-
     private boolean mPreDrawRegistered;
     private boolean mPreDrawListenerDetached;
 
@@ -312,16 +314,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private TextUtils.TruncateAt mEllipsize;
 
     static class Drawables {
-        final static int DRAWABLE_NONE = -1;
-        final static int DRAWABLE_RIGHT = 0;
-        final static int DRAWABLE_LEFT = 1;
+        static final int LEFT = 0;
+        static final int TOP = 1;
+        static final int RIGHT = 2;
+        static final int BOTTOM = 3;
+
+        static final int DRAWABLE_NONE = -1;
+        static final int DRAWABLE_RIGHT = 0;
+        static final int DRAWABLE_LEFT = 1;
 
         final Rect mCompoundRect = new Rect();
 
-        Drawable mDrawableTop, mDrawableBottom, mDrawableLeft, mDrawableRight,
-                mDrawableStart, mDrawableEnd, mDrawableError, mDrawableTemp;
+        final Drawable[] mShowing = new Drawable[4];
 
+        ColorStateList mTintList;
+        PorterDuff.Mode mTintMode;
+        boolean mHasTint;
+        boolean mHasTintMode;
+
+        Drawable mDrawableStart, mDrawableEnd, mDrawableError, mDrawableTemp;
         Drawable mDrawableLeftInitial, mDrawableRightInitial;
+
         boolean mIsRtlCompatibilityMode;
         boolean mOverride;
 
@@ -344,19 +357,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public void resolveWithLayoutDirection(int layoutDirection) {
             // First reset "left" and "right" drawables to their initial values
-            mDrawableLeft = mDrawableLeftInitial;
-            mDrawableRight = mDrawableRightInitial;
+            mShowing[Drawables.LEFT] = mDrawableLeftInitial;
+            mShowing[Drawables.RIGHT] = mDrawableRightInitial;
 
             if (mIsRtlCompatibilityMode) {
                 // Use "start" drawable as "left" drawable if the "left" drawable was not defined
-                if (mDrawableStart != null && mDrawableLeft == null) {
-                    mDrawableLeft = mDrawableStart;
+                if (mDrawableStart != null && mShowing[Drawables.LEFT] == null) {
+                    mShowing[Drawables.LEFT] = mDrawableStart;
                     mDrawableSizeLeft = mDrawableSizeStart;
                     mDrawableHeightLeft = mDrawableHeightStart;
                 }
                 // Use "end" drawable as "right" drawable if the "right" drawable was not defined
-                if (mDrawableEnd != null && mDrawableRight == null) {
-                    mDrawableRight = mDrawableEnd;
+                if (mDrawableEnd != null && mShowing[Drawables.RIGHT] == null) {
+                    mShowing[Drawables.RIGHT] = mDrawableEnd;
                     mDrawableSizeRight = mDrawableSizeEnd;
                     mDrawableHeightRight = mDrawableHeightEnd;
                 }
@@ -366,11 +379,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 switch(layoutDirection) {
                     case LAYOUT_DIRECTION_RTL:
                         if (mOverride) {
-                            mDrawableRight = mDrawableStart;
+                            mShowing[Drawables.RIGHT] = mDrawableStart;
                             mDrawableSizeRight = mDrawableSizeStart;
                             mDrawableHeightRight = mDrawableHeightStart;
 
-                            mDrawableLeft = mDrawableEnd;
+                            mShowing[Drawables.LEFT] = mDrawableEnd;
                             mDrawableSizeLeft = mDrawableSizeEnd;
                             mDrawableHeightLeft = mDrawableHeightEnd;
                         }
@@ -379,11 +392,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     case LAYOUT_DIRECTION_LTR:
                     default:
                         if (mOverride) {
-                            mDrawableLeft = mDrawableStart;
+                            mShowing[Drawables.LEFT] = mDrawableStart;
                             mDrawableSizeLeft = mDrawableSizeStart;
                             mDrawableHeightLeft = mDrawableHeightStart;
 
-                            mDrawableRight = mDrawableEnd;
+                            mShowing[Drawables.RIGHT] = mDrawableEnd;
                             mDrawableSizeRight = mDrawableSizeEnd;
                             mDrawableHeightRight = mDrawableHeightEnd;
                         }
@@ -395,17 +408,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         private void updateDrawablesLayoutDirection(int layoutDirection) {
-            if (mDrawableLeft != null) {
-                mDrawableLeft.setLayoutDirection(layoutDirection);
-            }
-            if (mDrawableRight != null) {
-                mDrawableRight.setLayoutDirection(layoutDirection);
-            }
-            if (mDrawableTop != null) {
-                mDrawableTop.setLayoutDirection(layoutDirection);
-            }
-            if (mDrawableBottom != null) {
-                mDrawableBottom.setLayoutDirection(layoutDirection);
+            for (Drawable dr : mShowing) {
+                if (dr != null) {
+                    dr.setLayoutDirection(layoutDirection);
+                }
             }
         }
 
@@ -415,10 +421,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             mDrawableError = dr;
 
-            final Rect compoundRect = mCompoundRect;
-            int[] state = tv.getDrawableState();
-
             if (mDrawableError != null) {
+                final Rect compoundRect = mCompoundRect;
+                final int[] state = tv.getDrawableState();
+
                 mDrawableError.setState(state);
                 mDrawableError.copyBounds(compoundRect);
                 mDrawableError.setCallback(tv);
@@ -433,12 +439,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // first restore the initial state if needed
             switch (mDrawableSaved) {
                 case DRAWABLE_LEFT:
-                    mDrawableLeft = mDrawableTemp;
+                    mShowing[Drawables.LEFT] = mDrawableTemp;
                     mDrawableSizeLeft = mDrawableSizeTemp;
                     mDrawableHeightLeft = mDrawableHeightTemp;
                     break;
                 case DRAWABLE_RIGHT:
-                    mDrawableRight = mDrawableTemp;
+                    mShowing[Drawables.RIGHT] = mDrawableTemp;
                     mDrawableSizeRight = mDrawableSizeTemp;
                     mDrawableHeightRight = mDrawableHeightTemp;
                     break;
@@ -451,11 +457,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     case LAYOUT_DIRECTION_RTL:
                         mDrawableSaved = DRAWABLE_LEFT;
 
-                        mDrawableTemp = mDrawableLeft;
+                        mDrawableTemp = mShowing[Drawables.LEFT];
                         mDrawableSizeTemp = mDrawableSizeLeft;
                         mDrawableHeightTemp = mDrawableHeightLeft;
 
-                        mDrawableLeft = mDrawableError;
+                        mShowing[Drawables.LEFT] = mDrawableError;
                         mDrawableSizeLeft = mDrawableSizeError;
                         mDrawableHeightLeft = mDrawableHeightError;
                         break;
@@ -463,11 +469,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     default:
                         mDrawableSaved = DRAWABLE_RIGHT;
 
-                        mDrawableTemp = mDrawableRight;
+                        mDrawableTemp = mShowing[Drawables.RIGHT];
                         mDrawableSizeTemp = mDrawableSizeRight;
                         mDrawableHeightTemp = mDrawableHeightRight;
 
-                        mDrawableRight = mDrawableError;
+                        mShowing[Drawables.RIGHT] = mDrawableError;
                         mDrawableSizeRight = mDrawableSizeError;
                         mDrawableHeightRight = mDrawableHeightError;
                         break;
@@ -770,6 +776,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         boolean selectallonfocus = false;
         Drawable drawableLeft = null, drawableTop = null, drawableRight = null,
             drawableBottom = null, drawableStart = null, drawableEnd = null;
+        ColorStateList drawableTint = null;
+        PorterDuff.Mode drawableTintMode = null;
         int drawablePadding = 0;
         int ellipsize = -1;
         boolean singleLine = false;
@@ -853,6 +861,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_drawableEnd:
                 drawableEnd = a.getDrawable(attr);
+                break;
+
+            case com.android.internal.R.styleable.TextView_drawableTint:
+                drawableTint = a.getColorStateList(attr);
+                break;
+
+            case com.android.internal.R.styleable.TextView_drawableTintMode:
+                drawableTintMode = Drawable.parseTintMode(a.getInt(attr, -1), drawableTintMode);
                 break;
 
             case com.android.internal.R.styleable.TextView_drawablePadding:
@@ -1238,6 +1254,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 bufferType = BufferType.SPANNABLE;
         }
 
+        // Set up the tint (if needed) before setting the drawables so that it
+        // gets applied correctly.
+        if (drawableTint != null || drawableTintMode != null) {
+            if (mDrawables == null) {
+                mDrawables = new Drawables(context);
+            }
+            if (drawableTint != null) {
+                mDrawables.mTintList = drawableTint;
+                mDrawables.mHasTint = true;
+            }
+            if (drawableTintMode != null) {
+                mDrawables.mTintMode = drawableTintMode;
+                mDrawables.mHasTintMode = true;
+            }
+        }
+
         // This call will save the initial left/right drawables
         setCompoundDrawablesWithIntrinsicBounds(
             drawableLeft, drawableTop, drawableRight, drawableBottom);
@@ -1420,6 +1452,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             resetResolvedDrawables();
             resolveDrawables();
+            applyCompoundDrawableTint();
         }
     }
 
@@ -1778,7 +1811,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public int getCompoundPaddingTop() {
         final Drawables dr = mDrawables;
-        if (dr == null || dr.mDrawableTop == null) {
+        if (dr == null || dr.mShowing[Drawables.TOP] == null) {
             return mPaddingTop;
         } else {
             return mPaddingTop + dr.mDrawablePadding + dr.mDrawableSizeTop;
@@ -1791,7 +1824,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public int getCompoundPaddingBottom() {
         final Drawables dr = mDrawables;
-        if (dr == null || dr.mDrawableBottom == null) {
+        if (dr == null || dr.mShowing[Drawables.BOTTOM] == null) {
             return mPaddingBottom;
         } else {
             return mPaddingBottom + dr.mDrawablePadding + dr.mDrawableSizeBottom;
@@ -1804,7 +1837,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public int getCompoundPaddingLeft() {
         final Drawables dr = mDrawables;
-        if (dr == null || dr.mDrawableLeft == null) {
+        if (dr == null || dr.mShowing[Drawables.LEFT] == null) {
             return mPaddingLeft;
         } else {
             return mPaddingLeft + dr.mDrawablePadding + dr.mDrawableSizeLeft;
@@ -1817,7 +1850,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public int getCompoundPaddingRight() {
         final Drawables dr = mDrawables;
-        if (dr == null || dr.mDrawableRight == null) {
+        if (dr == null || dr.mShowing[Drawables.RIGHT] == null) {
             return mPaddingRight;
         } else {
             return mPaddingRight + dr.mDrawablePadding + dr.mDrawableSizeRight;
@@ -2015,14 +2048,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } else {
                     // We need to retain the last set padding, so just clear
                     // out all of the fields in the existing structure.
-                    if (dr.mDrawableLeft != null) dr.mDrawableLeft.setCallback(null);
-                    dr.mDrawableLeft = null;
-                    if (dr.mDrawableTop != null) dr.mDrawableTop.setCallback(null);
-                    dr.mDrawableTop = null;
-                    if (dr.mDrawableRight != null) dr.mDrawableRight.setCallback(null);
-                    dr.mDrawableRight = null;
-                    if (dr.mDrawableBottom != null) dr.mDrawableBottom.setCallback(null);
-                    dr.mDrawableBottom = null;
+                    for (int i = dr.mShowing.length - 1; i >= 0; i--) {
+                        if (dr.mShowing[i] != null) {
+                            dr.mShowing[i].setCallback(null);
+                        }
+                        dr.mShowing[i] = null;
+                    }
                     dr.mDrawableSizeLeft = dr.mDrawableHeightLeft = 0;
                     dr.mDrawableSizeRight = dr.mDrawableHeightRight = 0;
                     dr.mDrawableSizeTop = dr.mDrawableWidthTop = 0;
@@ -2036,25 +2067,25 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             mDrawables.mOverride = false;
 
-            if (dr.mDrawableLeft != left && dr.mDrawableLeft != null) {
-                dr.mDrawableLeft.setCallback(null);
+            if (dr.mShowing[Drawables.LEFT] != left && dr.mShowing[Drawables.LEFT] != null) {
+                dr.mShowing[Drawables.LEFT].setCallback(null);
             }
-            dr.mDrawableLeft = left;
+            dr.mShowing[Drawables.LEFT] = left;
 
-            if (dr.mDrawableTop != top && dr.mDrawableTop != null) {
-                dr.mDrawableTop.setCallback(null);
+            if (dr.mShowing[Drawables.TOP] != top && dr.mShowing[Drawables.TOP] != null) {
+                dr.mShowing[Drawables.TOP].setCallback(null);
             }
-            dr.mDrawableTop = top;
+            dr.mShowing[Drawables.TOP] = top;
 
-            if (dr.mDrawableRight != right && dr.mDrawableRight != null) {
-                dr.mDrawableRight.setCallback(null);
+            if (dr.mShowing[Drawables.RIGHT] != right && dr.mShowing[Drawables.RIGHT] != null) {
+                dr.mShowing[Drawables.RIGHT].setCallback(null);
             }
-            dr.mDrawableRight = right;
+            dr.mShowing[Drawables.RIGHT] = right;
 
-            if (dr.mDrawableBottom != bottom && dr.mDrawableBottom != null) {
-                dr.mDrawableBottom.setCallback(null);
+            if (dr.mShowing[Drawables.BOTTOM] != bottom && dr.mShowing[Drawables.BOTTOM] != null) {
+                dr.mShowing[Drawables.BOTTOM].setCallback(null);
             }
-            dr.mDrawableBottom = bottom;
+            dr.mShowing[Drawables.BOTTOM] = bottom;
 
             final Rect compoundRect = dr.mCompoundRect;
             int[] state;
@@ -2110,6 +2141,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         resetResolvedDrawables();
         resolveDrawables();
+        applyCompoundDrawableTint();
         invalidate();
         requestLayout();
     }
@@ -2193,10 +2225,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // We're switching to relative, discard absolute.
         if (dr != null) {
-            if (dr.mDrawableLeft != null) dr.mDrawableLeft.setCallback(null);
-            dr.mDrawableLeft = dr.mDrawableLeftInitial = null;
-            if (dr.mDrawableRight != null) dr.mDrawableRight.setCallback(null);
-            dr.mDrawableRight = dr.mDrawableRightInitial = null;
+            if (dr.mShowing[Drawables.LEFT] != null) {
+                dr.mShowing[Drawables.LEFT].setCallback(null);
+            }
+            dr.mShowing[Drawables.LEFT] = dr.mDrawableLeftInitial = null;
+            if (dr.mShowing[Drawables.RIGHT] != null) {
+                dr.mShowing[Drawables.RIGHT].setCallback(null);
+            }
+            dr.mShowing[Drawables.RIGHT] = dr.mDrawableRightInitial = null;
             dr.mDrawableSizeLeft = dr.mDrawableHeightLeft = 0;
             dr.mDrawableSizeRight = dr.mDrawableHeightRight = 0;
         }
@@ -2214,12 +2250,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     // out all of the fields in the existing structure.
                     if (dr.mDrawableStart != null) dr.mDrawableStart.setCallback(null);
                     dr.mDrawableStart = null;
-                    if (dr.mDrawableTop != null) dr.mDrawableTop.setCallback(null);
-                    dr.mDrawableTop = null;
-                    if (dr.mDrawableEnd != null) dr.mDrawableEnd.setCallback(null);
+                    if (dr.mShowing[Drawables.TOP] != null) {
+                        dr.mShowing[Drawables.TOP].setCallback(null);
+                    }
+                    dr.mShowing[Drawables.TOP] = null;
+                    if (dr.mDrawableEnd != null) {
+                        dr.mDrawableEnd.setCallback(null);
+                    }
                     dr.mDrawableEnd = null;
-                    if (dr.mDrawableBottom != null) dr.mDrawableBottom.setCallback(null);
-                    dr.mDrawableBottom = null;
+                    if (dr.mShowing[Drawables.BOTTOM] != null) {
+                        dr.mShowing[Drawables.BOTTOM].setCallback(null);
+                    }
+                    dr.mShowing[Drawables.BOTTOM] = null;
                     dr.mDrawableSizeStart = dr.mDrawableHeightStart = 0;
                     dr.mDrawableSizeEnd = dr.mDrawableHeightEnd = 0;
                     dr.mDrawableSizeTop = dr.mDrawableWidthTop = 0;
@@ -2238,20 +2280,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             dr.mDrawableStart = start;
 
-            if (dr.mDrawableTop != top && dr.mDrawableTop != null) {
-                dr.mDrawableTop.setCallback(null);
+            if (dr.mShowing[Drawables.TOP] != top && dr.mShowing[Drawables.TOP] != null) {
+                dr.mShowing[Drawables.TOP].setCallback(null);
             }
-            dr.mDrawableTop = top;
+            dr.mShowing[Drawables.TOP] = top;
 
             if (dr.mDrawableEnd != end && dr.mDrawableEnd != null) {
                 dr.mDrawableEnd.setCallback(null);
             }
             dr.mDrawableEnd = end;
 
-            if (dr.mDrawableBottom != bottom && dr.mDrawableBottom != null) {
-                dr.mDrawableBottom.setCallback(null);
+            if (dr.mShowing[Drawables.BOTTOM] != bottom && dr.mShowing[Drawables.BOTTOM] != null) {
+                dr.mShowing[Drawables.BOTTOM].setCallback(null);
             }
-            dr.mDrawableBottom = bottom;
+            dr.mShowing[Drawables.BOTTOM] = bottom;
 
             final Rect compoundRect = dr.mCompoundRect;
             int[] state;
@@ -2377,9 +2419,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public Drawable[] getCompoundDrawables() {
         final Drawables dr = mDrawables;
         if (dr != null) {
-            return new Drawable[] {
-                dr.mDrawableLeft, dr.mDrawableTop, dr.mDrawableRight, dr.mDrawableBottom
-            };
+            return dr.mShowing.clone();
         } else {
             return new Drawable[] { null, null, null, null };
         }
@@ -2398,7 +2438,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final Drawables dr = mDrawables;
         if (dr != null) {
             return new Drawable[] {
-                dr.mDrawableStart, dr.mDrawableTop, dr.mDrawableEnd, dr.mDrawableBottom
+                dr.mDrawableStart, dr.mShowing[Drawables.TOP],
+                dr.mDrawableEnd, dr.mShowing[Drawables.BOTTOM]
             };
         } else {
             return new Drawable[] { null, null, null, null };
@@ -2437,6 +2478,118 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public int getCompoundDrawablePadding() {
         final Drawables dr = mDrawables;
         return dr != null ? dr.mDrawablePadding : 0;
+    }
+
+    /**
+     * Applies a tint to the compound drawables. Does not modify the
+     * current tint mode, which is {@link PorterDuff.Mode#SRC_IN} by default.
+     * <p>
+     * Subsequent calls to
+     * {@link #setCompoundDrawables(Drawable, Drawable, Drawable, Drawable)}
+     * and related methods will automatically mutate the drawables and apply
+     * the specified tint and tint mode using
+     * {@link Drawable#setTintList(ColorStateList)}.
+     *
+     * @param tint the tint to apply, may be {@code null} to clear tint
+     *
+     * @attr ref android.R.styleable#TextView_drawableTint
+     * @see #getCompoundDrawableTintList()
+     * @see Drawable#setTintList(ColorStateList)
+     */
+    public void setCompoundDrawableTintList(@Nullable ColorStateList tint) {
+        if (mDrawables == null) {
+            mDrawables = new Drawables(getContext());
+        }
+        mDrawables.mTintList = tint;
+        mDrawables.mHasTint = true;
+
+        applyCompoundDrawableTint();
+    }
+
+    /**
+     * @return the tint applied to the compound drawables
+     * @attr ref android.R.styleable#TextView_drawableTint
+     * @see #setCompoundDrawableTintList(ColorStateList)
+     */
+    public ColorStateList getCompoundDrawableTintList() {
+        return mDrawables != null ? mDrawables.mTintList : null;
+    }
+
+    /**
+     * Specifies the blending mode used to apply the tint specified by
+     * {@link #setCompoundDrawableTintList(ColorStateList)} to the compound
+     * drawables. The default mode is {@link PorterDuff.Mode#SRC_IN}.
+     *
+     * @param tintMode the blending mode used to apply the tint, may be
+     *                 {@code null} to clear tint
+     * @attr ref android.R.styleable#TextView_drawableTintMode
+     * @see #setCompoundDrawableTintList(ColorStateList)
+     * @see Drawable#setTintMode(PorterDuff.Mode)
+     */
+    public void setCompoundDrawableTintMode(@Nullable PorterDuff.Mode tintMode) {
+        if (mDrawables == null) {
+            mDrawables = new Drawables(getContext());
+        }
+        mDrawables.mTintMode = tintMode;
+        mDrawables.mHasTintMode = true;
+
+        applyCompoundDrawableTint();
+    }
+
+    /**
+     * Returns the blending mode used to apply the tint to the compound
+     * drawables, if specified.
+     *
+     * @return the blending mode used to apply the tint to the compound
+     *         drawables
+     * @attr ref android.R.styleable#TextView_drawableTintMode
+     * @see #setCompoundDrawableTintMode(PorterDuff.Mode)
+     */
+    public PorterDuff.Mode getCompoundDrawableTintMode() {
+        return mDrawables != null ? mDrawables.mTintMode : null;
+    }
+
+    private void applyCompoundDrawableTint() {
+        if (mDrawables == null) {
+            return;
+        }
+
+        if (mDrawables.mHasTint || mDrawables.mHasTintMode) {
+            final ColorStateList tintList = mDrawables.mTintList;
+            final PorterDuff.Mode tintMode = mDrawables.mTintMode;
+            final boolean hasTint = mDrawables.mHasTint;
+            final boolean hasTintMode = mDrawables.mHasTintMode;
+            final int[] state = getDrawableState();
+
+            for (Drawable dr : mDrawables.mShowing) {
+                if (dr == null) {
+                    continue;
+                }
+
+                if (dr == mDrawables.mDrawableError) {
+                    // From a developer's perspective, the error drawable isn't
+                    // a compound drawable. Don't apply the generic compound
+                    // drawable tint to it.
+                    continue;
+                }
+
+                dr.mutate();
+
+                if (hasTint) {
+                    dr.setTintList(tintList);
+                }
+
+                if (hasTintMode) {
+                    dr.setTintMode(tintMode);
+                }
+
+                // The drawable (or one of its children) may not have been
+                // stateful before applying the tint, so let's try again.
+                if (dr.isStateful()) {
+                    dr.setState(state);
+                }
+            }
+        }
     }
 
     @Override
@@ -3657,26 +3810,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             updateTextColors();
         }
 
-        final Drawables dr = mDrawables;
-        if (dr != null) {
-            int[] state = getDrawableState();
-            if (dr.mDrawableTop != null && dr.mDrawableTop.isStateful()) {
-                dr.mDrawableTop.setState(state);
-            }
-            if (dr.mDrawableBottom != null && dr.mDrawableBottom.isStateful()) {
-                dr.mDrawableBottom.setState(state);
-            }
-            if (dr.mDrawableLeft != null && dr.mDrawableLeft.isStateful()) {
-                dr.mDrawableLeft.setState(state);
-            }
-            if (dr.mDrawableRight != null && dr.mDrawableRight.isStateful()) {
-                dr.mDrawableRight.setState(state);
-            }
-            if (dr.mDrawableStart != null && dr.mDrawableStart.isStateful()) {
-                dr.mDrawableStart.setState(state);
-            }
-            if (dr.mDrawableEnd != null && dr.mDrawableEnd.isStateful()) {
-                dr.mDrawableEnd.setState(state);
+        if (mDrawables != null) {
+            final int[] state = getDrawableState();
+            for (Drawable dr : mDrawables.mShowing) {
+                if (dr != null && dr.isStateful()) {
+                    dr.setState(state);
+                }
             }
         }
     }
@@ -3685,25 +3824,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void drawableHotspotChanged(float x, float y) {
         super.drawableHotspotChanged(x, y);
 
-        final Drawables dr = mDrawables;
-        if (dr != null) {
-            if (dr.mDrawableTop != null) {
-                dr.mDrawableTop.setHotspot(x, y);
-            }
-            if (dr.mDrawableBottom != null) {
-                dr.mDrawableBottom.setHotspot(x, y);
-            }
-            if (dr.mDrawableLeft != null) {
-                dr.mDrawableLeft.setHotspot(x, y);
-            }
-            if (dr.mDrawableRight != null) {
-                dr.mDrawableRight.setHotspot(x, y);
-            }
-            if (dr.mDrawableStart != null) {
-                dr.mDrawableStart.setHotspot(x, y);
-            }
-            if (dr.mDrawableEnd != null) {
-                dr.mDrawableEnd.setHotspot(x, y);
+        if (mDrawables != null) {
+            final int[] state = getDrawableState();
+            for (Drawable dr : mDrawables.mShowing) {
+                if (dr != null && dr.isStateful()) {
+                    dr.setHotspot(x, y);
+                }
             }
         }
     }
@@ -5028,9 +5154,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected boolean verifyDrawable(Drawable who) {
         final boolean verified = super.verifyDrawable(who);
         if (!verified && mDrawables != null) {
-            return who == mDrawables.mDrawableLeft || who == mDrawables.mDrawableTop ||
-                    who == mDrawables.mDrawableRight || who == mDrawables.mDrawableBottom ||
-                    who == mDrawables.mDrawableStart || who == mDrawables.mDrawableEnd;
+            for (Drawable dr : mDrawables.mShowing) {
+                if (who == dr) {
+                    return true;
+                }
+            }
         }
         return verified;
     }
@@ -5039,23 +5167,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void jumpDrawablesToCurrentState() {
         super.jumpDrawablesToCurrentState();
         if (mDrawables != null) {
-            if (mDrawables.mDrawableLeft != null) {
-                mDrawables.mDrawableLeft.jumpToCurrentState();
-            }
-            if (mDrawables.mDrawableTop != null) {
-                mDrawables.mDrawableTop.jumpToCurrentState();
-            }
-            if (mDrawables.mDrawableRight != null) {
-                mDrawables.mDrawableRight.jumpToCurrentState();
-            }
-            if (mDrawables.mDrawableBottom != null) {
-                mDrawables.mDrawableBottom.jumpToCurrentState();
-            }
-            if (mDrawables.mDrawableStart != null) {
-                mDrawables.mDrawableStart.jumpToCurrentState();
-            }
-            if (mDrawables.mDrawableEnd != null) {
-                mDrawables.mDrawableEnd.jumpToCurrentState();
+            for (Drawable dr : mDrawables.mShowing) {
+                if (dr != null) {
+                    dr.jumpToCurrentState();
+                }
             }
         }
     }
@@ -5074,7 +5189,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // accordingly.
             final TextView.Drawables drawables = mDrawables;
             if (drawables != null) {
-                if (drawable == drawables.mDrawableLeft) {
+                if (drawable == drawables.mShowing[Drawables.LEFT]) {
                     final int compoundPaddingTop = getCompoundPaddingTop();
                     final int compoundPaddingBottom = getCompoundPaddingBottom();
                     final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
@@ -5082,7 +5197,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     scrollX += mPaddingLeft;
                     scrollY += compoundPaddingTop + (vspace - drawables.mDrawableHeightLeft) / 2;
                     handled = true;
-                } else if (drawable == drawables.mDrawableRight) {
+                } else if (drawable == drawables.mShowing[Drawables.RIGHT]) {
                     final int compoundPaddingTop = getCompoundPaddingTop();
                     final int compoundPaddingBottom = getCompoundPaddingBottom();
                     final int vspace = mBottom - mTop - compoundPaddingBottom - compoundPaddingTop;
@@ -5090,7 +5205,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     scrollX += (mRight - mLeft - mPaddingRight - drawables.mDrawableSizeRight);
                     scrollY += compoundPaddingTop + (vspace - drawables.mDrawableHeightRight) / 2;
                     handled = true;
-                } else if (drawable == drawables.mDrawableTop) {
+                } else if (drawable == drawables.mShowing[Drawables.TOP]) {
                     final int compoundPaddingLeft = getCompoundPaddingLeft();
                     final int compoundPaddingRight = getCompoundPaddingRight();
                     final int hspace = mRight - mLeft - compoundPaddingRight - compoundPaddingLeft;
@@ -5098,7 +5213,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     scrollX += compoundPaddingLeft + (hspace - drawables.mDrawableWidthTop) / 2;
                     scrollY += mPaddingTop;
                     handled = true;
-                } else if (drawable == drawables.mDrawableBottom) {
+                } else if (drawable == drawables.mShowing[Drawables.BOTTOM]) {
                     final int compoundPaddingLeft = getCompoundPaddingLeft();
                     final int compoundPaddingRight = getCompoundPaddingRight();
                     final int hspace = mRight - mLeft - compoundPaddingRight - compoundPaddingLeft;
@@ -5302,44 +5417,44 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
             // Make sure to update invalidateDrawable() when changing this code.
-            if (dr.mDrawableLeft != null) {
+            if (dr.mShowing[Drawables.LEFT] != null) {
                 canvas.save();
                 canvas.translate(scrollX + mPaddingLeft + leftOffset,
                                  scrollY + compoundPaddingTop +
                                  (vspace - dr.mDrawableHeightLeft) / 2);
-                dr.mDrawableLeft.draw(canvas);
+                dr.mShowing[Drawables.LEFT].draw(canvas);
                 canvas.restore();
             }
 
             // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
             // Make sure to update invalidateDrawable() when changing this code.
-            if (dr.mDrawableRight != null) {
+            if (dr.mShowing[Drawables.RIGHT] != null) {
                 canvas.save();
                 canvas.translate(scrollX + right - left - mPaddingRight
                         - dr.mDrawableSizeRight - rightOffset,
                          scrollY + compoundPaddingTop + (vspace - dr.mDrawableHeightRight) / 2);
-                dr.mDrawableRight.draw(canvas);
+                dr.mShowing[Drawables.RIGHT].draw(canvas);
                 canvas.restore();
             }
 
             // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
             // Make sure to update invalidateDrawable() when changing this code.
-            if (dr.mDrawableTop != null) {
+            if (dr.mShowing[Drawables.TOP] != null) {
                 canvas.save();
                 canvas.translate(scrollX + compoundPaddingLeft +
                         (hspace - dr.mDrawableWidthTop) / 2, scrollY + mPaddingTop);
-                dr.mDrawableTop.draw(canvas);
+                dr.mShowing[Drawables.TOP].draw(canvas);
                 canvas.restore();
             }
 
             // IMPORTANT: The coordinates computed are also used in invalidateDrawable()
             // Make sure to update invalidateDrawable() when changing this code.
-            if (dr.mDrawableBottom != null) {
+            if (dr.mShowing[Drawables.BOTTOM] != null) {
                 canvas.save();
                 canvas.translate(scrollX + compoundPaddingLeft +
                         (hspace - dr.mDrawableWidthBottom) / 2,
                          scrollY + bottom - top - mPaddingBottom - dr.mDrawableSizeBottom);
-                dr.mDrawableBottom.draw(canvas);
+                dr.mShowing[Drawables.BOTTOM].draw(canvas);
                 canvas.restore();
             }
         }
