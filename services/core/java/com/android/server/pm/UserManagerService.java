@@ -320,6 +320,9 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageUsersPermission("get the profile parent");
         synchronized (mPackagesLock) {
             UserInfo profile = getUserInfoLocked(userHandle);
+            if (profile == null) {
+                return null;
+            }
             int parentUserId = profile.profileGroupId;
             if (parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
                 return null;

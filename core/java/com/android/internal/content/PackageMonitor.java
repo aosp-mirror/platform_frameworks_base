@@ -24,6 +24,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.util.Slog;
 import com.android.internal.os.BackgroundThread;
 
 import java.util.HashSet;
@@ -279,8 +280,8 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         mChangeUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                 UserHandle.USER_NULL);
         if (mChangeUserId == UserHandle.USER_NULL) {
-            throw new IllegalArgumentException(
-                    "Intent broadcast does not contain user handle: " + intent);
+            Slog.w("PackageMonitor", "Intent broadcast does not contain user handle: " + intent);
+            return;
         }
         onBeginPackageChanges();
         
