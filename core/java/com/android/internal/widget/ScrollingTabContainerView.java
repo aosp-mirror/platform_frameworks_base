@@ -391,15 +391,15 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         }
 
         @Override
-        public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-            super.onInitializeAccessibilityEvent(event);
+        public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+            super.onInitializeAccessibilityEventInternal(event);
             // This view masquerades as an action bar tab.
             event.setClassName(ActionBar.Tab.class.getName());
         }
 
         @Override
-        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-            super.onInitializeAccessibilityNodeInfo(info);
+        public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfoInternal(info);
             // This view masquerades as an action bar tab.
             info.setClassName(ActionBar.Tab.class.getName());
         }

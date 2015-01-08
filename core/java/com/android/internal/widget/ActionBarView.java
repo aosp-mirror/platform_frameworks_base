@@ -1463,14 +1463,14 @@ public class ActionBarView extends AbsActionBarView implements DecorToolbar {
         }
 
         @Override
-        public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
             onPopulateAccessibilityEvent(event);
             return true;
         }
 
         @Override
-        public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-            super.onPopulateAccessibilityEvent(event);
+        public void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
+            super.onPopulateAccessibilityEventInternal(event);
             final CharSequence cdesc = getContentDescription();
             if (!TextUtils.isEmpty(cdesc)) {
                 event.getText().add(cdesc);

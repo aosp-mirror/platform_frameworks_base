@@ -189,9 +189,10 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
                 mController.getSelectedDay().get(Calendar.YEAR) - mMinDate.get(Calendar.YEAR));
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
 
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
             event.setFromIndex(0);

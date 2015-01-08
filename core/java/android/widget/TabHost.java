@@ -173,8 +173,9 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
     }
 
+    /** @hide */
     @Override
-    public void sendAccessibilityEvent(int eventType) {
+    public void sendAccessibilityEventInternal(int eventType) {
         /* avoid super class behavior - TabWidget sends the right events */
     }
 
@@ -383,15 +384,17 @@ mTabHost.addTab(TAB_TAG_1, "Hello, world!", "Tab 1");
         }
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
-        super.onInitializeAccessibilityEvent(event);
+    public void onInitializeAccessibilityEventInternal(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEventInternal(event);
         event.setClassName(TabHost.class.getName());
     }
 
+    /** @hide */
     @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
+    public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoInternal(info);
         info.setClassName(TabHost.class.getName());
     }
 

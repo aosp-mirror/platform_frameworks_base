@@ -77,7 +77,7 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     @Override
-    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+    public boolean onRequestSendAccessibilityEventInternal(View child, AccessibilityEvent event) {
         if (super.onRequestSendAccessibilityEvent(child, event)) {
             // The status bar is very small so augment the view that the user is touching
             // with the content of the status bar a whole. This way an accessibility service

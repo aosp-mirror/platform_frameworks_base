@@ -292,11 +292,11 @@ public interface WebViewProvider {
 
         public AccessibilityNodeProvider getAccessibilityNodeProvider();
 
-        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info);
+        public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info);
 
-        public void onInitializeAccessibilityEvent(AccessibilityEvent event);
+        public void onInitializeAccessibilityEventInternal(AccessibilityEvent event);
 
-        public boolean performAccessibilityAction(int action, Bundle arguments);
+        public boolean performAccessibilityActionInternal(int action, Bundle arguments);
 
         public void setOverScrollMode(int mode);
 

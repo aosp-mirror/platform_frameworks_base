@@ -40,7 +40,7 @@ public class AccessibleDateAnimator extends ViewAnimator {
      * Announce the currently-selected date when launched.
      */
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public boolean dispatchPopulateAccessibilityEventInternal(AccessibilityEvent event) {
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             // Clear the event's current text so that only the current date will be spoken.
             event.getText().clear();
@@ -51,6 +51,6 @@ public class AccessibleDateAnimator extends ViewAnimator {
             event.getText().add(dateString);
             return true;
         }
-        return super.dispatchPopulateAccessibilityEvent(event);
+        return super.dispatchPopulateAccessibilityEventInternal(event);
     }
 }
