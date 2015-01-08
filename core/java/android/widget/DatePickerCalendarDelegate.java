@@ -145,8 +145,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
 
         // Use Theme attributes if possible
         final int dayOfWeekTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_dayOfWeekTextAppearance, -1);
-        if (dayOfWeekTextAppearanceResId != -1) {
+                R.styleable.DatePicker_dayOfWeekTextAppearance, 0);
+        if (dayOfWeekTextAppearanceResId != 0) {
             mDayOfWeekView.setTextAppearance(context, dayOfWeekTextAppearanceResId);
         }
 
@@ -157,8 +157,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         final int headerSelectedTextColor = a.getColor(
                 R.styleable.DatePicker_headerSelectedTextColor, defaultHighlightColor);
         final int monthTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_headerMonthTextAppearance, -1);
-        if (monthTextAppearanceResId != -1) {
+                R.styleable.DatePicker_headerMonthTextAppearance, 0);
+        if (monthTextAppearanceResId != 0) {
             mHeaderMonthTextView.setTextAppearance(context, monthTextAppearanceResId);
         }
         mHeaderMonthTextView.setTextColor(ColorStateList.addFirstIfMissing(
@@ -166,18 +166,18 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
                 headerSelectedTextColor));
 
         final int dayOfMonthTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_headerDayOfMonthTextAppearance, -1);
-        if (dayOfMonthTextAppearanceResId != -1) {
+                R.styleable.DatePicker_headerDayOfMonthTextAppearance, 0);
+        if (dayOfMonthTextAppearanceResId != 0) {
             mHeaderDayOfMonthTextView.setTextAppearance(context, dayOfMonthTextAppearanceResId);
         }
         mHeaderDayOfMonthTextView.setTextColor(ColorStateList.addFirstIfMissing(
                 mHeaderDayOfMonthTextView.getTextColors(), R.attr.state_selected,
                 headerSelectedTextColor));
 
-        final int yearTextAppearanceResId = a.getResourceId(
-                R.styleable.DatePicker_headerYearTextAppearance, -1);
-        if (yearTextAppearanceResId != -1) {
-            mHeaderYearTextView.setTextAppearance(context, yearTextAppearanceResId);
+        final int headerYearTextAppearanceResId = a.getResourceId(
+                R.styleable.DatePicker_headerYearTextAppearance, 0);
+        if (headerYearTextAppearanceResId != 0) {
+            mHeaderYearTextView.setTextAppearance(context, headerYearTextAppearanceResId);
         }
         mHeaderYearTextView.setTextColor(ColorStateList.addFirstIfMissing(
                 mHeaderYearTextView.getTextColors(), R.attr.state_selected,
@@ -193,9 +193,15 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate i
         mYearPickerView = new YearPickerView(mContext);
         mYearPickerView.init(this);
 
-        final int yearSelectedCircleColor = a.getColor(R.styleable.DatePicker_yearListSelectorColor,
-                defaultHighlightColor);
-        mYearPickerView.setYearSelectedCircleColor(yearSelectedCircleColor);
+        final ColorStateList yearBackgroundColor = a.getColorStateList(
+                R.styleable.DatePicker_yearListSelectorColor);
+        mYearPickerView.setYearBackgroundColor(yearBackgroundColor);
+
+        final int yearTextAppearanceResId = a.getResourceId(
+                R.styleable.DatePicker_yearListItemTextAppearance, 0);
+        if (yearTextAppearanceResId != 0) {
+            mYearPickerView.setYearTextAppearance(yearTextAppearanceResId);
+        }
 
         final ColorStateList calendarTextColor = a.getColorStateList(
                 R.styleable.DatePicker_calendarTextColor);

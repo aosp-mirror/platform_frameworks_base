@@ -17,8 +17,10 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.util.AttributeSet;
+import android.util.StateSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
@@ -42,7 +44,7 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
     private DatePickerController mController;
 
     private int mSelectedPosition = -1;
-    private int mYearSelectedCircleColor;
+    private int mYearActivatedColor;
 
     public YearPickerView(Context context) {
         this(context, null);
@@ -97,15 +99,14 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
         onDateChanged();
     }
 
-    public void setYearSelectedCircleColor(int color) {
-        if (color != mYearSelectedCircleColor) {
-            mYearSelectedCircleColor = color;
-        }
-        requestLayout();
+    public void setYearBackgroundColor(ColorStateList yearBackgroundColor) {
+        mYearActivatedColor = yearBackgroundColor.getColorForState(
+                StateSet.get(StateSet.VIEW_STATE_ENABLED | StateSet.VIEW_STATE_ACTIVATED), 0);
+        invalidate();
     }
 
-    public int getYearSelectedCircleColor()  {
-        return mYearSelectedCircleColor;
+    public void setYearTextAppearance(int resId) {
+        mAdapter.setItemTextAppearance(resId);
     }
 
     private void updateAdapterData() {
@@ -127,12 +128,8 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
         mController.onYearSelected(mAdapter.getItem(position));
     }
 
-    void setItemTextAppearance(int resId) {
-        mAdapter.setItemTextAppearance(resId);
-    }
-
     private class YearAdapter extends ArrayAdapter<Integer> {
-        int mItemTextAppearanceResId;
+        private int mItemTextAppearanceResId;
 
         public YearAdapter(Context context, int resource) {
             super(context, resource);
@@ -140,16 +137,15 @@ class YearPickerView extends ListView implements AdapterView.OnItemClickListener
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            TextViewWithCircularIndicator v = (TextViewWithCircularIndicator)
+            final TextViewWithCircularIndicator v = (TextViewWithCircularIndicator)
                     super.getView(position, convertView, parent);
-            v.setTextAppearance(getContext(), mItemTextAppearanceResId);
-            v.requestLayout();
-            int year = getItem(position);
-            boolean selected = mController.getSelectedDay().get(Calendar.YEAR) == year;
-            v.setDrawIndicator(selected);
-            if (selected) {
-                v.setCircleColor(mYearSelectedCircleColor);
-            }
+            v.setTextAppearance(v.getContext(), mItemTextAppearanceResId);
+            v.setCircleColor(mYearActivatedColor);
+
+            final int year = getItem(position);
+            final boolean selected = mController.getSelectedDay().get(Calendar.YEAR) == year;
+            v.setActivated(selected);
+
             return v;
         }
 

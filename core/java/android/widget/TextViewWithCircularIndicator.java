@@ -18,7 +18,6 @@ package android.widget;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -27,14 +26,8 @@ import android.util.AttributeSet;
 import com.android.internal.R;
 
 class TextViewWithCircularIndicator extends TextView {
-
-    private static final int SELECTED_CIRCLE_ALPHA = 60;
-
     private final Paint mCirclePaint = new Paint();
-
     private final String mItemIsSelectedText;
-    private int mCircleColor;
-    private boolean mDrawIndicator;
 
     public TextViewWithCircularIndicator(Context context) {
         this(context, null);
@@ -50,21 +43,10 @@ class TextViewWithCircularIndicator extends TextView {
 
     public TextViewWithCircularIndicator(Context context, AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-        super(context, attrs);
-
-
-        // Use Theme attributes if possible
-        final TypedArray a = mContext.obtainStyledAttributes(attrs,
-                R.styleable.DatePicker, defStyleAttr, defStyleRes);
-        final int resId = a.getResourceId(R.styleable.DatePicker_yearListItemTextAppearance, -1);
-        if (resId != -1) {
-            setTextAppearance(context, resId);
-        }
+        super(context, attrs, defStyleAttr, defStyleRes);
 
         final Resources res = context.getResources();
         mItemIsSelectedText = res.getString(R.string.item_is_selected);
-
-        a.recycle();
 
         init();
     }
@@ -77,33 +59,26 @@ class TextViewWithCircularIndicator extends TextView {
     }
 
     public void setCircleColor(int color) {
-        if (color != mCircleColor) {
-            mCircleColor = color;
-            mCirclePaint.setColor(mCircleColor);
-            mCirclePaint.setAlpha(SELECTED_CIRCLE_ALPHA);
-            requestLayout();
-        }
-    }
-
-    public void setDrawIndicator(boolean drawIndicator) {
-        mDrawIndicator = drawIndicator;
+        mCirclePaint.setColor(color);
+        invalidate();
     }
 
     @Override
     public void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        if (mDrawIndicator) {
+        if (isActivated()) {
             final int width = getWidth();
             final int height = getHeight();
-            int radius = Math.min(width, height) / 2;
+            final int radius = Math.min(width, height) / 2;
             canvas.drawCircle(width / 2, height / 2, radius, mCirclePaint);
         }
+
+        super.onDraw(canvas);
     }
 
     @Override
     public CharSequence getContentDescription() {
-        CharSequence itemText = getText();
-        if (mDrawIndicator) {
+        final CharSequence itemText = getText();
+        if (isActivated()) {
             return String.format(mItemIsSelectedText, itemText);
         } else {
             return itemText;
