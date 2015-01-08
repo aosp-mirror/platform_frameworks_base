@@ -1352,8 +1352,15 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             if (wifiConfig == null) {
                 mConnector.execute("softap", "set", wlanIface);
             } else {
+                int apChannel;
+                if (wifiConfig.apChannel == 0) {
+                    apChannel = WifiConfiguration.chooseApChannel(wifiConfig.apBand);
+                } else {
+                    apChannel = wifiConfig.apChannel;
+                }
                 mConnector.execute("softap", "set", wlanIface, wifiConfig.SSID,
-                                   "broadcast", "6", getSecurityType(wifiConfig),
+                                   "broadcast", Integer.toString(apChannel),
+                                   getSecurityType(wifiConfig),
                                    new SensitiveArg(wifiConfig.preSharedKey));
             }
             mConnector.execute("softap", "startap");
