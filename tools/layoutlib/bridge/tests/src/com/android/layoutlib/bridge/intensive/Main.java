@@ -165,11 +165,27 @@ public class Main {
         if (!out.isDirectory()) {
             return null;
         }
-        File sdkDir = new File(out, "sdk" + File.separator + "sdk");
+        File sdkDir = new File(out, "sdk");
         if (!sdkDir.isDirectory()) {
-            // The directory we thought that should contain the sdk is not a directory.
             return null;
         }
+        File[] sdkDirs = sdkDir.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File path) {
+                // We need to search for $TARGET_PRODUCT (usually, sdk_phone_armv7)
+                return path.isDirectory() && path.getName().startsWith("sdk");
+            }
+        });
+        for (File dir : sdkDirs) {
+            String platformDir = getPlatformDirFromHostOutSdkSdk(dir);
+            if (platformDir != null) {
+                return platformDir;
+            }
+        }
+        return null;
+    }
+
+    private static String getPlatformDirFromHostOutSdkSdk(File sdkDir) {
         File[] possibleSdks = sdkDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File path) {
