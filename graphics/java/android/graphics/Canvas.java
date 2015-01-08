@@ -1646,7 +1646,7 @@ public class Canvas {
      *
      * @param text  The text to be drawn
      * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the origin of the text being drawn
+     * @param y     The y-coordinate of the baseline of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(@NonNull char[] text, int index, int count, float x, float y,
@@ -1665,7 +1665,7 @@ public class Canvas {
      *
      * @param text  The text to be drawn
      * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the origin of the text being drawn
+     * @param y     The y-coordinate of the baseline of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(@NonNull String text, float x, float y, @NonNull Paint paint) {
@@ -1681,7 +1681,7 @@ public class Canvas {
      * @param start The index of the first character in text to draw
      * @param end   (end - 1) is the index of the last character in text to draw
      * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the origin of the text being drawn
+     * @param y     The y-coordinate of the baseline of the text being drawn
      * @param paint The paint used for the text (e.g. color, size, style)
      */
     public void drawText(@NonNull String text, int start, int end, float x, float y,
