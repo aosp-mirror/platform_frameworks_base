@@ -16,6 +16,7 @@
 
 package com.android.tools.layoutlib.create;
 
+import com.android.tools.layoutlib.java.LinkedHashMap_Delegate;
 import com.android.tools.layoutlib.java.System_Delegate;
 
 import org.objectweb.asm.ClassVisitor;
@@ -26,8 +27,10 @@ import org.objectweb.asm.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -44,7 +47,7 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
             "([CI[CII)V", "([BI[BII)V", "([SI[SII)V", "([II[III)V",
             "([JI[JII)V", "([FI[FII)V", "([DI[DII)V", "([ZI[ZII)V"));
 
-    private static final List<MethodReplacer> METHOD_REPLACERS = new ArrayList<MethodReplacer>(2);
+    private static final List<MethodReplacer> METHOD_REPLACERS = new ArrayList<MethodReplacer>(5);
 
     private static final String ANDROID_LOCALE_CLASS =
             "com/android/layoutlib/bridge/android/AndroidLocale";
@@ -74,7 +77,8 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
         // Case 2: java.util.Locale.toLanguageTag() and java.util.Locale.getScript()
         METHOD_REPLACERS.add(new MethodReplacer() {
 
-            String LOCALE_TO_STRING = Type.getMethodDescriptor(STRING, Type.getType(Locale.class));
+            private final String LOCALE_TO_STRING =
+                    Type.getMethodDescriptor(STRING, Type.getType(Locale.class));
 
             @Override
             public boolean isNeeded(String owner, String name, String desc) {
@@ -127,6 +131,30 @@ public class ReplaceMethodCallsAdapter extends ClassVisitor {
                         || mi.desc.equals("(Ljava/lang/String;)V");
                 mi.name = "log";
                 mi.owner = Type.getInternalName(System_Delegate.class);
+            }
+        });
+
+        // Case 5: java.util.LinkedHashMap.eldest()
+        METHOD_REPLACERS.add(new MethodReplacer() {
+
+            private final String VOID_TO_MAP_ENTRY =
+                    Type.getMethodDescriptor(Type.getType(Map.Entry.class));
+            private final String LINKED_HASH_MAP = Type.getInternalName(LinkedHashMap.class);
+
+            @Override
+            public boolean isNeeded(String owner, String name, String desc) {
+                return LINKED_HASH_MAP.equals(owner) &&
+                        "eldest".equals(name) &&
+                        VOID_TO_MAP_ENTRY.equals(desc);
+            }
+
+            @Override
+            public void replace(MethodInformation mi) {
+                assert isNeeded(mi.owner, mi.name, mi.desc);
+                mi.opcode = Opcodes.INVOKESTATIC;
+                mi.owner = Type.getInternalName(LinkedHashMap_Delegate.class);
+                mi.desc = Type.getMethodDescriptor(
+                        Type.getType(Map.Entry.class), Type.getType(LinkedHashMap.class));
             }
         });
     }
