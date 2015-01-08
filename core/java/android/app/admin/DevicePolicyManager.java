@@ -111,9 +111,11 @@ public class DevicePolicyManager {
      *
      * <p>This intent must contain the extra {@link #EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME}.
      *
-     * <p> When managed provisioning has completed, an intent of the type
-     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcasted to the
-     * managed profile.
+     * <p> When managed provisioning has completed, broadcasts are sent to the application specified
+     * in the provisioning intent. The
+     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} broadcast is sent in the
+     * managed profile and the {@link #ACTION_MANAGED_PROFILE_PROVISIONED} broadcast is sent in
+     * the primary profile.
      *
      * <p> If provisioning fails, the managedProfile is removed so the device returns to its
      * previous state.
@@ -330,6 +332,20 @@ public class DevicePolicyManager {
      */
     public static final String EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM
         = "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM";
+
+    /**
+     * Broadcast Action: This broadcast is sent to indicate that provisioning of a managed profile
+     * has completed successfully.
+     *
+     * <p>The broadcast is limited to the primary profile, to the app specified in the provisioning
+     * intent (@see #ACTION_PROVISION_MANAGED_PROFILE).
+     *
+     * <p>This intent will contain the extra {@link EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE} which
+     * corresponds to the account requested to be migrated at provisioning time, if any.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGED_PROFILE_PROVISIONED
+        = "android.app.action.MANAGED_PROFILE_PROVISIONED";
 
     /**
      * A boolean extra indicating whether device encryption is required as part of Device Owner
