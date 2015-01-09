@@ -28,16 +28,14 @@ import android.util.AndroidException;
  */
 public class CameraAccessException extends AndroidException {
     /**
-     * The camera device is in use already
-     * @hide
+     * The camera device is in use already.
      */
     public static final int CAMERA_IN_USE = 4;
 
     /**
-     * The system-wide limit for number of open cameras has been reached,
-     * and more camera devices cannot be opened until previous instances are
-     * closed.
-     * @hide
+     * The system-wide limit for number of open cameras or camera resources has
+     * been reached, and more camera devices cannot be opened or torch mode
+     * cannot be turned on until previous instances are closed.
      */
     public static final int MAX_CAMERAS_IN_USE = 5;
 
