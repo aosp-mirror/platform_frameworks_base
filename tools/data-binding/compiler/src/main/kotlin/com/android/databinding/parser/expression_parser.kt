@@ -64,7 +64,7 @@ class ExprVisitor(val model : ExprModel) : DataBinderBaseVisitor<Expr>() {
     }
 
     override fun visitNilExpr(ctx: DataBinderParser.NilExprContext?): Expr? {
-        return SymbolExpr("null")
+        return SymbolExpr("null", javaClass<Any>())
     }
 
     override fun visitTernaryExpr(ctx: DataBinderParser.TernaryExprContext): Expr {
@@ -117,10 +117,11 @@ class ExprVisitor(val model : ExprModel) : DataBinderBaseVisitor<Expr>() {
 
     override fun visitHackyStringExpr(ctx: DataBinderParser.HackyStringExprContext): Expr? {
         val s = ctx.getText()
-        return SymbolExpr("\"${s.substring(1, s.size - 1)}\"");
+        return SymbolExpr("\"${s.substring(1, s.size - 1)}\"", javaClass<String>());
     }
 
     override fun visitSymbol(ctx: DataBinderParser.SymbolContext): Expr? {
-        return SymbolExpr(ctx.getText())
+        // TODO need to know what this is.
+        return SymbolExpr(ctx.getText(), javaClass<String>())
     }
 }

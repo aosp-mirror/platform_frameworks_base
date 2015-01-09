@@ -40,19 +40,19 @@ expression
     |   '(' type ')' expression                         # CastOp
     |   ('+'|'-') expression                            # UnaryOp
     |   ('~'|'!') expression                            # UnaryOp
-    |   expression ('*'|'/'|'%') expression             # BinaryOp
-    |   expression ('+'|'-') expression                 # BinaryOp
-    |   expression ('<<' | '>>>' | '>>') expression     # BinaryOp
-    |   expression ('<=' | '>=' | '>' | '<') expression # BinaryOp
+    |   left=expression op=('*'|'/'|'%') right=expression             # MathOp
+    |   left=expression op=('+'|'-') right=expression                 # MathOp
+    |   left=expression op=('<<' | '>>>' | '>>') right=expression     # BitShiftOp
+    |   left=expression op=('<=' | '>=' | '>' | '<') right=expression # ComparisonOp
     |   expression 'instanceof' type                    # InstanceOfOp
-    |   expression ('==' | '!=') expression             # BinaryOp
-    |   expression '&' expression                       # BinaryOp
-    |   expression '^' expression                       # BinaryOp
-    |   expression '|' expression                       # BinaryOp
-    |   expression '&&' expression                      # BinaryOp
-    |   expression '||' expression                      # BinaryOp
-    |   expression '?' expression ':' expression        # TernaryOp
-    |   expression '??' expression                      # QuestionQuestionOp
+    |   left=expression op=('==' | '!=') right=expression             # ComparisonOp
+    |   left=expression op='&' right=expression                       # BinaryOp
+    |   left=expression op='^' right=expression                       # BinaryOp
+    |   left=expression op='|' right=expression                       # BinaryOp
+    |   left=expression op='&&' right=expression                      # AndOrOp
+    |   left=expression op='||' right=expression                      # AndOrOp
+    |   left=expression op='?' iftrue=expression ':' iffalse=expression        # TernaryOp
+    |   left=expression op='??' right=expression                      # QuestionQuestionOp
     ;
 
 THIS

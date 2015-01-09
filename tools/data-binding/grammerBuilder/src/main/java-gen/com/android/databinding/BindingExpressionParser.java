@@ -352,22 +352,20 @@ public class BindingExpressionParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class UnaryOpContext extends ExpressionContext {
-		public ExpressionContext expression() {
-			return getRuleContext(ExpressionContext.class,0);
-		}
-		public UnaryOpContext(ExpressionContext ctx) { copyFrom(ctx); }
+	public static class ResourceContext extends ExpressionContext {
+		public TerminalNode ResourceReference() { return getToken(BindingExpressionParser.ResourceReference, 0); }
+		public ResourceContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).enterUnaryOp(this);
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).enterResource(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).exitUnaryOp(this);
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).exitResource(this);
 		}
 		@Override
 		public <Result> Result accept(ParseTreeVisitor<? extends Result> visitor) {
-			if ( visitor instanceof BindingExpressionVisitor<?> ) return ((BindingExpressionVisitor<? extends Result>)visitor).visitUnaryOp(this);
+			if ( visitor instanceof BindingExpressionVisitor<?> ) return ((BindingExpressionVisitor<? extends Result>)visitor).visitResource(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -393,20 +391,47 @@ public class BindingExpressionParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
-	public static class ResourceContext extends ExpressionContext {
-		public TerminalNode ResourceReference() { return getToken(BindingExpressionParser.ResourceReference, 0); }
-		public ResourceContext(ExpressionContext ctx) { copyFrom(ctx); }
+	public static class UnaryOpContext extends ExpressionContext {
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public UnaryOpContext(ExpressionContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).enterResource(this);
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).enterUnaryOp(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).exitResource(this);
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).exitUnaryOp(this);
 		}
 		@Override
 		public <Result> Result accept(ParseTreeVisitor<? extends Result> visitor) {
-			if ( visitor instanceof BindingExpressionVisitor<?> ) return ((BindingExpressionVisitor<? extends Result>)visitor).visitResource(this);
+			if ( visitor instanceof BindingExpressionVisitor<?> ) return ((BindingExpressionVisitor<? extends Result>)visitor).visitUnaryOp(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class AndOrOpContext extends ExpressionContext {
+		public ExpressionContext left;
+		public Token op;
+		public ExpressionContext right;
+		public ExpressionContext expression(int i) {
+			return getRuleContext(ExpressionContext.class,i);
+		}
+		public List<? extends ExpressionContext> expression() {
+			return getRuleContexts(ExpressionContext.class);
+		}
+		public AndOrOpContext(ExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).enterAndOrOp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).exitAndOrOp(this);
+		}
+		@Override
+		public <Result> Result accept(ParseTreeVisitor<? extends Result> visitor) {
+			if ( visitor instanceof BindingExpressionVisitor<?> ) return ((BindingExpressionVisitor<? extends Result>)visitor).visitAndOrOp(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -500,6 +525,10 @@ public class BindingExpressionParser extends Parser {
 		}
 	}
 	public static class TernaryOpContext extends ExpressionContext {
+		public ExpressionContext left;
+		public Token op;
+		public ExpressionContext iftrue;
+		public ExpressionContext iffalse;
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
@@ -518,6 +547,56 @@ public class BindingExpressionParser extends Parser {
 		@Override
 		public <Result> Result accept(ParseTreeVisitor<? extends Result> visitor) {
 			if ( visitor instanceof BindingExpressionVisitor<?> ) return ((BindingExpressionVisitor<? extends Result>)visitor).visitTernaryOp(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class ComparisonOpContext extends ExpressionContext {
+		public ExpressionContext left;
+		public Token op;
+		public ExpressionContext right;
+		public ExpressionContext expression(int i) {
+			return getRuleContext(ExpressionContext.class,i);
+		}
+		public List<? extends ExpressionContext> expression() {
+			return getRuleContexts(ExpressionContext.class);
+		}
+		public ComparisonOpContext(ExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).enterComparisonOp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).exitComparisonOp(this);
+		}
+		@Override
+		public <Result> Result accept(ParseTreeVisitor<? extends Result> visitor) {
+			if ( visitor instanceof BindingExpressionVisitor<?> ) return ((BindingExpressionVisitor<? extends Result>)visitor).visitComparisonOp(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class MathOpContext extends ExpressionContext {
+		public ExpressionContext left;
+		public Token op;
+		public ExpressionContext right;
+		public ExpressionContext expression(int i) {
+			return getRuleContext(ExpressionContext.class,i);
+		}
+		public List<? extends ExpressionContext> expression() {
+			return getRuleContexts(ExpressionContext.class);
+		}
+		public MathOpContext(ExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).enterMathOp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).exitMathOp(this);
+		}
+		@Override
+		public <Result> Result accept(ParseTreeVisitor<? extends Result> visitor) {
+			if ( visitor instanceof BindingExpressionVisitor<?> ) return ((BindingExpressionVisitor<? extends Result>)visitor).visitMathOp(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -566,7 +645,35 @@ public class BindingExpressionParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	public static class BitShiftOpContext extends ExpressionContext {
+		public ExpressionContext left;
+		public Token op;
+		public ExpressionContext right;
+		public ExpressionContext expression(int i) {
+			return getRuleContext(ExpressionContext.class,i);
+		}
+		public List<? extends ExpressionContext> expression() {
+			return getRuleContexts(ExpressionContext.class);
+		}
+		public BitShiftOpContext(ExpressionContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).enterBitShiftOp(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof BindingExpressionListener ) ((BindingExpressionListener)listener).exitBitShiftOp(this);
+		}
+		@Override
+		public <Result> Result accept(ParseTreeVisitor<? extends Result> visitor) {
+			if ( visitor instanceof BindingExpressionVisitor<?> ) return ((BindingExpressionVisitor<? extends Result>)visitor).visitBitShiftOp(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 	public static class QuestionQuestionOpContext extends ExpressionContext {
+		public ExpressionContext left;
+		public Token op;
+		public ExpressionContext right;
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
@@ -611,6 +718,9 @@ public class BindingExpressionParser extends Parser {
 		}
 	}
 	public static class BinaryOpContext extends ExpressionContext {
+		public ExpressionContext left;
+		public Token op;
+		public ExpressionContext right;
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
@@ -780,160 +890,177 @@ public class BindingExpressionParser extends Parser {
 					switch ( getInterpreter().adaptivePredict(_input,6,_ctx) ) {
 					case 1:
 						{
-						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						_localctx = new MathOpContext(new ExpressionContext(_parentctx, _parentState));
+						((MathOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(87);
 						if (!(precpred(_ctx, 13))) throw new FailedPredicateException(this, "precpred(_ctx, 13)");
 						setState(88);
+						((MathOpContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__35) | (1L << T__18) | (1L << T__7))) != 0)) ) {
-						_errHandler.recoverInline(this);
+							((MathOpContext)_localctx).op = _errHandler.recoverInline(this);
 						}
 						consume();
-						setState(89); expression(14);
+						setState(89); ((MathOpContext)_localctx).right = expression(14);
 						}
 						break;
 
 					case 2:
 						{
-						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						_localctx = new MathOpContext(new ExpressionContext(_parentctx, _parentState));
+						((MathOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(90);
 						if (!(precpred(_ctx, 12))) throw new FailedPredicateException(this, "precpred(_ctx, 12)");
 						setState(91);
+						((MathOpContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==T__33 || _la==T__13) ) {
-						_errHandler.recoverInline(this);
+							((MathOpContext)_localctx).op = _errHandler.recoverInline(this);
 						}
 						consume();
-						setState(92); expression(13);
+						setState(92); ((MathOpContext)_localctx).right = expression(13);
 						}
 						break;
 
 					case 3:
 						{
-						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						_localctx = new BitShiftOpContext(new ExpressionContext(_parentctx, _parentState));
+						((BitShiftOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(93);
 						if (!(precpred(_ctx, 11))) throw new FailedPredicateException(this, "precpred(_ctx, 11)");
 						setState(94);
+						((BitShiftOpContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__41) | (1L << T__25) | (1L << T__20))) != 0)) ) {
-						_errHandler.recoverInline(this);
+							((BitShiftOpContext)_localctx).op = _errHandler.recoverInline(this);
 						}
 						consume();
-						setState(95); expression(12);
+						setState(95); ((BitShiftOpContext)_localctx).right = expression(12);
 						}
 						break;
 
 					case 4:
 						{
-						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						_localctx = new ComparisonOpContext(new ExpressionContext(_parentctx, _parentState));
+						((ComparisonOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(96);
 						if (!(precpred(_ctx, 10))) throw new FailedPredicateException(this, "precpred(_ctx, 10)");
 						setState(97);
+						((ComparisonOpContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__30) | (1L << T__27) | (1L << T__9) | (1L << T__4))) != 0)) ) {
-						_errHandler.recoverInline(this);
+							((ComparisonOpContext)_localctx).op = _errHandler.recoverInline(this);
 						}
 						consume();
-						setState(98); expression(11);
+						setState(98); ((ComparisonOpContext)_localctx).right = expression(11);
 						}
 						break;
 
 					case 5:
 						{
-						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						_localctx = new ComparisonOpContext(new ExpressionContext(_parentctx, _parentState));
+						((ComparisonOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(99);
 						if (!(precpred(_ctx, 8))) throw new FailedPredicateException(this, "precpred(_ctx, 8)");
 						setState(100);
+						((ComparisonOpContext)_localctx).op = _input.LT(1);
 						_la = _input.LA(1);
 						if ( !(_la==T__28 || _la==T__6) ) {
-						_errHandler.recoverInline(this);
+							((ComparisonOpContext)_localctx).op = _errHandler.recoverInline(this);
 						}
 						consume();
-						setState(101); expression(9);
+						setState(101); ((ComparisonOpContext)_localctx).right = expression(9);
 						}
 						break;
 
 					case 6:
 						{
 						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						((BinaryOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(102);
 						if (!(precpred(_ctx, 7))) throw new FailedPredicateException(this, "precpred(_ctx, 7)");
-						setState(103); match(T__38);
-						setState(104); expression(8);
+						setState(103); ((BinaryOpContext)_localctx).op = match(T__38);
+						setState(104); ((BinaryOpContext)_localctx).right = expression(8);
 						}
 						break;
 
 					case 7:
 						{
 						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						((BinaryOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(105);
 						if (!(precpred(_ctx, 6))) throw new FailedPredicateException(this, "precpred(_ctx, 6)");
-						setState(106); match(T__17);
-						setState(107); expression(7);
+						setState(106); ((BinaryOpContext)_localctx).op = match(T__17);
+						setState(107); ((BinaryOpContext)_localctx).right = expression(7);
 						}
 						break;
 
 					case 8:
 						{
 						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						((BinaryOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(108);
 						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
-						setState(109); match(T__2);
-						setState(110); expression(6);
+						setState(109); ((BinaryOpContext)_localctx).op = match(T__2);
+						setState(110); ((BinaryOpContext)_localctx).right = expression(6);
 						}
 						break;
 
 					case 9:
 						{
-						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						_localctx = new AndOrOpContext(new ExpressionContext(_parentctx, _parentState));
+						((AndOrOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(111);
 						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
-						setState(112); match(T__11);
-						setState(113); expression(5);
+						setState(112); ((AndOrOpContext)_localctx).op = match(T__11);
+						setState(113); ((AndOrOpContext)_localctx).right = expression(5);
 						}
 						break;
 
 					case 10:
 						{
-						_localctx = new BinaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						_localctx = new AndOrOpContext(new ExpressionContext(_parentctx, _parentState));
+						((AndOrOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(114);
 						if (!(precpred(_ctx, 3))) throw new FailedPredicateException(this, "precpred(_ctx, 3)");
-						setState(115); match(T__10);
-						setState(116); expression(4);
+						setState(115); ((AndOrOpContext)_localctx).op = match(T__10);
+						setState(116); ((AndOrOpContext)_localctx).right = expression(4);
 						}
 						break;
 
 					case 11:
 						{
 						_localctx = new TernaryOpContext(new ExpressionContext(_parentctx, _parentState));
+						((TernaryOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(117);
 						if (!(precpred(_ctx, 2))) throw new FailedPredicateException(this, "precpred(_ctx, 2)");
-						setState(118); match(T__26);
-						setState(119); expression(0);
+						setState(118); ((TernaryOpContext)_localctx).op = match(T__26);
+						setState(119); ((TernaryOpContext)_localctx).iftrue = expression(0);
 						setState(120); match(T__31);
-						setState(121); expression(3);
+						setState(121); ((TernaryOpContext)_localctx).iffalse = expression(3);
 						}
 						break;
 
 					case 12:
 						{
 						_localctx = new QuestionQuestionOpContext(new ExpressionContext(_parentctx, _parentState));
+						((QuestionQuestionOpContext)_localctx).left = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(123);
 						if (!(precpred(_ctx, 1))) throw new FailedPredicateException(this, "precpred(_ctx, 1)");
-						setState(124); match(T__8);
-						setState(125); expression(2);
+						setState(124); ((QuestionQuestionOpContext)_localctx).op = match(T__8);
+						setState(125); ((QuestionQuestionOpContext)_localctx).right = expression(2);
 						}
 						break;
 

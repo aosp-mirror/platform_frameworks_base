@@ -17,10 +17,19 @@ package com.example.databinding;
 
 import com.android.databinding.BindingExpressionBaseVisitor;
 import com.android.databinding.BindingExpressionParser;
+import com.android.databinding.parser.AndOrOpExpr;
+import com.android.databinding.parser.BinaryOpExpr;
+import com.android.databinding.parser.ComparisonOpExpr;
 import com.android.databinding.parser.Expr;
 import com.android.databinding.parser.ExprModel;
+import com.android.databinding.parser.FieldExpr;
+import com.android.databinding.parser.MethodCallExpr;
+import com.android.databinding.parser.OpExpr;
+import com.android.databinding.parser.SymbolExpr;
+import com.android.databinding.parser.TernaryExpr;
 import com.android.databinding.parser.VariableRef;
-import com.android.databinding.util.Log;
+import com.android.databinding.util.ClassAnalyzer;
+import static com.android.databinding.BindingExpressionParser.*;
 
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -53,19 +62,7 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
             javaString = ctx.DoubleQuoteString().getText();
         }
 
-        return new Expr() {
-            @org.jetbrains.annotations.NotNull
-            @Override
-            public String toJava() {
-                return javaString;
-            }
-
-            @org.jetbrains.annotations.NotNull
-            @Override
-            public String toReadableString() {
-                return javaString;
-            }
-        };
+        return new SymbolExpr(javaString, String.class);
     }
 
     @Override
@@ -74,6 +71,13 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
             final Expr expression = visit(ctx.expression());
             final Expr defaults = visit(ctx.defaults());
             return new Expr() {
+                @org.jetbrains.annotations.NotNull
+                @Override
+                public Class<? extends Object> resolveValueType(
+                        @org.jetbrains.annotations.NotNull ClassAnalyzer classAnalyzer) {
+                    return expression.getResolvedClass();
+                }
+
                 @org.jetbrains.annotations.NotNull
                 @Override
                 public String toJava() {
@@ -106,6 +110,13 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
         return new Expr() {
             @org.jetbrains.annotations.NotNull
             @Override
+            public Class<? extends Object> resolveValueType(
+                    @org.jetbrains.annotations.NotNull ClassAnalyzer classAnalyzer) {
+                return variableRef.getVariable().getResolvedClass();
+            }
+
+            @org.jetbrains.annotations.NotNull
+            @Override
             public String toReadableString() {
                 return variableRef.getFullName();
             }
@@ -124,6 +135,14 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
         final Expr isNullExpression = visit(ctx.expression(1));
 
         return new Expr() {
+            @org.jetbrains.annotations.NotNull
+            @Override
+            public Class<? extends Object> resolveValueType(
+                    @org.jetbrains.annotations.NotNull ClassAnalyzer classAnalyzer) {
+                return classAnalyzer.commonParentOf(nullCheckExpression.getResolvedClass(),
+                        isNullExpression.getResolvedClass());
+            }
+
             @org.jetbrains.annotations.NotNull
             @Override
             public String toJava() {
@@ -145,19 +164,7 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
         final VariableRef variableRef = mModel.getOrCreateVariable(identifier, null);
         mAccessedVariables.add(variableRef);
 
-        return new Expr() {
-            @org.jetbrains.annotations.NotNull
-            @Override
-            public String toJava() {
-                return identifier;
-            }
-
-            @org.jetbrains.annotations.NotNull
-            @Override
-            public String toReadableString() {
-                return identifier;
-            }
-        };
+        return new FieldExpr(variableRef, new ArrayList<VariableRef>(0));
     }
 
     @Override
@@ -169,21 +176,58 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
     }
 
     @Override
-    public Expr visitTerminal(@NotNull TerminalNode node) {
-        final String text = " " + node.getText() + " ";
-        return new Expr() {
-            @org.jetbrains.annotations.NotNull
-            @Override
-            public String toReadableString() {
-                return text;
-            }
+    public Expr visitTernaryOp(@NotNull TernaryOpContext ctx) {
+        return new TernaryExpr(ctx.left.accept(this), ctx.iftrue.accept(this), ctx.iffalse.accept(this));
+    }
 
-            @org.jetbrains.annotations.NotNull
-            @Override
-            public String toJava() {
-                return text;
-            }
-        };
+    @Override
+    public Expr visitTerminal(@NotNull TerminalNode node) {
+
+        final int type = node.getSymbol().getType();
+        switch (type) {
+            case IntegerLiteral:
+                return new SymbolExpr(node.getText(), Integer.class);
+            case FloatingPointLiteral:
+                return new SymbolExpr(node.getText(), Float.class);
+            case BooleanLiteral:
+                return new SymbolExpr(node.getText(), Boolean.class);
+            case CharacterLiteral:
+                return new SymbolExpr(node.getText(), Character.class);
+            case SingleQuoteString:
+                return new SymbolExpr(node.getText(), String.class);
+            case DoubleQuoteString:
+                return new SymbolExpr(node.getText(), String.class);
+            case NullLiteral:
+                return new SymbolExpr(node.getText(), Object.class);
+            default:
+                throw new RuntimeException("cannot create expression from terminal node " + node.toString());
+        }
+    }
+
+    @Override
+    public Expr visitMathOp(@NotNull MathOpContext ctx) {
+        // TODO must support upper cast
+        return new OpExpr(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    }
+
+    @Override
+    public Expr visitBitShiftOp(@NotNull BitShiftOpContext ctx) {
+        return new BinaryOpExpr(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    }
+
+    @Override
+    public Expr visitComparisonOp(@NotNull ComparisonOpContext ctx) {
+        return new ComparisonOpExpr(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    }
+
+    @Override
+    public Expr visitBinaryOp(@NotNull BinaryOpContext ctx) {
+        return new BinaryOpExpr(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    }
+
+    @Override
+    public Expr visitAndOrOp(@NotNull AndOrOpContext ctx) {
+        return new AndOrOpExpr(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
     }
 
     @Override
@@ -192,6 +236,13 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
             return nextResult;
         } else {
             return new Expr() {
+                @org.jetbrains.annotations.NotNull
+                @Override
+                public Class<? extends Object> resolveValueType(
+                        @org.jetbrains.annotations.NotNull ClassAnalyzer classAnalyzer) {
+                    return classAnalyzer.commonParentOf(aggregate.getResolvedClass(), nextResult.getResolvedClass());
+                }
+
                 @org.jetbrains.annotations.NotNull
                 @Override
                 public String toReadableString() {
@@ -224,40 +275,6 @@ public class ExpressionVisitor extends BindingExpressionBaseVisitor<Expr> {
                 parameters.add(visit(parameter));
             }
         }
-        return new Expr() {
-            @org.jetbrains.annotations.NotNull
-            @Override
-            public String toJava() {
-                StringBuilder sb = new StringBuilder();
-                sb.append(expression.toJava())
-                        .append('.')
-                        .append(methodName)
-                        .append('(');
-                for (int i = 0; i < parameters.size(); i++) {
-                    if (i != 0) {
-                        sb.append(", ");
-                    }
-                    sb.append(parameters.get(i).toJava());
-                }
-                sb.append(')');
-                return sb.toString();
-            }
-
-            @org.jetbrains.annotations.NotNull
-            @Override
-            public String toReadableString() {
-                StringBuilder sb = new StringBuilder();
-                sb.append(expression.toReadableString())
-                        .append('(');
-                for (int i = 0; i < parameters.size(); i++) {
-                    if (i != 0) {
-                        sb.append(", ");
-                    }
-                    sb.append(parameters.get(i).toReadableString());
-                }
-                sb.append(')');
-                return sb.toString();
-            }
-        };
+        return new MethodCallExpr(expression, methodName, parameters);
     }
 }

@@ -28,14 +28,6 @@ public interface BindingExpressionVisitor<Result> extends ParseTreeVisitor<Resul
 	Result visitBracketOp(@NotNull BindingExpressionParser.BracketOpContext ctx);
 
 	/**
-	 * Visit a parse tree produced by the {@code CastOp}
-	 * labeled alternative in {@link BindingExpressionParser#expression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	Result visitCastOp(@NotNull BindingExpressionParser.CastOpContext ctx);
-
-	/**
 	 * Visit a parse tree produced by the {@code UnaryOp}
 	 * labeled alternative in {@link BindingExpressionParser#expression}.
 	 * @param ctx the parse tree
@@ -44,12 +36,20 @@ public interface BindingExpressionVisitor<Result> extends ParseTreeVisitor<Resul
 	Result visitUnaryOp(@NotNull BindingExpressionParser.UnaryOpContext ctx);
 
 	/**
-	 * Visit a parse tree produced by the {@code MethodInvocation}
+	 * Visit a parse tree produced by the {@code CastOp}
 	 * labeled alternative in {@link BindingExpressionParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	Result visitMethodInvocation(@NotNull BindingExpressionParser.MethodInvocationContext ctx);
+	Result visitCastOp(@NotNull BindingExpressionParser.CastOpContext ctx);
+
+	/**
+	 * Visit a parse tree produced by the {@code AndOrOp}
+	 * labeled alternative in {@link BindingExpressionParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	Result visitAndOrOp(@NotNull BindingExpressionParser.AndOrOpContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link BindingExpressionParser#expressionList}.
@@ -57,6 +57,14 @@ public interface BindingExpressionVisitor<Result> extends ParseTreeVisitor<Resul
 	 * @return the visitor result
 	 */
 	Result visitExpressionList(@NotNull BindingExpressionParser.ExpressionListContext ctx);
+
+	/**
+	 * Visit a parse tree produced by the {@code MethodInvocation}
+	 * labeled alternative in {@link BindingExpressionParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	Result visitMethodInvocation(@NotNull BindingExpressionParser.MethodInvocationContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link BindingExpressionParser#classOrInterfaceType}.
@@ -95,6 +103,14 @@ public interface BindingExpressionVisitor<Result> extends ParseTreeVisitor<Resul
 	Result visitBindingSyntax(@NotNull BindingExpressionParser.BindingSyntaxContext ctx);
 
 	/**
+	 * Visit a parse tree produced by the {@code ComparisonOp}
+	 * labeled alternative in {@link BindingExpressionParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	Result visitComparisonOp(@NotNull BindingExpressionParser.ComparisonOpContext ctx);
+
+	/**
 	 * Visit a parse tree produced by the {@code TernaryOp}
 	 * labeled alternative in {@link BindingExpressionParser#expression}.
 	 * @param ctx the parse tree
@@ -123,6 +139,14 @@ public interface BindingExpressionVisitor<Result> extends ParseTreeVisitor<Resul
 	 * @return the visitor result
 	 */
 	Result visitDefaults(@NotNull BindingExpressionParser.DefaultsContext ctx);
+
+	/**
+	 * Visit a parse tree produced by the {@code BitShiftOp}
+	 * labeled alternative in {@link BindingExpressionParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	Result visitBitShiftOp(@NotNull BindingExpressionParser.BitShiftOpContext ctx);
 
 	/**
 	 * Visit a parse tree produced by the {@code InstanceOfOp}
@@ -185,6 +209,14 @@ public interface BindingExpressionVisitor<Result> extends ParseTreeVisitor<Resul
 	 * @return the visitor result
 	 */
 	Result visitGenericCall(@NotNull BindingExpressionParser.GenericCallContext ctx);
+
+	/**
+	 * Visit a parse tree produced by the {@code MathOp}
+	 * labeled alternative in {@link BindingExpressionParser#expression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	Result visitMathOp(@NotNull BindingExpressionParser.MathOpContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link BindingExpressionParser#classExtraction}.
