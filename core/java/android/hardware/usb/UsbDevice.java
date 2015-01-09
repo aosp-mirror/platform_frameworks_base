@@ -40,6 +40,7 @@ import android.os.Parcelable;
 public class UsbDevice implements Parcelable {
 
     private static final String TAG = "UsbDevice";
+    private static final boolean DEBUG = false;
 
     private final String mName;
     private final String mManufacturerName;

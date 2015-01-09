@@ -37,46 +37,33 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * UsbAlsaManager manages USB audio and MIDI devices.
  */
 public class UsbAlsaManager {
     private static final String TAG = UsbAlsaManager.class.getSimpleName();
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final String ALSA_DIRECTORY = "/dev/snd/";
 
     private final Context mContext;
     private IMidiManager mMidiManager;
 
-    private final class AudioDevice {
-        public int mCard;
-        public int mDevice;
-        public boolean mHasPlayback;
-        public boolean mHasCapture;
-        public boolean mHasMIDI;
+    private final AlsaCardsParser mCardsParser = new AlsaCardsParser();
+    private final AlsaDevicesParser mDevicesParser = new AlsaDevicesParser();
 
-        public AudioDevice(int card, int device,
-                boolean hasPlayback, boolean hasCapture, boolean hasMidi) {
-            mCard = card;
-            mDevice = device;
-            mHasPlayback = hasPlayback;
-            mHasCapture = hasCapture;
-            mHasMIDI = hasMidi;
-        }
+    // this is needed to map USB devices to ALSA Audio Devices, especially to remove an
+    // ALSA device when we are notified that its associated USB device has been removed.
 
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("AudioDevice: [card: " + mCard);
-            sb.append(", device: " + mDevice);
-            sb.append(", hasPlayback: " + mHasPlayback);
-            sb.append(", hasCapture: " + mHasCapture);
-            sb.append(", hasMidi: " + mHasMIDI);
-            sb.append("]");
-            return sb.toString();
-        }
-    }
+    private final HashMap<UsbDevice,UsbAudioDevice>
+        mAudioDevices = new HashMap<UsbDevice,UsbAudioDevice>();
+
+    private final HashMap<String,AlsaDevice>
+        mAlsaDevices = new HashMap<String,AlsaDevice>();
+
+    private UsbAudioDevice mSelectedAudioDevice = null;
 
     private final class AlsaDevice {
         public static final int TYPE_UNKNOWN = 0;
@@ -112,12 +99,6 @@ public class UsbAlsaManager {
         }
     }
 
-    private final HashMap<UsbDevice,AudioDevice> mAudioDevices
-            = new HashMap<UsbDevice,AudioDevice>();
-
-    private final HashMap<String,AlsaDevice> mAlsaDevices
-            = new HashMap<String,AlsaDevice>();
-
     private final FileObserver mAlsaObserver = new FileObserver(ALSA_DIRECTORY,
             FileObserver.CREATE | FileObserver.DELETE) {
         public void onEvent(int event, String path) {
@@ -134,6 +115,9 @@ public class UsbAlsaManager {
 
     /* package */ UsbAlsaManager(Context context) {
         mContext = context;
+
+        // initial scan
+        mCardsParser.scan();
     }
 
     public void systemReady() {
@@ -149,9 +133,15 @@ public class UsbAlsaManager {
     }
 
     // Broadcasts the arrival/departure of a USB audio interface
-    // audioDevice - the AudioDevice that was added or removed
+    // audioDevice - the UsbAudioDevice that was added or removed
     // enabled - if true, we're connecting a device (it's arrived), else disconnecting
-    private void sendDeviceNotification(AudioDevice audioDevice, boolean enabled) {
+    private void sendDeviceNotification(UsbAudioDevice audioDevice, boolean enabled) {
+        if (DEBUG) {
+            Slog.d(TAG, "sendDeviceNotification(enabled:" + enabled +
+                    " c:" + audioDevice.mCard +
+                    " d:" + audioDevice.mDevice + ")");
+        }
+
         // send a sticky broadcast containing current USB state
         Intent intent = new Intent(AudioManager.ACTION_USB_AUDIO_DEVICE_PLUG);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
@@ -162,6 +152,7 @@ public class UsbAlsaManager {
         intent.putExtra("hasPlayback", audioDevice.mHasPlayback);
         intent.putExtra("hasCapture", audioDevice.mHasCapture);
         intent.putExtra("hasMIDI", audioDevice.mHasMIDI);
+        intent.putExtra("class", audioDevice.mDeviceClass);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
@@ -241,6 +232,81 @@ public class UsbAlsaManager {
         }
     }
 
+    /*
+     * Select the default device of the specified card.
+     */
+    /* package */ boolean selectCard(int card) {
+        if (DEBUG) {
+            Slog.d(TAG, "selectCard() card:" + card);
+        }
+        if (!mCardsParser.isCardUsb(card)) {
+            // Don't. AudioPolicyManager has logic for falling back to internal devices.
+            return false;
+        }
+
+        if (mSelectedAudioDevice != null) {
+            if (mSelectedAudioDevice.mCard == card) {
+                // Nothing to do here.
+                return false;
+            }
+            // "disconnect" the AudioPolicyManager from the previously selected device.
+            sendDeviceNotification(mSelectedAudioDevice, false);
+            mSelectedAudioDevice = null;
+        }
+
+        mDevicesParser.scan();
+        int device = mDevicesParser.getDefaultDeviceNum(card);
+
+        boolean hasPlayback = mDevicesParser.hasPlaybackDevices(card);
+        boolean hasCapture = mDevicesParser.hasCaptureDevices(card);
+        boolean hasMidi = mDevicesParser.hasMIDIDevices(card);
+        int deviceClass =
+            (mCardsParser.isCardUsb(card)
+                ? UsbAudioDevice.kAudioDeviceClass_External
+                : UsbAudioDevice.kAudioDeviceClass_Internal) |
+            UsbAudioDevice.kAudioDeviceMeta_Alsa;
+
+        // Playback device file needed/present?
+        if (hasPlayback && (waitForAlsaDevice(card, device, AlsaDevice.TYPE_PLAYBACK) == null)) {
+            return false;
+        }
+
+        // Capture device file needed/present?
+        if (hasCapture && (waitForAlsaDevice(card, device, AlsaDevice.TYPE_CAPTURE) == null)) {
+            return false;
+        }
+        //TODO - seems to me that we need to decouple the above tests for audio
+        // from the one below for MIDI.
+
+        // MIDI device file needed/present?
+        AlsaDevice midiDevice = null;
+        if (hasMidi) {
+            midiDevice = waitForAlsaDevice(card, device, AlsaDevice.TYPE_MIDI);
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "usb: hasPlayback:" + hasPlayback + " hasCapture:" + hasCapture);
+        }
+
+        mSelectedAudioDevice =
+                new UsbAudioDevice(card, device, hasPlayback, hasCapture, hasMidi, deviceClass);
+        mSelectedAudioDevice.mDeviceName = mCardsParser.getCardRecordFor(card).mCardName;
+        mSelectedAudioDevice.mDeviceDescription =
+                mCardsParser.getCardRecordFor(card).mCardDescription;
+
+        sendDeviceNotification(mSelectedAudioDevice, true);
+
+        return true;
+    }
+
+    /* package */ boolean selectDefaultDevice() {
+        if (DEBUG) {
+            Slog.d(TAG, "UsbAudioManager.selectDefaultDevice()");
+        }
+        mCardsParser.scan();
+        return selectCard(mCardsParser.getDefaultCard());
+    }
+
     /* package */ void deviceAdded(UsbDevice usbDevice) {
        if (DEBUG) {
           Slog.d(TAG, "deviceAdded(): " + usbDevice);
@@ -263,55 +329,27 @@ public class UsbAlsaManager {
             return;
         }
 
-        //TODO(pmclean) The "Parser" objects inspect files in "/proc/asound" which we presume is
-        // present, unlike the waitForAlsaDevice() which waits on a file in /dev/snd. It is not
-        // clear why this works, or that it can be relied on going forward.  Needs further
-        // research.
-        AlsaCardsParser cardsParser = new AlsaCardsParser();
-        cardsParser.scan();
-        // cardsParser.Log();
+        ArrayList<AlsaCardsParser.AlsaCardRecord> prevScanRecs = mCardsParser.getScanRecords();
+        mCardsParser.scan();
 
-        // But we need to parse the device to determine its capabilities.
-        AlsaDevicesParser devicesParser = new AlsaDevicesParser();
-        devicesParser.scan();
-        // devicesParser.Log();
-
-        // The protocol for now will be to select the last-connected (highest-numbered)
-        // Alsa Card.
-        int card = cardsParser.getNumCardRecords() - 1;
-        int device = 0;
-
-        boolean hasPlayback = devicesParser.hasPlaybackDevices(card);
-        boolean hasCapture = devicesParser.hasCaptureDevices(card);
-        boolean hasMidi = devicesParser.hasMIDIDevices(card);
-
-        // Playback device file needed/present?
-        if (hasPlayback &&
-            waitForAlsaDevice(card, device, AlsaDevice.TYPE_PLAYBACK) == null) {
-            return;
+        int addedCard = -1;
+        ArrayList<AlsaCardsParser.AlsaCardRecord>
+            newScanRecs = mCardsParser.getNewCardRecords(prevScanRecs);
+        if (newScanRecs.size() > 0) {
+            // This is where we select the just connected device
+            // NOTE - to switch to prefering the first-connected device, just always
+            // take the else clause below.
+            addedCard = newScanRecs.get(0).mCardNum;
+        } else {
+            addedCard = mCardsParser.getDefaultUsbCard();
         }
 
-        // Capture device file needed/present?
-        if (hasCapture &&
-            waitForAlsaDevice(card, device, AlsaDevice.TYPE_CAPTURE) == null) {
-            return;
+        // If the default isn't a USB device, let the existing "select internal mechanism"
+        // handle the selection.
+        if (mCardsParser.isCardUsb(addedCard)) {
+            selectCard(addedCard);
+            mAudioDevices.put(usbDevice, mSelectedAudioDevice);
         }
-
-        // MIDI device file needed/present?
-        if (hasMidi) {
-            midiDevice = waitForAlsaDevice(card, device, AlsaDevice.TYPE_MIDI);
-        }
-
-        if (DEBUG) {
-            Slog.d(TAG,
-                    "usb: hasPlayback:" + hasPlayback +
-                    " hasCapture:" + hasCapture +
-                    " hasMidi:" + hasMidi);
-        }
-
-        AudioDevice audioDevice = new AudioDevice(card, device, hasPlayback, hasCapture, hasMidi);
-        mAudioDevices.put(usbDevice, audioDevice);
-        sendDeviceNotification(audioDevice, true);
 
         if (midiDevice != null && mMidiManager != null) {
             try {
@@ -327,7 +365,7 @@ public class UsbAlsaManager {
           Slog.d(TAG, "deviceRemoved(): " + device);
         }
 
-        AudioDevice audioDevice = mAudioDevices.remove(device);
+        UsbAudioDevice audioDevice = mAudioDevices.remove(device);
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasPlayback) {
                 sendDeviceNotification(audioDevice, false);
@@ -340,12 +378,52 @@ public class UsbAlsaManager {
                 }
             }
         }
+
+        mSelectedAudioDevice = null;
+
+        // if there any external devices left, select one of them
+        selectDefaultDevice();
     }
 
+    //
+    // Devices List
+    //
+    public ArrayList<UsbAudioDevice> getConnectedDevices() {
+        ArrayList<UsbAudioDevice> devices = new ArrayList<UsbAudioDevice>(mAudioDevices.size());
+        for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
+            devices.add(entry.getValue());
+        }
+        return devices;
+    }
+
+    //
+    // Logging
+    //
     public void dump(FileDescriptor fd, PrintWriter pw) {
         pw.println("  USB AudioDevices:");
         for (UsbDevice device : mAudioDevices.keySet()) {
             pw.println("    " + device.getDeviceName() + ": " + mAudioDevices.get(device));
         }
     }
+
+    public void logDevicesList(String title) {
+      if (DEBUG) {
+          for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
+              Slog.i(TAG, "UsbDevice-------------------");
+              Slog.i(TAG, "" + (entry != null ? entry.getKey() : "[none]"));
+              Slog.i(TAG, "UsbAudioDevice--------------");
+              Slog.i(TAG, "" + entry.getValue());
+          }
+      }
+  }
+
+  // This logs a more terse (and more readable) version of the devices list
+  public void logDevices(String title) {
+      if (DEBUG) {
+          Slog.i(TAG, title);
+          for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
+              Slog.i(TAG, entry.getValue().toShortString());
+          }
+      }
+  }
 }

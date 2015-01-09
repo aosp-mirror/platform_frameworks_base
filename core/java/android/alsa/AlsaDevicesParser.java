@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * @hide
@@ -29,6 +29,7 @@ import java.util.Vector;
  */
 public class AlsaDevicesParser {
     private static final String TAG = "AlsaDevicesParser";
+    protected static final boolean DEBUG = false;
 
     private static final int kIndex_CardDeviceField = 5;
     private static final int kStartIndex_CardNum = 6;
@@ -58,8 +59,7 @@ public class AlsaDevicesParser {
         int mDeviceType = kDeviceType_Unknown;
         int mDeviceDir = kDeviceDir_Unknown;
 
-        public AlsaDeviceRecord() {
-        }
+        public AlsaDeviceRecord() {}
 
         public boolean parse(String line) {
             // "0123456789012345678901234567890"
@@ -176,38 +176,27 @@ public class AlsaDevicesParser {
         }
     }
 
-    private Vector<AlsaDeviceRecord>
-            deviceRecords_ = new Vector<AlsaDeviceRecord>();
+    private ArrayList<AlsaDeviceRecord> mDeviceRecords = new ArrayList<AlsaDeviceRecord>();
 
-    private boolean isLineDeviceRecord(String line) {
-        return line.charAt(kIndex_CardDeviceField) == '[';
+    public AlsaDevicesParser() {}
+
+    //
+    // Access
+    //
+    public int getDefaultDeviceNum(int card) {
+        // TODO - This (obviously) isn't sufficient. Revisit.
+        return 0;
     }
 
-    public AlsaDevicesParser() {
-    }
-
-    public int getNumDeviceRecords() {
-        return deviceRecords_.size();
-    }
-
-    public AlsaDeviceRecord getDeviceRecordAt(int index) {
-        return deviceRecords_.get(index);
-    }
-
-    public void Log() {
-        int numDevRecs = getNumDeviceRecords();
-        for (int index = 0; index < numDevRecs; ++index) {
-            Slog.w(TAG, "usb:" + getDeviceRecordAt(index).textFormat());
-        }
-    }
-
-    public boolean hasPlaybackDevices() {
+    //
+    // Predicates
+    //
+   public boolean hasPlaybackDevices() {
         return mHasPlaybackDevices;
     }
 
     public boolean hasPlaybackDevices(int card) {
-        for (int index = 0; index < deviceRecords_.size(); index++) {
-            AlsaDeviceRecord deviceRecord = deviceRecords_.get(index);
+        for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
             if (deviceRecord.mCardNum == card &&
                 deviceRecord.mDeviceType == AlsaDeviceRecord.kDeviceType_Audio &&
                 deviceRecord.mDeviceDir == AlsaDeviceRecord.kDeviceDir_Playback) {
@@ -222,8 +211,7 @@ public class AlsaDevicesParser {
     }
 
     public boolean hasCaptureDevices(int card) {
-        for (int index = 0; index < deviceRecords_.size(); index++) {
-            AlsaDeviceRecord deviceRecord = deviceRecords_.get(index);
+        for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
             if (deviceRecord.mCardNum == card &&
                 deviceRecord.mDeviceType == AlsaDeviceRecord.kDeviceType_Audio &&
                 deviceRecord.mDeviceDir == AlsaDeviceRecord.kDeviceDir_Capture) {
@@ -238,8 +226,7 @@ public class AlsaDevicesParser {
     }
 
     public boolean hasMIDIDevices(int card) {
-        for (int index = 0; index < deviceRecords_.size(); index++) {
-            AlsaDeviceRecord deviceRecord = deviceRecords_.get(index);
+        for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
             if (deviceRecord.mCardNum == card &&
                 deviceRecord.mDeviceType == AlsaDeviceRecord.kDeviceType_MIDI) {
                 return true;
@@ -248,8 +235,15 @@ public class AlsaDevicesParser {
         return false;
     }
 
+    //
+    // Process
+    //
+    private boolean isLineDeviceRecord(String line) {
+        return line.charAt(kIndex_CardDeviceField) == '[';
+    }
+
     public void scan() {
-        deviceRecords_.clear();
+        mDeviceRecords.clear();
 
         final String devicesFilePath = "/proc/asound/devices";
         File devicesFile = new File(devicesFilePath);
@@ -261,7 +255,7 @@ public class AlsaDevicesParser {
                 if (isLineDeviceRecord(line)) {
                     AlsaDeviceRecord deviceRecord = new AlsaDeviceRecord();
                     deviceRecord.parse(line);
-                    deviceRecords_.add(deviceRecord);
+                    mDeviceRecords.add(deviceRecord);
                 }
             }
             reader.close();
@@ -269,6 +263,18 @@ public class AlsaDevicesParser {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    //
+    // Loging
+    //
+    public void Log(String heading) {
+        if (DEBUG) {
+            Slog.i(TAG, heading);
+            for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
+                Slog.i(TAG, deviceRecord.textFormat());
+            }
         }
     }
 } // class AlsaDevicesParser
