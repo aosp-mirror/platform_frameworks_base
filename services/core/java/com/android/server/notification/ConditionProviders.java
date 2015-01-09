@@ -168,7 +168,6 @@ public class ConditionProviders extends ManagedServices {
 
     @Override
     protected void onServiceAdded(ManagedServiceInfo info) {
-        Slog.d(TAG, "onServiceAdded " + info);
         final IConditionProvider provider = provider(info);
         try {
             provider.onConnected();
