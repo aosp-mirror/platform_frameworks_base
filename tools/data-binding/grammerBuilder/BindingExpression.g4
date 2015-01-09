@@ -36,7 +36,7 @@ expression
 //    |   expression '.' 'this'                           # ThisReference
     |   expression '.' explicitGenericInvocation        # ExplicitGenericInvocationOp
     |   expression '[' expression ']'                   # BracketOp
-    |   expression '.' Identifier '(' expressionList? ')' # MethodInvocation
+    |   target=expression '.' methodName=Identifier '(' args=expressionList? ')' # MethodInvocation
     |   '(' type ')' expression                         # CastOp
     |   ('+'|'-') expression                            # UnaryOp
     |   ('~'|'!') expression                            # UnaryOp

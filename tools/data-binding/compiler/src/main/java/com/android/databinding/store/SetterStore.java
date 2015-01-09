@@ -15,7 +15,8 @@
  */
 package com.android.databinding.store;
 
-import com.android.databinding.util.ClassAnalyzer;
+import com.android.databinding2.ClassAnalyzer;
+import com.android.databinding2.util.L;
 
 import java.io.File;
 import java.io.IOException;
@@ -317,6 +318,8 @@ public class SetterStore {
 
     public String getSetterCall(String attribute, Class<?> viewType, Class<?> valueType,
             String viewExpression, String valueExpression) {
+        L.d("getting setter call for %s %s %s %s %s", attribute, viewType, valueType,
+                viewExpression, valueExpression);
         if (!attribute.startsWith("android:")) {
             int colon = attribute.indexOf(':');
             if (colon >= 0) {
@@ -324,10 +327,11 @@ public class SetterStore {
             }
         }
         ArrayList<AdaptedMethod> adapters = mAdaptedMethods.get(attribute);
-
+        L.d("returned adapter count %d", adapters == null ? -1 : adapters.size());
         AdaptedMethod adapter = null;
         String setterName = null;
         Method bestSetterMethod = getBestSetter(viewType, valueType, attribute);
+        L.d("setter method: %s", bestSetterMethod == null ? "null" : bestSetterMethod.getName());
         Class<?> bestViewType = null;
         Class<?> bestValueType = null;
         if (bestSetterMethod != null) {
@@ -338,6 +342,7 @@ public class SetterStore {
 
         if (adapters != null) {
             for (AdaptedMethod adaptedMethod : adapters) {
+                L.d("checking adapter method %s", adaptedMethod);
                 if (adaptedMethod.viewType.isAssignableFrom(viewType)) {
                     boolean isBetterView = bestViewType == null ||
                             bestValueType.isAssignableFrom(adaptedMethod.valueType);
@@ -346,7 +351,12 @@ public class SetterStore {
                         bestViewType = adaptedMethod.viewType;
                         bestValueType = adaptedMethod.valueType;
                         adapter = adaptedMethod;
+                        L.d("chosen %s", adaptedMethod);
+                    } else {
+                        L.d("not better");
                     }
+                } else {
+                    L.d("not assignable");
                 }
             }
         }
@@ -405,12 +415,8 @@ public class SetterStore {
     private static String getDefaultSetter(String attribute) {
         int colonIndex = attribute.indexOf(':');
         String propertyName;
-        if (colonIndex >= 0 && colonIndex + 1 < attribute.length()) {
-            propertyName = Character.toUpperCase(attribute.charAt(colonIndex + 1)) +
-                    attribute.substring(colonIndex + 2);
-        } else {
-            propertyName = "";
-        }
+        propertyName = Character.toUpperCase(attribute.charAt(colonIndex + 1)) +
+                attribute.substring(colonIndex + 2);
         return "set" + propertyName;
     }
 
@@ -502,7 +508,7 @@ public class SetterStore {
         }
     }
 
-    private static boolean isBoxingConversion(Class<?> class1, Class<?> class2) {
+    public static boolean isBoxingConversion(Class<?> class1, Class<?> class2) {
         if (class1.isPrimitive() != class2.isPrimitive()) {
             return (getWrappedType(class1).equals(getWrappedType(class2)));
         } else {
@@ -510,7 +516,7 @@ public class SetterStore {
         }
     }
 
-    private static Class<?> getWrappedType(Class<?> type) {
+    public static Class<?> getWrappedType(Class<?> type) {
         if (!type.isPrimitive()) {
             return type;
         }
@@ -530,6 +536,32 @@ public class SetterStore {
             return Float.class;
         } else if (boolean.class.equals(type)) {
             return Boolean.class;
+        } else {
+            // what type is this?
+            return type;
+        }
+    }
+
+    public static Class<?> getPrimitiveType(Class<?> type) {
+        if (type.isPrimitive()) {
+            return type;
+        }
+        if (Integer.class.equals(type)) {
+            return int.class;
+        } else if (Long.class.equals(type)) {
+            return long.class;
+        } else if (Short.class.equals(type)) {
+            return short.class;
+        } else if (Byte.class.equals(type)) {
+            return byte.class;
+        } else if (Character.class.equals(type)) {
+            return char.class;
+        } else if (Double.class.equals(type)) {
+            return double.class;
+        } else if (Float.class.equals(type)) {
+            return float.class;
+        } else if (Boolean.class.equals(type)) {
+            return boolean.class;
         } else {
             // what type is this?
             return type;
@@ -586,10 +618,10 @@ public class SetterStore {
         if (mConversionMethods == null) {
             mConversionMethods = new ArrayList<>();
             for (String key : mConversions.keySet()) {
-                Class<?> fromType = classAnalyzer.loadClass(key);
+                Class<?> fromType = classAnalyzer.findClass(key);
                 HashMap<String, MethodDescription> conversion = mConversions.get(key);
                 for (String toName : conversion.keySet()) {
-                    Class<?> toType = classAnalyzer.loadClass(toName);
+                    Class<?> toType = classAnalyzer.findClass(toName);
                     MethodDescription methodDescription = conversion.get(toName);
                     mConversionMethods
                             .add(new ConversionMethod(fromType, toType, methodDescription));
@@ -603,8 +635,8 @@ public class SetterStore {
                 HashMap<AccessorKey, MethodDescription> adapted = mAdapters.get(attribute);
                 for (AccessorKey key : adapted.keySet()) {
                     MethodDescription methodDescription = adapted.get(key);
-                    Class<?> viewType = classAnalyzer.loadClass(key.viewType);
-                    Class<?> valueType = classAnalyzer.loadClass(key.valueType);
+                    Class<?> viewType = classAnalyzer.findClass(key.viewType);
+                    Class<?> valueType = classAnalyzer.findClass(key.valueType);
                     adaptedMethods.add(new AdaptedMethod(viewType, valueType,
                             methodDescription));
                 }
@@ -617,7 +649,7 @@ public class SetterStore {
                 HashMap<String, MethodDescription> renamed = mRenamed.get(attribute);
                 for (String declaredClassName : renamed.keySet()) {
                     MethodDescription methodDescription = renamed.get(declaredClassName);
-                    Class<?> viewType = classAnalyzer.loadClass(declaredClassName);
+                    Class<?> viewType = classAnalyzer.findClass(declaredClassName);
                     renamedMethods.add(new RenamedMethod(viewType, methodDescription.method));
                 }
             }
@@ -731,6 +763,16 @@ public class SetterStore {
             this.valueType = valueType;
             this.type = method.type;
             this.method = method.method;
+        }
+
+        @Override
+        public String toString() {
+            return "AdaptedMethod{" +
+                    "viewType=" + viewType +
+                    ", valueType=" + valueType +
+                    ", type='" + type + '\'' +
+                    ", method='" + method + '\'' +
+                    '}';
         }
     }
 

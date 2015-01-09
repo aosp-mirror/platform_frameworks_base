@@ -30,10 +30,6 @@ public class CardViewBindingAdapter {
 
     @BindingAdapter("contentPadding")
     public static void setContentPadding(CardView view, int padding) {
-        int left = view.getContentPaddingLeft();
-        int top = view.getContentPaddingTop();
-        int right = view.getContentPaddingRight();
-        int bottom = view.getContentPaddingBottom();
         view.setContentPadding(padding, padding, padding, padding);
     }
 

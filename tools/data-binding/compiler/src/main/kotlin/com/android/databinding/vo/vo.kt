@@ -47,8 +47,9 @@ class Binding(val target : BindingTarget, val attr : String, val targetFieldName
 
     val setter by Delegates.lazy {
         val viewType = ClassAnalyzer.instance.loadClass(target.viewClass);
-        SetterStore.get(ClassAnalyzer.instance).getSetterCall(attr, viewType,
-                expr.resolvedClass, target.resolvedViewName, expr.toJava())
+//        SetterStore.get(ClassAnalyzer.instance).getSetterCall(attr, viewType,
+//                expr.resolvedClass, target.resolvedViewName, expr.toJava())
+        "NO;"
     }
 
     val isDirtyName by Delegates.lazy {"sDirtyFlag${target.resolvedUniqueName}_${targetFieldName.capitalize()}"}

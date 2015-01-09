@@ -458,6 +458,9 @@ public class BindingExpressionParser extends Parser {
 		}
 	}
 	public static class MethodInvocationContext extends ExpressionContext {
+		public ExpressionContext target;
+		public Token methodName;
+		public ExpressionListContext args;
 		public ExpressionListContext expressionList() {
 			return getRuleContext(ExpressionListContext.class,0);
 		}
@@ -1101,17 +1104,18 @@ public class BindingExpressionParser extends Parser {
 					case 16:
 						{
 						_localctx = new MethodInvocationContext(new ExpressionContext(_parentctx, _parentState));
+						((MethodInvocationContext)_localctx).target = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(137);
 						if (!(precpred(_ctx, 17))) throw new FailedPredicateException(this, "precpred(_ctx, 17)");
 						setState(138); match(T__15);
-						setState(139); match(Identifier);
+						setState(139); ((MethodInvocationContext)_localctx).methodName = match(Identifier);
 						setState(140); match(T__32);
 						setState(142);
 						_la = _input.LA(1);
 						if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__42) | (1L << T__39) | (1L << T__33) | (1L << T__32) | (1L << T__30) | (1L << T__29) | (1L << T__24) | (1L << T__23) | (1L << T__22) | (1L << T__21) | (1L << T__19) | (1L << T__16) | (1L << T__13) | (1L << T__5) | (1L << T__0) | (1L << IntegerLiteral) | (1L << FloatingPointLiteral) | (1L << BooleanLiteral) | (1L << CharacterLiteral) | (1L << SingleQuoteString) | (1L << DoubleQuoteString) | (1L << NullLiteral) | (1L << Identifier) | (1L << ResourceReference))) != 0)) {
 							{
-							setState(141); expressionList();
+							setState(141); ((MethodInvocationContext)_localctx).args = expressionList();
 							}
 						}
 

@@ -57,6 +57,8 @@ import java.io.FileOutputStream
 import com.android.databinding.ext.toArrayList
 import com.android.databinding.util.XmlEditor
 import com.android.databinding.util.Log
+import com.android.databinding2.LayoutBinder
+import com.android.databinding2.DataBinder
 
 
 public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Iterable<File>,
@@ -67,6 +69,8 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
     val viewExprBinderRenderers = arrayListOf<ViewExprBinderRenderer>()
     var processed = false
     public var classAnalyzer : ClassAnalyzer by Delegates.notNull()
+
+    val jDataBinder = DataBinder();
 
     val outputResDir by Delegates.lazy { File(outputResBaseDir, "values") }
 
@@ -119,6 +123,14 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
             }
             val vebr = ViewExprBinderRenderer("$appPkg.generated", appPkg, "${toClassName(xml.name)}Binder", toLayoutId(xml.name), exprBinding)
             viewExprBinderRenderers.add(vebr)
+            //TODO get rid of this after switch is complete
+            val size = jDataBinder.getLayoutBinders().size()
+            val lb = jDataBinder.getLayoutBinders().get(size - 1)
+            lb.setProjectPackage("$appPkg");
+            lb.setPackage("$appPkg.generated")
+            lb.setBaseClassName("${toClassName(xml.name)}Binder")
+            lb.setLayoutname(toLayoutId(xml.name))
+
         }
         br = BrRenderer("$appPkg.generated", "BR" ,viewExprBinderRenderers)
         dbr = DataBinderRenderer("com.android.databinding.library", appPkg,
@@ -158,9 +170,13 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
 //        viewBinderRenderers.forEach({
 //            writeToFile(File(dir, "${it.className}.java"), it.render(br))
 //        })
-        viewExprBinderRenderers.forEach({
-            writeToFile(File(dir, "${it.className}.java"), it.render(br))
-        })
+//        viewExprBinderRenderers.forEach({
+//            writeToFile(File(dir, "${it.className}.java"), it.render(br))
+//        })
+        jDataBinder.getLayoutBinders().forEach {
+            writeToFile(File(dir, "${it.getClassName()}.java"), it.writeViewBinder(br))
+        }
+
     }
 
     private fun writeToFile(file : File, contents : String) {
@@ -220,6 +236,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
         return if (original == null) {
             null
         } else {
+            jDataBinder.parseXml(original)
             parseXml3(original)
         }
     }
@@ -272,27 +289,6 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
                 layoutBinding.bindingTargets.add(bindingTarget)
             }
         }
-//        System.out.println("binding node count " + nodes.getLength())
-//        for (i in 0..nodes.getLength() - 1) {
-//            val item = nodes.item(i)
-//            System.out.println("checking node $item")
-//            val attributes = item.getAttributes()
-//            val id = attributes.getNamedItem("android:id")
-//            if (id == null) {
-//                continue
-//            }
-//            val bindingTarget = BindingTarget(item, id.getNodeValue(), getFullViewClassName(item.getNodeName()))
-//            val attrCount = attributes.getLength()
-//            for (j in 0..(attrCount - 1)) {
-//                val attr = attributes.item(j)
-//                val name = attr.getNodeName()
-//                if (name.startsWith("bind:")) {
-//                    bindingTarget.addBinding(name.substring("bind:".length), exprParser.parse(attr.getNodeValue()))
-//                }
-//            }
-//            layoutBinding.bindingTargets.add(bindingTarget)
-//        }
-
         val imports = getImportNodes(doc, xPath)
         System.out.println("import node count " + imports.getLength())
         imports.forEach { item ->

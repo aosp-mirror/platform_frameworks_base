@@ -35,7 +35,14 @@ public class MainActivity extends ActionBarActivity implements Observable {
     @Bindable
     User selected;
 
+    @Bindable
+    User selected2;
+
     private final ChangeListenerRegistry mListeners = new ChangeListenerRegistry();
+
+    public User getSelected2() {
+        return selected2;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

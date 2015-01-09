@@ -55,8 +55,14 @@
         android:layout_width="match_parent"
         android:layout_height="10dp" />
 
+    <TextView android:text="{activity.selected2 == activity.selected ? `same` : `different`}"
+              android:id="@+id/deleteme"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"/>
+
     <android.support.v7.widget.CardView
         android:id="@+id/selected_card"
+        bind:contentPadding="{activity.selected == null ? 5 : activity.selected.name.length()}"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         bind:visibility="{activity.selected == null ? View.INVISIBLE : View.VISIBLE}">

@@ -31,6 +31,9 @@ buildscript {
 
 
 dependencies {
+    compile 'junit:junit:4.12'
+    compile 'org.apache.commons:commons-lang3:3.3.2'
+    compile 'com.google.guava:guava:18.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     compile project(":annotations")
     compile project(":grammerBuilder")

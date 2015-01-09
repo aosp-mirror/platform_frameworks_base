@@ -44,7 +44,6 @@ import javax.tools.JavaCompiler
 import javax.tools.ToolProvider
 import java.util.Arrays
 import org.apache.commons.io.FileUtils
-import com.android.databinding.util.ClassAnalyzer
 
 class DataBinderPlugin : Plugin<Project> {
     var parser: KLayoutParser by Delegates.notNull()
@@ -174,7 +173,9 @@ class DataBinderPlugin : Plugin<Project> {
         val urls = cpFiles.map { it.toURI().toURL() }.copyToArray()
         log("generated urls: ${urls} len: ${urls.size}")
         val classLoader = URLClassLoader(urls, androidClassLoader)
-        parser.classAnalyzer = ClassAnalyzer(classLoader)
+        log("created class loader")
+        parser.classAnalyzer = com.android.databinding.util.ClassAnalyzer(classLoader)
+        com.android.databinding2.ClassAnalyzer.setClassLoader(classLoader)
         project.task("compileGenerated", MethodClosure(this, "compileGenerated"))
     }
     fun compileGenerated(o : Any?) {
