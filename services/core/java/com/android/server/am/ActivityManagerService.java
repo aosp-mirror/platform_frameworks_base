@@ -2998,6 +2998,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 instructionSet = VMRuntime.getInstructionSet(app.info.primaryCpuAbi);
             }
 
+            app.gids = gids;
+            app.requiredAbi = requiredAbi;
+            app.instructionSet = instructionSet;
+
             // Start the process.  It will either succeed and return a result containing
             // the PID of the new process, or else throw a RuntimeException.
             boolean isActivityProcess = (entryPoint == null);
@@ -3028,7 +3032,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             StringBuilder buf = mStringBuilder;
             buf.setLength(0);
             buf.append("Start proc ");
+            buf.append(startResult.pid);
+            buf.append(':');
             buf.append(app.processName);
+            buf.append('/');
+            UserHandle.formatUid(buf, uid);
             if (!isActivityProcess) {
                 buf.append(" [");
                 buf.append(entryPoint);
@@ -3039,23 +3047,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (hostingNameStr != null) {
                 buf.append(" ");
                 buf.append(hostingNameStr);
-            }
-            buf.append(": pid=");
-            buf.append(startResult.pid);
-            buf.append(" uid=");
-            buf.append(uid);
-            buf.append(" gids={");
-            if (gids != null) {
-                for (int gi=0; gi<gids.length; gi++) {
-                    if (gi != 0) buf.append(", ");
-                    buf.append(gids[gi]);
-
-                }
-            }
-            buf.append("}");
-            if (requiredAbi != null) {
-                buf.append(" abi=");
-                buf.append(requiredAbi);
             }
             Slog.i(TAG, buf.toString());
             app.setPid(startResult.pid);
@@ -5327,7 +5318,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             int callingPid = Binder.getCallingPid();
             if (callingPid == Process.myPid()) {
                 //  Yeah, um, no.
-                Slog.w(TAG, "Can't addPackageDependency on system process");
                 return;
             }
             ProcessRecord proc;

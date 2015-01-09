@@ -108,50 +108,46 @@ final class CoreSettingsObserver extends ContentObserver {
         for (Map.Entry<String, Class<?>> entry : map.entrySet()) {
             String setting = entry.getKey();
             Class<?> type = entry.getValue();
-            try {
-                if (type == String.class) {
-                    final String value;
-                    if (map == sSecureSettingToTypeMap) {
-                        value = Settings.Secure.getString(context.getContentResolver(), setting);
-                    } else if (map == sSystemSettingToTypeMap) {
-                        value = Settings.System.getString(context.getContentResolver(), setting);
-                    } else {
-                        value = Settings.Global.getString(context.getContentResolver(), setting);
-                    }
-                    snapshot.putString(setting, value);
-                } else if (type == int.class) {
-                    final int value;
-                    if (map == sSecureSettingToTypeMap) {
-                        value = Settings.Secure.getInt(context.getContentResolver(), setting);
-                    } else if (map == sSystemSettingToTypeMap) {
-                        value = Settings.System.getInt(context.getContentResolver(), setting);
-                    } else {
-                        value = Settings.Global.getInt(context.getContentResolver(), setting);
-                    }
-                    snapshot.putInt(setting, value);
-                } else if (type == float.class) {
-                    final float value;
-                    if (map == sSecureSettingToTypeMap) {
-                        value = Settings.Secure.getFloat(context.getContentResolver(), setting);
-                    } else if (map == sSystemSettingToTypeMap) {
-                        value = Settings.System.getFloat(context.getContentResolver(), setting);
-                    } else {
-                        value = Settings.Global.getFloat(context.getContentResolver(), setting);
-                    }
-                    snapshot.putFloat(setting, value);
-                } else if (type == long.class) {
-                    final long value;
-                    if (map == sSecureSettingToTypeMap) {
-                        value = Settings.Secure.getLong(context.getContentResolver(), setting);
-                    } else if (map == sSystemSettingToTypeMap) {
-                        value = Settings.System.getLong(context.getContentResolver(), setting);
-                    } else {
-                        value = Settings.Global.getLong(context.getContentResolver(), setting);
-                    }
-                    snapshot.putLong(setting, value);
+            if (type == String.class) {
+                final String value;
+                if (map == sSecureSettingToTypeMap) {
+                    value = Settings.Secure.getString(context.getContentResolver(), setting);
+                } else if (map == sSystemSettingToTypeMap) {
+                    value = Settings.System.getString(context.getContentResolver(), setting);
+                } else {
+                    value = Settings.Global.getString(context.getContentResolver(), setting);
                 }
-            } catch (SettingNotFoundException snfe) {
-                Log.w(LOG_TAG, "Cannot find setting \"" + setting + "\"", snfe);
+                snapshot.putString(setting, value);
+            } else if (type == int.class) {
+                final int value;
+                if (map == sSecureSettingToTypeMap) {
+                    value = Settings.Secure.getInt(context.getContentResolver(), setting, 0);
+                } else if (map == sSystemSettingToTypeMap) {
+                    value = Settings.System.getInt(context.getContentResolver(), setting, 0);
+                } else {
+                    value = Settings.Global.getInt(context.getContentResolver(), setting, 0);
+                }
+                snapshot.putInt(setting, value);
+            } else if (type == float.class) {
+                final float value;
+                if (map == sSecureSettingToTypeMap) {
+                    value = Settings.Secure.getFloat(context.getContentResolver(), setting, 0);
+                } else if (map == sSystemSettingToTypeMap) {
+                    value = Settings.System.getFloat(context.getContentResolver(), setting, 0);
+                } else {
+                    value = Settings.Global.getFloat(context.getContentResolver(), setting, 0);
+                }
+                snapshot.putFloat(setting, value);
+            } else if (type == long.class) {
+                final long value;
+                if (map == sSecureSettingToTypeMap) {
+                    value = Settings.Secure.getLong(context.getContentResolver(), setting, 0);
+                } else if (map == sSystemSettingToTypeMap) {
+                    value = Settings.System.getLong(context.getContentResolver(), setting, 0);
+                } else {
+                    value = Settings.Global.getLong(context.getContentResolver(), setting, 0);
+                }
+                snapshot.putLong(setting, value);
             }
         }
     }
