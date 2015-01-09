@@ -28647,6 +28647,7 @@ package android.telephony {
     method public static java.lang.String formatNumber(java.lang.String, java.lang.String);
     method public static java.lang.String formatNumber(java.lang.String, java.lang.String, java.lang.String);
     method public static java.lang.String formatNumberToE164(java.lang.String, java.lang.String);
+    method public static java.lang.String formatNumberToRFC3966(java.lang.String, java.lang.String);
     method public static deprecated int getFormatTypeForLocale(java.util.Locale);
     method public static java.lang.String getNumberFromIntent(android.content.Intent, android.content.Context);
     method public static java.lang.String getStrippedReversed(java.lang.String);
