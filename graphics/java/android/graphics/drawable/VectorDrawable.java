@@ -926,9 +926,10 @@ public class VectorDrawable extends Drawable {
             // Basically the Mfinal = Mviewport * M0 * M1 * M2;
             // Mi the local matrix at level i of the group tree.
             currentGroup.mStackedMatrix.set(currentMatrix);
-
             currentGroup.mStackedMatrix.preConcat(currentGroup.mLocalMatrix);
 
+            // Save the current clip information, which is local to this group.
+            canvas.save();
             // Draw the group tree in the same order as the XML file.
             for (int i = 0; i < currentGroup.mChildren.size(); i++) {
                 Object child = currentGroup.mChildren.get(i);
@@ -941,6 +942,7 @@ public class VectorDrawable extends Drawable {
                     drawPath(currentGroup, childPath, canvas, w, h, filter);
                 }
             }
+            canvas.restore();
         }
 
         public void draw(Canvas canvas, int w, int h, ColorFilter filter) {
