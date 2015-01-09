@@ -2,7 +2,12 @@ package com.android.databinding.annotationprocessor;
 
 import android.binding.Bindable;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,15 +43,14 @@ public class ProcessBindable extends AbstractProcessor {
         if (mFileGenerated) {
             return false;
         }
-        HashSet<String> properties = new HashSet<String>();
+        HashSet<String> properties = readIntermediateFile();
         for (Element element : roundEnv.getElementsAnnotatedWith(Bindable.class)) {
-//            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
-//                    "Found Bindable: " + element);
             String name = getPropertyName(element);
             if (name != null) {
                 properties.add(name);
             }
         }
+        writeIntermediateFile(properties);
         generateBR(properties);
         mFileGenerated = true;
         return true;
@@ -160,5 +164,45 @@ public class ProcessBindable extends AbstractProcessor {
                 Character.isJavaIdentifierStart(name.charAt(2)) &&
                 element.getParameters().isEmpty() &&
                 element.getReturnType().getKind() == TypeKind.BOOLEAN;
+    }
+
+    private HashSet<String> readIntermediateFile() {
+        HashSet<String> properties = null;
+        File intermediate = getIntermediateFile();
+        if (intermediate.exists()) {
+            try {
+                ObjectInputStream in = new ObjectInputStream(new FileInputStream(intermediate));
+                properties = (HashSet<String>) in.readObject();
+                in.close();
+            } catch (IOException e) {
+                System.err.println("Could not read Binding properties intermediate file: " +
+                        e.getLocalizedMessage());
+            } catch (ClassNotFoundException e) {
+                System.err.println("Could not read Binding properties intermediate file: " +
+                        e.getLocalizedMessage());
+            }
+        }
+        if (properties == null) {
+            properties = new HashSet<>();
+        }
+        return properties;
+    }
+
+    private void writeIntermediateFile(HashSet<String> properties) {
+        try {
+            File intermediate = getIntermediateFile();
+            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(intermediate));
+            out.writeObject(properties);
+            out.close();
+        } catch (IOException e) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+                    "Could not write to intermediate file: " + e.getLocalizedMessage());
+        }
+    }
+
+    private static File getIntermediateFile() {
+        File dir = new File(new File("build"),"intermediates");
+        dir.mkdirs();
+        return new File(dir, "binding_properties.bin");
     }
 }

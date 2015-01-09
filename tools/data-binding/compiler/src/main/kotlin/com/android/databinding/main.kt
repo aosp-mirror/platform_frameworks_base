@@ -266,7 +266,7 @@ public class KLayoutParser(val appPkg : String, val resourceFolders : kotlin.Ite
                     if (value.first() == '{' && value.last() == '}') {
                         val name = attr.getNodeName().split(":").last()
                         val strippedValue = value.substring(1, value.length() - 1)
-                        bindingTarget.addBinding(name, exprParser.parse(strippedValue))
+                        bindingTarget.addBinding(attr.getNodeName(), name, exprParser.parse(strippedValue))
                     }
                 }
                 layoutBinding.bindingTargets.add(bindingTarget)

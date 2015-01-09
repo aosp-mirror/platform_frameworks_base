@@ -149,7 +149,7 @@ ${lb.bindingTargets.filter { it.bindings.size > 0 }.map { """
         if ( (dirty & (${binding.isDirtyName})) != 0 ) {
             // ${binding.expr.toReadableString()}
             // resolved type: ${binding.expr.resolvedClass.getCanonicalName()}
-            ${binding.target.resolvedViewName}.${binding.setter}(${binding.expr.toJava()});
+            ${binding.setter};
         }"""}.joinIndented(2)}
     }
 

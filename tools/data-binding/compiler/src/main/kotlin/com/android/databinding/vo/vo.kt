@@ -31,8 +31,10 @@ import com.android.databinding.util.getMethodOrField
 import com.android.databinding.util.Log
 import com.android.databinding.ext.joinToCamelCaseAsVar
 import com.android.databinding.util.isObservable
+import com.android.databinding.annotationprocessor.BindingAdapterStore
 
-class Binding(val target : BindingTarget, val targetFieldName : String, val expr : Expr) {
+class Binding(val target : BindingTarget, val attr : String, val targetFieldName : String,
+        val expr : Expr) {
     // which variables effect the result of this binding
     // ordered by depth
     val relatedVariables : List<Variable> by Delegates.lazy {
@@ -43,15 +45,19 @@ class Binding(val target : BindingTarget, val targetFieldName : String, val expr
         relatedVariables.map {it.dirtyFlagName}.join(" | ")
     }
 
-    val setter = "set${targetFieldName.capitalize()}"
+    val setter by Delegates.lazy {
+        val viewType = ClassAnalyzer.instance.loadClass(target.viewClass);
+        BindingAdapterStore.get().getSetterCall(attr, viewType, expr.resolvedClass,
+                target.resolvedViewName, expr.toJava(), ClassAnalyzer.instance.classLoader)
+    }
 
     val isDirtyName by Delegates.lazy {"sDirtyFlag${target.resolvedUniqueName}_${targetFieldName.capitalize()}"}
 }
 
 data class BindingTarget(val node: Node, val id: String, val viewClass: String) {
     val bindings = arrayListOf<Binding>()
-    public fun addBinding(fieldName : String, expr : Expr) {
-        bindings.add(Binding(this, fieldName, expr))
+    public fun addBinding(attr : String, fieldName : String, expr : Expr) {
+        bindings.add(Binding(this, attr, fieldName, expr))
     }
     val rId:String by Delegates.lazy { "R.id.$idName" }
     val idName by Delegates.lazy { id.extractAndroidId() }
