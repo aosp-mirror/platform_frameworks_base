@@ -2419,7 +2419,7 @@ class ContextImpl extends Context {
                         int res = -1;
                         try {
                             res = mount.mkdirs(getPackageName(), dir.getAbsolutePath());
-                        } catch (RemoteException e) {
+                        } catch (Exception ignored) {
                         }
                         if (res != 0) {
                             Log.w(TAG, "Failed to ensure directory: " + dir);
