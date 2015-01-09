@@ -388,7 +388,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void updateBackgroundTint() {
-        int color = getBackgroundColor();
+        int color = getBgColor();
         int rippleColor = getRippleColor();
         if (color == mNormalColor) {
             // We don't need to tint a normal notification
@@ -652,7 +652,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     private void updateAppearAnimationAlpha() {
-        int backgroundColor = getBackgroundColor();
+        int backgroundColor = getBgColor();
         if (backgroundColor != -1) {
             float contentAlphaProgress = mAppearAnimationFraction;
             contentAlphaProgress = contentAlphaProgress / (1.0f - ALPHA_ANIMATION_END);
@@ -666,7 +666,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
-    private int getBackgroundColor() {
+    private int getBgColor() {
         if (mBgTint != 0) {
             return mBgTint;
         } else if (mShowingLegacyBackground) {
