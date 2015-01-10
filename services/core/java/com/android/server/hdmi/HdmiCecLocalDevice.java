@@ -202,6 +202,14 @@ abstract class HdmiCecLocalDevice {
     }
 
     /**
+     * Returns true if the local device allows the system to be put to standby.
+     * The default implementation returns true.
+     */
+    protected boolean canGoToStandby() {
+        return true;
+    }
+
+    /**
      * Dispatch incoming message.
      *
      * @param message incoming message
