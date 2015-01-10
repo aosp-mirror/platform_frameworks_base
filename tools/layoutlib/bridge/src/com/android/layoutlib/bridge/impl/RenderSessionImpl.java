@@ -36,6 +36,7 @@ import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.SessionParams.RenderingMode;
+import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.ide.common.rendering.api.ViewInfo;
 import com.android.ide.common.rendering.api.ViewType;
 import com.android.internal.util.XmlUtils;
@@ -134,6 +135,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
     private int mMeasuredScreenHeight = -1;
     private boolean mIsAlphaChannelImage;
     private boolean mWindowIsFloating;
+    private Boolean mIsThemeAppCompat;
 
     private int mStatusBarSize;
     private int mNavigationBarSize;
@@ -194,11 +196,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         DisplayMetrics metrics = getContext().getMetrics();
 
         // use default of true in case it's not found to use alpha by default
-        mIsAlphaChannelImage  = getBooleanThemeValue(resources,
-                "windowIsFloating", true /*defaultValue*/);
-
-        mWindowIsFloating = getBooleanThemeValue(resources, "windowIsFloating",
-                true /*defaultValue*/);
+        mIsAlphaChannelImage  = getBooleanThemeValue(resources, "windowIsFloating", true, true);
+        // FIXME: Find out why both variables are taking the same value.
+        mWindowIsFloating = getBooleanThemeValue(resources, "windowIsFloating", true, true);
 
         findBackground(resources);
         findStatusBar(resources, metrics);
@@ -1059,7 +1059,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
     private void findStatusBar(RenderResources resources, DisplayMetrics metrics) {
         boolean windowFullscreen = getBooleanThemeValue(resources,
-                "windowFullscreen", false /*defaultValue*/);
+                "windowFullscreen", false, !isThemeAppCompat(resources));
 
         if (!windowFullscreen && !mWindowIsFloating) {
             // default value
@@ -1086,7 +1086,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
 
         boolean windowActionBar = getBooleanThemeValue(resources,
-                "windowActionBar", true /*defaultValue*/);
+                "windowActionBar", true, !isThemeAppCompat(resources));
 
         // if there's a value and it's false (default is true)
         if (windowActionBar) {
@@ -1113,7 +1113,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         } else {
             // action bar overrides title bar so only look for this one if action bar is hidden
             boolean windowNoTitle = getBooleanThemeValue(resources,
-                    "windowNoTitle", false /*defaultValue*/);
+                    "windowNoTitle", false, !isThemeAppCompat(resources));
 
             if (!windowNoTitle) {
 
@@ -1185,20 +1185,30 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
     }
 
+    private boolean isThemeAppCompat(RenderResources resources) {
+        // Ideally, we should check if the corresponding activity extends
+        // android.support.v7.app.ActionBarActivity, and not care about the theme name at all.
+        if (mIsThemeAppCompat == null) {
+            StyleResourceValue defaultTheme = resources.getDefaultTheme();
+            StyleResourceValue val = resources.getStyle("Theme.AppCompat", false);
+            mIsThemeAppCompat = defaultTheme == val || resources.themeIsParentOf(val, defaultTheme);
+        }
+        return mIsThemeAppCompat;
+    }
+
     /**
-     * Looks for a attribute in the current theme. The attribute is in the android
-     * namespace.
+     * Looks for an attribute in the current theme.
      *
      * @param resources the render resources
      * @param name the name of the attribute
      * @param defaultValue the default value.
+     * @param isFrameworkAttr if the attribute is in android namespace
      * @return the value of the attribute or the default one if not found.
      */
     private boolean getBooleanThemeValue(RenderResources resources,
-            String name, boolean defaultValue) {
+            String name, boolean defaultValue, boolean isFrameworkAttr) {
 
-        // get the title bar flag from the current theme.
-        ResourceValue value = resources.findItemInTheme(name, true /*isFrameworkAttr*/);
+        ResourceValue value = resources.findItemInTheme(name, isFrameworkAttr);
 
         // because it may reference something else, we resolve it.
         value = resources.resolveResValue(value);
