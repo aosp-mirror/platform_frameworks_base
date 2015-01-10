@@ -82,7 +82,7 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
     private void broadcastActiveSource() {
         sendCommand(HdmiCecMessageBuilder.buildActiveSource(getSourceAddress(), getSourcePath()));
         // Because only playback device can create this action, it's safe to cast.
-        playback().markActiveSource();
+        playback().setActiveSource(true);
     }
 
     private void queryDevicePowerStatus() {
