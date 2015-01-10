@@ -37,6 +37,17 @@
 #include <img_utils/StripSource.h>
 
 #include "core_jni_helpers.h"
+#include <utils/Log.h>
+#include <utils/Errors.h>
+#include <utils/StrongPointer.h>
+#include <utils/RefBase.h>
+#include <utils/Vector.h>
+#include <cutils/properties.h>
+
+#include <string.h>
+#include <inttypes.h>
+
+#include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/android_hardware_camera2_CameraMetadata.h"
 
 #include <jni.h>
@@ -360,15 +371,18 @@ ssize_t JniInputByteBuffer::read(uint8_t* buf, size_t offset, size_t count) {
         realCount = count;
     }
 
-    mEnv->CallObjectMethod(mInBuf, gInputByteBufferClassInfo.mGetMethod, mByteArray, 0,
+    jobject chainingBuf = mEnv->CallObjectMethod(mInBuf, gInputByteBufferClassInfo.mGetMethod, mByteArray, 0,
             realCount);
+    mEnv->DeleteLocalRef(chainingBuf);
 
     if (mEnv->ExceptionCheck()) {
+        ALOGE("%s: Exception while reading from input into byte buffer.", __FUNCTION__);
         return BAD_VALUE;
     }
 
     mEnv->GetByteArrayRegion(mByteArray, 0, realCount, reinterpret_cast<jbyte*>(buf + offset));
     if (mEnv->ExceptionCheck()) {
+        ALOGE("%s: Exception while reading from byte buffer.", __FUNCTION__);
         return BAD_VALUE;
     }
     return realCount;
@@ -468,15 +482,17 @@ status_t InputStripSource::writeToStream(Output& stream, uint32_t count) {
 
     for (uint32_t i = 0; i < mHeight; ++i) {
         size_t rowFillAmt = 0;
-        size_t rowSize = mPixStride;
+        size_t rowSize = mRowStride;
 
         while (rowFillAmt < mRowStride) {
             ssize_t bytesRead = mInput->read(rowBytes, rowFillAmt, rowSize);
             if (bytesRead <= 0) {
                 if (bytesRead == NOT_ENOUGH_DATA || bytesRead == 0) {
+                    ALOGE("%s: Early EOF on row %" PRIu32 ", received bytesRead %zd",
+                            __FUNCTION__, i, bytesRead);
                     jniThrowExceptionFmt(mEnv, "java/io/IOException",
-                            "Early EOF encountered, not enough pixel data for image of size %u",
-                            fullSize);
+                            "Early EOF encountered, not enough pixel data for image of size %"
+                            PRIu32, fullSize);
                     bytesRead = NOT_ENOUGH_DATA;
                 } else {
                     if (!mEnv->ExceptionCheck()) {
