@@ -146,8 +146,10 @@ public abstract class Image implements AutoCloseable {
      * using coordinates in the largest-resolution plane.
      */
     public void setCropRect(Rect cropRect) {
-        cropRect = new Rect(cropRect);  // make a copy
-        cropRect.intersect(0, 0, getWidth(), getHeight());
+        if (cropRect != null) {
+            cropRect = new Rect(cropRect);  // make a copy
+            cropRect.intersect(0, 0, getWidth(), getHeight());
+        }
         mCropRect = cropRect;
     }
 
