@@ -2069,6 +2069,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // may trigger a re-evaluation of the network.
     private void unlinger(NetworkAgentInfo nai) {
         if (VDBG) log("Canceling linger of " + nai.name());
+        // If network has never been validated, it cannot have been lingered, so don't bother
+        // needlessly triggering a re-evaluation.
+        if (!nai.everValidated) return;
         nai.networkLingered.clear();
         nai.networkMonitor.sendMessage(NetworkMonitor.CMD_NETWORK_CONNECTED);
     }
@@ -4034,6 +4037,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     } else {
                         if (DBG) log("   accepting network in place of null");
                     }
+                    unlinger(newNetwork);
                     mNetworkForRequestId.put(nri.request.requestId, newNetwork);
                     newNetwork.addRequest(nri.request);
                     keep = true;
