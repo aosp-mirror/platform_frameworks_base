@@ -1778,10 +1778,6 @@ final public class MediaCodec {
             mIsValid = true;
             mIsReadOnly = buffer.isReadOnly();
             mBuffer = buffer.duplicate();
-            if (cropRect != null) {
-                cropRect.offset(-xOffset, -yOffset);
-            }
-            super.setCropRect(cropRect);
 
             // save offsets and info
             mXOffset = xOffset;
@@ -1833,6 +1829,12 @@ final public class MediaCodec {
                 throw new UnsupportedOperationException(
                         "unsupported info length: " + info.remaining());
             }
+
+            if (cropRect == null) {
+                cropRect = new Rect(0, 0, mWidth, mHeight);
+            }
+            cropRect.offset(-xOffset, -yOffset);
+            super.setCropRect(cropRect);
         }
 
         private class MediaPlane extends Plane {
