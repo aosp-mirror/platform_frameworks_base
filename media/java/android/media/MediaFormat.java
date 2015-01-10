@@ -106,6 +106,10 @@ public final class MediaFormat {
     public static final String MIMETYPE_AUDIO_FLAC = "audio/flac";
     public static final String MIMETYPE_AUDIO_MSGSM = "audio/gsm";
     public static final String MIMETYPE_AUDIO_AC3 = "audio/ac3";
+    /**
+     * @hide
+     */
+    public static final String MIMETYPE_AUDIO_EAC3 = "audio/eac3";
 
     /**
      * MIME type for WebVTT subtitle data.
