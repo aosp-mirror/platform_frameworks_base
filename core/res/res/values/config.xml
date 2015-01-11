@@ -424,6 +424,10 @@
     <!-- Integer indicating wpa_supplicant scan interval in milliseconds -->
     <integer translatable="false" name="config_wifi_supplicant_scan_interval">15000</integer>
 
+    <!-- Integer indicating amount of time failed networks areblacklisted for the purpose
+         of network switching in milliseconds -->
+    <integer translatable="false" name="config_wifi_network_switching_blacklist_time">172800000</integer>
+
     <!-- Integer indicating wpa_supplicant scan interval when p2p is connected in milliseconds -->
     <integer translatable="false" name="config_wifi_scan_interval_p2p_connected">60000</integer>
 
