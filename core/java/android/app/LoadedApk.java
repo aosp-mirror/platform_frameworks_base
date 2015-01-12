@@ -796,7 +796,7 @@ public final class LoadedApk {
                         if (extras != null) {
                             extras.setAllowFds(false);
                         }
-                        mgr.finishReceiver(this, resultCode, data, extras, false);
+                        mgr.finishReceiver(this, resultCode, data, extras, false, intent.getFlags());
                     } catch (RemoteException e) {
                         Slog.w(ActivityThread.TAG, "Couldn't finish broadcast to unregistered receiver");
                     }
@@ -821,8 +821,8 @@ public final class LoadedApk {
             public Args(Intent intent, int resultCode, String resultData, Bundle resultExtras,
                     boolean ordered, boolean sticky, int sendingUser) {
                 super(resultCode, resultData, resultExtras,
-                        mRegistered ? TYPE_REGISTERED : TYPE_UNREGISTERED,
-                        ordered, sticky, mIIntentReceiver.asBinder(), sendingUser);
+                        mRegistered ? TYPE_REGISTERED : TYPE_UNREGISTERED, ordered,
+                        sticky, mIIntentReceiver.asBinder(), sendingUser, intent.getFlags());
                 mCurIntent = intent;
                 mOrdered = ordered;
             }

@@ -466,8 +466,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String resultData = data.readString();
             Bundle resultExtras = data.readBundle();
             boolean resultAbort = data.readInt() != 0;
+            int intentFlags = data.readInt();
             if (who != null) {
-                finishReceiver(who, resultCode, resultData, resultExtras, resultAbort);
+                finishReceiver(who, resultCode, resultData, resultExtras, resultAbort, intentFlags);
             }
             reply.writeNoException();
             return true;
@@ -2807,7 +2808,8 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    public void finishReceiver(IBinder who, int resultCode, String resultData, Bundle map, boolean abortBroadcast) throws RemoteException
+    public void finishReceiver(IBinder who, int resultCode, String resultData, Bundle map,
+            boolean abortBroadcast, int flags) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -2817,6 +2819,7 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(resultData);
         data.writeBundle(map);
         data.writeInt(abortBroadcast ? 1 : 0);
+        data.writeInt(flags);
         mRemote.transact(FINISH_RECEIVER_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();
