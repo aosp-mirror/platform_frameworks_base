@@ -523,8 +523,7 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     // since we know we'll be done with the asset when we return, we can
     // just use a simple wrapper
-    SkAutoTUnref<SkStreamRewindable> stream(new AssetStreamAdaptor(asset,
-            AssetStreamAdaptor::kNo_OwnAsset, AssetStreamAdaptor::kNo_HasMemoryBase));
+    SkAutoTUnref<SkStreamRewindable> stream(new AssetStreamAdaptor(asset));
     return doDecode(env, stream, padding, options);
 }
 
