@@ -887,10 +887,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      *   <li>{@link #LENS_FACING_FRONT FRONT}</li>
      *   <li>{@link #LENS_FACING_BACK BACK}</li>
+     *   <li>{@link #LENS_FACING_EXTERNAL EXTERNAL}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      * @see #LENS_FACING_FRONT
      * @see #LENS_FACING_BACK
+     * @see #LENS_FACING_EXTERNAL
      */
     @PublicKey
     public static final Key<Integer> LENS_FACING =

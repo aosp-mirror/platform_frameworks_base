@@ -288,6 +288,13 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int LENS_FACING_BACK = 1;
 
+    /**
+     * <p>The camera device is an external camera, and has no fixed facing relative to the
+     * device's screen.</p>
+     * @see CameraCharacteristics#LENS_FACING
+     */
+    public static final int LENS_FACING_EXTERNAL = 2;
+
     //
     // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
     //
