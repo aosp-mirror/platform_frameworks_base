@@ -29,8 +29,6 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Бекітпесін ашу үшін құпия сөзді теріңіз"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Бекітпесін ашу үшін PIN кодын теріңіз"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Қате PIN код"</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"Бекітпесін ашу үшін Мәзір, одан кейін 0 пернесін түртіңіз."</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Бет-әлпет арқылы ашу әрекеттері анықталған шегінен асып кетті"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Зарядталған"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Зарядтауда"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Зарядтау құрылғысын жалғаңыз."</string>
@@ -46,20 +44,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM картасы бекітулі."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM картасының PUK коды бекітілген."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM картасының бекітпесін ашуда…"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %2$d виджет, барлығы %3$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Виджет қосу."</string>
-    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Бос"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Ашу аймағы кеңейтілді."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Ашу аймағы қирады."</string>
-    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> виджеті."</string>
-    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Пайдаланушы таңдаушы"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Камера"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Meдиа басқарулары"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Виджетті қайта реттеу басталды."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Виджетті қайта реттеу аяқталды."</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> виджеті жойылды."</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Ашу аймағын кеңейту."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Сырғыту арқылы ашу."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Кескін арқылы ашу."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Бет-әлпет арқылы ашу."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Pin арқылы ашу."</string>
@@ -69,39 +53,9 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN аумағы"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN аумағы"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK аумағы"</string>
-    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Алдыңғы жол түймесі"</string>
-    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Келесі жол түймесі"</string>
-    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Кідірту түймесі"</string>
-    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Ойнату түймесі"</string>
-    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Тоқтату түймесі"</string>
-    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Ұнайды"</string>
-    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Ұнамайды"</string>
-    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Жүрек"</string>
-    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Жалғастыру үшін ашу"</string>
-    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Қосу тоқтатылды"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> жою үшін тастаңыз"</string>
-    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> жойылмайды."</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Келесі дабыл <xliff:g id="ALARM">%1$s</xliff:g> уақытына орнатылған"</string>
-    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Өшіру"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Жою"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Орындалды"</string>
-    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Режим өзгерту"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Енгізу"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Бекітпесін ашу"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Камера"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Үнсіз"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Дыбыс қосулы"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Іздеу"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін жоғары сырғыту."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін төмен сырғыту."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін солға сырғыту."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін оңға жылжыту."</string>
-    <string name="user_switched" msgid="3768006783166984410">"Ағымдағы пайдаланушы <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Төтенше қоңырау"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Кескінді ұмытып қалу"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Қате кескін"</string>
@@ -123,13 +77,6 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Дұрыс PUK кодын қайта енгізіңіз. Әрекеттерді қайталау SIM картасының істен шығуына себеп болады."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN коды сәйкес емес."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Тым көп кескін әрекеттері"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Ашу үшін Google есептік жазбасы арқылы кіріңіз."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Пайдаланушы атауы (эл. пошта)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"Кілтсөз"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Кіру"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Пайдаланушы атауы немесе кілтсөз жарамсыз."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Пайдаланушы атауын немесе кілтсөзді ұмытып қалдыңыз ба?\n"<b>"google.com/accounts/recovery"</b>" веб-сайтына кіріңіз."</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"Есептік жазбаны тексеруде…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN кодты <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әркеттеніңіз."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Кілсөзді <xliff:g id="NUMBER_0">%d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Бекітпесін ашу кескінін <xliff:g id="NUMBER_0">%d</xliff:g> қате сыздыңыз. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қайта әркеттеніңіз."</string>
@@ -147,7 +94,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Телефон бекітпесін ашуға <xliff:g id="NUMBER">%d</xliff:g> рет дұрыс емес әрекет жасадыңыз. Жұмыс профилі жойылып, бүкіл профиль деректері жойылады."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате сыздыңыз. After <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін планшетіңізді есептік жазба арқылы ашу өтінішін аласыз.\n\n  <xliff:g id="NUMBER_2">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%d</xliff:g> рет қате сыздыңыз. <xliff:g id="NUMBER_1">%d</xliff:g> сәтсіз әрекеттен кейін телефоныңызды есептік жазба арқылы ашу өтінішін аласыз. \n\n <xliff:g id="NUMBER_2">%d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Алып тастау"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN коды дұрыс емес, құрылғыны ашу үшін қызмет жабдықтаушыға  хабарласаңыз."</string>
   <plurals name="kg_password_wrong_pin_code">
     <item quantity="one" msgid="8134313997799638254">"SIM PIN коды дұрыс емес, құрылғыны жабу өтінішімен жабдықтаушыға хабарласуға дейін <xliff:g id="NUMBER">%d</xliff:g> рет әрекеттену мүмкіндігіңіз бар."</item>
@@ -161,10 +107,5 @@
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN жұмысы орындалмады!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK жұмысы орындалмады!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Код қабылданды!"</string>
-    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Алдыңғы жол түймесі"</string>
-    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Келесі жол түймесі"</string>
-    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Кідірту түймесі"</string>
-    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Ойнату түймесі"</string>
-    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Тоқтату түймесі"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Қызмет көрсетілмейді."</string>
 </resources>

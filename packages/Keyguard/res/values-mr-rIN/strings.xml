@@ -29,8 +29,6 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"अनलॉक करण्यासाठी संकेतशब्द टाइप करा"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"अनलॉक करण्यासाठी पिन टाइप करा"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"अयोग्य पिन कोड."</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"अनलॉक करण्यासाठी, मेनू दाबा नंतर 0."</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"कमाल चेहरा अनलॉक प्रयत्न ओलांडले"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"चार्ज झाली"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"चार्ज होत आहे"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"आपले चार्जर कनेक्ट करा."</string>
@@ -46,20 +44,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"सिम कार्ड लॉक झाले आहे."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"सिम कार्ड PUK-लॉक केलेले आहे."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"सिम कार्ड अनलॉक करत आहे…"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d पैकी %2$d विजेट."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"विजेट जोडा."</string>
-    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"रिक्त"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"अनलॉक क्षेत्र विस्‍तृत केले."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"अनलॉक क्षेत्र संकुचित केले."</string>
-    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> विजेट."</string>
-    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"वापरकर्ता निवडकर्ता"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"कॅमेरा"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"मीडिया नियंत्रणे"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"विजेट पुनर्क्रमित करणे प्रारंभ झाले."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"विजेट पुनर्क्रमित करणे समाप्त झाले."</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"विजेट <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> हटविले."</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"अनलॉक क्षेत्र विस्तृत करा."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"स्‍लाइड अनलॉक."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"नमुना अनलॉक."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"चेहरा अनलॉक."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"पिन अनलॉक."</string>
@@ -69,39 +53,9 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"पिन क्षेत्र"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"सिम पिन क्षेत्र"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"सिम PUK क्षेत्र"</string>
-    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"मागील ट्रॅक बटण"</string>
-    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"पुढील ट्रॅक बटण"</string>
-    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"विराम बटण"</string>
-    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"प्ले बटण"</string>
-    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"थांबवा बटण"</string>
-    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"उत्तम"</string>
-    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"वाईट"</string>
-    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"हृदय"</string>
-    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"सुरु ठेवण्‍यासाठी अनलॉक करा"</string>
-    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"लाँच रद्द केले"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"हटविण्‍यासाठी <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ड्रॉप करा."</string>
-    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> हटविली जाणार नाही."</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"पुढील अलार्म <xliff:g id="ALARM">%1$s</xliff:g> साठी सेट केला"</string>
-    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"रद्द करा"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"हटवा"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"पूर्ण झाले"</string>
-    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"मोड बदल"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"प्रविष्ट करा"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"अनलॉक करा"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"कॅमेरा"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"मूक"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"ध्वनी सुरु"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"शोध"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी वर स्लाइड करा."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी खाली स्लाइड करा."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी डावीकडे स्लाइड करा."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> साठी उजवीकडे स्लाइड करा."</string>
-    <string name="user_switched" msgid="3768006783166984410">"वर्तमान वापरकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"आणीबाणीचा कॉल"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"नमुना विसरलात"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"चुकीचा नमुना"</string>
@@ -123,13 +77,6 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"योग्य PUK कोड पुन्हा-प्रविष्ट करा. परत प्रयत्न करणे सिम कायमचे अक्षम करेल."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड जुळत नाहीत"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बरेच नमुना प्रयत्न"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करण्यासाठी, आपल्या Google खात्यासह साइन इन करा."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"वापरकर्तानाव (ईमेल)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"संकेतशब्द"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"साइन इन करा"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"अवैध वापरकर्तानाव किंवा संकेतशब्द."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"आपले वापरकर्तानाव किंवा संकेतशब्द विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते तपासत आहे…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आपण आपला पिन <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यरितीने काढला आहे. \n\n <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
@@ -147,7 +94,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER">%d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. कार्य प्रोफाईल काढले जाईल, जे सर्व प्रोफाईल डेटा हटवेल."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, आपल्याला ईमेल खाते वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"आपण आपला अनलॉक नमुना <xliff:g id="NUMBER_0">%d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%d</xliff:g> अयशस्वी प्रयत्नांनंतर, आपल्याला ईमेल खाते वापरून आपला फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"काढा"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"सिम पिन कोड चुकीचा आहे आपण आता आपले डिव्‍हाइस अनलॉक करण्‍यासाठी आपल्‍या वाहकाशी संपर्क साधावा."</string>
   <plurals name="kg_password_wrong_pin_code">
     <item quantity="one" msgid="8134313997799638254">"सिम पिन कोड चुकीचा आहे, आपण आपले डिव्‍हाइस अनलॉक करण्‍यासाठी आपल्‍या वाहकाशी संपर्क साधण्‍यापूर्वी आपल्‍याकडे <xliff:g id="NUMBER">%d</xliff:g> प्रयत्न उर्वरित आहेत."</item>
@@ -161,10 +107,5 @@
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"सिम पिन कार्य अयशस्‍वी झाले!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"सिम PUK कार्य अयशस्‍वी झाले!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"कोड स्‍वीकारला!"</string>
-    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"मागील ट्रॅक बटण"</string>
-    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"पुढील ट्रॅक बटण"</string>
-    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"विराम बटण"</string>
-    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"प्ले बटण"</string>
-    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"थांबवा बटण"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"सेवा नाही."</string>
 </resources>

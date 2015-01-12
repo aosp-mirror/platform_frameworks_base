@@ -29,8 +29,6 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Introdueix la contrasenya per desbloquejar"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Introdueix la contrasenya per desbloquejar"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Codi PIN incorrecte."</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"Per desbloquejar-lo, premeu Menú i després 0."</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"S\'ha superat el nombre màxim d\'intents de desbloqueig facial"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Carregada"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Carregant"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Connecta el carregador."</string>
@@ -46,20 +44,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"La targeta SIM està bloquejada."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"La targeta SIM està bloquejada pel PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"S\'està desbloquejant la targeta SIM..."</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d de %3$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Afegeix un widget"</string>
-    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Buit"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"S\'ha ampliat l\'àrea de desbloqueig."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"L\'àrea de desbloqueig està replegada."</string>
-    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Widget de <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
-    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Selector d\'usuaris"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Càmera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Controls multimèdia"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"S\'ha iniciat la reorganització del widget."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Ha finalitzat la reorganització del widget."</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"S\'ha suprimit el widget de <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Desplega l\'àrea de desbloqueig."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Desbloqueig lliscant el dit"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Desbloqueig mitjançant patró"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Desbloqueig facial"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Desbloqueig mitjançant PIN"</string>
@@ -69,39 +53,9 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Zona del PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Zona del PIN de la SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Zona del PUK de la SIM"</string>
-    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Botó de pista anterior"</string>
-    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Botó de pista següent"</string>
-    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Botó de pausa"</string>
-    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Botó de reproducció"</string>
-    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Botó de parada"</string>
-    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"M\'agrada"</string>
-    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"No m\'agrada"</string>
-    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Cor"</string>
-    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Desbloqueja per continuar"</string>
-    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"S\'ha cancel·lat l\'inici"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Deixa anar <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> per suprimir-lo."</string>
-    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"No se suprimirà <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"S\'ha definit la pròxima alarma per a les: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Cancel·la"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Suprimeix"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Fet"</string>
-    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Canvi de mode"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Maj"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Retorn"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Desbloqueja"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Càmera"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Silenci"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Activa el so"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Cerca"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"Fes lliscar el dit cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"Fes lliscar el dit cap avall per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"Fes lliscar el dit cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"Fes lliscar el dit cap a la dreta per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="user_switched" msgid="3768006783166984410">"Usuari actual: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Trucada d\'emergència"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Patró oblidat"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Patró incorrecte"</string>
@@ -123,13 +77,6 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Torna a introduir el codi PUK correcte. Els intents repetits faran que es desactivi la SIM de manera permanent."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Els codis PIN no coincideixen"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Massa intents incorrectes"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Per desbloquejar el telèfon, inicia la sessió amb el compte de Google."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Nom d\'usuari (correu electrònic)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"Contrasenya"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Inicia la sessió"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nom d\'usuari o contrasenya no vàlids."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Has oblidat el teu nom d\'usuari o la contrasenya?\nVisita "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"S\'està comprovant el compte…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Has escrit malament el PIN <xliff:g id="NUMBER_0">%d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%d</xliff:g> segons."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Has escrit malament la contrasenya <xliff:g id="NUMBER_0">%d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%d</xliff:g> segons."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Has dibuixat el patró de desbloqueig de manera incorrecta <xliff:g id="NUMBER_0">%d</xliff:g> vegades. \n\nTorna-ho a provar d\'aquí a <xliff:g id="NUMBER_1">%d</xliff:g> segons."</string>
@@ -147,7 +94,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Has provat de desbloquejar el telèfon incorrectament <xliff:g id="NUMBER">%d</xliff:g> vegades. El perfil professional se suprimirà, juntament amb totes les dades que contingui."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis la tauleta amb un compte de correu electrònic.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%d</xliff:g> vegades de manera incorrecta. Després de <xliff:g id="NUMBER_1">%d</xliff:g> intents incorrectes més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%d</xliff:g> segons."</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Elimina"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"El codi PIN de la SIM no és correcte. Has de contactar amb l\'operador de telefonia mòbil per desbloquejar el dispositiu."</string>
   <plurals name="kg_password_wrong_pin_code">
     <item quantity="one" msgid="8134313997799638254">"El codi PIN de la SIM no és correcte. Et queda <xliff:g id="NUMBER">%d</xliff:g> intent; si no l\'encertes, contacta amb l\'operador de telefonia mòbil per desbloquejar el dispositiu."</item>
@@ -161,10 +107,5 @@
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Hi ha hagut un problema en l\'operació del PIN de la SIM."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Hi ha hagut un problema en l\'operació del PUK de la SIM."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"S\'ha acceptat el codi."</string>
-    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Botó de pista anterior"</string>
-    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Botó de pista següent"</string>
-    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Botó de pausa"</string>
-    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Botó de reproducció"</string>
-    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Botó de parada"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Sense servei."</string>
 </resources>

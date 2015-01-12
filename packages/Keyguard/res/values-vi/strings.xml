@@ -29,8 +29,6 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Nhập mật khẩu để mở khóa"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Nhập mã PIN để mở khóa"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Mã PIN không chính xác."</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"Để mở khóa, hãy nhấn vào Menu sau đó nhấn 0."</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Đã vượt quá số lần Mở khóa bằng khuôn mặt tối đa"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Pin đầy"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Đang sạc"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Kết nối bộ sạc của bạn."</string>
@@ -46,20 +44,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Thẻ SIM đã bị khóa."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Thẻ SIM đã bị khóa PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Đang mở khóa thẻ SIM…"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Tiện ích %2$d trong số %3$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Thêm tiện ích."</string>
-    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Trống"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Đã mở rộng vùng khóa."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Đã thu gọn vùng khóa."</string>
-    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> tiện ích."</string>
-    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Bộ chọn người dùng"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Máy ảnh"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Điều khiển phương tiện"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Đã bắt đầu xắp xếp lại tiện ích."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Đã kết thúc sắp xếp lại tiện ích."</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Đã xóa tiện ích <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Mở rộng vùng khóa."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Mở khóa bằng cách trượt."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Mở khóa bằng hình."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Mở khóa bằng khuôn mặt."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Mở khóa bằng mã pin."</string>
@@ -69,39 +53,9 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"Khu vực mã PIN"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"Khu vực mã PIN của SIM"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"Khu vực PUK của SIM"</string>
-    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Nút bản nhạc trước"</string>
-    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Nút bản nhạc tiếp theo"</string>
-    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Nút tạm dừng"</string>
-    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Nút phát"</string>
-    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Nút dừng"</string>
-    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Bài hát được đánh dấu thích"</string>
-    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Bài hát được đánh dấu không thích"</string>
-    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Trái tim"</string>
-    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Mở khóa để tiếp tục"</string>
-    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Quá trình chạy bị hủy"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Thả <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> để xóa."</string>
-    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> sẽ không bị xóa."</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Báo thức tiếp theo được đặt cho <xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Hủy"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Xóa"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Xong"</string>
-    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Thay đổi chế độ"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Mở khóa"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Máy ảnh"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Im lặng"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Bật âm thanh"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Tìm kiếm"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"Trượt lên để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"Trượt xuống để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"Trượt sang trái để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"Trượt sang phải để <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="user_switched" msgid="3768006783166984410">"Người dùng hiện tại <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Cuộc gọi khẩn cấp"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Đã quên hình"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Hình sai"</string>
@@ -123,13 +77,6 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Hãy nhập lại mã PUK chính xác. Nhiều lần lặp lại sẽ vô hiệu hóa vĩnh viễn thẻ SIM."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Mã PIN không khớp"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Quá nhiều lần nhập hình"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Để mở khóa, hãy đăng nhập bằng tài khoản Google của bạn."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Tên người dùng (email)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"Mật khẩu"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Đăng nhập"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Tên người dùng hoặc mật khẩu không hợp lệ."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Bạn quên tên người dùng hoặc mật khẩu?\nHãy truy cập "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"Đang kiểm tra tài khoản…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mã PIN của mình. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần nhập sai mật khẩu của mình. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Hãy \n\nthử lại sau <xliff:g id="NUMBER_1">%d</xliff:g> giây."</string>
@@ -147,7 +94,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Bạn đã mở khóa điện thoại sai <xliff:g id="NUMBER">%d</xliff:g> lần. Hồ sơ công việc sẽ bị xóa, tức là tất cả dữ liệu hồ sơ sẽ bị xóa."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa máy tính bảng bằng tài khoản email.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Bạn đã <xliff:g id="NUMBER_0">%d</xliff:g> lần vẽ không chính xác hình mở khóa của mình. Sau <xliff:g id="NUMBER_1">%d</xliff:g> lần thử không thành công nữa, bạn sẽ được yêu cầu mở khóa điện thoại bằng tài khoản email.\n\n Vui lòng thử lại sau <xliff:g id="NUMBER_2">%d</xliff:g> giây."</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Xóa"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Mã PIN của SIM không chính xác, bây giờ bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của bạn."</string>
   <plurals name="kg_password_wrong_pin_code">
     <item quantity="one" msgid="8134313997799638254">"Mã PIN của SIM không chính xác, bạn còn <xliff:g id="NUMBER">%d</xliff:g> lần thử trước khi bạn phải liên hệ với nhà cung cấp dịch vụ để mở khóa thiết bị của bạn."</item>
@@ -161,10 +107,5 @@
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Thao tác mã PIN của SIM không thành công!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Thao tác mã PUK của SIM không thành công!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Mã được chấp nhận!"</string>
-    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Nút bản nhạc trước"</string>
-    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Nút bản nhạc tiếp theo"</string>
-    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Nút tạm dừng"</string>
-    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Nút phát"</string>
-    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Nút dừng"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Không có dịch vụ."</string>
 </resources>

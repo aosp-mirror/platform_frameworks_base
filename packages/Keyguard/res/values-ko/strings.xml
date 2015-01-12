@@ -29,8 +29,6 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"잠금 해제하려면 비밀번호 입력"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"잠금을 해제하려면 PIN 입력"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN 코드가 잘못되었습니다."</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"잠금해제하려면 메뉴를 누른 다음 0을 누릅니다."</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"얼굴 인식 잠금해제 최대 시도 횟수를 초과했습니다."</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"충전됨"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"충전 중"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"충전기를 연결하세요."</string>
@@ -46,20 +44,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM 카드가 잠겨 있습니다."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM 카드가 PUK 잠김 상태입니다."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM 카드 잠금해제 중..."</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %3$d의 위젯 %2$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"위젯 추가"</string>
-    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"비어 있음"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"잠금 해제 영역 확장됨"</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"잠금 해제 영역 축소됨"</string>
-    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> 위젯"</string>
-    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"사용자 선택기"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"카메라"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"미디어 조정"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"위젯 재정렬 시작됨"</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"위젯 재정렬 완료됨"</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> 위젯이 삭제됨"</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"잠금 해제 영역 확장"</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"슬라이드하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"패턴을 사용하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"얼굴 인식을 사용하여 잠금해제합니다."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"핀을 사용하여 잠금해제합니다."</string>
@@ -69,39 +53,9 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN 영역"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN 영역"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK 영역"</string>
-    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"이전 트랙 버튼"</string>
-    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"다음 트랙 버튼"</string>
-    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"일시중지 버튼"</string>
-    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"재생 버튼"</string>
-    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"중지 버튼"</string>
-    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"좋아요"</string>
-    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"싫어요"</string>
-    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"하트"</string>
-    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"계속하려면 잠금해제합니다."</string>
-    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"실행 취소됨"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"삭제하려면 <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>을(를) 드롭합니다."</string>
-    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>은(는) 삭제되지 않습니다."</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"다음 알람이 <xliff:g id="ALARM">%1$s</xliff:g>(으)로 설정되었습니다."</string>
-    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt 키"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"취소"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete 키"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"완료"</string>
-    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"모드 변경"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift 키"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter 키"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"잠금 해제"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"카메라"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"무음"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"사운드 켜기"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"검색"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 아래로 슬라이드"</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 오른쪽으로 슬라이드"</string>
-    <string name="user_switched" msgid="3768006783166984410">"현재 사용자는 <xliff:g id="NAME">%1$s</xliff:g>님입니다."</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"긴급 통화"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"패턴을 잊음"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"잘못된 패턴"</string>
@@ -123,13 +77,6 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"올바른 PUK 코드를 다시 입력하세요. 입력을 반복해서 시도하면 SIM을 영구적으로 사용할 수 없게 됩니다."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN 코드가 일치하지 않음"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"패턴 시도 횟수가 너무 많음"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"잠금해제하려면 Google 계정으로 로그인하세요."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"사용자 이름(이메일)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"비밀번호"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"로그인"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"사용자 이름이나 비밀번호를 잊어버렸습니까?\n"<b>"google.com/accounts/recovery"</b>" 페이지를 방문하세요."</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"계정 확인 중…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"비밀번호를 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
@@ -147,7 +94,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"휴대전화 잠금 해제에 <xliff:g id="NUMBER">%d</xliff:g>번 실패했습니다. 직장 프로필이 삭제되며 모든 프로필 데이터가 삭제됩니다."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"삭제"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM PIN 코드가 잘못되었습니다. 이동통신사에 문의하여 기기를 잠금 해제해야 합니다."</string>
   <plurals name="kg_password_wrong_pin_code">
     <item quantity="one" msgid="8134313997799638254">"SIM PIN 코드가 잘못되었습니다. <xliff:g id="NUMBER">%d</xliff:g>회 이상 실패할 경우 이동통신사에 문의하여 기기를 잠금 해제해야 합니다."</item>
@@ -161,10 +107,5 @@
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM PIN 작업이 실패했습니다."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM PUK 작업이 실패했습니다."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"코드 승인 완료"</string>
-    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"이전 트랙 버튼"</string>
-    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"다음 트랙 버튼"</string>
-    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"일시중지 버튼"</string>
-    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"재생 버튼"</string>
-    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"중지 버튼"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"서비스 불가"</string>
 </resources>

@@ -29,8 +29,6 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Jei norite atrakinti, įveskite slaptažodį"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Jei norite atrakinti, įveskite PIN kodą"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Neteisingas PIN kodas."</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"Jei norite atrakinti, paspauskite „Meniu“ ir 0."</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Viršijote maksimalų atrakinimo pagal veidą bandymų skaičių"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Įkrauta"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Kraunama"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Prijunkite įkroviklį."</string>
@@ -46,20 +44,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM kortelė užrakinta."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM kortelė užrakinta PUK kodu."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Atrakinama SIM kortelė…"</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. %2$d valdiklis iš %3$d."</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Pridėti valdiklį."</string>
-    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tuščia"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Atrakinimo sritis išplėsta."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Atrakinimo sritis sutraukta."</string>
-    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"Valdiklis <xliff:g id="WIDGET_INDEX">%1$s</xliff:g>."</string>
-    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Naudotojo pasirinkimo valdiklis"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Fotoaparatas"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Medijos valdikliai"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"Valdiklių pertvarkymas pradėtas."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"Valdiklių pertvarkymas baigtas."</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"Valdiklis <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> ištrintas."</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"Išplėsti atrakinimo sritį."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Atrakinimas slystant."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Atrakinimas pagal piešinį."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Atrakinimas pagal veidą."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Atrakinimas įvedus PIN kodą."</string>
@@ -69,39 +53,9 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN kodo sritis"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM kortelės PIN kodo sritis"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM kortelės PUK kodo sritis"</string>
-    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Ankstesnio takelio mygtukas"</string>
-    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Kito takelio mygtukas"</string>
-    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Pristabdymo mygtukas"</string>
-    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Paleidimo mygtukas"</string>
-    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Sustabdymo mygtukas"</string>
-    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Patinka"</string>
-    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Nepatinka"</string>
-    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Širdis"</string>
-    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"Jei norite tęsti, atrakinkite"</string>
-    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Paleidimas atšauktas"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Paleiskite „<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>“, kad jį ištrintumėte."</string>
-    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"„<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>“ nebus ištrintas."</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"Kitas nustatytas signalas: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Atšaukti"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Ištrinti"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Atlikta"</string>
-    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Režimo keitimas"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Įvesti"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Atrakinti"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Vaizdo kamera"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Begarsis"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Garsas įjungtas"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Paieška"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"Slyskite aukštyn link <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"Slyskite žemyn link <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"Slyskite į kairę link <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"Slyskite į dešinę link <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="user_switched" msgid="3768006783166984410">"Dabartinis naudotojas: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Skambutis pagalbos numeriu"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Pamiršau atrakinimo piešinį"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Netinkamas atrakinimo piešinys"</string>
@@ -123,13 +77,6 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Pakartotinai įveskite tinkamą PUK kodą. Pakartotinai bandant SIM bus neleidžiama visam laikui."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodai neatitinka"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Per daug atrakinimo piešinių bandymų"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Jei norite atrakinti, prisijunkite naudodami „Google“ paskyrą."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Naudotojo vardas (el. paštas)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"Slaptažodis"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Prisijungti"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Netinkamas naudotojo vardas ar slaptažodis."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Pamiršote naudotojo vardą ar slaptažodį?\nApsilankykite šiuo adresu: "<b>"google.com/accounts/recovery"</b></string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"Tikrinama paskyra…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN kodą netinkamai įvedėte <xliff:g id="NUMBER_0">%d</xliff:g> k. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Neteisingai įvedėte slaptažodį <xliff:g id="NUMBER_0">%d</xliff:g> k. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
@@ -147,7 +94,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"<xliff:g id="NUMBER">%d</xliff:g> kart. nesėkmingai bandėte atrakinti telefoną. Darbo profilis bus pašalintas ir visi profilio duomenys bus ištrinti."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami „Google“ prisijungimo duomenis.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Pašalinti"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Netinkamas SIM kortelės PIN kodas. Reikės susisiekti su operatoriumi, kad atrakintų įrenginį."</string>
   <plurals name="kg_password_wrong_pin_code">
     <item quantity="one" msgid="8134313997799638254">"Netinkamas SIM kortelės PIN kodas. Jums liko <xliff:g id="NUMBER">%d</xliff:g> band. Paskui reikės susisiekti su operatoriumi, kad jis atrakintų įrenginį."</item>
@@ -161,10 +107,5 @@
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"Nepavyko atlikti SIM kortelės PIN kodo operacijos."</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"Nepavyko atlikti SIM kortelės PUK kodo operacijos."</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kodas priimtas."</string>
-    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Ankstesnio takelio mygtukas"</string>
-    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Kito takelio mygtukas"</string>
-    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Pristabdymo mygtukas"</string>
-    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Paleidimo mygtukas"</string>
-    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Sustabdymo mygtukas"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nėra paslaugos."</string>
 </resources>

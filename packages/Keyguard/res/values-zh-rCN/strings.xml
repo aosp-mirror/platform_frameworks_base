@@ -29,8 +29,6 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"输入密码以解锁"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"输入PIN码进行解锁"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"PIN码有误。"</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"要解锁，请先按 MENU 再按 0。"</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"已超过“人脸解锁”尝试次数上限"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"充电完成"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"正在充电"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"请连接充电器。"</string>
@@ -46,20 +44,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM卡已被锁定。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM卡已被PUK码锁定。"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"正在解锁SIM卡..."</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s。%3$d的小部件%2$d。"</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"添加小部件。"</string>
-    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"空白"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"已展开解锁区域。"</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"已折叠解锁区域。"</string>
-    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>小部件。"</string>
-    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"用户选择器"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"相机"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"媒体控制"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"已开始将小部件重新排序。"</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"已完成小部件重新排序。"</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"已删除小部件<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>。"</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"展开解锁区域。"</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"滑动解锁。"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"图案解锁。"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"人脸解锁。"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"PIN码解锁。"</string>
@@ -69,39 +53,9 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN 码区域"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM 卡 PIN 码区域"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM 卡 PUK 码区域"</string>
-    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"上一曲按钮"</string>
-    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"下一曲按钮"</string>
-    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"暂停按钮"</string>
-    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"播放按钮"</string>
-    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"停止按钮"</string>
-    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"我喜欢"</string>
-    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"不喜欢"</string>
-    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"爱心"</string>
-    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"解锁即可继续"</string>
-    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"启动已取消"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"放下<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>即可将其删除。"</string>
-    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g>将不会被删除。"</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"下次闹钟时间已设置为<xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"取消"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"完成"</string>
-    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"模式更改"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"解锁"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"相机"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"静音"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"打开声音"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"搜索"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"向上滑动以<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"向下滑动以<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"向左滑动以<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"向右滑动以<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="user_switched" msgid="3768006783166984410">"当前用户是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"紧急呼救"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"忘记了图案"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"图案错误"</string>
@@ -123,13 +77,6 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"请重新输入正确的PUK码。如果尝试错误次数过多，SIM卡将永久停用。"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN码不匹配"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"图案尝试次数过多"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"要解锁，请登录您的Google帐户。"</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"用户名（电子邮件地址）"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"密码"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"登录"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"用户名或密码无效。"</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"忘记了用户名或密码？\n请访问 "<b>"google.com/accounts/recovery"</b>"。"</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"正在检查帐户…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您已经<xliff:g id="NUMBER_0">%d</xliff:g>次输错了PIN码。\n\n请在<xliff:g id="NUMBER_1">%d</xliff:g>秒后重试。"</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地输入了密码。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。\n\n请在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后重试。"</string>
@@ -147,7 +94,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"您已经 <xliff:g id="NUMBER">%d</xliff:g> 次错误地尝试解锁手机。系统将移除此工作资料，这会删除所有的工作资料数据。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁平板电脑。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您已经 <xliff:g id="NUMBER_0">%d</xliff:g> 次错误地绘制了解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐户解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒后重试。"</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"删除"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"SIM卡PIN码不正确，您现在必须联系运营商为您解锁设备。"</string>
   <plurals name="kg_password_wrong_pin_code">
     <item quantity="one" msgid="8134313997799638254">"SIM卡PIN码不正确，您还有<xliff:g id="NUMBER">%d</xliff:g>次尝试机会。如果仍然失败，则必须联系运营商帮您解锁设备。"</item>
@@ -161,10 +107,5 @@
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"SIM卡PIN码操作失败！"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"SIM卡PUK码操作失败！"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"代码正确！"</string>
-    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"“上一曲”按钮"</string>
-    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"“下一曲”按钮"</string>
-    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"“暂停”按钮"</string>
-    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"“播放”按钮"</string>
-    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"“停止”按钮"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"无服务。"</string>
 </resources>

@@ -29,8 +29,6 @@
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"A feloldáshoz írja be a jelszót"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Feloldáshoz írja be a PIN kódot"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Helytelen PIN kód."</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"A feloldáshoz nyomja meg a Menü, majd a 0 gombot."</string>
-    <string name="faceunlock_multiple_failures" msgid="754137583022792429">"Elérte az arcalapú feloldási kísérletek maximális számát"</string>
     <string name="keyguard_charged" msgid="3272223906073492454">"Feltöltve"</string>
     <string name="keyguard_plugged_in" msgid="9087497435553252863">"Töltés"</string>
     <string name="keyguard_low_battery" msgid="8143808018719173859">"Csatlakoztassa a töltőt."</string>
@@ -46,20 +44,6 @@
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"A SIM kártya le van zárva."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"A SIM kártya le van zárva a PUK kóddal."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"SIM kártya feloldása..."</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Modul %3$d/%2$d"</string>
-    <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Modul hozzáadása."</string>
-    <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Üres"</string>
-    <string name="keyguard_accessibility_unlock_area_expanded" msgid="2278106022311170299">"Feloldási terület kiterjesztve."</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="6366992066936076396">"Feloldási terület összecsukva."</string>
-    <string name="keyguard_accessibility_widget" msgid="6527131039741808240">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> modul."</string>
-    <string name="keyguard_accessibility_user_selector" msgid="1226798370913698896">"Felhasználóválasztó"</string>
-    <string name="keyguard_accessibility_camera" msgid="8904231194181114603">"Kamera"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="262209654292161806">"Médiaelemek vezérlője"</string>
-    <string name="keyguard_accessibility_widget_reorder_start" msgid="8736853615588828197">"A modulátrendezés elkezdődött."</string>
-    <string name="keyguard_accessibility_widget_reorder_end" msgid="7170190950870468320">"A modulátrendezés véget ért."</string>
-    <string name="keyguard_accessibility_widget_deleted" msgid="4426204263929224434">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> modul törölve."</string>
-    <string name="keyguard_accessibility_expand_lock_area" msgid="519859720934178024">"A feloldási terület kiterjesztése."</string>
-    <string name="keyguard_accessibility_slide_unlock" msgid="2959928478764697254">"Feloldás csúsztatással"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Feloldás mintával"</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Arcalapú feloldás"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Feloldás PIN kóddal"</string>
@@ -69,39 +53,9 @@
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"PIN kód területe"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"SIM PIN kód területe"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="1880823406954996207">"SIM PUK kód területe"</string>
-    <string name="keyguard_accessibility_transport_prev_description" msgid="1337286538318543555">"Előző szám gomb"</string>
-    <string name="keyguard_accessibility_transport_next_description" msgid="7073928300444909320">"Következő szám gomb"</string>
-    <string name="keyguard_accessibility_transport_pause_description" msgid="8455979545295224302">"Szünet gomb"</string>
-    <string name="keyguard_accessibility_transport_play_description" msgid="8146417789511154044">"Lejátszás gomb"</string>
-    <string name="keyguard_accessibility_transport_stop_description" msgid="7656358482980912216">"Leállítás gomb"</string>
-    <string name="keyguard_accessibility_transport_thumbs_up_description" msgid="4535938129663903194">"Tetszik"</string>
-    <string name="keyguard_accessibility_transport_thumbs_down_description" msgid="8101433677192177861">"Nem tetszik"</string>
-    <string name="keyguard_accessibility_transport_heart_description" msgid="2336943232474689887">"Szív"</string>
-    <string name="keyguard_accessibility_show_bouncer" msgid="5425837272418176176">"A folytatáshoz oldja fel a billentyűzárat"</string>
-    <string name="keyguard_accessibility_hide_bouncer" msgid="7896992171878309358">"Indítás törölve"</string>
-    <string name="keyguard_accessibility_delete_widget_start" msgid="4096550552634391451">"Engedje el a(z) <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> törléséhez."</string>
-    <string name="keyguard_accessibility_delete_widget_end" msgid="508833506780909393">"A(z) <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> nem lesz törölve."</string>
     <string name="keyguard_accessibility_next_alarm" msgid="7269583073750518672">"A következő riasztás beállított ideje: <xliff:g id="ALARM">%1$s</xliff:g>"</string>
-    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
-    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
-    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
-    <string name="keyboardview_keycode_alt" msgid="4856868820040051939">"Alt"</string>
-    <string name="keyboardview_keycode_cancel" msgid="1203984017245783244">"Mégse"</string>
     <string name="keyboardview_keycode_delete" msgid="3337914833206635744">"Delete"</string>
-    <string name="keyboardview_keycode_done" msgid="1992571118466679775">"Kész"</string>
-    <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"Mód váltása"</string>
-    <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
     <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"Enter"</string>
-    <string name="description_target_unlock" msgid="2228524900439801453">"Feloldás"</string>
-    <string name="description_target_camera" msgid="969071997552486814">"Kamera"</string>
-    <string name="description_target_silent" msgid="893551287746522182">"Némítás"</string>
-    <string name="description_target_soundon" msgid="30052466675500172">"Hang bekapcsolása"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"Keresés"</string>
-    <string name="description_direction_up" msgid="7169032478259485180">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa felfelé."</string>
-    <string name="description_direction_down" msgid="5087739728639014595">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa lefelé."</string>
-    <string name="description_direction_left" msgid="7207478719805562165">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa balra."</string>
-    <string name="description_direction_right" msgid="8034433242579600980">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa jobbra."</string>
-    <string name="user_switched" msgid="3768006783166984410">"<xliff:g id="NAME">%1$s</xliff:g> az aktuális felhasználó."</string>
     <string name="kg_emergency_call_label" msgid="684946192523830531">"Segélyhívás"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"Elfelejtett minta"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Helytelen minta"</string>
@@ -123,13 +77,6 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Adja meg újra a helyes PUK kódot. Az ismételt próbálkozással véglegesen letiltja a SIM kártyát."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"A PIN kódok nem egyeznek."</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Túl sok mintarajzolási próbálkozás"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"A feloldáshoz jelentkezzen be Google-fiókjával."</string>
-    <string name="kg_login_username_hint" msgid="5718534272070920364">"Felhasználónév (e-mail cím)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"Jelszó"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Bejelentkezés"</string>
-    <string name="kg_login_invalid_input" msgid="5754664119319872197">"Érvénytelen felhasználónév vagy jelszó."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Elfelejtette a felhasználónevét vagy jelszavát?\nKeresse fel a "<b>"google.com/accounts/recovery"</b>" webhelyet."</string>
-    <string name="kg_login_checking_password" msgid="1052685197710252395">"Fiók ellenőrzése..."</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg PIN kódját. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül adta meg a jelszót. \n\n Próbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal rosszul rajzolta le feloldási mintát. \n\nPróbálja újra <xliff:g id="NUMBER_1">%d</xliff:g> másodperc múlva."</string>
@@ -147,7 +94,6 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"<xliff:g id="NUMBER">%d</xliff:g> alkalommal próbálkozott sikertelenül a telefon zárolásának feloldásával. A rendszer eltávolítja munkahelyi profilját, és összes profiladata törlődik."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a táblagépét.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"<xliff:g id="NUMBER_0">%d</xliff:g> alkalommal helytelenül rajzolta le a feloldási mintát. További <xliff:g id="NUMBER_1">%d</xliff:g> sikertelen kísérlet után egy e-mail fiók használatával kell feloldania a telefonját.\n\n Kérjük, próbálja újra <xliff:g id="NUMBER_2">%d</xliff:g> másodperc múlva."</string>
-    <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Eltávolítás"</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Helytelen PIN kód a SIM kártyához; vegye fel a kapcsolatot szolgáltatójával az eszköz feloldásához."</string>
   <plurals name="kg_password_wrong_pin_code">
     <item quantity="one" msgid="8134313997799638254">"Helytelen PIN kód a SIM kártyához; még <xliff:g id="NUMBER">%d</xliff:g> próbálkozása van, mielőtt fel kellene vennie a kapcsolatot szolgáltatójával az eszköz feloldásához."</item>
@@ -161,10 +107,5 @@
     <string name="kg_password_pin_failed" msgid="6268288093558031564">"A SIM kártya PIN-művelete sikertelen!"</string>
     <string name="kg_password_puk_failed" msgid="2838824369502455984">"A SIM kártya PUK-művelete sikertelen!"</string>
     <string name="kg_pin_accepted" msgid="1448241673570020097">"Kód elfogadva."</string>
-    <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Előző szám gomb"</string>
-    <string name="keyguard_transport_next_description" msgid="4299258300283778305">"Következő szám gomb"</string>
-    <string name="keyguard_transport_pause_description" msgid="5093073338238310224">"Szünet gomb"</string>
-    <string name="keyguard_transport_play_description" msgid="2924628863741150956">"Lejátszás gomb"</string>
-    <string name="keyguard_transport_stop_description" msgid="3084179324810575787">"Leállítás gomb"</string>
     <string name="keyguard_carrier_default" msgid="8700650403054042153">"Nincs szolgáltatás."</string>
 </resources>
