@@ -215,19 +215,6 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         return (jint) AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT;
     }
 
-    // for the moment 8bitPCM in MODE_STATIC is not supported natively in the AudioTrack C++ class
-    // so we declare everything as 16bitPCM, the 8->16bit conversion for MODE_STATIC will be handled
-    // in android_media_AudioTrack_native_write_byte()
-    if ((format == AUDIO_FORMAT_PCM_8_BIT)
-        && (memoryMode == MODE_STATIC)) {
-        ALOGV("android_media_AudioTrack_setup(): requesting MODE_STATIC for 8bit \
-            buff size of %dbytes, switching to 16bit, buff size of %dbytes",
-            buffSizeInBytes, 2*buffSizeInBytes);
-        format = AUDIO_FORMAT_PCM_16_BIT;
-        // we will need twice the memory to store the data
-        buffSizeInBytes *= 2;
-    }
-
     // compute the frame count
     size_t frameCount;
     if (audio_is_linear_pcm(format)) {
@@ -523,41 +510,14 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, const jbyte* da
             written = 0;
         }
     } else {
-        const audio_format_t format = audioFormatToNative(audioFormat);
-        switch (format) {
-
-        default:
-        case AUDIO_FORMAT_PCM_FLOAT:
-        case AUDIO_FORMAT_PCM_16_BIT: {
-            // writing to shared memory, check for capacity
-            if ((size_t)sizeInBytes > track->sharedBuffer()->size()) {
-                sizeInBytes = track->sharedBuffer()->size();
-            }
-            memcpy(track->sharedBuffer()->pointer(), data + offsetInBytes, sizeInBytes);
-            written = sizeInBytes;
-            } break;
-
-        case AUDIO_FORMAT_PCM_8_BIT: {
-            // data contains 8bit data we need to expand to 16bit before copying
-            // to the shared memory
-            // writing to shared memory, check for capacity,
-            // note that input data will occupy 2X the input space due to 8 to 16bit conversion
-            if (((size_t)sizeInBytes)*2 > track->sharedBuffer()->size()) {
-                sizeInBytes = track->sharedBuffer()->size() / 2;
-            }
-            int count = sizeInBytes;
-            int16_t *dst = (int16_t *)track->sharedBuffer()->pointer();
-            const uint8_t *src = (const uint8_t *)(data + offsetInBytes);
-            memcpy_to_i16_from_u8(dst, src, count);
-            // even though we wrote 2*sizeInBytes, we only report sizeInBytes as written to hide
-            // the 8bit mixer restriction from the user of this function
-            written = sizeInBytes;
-            } break;
-
+        // writing to shared memory, check for capacity
+        if ((size_t)sizeInBytes > track->sharedBuffer()->size()) {
+            sizeInBytes = track->sharedBuffer()->size();
         }
+        memcpy(track->sharedBuffer()->pointer(), data + offsetInBytes, sizeInBytes);
+        written = sizeInBytes;
     }
     return written;
-
 }
 
 // ----------------------------------------------------------------------------
