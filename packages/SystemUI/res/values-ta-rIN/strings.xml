@@ -262,8 +262,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"முடிந்தது"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"இணைக்கப்பட்டது"</string>
     <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"வைஃபை அசிஸ்டண்ட் மூலம் இணைக்கப்பட்டது"</string>
-    <!-- no translation found for quick_settings_saved (4758747300943481411) -->
-    <skip />
+    <string name="quick_settings_saved" msgid="4758747300943481411">"சேமிக்கப்பட்டது"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"இணைக்கிறது..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"டெதெரிங்"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"ஹாட்ஸ்பாட்"</string>

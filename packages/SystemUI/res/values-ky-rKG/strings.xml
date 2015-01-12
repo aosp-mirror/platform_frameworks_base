@@ -287,8 +287,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Аткарылды"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Туташкан"</string>
     <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"Wi‑Fi жардамчысы аркылуу туташып турат"</string>
-    <!-- no translation found for quick_settings_saved (4758747300943481411) -->
-    <skip />
+    <string name="quick_settings_saved" msgid="4758747300943481411">"Сакталды"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Туташууда…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Тетеринг"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Туташуу чекити"</string>
