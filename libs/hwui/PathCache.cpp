@@ -493,7 +493,9 @@ void PathCache::precache(const SkPath* path, const SkPaint* paint) {
         if (mProcessor == NULL) {
             mProcessor = new PathProcessor(Caches::getInstance());
         }
-        mProcessor->add(task);
+        if (!mProcessor->add(task)) {
+            mProcessor->process(task);
+        }
     }
 }
 
