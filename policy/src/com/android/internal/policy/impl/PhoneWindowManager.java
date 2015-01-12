@@ -1641,8 +1641,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         outAppOp[0] = AppOpsManager.OP_NONE;
 
-        if (type < WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
-                || type > WindowManager.LayoutParams.LAST_SYSTEM_WINDOW) {
+        if (!((type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW)
+                || (type >= FIRST_SUB_WINDOW && type <= LAST_SUB_WINDOW)
+                || (type >= FIRST_SYSTEM_WINDOW && type <= LAST_SYSTEM_WINDOW))) {
+            return WindowManagerGlobal.ADD_INVALID_TYPE;
+        }
+
+        if (type < FIRST_SYSTEM_WINDOW || type > LAST_SYSTEM_WINDOW) {
+            // Window manager will make sure these are okay.
             return WindowManagerGlobal.ADD_OKAY;
         }
         String permission = null;
