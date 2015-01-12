@@ -1145,6 +1145,7 @@ public class PhoneNumberUtils
      *
      * @deprecated Use link #formatNumber(String phoneNumber, String defaultCountryIso) instead
      */
+    @Deprecated
     public static String formatNumber(String source) {
         SpannableStringBuilder text = new SpannableStringBuilder(source);
         formatNumber(text, getFormatTypeForLocale(Locale.getDefault()));
@@ -1163,6 +1164,7 @@ public class PhoneNumberUtils
      * @hide
      * @deprecated Use link #formatNumber(String phoneNumber, String defaultCountryIso) instead
      */
+    @Deprecated
     public static String formatNumber(String source, int defaultFormattingType) {
         SpannableStringBuilder text = new SpannableStringBuilder(source);
         formatNumber(text, defaultFormattingType);
@@ -1178,6 +1180,7 @@ public class PhoneNumberUtils
      *
      * @deprecated Use link #formatNumber(String phoneNumber, String defaultCountryIso) instead
      */
+    @Deprecated
     public static int getFormatTypeForLocale(Locale locale) {
         String country = locale.getCountry();
 
@@ -1194,6 +1197,7 @@ public class PhoneNumberUtils
      *
      * @deprecated Use link #formatNumber(String phoneNumber, String defaultCountryIso) instead
      */
+    @Deprecated
     public static void formatNumber(Editable text, int defaultFormattingType) {
         int formatType = defaultFormattingType;
 
@@ -1242,6 +1246,7 @@ public class PhoneNumberUtils
      *
      * @deprecated Use link #formatNumber(String phoneNumber, String defaultCountryIso) instead
      */
+    @Deprecated
     public static void formatNanpNumber(Editable text) {
         int length = text.length();
         if (length > "+1-nnn-nnn-nnnn".length()) {
@@ -1357,6 +1362,7 @@ public class PhoneNumberUtils
      *
      * @deprecated Use link #formatNumber(String phoneNumber, String defaultCountryIso) instead
      */
+    @Deprecated
     public static void formatJapaneseNumber(Editable text) {
         JapanesePhoneNumberFormatter.format(text);
     }
@@ -1378,32 +1384,52 @@ public class PhoneNumberUtils
     }
 
     /**
-     * Format the given phoneNumber to the E.164 representation.
-     * <p>
-     * The given phone number must have an area code and could have a country
-     * code.
-     * <p>
-     * The defaultCountryIso is used to validate the given number and generate
-     * the E.164 phone number if the given number doesn't have a country code.
+     * Formats the specified {@code phoneNumber} to the E.164 representation.
      *
-     * @param phoneNumber
-     *            the phone number to format
-     * @param defaultCountryIso
-     *            the ISO 3166-1 two letters country code
-     * @return the E.164 representation, or null if the given phone number is
-     *         not valid.
+     * @param phoneNumber the phone number to format.
+     * @param defaultCountryIso the ISO 3166-1 two letters country code.
+     * @return the E.164 representation, or null if the given phone number is not valid.
      */
     public static String formatNumberToE164(String phoneNumber, String defaultCountryIso) {
+        return formatNumberInternal(phoneNumber, defaultCountryIso, PhoneNumberFormat.E164);
+    }
+
+    /**
+     * Formats the specified {@code phoneNumber} to the RFC3966 representation.
+     *
+     * @param phoneNumber the phone number to format.
+     * @param defaultCountryIso the ISO 3166-1 two letters country code.
+     * @return the RFC3966 representation, or null if the given phone number is not valid.
+     */
+    public static String formatNumberToRFC3966(String phoneNumber, String defaultCountryIso) {
+        return formatNumberInternal(phoneNumber, defaultCountryIso, PhoneNumberFormat.RFC3966);
+    }
+
+    /**
+     * Formats the raw phone number (string) using the specified {@code formatIdentifier}.
+     * <p>
+     * The given phone number must have an area code and could have a country code.
+     * <p>
+     * The defaultCountryIso is used to validate the given number and generate the formatted number
+     * if the specified number doesn't have a country code.
+     *
+     * @param rawPhoneNumber The phone number to format.
+     * @param defaultCountryIso The ISO 3166-1 two letters country code.
+     * @param formatIdentifier The (enum) identifier of the desired format.
+     * @return the formatted representation, or null if the specified number is not valid.
+     */
+    private static String formatNumberInternal(
+            String rawPhoneNumber, String defaultCountryIso, PhoneNumberFormat formatIdentifier) {
+
         PhoneNumberUtil util = PhoneNumberUtil.getInstance();
-        String result = null;
         try {
-            PhoneNumber pn = util.parse(phoneNumber, defaultCountryIso);
-            if (util.isValidNumber(pn)) {
-                result = util.format(pn, PhoneNumberFormat.E164);
+            PhoneNumber phoneNumber = util.parse(rawPhoneNumber, defaultCountryIso);
+            if (util.isValidNumber(phoneNumber)) {
+                return util.format(phoneNumber, formatIdentifier);
             }
-        } catch (NumberParseException e) {
-        }
-        return result;
+        } catch (NumberParseException ignored) { }
+
+        return null;
     }
 
     /**
@@ -2454,7 +2480,7 @@ public class PhoneNumberUtils
      *
      * @param number SIP address of the form "username@domainname"
      *               (or the URI-escaped equivalent "username%40domainname")
-     * @see isUriNumber
+     * @see #isUriNumber
      *
      * @hide
      */
