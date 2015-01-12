@@ -156,8 +156,7 @@
     <string name="low_memory" product="default" msgid="3475999286680000541">"फोन भण्डारण भरिएको छ! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"सञ्जाल अनुगमित हुन सक्छ"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"अज्ञात तेस्रो पक्ष द्वारा"</string>
-    <!-- no translation found for ssl_ca_cert_noti_by_administrator (550758088185764312) -->
-    <skip />
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"तपाईँको काम प्रोफाइल प्रशासक द्वारा"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> द्वारा"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"कार्य प्रोफाइल मेटियो"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"प्रशासन अनुप्रयोग हराएको कारण कार्य प्रोफाइल मेटियो।"</string>
@@ -1120,8 +1119,7 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"प्रविष्टि गर्नुहोस्"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"मेटाउनुहोस्"</string>
     <string name="search_go" msgid="8298016669822141719">"खोज्नुहोस्"</string>
-    <!-- no translation found for search_hint (6478518958261830568) -->
-    <skip />
+    <string name="search_hint" msgid="1733947260773056054">"खोज्नुहोस्..."</string>
     <string name="searchview_description_search" msgid="6749826639098512120">"खोज्नुहोस्"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"जिज्ञासा खोज गर्नुहोस्"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"प्रश्‍न हटाउनुहोस्"</string>
@@ -1854,8 +1852,7 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"पिन निकाल्नुअघि PIN सोध्नुहोस्"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"पिन निकाल्नुअघि खोल्ने रूपरेखा सोध्नुहोस्"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"पिन निकाल्नुअघि पासवर्ड सोध्नुहोस्"</string>
-    <!-- no translation found for battery_saver_description (8827793659456917683) -->
-    <skip />
+    <string name="battery_saver_description" msgid="1960431123816253034">"ब्याट्रीको आयु सुधार्न, ब्याट्री रक्षकले तपाईँको यन्त्रको कार्यसम्पादन घटाउँछ र भाइब्रेसन, स्थान सेवा र बहुसंख्यक पृष्ठभूमि डेटा सीमित गर्दछ। इमेल, सन्देश, र अन्य अनुप्रयोगहरू जुन सिङ्कमा भर पर्छन् अद्यावधिक नहुन सक्छन् जबसम्म तपाईँ तिनीहरूलाई खोल्नुहुन्न\n\n ब्याट्री रक्षक स्वत: निस्कृय हुन्छ जब तपाईँको यन्त्र चार्ज हुँदै हुन्छ।"</string>
     <string name="downtime_condition_summary" msgid="8761776337475705749">"तपाईँको <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> डाउनटाइम समाप्त हुँदा सम्म"</string>
     <string name="downtime_condition_line_one" msgid="8762708714645352010">"तपाईँको डाउनटाइम समाप्त नभए सम्म"</string>
   <plurals name="zen_mode_duration_minutes_summary">
