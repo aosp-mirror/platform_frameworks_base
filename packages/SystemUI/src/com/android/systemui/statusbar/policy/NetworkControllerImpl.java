@@ -1194,7 +1194,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 int length = mSignalsChangedCallbacks.size();
                 for (int i = 0; i < length; i++) {
                     mSignalsChangedCallbacks.get(i).onMobileDataSignalChanged(mCurrentState.enabled
-                            && !mCurrentState.isEmergency && !mCurrentState.airplaneMode,
+                            && !mCurrentState.isEmergency,
                             getQsCurrentIconId(), contentDescription,
                             qsTypeIcon,
                             mCurrentState.dataConnected && mCurrentState.activityIn,
