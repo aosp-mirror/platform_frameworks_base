@@ -1,0 +1,315 @@
+page.title=Applying a Transition
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#Create">Create a Transition</a></li>
+  <li><a href="#Apply">Apply a Transition</a></li>
+  <li><a href="#Targets">Choose Specific Target Views</a></li>
+  <li><a href="#Multiple">Specify Multiple Transitions</a></li>
+  <li><a href="#NoScenes">Apply a Transition Without Scenes</a></li>
+  <li><a href="#Callbacks">Define Transition Lifecycle Callbacks</a></li>
+</ol>
+</div>
+</div>
+
+<p>In the transitions framework, animations create a series of frames that depict a change
+between the view hierarchies in the starting and ending scenes. The framework represents
+these animations as transition objects, which contain information about an animation. To
+run an animation, you provide the transition to use and the ending scene to a transition
+manager.</p>
+
+<p>This lesson teaches you run an animation between two scenes using built-in transitions
+to move, resize, and fade views. The next lesson shows you how to define custom transitions.</p>
+
+
+
+<h2 id="Create">Create a Transition</h2>
+
+<p>In the previous lesson, you learned how to create scenes that represent the state of
+different view hierarchies. Once you have defined the starting scene and the ending scene you
+want to change between, you need to create a {@link android.transition.Transition} object
+that defines an animation. The framework enables you to specify a built-in transition in a
+resource file and inflate it in your code or to create an instance of a built-in transition
+directly in your code.</p>
+
+<!-- Built in transition table -->
+<p class="table-caption" id="table1"><strong>Table 1.</strong> Built-in transition types.</p>
+<table>
+<tr>
+  <th scope="col">Class</th>
+  <th scope="col">Tag</th>
+  <th scope="col">Attributes</th>
+  <th scope="col">Effect</th>
+</tr>
+<tr>
+  <td><code><a href="/reference/android/transition/AutoTransition.html">AutoTransition</a></code></td>
+  <td>&lt;autoTransition/&gt;</td>
+  <td style="text-align=center;"> - </td>
+  <td>Default transition. Fade out, move and resize, and fade in views, in that order.</td>
+</tr>
+<tr>
+  <td><code><a href="/reference/android/transition/Fade.html">Fade</a></code></td>
+  <td>&lt;fade/&gt;</td>
+  <td><code>android:fadingMode="[fade_in |<br> fade_out |<br> fade_in_out]"</code></td>
+  <td>
+    <code>fade_in</code> fades in views<br>
+    <code>fade_out</code> fades out views<br>
+    <code>fade_in_out</code> (default) does a <code>fade_out</code> followed by a <code>fade_in</code>.
+  </td>
+</tr>
+<tr>
+  <td><code><a href="/reference/android/transition/ChangeBounds.html">ChangeBounds</a></code></td>
+  <td>&lt;changeBounds/&gt;</td>
+  <td style="text-align=center;"> - </td>
+  <td>Moves and resizes views.</td>
+</tr>
+</table>
+
+
+<h3 id="FromFile">Create a transition instance from a resource file</h3>
+
+<p>This technique enables you to modify your transition definition without having to change
+the code of your activity. This technique is also useful to separate complex transition
+definitions from your application code, as shown in <a href="#Multiple">Specify Multiple
+Transitions</a>.</p>
+
+<p>To specify a built-in transition in a resource file, follow these steps:</p>
+
+<ol>
+<li>Add the <code>res/transition/</code> directory to your project.</li>
+<li>Create a new XML resource file inside this directory.</li>
+<li>Add an XML node for one of the built-in transitions.</li>
+</ol>
+
+<p>For example, the following resource file specifies the {@link android.transition.Fade}
+transition:</p>
+
+<p class="code-caption">res/transition/fade_transition.xml</p>
+
+<pre>
+&lt;fade xmlns:android="http://schemas.android.com/apk/res/android" />
+</pre>
+
+<p>The following code snippet shows how to inflate a {@link android.transition.Transition}
+instance inside your activity from a resource file:</p>
+
+<pre>
+Transition mFadeTransition =
+        TransitionInflater.from(this).
+        inflateTransition(R.transition.fade_transition);
+</pre>
+
+
+<h3 id="FromCode">Create a transition instance in your code</h3>
+
+<p>This technique is useful for creating transition objects dynamically if you modify the user
+interface in your code, and to create simple built-in transition instances with few or
+no parameters.</p>
+
+<p>To create an instance of a built-in transition, invoke one of the public constructors in
+the subclasses of the {@link android.transition.Transition} class. For example, the following
+code snippet creates an instance of the {@link android.transition.Fade} transition:</p>
+
+<pre>
+Transition mFadeTransition = new Fade();
+</pre>
+
+
+
+<h2 id="Apply">Apply a Transition</h2>
+
+<p>You typically apply a transition to change between different view hierarchies in response
+to an event, such as a user action. For example, consider a search app: when the user enters
+a search term and clicks the search button, the app changes to the scene that represents the
+results layout while applying a transition that fades out the search button and fades in the
+search results.</p>
+
+<p>To make a scene change while applying a transition in response to some event in your
+activity, call the {@link android.transition.TransitionManager#go TransitionManager.go()}
+static method with the ending scene and the transition instance to use for the animation,
+as shown in the following snippet:</p>
+
+<pre>
+TransitionManager.go(mEndingScene, mFadeTransition);
+</pre>
+
+<p>The framework changes the view hierarchy inside the scene root with the view hierarchy
+from the ending scene while running the animation specified by the transition instance. The
+starting scene is the ending scene from the last transition. If there was no previous
+transition, the starting scene is determined automatically from the current state of the
+user interface.</p>
+
+<p>If you do not specify a transition instance, the transition manager can apply an automatic
+transition that does something reasonable for most situations. For more information, see the
+API reference for the {@link android.transition.TransitionManager} class.</p>
+
+
+
+<h2 id="Targets">Choose Specific Target Views</h2>
+
+<p>The framework applies transitions to all views in the starting and ending scenes by
+default. In some cases, you may only want  to apply an animation to a subset of views in a
+scene. For example, the framework does not support animating changes to
+{@link android.widget.ListView} objects, so you should not try to animate them during a
+transition. The framework enables you to select specific views you want to animate.</p>
+
+<p>Each view that the transition animates is called a <em>target</em>. You can only
+select targets that are part of the view hierarchy associated with a scene.</p>
+
+<p>To remove one or more views from the list of targets, call the {@link
+android.transition.Transition#removeTarget removeTarget()} method before starting
+the transition. To add only the views you specify to the list of targets, call the
+{@link android.transition.Transition#addTarget addTarget()} method. For more
+information, see the API reference for the {@link android.transition.Transition} class.</p>
+
+
+
+<h2 id="Multiple">Specify Multiple Transitions</h2>
+
+<p>To get the most impact from an animation, you should match it to the type of changes
+that occur between the scenes. For example, if you are removing some views and adding others
+between scenes, a fade out/fade in animation provides a noticeable indication that some views
+are no longer available. If you are moving views to different points on the screen, a better
+choice would be to animate the movement so that users notice the new location of the views.</p>
+
+<p>You do not have to choose only one animation, since the transitions framework enables you
+to combine animation effects in a transition set that contains a group of individual built-in
+or custom transitions.</p>
+
+<p>To define a transition set from a collection of transitions in XML, create a resource file
+in the <code>res/transitions/</code> directory and list the transitions under the
+<code>transitionSet</code> element. For example, the following snippet shows how to specify a
+transition set that has the same behaviour as the {@link android.transition.AutoTransition}
+class:</p>
+
+<pre>
+&lt;transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+    android:transitionOrdering="sequential">
+    &lt;fade android:fadingMode="fade_out" />
+    &lt;changeBounds />
+    &lt;fade android:fadingMode="fade_in" />
+&lt;/transitionSet>
+</pre>
+
+<p>To inflate the transition set into a {@link android.transition.TransitionSet} object in
+your code, call the {@link android.transition.TransitionInflater#from TransitionInflater.from()}
+method in your activity. The {@link android.transition.TransitionSet} class extends from the
+{@link android.transition.Transition} class, so you can use it with a transition manager just
+like any other {@link android.transition.Transition} instance.</p>
+
+
+
+<h2 id="NoScenes">Apply a Transition Without Scenes</h2>
+
+<p>Changing view hierarchies is not the only way to modify your user interface. You can also
+make changes by adding, modifying, and removing child views within the current hierarchy. For
+example, you can implement a search interaction with just a single layout. Start with the
+layout showing a search entry field and a search icon. To change the user interface to show
+the results, remove the search button when the user clicks it by calling the {@link
+android.view.ViewGroup#removeView ViewGroup.removeView()} method, and add the search results by
+calling {@link android.view.ViewGroup#addView ViewGroup.addView()} method.</p>
+
+<p>You may want to use this approach if the alternative is to have two hierarchies that are
+nearly identical. Rather than having to create and maintain two separate layout files for a
+minor difference in the user interface, you can have one layout file containing a view
+hierarchy that you modify in code.</p>
+
+<p>If you make changes within the current view hierarchy in this fashion, you do not need to
+create a scene. Instead, you can create and apply a transition between two states of a view
+hierarchy using a <em>delayed transition</em>. This feature of the transitions framework
+starts with the current view hierarchy state, records changes you make to its views, and applies
+a transition that animates the changes when the system redraws the user interface.</p>
+
+<p>To create a delayed transition within a single view hierarchy, follow these steps:</p>
+
+<ol>
+<li>When the event that triggers the transition occurs, call the {@link
+android.transition.TransitionManager#beginDelayedTransition
+TransitionManager.beginDelayedTransition()} method providing the parent view of all the views
+you want to change and the transition to use. The framework stores the current state of the
+child views and their property values.</li>
+<li>Make changes to the child views as required by your use case. The framework records
+the changes you make to the child views and their properties.</li>
+<li>When the system redraws the user interface according to your changes, the framework
+animates the changes between the original state and the new state.</li>
+</ol>
+
+<p>The following example shows how to animate the addition of a text view to a view hierarchy
+using a delayed transition. The first snippet shows the layout definition file:</p>
+
+<p class="code-caption">res/layout/activity_main.xml</p>
+
+<pre>
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    &lt;EditText
+        android:id="@+id/inputText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    ...
+&lt;/RelativeLayout>
+</pre>
+
+<p>The next snippet shows the code that animates the addition of the text view:</p>
+
+<p class="code-caption">MainActivity.java</p>
+
+<pre>
+private TextView mLabelText;
+private Fade mFade;
+private ViewGroup mRootView;
+...
+
+// Load the layout
+this.setContentView(R.layout.activity_main);
+...
+
+// Create a new TextView and set some View properties
+mLabelText = new TextView();
+mLabelText.setText("Label").setId("1");
+
+// Get the root view and create a transition
+mRootView = (ViewGroup) findViewById(R.id.mainLayout);
+mFade = new Fade(IN);
+
+// Start recording changes to the view hierarchy
+TransitionManager.beginDelayedTransition(mRootView, mFade);
+
+// Add the new TextView to the view hierarchy
+mRootView.addView(mLabelText);
+
+// When the system redraws the screen to show this update,
+// the framework will animate the addition as a fade in
+</pre>
+
+
+
+<h2 id="Callbacks">Define Transition Lifecycle Callbacks</h2>
+
+<p>The transition lifecycle is similar to the activity lifecycle. It represents the transition
+states that the framework monitors during the time between a call to the {@link
+android.transition.TransitionManager#go TransitionManager.go()} method and the completion of
+the animation. At important lifecycle states, the framework invokes callbacks defined by
+the {@link android.transition.Transition.TransitionListener TransitionListener}
+interface.</p>
+
+<p>Transition lifecycle callbacks are useful, for example, for copying a view property value
+from the starting view hierarchy to the ending view hierarchy during a scene change. You
+cannot simply copy the value from its starting view to the view in the ending view hierarchy,
+because the ending view hierarchy is not inflated until the transition is completed.
+Instead, you need to store the value in a variable and then copy it into the ending view
+hierarchy when the framework has finished the transition. To get notified when the transition
+is completed, you can implement the {@link
+android.transition.Transition.TransitionListener#onTransitionEnd
+TransitionListener.onTransitionEnd()} method in your activity.</p>
+
+<p>For more information, see the API reference for the {@link
+android.transition.Transition.TransitionListener TransitionListener} class.</p>

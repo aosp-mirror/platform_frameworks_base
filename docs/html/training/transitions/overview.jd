@@ -1,0 +1,165 @@
+page.title=The Transitions Framework
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+<h2>This lesson covers</h2>
+<ol>
+  <li><a href="#Overview">Overview</a></li>
+  <li><a href="#Scenes">Scenes</a></li>
+  <li><a href="#Transitions">Transitions</a></li>
+  <li><a href="#Limitations">Limitations</a></li>
+</ol>
+</div>
+</div>
+
+<p>Animating your app's user interface provides more than just visual appeal. Animations
+highlight changes and provide visual cues that help users learn how your app works.</p>
+
+<p>To help you animate a change between one view hierarchy and another, Android provides the
+transitions framework. This framework applies one or more animations to all the views in the
+hierarchies as it changes between them.</p>
+
+<p>The framework has the following features:</p>
+
+<dl>
+<dt><em>Group-level animations</em></dt>
+<dd>Applies one or more animation effects to all of the views in a view hierarchy.</dd>
+<dt><em>Transition-based animation</em></dt>
+<dd>Runs animations based on the changes between starting and ending view property values.</dd>
+<dt><em>Built-in animations</em></dt>
+<dd>Includes predefined animations for common effects such as fade out or movement.</dd>
+
+<!-- Figure 1 - Transitions video -->
+<div style="float:right;margin-left:30px;margin-top:10px">
+<div class="framed-nexus5-port-span-5" style="clear:left;">
+<video class="play-on-hover" height="442" autoplay="" poster="">
+<source src="{@docRoot}images/transitions/transition_sample_video.mp4" type="video/mp4">
+<source src="{@docRoot}images/transitions/transition_sample_video.ogv" type="video/ogg">
+<source src="{@docRoot}images/transitions/transition_sample_video.webm" type="video/webm">
+</video>
+</div>
+<p class="img-caption" style="margin-top:7px;margin-bottom:0px">
+<strong>Figure 1.</strong> Visual cues using user interface animation.</p>
+<div style="margin-top:5px;margin-bottom:20px;font-size:10pt" class="video-instructions">&nbsp;</div>
+</div>
+
+<dt><em>Resource file support</em></dt>
+<dd>Loads view hierarchies and built-in animations from layout resource files.</dd>
+<dt><em>Lifecycle callbacks</em></dt>
+<dd>Defines callbacks that provide finer control over the animation and hierarchy change
+process.</dd>
+</dl>
+
+
+
+<h2 id="Overview">Overview</h2>
+
+<p>The example in Figure 1 shows how an animation provides visual cues to help the user. As the
+app changes from its search entry screen to its search results screen, it fades out views that
+are no longer in use and fades in new views.</p>
+
+<p>This animation is an example of using the transitions framework. The framework
+animates changes to all the views in two view hierarchies. A view hierarchy can be as simple
+as a single view or as complex as a {@link android.view.ViewGroup} containing an elaborate
+tree of views. The framework animates each view by changing one or more of its property values
+over time between the initial or <em>starting</em> view hierarchy and the final or <em>ending</em>
+view hierarchy.</p>
+
+<p>The transitions framework works in parallel with view hierarchies and animations. The
+purpose of the framework is to store the state of view hierarchies, change between these
+hierarchies in order to modify the appearance of the device screen, and animate the change by
+storing and applying animation definitions.</p>
+
+<p>The diagram in Figure 2 illustrates the relationship between view hierarchies, framework
+objects, and animations:</p>
+
+<!-- Figure 2 - diagram -->
+<img src="{@docRoot}images/transitions/transitions_diagram.png"
+     width="506" height="234" alt="" style="margin-top:7px" />
+<p class="img-caption"><strong>Figure 2.</strong> Relationships in the transitions framework.</p>
+
+<p>The transitions framework provides abstractions for scenes, transitions, and transition
+managers. These are described in detail in the following sections. To use the framework, you
+create scenes for the view hierarchies in your app that you plan to change between. Next, you
+create a transition for each animation you want to use. To start the animation between two
+view hierarchies, you use a transition manager specifying the transition to use and the ending
+scene. This procedure is described in detail in the remaining lessons in this class.</p>
+
+
+
+<h2 id="Scenes">Scenes</h2>
+
+<p>A scene stores the state of a view hierarchy, including all its views and their property
+values. A view hierarchy can be a simple view or a complex tree of views and child layouts.
+Storing the view hierarchy state in a scene enables you to transition into that state from
+another scene. The framework provides the {@link android.transition.Scene} class to represent
+a scene.</p>
+
+<p>The transitions framework lets you create scenes from layout resource files or from
+{@link android.view.ViewGroup} objects in your code. Creating a scene in your code is useful
+if you generated a view hierarchy dynamically or if you are modifying it at runtime.</p>
+
+<p>In most cases, you do not create a starting scene explicitly. If you have applied a
+transition, the framework uses the previous ending scene as the starting scene for any
+subsequent transitions. If you have not applied a transition, the framework collects information
+about the views from the current state of the screen.</p>
+
+<p>A scene can also define its own actions that run when you make a scene change. For example,
+this feature is useful for cleaning up view settings after you transition to a scene.</p>
+
+<p>In addition to the view hierarchy and its property values, a scene also stores a reference
+to the parent of the view hierarchy. This root view is called a <strong>scene root</strong>.
+Changes to the scene and animations that affect the scene occur within the scene root.</p>
+
+<p>To learn how to create scenes, see
+<a href="{@docRoot}training/transitions/scenes.html">Creating a Scene</a>.</p>
+
+
+
+<h2 id="Transitions">Transitions</h2>
+
+<p>In the transitions framework, animations create a series of frames that depict a change
+between the view hierarchies in the starting and ending scenes. Information about the animation
+is stored in a {@link android.transition.Transition} object. To run the animation, you apply the
+transition using a {@link android.transition.TransitionManager} instance. The framework can
+transition between two different scenes or transition to a different state for the current
+scene.</p>
+
+<p>The framework includes a set of built-in transitions for commonly-used animation effects,
+such as fading and resizing views. You can also define your own custom transitions to create
+an animation effect using the APIs in the animations framework. The transitions framework also
+enables you to combine different animation effects in a transition set that contains a group
+of individual built-in or custom transitions.</p>
+
+<p>The transition lifecycle is similar to the activity lifecycle, and it represents the
+transition states that the framework monitors between the start and the completion of an
+animation. At important lifecycle states, the framework invokes callback methods that you can
+implement to make adjustments to your user interface at different phases of the transition.</p>
+
+<p>To learn more about transitions, see
+<a href="{@docRoot}training/transitions/transitions.html">Applying a Transition</a> and
+<a href="{@docRoot}training/transitions/custom-transitions.html">Creating Custom
+Transitions</a>.</p>
+
+
+
+<h2 id="Limitations">Limitations</h2>
+
+<p>This section lists some known limitations of the transitions framework:</p>
+
+<ul>
+<li>Animations applied to a {@link android.view.SurfaceView} may not appear correctly.
+{@link android.view.SurfaceView} instances are updated from a non-UI thread, so the updates
+may be out of sync with the animations of other views.</li>
+<li>Some specific transition types may not produce the desired animation effect when applied
+to a {@link android.view.TextureView}.</li>
+<li>Classes that extend {@link android.widget.AdapterView}, such as
+{@link android.widget.ListView}, manage their child views in ways that are incompatible with
+the transitions framework. If you try to animate a view based on
+{@link android.widget.AdapterView}, the device display may hang.</li>
+<li>If you try to resize a {@link android.widget.TextView} with an animation, the text will
+pop to a new location before the object has completely resized. To avoid this problem, do not
+animate the resizing of views that contain text.</li>
+</ul>
