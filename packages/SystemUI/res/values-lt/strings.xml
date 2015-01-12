@@ -262,8 +262,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"Atlikta"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Prijungtas"</string>
     <string name="quick_settings_connected_via_wfa" msgid="1587051627194895715">"Prisijungta naudojant „Wi‑Fi“ pagelbiklį"</string>
-    <!-- no translation found for quick_settings_saved (4758747300943481411) -->
-    <skip />
+    <string name="quick_settings_saved" msgid="4758747300943481411">"Išsaugota"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Prisijungiama..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Susiejimas"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Viešosios interneto prieigos taškas"</string>
