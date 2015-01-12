@@ -164,21 +164,25 @@ public class AnalogWatchFaceService extends CanvasWatchFaceService {
 
         &#64;Override
         public void onCreate(SurfaceHolder holder) {
+            super.onCreate(holder);
             /* initialize your watch face */
         }
 
         &#64;Override
         public void onPropertiesChanged(Bundle properties) {
+            super.onPropertiesChanged(properties);
             /* get device features (burn-in, low-bit ambient) */
         }
 
         &#64;Override
         public void onTimeTick() {
+            super.onTimeTick();
             /* the time changed */
         }
 
         &#64;Override
         public void onAmbientModeChanged(boolean inAmbientMode) {
+            super.onAmbientModeChanged(inAmbientMode);
             /* the wearable switched between modes */
         }
 
@@ -189,6 +193,7 @@ public class AnalogWatchFaceService extends CanvasWatchFaceService {
 
         &#64;Override
         public void onVisibilityChanged(boolean visible) {
+            super.onVisibilityChanged(visible);
             /* the watch face became visible or invisible */
         }
     }
