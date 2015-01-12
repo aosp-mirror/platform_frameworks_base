@@ -16,7 +16,6 @@
 
 package android.net;
 
-import android.net.NetworkUtils;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.system.ErrnoException;
@@ -31,15 +30,14 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLStreamHandler;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.net.SocketFactory;
 
 import com.android.okhttp.ConnectionPool;
-import com.android.okhttp.HostResolver;
 import com.android.okhttp.HttpHandler;
 import com.android.okhttp.HttpsHandler;
 import com.android.okhttp.OkHttpClient;
+import com.android.okhttp.OkUrlFactory;
+import com.android.okhttp.internal.Internal;
 
 /**
  * Identifies a {@code Network}.  This is supplied to applications via
@@ -60,10 +58,10 @@ public class Network implements Parcelable {
     // Objects used to perform per-network operations such as getSocketFactory
     // and openConnection, and a lock to protect access to them.
     private volatile NetworkBoundSocketFactory mNetworkBoundSocketFactory = null;
-    // mLock should be used to control write access to mConnectionPool and mHostResolver.
+    // mLock should be used to control write access to mConnectionPool and mNetwork.
     // maybeInitHttpClient() must be called prior to reading either variable.
     private volatile ConnectionPool mConnectionPool = null;
-    private volatile HostResolver mHostResolver = null;
+    private volatile com.android.okhttp.internal.Network mNetwork = null;
     private Object mLock = new Object();
 
     // Default connection pool values. These are evaluated at startup, just
@@ -217,10 +215,10 @@ public class Network implements Parcelable {
     // out) ConnectionPools.
     private void maybeInitHttpClient() {
         synchronized (mLock) {
-            if (mHostResolver == null) {
-                mHostResolver = new HostResolver() {
+            if (mNetwork == null) {
+                mNetwork = new com.android.okhttp.internal.Network() {
                     @Override
-                    public InetAddress[] getAllByName(String host) throws UnknownHostException {
+                    public InetAddress[] resolveInetAddresses(String host) throws UnknownHostException {
                         return Network.this.getAllByName(host);
                     }
                 };
@@ -244,23 +242,26 @@ public class Network implements Parcelable {
     public URLConnection openConnection(URL url) throws IOException {
         maybeInitHttpClient();
         String protocol = url.getProtocol();
-        OkHttpClient client;
-        // TODO: HttpHandler creates OkHttpClients that share the default ResponseCache.
+        OkUrlFactory okUrlFactory;
+        // TODO: HttpHandler creates OkUrlFactory instances that share the default ResponseCache.
         // Could this cause unexpected behavior?
         // TODO: Should the network's proxy be specified?
         if (protocol.equals("http")) {
-            client = HttpHandler.createHttpOkHttpClient(null /* proxy */);
+            okUrlFactory = HttpHandler.createHttpOkUrlFactory(null /* proxy */);
         } else if (protocol.equals("https")) {
-            client = HttpsHandler.createHttpsOkHttpClient(null /* proxy */);
+            okUrlFactory = HttpsHandler.createHttpsOkUrlFactory(null /* proxy */);
         } else {
-            // OkHttpClient only supports HTTP and HTTPS and returns a null URLStreamHandler if
+            // OkHttp only supports HTTP and HTTPS and returns a null URLStreamHandler if
             // passed another protocol.
             throw new MalformedURLException("Invalid URL or unrecognized protocol " + protocol);
         }
-        return client.setSocketFactory(getSocketFactory())
-                .setHostResolver(mHostResolver)
-                .setConnectionPool(mConnectionPool)
-                .open(url);
+        OkHttpClient client = okUrlFactory.client();
+        client.setSocketFactory(getSocketFactory()).setConnectionPool(mConnectionPool);
+
+        // Use internal APIs to change the Network.
+        Internal.instance.setNetwork(client, mNetwork);
+
+        return okUrlFactory.open(url);
     }
 
     /**
