@@ -129,28 +129,28 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Returns the subscription ID.
+     * @return the subscription ID.
      */
     public int getSubscriptionId() {
         return this.mId;
     }
 
     /**
-     * Returns the ICC ID.
+     * @return the ICC ID.
      */
     public String getIccId() {
         return this.mIccId;
     }
 
     /**
-     * Returns the slot index of this Subscription's SIM card.
+     * @return the slot index of this Subscription's SIM card.
      */
     public int getSimSlotIndex() {
         return this.mSimSlotIndex;
     }
 
     /**
-     * Returns the name displayed to the user that identifies this subscription
+     * @return the name displayed to the user that identifies this subscription
      */
     public CharSequence getDisplayName() {
         return this.mDisplayName;
@@ -165,7 +165,7 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Returns the name displayed to the user that identifies Subscription provider name
+     * @return the name displayed to the user that identifies Subscription provider name
      */
     public CharSequence getCarrierName() {
         return this.mCarrierName;
@@ -180,8 +180,9 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Return the source of the name, eg NAME_SOURCE_UNDEFINED, NAME_SOURCE_DEFAULT_SOURCE,
+     * @return the source of the name, eg NAME_SOURCE_UNDEFINED, NAME_SOURCE_DEFAULT_SOURCE,
      * NAME_SOURCE_SIM_SOURCE or NAME_SOURCE_USER_INPUT.
+     * @hide
      */
     public int getNameSource() {
         return this.mNameSource;
@@ -246,35 +247,37 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Returns the number of this subscription.
+     * @return the number of this subscription.
      */
     public String getNumber() {
         return mNumber;
     }
 
     /**
-     * Return the data roaming value.
+     * @return the data roaming state for this subscription, either DATA_ROAMING_ENABLE or
+     * DATA_ROAMING_DISABLE.
+     * @hide
      */
     public int getDataRoaming() {
         return this.mDataRoaming;
     }
 
     /**
-     * Returns the MCC.
+     * @return the MCC.
      */
     public int getMcc() {
         return this.mMcc;
     }
 
     /**
-     * Returns the MNC.
+     * @return the MNC.
      */
     public int getMnc() {
         return this.mMnc;
     }
 
     /**
-     * Returns the ISO country code
+     * @return the ISO country code
      */
     public String getCountryIso() {
         return this.mCountryIso;

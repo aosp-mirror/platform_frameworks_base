@@ -28619,13 +28619,11 @@ package android.telephony {
     method public int describeContents();
     method public java.lang.CharSequence getCarrierName();
     method public java.lang.String getCountryIso();
-    method public int getDataRoaming();
     method public java.lang.CharSequence getDisplayName();
     method public java.lang.String getIccId();
     method public int getIconTint();
     method public int getMcc();
     method public int getMnc();
-    method public int getNameSource();
     method public java.lang.String getNumber();
     method public int getSimSlotIndex();
     method public int getSubscriptionId();
