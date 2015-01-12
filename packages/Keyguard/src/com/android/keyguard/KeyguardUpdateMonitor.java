@@ -284,8 +284,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
                 if (cb != null) {
                     cb.onSimStateChanged(data.subId, data.slotId, data.simState);
-                    cb.onRefreshCarrierInfo();
                 }
+            }
+        }
+        for (int j = 0; j < mCallbacks.size(); j++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
+            if (cb != null) {
+                cb.onRefreshCarrierInfo();
             }
         }
     }
