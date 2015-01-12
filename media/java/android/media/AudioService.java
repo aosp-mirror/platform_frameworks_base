@@ -846,12 +846,6 @@ public class AudioService extends IAudioService.Stub {
         mDockAudioMediaEnabled = Settings.Global.getInt(
                                         cr, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED, 0) == 1;
 
-        if (mDockAudioMediaEnabled) {
-            mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
-        } else {
-            mBecomingNoisyIntentDevices &= ~AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
-        }
-
         sendMsg(mAudioHandler,
                 MSG_SET_FORCE_USE,
                 SENDMSG_QUEUE,
@@ -4182,7 +4176,9 @@ public class AudioService extends IAudioService.Stub {
         }
 
         private void setForceUse(int usage, int config) {
-            AudioSystem.setForceUse(usage, config);
+            synchronized (mConnectedDevices) {
+                setForceUseInt_SyncDevices(usage, config);
+            }
         }
 
         private void onPersistSafeVolumeState(int state) {
@@ -4672,6 +4668,7 @@ public class AudioService extends IAudioService.Stub {
 
     // Devices which removal triggers intent ACTION_AUDIO_BECOMING_NOISY. The intent is only
     // sent if none of these devices is connected.
+    // Access synchronized on mConnectedDevices
     int mBecomingNoisyIntentDevices =
             AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
             AudioSystem.DEVICE_OUT_ALL_A2DP | AudioSystem.DEVICE_OUT_HDMI |
@@ -4679,6 +4676,7 @@ public class AudioService extends IAudioService.Stub {
             AudioSystem.DEVICE_OUT_ALL_USB | AudioSystem.DEVICE_OUT_LINE;
 
     // must be called before removing the device from mConnectedDevices
+    // Called synchronized on mConnectedDevices
     private int checkSendBecomingNoisyIntent(int device, int state) {
         int delay = 0;
         if ((state == 0) && ((device & mBecomingNoisyIntentDevices) != 0)) {
@@ -5278,13 +5276,37 @@ public class AudioService extends IAudioService.Stub {
 
 
     // Handles request to override default use of A2DP for media.
+    // Must be called synchronized on mConnectedDevices
     public void setBluetoothA2dpOnInt(boolean on) {
         synchronized (mBluetoothA2dpEnabledLock) {
             mBluetoothA2dpEnabled = on;
             mAudioHandler.removeMessages(MSG_SET_FORCE_BT_A2DP_USE);
-            AudioSystem.setForceUse(AudioSystem.FOR_MEDIA,
+            setForceUseInt_SyncDevices(AudioSystem.FOR_MEDIA,
                     mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP);
         }
+    }
+
+    // Must be called synchronized on mConnectedDevices
+    private void setForceUseInt_SyncDevices(int usage, int config) {
+        switch (usage) {
+            case AudioSystem.FOR_MEDIA:
+                if (config == AudioSystem.FORCE_NO_BT_A2DP) {
+                    mBecomingNoisyIntentDevices &= ~AudioSystem.DEVICE_OUT_ALL_A2DP;
+                } else { // config == AudioSystem.FORCE_NONE
+                    mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ALL_A2DP;
+                }
+                break;
+            case AudioSystem.FOR_DOCK:
+                if (config == AudioSystem.FORCE_ANALOG_DOCK) {
+                    mBecomingNoisyIntentDevices |= AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
+                } else { // config == AudioSystem.FORCE_NONE
+                    mBecomingNoisyIntentDevices &= ~AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET;
+                }
+                break;
+            default:
+                // usage doesn't affect the broadcast of ACTION_AUDIO_BECOMING_NOISY
+        }
+        AudioSystem.setForceUse(usage, config);
     }
 
     @Override
