@@ -648,7 +648,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         // Register for SubscriptionInfo list changes which is guaranteed
         // to invoke onSubscriptionsChanged the first time.
         SubscriptionManager.from(mContext)
-            .registerOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
+            .addOnSubscriptionsChangedListener(mOnSubscriptionsChangedListener);
 
         // construct handler, listen for events
         mHandler = new ProviderHandler(looper);

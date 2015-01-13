@@ -30,9 +30,9 @@ import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 
 interface ITelephonyRegistry {
-    void registerOnSubscriptionsChangedListener(String pkg,
+    void addOnSubscriptionsChangedListener(String pkg,
             IOnSubscriptionsChangedListener callback);
-    void unregisterOnSubscriptionsChangedListener(String pkg,
+    void removeOnSubscriptionsChangedListener(String pkg,
             IOnSubscriptionsChangedListener callback);
     void listen(String pkg, IPhoneStateListener callback, int events, boolean notifyNow);
     void listenForSubscriber(in int subId, String pkg, IPhoneStateListener callback, int events,

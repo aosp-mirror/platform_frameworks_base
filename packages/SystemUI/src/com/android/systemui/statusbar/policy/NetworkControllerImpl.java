@@ -173,7 +173,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.registerListener();
         }
-        mSubscriptionManager.registerOnSubscriptionsChangedListener(mSubscriptionListener);
+        mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
 
         // broadcasts
         IntentFilter filter = new IntentFilter();
@@ -199,7 +199,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         for (MobileSignalController mobileSignalController : mMobileSignalControllers.values()) {
             mobileSignalController.unregisterListener();
         }
-        mSubscriptionManager.unregisterOnSubscriptionsChangedListener(mSubscriptionListener);
+        mSubscriptionManager.removeOnSubscriptionsChangedListener(mSubscriptionListener);
         mContext.unregisterReceiver(this);
     }
 
