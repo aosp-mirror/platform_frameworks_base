@@ -414,6 +414,12 @@ public final class ActivityStackSupervisor implements DisplayListener {
             if (DEBUG_STACK) Slog.d(TAG, "moveHomeTask: topStack old=" + topStack + " new="
                     + mFocusedStack);
         }
+        if (mService.mBooting || !mService.mBooted) {
+            final ActivityRecord r = topRunningActivityLocked();
+            if (r != null && r.idle) {
+                checkFinishBootingLocked();
+            }
+        }
     }
 
     void moveHomeStackTaskToTop(int homeStackTaskType) {
@@ -2235,6 +2241,24 @@ public final class ActivityStackSupervisor implements DisplayListener {
         }
     }
 
+    /**
+     * Called when the frontmost task is idle.
+     * @return the state of mService.mBooting before this was called.
+     */
+    private boolean checkFinishBootingLocked() {
+        final boolean booting = mService.mBooting;
+        boolean enableScreen = false;
+        mService.mBooting = false;
+        if (!mService.mBooted) {
+            mService.mBooted = true;
+            enableScreen = true;
+        }
+        if (booting || enableScreen) {
+            mService.postFinishBooting(booting, enableScreen);
+        }
+        return booting;
+    }
+
     // Checked.
     final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
             Configuration config) {
@@ -2246,7 +2270,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         int NS = 0;
         int NF = 0;
         boolean booting = false;
-        boolean enableScreen = false;
         boolean activityRemoved = false;
 
         ActivityRecord r = ActivityRecord.forToken(token);
@@ -2274,12 +2297,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
             //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
             if (isFrontStack(r.task.stack) || fromTimeout) {
-                booting = mService.mBooting;
-                mService.mBooting = false;
-                if (!mService.mBooted) {
-                    mService.mBooted = true;
-                    enableScreen = true;
-                }
+                booting = checkFinishBootingLocked();
             }
         }
 
@@ -2351,10 +2369,6 @@ public final class ActivityStackSupervisor implements DisplayListener {
         mService.trimApplications();
         //dump();
         //mWindowManager.dump();
-
-        if (booting || enableScreen) {
-            mService.postFinishBooting(booting, enableScreen);
-        }
 
         if (activityRemoved) {
             resumeTopActivitiesLocked();
@@ -2624,6 +2638,8 @@ public final class ActivityStackSupervisor implements DisplayListener {
             // before an application stack is created...Go ahead and create one on the default
             // display.
             stack = getStack(createStackOnDisplay(getNextStackId(), Display.DEFAULT_DISPLAY));
+            // Restore home stack to top.
+            moveHomeStack(true);
             if (DEBUG_RECENTS)
                 Slog.v(TAG, "Created stack=" + stack + " for recents restoration.");
         }
