@@ -20,6 +20,8 @@ LOCAL_RESOURCE_DIR := \
     $(LOCAL_PATH)/res
 LOCAL_AAPT_FLAGS := --auto-add-overlay --extra-packages com.android.keyguard
 
+include frameworks/base/packages/SettingsLib/common.mk
+
 include $(BUILD_PACKAGE)
 
 ifeq ($(EXCLUDE_SYSTEMUI_TESTS),)
