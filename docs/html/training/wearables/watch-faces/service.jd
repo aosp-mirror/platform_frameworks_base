@@ -103,8 +103,8 @@ Data Layer API</a>.</p>
 <h3 id="Reference">Wearable Support Library API Reference</h3>
 
 <p>The reference documentation provides detailed information about the classes you use to
-implement watch faces. Download the
-<a href="{@docRoot}shareables/training/wearable-support-docs.zip">API reference
+implement watch faces. Browse the
+<a href="{@docRoot}reference/android/support/wearable/watchface/package-summary.html">API reference
 documentation</a> for the Wearable Support Library.</p>
 
 <h3 id="LibEclipse">Download the Wearable Support Library for Eclipse ADT</h3>

@@ -142,9 +142,9 @@ dependencies {
 
 <h3 id="UiLibReference">Wear UI library API reference</h3>
 
-<p>The reference documentation explains how to use each UI widget in detail. Download the
-<a href="{@docRoot}shareables/training/wearable-support-docs.zip">API reference documentation</a>
-for the classes above.</p>
+<p>The reference documentation explains how to use each UI widget in detail. Browse the
+<a href="{@docRoot}reference/android/support/wearable/view/package-summary.html">Wear API
+reference documentation</a> for the classes above.</p>
 
 <h3 id="UiLibEclipse">Download the Wearable UI library for Eclipse ADT</h3>
 

@@ -88,8 +88,8 @@ dependencies {
 <p>The <code>'com.google.android.support:wearable'</code> dependency is required to implement
 the layout techniques shown in the following sections.</p>
 
-<p><a href="/shareables/training/wearable-support-docs.zip">Download the full API
-reference documentation</a> for the Wearable UI Library classes.</p>
+<p>Browse the <a href="{@docRoot}reference/android/support/wearable/view/package-summary.html">
+API reference documentation</a> for the Wearable UI Library classes.</p>
 
 
 <h2 id="different-layouts">Specify Different Layouts for Square and Round Screens</h2>
