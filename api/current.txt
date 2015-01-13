@@ -28634,6 +28634,7 @@ package android.telephony {
   }
 
   public class SubscriptionManager {
+    method public void addOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
     method public static android.telephony.SubscriptionManager from(android.content.Context);
     method public android.telephony.SubscriptionInfo getActiveSubscriptionInfo(int);
     method public int getActiveSubscriptionInfoCount();
@@ -28641,8 +28642,7 @@ package android.telephony {
     method public android.telephony.SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int);
     method public java.util.List<android.telephony.SubscriptionInfo> getActiveSubscriptionInfoList();
     method public boolean isNetworkRoaming(int);
-    method public void registerOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
-    method public void unregisterOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
+    method public void removeOnSubscriptionsChangedListener(android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
   }
 
   public static class SubscriptionManager.OnSubscriptionsChangedListener {
