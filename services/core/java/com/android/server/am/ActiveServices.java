@@ -1325,6 +1325,7 @@ public final class ActiveServices {
         // We are now bringing the service up, so no longer in the
         // restarting state.
         if (mRestartingServices.remove(r)) {
+            r.resetRestartCounter();
             clearRestartingIfNeededLocked(r);
         }
 
