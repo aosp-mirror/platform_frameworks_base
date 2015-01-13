@@ -1087,6 +1087,10 @@ public abstract class Window {
 
     /**
      * Sets the window elevation.
+     * <p>
+     * Changes to this property take effect immediately and will cause the
+     * window surface to be recreated. This is an expensive operation and as a
+     * result, this property should not be animated.
      *
      * @param elevation The window elevation.
      * @see View#setElevation(float)

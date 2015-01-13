@@ -1338,6 +1338,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mDecor != null) {
             mDecor.setElevation(elevation);
         }
+        dispatchWindowAttributesChanged(getAttributes());
     }
 
     @Override
