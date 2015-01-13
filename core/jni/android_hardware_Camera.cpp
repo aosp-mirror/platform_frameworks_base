@@ -133,7 +133,8 @@ sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, JNICameraContext** pCont
     }
     ALOGV("get_native_camera: context=%p, camera=%p", context, camera.get());
     if (camera == 0) {
-        jniThrowRuntimeException(env, "Method called after release()");
+        jniThrowRuntimeException(env,
+                "Camera is being used after Camera.release() was called");
     }
 
     if (pContext != NULL) *pContext = context;
