@@ -560,39 +560,43 @@ public final class ViewRootImpl implements ViewParent,
                         case WindowManagerGlobal.ADD_BAD_APP_TOKEN:
                         case WindowManagerGlobal.ADD_BAD_SUBWINDOW_TOKEN:
                             throw new WindowManager.BadTokenException(
-                                "Unable to add window -- token " + attrs.token
-                                + " is not valid; is your activity running?");
+                                    "Unable to add window -- token " + attrs.token
+                                    + " is not valid; is your activity running?");
                         case WindowManagerGlobal.ADD_NOT_APP_TOKEN:
                             throw new WindowManager.BadTokenException(
-                                "Unable to add window -- token " + attrs.token
-                                + " is not for an application");
+                                    "Unable to add window -- token " + attrs.token
+                                    + " is not for an application");
                         case WindowManagerGlobal.ADD_APP_EXITING:
                             throw new WindowManager.BadTokenException(
-                                "Unable to add window -- app for token " + attrs.token
-                                + " is exiting");
+                                    "Unable to add window -- app for token " + attrs.token
+                                    + " is exiting");
                         case WindowManagerGlobal.ADD_DUPLICATE_ADD:
                             throw new WindowManager.BadTokenException(
-                                "Unable to add window -- window " + mWindow
-                                + " has already been added");
+                                    "Unable to add window -- window " + mWindow
+                                    + " has already been added");
                         case WindowManagerGlobal.ADD_STARTING_NOT_NEEDED:
                             // Silently ignore -- we would have just removed it
                             // right away, anyway.
                             return;
                         case WindowManagerGlobal.ADD_MULTIPLE_SINGLETON:
                             throw new WindowManager.BadTokenException(
-                                "Unable to add window " + mWindow +
-                                " -- another window of this type already exists");
+                                    "Unable to add window " + mWindow +
+                                    " -- another window of this type already exists");
                         case WindowManagerGlobal.ADD_PERMISSION_DENIED:
                             throw new WindowManager.BadTokenException(
-                                "Unable to add window " + mWindow +
-                                " -- permission denied for this window type");
+                                    "Unable to add window " + mWindow +
+                                    " -- permission denied for this window type");
                         case WindowManagerGlobal.ADD_INVALID_DISPLAY:
                             throw new WindowManager.InvalidDisplayException(
-                                "Unable to add window " + mWindow +
-                                " -- the specified display can not be found");
+                                    "Unable to add window " + mWindow +
+                                    " -- the specified display can not be found");
+                        case WindowManagerGlobal.ADD_INVALID_TYPE:
+                            throw new WindowManager.InvalidDisplayException(
+                                    "Unable to add window " + mWindow
+                                    + " -- the specified window type is not valid");
                     }
                     throw new RuntimeException(
-                        "Unable to add window -- unknown error code " + res);
+                            "Unable to add window -- unknown error code " + res);
                 }
 
                 if (view instanceof RootViewSurfaceTaker) {
