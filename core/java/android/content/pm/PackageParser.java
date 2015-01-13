@@ -2760,7 +2760,15 @@ public class PackageParser {
             }
         }
 
+        addSharedLibrariesForBackwardCompatibility(owner);
+
         return true;
+    }
+
+    private static void addSharedLibrariesForBackwardCompatibility(Package owner) {
+        if (owner.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            owner.usesLibraries = ArrayUtils.add(owner.usesLibraries, "org.apache.http.legacy");
+        }
     }
 
     /**
