@@ -55,7 +55,7 @@ import java.lang.reflect.Method;
 
 public class CaptivePortalLoginActivity extends Activity {
     private static final String TAG = "CaptivePortalLogin";
-    private static final String DEFAULT_SERVER = "clients3.google.com";
+    private static final String DEFAULT_SERVER = "connectivitycheck.android.com";
     private static final int SOCKET_TIMEOUT_MS = 10000;
 
     // Keep this in sync with NetworkMonitor.
