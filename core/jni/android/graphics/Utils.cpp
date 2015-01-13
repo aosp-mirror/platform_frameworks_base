@@ -19,19 +19,9 @@
 
 using namespace android;
 
-AssetStreamAdaptor::AssetStreamAdaptor(Asset* asset, OwnAsset ownAsset,
-                                       HasMemoryBase hasMemoryBase)
+AssetStreamAdaptor::AssetStreamAdaptor(Asset* asset)
     : fAsset(asset)
-    , fMemoryBase(kYes_HasMemoryBase == hasMemoryBase ?
-                  asset->getBuffer(false) : NULL)
-    , fOwnAsset(ownAsset)
 {
-}
-
-AssetStreamAdaptor::~AssetStreamAdaptor() {
-    if (kYes_OwnAsset == fOwnAsset) {
-        delete fAsset;
-    }
 }
 
 bool AssetStreamAdaptor::rewind() {
