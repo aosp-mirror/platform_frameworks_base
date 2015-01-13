@@ -4,11 +4,26 @@ page.metaDescription=Android Training provides a collection of classes that aim 
 
 @jd:body
 
-
 <p>Welcome to Training for Android developers. Here you'll find sets of lessons within classes
 that describe how to accomplish a specific task with code samples you can re-use in your app.
 Classes are organized into several groups you can see at the top-level of the left navigation.</p>
 
-<p>This first group, <em>Getting Started</em>, teaches you the bare
-essentials for Android app development.
-If you're a new Android app developer, you should complete each of these classes in order:</p>
+ <p>This first group, <em>Getting Started</em>, teaches you the bare
+    essentials for Android app development. If you're a new Android app developer, you should
+    complete each of these classes in order.</p>
+
+<div>
+<div style="float:left; width:40%; margin-right:30px">
+
+    <p>If you think you might prefer to learn the basics through interactive video training,
+    check out this trailer for a course in the fundamentals of Android development.</p>
+    <p><a href="https://www.udacity.com/course/ud853" class="button">
+    Start the video course</a></p>
+</div>
+
+<div style="float:left; margin-bottom:20px">
+    <iframe width="300" height="169" src="//www.youtube.com/embed/LfVBFFoy9Y0?utm_source=dac&utm_medium=video&utm_content=andfuntrain&utm_campaign=udacint?rel=0&amp;hd=1" frameborder="0" allowfullscreen></iframe>
+</div>
+</div>
+
+<div style="clear:left"></div>
