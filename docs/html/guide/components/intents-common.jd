@@ -1754,7 +1754,7 @@ public void showStepCount() {
 </div>
 
 <p>To call a taxi, use the
-<a href="{@docRoot}com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a>
+<a href="{@docRoot}reference/com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a>
 action.</p>
 
 <p class="note"><strong>Note:</strong> Apps must ask for confirmation from the user
@@ -1762,7 +1762,7 @@ before completing the action.</p>
 
 <dl>
   <dt><b>Action</b></dt>
-  <dd><a href="{@docRoot}com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a></dd>
+  <dd><a href="{@docRoot}reference/com/google/android/gms/actions/ReserveIntents.html#ACTION_RESERVE_TAXI_RESERVATION"><code>ACTION_RESERVE_TAXI_RESERVATION</code></a></dd>
 
   <dt><b>Data URI</b></dt>
   <dd>None</dd>
