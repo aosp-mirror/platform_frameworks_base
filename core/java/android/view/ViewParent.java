@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
@@ -551,4 +552,23 @@ public interface ViewParent {
      * @return true if this parent consumed the fling ahead of the target view
      */
     public boolean onNestedPreFling(View target, float velocityX, float velocityY);
+
+    /**
+     * React to an accessibility action delegated by a target descendant view before the target
+     * processes it.
+     *
+     * <p>This method may be called by a target descendant view if the target wishes to give
+     * a view in its parent chain a chance to react to the event before normal processing occurs.
+     * Most commonly this will be a scroll event such as
+     * {@link android.view.accessibility.AccessibilityNodeInfo#ACTION_SCROLL_FORWARD}.
+     * A ViewParent that supports acting as a nested scrolling parent should override this
+     * method and act accordingly to implement scrolling via accesibility systems.</p>
+     *
+     * @param target The target view dispatching this action
+     * @param action Action being performed; see
+     *               {@link android.view.accessibility.AccessibilityNodeInfo}
+     * @param arguments Optional action arguments
+     * @return true if the action was consumed by this ViewParent
+     */
+    public boolean onNestedPrePerformAccessibilityAction(View target, int action, Bundle arguments);
 }
