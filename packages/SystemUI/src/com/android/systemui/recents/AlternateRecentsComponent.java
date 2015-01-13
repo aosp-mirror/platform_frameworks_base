@@ -642,12 +642,13 @@ public class AlternateRecentsComponent implements ActivityOptions.OnAnimationSta
 
     /** Starts the recents activity */
     void startRecentsActivity(ActivityManager.RunningTaskInfo topTask, boolean isTopTaskHome) {
+        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
+        RecentsConfiguration.reinitialize(mContext, mSystemServicesProxy);
+
         if (sInstanceLoadPlan == null) {
             // Create a new load plan if onPreloadRecents() was never triggered
-            RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
             sInstanceLoadPlan = loader.createLoadPlan(mContext);
         }
-        RecentsTaskLoader loader = RecentsTaskLoader.getInstance();
         loader.preloadTasks(sInstanceLoadPlan, isTopTaskHome);
         TaskStack stack = sInstanceLoadPlan.getTaskStack();
 
