@@ -705,7 +705,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         context.registerReceiverAsUser(mBroadcastAllReceiver, UserHandle.ALL, allUserFilter,
                 null, null);
 
-        mSubscriptionManager.registerOnSubscriptionsChangedListener(mSubscriptionListener);
+        mSubscriptionManager.addOnSubscriptionsChangedListener(mSubscriptionListener);
         try {
             ActivityManagerNative.getDefault().registerUserSwitchObserver(
                     new IUserSwitchObserver.Stub() {

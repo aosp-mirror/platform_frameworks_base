@@ -338,7 +338,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void registerOnSubscriptionsChangedListener(String pkgForDebug,
+    public void addOnSubscriptionsChangedListener(String pkgForDebug,
             IOnSubscriptionsChangedListener callback) {
         int callerUid = UserHandle.getCallingUserId();
         int myUid = UserHandle.myUserId();
@@ -393,7 +393,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void unregisterOnSubscriptionsChangedListener(String pkgForDebug,
+    public void removeOnSubscriptionsChangedListener(String pkgForDebug,
             IOnSubscriptionsChangedListener callback) {
         if (DBG) log("listen oscl: Unregister");
         remove(callback.asBinder());

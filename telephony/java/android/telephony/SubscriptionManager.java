@@ -266,9 +266,9 @@ public class SubscriptionManager {
      * A listener class for monitoring changes to {@link SubscriptionInfo} records.
      * <p>
      * Override the onSubscriptionsChanged method in the object that extends this
-     * class and pass it to {@link #registerOnSubscriptionsChangedListener(OnSubscriptionsChangedListener)}
+     * class and pass it to {@link #addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener)}
      * to register your listener and to unregister invoke
-     * {@link #unregisterOnSubscriptionsChangedListener(OnSubscriptionsChangedListener)}
+     * {@link #removeOnSubscriptionsChangedListener(OnSubscriptionsChangedListener)}
      * <p>
      * Permissions android.Manifest.permission.READ_PHONE_STATE is required
      * for #onSubscriptionsChanged to be invoked.
@@ -340,7 +340,7 @@ public class SubscriptionManager {
      * @param listener an instance of {@link OnSubscriptionsChangedListener} with
      *                 onSubscriptionsChanged overridden.
      */
-    public void registerOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
+    public void addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
         String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
         if (DBG) {
             logd("register OnSubscriptionsChangedListener pkgForDebug=" + pkgForDebug
@@ -352,7 +352,7 @@ public class SubscriptionManager {
             ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
                     "telephony.registry"));
             if (tr != null) {
-                tr.registerOnSubscriptionsChangedListener(pkgForDebug, listener.callback);
+                tr.addOnSubscriptionsChangedListener(pkgForDebug, listener.callback);
             }
         } catch (RemoteException ex) {
             // Should not happen
@@ -366,7 +366,7 @@ public class SubscriptionManager {
      *
      * @param listener that is to be unregistered.
      */
-    public void unregisterOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
+    public void removeOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
         String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
         if (DBG) {
             logd("unregister OnSubscriptionsChangedListener pkgForDebug=" + pkgForDebug
@@ -378,7 +378,7 @@ public class SubscriptionManager {
             ITelephonyRegistry tr = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
                     "telephony.registry"));
             if (tr != null) {
-                tr.unregisterOnSubscriptionsChangedListener(pkgForDebug, listener.callback);
+                tr.removeOnSubscriptionsChangedListener(pkgForDebug, listener.callback);
             }
         } catch (RemoteException ex) {
             // Should not happen
