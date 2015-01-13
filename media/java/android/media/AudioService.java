@@ -4734,7 +4734,8 @@ public class AudioService extends IAudioService.Stub {
             connType = AudioRoutesInfo.MAIN_HEADPHONES;
             intent.setAction(Intent.ACTION_HEADSET_PLUG);
             intent.putExtra("microphone", 0);
-        } else if (device == AudioSystem.DEVICE_OUT_HDMI) {
+        } else if (device == AudioSystem.DEVICE_OUT_HDMI ||
+                device == AudioSystem.DEVICE_OUT_HDMI_ARC) {
             connType = AudioRoutesInfo.MAIN_HDMI;
             configureHdmiPlugIntent(intent, state);
         }
@@ -4829,7 +4830,8 @@ public class AudioService extends IAudioService.Stub {
                 for (AudioPort port : ports) {
                     if (port instanceof AudioDevicePort) {
                         final AudioDevicePort devicePort = (AudioDevicePort) port;
-                        if (devicePort.type() == AudioManager.DEVICE_OUT_HDMI) {
+                        if (devicePort.type() == AudioManager.DEVICE_OUT_HDMI ||
+                                devicePort.type() == AudioManager.DEVICE_OUT_HDMI_ARC) {
                             // format the list of supported encodings
                             int[] formats = devicePort.formats();
                             if (formats.length > 0) {
