@@ -50,9 +50,8 @@ startpage=true
 
 <p>
   This class shows you how to use the Google Play services location APIs in your
-  app to get the current location, get periodic location updates, look up
-  addresses, create and monitor geofences, and detect user activities. The class
-  includes sample apps and code snippets that you can use as a starting point
+  app to get the current location, get periodic location updates, and look up
+  addresses. The class includes sample apps and code snippets that you can use as a starting point
   for adding location awareness to your app.
 </p>
 
@@ -81,25 +80,5 @@ startpage=true
   </dt> <dd>
     Learn how to convert a location's latitude and longitude into an address
     (reverse geocoding).
-  </dd> <dt>
-    <b>
-      <a href="geofencing.html">Creating and Monitoring Geofences</a>
-    </b>
-  </dt> <dd>
-    Learn how to define one or more geographic areas as locations of interest,
-    called geofences, and detect when the user is close to or inside a geofence.
-  </dd> <dt>
-    <b><a href="activity-recognition.html">Recognizing the User's Current
-    Activity</a></b>
-  </dt> <dd>
-    Learn how to recognize the user's current activity, such as walking,
-    bicycling, or driving a car, and how to use this information to modify your
-    app's location strategy.
-  </dd> <dt>
-    <b><a href="location-testing.html">Testing Using Mock Locations</a></b>
-  </dt> <dd>
-    Learn how to test a location-aware app by injecting mock locations into
-    Location Services. In mock mode, Location Services sends out mock locations
-    that you inject instead of sensor-based locations.
   </dd>
 </dl>
