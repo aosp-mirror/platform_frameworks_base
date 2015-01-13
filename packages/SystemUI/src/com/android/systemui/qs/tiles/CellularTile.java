@@ -184,6 +184,11 @@ public class CellularTile extends QSTile<QSTile.SignalState> {
                 // Make sure signal gets cleared out when no sims.
                 mInfo.mobileSignalIconId = 0;
                 mInfo.dataTypeIconId = 0;
+                // Show a No SIMs description to avoid emergency calls message.
+                mInfo.enabled = true;
+                mInfo.enabledDesc = mContext.getString(
+                        R.string.keyguard_missing_sim_message_short);
+                mInfo.signalContentDescription = mInfo.enabledDesc;
             }
             refreshState(mInfo);
         }
