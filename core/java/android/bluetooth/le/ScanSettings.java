@@ -25,6 +25,15 @@ import android.os.Parcelable;
  * parameters for the scan.
  */
 public final class ScanSettings implements Parcelable {
+
+    /**
+     * A special Bluetooth LE scan mode. Applications using this scan mode will passively listen for
+     * other scan results without starting BLE scans themselves.
+     *
+     * @hide
+     */
+    public static final int SCAN_MODE_OPPORTUNISTIC = -1;
+
     /**
      * Perform Bluetooth LE scan in low power mode. This is the default scan mode as it consumes the
      * least power.
@@ -177,7 +186,7 @@ public final class ScanSettings implements Parcelable {
          * @throws IllegalArgumentException If the {@code scanMode} is invalid.
          */
         public Builder setScanMode(int scanMode) {
-            if (scanMode < SCAN_MODE_LOW_POWER || scanMode > SCAN_MODE_LOW_LATENCY) {
+            if (scanMode < SCAN_MODE_OPPORTUNISTIC || scanMode > SCAN_MODE_LOW_LATENCY) {
                 throw new IllegalArgumentException("invalid scan mode " + scanMode);
             }
             mScanMode = scanMode;
