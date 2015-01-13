@@ -32,6 +32,12 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @SystemApi
 public abstract class Conference implements IConferenceable {
 
+    /**
+     * Used to indicate that the conference connection time is not specified.  If not specified,
+     * Telecom will set the connect time.
+     */
+    public static long CONNECT_TIME_NOT_SPECIFIED = 0;
+
     /** @hide */
     public abstract static class Listener {
         public void onStateChanged(Conference conference, int oldState, int newState) {}
@@ -59,6 +65,7 @@ public abstract class Conference implements IConferenceable {
     private DisconnectCause mDisconnectCause;
     private int mConnectionCapabilities;
     private String mDisconnectMessage;
+    private long mConnectTimeMillis = CONNECT_TIME_NOT_SPECIFIED;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -419,6 +426,26 @@ public abstract class Conference implements IConferenceable {
             return null;
         }
         return mUnmodifiableChildConnections.get(0);
+    }
+
+    /**
+     * Sets the connect time of the {@code Conference}.
+     *
+     * @param connectTimeMillis The connection time, in milliseconds.
+     */
+    public void setConnectTimeMillis(long connectTimeMillis) {
+        mConnectTimeMillis = connectTimeMillis;
+    }
+
+    /**
+     * Retrieves the connect time of the {@code Conference}, if specified.  A value of
+     * {@link #CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the start time
+     * of the conference.
+     *
+     * @return The time the {@code Conference} has been connected.
+     */
+    public long getConnectTimeMillis() {
+        return mConnectTimeMillis;
     }
 
     /**
