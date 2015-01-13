@@ -302,6 +302,46 @@ public class RenderScript {
         rsnContextResume(mContext);
     }
 
+    native long rsnClosureCreate(long con, long kernelID, long returnValue,
+        long[] fieldIDs, long[] values, int[] sizes, long[] depClosures,
+        long[] depFieldIDs);
+    synchronized long nClosureCreate(long kernelID, long returnValue,
+        long[] fieldIDs, long[] values, int[] sizes, long[] depClosures,
+        long[] depFieldIDs) {
+      validate();
+      return rsnClosureCreate(mContext, kernelID, returnValue, fieldIDs, values,
+          sizes, depClosures, depFieldIDs);
+    }
+
+    native void rsnClosureSetArg(long con, long closureID, int index,
+      long value, int size);
+    synchronized void nClosureSetArg(long closureID, int index, long value,
+        int size) {
+      validate();
+      rsnClosureSetArg(mContext, closureID, index, value, size);
+    }
+
+    native void rsnClosureSetGlobal(long con, long closureID, long fieldID,
+        long value, int size);
+    // Does this have to be synchronized?
+    synchronized void nClosureSetGlobal(long closureID, long fieldID,
+        long value, int size) {
+      validate(); // TODO: is this necessary?
+      rsnClosureSetGlobal(mContext, closureID, fieldID, value, size);
+    }
+
+    native long rsnScriptGroup2Create(long con, long[] closures);
+    synchronized long nScriptGroup2Create(long[] closures) {
+      validate();
+      return rsnScriptGroup2Create(mContext, closures);
+    }
+
+    native void rsnScriptGroup2Execute(long con, long groupID);
+    synchronized void nScriptGroup2Execute(long groupID) {
+      validate();
+      rsnScriptGroup2Execute(mContext, groupID);
+    }
+
     native void rsnAssignName(long con, long obj, byte[] name);
     synchronized void nAssignName(long obj, byte[] name) {
         validate();
