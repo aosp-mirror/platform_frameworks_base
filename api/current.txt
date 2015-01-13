@@ -33611,6 +33611,7 @@ package android.view {
     method public boolean dispatchKeyShortcutEvent(android.view.KeyEvent);
     method public boolean dispatchNestedFling(float, float, boolean);
     method public boolean dispatchNestedPreFling(float, float);
+    method public boolean dispatchNestedPrePerformAccessibilityAction(int, android.os.Bundle);
     method public boolean dispatchNestedPreScroll(int, int, int[], int[]);
     method public boolean dispatchNestedScroll(int, int, int, int, int[]);
     method public boolean dispatchPopulateAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
@@ -34424,6 +34425,7 @@ package android.view {
     method protected abstract void onLayout(boolean, int, int, int, int);
     method public boolean onNestedFling(android.view.View, float, float, boolean);
     method public boolean onNestedPreFling(android.view.View, float, float);
+    method public boolean onNestedPrePerformAccessibilityAction(android.view.View, int, android.os.Bundle);
     method public void onNestedPreScroll(android.view.View, int, int, int[]);
     method public void onNestedScroll(android.view.View, int, int, int, int);
     method public void onNestedScrollAccepted(android.view.View, android.view.View, int);
@@ -34572,6 +34574,7 @@ package android.view {
     method public abstract void notifySubtreeAccessibilityStateChanged(android.view.View, android.view.View, int);
     method public abstract boolean onNestedFling(android.view.View, float, float, boolean);
     method public abstract boolean onNestedPreFling(android.view.View, float, float);
+    method public abstract boolean onNestedPrePerformAccessibilityAction(android.view.View, int, android.os.Bundle);
     method public abstract void onNestedPreScroll(android.view.View, int, int, int[]);
     method public abstract void onNestedScroll(android.view.View, int, int, int, int);
     method public abstract void onNestedScrollAccepted(android.view.View, android.view.View, int);

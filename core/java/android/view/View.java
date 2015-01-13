@@ -8121,6 +8121,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Report an accessibility action to this view's parents for delegated processing.
+     *
+     * <p>Implementations of {@link #performAccessibilityAction(int, Bundle)} may internally
+     * call this method to delegate an accessibility action to a supporting parent. If the parent
+     * returns true from its
+     * {@link ViewParent#onNestedPrePerformAccessibilityAction(View, int, android.os.Bundle)}
+     * method this method will return true to signify that the action was consumed.</p>
+     *
+     * <p>This method is useful for implementing nested scrolling child views. If
+     * {@link #isNestedScrollingEnabled()} returns true and the action is a scrolling action
+     * a custom view implementation may invoke this method to allow a parent to consume the
+     * scroll first. If this method returns true the custom view should skip its own scrolling
+     * behavior.</p>
+     *
+     * @param action Accessibility action to delegate
+     * @param arguments Optional action arguments
+     * @return true if the action was consumed by a parent
+     */
+    public boolean dispatchNestedPrePerformAccessibilityAction(int action, Bundle arguments) {
+        for (ViewParent p = getParent(); p != null; p = p.getParent()) {
+            if (p.onNestedPrePerformAccessibilityAction(this, action, arguments)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Performs the specified accessibility action on the view. For
      * possible accessibility actions look at {@link AccessibilityNodeInfo}.
      * <p>
@@ -8129,6 +8157,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link AccessibilityDelegate#performAccessibilityAction(View, int, Bundle)}
      * is responsible for handling this call.
      * </p>
+     *
+     * <p>The default implementation will delegate
+     * {@link AccessibilityNodeInfo#ACTION_SCROLL_BACKWARD} and
+     * {@link AccessibilityNodeInfo#ACTION_SCROLL_FORWARD} to nested scrolling parents if
+     * {@link #isNestedScrollingEnabled() nested scrolling is enabled} on this view.</p>
      *
      * @param action The action to perform.
      * @param arguments Optional action arguments.
@@ -8150,6 +8183,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     * @hide
     */
     public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (isNestedScrollingEnabled()
+                && (action == AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD
+                || action == AccessibilityNodeInfo.ACTION_SCROLL_FORWARD)) {
+            if (dispatchNestedPrePerformAccessibilityAction(action, arguments)) {
+                return true;
+            }
+        }
+
         switch (action) {
             case AccessibilityNodeInfo.ACTION_CLICK: {
                 if (isClickable()) {
