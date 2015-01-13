@@ -262,6 +262,8 @@ public class WindowManagerService extends IWindowManager.Stub
     /** Amount of time (in milliseconds) to delay before declaring a window freeze timeout. */
     static final int WINDOW_FREEZE_TIMEOUT_DURATION = 2000;
 
+    /** Amount of time to allow a last ANR message to exist before freeing the memory. */
+    static final int LAST_ANR_LIFETIME_DURATION_MSECS = 2 * 60 * 60 * 1000; // Two hours
     /**
      * If true, the window manager will do its own custom freezing and general
      * management of the screen during rotation.
@@ -940,7 +942,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void placeWindowAfter(WindowState pos, WindowState window) {
         final WindowList windows = pos.getWindowList();
         final int i = windows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
+        if (true || DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
             TAG, "Adding window " + window + " at "
             + (i+1) + " of " + windows.size() + " (after " + pos + ")");
         windows.add(i+1, window);
@@ -950,7 +952,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void placeWindowBefore(WindowState pos, WindowState window) {
         final WindowList windows = pos.getWindowList();
         int i = windows.indexOf(pos);
-        if (DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
+        if (true || DEBUG_FOCUS || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(
             TAG, "Adding window " + window + " at "
             + i + " of " + windows.size() + " (before " + pos + ")");
         if (i < 0) {
@@ -1048,7 +1050,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     //apptoken note that the window could be a floating window
                     //that was created later or a window at the top of the list of
                     //windows associated with this token.
-                    if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+                    if (true || DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
                             "not Base app: Adding window " + win + " at " + (newIdx + 1) + " of " +
                             N);
                     windows.add(newIdx + 1, win);
@@ -1170,7 +1172,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
             }
         }
-        if (DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
+        if (true || DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
                 "Based on layer: Adding window " + win + " at " + i + " of " + N);
         windows.add(i, win);
         mWindowsChanged = true;
@@ -3657,7 +3659,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.layoutConfigChanges = (configChanges &
                     (ActivityInfo.CONFIG_SCREEN_SIZE | ActivityInfo.CONFIG_ORIENTATION)) != 0;
             atoken.mLaunchTaskBehind = launchTaskBehind;
-            if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + atoken
+            if (true || DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + atoken
                     + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
 
             Task task = mTaskIdToTask.get(taskId);
@@ -7633,6 +7635,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int SHOW_EMULATOR_DISPLAY_OVERLAY = 36;
 
         public static final int CHECK_IF_BOOT_ANIMATION_FINISHED = 37;
+        public static final int RESET_ANR_MESSAGE = 38;
 
         @Override
         public void handleMessage(Message msg) {
@@ -8140,6 +8143,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     if (bootAnimationComplete) {
                         performEnableScreen();
+                    }
+                }
+                break;
+                case RESET_ANR_MESSAGE: {
+                    synchronized (mWindowMap) {
+                        mLastANRState = null;
                     }
                 }
                 break;
@@ -11324,8 +11333,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         pw.println();
         dumpWindowsNoHeaderLocked(pw, true, null);
+        pw.println();
+        pw.println("Last ANR continued");
+        dumpDisplayContentsLocked(pw, true);
         pw.close();
         mLastANRState = sw.toString();
+
+        mH.removeMessages(H.RESET_ANR_MESSAGE);
+        mH.sendEmptyMessageDelayed(H.RESET_ANR_MESSAGE, LAST_ANR_LIFETIME_DURATION_MSECS);
     }
 
     @Override
