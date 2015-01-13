@@ -883,7 +883,8 @@ public abstract class ConnectionService extends Service {
                     conference.getPhoneAccountHandle(),
                     conference.getState(),
                     conference.getConnectionCapabilities(),
-                    connectionIds);
+                    connectionIds,
+                    conference.getConnectTimeMillis());
             mAdapter.addConferenceCall(id, parcelableConference);
 
             // Go through any child calls and set the parent.
