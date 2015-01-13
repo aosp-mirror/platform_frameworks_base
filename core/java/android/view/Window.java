@@ -156,7 +156,10 @@ public abstract class Window {
     public static final String NAVIGATION_BAR_BACKGROUND_TRANSITION_NAME =
             "android:navigation:background";
 
-    /** The default features enabled */
+    /**
+     * The default features enabled.
+     * @deprecated use {@link #getDefaultFeatures(android.content.Context)} instead.
+     */
     @Deprecated
     @SuppressWarnings({"PointlessBitwiseExpression"})
     protected static final int DEFAULT_FEATURES = (1 << FEATURE_OPTIONS_PANEL) |
