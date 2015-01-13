@@ -542,7 +542,7 @@ public class RecentsView extends FrameLayout implements TaskStackView.TaskStackV
         loader.deleteTaskData(t, false);
 
         // Remove the old task from activity manager
-        RecentsTaskLoader.getInstance().getSystemServicesProxy().removeTask(t.key.id);
+        loader.getSystemServicesProxy().removeTask(t.key.id);
     }
 
     @Override

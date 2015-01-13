@@ -361,12 +361,11 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // For the non-primary user, ensure that the SystemSericesProxy is initialized
+        // For the non-primary user, ensure that the SystemServicesProxy and configuration is
+        // initialized
         RecentsTaskLoader.initialize(this);
-
-        // Initialize the loader and the configuration
-        mConfig = RecentsConfiguration.reinitialize(this,
-                RecentsTaskLoader.getInstance().getSystemServicesProxy());
+        SystemServicesProxy ssp = RecentsTaskLoader.getInstance().getSystemServicesProxy();
+        mConfig = RecentsConfiguration.reinitialize(this, ssp);
 
         // Initialize the widget host (the host id is static and does not change)
         mAppWidgetHost = new RecentsAppWidgetHost(this, Constants.Values.App.AppWidgetHostId);
@@ -421,9 +420,6 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
         super.onNewIntent(intent);
         setIntent(intent);
 
-        // Reinitialize the configuration
-        RecentsConfiguration.reinitialize(this, RecentsTaskLoader.getInstance().getSystemServicesProxy());
-
         // Clear any debug rects
         if (mDebugOverlay != null) {
             mDebugOverlay.clear();
@@ -450,6 +446,12 @@ public class RecentsActivity extends Activity implements RecentsView.RecentsView
 
         // Update the recent tasks
         updateRecentsTasks(getIntent());
+
+        // If this is a new instance from a configuration change, then we have to manually trigger
+        // the enter animation state
+        if (mConfig.launchedHasConfigurationChanged) {
+            onEnterAnimationTriggered();
+        }
     }
 
     @Override
