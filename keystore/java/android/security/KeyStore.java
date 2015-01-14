@@ -68,13 +68,13 @@ public class KeyStore {
         return new KeyStore(keystore);
     }
 
-    static int getKeyTypeForAlgorithm(String keyType) throws IllegalArgumentException {
+    static int getKeyTypeForAlgorithm(String keyType) {
         if ("RSA".equalsIgnoreCase(keyType)) {
             return NativeCrypto.EVP_PKEY_RSA;
         } else if ("EC".equalsIgnoreCase(keyType)) {
             return NativeCrypto.EVP_PKEY_EC;
         } else {
-            throw new IllegalArgumentException("Unsupported key type: " + keyType);
+            return -1;
         }
     }
 

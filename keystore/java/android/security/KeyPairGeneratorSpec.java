@@ -16,8 +16,6 @@
 
 package android.security;
 
-import com.android.org.conscrypt.NativeCrypto;
-
 import android.content.Context;
 import android.text.TextUtils;
 
@@ -26,7 +24,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Date;
 
 import javax.security.auth.x500.X500Principal;
@@ -54,19 +51,6 @@ import javax.security.auth.x500.X500Principal;
  * certificate signed by a real Certificate Authority.
  */
 public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
-    /*
-     * These must be kept in sync with system/security/keystore/defaults.h
-     */
-
-    /* EC */
-    private static final int EC_DEFAULT_KEY_SIZE = 256;
-    private static final int EC_MIN_KEY_SIZE = 192;
-    private static final int EC_MAX_KEY_SIZE = 521;
-
-    /* RSA */
-    private static final int RSA_DEFAULT_KEY_SIZE = 2048;
-    private static final int RSA_MIN_KEY_SIZE = 512;
-    private static final int RSA_MAX_KEY_SIZE = 8192;
 
     private final Context mContext;
 
@@ -139,13 +123,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             throw new IllegalArgumentException("endDate < startDate");
         }
 
-        final int keyTypeInt = KeyStore.getKeyTypeForAlgorithm(keyType);
-        if (keySize == -1) {
-            keySize = getDefaultKeySizeForType(keyTypeInt);
-        }
-        checkCorrectParametersSpec(keyTypeInt, keySize, spec);
-        checkValidKeySize(keyTypeInt, keySize);
-
         mContext = context;
         mKeystoreAlias = keyStoreAlias;
         mKeyType = keyType;
@@ -156,46 +133,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         mStartDate = startDate;
         mEndDate = endDate;
         mFlags = flags;
-    }
-
-    private static int getDefaultKeySizeForType(int keyType) {
-        if (keyType == NativeCrypto.EVP_PKEY_EC) {
-            return EC_DEFAULT_KEY_SIZE;
-        } else if (keyType == NativeCrypto.EVP_PKEY_RSA) {
-            return RSA_DEFAULT_KEY_SIZE;
-        }
-        throw new IllegalArgumentException("Invalid key type " + keyType);
-    }
-
-    private static void checkValidKeySize(int keyType, int keySize) {
-        if (keyType == NativeCrypto.EVP_PKEY_EC) {
-            if (keySize < EC_MIN_KEY_SIZE || keySize > EC_MAX_KEY_SIZE) {
-                throw new IllegalArgumentException("EC keys must be >= " + EC_MIN_KEY_SIZE
-                        + " and <= " + EC_MAX_KEY_SIZE);
-            }
-        } else if (keyType == NativeCrypto.EVP_PKEY_RSA) {
-            if (keySize < RSA_MIN_KEY_SIZE || keySize > RSA_MAX_KEY_SIZE) {
-                throw new IllegalArgumentException("RSA keys must be >= " + RSA_MIN_KEY_SIZE
-                        + " and <= " + RSA_MAX_KEY_SIZE);
-            }
-        } else {
-            throw new IllegalArgumentException("Invalid key type " + keyType);
-        }
-    }
-
-    private static void checkCorrectParametersSpec(int keyType, int keySize,
-            AlgorithmParameterSpec spec) {
-        if (keyType == NativeCrypto.EVP_PKEY_RSA && spec != null) {
-            if (spec instanceof RSAKeyGenParameterSpec) {
-                RSAKeyGenParameterSpec rsaSpec = (RSAKeyGenParameterSpec) spec;
-                if (keySize != -1 && keySize != rsaSpec.getKeysize()) {
-                    throw new IllegalArgumentException("RSA key size must match: " + keySize
-                            + " vs " + rsaSpec.getKeysize());
-                }
-            } else {
-                throw new IllegalArgumentException("RSA may only use RSAKeyGenParameterSpec");
-            }
-        }
     }
 
     /**
@@ -311,7 +248,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
         private String mKeystoreAlias;
 
-        private String mKeyType = "RSA";
+        private String mKeyType;
 
         private int mKeySize = -1;
 
@@ -360,9 +297,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             if (keyType == null) {
                 throw new NullPointerException("keyType == null");
             } else {
-                try {
-                    KeyStore.getKeyTypeForAlgorithm(keyType);
-                } catch (IllegalArgumentException e) {
+                if (KeyStore.getKeyTypeForAlgorithm(keyType) == -1) {
                     throw new NoSuchAlgorithmException("Unsupported key type: " + keyType);
                 }
             }
