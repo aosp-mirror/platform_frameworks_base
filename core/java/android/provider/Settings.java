@@ -3669,7 +3669,11 @@ public final class Settings {
 
         /**
          * Whether autolock is enabled (0 = false, 1 = true)
+         *
+         * @deprecated Use {@link android.app.KeyguardManager} to determine the state and security
+         *             level of the keyguard.
          */
+        @Deprecated
         public static final String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
 
         /**

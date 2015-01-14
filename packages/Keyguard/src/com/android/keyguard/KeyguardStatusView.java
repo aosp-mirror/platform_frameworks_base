@@ -22,7 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.provider.AlarmClock;
+import android.os.UserHandle;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -42,7 +42,8 @@ public class KeyguardStatusView extends GridLayout {
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final String TAG = "KeyguardStatusView";
 
-    private LockPatternUtils mLockPatternUtils;
+    private final LockPatternUtils mLockPatternUtils;
+    private final AlarmManager mAlarmManager;
 
     private TextView mAlarmStatusView;
     private TextClock mDateView;
@@ -92,6 +93,8 @@ public class KeyguardStatusView extends GridLayout {
 
     public KeyguardStatusView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mLockPatternUtils = new LockPatternUtils(getContext());
     }
 
     private void setEnableMarquee(boolean enabled) {
@@ -109,7 +112,7 @@ public class KeyguardStatusView extends GridLayout {
         mDateView.setShowCurrentUserTime(true);
         mClockView.setShowCurrentUserTime(true);
         mOwnerInfo = (TextView) findViewById(R.id.owner_info);
-        mLockPatternUtils = new LockPatternUtils(getContext());
+
         final boolean screenOn = KeyguardUpdateMonitor.getInstance(mContext).isScreenOn();
         setEnableMarquee(screenOn);
         refresh();
@@ -140,7 +143,8 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     private void refresh() {
-        AlarmManager.AlarmClockInfo nextAlarm = mLockPatternUtils.getNextAlarm();
+        AlarmManager.AlarmClockInfo nextAlarm =
+                mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
         Patterns.update(mContext, nextAlarm != null);
 
         refreshTime();

@@ -263,7 +263,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     public boolean getBoolean(String key, boolean defaultValue, int userId) throws RemoteException {
         checkReadPermission(key, userId);
 
-        String value = mStorage.readKeyValue(key, null, userId);
+        String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ?
                 defaultValue : (value.equals("1") || value.equals("true"));
     }
@@ -272,13 +272,21 @@ public class LockSettingsService extends ILockSettings.Stub {
     public long getLong(String key, long defaultValue, int userId) throws RemoteException {
         checkReadPermission(key, userId);
 
-        String value = mStorage.readKeyValue(key, null, userId);
+        String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ? defaultValue : Long.parseLong(value);
     }
 
     @Override
     public String getString(String key, String defaultValue, int userId) throws RemoteException {
         checkReadPermission(key, userId);
+
+        return getStringUnchecked(key, defaultValue, userId);
+    }
+
+    public String getStringUnchecked(String key, String defaultValue, int userId) {
+        if (Settings.Secure.LOCK_PATTERN_ENABLED.equals(key)) {
+            return mLockPatternUtils.isLockPatternEnabled(userId) ? "1" : "0";
+        }
 
         return mStorage.readKeyValue(key, defaultValue, userId);
     }
@@ -402,7 +410,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         try {
-            if (mLockPatternUtils.isLockPatternEnabled()) {
+            if (mLockPatternUtils.isLockPatternEnabled(userId)) {
                 if (checkPattern(password, userId)) {
                     return true;
                 }
@@ -411,7 +419,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         try {
-            if (mLockPatternUtils.isLockPasswordEnabled()) {
+            if (mLockPatternUtils.isLockPasswordEnabled(userId)) {
                 if (checkPassword(password, userId)) {
                     return true;
                 }
