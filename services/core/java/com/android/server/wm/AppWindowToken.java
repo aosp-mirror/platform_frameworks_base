@@ -107,7 +107,7 @@ class AppWindowToken extends WindowToken {
     // Input application handle used by the input dispatcher.
     final InputApplicationHandle mInputApplicationHandle;
 
-    boolean mDeferRemoval;
+    boolean mIsExiting;
 
     boolean mLaunchTaskBehind;
     boolean mEnteringAnimation;
@@ -304,11 +304,11 @@ class AppWindowToken extends WindowToken {
             pw.print(prefix); pw.print("inPendingTransaction=");
                     pw.println(inPendingTransaction);
         }
-        if (startingData != null || removed || firstWindowDrawn || mDeferRemoval) {
+        if (startingData != null || removed || firstWindowDrawn || mIsExiting) {
             pw.print(prefix); pw.print("startingData="); pw.print(startingData);
                     pw.print(" removed="); pw.print(removed);
                     pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
-                    pw.print(" mDeferRemoval="); pw.println(mDeferRemoval);
+                    pw.print(" mIsExiting="); pw.println(mIsExiting);
         }
         if (startingWindow != null || startingView != null
                 || startingDisplayed || startingMoved) {
