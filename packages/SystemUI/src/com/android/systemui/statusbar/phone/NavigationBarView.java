@@ -369,8 +369,6 @@ public class NavigationBarView extends LinearLayout {
         getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
         getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
-
-        mBarTransitions.applyBackButtonQuiescentAlpha(mBarTransitions.getMode(), true /*animate*/);
     }
 
     private boolean inLockTask() {
@@ -662,10 +660,6 @@ public class NavigationBarView extends LinearLayout {
                     + " " + visibilityToString(button.getVisibility())
                     + " alpha=" + button.getAlpha()
                     );
-            if (button instanceof KeyButtonView) {
-                pw.print(" drawingAlpha=" + ((KeyButtonView)button).getDrawingAlpha());
-                pw.print(" quiescentAlpha=" + ((KeyButtonView)button).getQuiescentAlpha());
-            }
         }
         pw.println();
     }
