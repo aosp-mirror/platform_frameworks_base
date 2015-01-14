@@ -9,7 +9,14 @@ option java_package com.android.systemui;
 36001 sysui_heads_up_status (key|3),(visible|1)
 36002 sysui_fullscreen_notification (key|3)
 36003 sysui_heads_up_escalation (key|3)
-36004 sysui_status_bar_state (state|1)
+# sysui_status_bar_state: Logged whenever the status bar / keyguard state changes
+## state: 0: SHADE, 1: KEYGUARD, 2: SHADE_LOCKED
+## keyguardShowing: 1: Keyguard shown to the user (or keyguardOccluded)
+## keyguardOccluded: 1: Keyguard active, but another activity is occluding it
+## bouncerShowing: 1: Bouncer currently shown to the user
+## secure: 1: The user has set up a secure unlock method (PIN, password, etc.)
+## currentlyInsecure: 1: No secure unlock method set up (!secure), or trusted environment (TrustManager)
+36004 sysui_status_bar_state (state|1),(keyguardShowing|1),(keyguardOccluded|1),(bouncerShowing|1),(secure|1),(currentlyInsecure|1)
 
 # ---------------------------
 # PhoneStatusBarView.java
