@@ -6,6 +6,7 @@ import android.content.res.Configuration;
 import android.service.media.IMediaBrowserServiceCallbacks;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ResultReceiver;
 
 /**
  * Media API allows clients to browse through hierarchy of a user’s media collection,
@@ -18,4 +19,5 @@ oneway interface IMediaBrowserService {
 
     void addSubscription(String uri, IMediaBrowserServiceCallbacks callbacks);
     void removeSubscription(String uri, IMediaBrowserServiceCallbacks callbacks);
+    void getMediaItem(String uri, in ResultReceiver cb);
 }
