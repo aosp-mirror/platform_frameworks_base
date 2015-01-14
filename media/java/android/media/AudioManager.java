@@ -65,7 +65,7 @@ public class AudioManager {
     private final boolean mUseFixedVolume;
     private final Binder mToken = new Binder();
     private static String TAG = "AudioManager";
-    AudioPortEventHandler mAudioPortEventHandler;
+    private static final AudioPortEventHandler sAudioPortEventHandler = new AudioPortEventHandler();
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become
@@ -646,9 +646,9 @@ public class AudioManager {
                 com.android.internal.R.bool.config_useMasterVolume);
         mUseVolumeKeySounds = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useVolumeKeySounds);
-        mAudioPortEventHandler = new AudioPortEventHandler(this);
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
+        sAudioPortEventHandler.init();
     }
 
     private static IAudioService getService()
@@ -3607,7 +3607,7 @@ public class AudioManager {
      * @hide
      */
     public void registerAudioPortUpdateListener(OnAudioPortUpdateListener l) {
-        mAudioPortEventHandler.registerListener(l);
+        sAudioPortEventHandler.registerListener(l);
     }
 
     /**
@@ -3615,7 +3615,7 @@ public class AudioManager {
      * @hide
      */
     public void unregisterAudioPortUpdateListener(OnAudioPortUpdateListener l) {
-        mAudioPortEventHandler.unregisterListener(l);
+        sAudioPortEventHandler.unregisterListener(l);
     }
 
     //
@@ -3623,23 +3623,23 @@ public class AudioManager {
     //
 
     static final int AUDIOPORT_GENERATION_INIT = 0;
-    Integer mAudioPortGeneration = new Integer(AUDIOPORT_GENERATION_INIT);
-    ArrayList<AudioPort> mAudioPortsCached = new ArrayList<AudioPort>();
-    ArrayList<AudioPatch> mAudioPatchesCached = new ArrayList<AudioPatch>();
+    static Integer sAudioPortGeneration = new Integer(AUDIOPORT_GENERATION_INIT);
+    static ArrayList<AudioPort> sAudioPortsCached = new ArrayList<AudioPort>();
+    static ArrayList<AudioPatch> sAudioPatchesCached = new ArrayList<AudioPatch>();
 
-    int resetAudioPortGeneration() {
+    static int resetAudioPortGeneration() {
         int generation;
-        synchronized (mAudioPortGeneration) {
-            generation = mAudioPortGeneration;
-            mAudioPortGeneration = AUDIOPORT_GENERATION_INIT;
+        synchronized (sAudioPortGeneration) {
+            generation = sAudioPortGeneration;
+            sAudioPortGeneration = AUDIOPORT_GENERATION_INIT;
         }
         return generation;
     }
 
-    int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches) {
-        synchronized (mAudioPortGeneration) {
+    static int updateAudioPortCache(ArrayList<AudioPort> ports, ArrayList<AudioPatch> patches) {
+        synchronized (sAudioPortGeneration) {
 
-            if (mAudioPortGeneration == AUDIOPORT_GENERATION_INIT) {
+            if (sAudioPortGeneration == AUDIOPORT_GENERATION_INIT) {
                 int[] patchGeneration = new int[1];
                 int[] portGeneration = new int[1];
                 int status;
@@ -3678,23 +3678,23 @@ public class AudioManager {
                     }
                 }
 
-                mAudioPortsCached = newPorts;
-                mAudioPatchesCached = newPatches;
-                mAudioPortGeneration = portGeneration[0];
+                sAudioPortsCached = newPorts;
+                sAudioPatchesCached = newPatches;
+                sAudioPortGeneration = portGeneration[0];
             }
             if (ports != null) {
                 ports.clear();
-                ports.addAll(mAudioPortsCached);
+                ports.addAll(sAudioPortsCached);
             }
             if (patches != null) {
                 patches.clear();
-                patches.addAll(mAudioPatchesCached);
+                patches.addAll(sAudioPatchesCached);
             }
         }
         return SUCCESS;
     }
 
-    AudioPortConfig updatePortConfig(AudioPortConfig portCfg, ArrayList<AudioPort> ports) {
+    static AudioPortConfig updatePortConfig(AudioPortConfig portCfg, ArrayList<AudioPort> ports) {
         AudioPort port = portCfg.port();
         int k;
         for (k = 0; k < ports.size(); k++) {
