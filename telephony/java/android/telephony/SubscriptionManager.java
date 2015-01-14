@@ -226,10 +226,10 @@ public class SubscriptionManager {
     /** @hide */
     public static final String DATA_ROAMING = "data_roaming";
 
-    /** @hide */
+    /** Indicates that data roaming is enabled for a subscription */
     public static final int DATA_ROAMING_ENABLE = 1;
 
-    /** @hide */
+    /** Indicates that data roaming is disabled for a subscription */
     public static final int DATA_ROAMING_DISABLE = 0;
 
     /** @hide */
