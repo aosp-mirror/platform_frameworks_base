@@ -575,7 +575,7 @@ private:
     const Item* getItem(uint32_t resID, uint32_t attrID) const;
     bool getItemValue(uint32_t resID, uint32_t attrID,
                       Res_value* outValue);
-    bool isAttributeFromL(uint32_t attrId);
+    int getPublicAttributeSdkLevel(uint32_t attrId) const;
 
 
     String16 mAssetsPackage;

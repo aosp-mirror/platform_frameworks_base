@@ -44,4 +44,10 @@
         <item>@string/boom</item>
         <item>25dp</item>
     </array>
+
+    <style name="temp">
+        <item name="android:versionName">hey</item>
+        <item name="android:allowBackup">true</item>
+        <item name="android:colorAccent">#ffffffff</item>
+    </style>
 </resources>
