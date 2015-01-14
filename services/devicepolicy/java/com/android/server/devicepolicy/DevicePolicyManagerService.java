@@ -1497,11 +1497,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // a sanity check in case the two get out of sync; this should
         // never normally happen.
         LockPatternUtils utils = new LockPatternUtils(mContext);
-        if (utils.getActivePasswordQuality() < policy.mActivePasswordQuality) {
+        if (utils.getActivePasswordQuality(userHandle) < policy.mActivePasswordQuality) {
             Slog.w(LOG_TAG, "Active password quality 0x"
                     + Integer.toHexString(policy.mActivePasswordQuality)
                     + " does not match actual quality 0x"
-                    + Integer.toHexString(utils.getActivePasswordQuality()));
+                    + Integer.toHexString(utils.getActivePasswordQuality(userHandle)));
             policy.mActivePasswordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
             policy.mActivePasswordLength = 0;
             policy.mActivePasswordUpperCase = 0;
