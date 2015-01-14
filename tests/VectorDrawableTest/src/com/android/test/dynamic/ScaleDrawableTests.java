@@ -37,8 +37,8 @@ public class ScaleDrawableTests extends Activity {
     };
 
     protected int icon = R.drawable.bitmap_drawable01;
-
     protected int vector_icon = R.drawable.vector_drawable16;
+    protected int animated_vector_icon = R.drawable.ic_hourglass_animation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +46,12 @@ public class ScaleDrawableTests extends Activity {
         ScrollView scrollView = new ScrollView(this);
         GridLayout container = new GridLayout(this);
         scrollView.addView(container);
-        container.setColumnCount(3);
+        container.setColumnCount(4);
         container.setBackgroundColor(0xFF888888);
 
         LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-        params.width = 400;
-        params.height = 300;
+        params.width = 300;
+        params.height = 200;
 
         for (int i = 0; i < scaleTypes.length; i++) {
             TextView t = new TextView(this);
@@ -71,6 +71,13 @@ public class ScaleDrawableTests extends Activity {
             view.setScaleType(scaleType);
             view.setImageResource(vector_icon);
             container.addView(view);
+
+            ImageView avd_view = new ImageView(this);
+            avd_view.setLayoutParams(params);
+            avd_view.setScaleType(scaleType);
+            avd_view.setImageResource(animated_vector_icon);
+            container.addView(avd_view);
+
         }
 
         setContentView(scrollView);
