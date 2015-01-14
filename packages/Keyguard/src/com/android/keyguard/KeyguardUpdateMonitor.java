@@ -103,12 +103,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private static final int MSG_DEVICE_PROVISIONED = 308;
     private static final int MSG_DPM_STATE_CHANGED = 309;
     private static final int MSG_USER_SWITCHING = 310;
-    private static final int MSG_USER_REMOVED = 311;
     private static final int MSG_KEYGUARD_VISIBILITY_CHANGED = 312;
     private static final int MSG_BOOT_COMPLETED = 313;
     private static final int MSG_USER_SWITCH_COMPLETE = 314;
-    private static final int MSG_SET_CURRENT_CLIENT_ID = 315;
-    private static final int MSG_SET_PLAYBACK_STATE = 316;
     private static final int MSG_USER_INFO_CHANGED = 317;
     private static final int MSG_REPORT_EMERGENCY_CALL_ACTION = 318;
     private static final int MSG_SCREEN_TURNED_ON = 319;
@@ -184,9 +181,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     break;
                 case MSG_USER_SWITCH_COMPLETE:
                     handleUserSwitchComplete(msg.arg1);
-                    break;
-                case MSG_USER_REMOVED:
-                    handleUserRemoved(msg.arg1);
                     break;
                 case MSG_KEYGUARD_VISIBILITY_CHANGED:
                     handleKeyguardVisibilityChanged(msg.arg1);
@@ -454,9 +448,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
                 String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
-            } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_REMOVED,
-                       intent.getIntExtra(Intent.EXTRA_USER_HANDLE, 0), 0));
             } else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
                 dispatchBootCompleted();
             }
@@ -684,7 +675,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(AudioManager.RINGER_MODE_CHANGED_ACTION);
-        filter.addAction(Intent.ACTION_USER_REMOVED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         final IntentFilter bootCompleteFilter = new IntentFilter();
@@ -834,18 +824,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     public boolean hasBootCompleted() {
         return mBootCompleted;
-    }
-
-    /**
-     * Handle {@link #MSG_USER_REMOVED}
-     */
-    protected void handleUserRemoved(int userId) {
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-            if (cb != null) {
-                cb.onUserRemoved(userId);
-            }
-        }
     }
 
     /**
