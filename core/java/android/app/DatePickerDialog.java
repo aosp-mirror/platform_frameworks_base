@@ -131,6 +131,9 @@ public class DatePickerDialog extends AlertDialog implements OnClickListener,
         switch (which) {
             case BUTTON_POSITIVE:
                 if (mDateSetListener != null) {
+                    // Clearing focus forces the dialog to commit any pending
+                    // changes, e.g. typed text in a NumberPicker.
+                    mDatePicker.clearFocus();
                     mDateSetListener.onDateSet(mDatePicker, mDatePicker.getYear(),
                             mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
                 }
