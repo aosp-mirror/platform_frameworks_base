@@ -36,7 +36,10 @@ public class UnlockMethodCache {
     private final LockPatternUtils mLockPatternUtils;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ArrayList<OnUnlockMethodChangedListener> mListeners = new ArrayList<>();
-    private boolean mMethodInsecure;
+    /** Whether the user configured a secure unlock method (PIN, password, etc.) */
+    private boolean mSecure;
+    /** Whether the unlock method is currently insecure (insecure method or trusted environment) */
+    private boolean mCurrentlyInsecure;
     private boolean mTrustManaged;
     private boolean mFaceUnlockRunning;
 
@@ -44,7 +47,7 @@ public class UnlockMethodCache {
         mLockPatternUtils = new LockPatternUtils(ctx);
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(ctx);
         KeyguardUpdateMonitor.getInstance(ctx).registerCallback(mCallback);
-        updateMethodSecure(true /* updateAlways */);
+        update(true /* updateAlways */);
     }
 
     public static UnlockMethodCache getInstance(Context context) {
@@ -55,10 +58,17 @@ public class UnlockMethodCache {
     }
 
     /**
-     * @return whether the current security method is secure, i. e. the bouncer will be shown
+     * @return whether the user configured a secure unlock method like PIN, password, etc.
      */
-    public boolean isMethodInsecure() {
-        return mMethodInsecure;
+    public boolean isMethodSecure() {
+        return mSecure;
+    }
+
+    /**
+     * @return whether the lockscreen is currently insecure, i. e. the bouncer won't be shown
+     */
+    public boolean isCurrentlyInsecure() {
+        return mCurrentlyInsecure;
     }
 
     public void addListener(OnUnlockMethodChangedListener listener) {
@@ -69,58 +79,59 @@ public class UnlockMethodCache {
         mListeners.remove(listener);
     }
 
-    private void updateMethodSecure(boolean updateAlways) {
+    private void update(boolean updateAlways) {
         int user = mLockPatternUtils.getCurrentUser();
-        boolean methodInsecure = !mLockPatternUtils.isSecure() ||
-                mKeyguardUpdateMonitor.getUserHasTrust(user);
+        boolean secure = mLockPatternUtils.isSecure();
+        boolean currentlyInsecure = !secure ||  mKeyguardUpdateMonitor.getUserHasTrust(user);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean faceUnlockRunning = mKeyguardUpdateMonitor.isFaceUnlockRunning(user)
                 && trustManaged;
-        boolean changed = methodInsecure != mMethodInsecure || trustManaged != mTrustManaged
-                || faceUnlockRunning != mFaceUnlockRunning;
+        boolean changed = secure != mSecure || currentlyInsecure != mCurrentlyInsecure ||
+                trustManaged != mTrustManaged  || faceUnlockRunning != mFaceUnlockRunning;
         if (changed || updateAlways) {
-            mMethodInsecure = methodInsecure;
+            mSecure = secure;
+            mCurrentlyInsecure = currentlyInsecure;
             mTrustManaged = trustManaged;
             mFaceUnlockRunning = faceUnlockRunning;
-            notifyListeners(mMethodInsecure);
+            notifyListeners();
         }
     }
 
-    private void notifyListeners(boolean secure) {
+    private void notifyListeners() {
         for (OnUnlockMethodChangedListener listener : mListeners) {
-            listener.onMethodSecureChanged(secure);
+            listener.onUnlockMethodStateChanged();
         }
     }
 
     private final KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
         @Override
         public void onUserSwitchComplete(int userId) {
-            updateMethodSecure(false /* updateAlways */);
+            update(false /* updateAlways */);
         }
 
         @Override
         public void onTrustChanged(int userId) {
-            updateMethodSecure(false /* updateAlways */);
+            update(false /* updateAlways */);
         }
 
         @Override
         public void onTrustManagedChanged(int userId) {
-            updateMethodSecure(false /* updateAlways */);
+            update(false /* updateAlways */);
         }
 
         @Override
         public void onScreenTurnedOn() {
-            updateMethodSecure(false /* updateAlways */);
+            update(false /* updateAlways */);
         }
 
         @Override
         public void onFingerprintRecognized(int userId) {
-            updateMethodSecure(false /* updateAlways */);
+            update(false /* updateAlways */);
         }
 
         @Override
         public void onFaceUnlockStateChanged(boolean running, int userId) {
-            updateMethodSecure(false /* updateAlways */);
+            update(false /* updateAlways */);
         }
     };
 
@@ -133,6 +144,6 @@ public class UnlockMethodCache {
     }
 
     public static interface OnUnlockMethodChangedListener {
-        void onMethodSecureChanged(boolean methodSecure);
+        void onUnlockMethodStateChanged();
     }
 }
