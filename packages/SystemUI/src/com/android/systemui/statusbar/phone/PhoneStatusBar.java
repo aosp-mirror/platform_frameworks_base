@@ -147,6 +147,7 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.SpeedBumpView;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -183,7 +184,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
-        DragDownHelper.DragDownCallback, ActivityStarter {
+        DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -493,6 +494,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mLaunchTransitionFadingAway;
     private ExpandableNotificationRow mDraggedDownRow;
 
+    // Fingerprint (as computed by getLoggingFingerprint() of the last logged state.
+    private int mLastLoggedStateFingerprint;
+
     private static final int VISIBLE_LOCATIONS = ViewState.LOCATION_FIRST_CARD
             | ViewState.LOCATION_TOP_STACK_PEEKING
             | ViewState.LOCATION_MAIN_AREA
@@ -603,6 +607,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     mHeadsUpObserver);
         }
         mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
+        mUnlockMethodCache.addListener(this);
         startKeyguard();
 
         mDozeServiceHost = new DozeServiceHost();
@@ -2159,8 +2164,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public boolean isFalsingThresholdNeeded() {
         boolean onKeyguard = getBarState() == StatusBarState.KEYGUARD;
-        boolean isMethodInsecure = mUnlockMethodCache.isMethodInsecure();
-        return onKeyguard && (isMethodInsecure || mDozing || mScreenOnComingFromTouch);
+        boolean isCurrentlyInsecure = mUnlockMethodCache.isCurrentlyInsecure();
+        return onKeyguard && (isCurrentlyInsecure || mDozing || mScreenOnComingFromTouch);
     }
 
     public boolean isDozing() {
@@ -2174,6 +2179,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public boolean isScrimSrcModeEnabled() {
         return mScrimSrcModeEnabled;
+    }
+
+    /**
+     * To be called when there's a state change in StatusBarKeyguardViewManager.
+     */
+    public void onKeyguardViewManagerStatesUpdated() {
+        logStateToEventlog();
+    }
+
+    @Override  // UnlockMethodCache.OnUnlockMethodChangedListener
+    public void onUnlockMethodStateChanged() {
+        logStateToEventlog();
     }
 
     /**
@@ -3348,6 +3365,47 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    // State logging
+
+    private void logStateToEventlog() {
+        boolean isShowing = mStatusBarKeyguardViewManager.isShowing();
+        boolean isOccluded = mStatusBarKeyguardViewManager.isOccluded();
+        boolean isBouncerShowing = mStatusBarKeyguardViewManager.isBouncerShowing();
+        boolean isSecure = mUnlockMethodCache.isMethodSecure();
+        boolean isCurrentlyInsecure = mUnlockMethodCache.isCurrentlyInsecure();
+        int stateFingerprint = getLoggingFingerprint(mState,
+                isShowing,
+                isOccluded,
+                isBouncerShowing,
+                isSecure,
+                isCurrentlyInsecure);
+        if (stateFingerprint != mLastLoggedStateFingerprint) {
+            EventLogTags.writeSysuiStatusBarState(mState,
+                    isShowing ? 1 : 0,
+                    isOccluded ? 1 : 0,
+                    isBouncerShowing ? 1 : 0,
+                    isSecure ? 1 : 0,
+                    isCurrentlyInsecure ? 1 : 0);
+            mLastLoggedStateFingerprint = stateFingerprint;
+        }
+    }
+
+    /**
+     * Returns a fingerprint of fields logged to eventlog
+     */
+    private static int getLoggingFingerprint(int statusBarState, boolean keyguardShowing,
+            boolean keyguardOccluded, boolean bouncerShowing, boolean secure,
+            boolean currentlyInsecure) {
+        // Reserve 8 bits for statusBarState. We'll never go higher than
+        // that, right? Riiiight.
+        return (statusBarState & 0xFF)
+                | ((keyguardShowing   ? 1 : 0) <<  8)
+                | ((keyguardOccluded  ? 1 : 0) <<  9)
+                | ((bouncerShowing    ? 1 : 0) << 10)
+                | ((secure            ? 1 : 0) << 11)
+                | ((currentlyInsecure ? 1 : 0) << 12);
+    }
+
     //
     // tracing
     //
@@ -3836,19 +3894,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
      * @param state The {@link StatusBarState} to set.
      */
     public void setBarState(int state) {
-        if (state != mState) {
-            EventLogTags.writeSysuiStatusBarState(state);
-
-            // If we're visible and switched to SHADE_LOCKED (the user dragged
-            // down on the lockscreen), clear notification LED, vibration,
-            // ringing.
-            // Other transitions are covered in handleVisibleToUserChanged().
-            if (mVisible && state == StatusBarState.SHADE_LOCKED) {
-                try {
-                    mBarService.clearNotificationEffects();
-                } catch (RemoteException e) {
-                    // Ignore.
-                }
+        // If we're visible and switched to SHADE_LOCKED (the user dragged
+        // down on the lockscreen), clear notification LED, vibration,
+        // ringing.
+        // Other transitions are covered in handleVisibleToUserChanged().
+        if (state != mState && mVisible && state == StatusBarState.SHADE_LOCKED) {
+            try {
+                mBarService.clearNotificationEffects();
+            } catch (RemoteException e) {
+                // Ignore.
             }
         }
         mState = state;
@@ -3890,7 +3944,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            if (!expand && !mUnlockMethodCache.isMethodInsecure()) {
+            if (!expand && !mUnlockMethodCache.isCurrentlyInsecure()) {
                 showBouncer();
             }
         }

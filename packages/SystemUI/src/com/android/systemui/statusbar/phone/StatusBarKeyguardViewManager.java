@@ -299,6 +299,9 @@ public class StatusBarKeyguardViewManager {
         }
     }
 
+    /**
+     * WARNING: This method might cause Binder calls.
+     */
     public boolean isSecure() {
         return mBouncer.isSecure();
     }
@@ -392,6 +395,8 @@ public class StatusBarKeyguardViewManager {
         mLastOccluded = occluded;
         mLastBouncerShowing = bouncerShowing;
         mLastBouncerDismissible = bouncerDismissible;
+
+        mPhoneStatusBar.onKeyguardViewManagerStatesUpdated();
     }
 
     public boolean onMenuPressed() {
