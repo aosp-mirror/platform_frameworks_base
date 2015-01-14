@@ -11,6 +11,9 @@
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
 
+#include <Caches.h>
+#include <TextureCache.h>
+
 void doThrowNPE(JNIEnv* env) {
     jniThrowNullPointerException(env, NULL);
 }
@@ -500,9 +503,27 @@ AndroidPixelRef::~AndroidPixelRef() {
         JNIEnv* env = vm2env(fVM);
         env->DeleteGlobalRef(fStorageObj);
     }
+
+    if (android::uirenderer::Caches::hasInstance()) {
+        android::uirenderer::Caches::getInstance().textureCache.releaseTexture(getStableID());
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+
+static bool computeAllocationSize(const SkImageInfo& info, size_t* size, size_t* rowBytes) {
+        int32_t rowBytes32 = SkToS32(info.minRowBytes());
+        int64_t bigSize = (int64_t)info.height() * rowBytes32;
+        if (rowBytes32 < 0 || !sk_64_isS32(bigSize)) {
+            return false; // allocation will be too large
+        }
+
+        *size = sk_64_asS32(bigSize);
+        *rowBytes = rowBytes32;
+
+        SkASSERT(*size >= info.getSafeSize(*rowBytes));
+        return true;
+}
 
 jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                                              SkColorTable* ctable) {
@@ -512,7 +533,11 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
         return NULL;
     }
 
-    const size_t size = bitmap->getSize();
+    size_t size, rowBytes;
+    if (!computeAllocationSize(info, &size, &rowBytes)) {
+        return NULL;
+    }
+
     jbyteArray arrayObj = (jbyteArray) env->CallObjectMethod(gVMRuntime,
                                                              gVMRuntime_newNonMovableArray,
                                                              gByte_class, size);
@@ -525,14 +550,63 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
         return NULL;
     }
     SkASSERT(addr);
-    SkPixelRef* pr = new AndroidPixelRef(env, info, (void*) addr,
-            bitmap->rowBytes(), arrayObj, ctable);
+    SkPixelRef* pr = new AndroidPixelRef(env, info, (void*) addr, rowBytes, arrayObj, ctable);
     bitmap->setPixelRef(pr)->unref();
     // since we're already allocated, we lockPixels right away
     // HeapAllocator behaves this way too
     bitmap->lockPixels();
 
     return arrayObj;
+}
+
+struct AndroidPixelRefContext {
+    int32_t stableID;
+};
+
+static void allocatePixelsReleaseProc(void* ptr, void* ctx) {
+    AndroidPixelRefContext* context = (AndroidPixelRefContext*)ctx;
+    if (android::uirenderer::Caches::hasInstance()) {
+         android::uirenderer::Caches::getInstance().textureCache.releaseTexture(context->stableID);
+    }
+
+    sk_free(ptr);
+    delete context;
+}
+
+bool GraphicsJNI::allocatePixels(JNIEnv* env, SkBitmap* bitmap, SkColorTable* ctable) {
+    const SkImageInfo& info = bitmap->info();
+    if (info.fColorType == kUnknown_SkColorType) {
+        doThrowIAE(env, "unknown bitmap configuration");
+        return NULL;
+    }
+
+    size_t size, rowBytes;
+    if (!computeAllocationSize(info, &size, &rowBytes)) {
+        return false;
+    }
+
+    void* addr = sk_malloc_flags(size, 0);
+    if (NULL == addr) {
+        return false;
+    }
+
+    AndroidPixelRefContext* context = new AndroidPixelRefContext;
+    SkMallocPixelRef* pr = SkMallocPixelRef::NewWithProc(info, rowBytes, ctable, addr,
+                                                         &allocatePixelsReleaseProc, context);
+    if (!pr) {
+        delete context;
+        return false;
+    }
+
+    // set the stableID in the context so that it can be used later in
+    // allocatePixelsReleaseProc to remove the texture from the cache.
+    context->stableID = pr->getStableID();
+
+    bitmap->setPixelRef(pr)->unref();
+    // since we're already allocated, we can lockPixels right away
+    bitmap->lockPixels();
+
+    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -734,27 +734,6 @@ private:
     Rect mSrc;
 };
 
-class DrawBitmapDataOp : public DrawBitmapOp {
-public:
-    DrawBitmapDataOp(const SkBitmap* bitmap, const SkPaint* paint)
-            : DrawBitmapOp(bitmap, paint) {}
-
-    virtual void applyDraw(OpenGLRenderer& renderer, Rect& dirty) override {
-        renderer.drawBitmapData(mBitmap, mPaint);
-    }
-
-    virtual void output(int level, uint32_t logFlags) const override {
-        OP_LOG("Draw bitmap %p", mBitmap);
-    }
-
-    virtual const char* name() override { return "DrawBitmapData"; }
-
-    virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo,
-            const DeferredDisplayState& state) override {
-        deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
-    }
-};
-
 class DrawBitmapMeshOp : public DrawBoundedOp {
 public:
     DrawBitmapMeshOp(const SkBitmap* bitmap, int meshWidth, int meshHeight,

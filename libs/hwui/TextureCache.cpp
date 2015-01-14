@@ -233,11 +233,9 @@ Texture* TextureCache::getTransient(const SkBitmap* bitmap) {
     return texture;
 }
 
-void TextureCache::releaseTexture(const SkBitmap* bitmap) {
-    if (!bitmap || !bitmap->pixelRef()) return;
-
+void TextureCache::releaseTexture(uint32_t pixelRefStableID) {
     Mutex::Autolock _l(mLock);
-    mGarbage.push(bitmap->pixelRef()->getStableID());
+    mGarbage.push(pixelRefStableID);
 }
 
 void TextureCache::clearGarbage() {
