@@ -274,12 +274,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         // Hack level over 9000: Because the subscription id is not yet valid when we see the
         // first update in handleSimStateChange, we need to force refresh all all SIM states
         // so the subscription id for them is consistent.
+        ArrayList<SubscriptionInfo> changedSubscriptions = new ArrayList<>();
         for (int i = 0; i < subscriptionInfos.size(); i++) {
             SubscriptionInfo info = subscriptionInfos.get(i);
-            refreshSimState(info.getSubscriptionId(), info.getSimSlotIndex());
+            boolean changed = refreshSimState(info.getSubscriptionId(), info.getSimSlotIndex());
+            if (changed) {
+                changedSubscriptions.add(info);
+            }
         }
-        for (int i = 0; i < subscriptionInfos.size(); i++) {
-            SimData data = mSimDatas.get(mSubscriptionInfo.get(i).getSubscriptionId());
+        for (int i = 0; i < changedSubscriptions.size(); i++) {
+            SimData data = mSimDatas.get(changedSubscriptions.get(i).getSubscriptionId());
             for (int j = 0; j < mCallbacks.size(); j++) {
                 KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
                 if (cb != null) {
@@ -1242,7 +1246,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private void refreshSimState(int subId, int slotId) {
+    /**
+     * @return true if and only if the state has changed for the specified {@code slotId}
+     */
+    private boolean refreshSimState(int subId, int slotId) {
 
         // This is awful. It exists because there are two APIs for getting the SIM status
         // that don't return the complete set of values and have different types. In Keyguard we
@@ -1256,8 +1263,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         } catch(IllegalArgumentException ex) {
             Log.w(TAG, "Unknown sim state: " + simState);
             state = State.UNKNOWN;
-	}
-        mSimDatas.put(subId, new SimData(state, slotId, subId));
+        }
+        SimData data = mSimDatas.get(subId);
+        final boolean changed;
+        if (data == null) {
+            data = new SimData(state, slotId, subId);
+            mSimDatas.put(subId, data);
+            changed = true; // no data yet; force update
+        } else {
+            changed = data.simState != state;
+            data.simState = state;
+        }
+        return changed;
     }
 
     public static boolean isSimPinSecure(IccCardConstants.State state) {
