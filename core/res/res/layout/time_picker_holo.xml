@@ -28,7 +28,10 @@
         android:layout_gravity="center" />
     <android.widget.RadialTimePickerView
         android:id="@+id/radial_picker"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/timepicker_radial_picker_dimen"
         android:layout_height="@dimen/timepicker_radial_picker_dimen"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:layout_marginTop="?attr/dialogPreferredPadding"
+        android:layout_marginStart="?attr/dialogPreferredPadding"
+        android:layout_marginEnd="?attr/dialogPreferredPadding" />
 </LinearLayout>
