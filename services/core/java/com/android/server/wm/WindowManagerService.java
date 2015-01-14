@@ -153,6 +153,7 @@ import java.io.StringWriter;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -554,6 +555,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     WindowState mInputMethodWindow = null;
     final ArrayList<WindowState> mInputMethodDialogs = new ArrayList<WindowState>();
+
+    /** Temporary list for comparison. Always clear this after use so we don't end up with
+     * orphaned windows references */
+    final ArrayList<WindowState> mTmpWindows = new ArrayList<>();
 
     boolean mHardKeyboardAvailable;
     boolean mShowImeWithHardKeyboard;
@@ -4824,7 +4829,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                             "removeAppToken make exiting: " + wtoken);
                     stack.mExitingAppTokens.add(wtoken);
-                    wtoken.mDeferRemoval = true;
+                    wtoken.mIsExiting = true;
                 } else {
                     // Make sure there is no animation running on this token,
                     // so any windows associated with it will be removed as
@@ -4874,39 +4879,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private boolean tmpRemoveAppWindowsLocked(WindowToken token) {
-        WindowList windows = token.windows;
-        final int NW = windows.size();
-        if (NW > 0) {
-            mWindowsChanged = true;
-        }
-        int targetDisplayId = -1;
-        Task targetTask = mTaskIdToTask.get(token.appWindowToken.groupId);
-        if (targetTask != null) {
-            DisplayContent targetDisplayContent = targetTask.getDisplayContent();
-            if (targetDisplayContent != null) {
-                targetDisplayId = targetDisplayContent.getDisplayId();
-            }
-        }
-        for (int i = 0; i < NW; i++) {
-            WindowState win = windows.get(i);
-            if (targetDisplayId != -1 && win.getDisplayId() != targetDisplayId) {
-                continue;
-            }
-            if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Tmp removing app window " + win);
-            win.getWindowList().remove(win);
-            int j = win.mChildWindows.size();
-            while (j > 0) {
-                j--;
-                WindowState cwin = win.mChildWindows.get(j);
-                if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG,
-                        "Tmp removing child window " + cwin);
-                cwin.getWindowList().remove(cwin);
-            }
-        }
-        return NW > 0;
-    }
-
     void dumpAppTokensLocked() {
         final int numStacks = mStackIdToStack.size();
         for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
@@ -4938,90 +4910,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private int findAppWindowInsertionPointLocked(AppWindowToken target) {
-        final int taskId = target.groupId;
-        Task targetTask = mTaskIdToTask.get(taskId);
-        if (targetTask == null) {
-            Slog.w(TAG, "findAppWindowInsertionPointLocked: no Task for " + target + " taskId="
-                    + taskId);
-            return 0;
-        }
-        DisplayContent displayContent = targetTask.getDisplayContent();
-        if (displayContent == null) {
-            Slog.w(TAG, "findAppWindowInsertionPointLocked: no DisplayContent for " + target);
-            return 0;
-        }
-        final WindowList windows = displayContent.getWindowList();
-        final int NW = windows.size();
-
-        boolean found = false;
-        final ArrayList<Task> tasks = displayContent.getTasks();
-        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
-            final Task task = tasks.get(taskNdx);
-            if (!found && task.taskId != taskId) {
-                continue;
-            }
-            AppTokenList tokens = task.mAppTokens;
-            for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-                final AppWindowToken wtoken = tokens.get(tokenNdx);
-                if (!found && wtoken == target) {
-                    found = true;
-                }
-                if (found) {
-                    // Find the first app token below the new position that has
-                    // a window displayed.
-                    if (DEBUG_REORDER) Slog.v(TAG, "Looking for lower windows in " + wtoken.token);
-                    if (wtoken.sendingToBottom) {
-                        if (DEBUG_REORDER) Slog.v(TAG, "Skipping token -- currently sending to bottom");
-                        continue;
-                    }
-                    for (int i = wtoken.windows.size() - 1; i >= 0; --i) {
-                        WindowState win = wtoken.windows.get(i);
-                        for (int j = win.mChildWindows.size() - 1; j >= 0; --j) {
-                            WindowState cwin = win.mChildWindows.get(j);
-                            if (cwin.mSubLayer >= 0) {
-                                for (int pos = NW - 1; pos >= 0; pos--) {
-                                    if (windows.get(pos) == cwin) {
-                                        if (DEBUG_REORDER) Slog.v(TAG,
-                                                "Found child win @" + (pos + 1));
-                                        return pos + 1;
-                                    }
-                                }
-                            }
-                        }
-                        for (int pos = NW - 1; pos >= 0; pos--) {
-                            if (windows.get(pos) == win) {
-                                if (DEBUG_REORDER) Slog.v(TAG, "Found win @" + (pos + 1));
-                                return pos + 1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // Never put an app window underneath wallpaper.
-        for (int pos = NW - 1; pos >= 0; pos--) {
-            if (windows.get(pos).mIsWallpaper) {
-                if (DEBUG_REORDER) Slog.v(TAG, "Found wallpaper @" + pos);
-                return pos + 1;
-            }
-        }
-        return 0;
-    }
-
     private final int reAddWindowLocked(int index, WindowState win) {
         final WindowList windows = win.getWindowList();
+        // Adding child windows relies on mChildWindows being ordered by mSubLayer.
         final int NCW = win.mChildWindows.size();
-        boolean added = false;
+        boolean winAdded = false;
         for (int j=0; j<NCW; j++) {
             WindowState cwin = win.mChildWindows.get(j);
-            if (!added && cwin.mSubLayer >= 0) {
+            if (!winAdded && cwin.mSubLayer >= 0) {
                 if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding child window at "
                         + index + ": " + cwin);
                 win.mRebuilding = false;
                 windows.add(index, win);
                 index++;
-                added = true;
+                winAdded = true;
             }
             if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding window at "
                     + index + ": " + cwin);
@@ -5029,7 +4931,7 @@ public class WindowManagerService extends IWindowManager.Stub
             windows.add(index, cwin);
             index++;
         }
-        if (!added) {
+        if (!winAdded) {
             if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG, "Re-adding window at "
                     + index + ": " + win);
             win.mRebuilding = false;
@@ -5054,41 +4956,40 @@ public class WindowManagerService extends IWindowManager.Stub
         return index;
     }
 
-    void tmpRemoveTaskWindowsLocked(Task task) {
-        AppTokenList tokens = task.mAppTokens;
-        for (int tokenNdx = tokens.size() - 1; tokenNdx >= 0; --tokenNdx) {
-            tmpRemoveAppWindowsLocked(tokens.get(tokenNdx));
-        }
-    }
 
     void moveStackWindowsLocked(DisplayContent displayContent) {
-        // First remove all of the windows from the list.
-        final ArrayList<Task> tasks = displayContent.getTasks();
-        final int numTasks = tasks.size();
-        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
-            tmpRemoveTaskWindowsLocked(tasks.get(taskNdx));
-        }
+        final WindowList windows = displayContent.getWindowList();
+        mTmpWindows.addAll(windows);
 
-        // And now add them back at the correct place.
-        // Where to start adding?
-        for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
-            AppTokenList tokens = tasks.get(taskNdx).mAppTokens;
-            final int numTokens = tokens.size();
-            if (numTokens == 0) {
-                continue;
-            }
-            int pos = findAppWindowInsertionPointLocked(tokens.get(0));
-            for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
-                final AppWindowToken wtoken = tokens.get(tokenNdx);
-                if (wtoken != null) {
-                    final int newPos = reAddAppWindowsLocked(displayContent, pos, wtoken);
-                    if (newPos != pos) {
-                        displayContent.layoutNeeded = true;
-                    }
-                    pos = newPos;
-                }
+        rebuildAppWindowListLocked(displayContent);
+
+        // Set displayContent.layoutNeeded if window order changed.
+        final int tmpSize = mTmpWindows.size();
+        final int winSize = windows.size();
+        int tmpNdx = 0, winNdx = 0;
+        while (tmpNdx < tmpSize && winNdx < winSize) {
+            // Skip over all exiting windows, they've been moved out of order.
+            WindowState tmp;
+            do {
+                tmp = mTmpWindows.get(tmpNdx++);
+            } while (tmpNdx < tmpSize && tmp.mAppToken != null && tmp.mAppToken.mIsExiting);
+
+            WindowState win;
+            do {
+                win = windows.get(winNdx++);
+            } while (winNdx < winSize && win.mAppToken != null && win.mAppToken.mIsExiting);
+
+            if (tmp != win) {
+                // Window order changed.
+                displayContent.layoutNeeded = true;
+                break;
             }
         }
+        if (tmpNdx != winNdx) {
+            // One list was different from the other.
+            displayContent.layoutNeeded = true;
+        }
+        mTmpWindows.clear();
 
         if (!updateFocusedWindowLocked(UPDATE_FOCUS_WILL_PLACE_SURFACES,
                 false /*updateInputWindows*/)) {
@@ -5229,7 +5130,7 @@ public class WindowManagerService extends IWindowManager.Stub
         for (int appNdx = exitingApps.size() - 1; appNdx >= 0; --appNdx) {
             final AppWindowToken wtoken = exitingApps.get(appNdx);
             if (wtoken.groupId == taskId) {
-                wtoken.mDeferRemoval = false;
+                wtoken.mIsExiting = false;
                 exitingApps.remove(appNdx);
             }
         }
@@ -8645,7 +8546,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int numTokens = tokens.size();
                 for (int tokenNdx = 0; tokenNdx < numTokens; ++tokenNdx) {
                     final AppWindowToken wtoken = tokens.get(tokenNdx);
-                    if (wtoken.mDeferRemoval) {
+                    if (wtoken.mIsExiting) {
                         continue;
                     }
                     i = reAddAppWindowsLocked(displayContent, i, wtoken);
@@ -8655,6 +8556,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         i -= lastBelow;
         if (i != numRemoved) {
+            displayContent.layoutNeeded = true;
             Slog.w(TAG, "On display=" + displayContent.getDisplayId() + " Rebuild removed " +
                     numRemoved + " windows but added " + i,
                     new RuntimeException("here").fillInStackTrace());
@@ -8675,6 +8577,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Slog.w(TAG, "Final window list:");
             dumpWindowsLocked();
         }
+        Arrays.fill(mRebuildTmp, null);
     }
 
     private final void assignLayersLocked(WindowList windows) {
@@ -10067,7 +9970,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mStackIdToStack.valueAt(stackNdx).mExitingAppTokens;
             for (i = exitingAppTokens.size() - 1; i >= 0; i--) {
                 AppWindowToken token = exitingAppTokens.get(i);
-                if (!token.hasVisible && !mClosingApps.contains(token) && !token.mDeferRemoval) {
+                if (!token.hasVisible && !mClosingApps.contains(token) && !token.mIsExiting) {
                     // Make sure there is no animation running on this token,
                     // so any windows associated with it will be removed as
                     // soon as their animations are complete
