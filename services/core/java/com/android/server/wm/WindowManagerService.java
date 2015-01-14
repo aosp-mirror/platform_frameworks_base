@@ -1166,15 +1166,15 @@ public class WindowManagerService extends IWindowManager.Stub
         // Just search for the start of this layer.
         final int myLayer = win.mBaseLayer;
         int i;
-        for (i = 0; i < N; i++) {
+        for (i = N - 1; i >= 0; --i) {
             WindowState w = windows.get(i);
-            if (w.mBaseLayer > myLayer) {
+            if (w.mBaseLayer <= myLayer) {
                 break;
             }
         }
         if (true || DEBUG_FOCUS_LIGHT || DEBUG_WINDOW_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG,
-                "Based on layer: Adding window " + win + " at " + i + " of " + N);
-        windows.add(i, win);
+                "Based on layer: Adding window " + win + " at " + (i + 1) + " of " + N);
+        windows.add(i + 1, win);
         mWindowsChanged = true;
         return tokenWindowsPos;
     }
