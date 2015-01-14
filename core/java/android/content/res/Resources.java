@@ -2696,8 +2696,8 @@ public class Resources {
 
     private ColorStateList loadColorStateListForCookie(TypedValue value, int id, Theme theme) {
         if (value.string == null) {
-            throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("
-                    + Integer.toHexString(id) + ") is not a ColorStateList: " + value);
+            throw new UnsupportedOperationException(
+                    "Can't convert to color state list: type=0x" + value.type);
         }
 
         final String file = value.string.toString();

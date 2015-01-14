@@ -174,8 +174,16 @@ public final class StrictMode {
      */
     public static final int DETECT_CUSTOM = 0x08;  // for ThreadPolicy
 
+    /**
+     * For StrictMode.noteResourceMismatch()
+     *
+     * @hide
+     */
+    public static final int DETECT_RESOURCE_MISMATCH = 0x10;  // for ThreadPolicy
+
     private static final int ALL_THREAD_DETECT_BITS =
-            DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK | DETECT_CUSTOM;
+            DETECT_DISK_WRITE | DETECT_DISK_READ | DETECT_NETWORK | DETECT_CUSTOM |
+            DETECT_RESOURCE_MISMATCH;
 
     // Process-policy:
 
@@ -427,6 +435,22 @@ public final class StrictMode {
              */
             public Builder permitCustomSlowCalls() {
                 return disable(DETECT_CUSTOM);
+            }
+
+            /**
+             * Disable detection of mismatches between defined resource types
+             * and getter calls.
+             */
+            public Builder permitResourceMismatches() {
+                return disable(DETECT_RESOURCE_MISMATCH);
+            }
+
+            /**
+             * Enable detection of mismatches between defined resource types
+             * and getter calls.
+             */
+            public Builder detectResourceMismatches() {
+                return enable(DETECT_RESOURCE_MISMATCH);
             }
 
             /**
@@ -851,6 +875,15 @@ public final class StrictMode {
     }
 
     /**
+     * @hide
+     */
+    private static class StrictModeResourceMismatchViolation extends StrictModeViolation {
+        public StrictModeResourceMismatchViolation(int policyMask, Object tag) {
+            super(policyMask, DETECT_RESOURCE_MISMATCH, tag != null ? tag.toString() : null);
+        }
+    }
+
+    /**
      * Returns the bitmask of the current thread's policy.
      *
      * @return the bitmask of all the DETECT_* and PENALTY_* bits currently enabled
@@ -1121,6 +1154,20 @@ public final class StrictMode {
                 return;
             }
             BlockGuard.BlockGuardPolicyException e = new StrictModeCustomViolation(mPolicyMask, name);
+            e.fillInStackTrace();
+            startHandlingViolationException(e);
+        }
+
+        // Not part of BlockGuard.Policy; just part of StrictMode:
+        void onResourceMismatch(Object tag) {
+            if ((mPolicyMask & DETECT_RESOURCE_MISMATCH) == 0) {
+                return;
+            }
+            if (tooManyViolationsThisLoop()) {
+                return;
+            }
+            BlockGuard.BlockGuardPolicyException e =
+                    new StrictModeResourceMismatchViolation(mPolicyMask, tag);
             e.fillInStackTrace();
             startHandlingViolationException(e);
         }
@@ -1940,6 +1987,26 @@ public final class StrictMode {
             return;
         }
         ((AndroidBlockGuardPolicy) policy).onCustomSlowCall(name);
+    }
+
+    /**
+     * For code to note that a resource was obtained using a type other than
+     * its defined type. This is a no-op unless the current thread's
+     * {@link android.os.StrictMode.ThreadPolicy} has
+     * {@link android.os.StrictMode.ThreadPolicy.Builder#detectResourceMismatches()}
+     * enabled.
+     *
+     * @param tag an object for the exception stack trace that's
+     *            built if when this fires.
+     * @hide
+     */
+    public static void noteResourceMismatch(Object tag) {
+        BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
+        if (!(policy instanceof AndroidBlockGuardPolicy)) {
+            // StrictMode not enabled.
+            return;
+        }
+        ((AndroidBlockGuardPolicy) policy).onResourceMismatch(tag);
     }
 
     /**
