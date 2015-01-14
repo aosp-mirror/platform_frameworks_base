@@ -18,7 +18,6 @@ package android.provider;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.annotation.SystemApi;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
@@ -132,7 +131,6 @@ public final class Settings {
             "android.settings.AIRPLANE_MODE_SETTINGS";
 
     /**
-     * @hide
      * Activity Action: Modify Airplane mode settings using the users voice.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
@@ -154,7 +152,6 @@ public final class Settings {
      * Output: Nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    @SystemApi
     public static final String ACTION_VOICE_CONTROL_AIRPLANE_MODE =
             "android.settings.VOICE_CONTROL_AIRPLANE_MODE";
 
@@ -991,13 +988,11 @@ public final class Settings {
     public static final String EXTRA_INPUT_DEVICE_IDENTIFIER = "input_device_identifier";
 
     /**
-     * @hide
      * Activity Extra: Enable or disable Airplane Mode.
      * <p>
      * This can be passed as an extra field to the {@link #ACTION_VOICE_CONTROL_AIRPLANE_MODE}
      * intent as a boolean.
      */
-    @SystemApi
     public static final String EXTRA_AIRPLANE_MODE_ENABLED = "airplane_mode_enabled";
 
     private static final String JID_RESOURCE_PREFIX = "android";

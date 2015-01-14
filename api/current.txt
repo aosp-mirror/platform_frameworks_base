@@ -3322,6 +3322,7 @@ package android.app {
     method public int getTaskId();
     method public final java.lang.CharSequence getTitle();
     method public final int getTitleColor();
+    method public android.app.VoiceInteractor getVoiceInteractor();
     method public final int getVolumeControlStream();
     method public android.view.Window getWindow();
     method public android.view.WindowManager getWindowManager();
@@ -3333,6 +3334,7 @@ package android.app {
     method public boolean isFinishing();
     method public boolean isImmersive();
     method public boolean isTaskRoot();
+    method public boolean isVoiceInteraction();
     method public final deprecated android.database.Cursor managedQuery(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
     method public boolean moveTaskToBack(boolean);
     method public boolean navigateUpTo(android.content.Intent);
@@ -5185,6 +5187,41 @@ package android.app {
     field public static final int MODE_NIGHT_AUTO = 0; // 0x0
     field public static final int MODE_NIGHT_NO = 1; // 0x1
     field public static final int MODE_NIGHT_YES = 2; // 0x2
+  }
+
+  public class VoiceInteractor {
+    method public boolean submitRequest(android.app.VoiceInteractor.Request);
+    method public boolean[] supportsCommands(java.lang.String[]);
+  }
+
+  public static class VoiceInteractor.AbortVoiceRequest extends android.app.VoiceInteractor.Request {
+    ctor public VoiceInteractor.AbortVoiceRequest(java.lang.CharSequence, android.os.Bundle);
+    method public void onAbortResult(android.os.Bundle);
+  }
+
+  public static class VoiceInteractor.CommandRequest extends android.app.VoiceInteractor.Request {
+    ctor public VoiceInteractor.CommandRequest(java.lang.String, android.os.Bundle);
+    method public void onCommandResult(boolean, android.os.Bundle);
+  }
+
+  public static class VoiceInteractor.CompleteVoiceRequest extends android.app.VoiceInteractor.Request {
+    ctor public VoiceInteractor.CompleteVoiceRequest(java.lang.CharSequence, android.os.Bundle);
+    method public void onCompleteResult(android.os.Bundle);
+  }
+
+  public static class VoiceInteractor.ConfirmationRequest extends android.app.VoiceInteractor.Request {
+    ctor public VoiceInteractor.ConfirmationRequest(java.lang.CharSequence, android.os.Bundle);
+    method public void onConfirmationResult(boolean, android.os.Bundle);
+  }
+
+  public static abstract class VoiceInteractor.Request {
+    ctor public VoiceInteractor.Request();
+    method public void cancel();
+    method public android.app.Activity getActivity();
+    method public android.content.Context getContext();
+    method public void onAttached(android.app.Activity);
+    method public void onCancel();
+    method public void onDetached();
   }
 
   public final class WallpaperInfo implements android.os.Parcelable {
@@ -7737,6 +7774,7 @@ package android.content {
     field public static final java.lang.String CATEGORY_TAB = "android.intent.category.TAB";
     field public static final java.lang.String CATEGORY_TEST = "android.intent.category.TEST";
     field public static final java.lang.String CATEGORY_UNIT_TEST = "android.intent.category.UNIT_TEST";
+    field public static final java.lang.String CATEGORY_VOICE = "android.intent.category.VOICE";
     field public static final android.os.Parcelable.Creator<android.content.Intent> CREATOR;
     field public static final java.lang.String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
     field public static final java.lang.String EXTRA_ALLOW_MULTIPLE = "android.intent.extra.ALLOW_MULTIPLE";
@@ -17768,7 +17806,7 @@ package android.net.http {
     method public static android.net.http.HttpResponseCache getInstalled();
     method public int getNetworkCount();
     method public int getRequestCount();
-    method public static android.net.http.HttpResponseCache install(java.io.File, long) throws java.io.IOException;
+    method public static synchronized android.net.http.HttpResponseCache install(java.io.File, long) throws java.io.IOException;
     method public long maxSize();
     method public java.net.CacheRequest put(java.net.URI, java.net.URLConnection) throws java.io.IOException;
     method public long size();
@@ -25506,12 +25544,14 @@ package android.provider {
     field public static final java.lang.String ACTION_SYNC_SETTINGS = "android.settings.SYNC_SETTINGS";
     field public static final java.lang.String ACTION_USAGE_ACCESS_SETTINGS = "android.settings.USAGE_ACCESS_SETTINGS";
     field public static final java.lang.String ACTION_USER_DICTIONARY_SETTINGS = "android.settings.USER_DICTIONARY_SETTINGS";
+    field public static final java.lang.String ACTION_VOICE_CONTROL_AIRPLANE_MODE = "android.settings.VOICE_CONTROL_AIRPLANE_MODE";
     field public static final java.lang.String ACTION_VOICE_INPUT_SETTINGS = "android.settings.VOICE_INPUT_SETTINGS";
     field public static final java.lang.String ACTION_WIFI_IP_SETTINGS = "android.settings.WIFI_IP_SETTINGS";
     field public static final java.lang.String ACTION_WIFI_SETTINGS = "android.settings.WIFI_SETTINGS";
     field public static final java.lang.String ACTION_WIRELESS_SETTINGS = "android.settings.WIRELESS_SETTINGS";
     field public static final java.lang.String AUTHORITY = "settings";
     field public static final java.lang.String EXTRA_ACCOUNT_TYPES = "account_types";
+    field public static final java.lang.String EXTRA_AIRPLANE_MODE_ENABLED = "airplane_mode_enabled";
     field public static final java.lang.String EXTRA_AUTHORITIES = "authorities";
     field public static final java.lang.String EXTRA_INPUT_METHOD_ID = "input_method_id";
   }
@@ -27461,14 +27501,52 @@ package android.service.voice {
     ctor public VoiceInteractionSession(android.content.Context);
     ctor public VoiceInteractionSession(android.content.Context, android.os.Handler);
     method public void finish();
+    method public android.view.LayoutInflater getLayoutInflater();
+    method public android.app.Dialog getWindow();
+    method public void hideWindow();
+    method public void onAbortVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
+    method public void onBackPressed();
+    method public abstract void onCancel(android.service.voice.VoiceInteractionSession.Request);
     method public void onCloseSystemDialogs();
+    method public abstract void onCommand(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.String, android.os.Bundle);
+    method public void onCompleteVoice(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
+    method public void onComputeInsets(android.service.voice.VoiceInteractionSession.Insets);
+    method public abstract void onConfirm(android.service.voice.VoiceInteractionSession.Caller, android.service.voice.VoiceInteractionSession.Request, java.lang.CharSequence, android.os.Bundle);
     method public void onCreate(android.os.Bundle);
+    method public android.view.View onCreateContentView();
     method public void onDestroy();
+    method public boolean[] onGetSupportedCommands(android.service.voice.VoiceInteractionSession.Caller, java.lang.String[]);
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
+    method public void onTaskFinished(android.content.Intent, int);
+    method public void onTaskStarted(android.content.Intent, int);
     method public void setContentView(android.view.View);
+    method public void setTheme(int);
+    method public void showWindow();
+    method public void startVoiceActivity(android.content.Intent);
+  }
+
+  public static class VoiceInteractionSession.Caller {
+  }
+
+  public static final class VoiceInteractionSession.Insets {
+    ctor public VoiceInteractionSession.Insets();
+    field public static final int TOUCHABLE_INSETS_CONTENT = 1; // 0x1
+    field public static final int TOUCHABLE_INSETS_FRAME = 0; // 0x0
+    field public static final int TOUCHABLE_INSETS_REGION = 3; // 0x3
+    field public final android.graphics.Rect contentInsets;
+    field public int touchableInsets;
+    field public final android.graphics.Region touchableRegion;
+  }
+
+  public static class VoiceInteractionSession.Request {
+    method public void sendAbortVoiceResult(android.os.Bundle);
+    method public void sendCancelResult();
+    method public void sendCommandResult(boolean, android.os.Bundle);
+    method public void sendCompleteVoiceResult(android.os.Bundle);
+    method public void sendConfirmResult(boolean, android.os.Bundle);
   }
 
   public abstract class VoiceInteractionSessionService extends android.app.Service {

@@ -2808,14 +2808,12 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_BROWSABLE = "android.intent.category.BROWSABLE";
     /**
-     * @hide
      * Categories for activities that can participate in voice interaction.
      * An activity that supports this category must be prepared to run with
      * no UI shown at all (though in some case it may have a UI shown), and
      * rely on {@link android.app.VoiceInteractor} to interact with the user.
      */
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
-    @SystemApi
     public static final String CATEGORY_VOICE = "android.intent.category.VOICE";
     /**
      * Set if the activity should be considered as an alternative action to

@@ -16,7 +16,6 @@
 
 package android.service.voice;
 
-import android.annotation.SystemApi;
 import android.app.Dialog;
 import android.app.Instrumentation;
 import android.content.Context;
@@ -54,7 +53,15 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
- * An active interaction session, started by a {@link VoiceInteractionService}.
+ * An active voice interaction session, providing a facility for the implementation
+ * to interact with the user in the voice interaction layer.  This interface is no shown
+ * by default, but you can request that it be shown with {@link #showWindow()}, which
+ * will result in a later call to {@link #onCreateContentView()} in which the UI can be
+ * built
+ *
+ * <p>A voice interaction session can be self-contained, ultimately calling {@link #finish}
+ * when done.  It can also initiate voice interactions with applications by calling
+ * {@link #startVoiceActivity}</p>.
  */
 public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     static final String TAG = "VoiceInteractionSession";
@@ -168,10 +175,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
     };
 
-    /**
-     * @hide
-     */
-    @SystemApi
     public static class Request {
         final IVoiceInteractorRequest mInterface = new IVoiceInteractorRequest.Stub() {
             @Override
@@ -255,10 +258,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
     }
 
-    /**
-     * @hide
-     */
-    @SystemApi
     public static class Caller {
         final String packageName;
         final int uid;
@@ -354,10 +353,8 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     final MyCallbacks mCallbacks = new MyCallbacks();
 
     /**
-     * @hide
      * Information about where interesting parts of the input method UI appear.
      */
-    @SystemApi
     public static final class Insets {
         /**
          * This is the part of the UI that is the main content.  It is
@@ -477,10 +474,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         mContentFrame = (FrameLayout)mRootView.findViewById(android.R.id.content);
     }
 
-    /**
-     * @hide
-     */
-    @SystemApi
     public void showWindow() {
         if (DEBUG) Log.v(TAG, "Showing window: mWindowAdded=" + mWindowAdded
                 + " mWindowVisible=" + mWindowVisible);
@@ -509,10 +502,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
         }
     }
 
-    /**
-     * @hide
-     */
-    @SystemApi
     public void hideWindow() {
         if (mWindowVisible) {
             mWindow.hide();
@@ -521,13 +510,11 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
      * You can call this to customize the theme used by your IME's window.
      * This must be set before {@link #onCreate}, so you
      * will typically call it in your constructor with the resource ID
      * of your custom theme.
      */
-    @SystemApi
     public void setTheme(int theme) {
         if (mWindow != null) {
             throw new IllegalStateException("Must be called before onCreate()");
@@ -536,7 +523,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
      * Ask that a new activity be started for voice interaction.  This will create a
      * new dedicated task in the activity manager for this voice interaction session;
      * this means that {@link Intent#FLAG_ACTIVITY_NEW_TASK Intent.FLAG_ACTIVITY_NEW_TASK}
@@ -557,7 +543,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
      * always have {@link Intent#CATEGORY_VOICE Intent.CATEGORY_VOICE} added to it, since
      * this is part of a voice interaction.
      */
-    @SystemApi
     public void startVoiceActivity(Intent intent) {
         if (mToken == null) {
             throw new IllegalStateException("Can't call before onCreate()");
@@ -573,19 +558,15 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
      * Convenience for inflating views.
      */
-    @SystemApi
     public LayoutInflater getLayoutInflater() {
         return mInflater;
     }
 
     /**
-     * @hide
      * Retrieve the window being used to show the session's UI.
      */
-    @SystemApi
     public Dialog getWindow() {
         return mWindow;
     }
@@ -631,10 +612,8 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
      * Hook in which to create the session's UI.
      */
-    @SystemApi
     public View onCreateContentView() {
         return null;
     }
@@ -647,42 +626,22 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
 
     }
 
-    /**
-     * @hide
-     */
-    @SystemApi
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return false;
     }
 
-    /**
-     * @hide
-     */
-    @SystemApi
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
         return false;
     }
 
-    /**
-     * @hide
-     */
-    @SystemApi
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         return false;
     }
 
-    /**
-     * @hide
-     */
-    @SystemApi
     public boolean onKeyMultiple(int keyCode, int count, KeyEvent event) {
         return false;
     }
 
-    /**
-     * @hide
-     */
-    @SystemApi
     public void onBackPressed() {
         finish();
     }
@@ -697,14 +656,12 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
      * Compute the interesting insets into your UI.  The default implementation
      * uses the entire window frame as the insets.  The default touchable
      * insets are {@link Insets#TOUCHABLE_INSETS_FRAME}.
      *
      * @param outInsets Fill in with the current UI insets.
      */
-    @SystemApi
     public void onComputeInsets(Insets outInsets) {
         int[] loc = mTmpLocation;
         View decor = getWindow().getWindow().getDecorView();
@@ -718,8 +675,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
-     * @SystemApi
      * Called when a task initiated by {@link #startVoiceActivity(android.content.Intent)}
      * has actually started.
      *
@@ -731,8 +686,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
-     * @SystemApi
      * Called when the last activity of a task initiated by
      * {@link #startVoiceActivity(android.content.Intent)} has finished.  The default
      * implementation calls {@link #finish()} on the assumption that this represents
@@ -748,8 +701,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
-     * @SystemApi
      * Request to query for what extended commands the session supports.
      *
      * @param caller Who is making the request.
@@ -764,8 +715,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
-     * @SystemApi
      * Request to confirm with the user before proceeding with an unrecoverable operation,
      * corresponding to a {@link android.app.VoiceInteractor.ConfirmationRequest
      * VoiceInteractor.ConfirmationRequest}.
@@ -781,8 +730,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
             Bundle extras);
 
     /**
-     * @hide
-     * @SystemApi
      * Request to complete the voice interaction session because the voice activity successfully
      * completed its interaction using voice.  Corresponds to
      * {@link android.app.VoiceInteractor.CompleteVoiceRequest
@@ -804,8 +751,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
-     * @SystemApi
      * Request to abort the voice interaction session because the voice activity can not
      * complete its interaction using voice.  Corresponds to
      * {@link android.app.VoiceInteractor.AbortVoiceRequest
@@ -824,8 +769,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     }
 
     /**
-     * @hide
-     * @SystemApi
      * Process an arbitrary extended command from the caller,
      * corresponding to a {@link android.app.VoiceInteractor.CommandRequest
      * VoiceInteractor.CommandRequest}.
@@ -840,8 +783,6 @@ public abstract class VoiceInteractionSession implements KeyEvent.Callback {
     public abstract void onCommand(Caller caller, Request request, String command, Bundle extras);
 
     /**
-     * @hide
-     * @SystemApi
      * Called when the {@link android.app.VoiceInteractor} has asked to cancel a {@link Request}
      * that was previously delivered to {@link #onConfirm} or {@link #onCommand}.
      *

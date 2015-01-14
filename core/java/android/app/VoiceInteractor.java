@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -34,7 +33,6 @@ import com.android.internal.os.SomeArgs;
 import java.util.ArrayList;
 
 /**
- * @hide
  * Interface for an {@link Activity} to interact with the user through voice.  Use
  * {@link android.app.Activity#getVoiceInteractor() Activity.getVoiceInteractor}
  * to retrieve the interface, if the activity is currently involved in a voice interaction.
@@ -56,7 +54,6 @@ import java.util.ArrayList;
  * request, rather than holding on to the activity instance yourself, either explicitly
  * or implicitly through a non-static inner class.
  */
-@SystemApi
 public class VoiceInteractor {
     static final String TAG = "VoiceInteractor";
     static final boolean DEBUG = true;
@@ -322,7 +319,7 @@ public class VoiceInteractor {
          * complete an action (e.g. booking a table might have several possible times that the
          * user could select from or an app might need the user to agree to a terms of service).
          * The result of the confirmation will be returned through an asynchronous call to
-         * either {@link #onCommandResult(android.os.Bundle)} or
+         * either {@link #onCommandResult(boolean, android.os.Bundle)} or
          * {@link #onCancel()}.
          *
          * <p>The command is a string that describes the generic operation to be performed.
