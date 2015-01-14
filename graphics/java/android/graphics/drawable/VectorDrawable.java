@@ -150,7 +150,8 @@ import java.util.Stack;
  *
  * <dl>
  * <dt><code>&lt;clip-path></code></dt>
- * <dd>Defines path to be the current clip.
+ * <dd>Defines path to be the current clip. Note that the clip path only apply to
+ * the current group and its children.
  * <dl>
  * <dt><code>android:name</code></dt>
  * <dd>Defines the name of the clip path.</dd>
