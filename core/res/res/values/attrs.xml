@@ -4396,6 +4396,8 @@
         </attr>
         <!-- List selector to use for spinnerMode="dropdown" display. -->
         <attr name="dropDownSelector" />
+        <!-- Theme to use for the drop-down or dialog popup window. -->
+        <attr name="popupTheme" />
         <!-- Background drawable to use for the dropdown in spinnerMode="dropdown". -->
         <attr name="popupBackground" />
         <!-- Window elevation to use for the dropdown in spinnerMode="dropdown". -->

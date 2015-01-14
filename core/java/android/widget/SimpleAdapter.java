@@ -17,6 +17,8 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
@@ -40,14 +42,14 @@ import java.util.Map;
  * If the returned value is false, the following views are then tried in order:
  * <ul>
  * <li> A view that implements Checkable (e.g. CheckBox).  The expected bind value is a boolean.
- * <li> TextView.  The expected bind value is a string and {@link #setViewText(TextView, String)} 
+ * <li> TextView.  The expected bind value is a string and {@link #setViewText(TextView, String)}
  * is invoked.
- * <li> ImageView. The expected bind value is a resource id or a string and 
- * {@link #setViewImage(ImageView, int)} or {@link #setViewImage(ImageView, String)} is invoked. 
+ * <li> ImageView. The expected bind value is a resource id or a string and
+ * {@link #setViewImage(ImageView, int)} or {@link #setViewImage(ImageView, String)} is invoked.
  * </ul>
  * If no appropriate binding can be found, an {@link IllegalStateException} is thrown.
  */
-public class SimpleAdapter extends BaseAdapter implements Filterable {
+public class SimpleAdapter extends BaseAdapter implements Filterable, Spinner.ThemedSpinnerAdapter {
     private int[] mTo;
     private String[] mFrom;
     private ViewBinder mViewBinder;
@@ -58,12 +60,15 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
     private int mDropDownResource;
     private LayoutInflater mInflater;
 
+    /** Layout inflater used for {@link #getDropDownView(int, View, ViewGroup)}. */
+    private LayoutInflater mDropDownInflater;
+
     private SimpleFilter mFilter;
     private ArrayList<Map<String, ?>> mUnfilteredData;
 
     /**
      * Constructor
-     * 
+     *
      * @param context The context where the View associated with this SimpleAdapter is running
      * @param data A List of Maps. Each entry in the List corresponds to one row in the list. The
      *        Maps contain the data for each row, and should include all the entries specified in
@@ -85,7 +90,6 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
-    
     /**
      * @see android.widget.Adapter#getCount()
      */
@@ -111,14 +115,14 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
      * @see android.widget.Adapter#getView(int, View, ViewGroup)
      */
     public View getView(int position, View convertView, ViewGroup parent) {
-        return createViewFromResource(position, convertView, parent, mResource);
+        return createViewFromResource(mInflater, position, convertView, parent, mResource);
     }
 
-    private View createViewFromResource(int position, View convertView,
+    private View createViewFromResource(LayoutInflater inflater, int position, View convertView,
             ViewGroup parent, int resource) {
         View v;
         if (convertView == null) {
-            v = mInflater.inflate(resource, parent, false);
+            v = inflater.inflate(resource, parent, false);
         } else {
             v = convertView;
         }
@@ -135,12 +139,41 @@ public class SimpleAdapter extends BaseAdapter implements Filterable {
      * @see #getDropDownView(int, android.view.View, android.view.ViewGroup)
      */
     public void setDropDownViewResource(int resource) {
-        this.mDropDownResource = resource;
+        mDropDownResource = resource;
+    }
+
+    /**
+     * Sets the {@link android.content.res.Resources.Theme} against which drop-down views are
+     * inflated.
+     * <p>
+     * By default, drop-down views are inflated against the theme of the
+     * {@link Context} passed to the adapter's constructor.
+     *
+     * @param theme the theme against which to inflate drop-down views or
+     *              {@code null} to use the theme from the adapter's context
+     * @see #getDropDownView(int, View, ViewGroup)
+     */
+    @Override
+    public void setDropDownViewTheme(Resources.Theme theme) {
+        if (theme == null) {
+            mDropDownInflater = null;
+        } else if (theme == mInflater.getContext().getTheme()) {
+            mDropDownInflater = mInflater;
+        } else {
+            final Context context = new ContextThemeWrapper(mInflater.getContext(), theme);
+            mDropDownInflater = LayoutInflater.from(context);
+        }
+    }
+
+    @Override
+    public Resources.Theme getDropDownViewTheme() {
+        return mDropDownInflater == null ? null : mDropDownInflater.getContext().getTheme();
     }
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        return createViewFromResource(position, convertView, parent, mDropDownResource);
+        return createViewFromResource(
+                mDropDownInflater, position, convertView, parent, mDropDownResource);
     }
 
     private void bindView(int position, View view) {

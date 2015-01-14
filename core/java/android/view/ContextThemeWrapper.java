@@ -35,13 +35,19 @@ public class ContextThemeWrapper extends ContextWrapper {
     public ContextThemeWrapper() {
         super(null);
     }
-    
-    public ContextThemeWrapper(Context base, int themeres) {
+
+    public ContextThemeWrapper(Context base, int themeResId) {
         super(base);
-        mThemeResource = themeres;
+        mThemeResource = themeResId;
     }
 
-    @Override protected void attachBaseContext(Context newBase) {
+    public ContextThemeWrapper(Context base, Resources.Theme theme) {
+        super(base);
+        mTheme = theme;
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
     }
 

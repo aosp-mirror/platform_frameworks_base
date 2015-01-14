@@ -276,6 +276,7 @@ please see themes_device_defaults.xml.
         <item name="quickContactBadgeStyleSmallWindowLarge">@style/Widget.Material.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@style/Widget.Material.ListPopupWindow</item>
         <item name="popupMenuStyle">@style/Widget.Material.PopupMenu</item>
+        <item name="popupTheme">@null</item>
         <item name="stackViewStyle">@style/Widget.Material.StackView</item>
         <item name="activityChooserViewStyle">@style/Widget.Material.ActivityChooserView</item>
         <item name="fragmentBreadCrumbsStyle">@style/Widget.Material.FragmentBreadCrumbs</item>
@@ -324,7 +325,7 @@ please see themes_device_defaults.xml.
         <item name="actionMenuTextAppearance">@style/TextAppearance.Material.Widget.ActionBar.Menu</item>
         <item name="actionMenuTextColor">?attr/textColorPrimary</item>
         <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarPopupTheme">@null</item>
+        <item name="actionBarPopupTheme">?attr/popupTheme</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.ActionBar</item>
         <item name="actionBarItemBackground">?attr/selectableItemBackgroundBorderless</item>
 
@@ -677,7 +678,6 @@ please see themes_device_defaults.xml.
         <item name="actionBarSize">@dimen/action_bar_default_height_material</item>
         <item name="actionModePopupWindowStyle">@style/Widget.Material.Light.PopupWindow.ActionMode</item>
         <item name="actionBarWidgetTheme">@null</item>
-        <item name="actionBarPopupTheme">@null</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.ActionBar</item>
         <item name="actionBarItemBackground">?attr/selectableItemBackgroundBorderless</item>
 
@@ -744,7 +744,7 @@ please see themes_device_defaults.xml.
     <style name="Theme.Material.Light.DarkActionBar">
         <item name="actionBarWidgetTheme">@null</item>
         <item name="actionBarTheme">@style/ThemeOverlay.Material.Dark.ActionBar</item>
-        <item name="actionBarPopupTheme">@style/ThemeOverlay.Material.Light</item>
+        <item name="popupTheme">@style/ThemeOverlay.Material.Light</item>
 
         <item name="colorPrimaryDark">@color/primary_dark_material_dark</item>
         <item name="colorPrimary">@color/primary_material_dark</item>
