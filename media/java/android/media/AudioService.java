@@ -1511,9 +1511,11 @@ public class AudioService extends IAudioService.Stub {
         if (mUseFixedVolume) {
             return;
         }
-
+        int streamAlias = mStreamVolumeAlias[streamType];
         for (int stream = 0; stream < mStreamStates.length; stream++) {
-            if (!isStreamAffectedByMute(stream) || stream == streamType) continue;
+            if (!isStreamAffectedByMute(streamAlias) || streamAlias == mStreamVolumeAlias[stream]) {
+                continue;
+            }
             mStreamStates[stream].mute(cb, state);
          }
     }
@@ -1526,17 +1528,21 @@ public class AudioService extends IAudioService.Stub {
         if (streamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
             streamType = getActiveStreamType(streamType);
         }
-
-        if (isStreamAffectedByMute(streamType)) {
-            if (streamType == AudioSystem.STREAM_MUSIC) {
+        int streamAlias = mStreamVolumeAlias[streamType];
+        if (isStreamAffectedByMute(streamAlias)) {
+            if (streamAlias == AudioSystem.STREAM_MUSIC) {
                 setSystemAudioMute(state);
             }
-            mStreamStates[streamType].mute(cb, state);
+            for (int stream = 0; stream < mStreamStates.length; stream++) {
+                if (streamAlias == mStreamVolumeAlias[stream]) {
+                    mStreamStates[stream].mute(cb, state);
 
-            Intent intent = new Intent(AudioManager.STREAM_MUTE_CHANGED_ACTION);
-            intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, streamType);
-            intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, state);
-            sendBroadcastToAll(intent);
+                    Intent intent = new Intent(AudioManager.STREAM_MUTE_CHANGED_ACTION);
+                    intent.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE, stream);
+                    intent.putExtra(AudioManager.EXTRA_STREAM_VOLUME_MUTED, state);
+                    sendBroadcastToAll(intent);
+                }
+            }
         }
     }
 
