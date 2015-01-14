@@ -193,10 +193,6 @@ public class KeyguardStatusView extends GridLayout {
         KeyguardUpdateMonitor.getInstance(mContext).removeCallback(mInfoCallback);
     }
 
-    public int getAppWidgetId() {
-        return LockPatternUtils.ID_DEFAULT_STATUS_WIDGET;
-    }
-
     private String getOwnerInfo() {
         ContentResolver res = getContext().getContentResolver();
         String info = null;

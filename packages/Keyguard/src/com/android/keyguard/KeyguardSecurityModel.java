@@ -91,26 +91,4 @@ public class KeyguardSecurityModel {
         }
         return mode;
     }
-
-    /**
-     * Some unlock methods can have an alternate, such as biometric unlocks (e.g. face unlock).
-     * This function decides if an alternate unlock is available and returns it. Otherwise,
-     * returns @param mode.
-     *
-     * @param mode the mode we want the alternate for
-     * @return alternate or the given mode
-     */
-    SecurityMode getAlternateFor(SecurityMode mode) {
-        return mode; // no alternate, return what was given
-    }
-
-    /**
-     * Some unlock methods can have a backup which gives the user another way to get into
-     * the device. This is currently only supported for Biometric and Pattern unlock.
-     *
-     * @return backup method or current security mode
-     */
-    SecurityMode getBackupSecurityMode(SecurityMode mode) {
-        return mode; // no backup, return current security mode
-    }
 }

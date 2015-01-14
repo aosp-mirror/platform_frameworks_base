@@ -40,9 +40,4 @@ public interface KeyguardSecurityCallback {
      */
     void reportUnlockAttempt(boolean success);
 
-    /**
-     * Shows the backup security for the current method.  If none available, this call is a no-op.
-     */
-    void showBackupSecurity();
-
 }

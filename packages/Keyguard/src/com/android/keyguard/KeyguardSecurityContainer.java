@@ -304,24 +304,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     void showPrimarySecurityScreen(boolean turningOff) {
         SecurityMode securityMode = mSecurityModel.getSecurityMode();
         if (DEBUG) Log.v(TAG, "showPrimarySecurityScreen(turningOff=" + turningOff + ")");
-        if (!turningOff &&
-                KeyguardUpdateMonitor.getInstance(mContext).isAlternateUnlockEnabled()) {
-            // If we're not turning off, then allow biometric alternate.
-            // We'll reload it when the device comes back on.
-            securityMode = mSecurityModel.getAlternateFor(securityMode);
-        }
         showSecurityScreen(securityMode);
-    }
-
-    /**
-     * Shows the backup security screen for the current security mode.  This could be used for
-     * password recovery screens but is currently only used for pattern unlock to show the
-     * account unlock screen and biometric unlock to show the user's normal unlock.
-     */
-    private void showBackupSecurityScreen() {
-        if (DEBUG) Log.d(TAG, "showBackupSecurity()");
-        SecurityMode backup = mSecurityModel.getBackupSecurityMode(mCurrentSecuritySelection);
-        showSecurityScreen(backup);
     }
 
     /**
@@ -336,8 +319,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             finish = true;
         } else if (SecurityMode.None == mCurrentSecuritySelection) {
             SecurityMode securityMode = mSecurityModel.getSecurityMode();
-            // Allow an alternate, such as biometric unlock
-            securityMode = mSecurityModel.getAlternateFor(securityMode);
             if (SecurityMode.None == securityMode) {
                 finish = true; // no security required
             } else {
@@ -450,11 +431,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
             }
         }
 
-        @Override
-        public void showBackupSecurity() {
-            KeyguardSecurityContainer.this.showBackupSecurityScreen();
-        }
-
     };
 
     // The following is used to ignore callbacks from SecurityViews that are no longer current
@@ -463,8 +439,6 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private KeyguardSecurityCallback mNullCallback = new KeyguardSecurityCallback() {
         @Override
         public void userActivity() { }
-        @Override
-        public void showBackupSecurity() { }
         @Override
         public void reportUnlockAttempt(boolean success) { }
         @Override

@@ -3657,6 +3657,7 @@ public final class Settings {
          * A flag containing settings used for biometric weak
          * @hide
          */
+        @Deprecated
         public static final String LOCK_BIOMETRIC_WEAK_FLAGS =
                 "lock_biometric_weak_flags";
 
@@ -3707,6 +3708,7 @@ public final class Settings {
          * Ids of the user-selected appwidgets on the lockscreen (comma-delimited).
          * @hide
          */
+        @Deprecated
         public static final String LOCK_SCREEN_APPWIDGET_IDS =
             "lock_screen_appwidget_ids";
 
@@ -3720,6 +3722,7 @@ public final class Settings {
          * Id of the appwidget shown on the lock screen when appwidgets are disabled.
          * @hide
          */
+        @Deprecated
         public static final String LOCK_SCREEN_FALLBACK_APPWIDGET_ID =
             "lock_screen_fallback_appwidget_id";
 
@@ -3727,6 +3730,7 @@ public final class Settings {
          * Index of the lockscreen appwidget to restore, -1 if none.
          * @hide
          */
+        @Deprecated
         public static final String LOCK_SCREEN_STICKY_APPWIDGET =
             "lock_screen_sticky_appwidget";
 
