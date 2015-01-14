@@ -201,7 +201,6 @@ public class RelativeLayout extends ViewGroup {
     private static final int VALUE_NOT_SET = Integer.MIN_VALUE;
 
     private View mBaselineView = null;
-    private boolean mHasBaselineAlignedChild;
 
     private int mGravity = Gravity.START | Gravity.TOP;
     private final Rect mContentBounds = new Rect();
@@ -417,8 +416,6 @@ public class RelativeLayout extends ViewGroup {
             height = myHeight;
         }
 
-        mHasBaselineAlignedChild = false;
-
         View ignore = null;
         int gravity = mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
         final boolean horizontalGravity = gravity != Gravity.START && gravity != 0;
@@ -473,11 +470,11 @@ public class RelativeLayout extends ViewGroup {
         final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
 
         for (int i = 0; i < count; i++) {
-            View child = views[i];
+            final View child = views[i];
             if (child.getVisibility() != GONE) {
-                LayoutParams params = (LayoutParams) child.getLayoutParams();
-                
-                applyVerticalSizeRules(params, myHeight);
+                final LayoutParams params = (LayoutParams) child.getLayoutParams();
+
+                applyVerticalSizeRules(params, myHeight, child.getBaseline());
                 measureChild(child, params, myWidth, myHeight);
                 if (positionChildVertical(child, params, myHeight, isWrapContentHeight)) {
                     offsetVerticalAxis = true;
@@ -515,26 +512,6 @@ public class RelativeLayout extends ViewGroup {
                 if (child != ignore || horizontalGravity) {
                     right = Math.max(right, params.mRight + params.rightMargin);
                     bottom = Math.max(bottom, params.mBottom + params.bottomMargin);
-                }
-            }
-        }
-
-        if (mHasBaselineAlignedChild) {
-            for (int i = 0; i < count; i++) {
-                View child = getChildAt(i);
-                if (child.getVisibility() != GONE) {
-                    LayoutParams params = (LayoutParams) child.getLayoutParams();
-                    alignBaseline(child, params);
-
-                    if (child != ignore || verticalGravity) {
-                        left = Math.min(left, params.mLeft - params.leftMargin);
-                        top = Math.min(top, params.mTop - params.topMargin);
-                    }
-
-                    if (child != ignore || horizontalGravity) {
-                        right = Math.max(right, params.mRight + params.rightMargin);
-                        bottom = Math.max(bottom, params.mBottom + params.bottomMargin);
-                    }
                 }
             }
         }
@@ -638,39 +615,22 @@ public class RelativeLayout extends ViewGroup {
                     params.mRight -= offsetWidth;
                 }
             }
-
         }
+
+        // Use the bottom-most view as the baseline.
+        View baselineView = null;
+        int baseline = 0;
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            final int childBaseline = child.getBaseline();
+            if (childBaseline >= baseline) {
+                baselineView = child;
+                baseline = childBaseline;
+            }
+        }
+        mBaselineView = baselineView;
 
         setMeasuredDimension(width, height);
-    }
-
-    private void alignBaseline(View child, LayoutParams params) {
-        final int layoutDirection = getLayoutDirection();
-        int[] rules = params.getRules(layoutDirection);
-        int anchorBaseline = getRelatedViewBaseline(rules, ALIGN_BASELINE);
-
-        if (anchorBaseline != -1) {
-            LayoutParams anchorParams = getRelatedViewParams(rules, ALIGN_BASELINE);
-            if (anchorParams != null) {
-                int offset = anchorParams.mTop + anchorBaseline;
-                int baseline = child.getBaseline();
-                if (baseline != -1) {
-                    offset -= baseline;
-                }
-                int height = params.mBottom - params.mTop;
-                params.mTop = offset;
-                params.mBottom = params.mTop + height;
-            }
-        }
-
-        if (mBaselineView == null) {
-            mBaselineView = child;
-        } else {
-            LayoutParams lp = (LayoutParams) mBaselineView.getLayoutParams();
-            if (params.mTop < lp.mTop || (params.mTop == lp.mTop && params.mLeft < lp.mLeft)) {
-                mBaselineView = child;
-            }
-        }
     }
 
     /**
@@ -950,8 +910,20 @@ public class RelativeLayout extends ViewGroup {
         }
     }
 
-    private void applyVerticalSizeRules(LayoutParams childParams, int myHeight) {
-        int[] rules = childParams.getRules();
+    private void applyVerticalSizeRules(LayoutParams childParams, int myHeight, int myBaseline) {
+        final int[] rules = childParams.getRules();
+
+        // Baseline alignment overrides any explicitly specified top or bottom.
+        int baselineOffset = getRelatedViewBaselineOffset(rules);
+        if (baselineOffset != -1) {
+            if (myBaseline != -1) {
+                baselineOffset -= myBaseline;
+            }
+            childParams.mTop = baselineOffset;
+            childParams.mBottom = VALUE_NOT_SET;
+            return;
+        }
+
         RelativeLayout.LayoutParams anchorParams;
 
         childParams.mTop = VALUE_NOT_SET;
@@ -1000,10 +972,6 @@ public class RelativeLayout extends ViewGroup {
                 childParams.mBottom = myHeight - mPaddingBottom - childParams.bottomMargin;
             }
         }
-
-        if (rules[ALIGN_BASELINE] != 0) {
-            mHasBaselineAlignedChild = true;
-        }
     }
 
     private View getRelatedView(int[] rules, int relation) {
@@ -1038,10 +1006,17 @@ public class RelativeLayout extends ViewGroup {
         return null;
     }
 
-    private int getRelatedViewBaseline(int[] rules, int relation) {
-        View v = getRelatedView(rules, relation);
+    private int getRelatedViewBaselineOffset(int[] rules) {
+        final View v = getRelatedView(rules, ALIGN_BASELINE);
         if (v != null) {
-            return v.getBaseline();
+            final int baseline = v.getBaseline();
+            if (baseline != -1) {
+                final ViewGroup.LayoutParams params = v.getLayoutParams();
+                if (params instanceof LayoutParams) {
+                    final LayoutParams anchorParams = (LayoutParams) v.getLayoutParams();
+                    return anchorParams.mTop + baseline;
+                }
+            }
         }
         return -1;
     }
