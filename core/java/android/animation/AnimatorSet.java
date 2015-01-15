@@ -972,6 +972,18 @@ public final class AnimatorSet extends Animator {
         }
     }
 
+    @Override
+    public String toString() {
+        String returnVal = "AnimatorSet@" + Integer.toHexString(hashCode()) + "{";
+        boolean prevNeedsSort = mNeedsSort;
+        sortNodes();
+        mNeedsSort = prevNeedsSort;
+        for (Node node : mSortedNodes) {
+            returnVal += "\n    " + node.animation.toString();
+        }
+        return returnVal + "\n}";
+    }
+
     /**
      * Dependency holds information about the node that some other node is
      * dependent upon and the nature of that dependency.

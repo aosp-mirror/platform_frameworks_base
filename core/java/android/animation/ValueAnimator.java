@@ -17,6 +17,7 @@
 package android.animation;
 
 import android.content.res.ConfigurationBoundResourceCache;
+import android.os.Debug;
 import android.os.Looper;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
@@ -39,6 +40,21 @@ import java.util.HashMap;
  * {@link AccelerateDecelerateInterpolator} class, which accelerates into and decelerates
  * out of an animation. This behavior can be changed by calling
  * {@link ValueAnimator#setInterpolator(TimeInterpolator)}.</p>
+ *
+ * <p>Animators can be created from either code or resource files. Here is an example
+ * of a ValueAnimator resource file:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/anim/animator.xml ValueAnimatorResources}
+ *
+ * <p>It is also possible to use a combination of {@link PropertyValuesHolder} and
+ * {@link Keyframe} resource tags to create a multi-step animation.
+ * Note that you can specify explicit fractional values (from 0 to 1) for
+ * each keyframe to determine when, in the overall duration, the animation should arrive at that
+ * value. Alternatively, you can leave the fractions off and the keyframes will be equally
+ * distributed within the total duration:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/anim/value_animator_pvh_kf.xml
+ * ValueAnimatorKeyframeResources}
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>

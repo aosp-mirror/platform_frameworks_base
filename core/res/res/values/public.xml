@@ -2596,6 +2596,7 @@
     <public type="attr" name="revisionCode" />
     <public type="attr" name="drawableTint" />
     <public type="attr" name="drawableTintMode" />
+    <public type="attr" name="fraction" />
 
     <public type="style" name="Theme.DeviceDefault.Dialog.Alert" />
     <public type="style" name="Theme.DeviceDefault.Light.Dialog.Alert" />
