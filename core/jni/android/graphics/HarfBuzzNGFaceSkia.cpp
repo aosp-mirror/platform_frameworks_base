@@ -33,11 +33,11 @@
 #include "HarfBuzzNGFaceSkia.h"
 
 #include <cutils/log.h>
-#include <SkFontHost.h>
 #include <SkPaint.h>
 #include <SkPath.h>
 #include <SkPoint.h>
 #include <SkRect.h>
+#include <SkTypeface.h>
 #include <SkUtils.h>
 
 #include <hb.h>
