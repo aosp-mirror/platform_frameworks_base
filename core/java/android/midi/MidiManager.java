@@ -20,7 +20,6 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -146,40 +145,31 @@ public class MidiManager {
      */
     public MidiDevice openDevice(MidiDeviceInfo deviceInfo) {
         try {
-            ParcelFileDescriptor pfd = mService.openDevice(mToken, deviceInfo);
-            if (pfd == null) {
+            IMidiDeviceServer server = mService.openDevice(mToken, deviceInfo);
+            if (server == null) {
                 Log.e(TAG, "could not open device " + deviceInfo);
                 return null;
             }
-            MidiDevice device = new MidiDevice(deviceInfo, pfd);
-            if (device.open()) {
-                Log.d(TAG, "openDevice returning " + device);
-                return device;
-            }
+            return new MidiDevice(deviceInfo, server);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in openDevice");
         }
         return null;
     }
 
-    /**
-     * Creates a new MIDI virtual device.
-     * NOTE: The method for creating virtual devices is likely to change before release.
-     *
-     * @param numInputPorts number of input ports for the virtual device
-     * @param numOutputPorts number of output ports for the virtual device
-     * @param properties a {@link android.os.Bundle} containing properties describing the device
-     * @return a {@link MidiDevice} object to locally represent the device
-     */
-    public MidiDevice createVirtualDevice(int numInputPorts, int numOutputPorts,
-            Bundle properties) {
+    /** @hide */
+    public MidiDeviceServer createDeviceServer(int numInputPorts, int numOutputPorts,
+            Bundle properties, boolean isPrivate, int type) {
         try {
-            MidiDevice device = mService.registerVirtualDevice(mToken,
-                    numInputPorts, numOutputPorts, properties);
-            if (device != null && !device.open()) {
-                device = null;
+            MidiDeviceServer server = new MidiDeviceServer(mService);
+            MidiDeviceInfo deviceInfo = mService.registerDeviceServer(server.getBinderInterface(),
+                    numInputPorts, numOutputPorts, properties, isPrivate, type);
+            if (deviceInfo == null) {
+                Log.e(TAG, "registerVirtualDevice failed");
+                return null;
             }
-            return device;
+            server.setDeviceInfo(deviceInfo);
+            return server;
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in createVirtualDevice");
             return null;
@@ -187,16 +177,19 @@ public class MidiManager {
     }
 
     /**
-     * Removes a MIDI virtual device.
+     * Creates a new MIDI virtual device.
      *
-     * @param device the {@link MidiDevice} for the virtual device to remove
+     * @param numInputPorts number of input ports for the virtual device
+     * @param numOutputPorts number of output ports for the virtual device
+     * @param properties a {@link android.os.Bundle} containing properties describing the device
+     * @param isPrivate true if this device should only be visible and accessible to apps
+     *                  with the same UID as the caller
+     * @return a {@link MidiVirtualDevice} object to locally represent the device
      */
-    public void closeVirtualDevice(MidiDevice device) {
-        try {
-            device.close();
-            mService.unregisterVirtualDevice(mToken, device.getInfo());
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in unregisterVirtualDevice");
-        }
+    public MidiDeviceServer createDeviceServer(int numInputPorts, int numOutputPorts,
+            Bundle properties, boolean isPrivate) {
+        return createDeviceServer(numInputPorts, numOutputPorts, properties,
+                isPrivate, MidiDeviceInfo.TYPE_VIRTUAL);
     }
+
 }

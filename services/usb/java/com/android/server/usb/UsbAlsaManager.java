@@ -24,14 +24,14 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.media.AudioManager;
-import android.midi.IMidiManager;
 import android.os.FileObserver;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
+
+import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -42,14 +42,13 @@ import java.util.ArrayList;
 /**
  * UsbAlsaManager manages USB audio and MIDI devices.
  */
-public class UsbAlsaManager {
+public final class UsbAlsaManager {
     private static final String TAG = UsbAlsaManager.class.getSimpleName();
     private static final boolean DEBUG = true;
 
     private static final String ALSA_DIRECTORY = "/dev/snd/";
 
     private final Context mContext;
-    private IMidiManager mMidiManager;
 
     private final AlsaCardsParser mCardsParser = new AlsaCardsParser();
     private final AlsaDevicesParser mDevicesParser = new AlsaDevicesParser();
@@ -59,6 +58,9 @@ public class UsbAlsaManager {
 
     private final HashMap<UsbDevice,UsbAudioDevice>
         mAudioDevices = new HashMap<UsbDevice,UsbAudioDevice>();
+
+    private final HashMap<UsbDevice,UsbMidiDevice>
+        mMidiDevices = new HashMap<UsbDevice,UsbMidiDevice>();
 
     private final HashMap<String,AlsaDevice>
         mAlsaDevices = new HashMap<String,AlsaDevice>();
@@ -121,8 +123,6 @@ public class UsbAlsaManager {
     }
 
     public void systemReady() {
-        final IBinder b = ServiceManager.getService(Context.MIDI_SERVICE);
-        mMidiManager = IMidiManager.Stub.asInterface(b);
         mAlsaObserver.startWatching();
 
         // add existing alsa devices
@@ -151,7 +151,6 @@ public class UsbAlsaManager {
         intent.putExtra("device", audioDevice.mDevice);
         intent.putExtra("hasPlayback", audioDevice.mHasPlayback);
         intent.putExtra("hasCapture", audioDevice.mHasCapture);
-        intent.putExtra("hasMIDI", audioDevice.mHasMIDI);
         intent.putExtra("class", audioDevice.mDeviceClass);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
@@ -235,9 +234,9 @@ public class UsbAlsaManager {
     /*
      * Select the default device of the specified card.
      */
-    /* package */ boolean selectCard(int card) {
+    /* package */ boolean selectAudioCard(int card) {
         if (DEBUG) {
-            Slog.d(TAG, "selectCard() card:" + card);
+            Slog.d(TAG, "selectAudioCard() card:" + card);
         }
         if (!mCardsParser.isCardUsb(card)) {
             // Don't. AudioPolicyManager has logic for falling back to internal devices.
@@ -259,7 +258,6 @@ public class UsbAlsaManager {
 
         boolean hasPlayback = mDevicesParser.hasPlaybackDevices(card);
         boolean hasCapture = mDevicesParser.hasCaptureDevices(card);
-        boolean hasMidi = mDevicesParser.hasMIDIDevices(card);
         int deviceClass =
             (mCardsParser.isCardUsb(card)
                 ? UsbAudioDevice.kAudioDeviceClass_External
@@ -275,21 +273,13 @@ public class UsbAlsaManager {
         if (hasCapture && (waitForAlsaDevice(card, device, AlsaDevice.TYPE_CAPTURE) == null)) {
             return false;
         }
-        //TODO - seems to me that we need to decouple the above tests for audio
-        // from the one below for MIDI.
-
-        // MIDI device file needed/present?
-        AlsaDevice midiDevice = null;
-        if (hasMidi) {
-            midiDevice = waitForAlsaDevice(card, device, AlsaDevice.TYPE_MIDI);
-        }
 
         if (DEBUG) {
             Slog.d(TAG, "usb: hasPlayback:" + hasPlayback + " hasCapture:" + hasCapture);
         }
 
         mSelectedAudioDevice =
-                new UsbAudioDevice(card, device, hasPlayback, hasCapture, hasMidi, deviceClass);
+                new UsbAudioDevice(card, device, hasPlayback, hasCapture, deviceClass);
         mSelectedAudioDevice.mDeviceName = mCardsParser.getCardRecordFor(card).mCardName;
         mSelectedAudioDevice.mDeviceDescription =
                 mCardsParser.getCardRecordFor(card).mCardDescription;
@@ -304,7 +294,7 @@ public class UsbAlsaManager {
             Slog.d(TAG, "UsbAudioManager.selectDefaultDevice()");
         }
         mCardsParser.scan();
-        return selectCard(mCardsParser.getDefaultCard());
+        return selectAudioCard(mCardsParser.getDefaultCard());
     }
 
     /* package */ void deviceAdded(UsbDevice usbDevice) {
@@ -314,7 +304,6 @@ public class UsbAlsaManager {
 
         // Is there an audio interface in there?
         boolean isAudioDevice = false;
-        AlsaDevice midiDevice = null;
 
         // FIXME - handle multiple configurations?
         int interfaceCount = usbDevice.getInterfaceCount();
@@ -347,36 +336,44 @@ public class UsbAlsaManager {
         // If the default isn't a USB device, let the existing "select internal mechanism"
         // handle the selection.
         if (mCardsParser.isCardUsb(addedCard)) {
-            selectCard(addedCard);
+            selectAudioCard(addedCard);
             mAudioDevices.put(usbDevice, mSelectedAudioDevice);
-        }
 
-        if (midiDevice != null && mMidiManager != null) {
-            try {
-                mMidiManager.alsaDeviceAdded(midiDevice.mCard, midiDevice.mDevice, usbDevice);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "MIDI Manager dead", e);
+            // look for MIDI devices
+
+            // Don't need to call mDevicesParser.scan() because selectAudioCard() does this above.
+            // Uncomment this next line if that behavior changes in the fugure.
+            // mDevicesParser.scan()
+
+            boolean hasMidi = mDevicesParser.hasMIDIDevices(addedCard);
+            if (hasMidi) {
+                int device = mDevicesParser.getDefaultDeviceNum(addedCard);
+                AlsaDevice alsaDevice = waitForAlsaDevice(addedCard, device, AlsaDevice.TYPE_MIDI);
+                if (alsaDevice != null) {
+                    UsbMidiDevice usbMidiDevice = UsbMidiDevice.create(mContext, usbDevice,
+                            alsaDevice.mCard, alsaDevice.mDevice);
+                    if (usbMidiDevice != null) {
+                        mMidiDevices.put(usbDevice, usbMidiDevice);
+                    }
+                }
             }
         }
     }
 
-    /* package */ void deviceRemoved(UsbDevice device) {
+    /* package */ void deviceRemoved(UsbDevice usbDevice) {
        if (DEBUG) {
-          Slog.d(TAG, "deviceRemoved(): " + device);
+          Slog.d(TAG, "deviceRemoved(): " + usbDevice);
         }
 
-        UsbAudioDevice audioDevice = mAudioDevices.remove(device);
+        UsbAudioDevice audioDevice = mAudioDevices.remove(usbDevice);
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasPlayback) {
                 sendDeviceNotification(audioDevice, false);
             }
-            if (audioDevice.mHasMIDI) {
-                try {
-                    mMidiManager.alsaDeviceRemoved(device);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "MIDI Manager dead", e);
-                }
-            }
+        }
+        UsbMidiDevice usbMidiDevice = mMidiDevices.remove(usbDevice);
+        if (usbMidiDevice != null) {
+            IoUtils.closeQuietly(usbMidiDevice);
         }
 
         mSelectedAudioDevice = null;
@@ -400,9 +397,13 @@ public class UsbAlsaManager {
     // Logging
     //
     public void dump(FileDescriptor fd, PrintWriter pw) {
-        pw.println("  USB AudioDevices:");
+        pw.println("  USB Audio Devices:");
         for (UsbDevice device : mAudioDevices.keySet()) {
             pw.println("    " + device.getDeviceName() + ": " + mAudioDevices.get(device));
+        }
+        pw.println("  USB MIDI Devices:");
+        for (UsbDevice device : mMidiDevices.keySet()) {
+            pw.println("    " + device.getDeviceName() + ": " + mMidiDevices.get(device));
         }
     }
 

@@ -74,7 +74,7 @@ import com.android.server.lights.LightsService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.MediaSessionService;
 import com.android.server.media.projection.MediaProjectionManagerService;
-import com.android.server.midi.MidiService;
+import com.android.server.MidiService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
 import com.android.server.notification.NotificationManagerService;
