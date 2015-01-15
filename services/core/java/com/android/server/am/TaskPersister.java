@@ -132,6 +132,8 @@ public class TaskPersister {
     // Data organization: <packageNameOfAffiliateTask, listOfAffiliatedTasksChains>
     private ArrayMap<String, List<List<OtherDeviceTask>>> mOtherDeviceTasksMap =
                 new ArrayMap<>(10);
+    // Local cache of package names to uid used when restoring a task from another device.
+    private ArrayMap<String, Integer> mPackageUidMap;
 
     // The next time in milliseconds we will remove expired task from
     // {@link #mOtherDeviceTasksMap} and disk. Set to {@link Long.MAX_VALUE} to never clean-up
@@ -579,7 +581,12 @@ public class TaskPersister {
     private void removeExpiredTasksIfNeeded() {
         synchronized (mOtherDeviceTasksMap) {
             final long now = System.currentTimeMillis();
-            if (mOtherDeviceTasksMap.isEmpty() || now < mExpiredTasksCleanupTime) {
+            final boolean noMoreTasks = mOtherDeviceTasksMap.isEmpty();
+            if (noMoreTasks || now < mExpiredTasksCleanupTime) {
+                if (noMoreTasks && mPackageUidMap != null) {
+                    // All done! package->uid map no longer needed.
+                    mPackageUidMap = null;
+                }
                 return;
             }
 
@@ -632,6 +639,20 @@ public class TaskPersister {
                 if (DEBUG_RESTORER) Slog.d(TAG, "Reset expiration time to "
                             + DateUtils.formatDateTime(mService.mContext, mExpiredTasksCleanupTime,
                             DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME));
+            } else {
+                // All done! package->uid map no longer needed.
+                mPackageUidMap = null;
+            }
+        }
+    }
+
+    /**
+     * Removes the input package name from the local package->uid map.
+     */
+    void removeFromPackageCache(String packageName) {
+        synchronized (mOtherDeviceTasksMap) {
+            if (mPackageUidMap != null) {
+                mPackageUidMap.remove(packageName);
             }
         }
     }
@@ -778,6 +799,27 @@ public class TaskPersister {
                             task.mAffiliatedTaskId = INVALID_TASK_ID;
                             task.mPrevAffiliateTaskId = INVALID_TASK_ID;
                             task.mNextAffiliateTaskId = INVALID_TASK_ID;
+                            // Set up uids valid for this device.
+                            Integer uid = mPackageUidMap.get(task.realActivity.getPackageName());
+                            if (uid == null) {
+                                // How did this happen???
+                                Slog.wtf(TAG, "Can't find uid for task=" + task
+                                        + " in mPackageUidMap=" + mPackageUidMap);
+                                return null;
+                            }
+                            task.effectiveUid = task.mCallingUid = uid;
+                            for (int i = task.mActivities.size() - 1; i >= 0; --i) {
+                                final ActivityRecord activity = task.mActivities.get(i);
+                                uid = mPackageUidMap.get(activity.launchedFromPackage);
+                                if (uid == null) {
+                                    // How did this happen??
+                                    Slog.wtf(TAG, "Can't find uid for activity=" + activity
+                                            + " in mPackageUidMap=" + mPackageUidMap);
+                                    return null;
+                                }
+                                activity.launchedFromUid = uid;
+                            }
+
                         } else {
                             Slog.e(TAG, "Unable to create task for backed-up file=" + file + ": "
                                         + fileToString(file));
@@ -801,42 +843,81 @@ public class TaskPersister {
 
     /**
      * Returns true if the input task chain backed-up from another device can be restored on this
-     * device.
+     * device. Also, sets the {@link OtherDeviceTask#mUid} on the input tasks if they can be
+     * restored.
      */
     private boolean canAddOtherDeviceTaskChain(List<OtherDeviceTask> chain) {
 
-        // Get component names of all the tasks in the chain.
-        // Mainly doing this to reduce checking for a component twice if two or more
-        // affiliations belong to the same component which is highly likely.
-        ArraySet<ComponentName> componentsToCheck = new ArraySet<>();
+        final ArraySet<ComponentName> validComponents = new ArraySet<>();
+        final IPackageManager pm = AppGlobals.getPackageManager();
         for (int i = 0; i < chain.size(); i++) {
 
             OtherDeviceTask task = chain.get(i);
             // Quick check, we can't add the task chain if any of its task files don't exist.
             if (!task.mFile.exists()) {
-                if (DEBUG_RESTORER)
-                        Slog.d(TAG, "Can't add chain due to missing file=" + task.mFile);
+                if (DEBUG_RESTORER) Slog.d(TAG,
+                        "Can't add chain due to missing file=" + task.mFile);
                 return false;
             }
-            componentsToCheck.add(task.mComponentName);
+
+            // Verify task package is installed.
+            if (!isPackageInstalled(task.mComponentName.getPackageName())) {
+                return false;
+            }
+            // Verify that all the launch packages are installed.
+            if (task.mLaunchPackages != null) {
+                for (int j = task.mLaunchPackages.size() - 1; j >= 0; --j) {
+                    if (!isPackageInstalled(task.mLaunchPackages.valueAt(j))) {
+                        return false;
+                    }
+                }
+            }
+
+            if (validComponents.contains(task.mComponentName)) {
+                // Existance of component has already been verified.
+                continue;
+            }
+
+            // Check to see if the specific component is installed.
+            try {
+                if (pm.getActivityInfo(task.mComponentName, 0, UserHandle.USER_OWNER) == null) {
+                    // Component isn't installed...
+                    return false;
+                }
+                validComponents.add(task.mComponentName);
+            } catch (RemoteException e) {
+                // Should not happen???
+                return false;
+            }
         }
 
-        boolean canAdd = true;
+        return true;
+    }
+
+    /**
+     * Returns true if the input package name is installed. If the package is installed, an entry
+     * for the package is added to {@link #mPackageUidMap}.
+     */
+    private boolean isPackageInstalled(final String packageName) {
+        if (mPackageUidMap != null && mPackageUidMap.containsKey(packageName)) {
+            return true;
+        }
         try {
-            // Check to see if all the components for this task chain are installed.
-            final IPackageManager pm = AppGlobals.getPackageManager();
-            for (int i = 0; canAdd && i < componentsToCheck.size(); i++) {
-                ComponentName cn = componentsToCheck.valueAt(i);
-                canAdd &= pm.getActivityInfo(cn, 0, UserHandle.USER_OWNER) != null;
-                if (DEBUG_RESTORER) Slog.d(TAG, "ComponentName=" + cn + " installed=" + canAdd);
+            int uid = AppGlobals.getPackageManager().getPackageUid(
+                    packageName, UserHandle.USER_OWNER);
+            if (uid == -1) {
+                // package doesn't exist...
+                return false;
             }
+            if (mPackageUidMap == null) {
+                mPackageUidMap = new ArrayMap<>();
+            }
+            mPackageUidMap.put(packageName, uid);
+            return true;
         } catch (RemoteException e) {
             // Should not happen???
-            canAdd = false;
+            return false;
         }
-
-        if (DEBUG_RESTORER) Slog.d(TAG, "canAdd=" + canAdd);
-        return canAdd;
     }
 
     private class LazyTaskWriterThread extends Thread {
@@ -993,12 +1074,17 @@ public class TaskPersister {
         final int mTaskId;
         final int mAffiliatedTaskId;
 
-        private OtherDeviceTask(
-                File file, ComponentName componentName, int taskId, int affiliatedTaskId) {
+        // Names of packages that launched activities in this task. All packages listed here need
+        // to be installed on the current device in order for the task to be restored successfully.
+        final ArraySet<String> mLaunchPackages;
+
+        private OtherDeviceTask(File file, ComponentName componentName, int taskId,
+                int affiliatedTaskId, ArraySet<String> launchPackages) {
             mFile = file;
             mComponentName = componentName;
             mTaskId = taskId;
             mAffiliatedTaskId = (affiliatedTaskId == INVALID_TASK_ID) ? taskId: affiliatedTaskId;
+            mLaunchPackages = launchPackages;
         }
 
         @Override
@@ -1036,6 +1122,7 @@ public class TaskPersister {
                     final String name = in.getName();
 
                     if (TAG_TASK.equals(name)) {
+                        final int outerDepth = in.getDepth();
                         ComponentName componentName = null;
                         int taskId = INVALID_TASK_ID;
                         int taskAffiliation = INVALID_TASK_ID;
@@ -1056,10 +1143,31 @@ public class TaskPersister {
                                     + " taskId=" + taskId + " file=" + file);
                             return null;
                         }
+
+                        ArraySet<String> launchPackages = null;
+                        while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
+                                (event != XmlPullParser.END_TAG || in.getDepth() < outerDepth)) {
+                            if (event == XmlPullParser.START_TAG) {
+                                if (TaskRecord.TAG_ACTIVITY.equals(in.getName())) {
+                                    for (int j = in.getAttributeCount() - 1; j >= 0; --j) {
+                                        if (ActivityRecord.ATTR_LAUNCHEDFROMPACKAGE.equals(
+                                                in.getAttributeName(j))) {
+                                            if (launchPackages == null) {
+                                                launchPackages = new ArraySet();
+                                            }
+                                            launchPackages.add(in.getAttributeValue(j));
+                                        }
+                                    }
+                                } else {
+                                    XmlUtils.skipCurrentTag(in);
+                                }
+                            }
+                        }
                         if (DEBUG_RESTORER) Slog.d(TAG, "creating OtherDeviceTask from file="
                                 + file.getName() + " componentName=" + componentName
-                                + " taskId=" + taskId);
-                        return new OtherDeviceTask(file, componentName, taskId, taskAffiliation);
+                                + " taskId=" + taskId + " launchPackages=" + launchPackages);
+                        return new OtherDeviceTask(file, componentName, taskId,
+                                taskAffiliation, launchPackages);
                     } else {
                         Slog.wtf(TAG,
                                 "createFromFile: Unknown xml event=" + event + " name=" + name);
