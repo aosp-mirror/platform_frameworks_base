@@ -242,7 +242,7 @@ public final class KeyChain {
      * @param response Callback to invoke when the request completes;
      *     must not be null
      * @param keyTypes The acceptable types of asymmetric keys such as
-     *     "RSA" or "DSA", or a null array.
+     *     "EC" or "RSA", or a null array.
      * @param issuers The acceptable certificate issuers for the
      *     certificate matching the private key, or null.
      * @param host The host name of the server requesting the
@@ -263,7 +263,7 @@ public final class KeyChain {
          *
          * keyTypes would allow the list to be filtered and typically
          * will be set correctly by the server. In practice today,
-         * most all users will want only RSA, rarely DSA, and usually
+         * most all users will want only RSA or EC, and usually
          * only a small number of certs will be available.
          *
          * issuers is typically not useful. Some servers historically

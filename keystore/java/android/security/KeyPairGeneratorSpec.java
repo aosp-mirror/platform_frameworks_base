@@ -108,7 +108,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * @param context Android context for the activity
      * @param keyStoreAlias name to use for the generated key in the Android
      *            keystore
-     * @param keyType key algorithm to use (RSA, DSA, EC)
+     * @param keyType key algorithm to use (EC, RSA)
      * @param keySize size of key to generate
      * @param spec the underlying key type parameters
      * @param subjectDN X.509 v3 Subject Distinguished Name
@@ -214,8 +214,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Returns the key type (e.g., "RSA", "DSA", "EC") specified by this
-     * parameter.
+     * Returns the key type (e.g., "EC", "RSA") specified by this parameter.
      */
     public String getKeyType() {
         return mKeyType;
@@ -354,7 +353,7 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the key type (e.g., RSA, DSA, EC) of the keypair to be created.
+         * Sets the key type (e.g., EC, RSA) of the keypair to be created.
          */
         public Builder setKeyType(String keyType) throws NoSuchAlgorithmException {
             if (keyType == null) {
@@ -384,9 +383,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
         }
 
         /**
-         * Sets the underlying key type's parameters. This is required for DSA
-         * where you must set this to an instance of
-         * {@link java.security.spec.DSAParameterSpec}.
+         * Sets the algorithm-specific key generation parameters. For example, for RSA keys
+         * this may be an instance of {@link java.security.spec.RSAKeyGenParameterSpec}.
          */
         public Builder setAlgorithmParameterSpec(AlgorithmParameterSpec spec) {
             if (spec == null) {
