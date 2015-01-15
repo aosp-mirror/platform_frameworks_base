@@ -222,9 +222,6 @@ public:
         return mCaches;
     }
 
-    // simple rect clip
-    bool isCurrentClipSimple() { return mState.isCurrentClipSimple(); }
-
     int getViewportWidth() { return mState.getViewportWidth(); }
     int getViewportHeight() { return mState.getViewportHeight(); }
 
@@ -431,6 +428,13 @@ protected:
      * attaches it to the specified layer.
      */
     void attachStencilBufferToLayer(Layer* layer);
+
+    /**
+     * Draw a rectangle list. Currently only used for the the stencil buffer so that the stencil
+     * will have a value of 'n' in every unclipped pixel, where 'n' is the number of rectangles
+     * in the list.
+     */
+    void drawRectangleList(const RectangleList& rectangleList);
 
     bool quickRejectSetupScissor(float left, float top, float right, float bottom,
             const SkPaint* paint = nullptr);

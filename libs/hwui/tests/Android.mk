@@ -32,3 +32,16 @@ LOCAL_SRC_FILES += \
 	tests/main.cpp
 
 include $(BUILD_EXECUTABLE)
+
+include $(CLEAR_VARS)
+
+LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.common.mk
+LOCAL_MODULE := hwui_unit_tests
+LOCAL_MODULE_TAGS := tests
+
+include $(LOCAL_PATH)/Android.common.mk
+
+LOCAL_SRC_FILES += \
+	tests/ClipAreaTests.cpp \
+
+include $(BUILD_NATIVE_TEST)

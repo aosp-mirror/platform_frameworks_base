@@ -32,7 +32,8 @@ namespace uirenderer {
 #define STENCIL_MASK_VALUE 0x1
 #endif
 
-Stencil::Stencil(): mState(kDisabled) {
+Stencil::Stencil()
+        : mState(kDisabled) {
 }
 
 uint8_t Stencil::getStencilSize() {
@@ -56,24 +57,36 @@ void Stencil::clear() {
     glClear(GL_STENCIL_BUFFER_BIT);
 }
 
-void Stencil::enableTest() {
+void Stencil::enableTest(int incrementThreshold) {
     if (mState != kTest) {
         enable();
-        glStencilFunc(GL_EQUAL, STENCIL_WRITE_VALUE, STENCIL_MASK_VALUE);
+        if (incrementThreshold > 0) {
+            glStencilFunc(GL_EQUAL, incrementThreshold, 0xff);
+        } else {
+            glStencilFunc(GL_EQUAL, STENCIL_WRITE_VALUE, STENCIL_MASK_VALUE);
+        }
         // We only want to test, let's keep everything
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        glStencilMask(0);
         mState = kTest;
     }
 }
 
-void Stencil::enableWrite() {
+void Stencil::enableWrite(int incrementThreshold) {
     if (mState != kWrite) {
         enable();
-        glStencilFunc(GL_ALWAYS, STENCIL_WRITE_VALUE, STENCIL_MASK_VALUE);
-        // The test always passes so the first two values are meaningless
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        if (incrementThreshold > 0) {
+            glStencilFunc(GL_ALWAYS, 1, 0xff);
+            // The test always passes so the first two values are meaningless
+            glStencilOp(GL_INCR, GL_INCR, GL_INCR);
+        } else {
+            glStencilFunc(GL_ALWAYS, STENCIL_WRITE_VALUE, STENCIL_MASK_VALUE);
+            // The test always passes so the first two values are meaningless
+            glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        }
         glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        glStencilMask(0xff);
         mState = kWrite;
     }
 }

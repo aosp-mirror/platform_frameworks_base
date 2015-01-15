@@ -18,6 +18,7 @@ LOCAL_SRC_FILES := \
     AssetAtlas.cpp \
     Caches.cpp \
     CanvasState.cpp \
+    ClipArea.cpp \
     DamageAccumulator.cpp \
     DisplayList.cpp \
     DeferredDisplayList.cpp \
