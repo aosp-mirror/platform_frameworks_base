@@ -5,6 +5,7 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 LOCAL_PACKAGE_NAME := install_bad_dex
 
-LOCAL_JAVA_RESOURCE_FILES := $(LOCAL_PATH)/classes.dex
-
 include $(FrameworkCoreTests_BUILD_PACKAGE)
+
+# Override target specific variable PRIVATE_DEX_FILE to inject bad classes.dex file.
+$(LOCAL_BUILT_MODULE): PRIVATE_DEX_FILE := $(LOCAL_PATH)/classes.dex
