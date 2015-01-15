@@ -152,7 +152,7 @@ private:
     KeyedVector<String8,FileRec> m_files;
 };
 
-#define TEST_BACKUP_HELPERS 1
+//#define TEST_BACKUP_HELPERS 1
 
 #if TEST_BACKUP_HELPERS
 int backup_helper_test_empty();
