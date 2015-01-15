@@ -29,6 +29,8 @@ import android.graphics.drawable.Drawable;
  * {@hide}
  */
 public class ScrollBarDrawable extends Drawable {
+    private static final int[] STATE_ENABLED = new int[] { android.R.attr.state_enabled };
+
     private Drawable mVerticalTrack;
     private Drawable mHorizontalTrack;
     private Drawable mVerticalThumb;
@@ -189,21 +191,29 @@ public class ScrollBarDrawable extends Drawable {
 
     public void setVerticalThumbDrawable(Drawable thumb) {
         if (thumb != null) {
+            thumb.setState(STATE_ENABLED);
             mVerticalThumb = thumb;
         }
     }
 
     public void setVerticalTrackDrawable(Drawable track) {
+        if (track != null) {
+            track.setState(STATE_ENABLED);
+        }
         mVerticalTrack = track;
     }
 
     public void setHorizontalThumbDrawable(Drawable thumb) {
         if (thumb != null) {
+            thumb.setState(STATE_ENABLED);
             mHorizontalThumb = thumb;
         }
     }
 
     public void setHorizontalTrackDrawable(Drawable track) {
+        if (track != null) {
+            track.setState(STATE_ENABLED);
+        }
         mHorizontalTrack = track;
     }
 
