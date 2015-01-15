@@ -1427,6 +1427,11 @@ public final class HdmiControlService extends SystemService {
             runOnServiceThread(new Runnable() {
                 @Override
                 public void run() {
+                    HdmiMhlLocalDeviceStub mhlDevice = mMhlController.getLocalDeviceById(deviceId);
+                    if (mhlDevice != null) {
+                        mhlDevice.sendStandby();
+                        return;
+                    }
                     HdmiCecLocalDevice device = mCecController.getLocalDevice(deviceType);
                     if (device == null) {
                         Slog.w(TAG, "Local device not available");
@@ -1546,6 +1551,12 @@ public final class HdmiControlService extends SystemService {
                 mCecController.dump(pw);
                 pw.decreaseIndent();
             }
+
+            pw.println("mMhlController: ");
+            pw.increaseIndent();
+            mMhlController.dump(pw);
+            pw.decreaseIndent();
+
             pw.println("mPortInfo: ");
             pw.increaseIndent();
             for (HdmiPortInfo hdmiPortInfo : mPortInfo) {
