@@ -4363,38 +4363,80 @@ bool ResourceTable::getItemValue(
 }
 
 /**
- * Returns true if the given attribute ID comes from
- * a platform version from or after L.
+ * Returns the SDK version at which the attribute was
+ * made public, or -1 if the resource ID is not an attribute
+ * or is not public.
  */
-bool ResourceTable::isAttributeFromL(uint32_t attrId) {
-    const uint32_t baseAttrId = 0x010103f7;
-    if ((attrId & 0xffff0000) != (baseAttrId & 0xffff0000)) {
-        return false;
+int ResourceTable::getPublicAttributeSdkLevel(uint32_t attrId) const {
+    if (Res_GETPACKAGE(attrId) + 1 != 0x01 || Res_GETTYPE(attrId) + 1 != 0x01) {
+        return -1;
     }
 
     uint32_t specFlags;
     if (!mAssets->getIncludedResources().getResourceFlags(attrId, &specFlags)) {
-        return false;
+        return -1;
     }
 
-    return (specFlags & ResTable_typeSpec::SPEC_PUBLIC) != 0 &&
-        (attrId & 0x0000ffff) >= (baseAttrId & 0x0000ffff);
+    if ((specFlags & ResTable_typeSpec::SPEC_PUBLIC) == 0) {
+        return -1;
+    }
+
+    const size_t entryId = Res_GETENTRY(attrId);
+    if (entryId <= 0x021c) {
+        return 1;
+    } else if (entryId <= 0x021d) {
+        return 2;
+    } else if (entryId <= 0x0269) {
+        return SDK_CUPCAKE;
+    } else if (entryId <= 0x028d) {
+        return SDK_DONUT;
+    } else if (entryId <= 0x02ad) {
+        return SDK_ECLAIR;
+    } else if (entryId <= 0x02b3) {
+        return SDK_ECLAIR_0_1;
+    } else if (entryId <= 0x02b5) {
+        return SDK_ECLAIR_MR1;
+    } else if (entryId <= 0x02bd) {
+        return SDK_FROYO;
+    } else if (entryId <= 0x02cb) {
+        return SDK_GINGERBREAD;
+    } else if (entryId <= 0x0361) {
+        return SDK_HONEYCOMB;
+    } else if (entryId <= 0x0366) {
+        return SDK_HONEYCOMB_MR1;
+    } else if (entryId <= 0x03a6) {
+        return SDK_HONEYCOMB_MR2;
+    } else if (entryId <= 0x03ae) {
+        return SDK_JELLY_BEAN;
+    } else if (entryId <= 0x03cc) {
+        return SDK_JELLY_BEAN_MR1;
+    } else if (entryId <= 0x03da) {
+        return SDK_JELLY_BEAN_MR2;
+    } else if (entryId <= 0x03f1) {
+        return SDK_KITKAT;
+    } else if (entryId <= 0x03f6) {
+        return SDK_KITKAT_WATCH;
+    } else if (entryId <= 0x04ce) {
+        return SDK_LOLLIPOP;
+    } else {
+        // Anything else is marked as defined in
+        // SDK_LOLLIPOP_MR1 since after this
+        // version no attribute compat work
+        // needs to be done.
+        return SDK_LOLLIPOP_MR1;
+    }
 }
 
-static bool isMinSdkVersionLOrAbove(const Bundle* bundle) {
-    if (bundle->getMinSdkVersion() != NULL && strlen(bundle->getMinSdkVersion()) > 0) {
-        const char firstChar = bundle->getMinSdkVersion()[0];
-        if (firstChar >= 'L' && firstChar <= 'Z') {
-            // L is the code-name for the v21 release.
-            return true;
-        }
-
-        const int minSdk = atoi(bundle->getMinSdkVersion());
-        if (minSdk >= SDK_LOLLIPOP) {
-            return true;
-        }
+/**
+ * First check the Manifest, then check the command line flag.
+ */
+static int getMinSdkVersion(const Bundle* bundle) {
+    if (bundle->getManifestMinSdkVersion() != NULL && strlen(bundle->getManifestMinSdkVersion()) > 0) {
+        return atoi(bundle->getManifestMinSdkVersion());
+    } else if (bundle->getMinSdkVersion() != NULL && strlen(bundle->getMinSdkVersion()) > 0) {
+        return atoi(bundle->getMinSdkVersion());
     }
-    return false;
+    return 0;
 }
 
 /**
@@ -4440,9 +4482,10 @@ static bool isMinSdkVersionLOrAbove(const Bundle* bundle) {
  * attribute will be respected.
  */
 status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
-    if (isMinSdkVersionLOrAbove(bundle)) {
-        // If this app will only ever run on L+ devices,
-        // we don't need to do any compatibility work.
+    const int minSdk = getMinSdkVersion(bundle);
+    if (minSdk >= SDK_LOLLIPOP_MR1) {
+        // Lollipop MR1 and up handles public attributes differently, no
+        // need to do any compat modifications.
         return NO_ERROR;
     }
 
@@ -4481,20 +4524,19 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                     }
 
                     const ConfigDescription& config = entries.keyAt(ei);
-                    if (config.sdkVersion >= SDK_LOLLIPOP) {
-                        // We don't need to do anything if the resource is
-                        // already qualified for version 21 or higher.
+                    if (config.sdkVersion >= SDK_LOLLIPOP_MR1) {
                         continue;
                     }
 
-                    Vector<String16> attributesToRemove;
+                    KeyedVector<int, Vector<String16> > attributesToRemove;
                     const KeyedVector<String16, Item>& bag = e->getBag();
                     const size_t bagCount = bag.size();
                     for (size_t bi = 0; bi < bagCount; bi++) {
                         const Item& item = bag.valueAt(bi);
                         const uint32_t attrId = getResId(bag.keyAt(bi), &attr16);
-                        if (isAttributeFromL(attrId)) {
-                            attributesToRemove.add(bag.keyAt(bi));
+                        const int sdkLevel = getPublicAttributeSdkLevel(attrId);
+                        if (sdkLevel > 1 && sdkLevel > config.sdkVersion && sdkLevel > minSdk) {
+                            AaptUtil::appendValue(attributesToRemove, sdkLevel, bag.keyAt(bi));
                         }
                     }
 
@@ -4502,16 +4544,41 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                         continue;
                     }
 
-                    // Duplicate the entry under the same configuration
-                    // but with sdkVersion == SDK_LOLLIPOP.
-                    ConfigDescription newConfig(config);
-                    newConfig.sdkVersion = SDK_LOLLIPOP;
-                    entriesToAdd.add(key_value_pair_t<ConfigDescription, sp<Entry> >(
-                            newConfig, new Entry(*e)));
+                    const size_t sdkCount = attributesToRemove.size();
+                    for (size_t i = 0; i < sdkCount; i++) {
+                        const int sdkLevel = attributesToRemove.keyAt(i);
+
+                        // Duplicate the entry under the same configuration
+                        // but with sdkVersion == sdkLevel.
+                        ConfigDescription newConfig(config);
+                        newConfig.sdkVersion = sdkLevel;
+
+                        sp<Entry> newEntry = new Entry(*e);
+
+                        // Remove all items that have a higher SDK level than
+                        // the one we are synthesizing.
+                        for (size_t j = 0; j < sdkCount; j++) {
+                            if (j == i) {
+                                continue;
+                            }
+
+                            if (attributesToRemove.keyAt(j) > sdkLevel) {
+                                const size_t attrCount = attributesToRemove[j].size();
+                                for (size_t k = 0; k < attrCount; k++) {
+                                    newEntry->removeFromBag(attributesToRemove[j][k]);
+                                }
+                            }
+                        }
+
+                        entriesToAdd.add(key_value_pair_t<ConfigDescription, sp<Entry> >(
+                                newConfig, newEntry));
+                    }
 
                     // Remove the attribute from the original.
                     for (size_t i = 0; i < attributesToRemove.size(); i++) {
-                        e->removeFromBag(attributesToRemove[i]);
+                        for (size_t j = 0; j < attributesToRemove[i].size(); j++) {
+                            e->removeFromBag(attributesToRemove[i][j]);
+                        }
                     }
                 }
 
@@ -4528,7 +4595,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle) {
                     if (bundle->getVerbose()) {
                         entriesToAdd[i].value->getPos()
                                 .printf("using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
-                                        SDK_LOLLIPOP,
+                                        entriesToAdd[i].key.sdkVersion,
                                         String8(p->getName()).string(),
                                         String8(t->getName()).string(),
                                         String8(entriesToAdd[i].value->getName()).string(),
@@ -4551,17 +4618,23 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
                                         const String16& resourceName,
                                         const sp<AaptFile>& target,
                                         const sp<XMLNode>& root) {
-    if (isMinSdkVersionLOrAbove(bundle)) {
+    const int minSdk = getMinSdkVersion(bundle);
+    if (minSdk >= SDK_LOLLIPOP_MR1) {
+        // Lollipop MR1 and up handles public attributes differently, no
+        // need to do any compat modifications.
         return NO_ERROR;
     }
 
-    if (target->getResourceType() == "" || target->getGroupEntry().toParams().sdkVersion >= SDK_LOLLIPOP) {
+    const ConfigDescription config(target->getGroupEntry().toParams());
+    if (target->getResourceType() == "" || config.sdkVersion >= SDK_LOLLIPOP_MR1) {
         // Skip resources that have no type (AndroidManifest.xml) or are already version qualified with v21
         // or higher.
         return NO_ERROR;
     }
 
     sp<XMLNode> newRoot = NULL;
+    ConfigDescription newConfig(target->getGroupEntry().toParams());
+    newConfig.sdkVersion = SDK_LOLLIPOP_MR1;
 
     Vector<sp<XMLNode> > nodesToVisit;
     nodesToVisit.push(root);
@@ -4572,9 +4645,17 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         const Vector<XMLNode::attribute_entry>& attrs = node->getAttributes();
         for (size_t i = 0; i < attrs.size(); i++) {
             const XMLNode::attribute_entry& attr = attrs[i];
-            if (isAttributeFromL(attr.nameResId)) {
+            const int sdkLevel = getPublicAttributeSdkLevel(attr.nameResId);
+            if (sdkLevel > 1 && sdkLevel > config.sdkVersion && sdkLevel > minSdk) {
                 if (newRoot == NULL) {
                     newRoot = root->clone();
+                }
+
+                // Find the smallest sdk version that we need to synthesize for
+                // and do that one. Subsequent versions will be processed on
+                // the next pass.
+                if (sdkLevel < newConfig.sdkVersion) {
+                    newConfig.sdkVersion = sdkLevel;
                 }
 
                 if (bundle->getVerbose()) {
@@ -4602,9 +4683,6 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         return NO_ERROR;
     }
 
-    ConfigDescription newConfig(target->getGroupEntry().toParams());
-    newConfig.sdkVersion = SDK_LOLLIPOP;
-
     // Look to see if we already have an overriding v21 configuration.
     sp<ConfigList> cl = getConfigList(String16(mAssets->getPackage()),
             String16(target->getResourceType()), resourceName);
@@ -4621,7 +4699,7 @@ status_t ResourceTable::modifyForCompat(const Bundle* bundle,
         if (bundle->getVerbose()) {
             SourcePos(target->getSourceFile(), -1).printf(
                     "using v%d attributes; synthesizing resource %s:%s/%s for configuration %s.",
-                    SDK_LOLLIPOP,
+                    newConfig.sdkVersion,
                     mAssets->getPackage().string(),
                     newFile->getResourceType().string(),
                     String8(resourceName).string(),
