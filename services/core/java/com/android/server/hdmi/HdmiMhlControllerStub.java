@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.util.SparseArray;
 
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 /**
@@ -134,5 +135,8 @@ final class HdmiMhlControllerStub {
      */
     int getEcbusDeviceRoles(int portId) {
         return INVALID_DEVICE_ROLES;
+    }
+
+    void dump(IndentingPrintWriter pw) {
     }
 }
