@@ -105,10 +105,6 @@ public class ImageWallpaper extends WallpaperService {
         static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
         static final int EGL_OPENGL_ES2_BIT = 4;
 
-        // TODO: Not currently used, keeping around until we know we don't need it
-        @SuppressWarnings({"UnusedDeclaration"})
-        private WallpaperObserver mReceiver;
-
         Bitmap mBackground;
         int mBackgroundWidth = -1, mBackgroundHeight = -1;
         int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
@@ -151,22 +147,6 @@ public class ImageWallpaper extends WallpaperService {
         private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
         private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
 
-        class WallpaperObserver extends BroadcastReceiver {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (DEBUG) {
-                    Log.d(TAG, "onReceive");
-                }
-
-                mLastSurfaceWidth = mLastSurfaceHeight = -1;
-                mBackground = null;
-                mBackgroundWidth = -1;
-                mBackgroundHeight = -1;
-                mRedrawNeeded = true;
-                drawFrame();
-            }
-        }
-
         public DrawableEngine() {
             super();
             setFixedSizeAllowed(true);
@@ -194,12 +174,6 @@ public class ImageWallpaper extends WallpaperService {
 
             super.onCreate(surfaceHolder);
 
-            // TODO: Don't need this currently because the wallpaper service
-            // will restart the image wallpaper whenever the image changes.
-            //IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
-            //mReceiver = new WallpaperObserver();
-            //registerReceiver(mReceiver, filter, null, mHandler);
-
             updateSurfaceSize(surfaceHolder);
 
             setOffsetNotificationsEnabled(false);
@@ -208,9 +182,6 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onDestroy() {
             super.onDestroy();
-            if (mReceiver != null) {
-                unregisterReceiver(mReceiver);
-            }
             mBackground = null;
             mWallpaperManager.forgetLoadedWallpaper();
         }
@@ -562,7 +533,7 @@ public class ImageWallpaper extends WallpaperService {
             boolean status = mEgl.eglSwapBuffers(mEglDisplay, mEglSurface);
             checkEglError();
 
-            finishGL();
+            finishGL(texture, program);
 
             return status;
         }
@@ -615,21 +586,18 @@ public class ImageWallpaper extends WallpaperService {
 
             int program = glCreateProgram();
             glAttachShader(program, vertexShader);
-            checkGlError();
-
             glAttachShader(program, fragmentShader);
-            checkGlError();
-
             glLinkProgram(program);
             checkGlError();
+
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
 
             int[] status = new int[1];
             glGetProgramiv(program, GL_LINK_STATUS, status, 0);
             if (status[0] != GL_TRUE) {
                 String error = glGetProgramInfoLog(program);
                 Log.d(GL_LOG_TAG, "Error while linking program:\n" + error);
-                glDeleteShader(vertexShader);
-                glDeleteShader(fragmentShader);
                 glDeleteProgram(program);
                 return 0;
             }
@@ -672,7 +640,11 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
-        private void finishGL() {
+        private void finishGL(int texture, int program) {
+            int[] textures = new int[1];
+            textures[0] = texture;
+            glDeleteTextures(1, textures, 0);
+            glDeleteProgram(program);
             mEgl.eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
             mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
             mEgl.eglDestroyContext(mEglDisplay, mEglContext);
