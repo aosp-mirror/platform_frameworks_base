@@ -690,14 +690,6 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case MOVE_TASK_TO_BACK_TRANSACTION: {
-            data.enforceInterface(IActivityManager.descriptor);
-            int task = data.readInt();
-            moveTaskToBack(task);
-            reply.writeNoException();
-            return true;
-        }
-
         case MOVE_ACTIVITY_TASK_TO_BACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
@@ -3161,17 +3153,6 @@ class ActivityManagerProxy implements IActivityManager
             data.writeInt(0);
         }
         mRemote.transact(MOVE_TASK_TO_FRONT_TRANSACTION, data, reply, 0);
-        reply.readException();
-        data.recycle();
-        reply.recycle();
-    }
-    public void moveTaskToBack(int task) throws RemoteException
-    {
-        Parcel data = Parcel.obtain();
-        Parcel reply = Parcel.obtain();
-        data.writeInterfaceToken(IActivityManager.descriptor);
-        data.writeInt(task);
-        mRemote.transact(MOVE_TASK_TO_BACK_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();
