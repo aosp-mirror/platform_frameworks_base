@@ -17,20 +17,16 @@ package com.android.keyguard;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
-import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.widget.LockPatternUtils;
 
-import java.util.List;
-
 public class KeyguardSecurityModel {
 
     /**
-     * The different types of security available for {@link Mode#UnlockScreen}.
-     * @see com.android.internal.policy.impl.LockPatternKeyguardView#getUnlockMode()
+     * The different types of security available.
+     * @see KeyguardSecurityContainer#showSecurityScreen
      */
     public enum SecurityMode {
         Invalid, // NULL state
@@ -42,12 +38,16 @@ public class KeyguardSecurityModel {
         SimPuk // Unlock by entering a sim puk
     }
 
-    private Context mContext;
+    private final Context mContext;
+    private final boolean mIsPukScreenAvailable;
+
     private LockPatternUtils mLockPatternUtils;
 
     KeyguardSecurityModel(Context context) {
         mContext = context;
         mLockPatternUtils = new LockPatternUtils(context);
+        mIsPukScreenAvailable = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enable_puk_unlock_screen);
     }
 
     void setLockPatternUtils(LockPatternUtils utils) {
@@ -56,39 +56,35 @@ public class KeyguardSecurityModel {
 
     SecurityMode getSecurityMode() {
         KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
-        SecurityMode mode = SecurityMode.None;
+
         if (SubscriptionManager.isValidSubscriptionId(
                 monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED))) {
-            mode = SecurityMode.SimPin;
-        } else if (SubscriptionManager.isValidSubscriptionId(
-                    monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED))
-                && mLockPatternUtils.isPukUnlockScreenEnable()) {
-            mode = SecurityMode.SimPuk;
-        } else {
-            final int security = mLockPatternUtils.getKeyguardStoredPasswordQuality();
-            switch (security) {
-                case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
-                case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
-                    mode = mLockPatternUtils.isLockPasswordEnabled() ?
-                            SecurityMode.PIN : SecurityMode.None;
-                    break;
-                case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
-                case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
-                case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
-                    mode = mLockPatternUtils.isLockPasswordEnabled() ?
-                            SecurityMode.Password : SecurityMode.None;
-                    break;
-
-                case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
-                case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
-                    mode = mLockPatternUtils.isLockPatternEnabled() ?
-                            SecurityMode.Pattern : SecurityMode.None;
-                    break;
-
-                default:
-                    throw new IllegalStateException("Unknown security quality:" + security);
-            }
+            return SecurityMode.SimPin;
         }
-        return mode;
+
+        if (mIsPukScreenAvailable && SubscriptionManager.isValidSubscriptionId(
+                monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED))) {
+            return SecurityMode.SimPuk;
+        }
+
+        final int security = mLockPatternUtils.getActivePasswordQuality();
+        switch (security) {
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                return SecurityMode.PIN;
+
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
+                return SecurityMode.Password;
+
+            case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
+                return SecurityMode.Pattern;
+            case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
+                return SecurityMode.None;
+
+            default:
+                throw new IllegalStateException("Unknown security quality:" + security);
+        }
     }
 }

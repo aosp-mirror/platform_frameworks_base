@@ -41,7 +41,8 @@ public class CarrierText extends TextView {
 
     private static CharSequence mSeparator;
 
-    private LockPatternUtils mLockPatternUtils;
+    private final boolean mIsEmergencyCallCapable;
+
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     private KeyguardUpdateMonitorCallback mCallback = new KeyguardUpdateMonitorCallback() {
@@ -78,7 +79,8 @@ public class CarrierText extends TextView {
 
     public CarrierText(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mLockPatternUtils = new LockPatternUtils(mContext);
+        mIsEmergencyCallCapable = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_voice_capable);
         boolean useAllCaps;
         TypedArray a = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.CarrierText, 0, 0);
@@ -222,7 +224,7 @@ public class CarrierText extends TextView {
      */
     private CharSequence makeCarrierStringOnEmergencyCapable(
             CharSequence simMessage, CharSequence emergencyCallMessage) {
-        if (mLockPatternUtils.isEmergencyCallCapable()) {
+        if (mIsEmergencyCallCapable) {
             return concatenate(simMessage, emergencyCallMessage);
         }
         return simMessage;
