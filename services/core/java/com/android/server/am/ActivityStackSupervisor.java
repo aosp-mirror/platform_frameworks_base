@@ -2563,7 +2563,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
         return null;
     }
 
-    ActivityContainer createActivityContainer(ActivityRecord parentActivity,
+    ActivityContainer createVirtualActivityContainer(ActivityRecord parentActivity,
             IActivityContainerCallback callback) {
         ActivityContainer activityContainer =
                 new VirtualActivityContainer(parentActivity, callback);

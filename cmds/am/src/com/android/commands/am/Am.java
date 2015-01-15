@@ -1695,7 +1695,8 @@ public class Am extends BaseCommand {
 
         try {
             IBinder homeActivityToken = mAm.getHomeActivityToken();
-            IActivityContainer container = mAm.createActivityContainer(homeActivityToken, null);
+            IActivityContainer container =
+                    mAm.createVirtualActivityContainer(homeActivityToken, null);
             container.attachToDisplay(displayId);
             container.startActivity(intent);
         } catch (RemoteException e) {

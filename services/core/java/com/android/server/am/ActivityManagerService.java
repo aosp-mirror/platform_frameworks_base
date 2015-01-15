@@ -8097,7 +8097,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public IActivityContainer createActivityContainer(IBinder parentActivityToken,
+    public IActivityContainer createVirtualActivityContainer(IBinder parentActivityToken,
             IActivityContainerCallback callback) throws RemoteException {
         enforceCallingPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS,
                 "createActivityContainer()");
@@ -8112,7 +8112,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (callback == null) {
                 throw new IllegalArgumentException("callback must not be null");
             }
-            return mStackSupervisor.createActivityContainer(r, callback);
+            return mStackSupervisor.createVirtualActivityContainer(r, callback);
         }
     }
 
