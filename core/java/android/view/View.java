@@ -17786,37 +17786,40 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * Utility to reconcile a desired size and state, with constraints imposed
-     * by a MeasureSpec.  Will take the desired size, unless a different size
-     * is imposed by the constraints.  The returned value is a compound integer,
+     * by a MeasureSpec. Will take the desired size, unless a different size
+     * is imposed by the constraints. The returned value is a compound integer,
      * with the resolved size in the {@link #MEASURED_SIZE_MASK} bits and
-     * optionally the bit {@link #MEASURED_STATE_TOO_SMALL} set if the resulting
-     * size is smaller than the size the view wants to be.
+     * optionally the bit {@link #MEASURED_STATE_TOO_SMALL} set if the
+     * resulting size is smaller than the size the view wants to be.
      *
-     * @param size How big the view wants to be
-     * @param measureSpec Constraints imposed by the parent
+     * @param size How big the view wants to be.
+     * @param measureSpec Constraints imposed by the parent.
+     * @param childMeasuredState Size information bit mask for the view's
+     *                           children.
      * @return Size information bit mask as defined by
-     * {@link #MEASURED_SIZE_MASK} and {@link #MEASURED_STATE_TOO_SMALL}.
+     *         {@link #MEASURED_SIZE_MASK} and
+     *         {@link #MEASURED_STATE_TOO_SMALL}.
      */
     public static int resolveSizeAndState(int size, int measureSpec, int childMeasuredState) {
-        int result = size;
-        int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize =  MeasureSpec.getSize(measureSpec);
+        final int specMode = MeasureSpec.getMode(measureSpec);
+        final int specSize = MeasureSpec.getSize(measureSpec);
+        final int result;
         switch (specMode) {
-        case MeasureSpec.UNSPECIFIED:
-            result = size;
-            break;
-        case MeasureSpec.AT_MOST:
-            if (specSize < size) {
-                result = specSize | MEASURED_STATE_TOO_SMALL;
-            } else {
+            case MeasureSpec.AT_MOST:
+                if (specSize < size) {
+                    result = specSize | MEASURED_STATE_TOO_SMALL;
+                } else {
+                    result = size;
+                }
+                break;
+            case MeasureSpec.EXACTLY:
+                result = specSize;
+                break;
+            case MeasureSpec.UNSPECIFIED:
+            default:
                 result = size;
-            }
-            break;
-        case MeasureSpec.EXACTLY:
-            result = specSize;
-            break;
         }
-        return result | (childMeasuredState&MEASURED_STATE_MASK);
+        return result | (childMeasuredState & MEASURED_STATE_MASK);
     }
 
     /**

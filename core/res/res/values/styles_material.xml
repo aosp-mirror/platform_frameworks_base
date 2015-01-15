@@ -652,12 +652,12 @@ please see styles_device_defaults.xml.
         <item name="headerAmPmTextAppearance">@style/TextAppearance.Material.TimePicker.AmPmLabel</item>
         <item name="headerSelectedTextColor">?attr/textColorPrimaryInverse</item>
         <item name="headerBackground">@drawable/time_picker_header_material</item>
-        <item name="numbersTextColor">?attr/textColorSecondary</item>
+        <item name="numbersTextColor">?attr/textColorSecondaryActivated</item>
         <item name="numbersBackgroundColor">#10ffffff</item>
+        <item name="numbersSelectorColor">?attr/colorControlActivated</item>
         <item name="amPmTextColor">?attr/textColorSecondary</item>
         <item name="amPmBackgroundColor">@color/transparent</item>
         <item name="amPmSelectedBackgroundColor">?attr/colorControlActivated</item>
-        <item name="numbersSelectorColor">?attr/colorControlActivated</item>
     </style>
 
     <style name="Widget.Material.DatePicker" parent="Widget.DatePicker">
