@@ -330,6 +330,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (volumeBefore != mOptimisticVolume) {
                 pushVolumeUpdate();
             }
+            mService.notifyRemoteVolumeChanged(flags, this);
 
             if (DEBUG) {
                 Log.d(TAG, "Adjusted optimistic volume to " + mOptimisticVolume + " max is "
@@ -357,6 +358,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             if (volumeBefore != mOptimisticVolume) {
                 pushVolumeUpdate();
             }
+            mService.notifyRemoteVolumeChanged(flags, this);
 
             if (DEBUG) {
                 Log.d(TAG, "Set optimistic volume to " + mOptimisticVolume + " max is "
