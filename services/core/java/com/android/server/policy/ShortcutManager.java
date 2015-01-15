@@ -16,81 +16,47 @@
 
 package com.android.server.policy;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.database.ContentObserver;
-import android.database.Cursor;
-import android.os.Handler;
-import android.provider.Settings;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.content.res.XmlResourceParser;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyCharacterMap;
+import com.android.internal.util.XmlUtils;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
-import java.net.URISyntaxException;
+import java.io.IOException;
 
 /**
  * Manages quick launch shortcuts by:
  * <li> Keeping the local copy in sync with the database (this is an observer)
  * <li> Returning a shortcut-matching intent to clients
  */
-class ShortcutManager extends ContentObserver {
-    
+class ShortcutManager {
     private static final String TAG = "ShortcutManager";
-    
-    private static final int COLUMN_SHORTCUT = 0;
-    private static final int COLUMN_INTENT = 1;
-    private static final String[] sProjection = new String[] {
-        Settings.Bookmarks.SHORTCUT, Settings.Bookmarks.INTENT
-    };
 
-    private Context mContext;
-    private Cursor mCursor;
-    /** Map of a shortcut to its intent. */
-    private SparseArray<Intent> mShortcutIntents;
+    private static final String TAG_BOOKMARKS = "bookmarks";
+    private static final String TAG_BOOKMARK = "bookmark";
+
+    private static final String ATTRIBUTE_PACKAGE = "package";
+    private static final String ATTRIBUTE_CLASS = "class";
+    private static final String ATTRIBUTE_SHORTCUT = "shortcut";
+    private static final String ATTRIBUTE_CATEGORY = "category";
+
+    private final SparseArray<ShortcutInfo> mShortcuts = new SparseArray<>();
+
+    private final Context mContext;
     
-    public ShortcutManager(Context context, Handler handler) {
-        super(handler);
-        
+    public ShortcutManager(Context context) {
         mContext = context;
-        mShortcutIntents = new SparseArray<Intent>();
+        loadShortcuts();
     }
 
-    /** Observes the provider of shortcut+intents */
-    public void observe() {
-        mCursor = mContext.getContentResolver().query(
-                Settings.Bookmarks.CONTENT_URI, sProjection, null, null, null);
-        mCursor.registerContentObserver(this);
-        updateShortcuts();
-    }
-
-    @Override
-    public void onChange(boolean selfChange) {
-        updateShortcuts();
-    }
-    
-    private void updateShortcuts() {
-        Cursor c = mCursor;
-        if (!c.requery()) {
-            Log.e(TAG, "ShortcutObserver could not re-query shortcuts.");
-            return;
-        }
-
-        mShortcutIntents.clear();
-        while (c.moveToNext()) {
-            int shortcut = c.getInt(COLUMN_SHORTCUT);
-            if (shortcut == 0) continue;
-            String intentURI = c.getString(COLUMN_INTENT);
-            Intent intent = null;
-            try {
-                intent = Intent.getIntent(intentURI);
-            } catch (URISyntaxException e) {
-                Log.w(TAG, "Intent URI for shortcut invalid.", e);
-            }
-            if (intent == null) continue;
-            mShortcutIntents.put(shortcut, intent);
-        }
-    }
-    
     /**
      * Gets the shortcut intent for a given keycode+modifier. Make sure you
      * strip whatever modifier is used for invoking shortcuts (for example,
@@ -107,23 +73,105 @@ class ShortcutManager extends ContentObserver {
      * @return The intent that matches the shortcut, or null if not found.
      */
     public Intent getIntent(KeyCharacterMap kcm, int keyCode, int metaState) {
-        Intent intent = null;
+        ShortcutInfo shortcut = null;
 
         // First try the exact keycode (with modifiers).
-        int shortcut = kcm.get(keyCode, metaState);
-        if (shortcut != 0) {
-            intent = mShortcutIntents.get(shortcut);
+        int shortcutChar = kcm.get(keyCode, metaState);
+        if (shortcutChar != 0) {
+            shortcut = mShortcuts.get(shortcutChar);
         }
 
         // Next try the primary character on that key.
-        if (intent == null) {
-            shortcut = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
-            if (shortcut != 0) {
-                intent = mShortcutIntents.get(shortcut);
+        if (shortcut == null) {
+            shortcutChar = Character.toLowerCase(kcm.getDisplayLabel(keyCode));
+            if (shortcutChar != 0) {
+                shortcut = mShortcuts.get(shortcutChar);
             }
         }
 
-        return intent;
+        return (shortcut != null) ? shortcut.intent : null;
     }
 
+    private void loadShortcuts() {
+        PackageManager packageManager = mContext.getPackageManager();
+        try {
+            XmlResourceParser parser = mContext.getResources().getXml(
+                    com.android.internal.R.xml.bookmarks);
+            XmlUtils.beginDocument(parser, TAG_BOOKMARKS);
+
+            while (true) {
+                XmlUtils.nextElement(parser);
+
+                if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
+                    break;
+                }
+
+                if (!TAG_BOOKMARK.equals(parser.getName())) {
+                    break;
+                }
+
+                String packageName = parser.getAttributeValue(null, ATTRIBUTE_PACKAGE);
+                String className = parser.getAttributeValue(null, ATTRIBUTE_CLASS);
+                String shortcutName = parser.getAttributeValue(null, ATTRIBUTE_SHORTCUT);
+                String categoryName = parser.getAttributeValue(null, ATTRIBUTE_CATEGORY);
+
+                if (TextUtils.isEmpty(shortcutName)) {
+                    Log.w(TAG, "Unable to get shortcut for: " + packageName + "/" + className);
+                    continue;
+                }
+
+                final int shortcutChar = shortcutName.charAt(0);
+
+                final Intent intent;
+                final String title;
+                if (packageName != null && className != null) {
+                    ActivityInfo info = null;
+                    ComponentName componentName = new ComponentName(packageName, className);
+                    try {
+                        info = packageManager.getActivityInfo(componentName, 0);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        String[] packages = packageManager.canonicalToCurrentPackageNames(
+                                new String[] { packageName });
+                        componentName = new ComponentName(packages[0], className);
+                        try {
+                            info = packageManager.getActivityInfo(componentName, 0);
+                        } catch (PackageManager.NameNotFoundException e1) {
+                            Log.w(TAG, "Unable to add bookmark: " + packageName
+                                    + "/" + className, e);
+                            continue;
+                        }
+                    }
+
+                    intent = new Intent(Intent.ACTION_MAIN);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    intent.setComponent(componentName);
+                    title = info.loadLabel(packageManager).toString();
+                } else if (categoryName != null) {
+                    intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, categoryName);
+                    title = "";
+                } else {
+                    Log.w(TAG, "Unable to add bookmark for shortcut " + shortcutName
+                            + ": missing package/class or category attributes");
+                    continue;
+                }
+
+                ShortcutInfo shortcut = new ShortcutInfo(title, intent);
+                mShortcuts.put(shortcutChar, shortcut);
+            }
+        } catch (XmlPullParserException e) {
+            Log.w(TAG, "Got exception parsing bookmarks.", e);
+        } catch (IOException e) {
+            Log.w(TAG, "Got exception parsing bookmarks.", e);
+        }
+    }
+
+    private static final class ShortcutInfo {
+        public final String title;
+        public final Intent intent;
+
+        public ShortcutInfo(String title, Intent intent) {
+            this.title = title;
+            this.intent = intent;
+        }
+    }
 }

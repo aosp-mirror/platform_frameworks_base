@@ -110,11 +110,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     private static final String TAG = "SettingsBackupAgent";
 
-    private static final int COLUMN_NAME = 1;
-    private static final int COLUMN_VALUE = 2;
-
     private static final String[] PROJECTION = {
-        Settings.NameValueTable._ID,
         Settings.NameValueTable.NAME,
         Settings.NameValueTable.VALUE
     };
@@ -473,8 +469,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             ParcelFileDescriptor newState) throws IOException {
 
         HashSet<String> movedToGlobal = new HashSet<String>();
-        Settings.System.getMovedKeys(movedToGlobal);
-        Settings.Secure.getMovedKeys(movedToGlobal);
+        Settings.System.getMovedToGlobalSettings(movedToGlobal);
+        Settings.Secure.getMovedToGlobalSettings(movedToGlobal);
 
         while (data.readNextHeader()) {
             final String key = data.getKey();
@@ -577,8 +573,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         if (version <= FULL_BACKUP_VERSION) {
             // Generate the moved-to-global lookup table
             HashSet<String> movedToGlobal = new HashSet<String>();
-            Settings.System.getMovedKeys(movedToGlobal);
-            Settings.Secure.getMovedKeys(movedToGlobal);
+            Settings.System.getMovedToGlobalSettings(movedToGlobal);
+            Settings.Secure.getMovedToGlobalSettings(movedToGlobal);
 
             // system settings data first
             int nBytes = in.readInt();
@@ -824,11 +820,14 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             String key = settings[i];
             String value = cachedEntries.remove(key);
 
+            final int nameColumnIndex = cursor.getColumnIndex(Settings.NameValueTable.NAME);
+            final int valueColumnIndex = cursor.getColumnIndex(Settings.NameValueTable.VALUE);
+
             // If the value not cached, let us look it up.
             if (value == null) {
                 while (!cursor.isAfterLast()) {
-                    String cursorKey = cursor.getString(COLUMN_NAME);
-                    String cursorValue = cursor.getString(COLUMN_VALUE);
+                    String cursorKey = cursor.getString(nameColumnIndex);
+                    String cursorValue = cursor.getString(valueColumnIndex);
                     cursor.moveToNext();
                     if (key.equals(cursorKey)) {
                         value = cursorValue;

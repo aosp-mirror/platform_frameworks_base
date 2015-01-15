@@ -16,1211 +16,461 @@
 
 package com.android.providers.settings;
 
-import java.io.FileNotFoundException;
-import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.backup.BackupManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
-import android.database.AbstractCursor;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.hardware.camera2.utils.ArrayUtils;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
-import android.os.FileObserver;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
-import android.provider.Settings.Secure;
 import android.text.TextUtils;
-import android.util.Log;
-import android.util.LruCache;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.BackgroundThread;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
+import com.android.providers.settings.SettingsState.Setting;
+
+/**
+ * <p>
+ * This class is a content provider that publishes the system settings.
+ * It can be accessed via the content provider APIs or via custom call
+ * commands. The latter is a bit faster and is the preferred way to access
+ * the platform settings.
+ * </p>
+ * <p>
+ * There are three settings types, global (with signature level protection
+ * and shared across users), secure (with signature permission level
+ * protection and per user), and system (with dangerous permission level
+ * protection and per user). Global settings are stored under the device owner.
+ * Each of these settings is represented by a {@link
+ * com.android.providers.settings.SettingsState} object mapped to an integer
+ * key derived from the setting type in the most significant bits and user
+ * id in the least significant bits. Settings are synchronously loaded on
+ * instantiation of a SettingsState and asynchronously persisted on mutation.
+ * Settings are stored in the user specific system directory.
+ * </p>
+ * <p>
+ * Apps targeting APIs Lollipop MR1 and lower can add custom settings entries
+ * and get a warning. Targeting higher API version prohibits this as the
+ * system settings are not a place for apps to save their state. When a package
+ * is removed the settings it added are deleted. Apps cannot delete system
+ * settings added by the platform. System settings values are validated to
+ * ensure the clients do not put bad values. Global and secure settings are
+ * changed only by trusted parties, therefore no validation is performed. Also
+ * there is a limit on the amount of app specific settings that can be added
+ * to prevent unlimited growth of the system process memory footprint.
+ * </p>
+ */
+@SuppressWarnings("deprecation")
 public class SettingsProvider extends ContentProvider {
-    private static final String TAG = "SettingsProvider";
-    private static final boolean LOCAL_LOGV = false;
+    private static final boolean DEBUG = false;
 
-    private static final boolean USER_CHECK_THROWS = true;
+    private static final boolean DROP_DATABASE_ON_MIGRATION = !Build.IS_DEBUGGABLE;
+
+    private static final String LOG_TAG = "SettingsProvider";
 
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
     private static final String TABLE_GLOBAL = "global";
+
+    // Old tables no longer exist.
     private static final String TABLE_FAVORITES = "favorites";
     private static final String TABLE_OLD_FAVORITES = "old_favorites";
+    private static final String TABLE_BLUETOOTH_DEVICES = "bluetooth_devices";
+    private static final String TABLE_BOOKMARKS = "bookmarks";
+    private static final String TABLE_ANDROID_METADATA = "android_metadata";
 
-    private static final String[] COLUMN_VALUE = new String[] { "value" };
-
-    // Caches for each user's settings, access-ordered for acting as LRU.
-    // Guarded by themselves.
-    private static final int MAX_CACHE_ENTRIES = 200;
-    private static final SparseArray<SettingsCache> sSystemCaches
-            = new SparseArray<SettingsCache>();
-    private static final SparseArray<SettingsCache> sSecureCaches
-            = new SparseArray<SettingsCache>();
-    private static final SettingsCache sGlobalCache = new SettingsCache(TABLE_GLOBAL);
-
-    // The count of how many known (handled by SettingsProvider)
-    // database mutations are currently being handled for this user.
-    // Used by file observers to not reload the database when it's ourselves
-    // modifying it.
-    private static final SparseArray<AtomicInteger> sKnownMutationsInFlight
-            = new SparseArray<AtomicInteger>();
-
-    // Each defined user has their own settings
-    protected final SparseArray<DatabaseHelper> mOpenHelpers = new SparseArray<DatabaseHelper>();
-
-    // Keep the list of managed profiles synced here
-    private List<UserInfo> mManagedProfiles = null;
-
-    // Over this size we don't reject loading or saving settings but
-    // we do consider them broken/malicious and don't keep them in
-    // memory at least:
-    private static final int MAX_CACHE_ENTRY_SIZE = 500;
-
-    private static final Bundle NULL_SETTING = Bundle.forPair("value", null);
-
-    // Used as a sentinel value in an instance equality test when we
-    // want to cache the existence of a key, but not store its value.
-    private static final Bundle TOO_LARGE_TO_CACHE_MARKER = Bundle.forPair("_dummy", null);
-
-    private UserManager mUserManager;
-    private BackupManager mBackupManager;
-
-    /**
-     * Settings which need to be treated as global/shared in multi-user environments.
-     */
-    static final HashSet<String> sSecureGlobalKeys;
-    static final HashSet<String> sSystemGlobalKeys;
-
-    // Settings that cannot be modified if associated user restrictions are enabled.
-    static final Map<String, String> sRestrictedKeys;
-
-    private static final String DROPBOX_TAG_USERLOG = "restricted_profile_ssaid";
-
-    static final HashSet<String> sSecureCloneToManagedKeys;
-    static final HashSet<String> sSystemCloneToManagedKeys;
-
+    // The set of removed legacy tables.
+    private static final Set<String> REMOVED_LEGACY_TABLES = new ArraySet<>();
     static {
-        // Keys (name column) from the 'secure' table that are now in the owner user's 'global'
-        // table, shared across all users
-        // These must match Settings.Secure.MOVED_TO_GLOBAL
-        sSecureGlobalKeys = new HashSet<String>();
-        Settings.Secure.getMovedKeys(sSecureGlobalKeys);
+        REMOVED_LEGACY_TABLES.add(TABLE_FAVORITES);
+        REMOVED_LEGACY_TABLES.add(TABLE_OLD_FAVORITES);
+        REMOVED_LEGACY_TABLES.add(TABLE_BLUETOOTH_DEVICES);
+        REMOVED_LEGACY_TABLES.add(TABLE_BOOKMARKS);
+        REMOVED_LEGACY_TABLES.add(TABLE_ANDROID_METADATA);
+    }
 
-        // Keys from the 'system' table now moved to 'global'
-        // These must match Settings.System.MOVED_TO_GLOBAL
-        sSystemGlobalKeys = new HashSet<String>();
-        Settings.System.getNonLegacyMovedKeys(sSystemGlobalKeys);
+    private static final int MUTATION_OPERATION_INSERT = 1;
+    private static final int MUTATION_OPERATION_DELETE = 2;
+    private static final int MUTATION_OPERATION_UPDATE = 3;
 
-        sRestrictedKeys = new HashMap<String, String>();
-        sRestrictedKeys.put(Settings.Secure.LOCATION_MODE, UserManager.DISALLOW_SHARE_LOCATION);
-        sRestrictedKeys.put(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+    private static final String[] ALL_COLUMNS = new String[] {
+            Settings.NameValueTable._ID,
+            Settings.NameValueTable.NAME,
+            Settings.NameValueTable.VALUE
+    };
+
+    private static final Bundle NULL_SETTING = Bundle.forPair(Settings.NameValueTable.VALUE, null);
+
+    // Per user settings that cannot be modified if associated user restrictions are enabled.
+    private static final Map<String, String> sSettingToUserRestrictionMap = new ArrayMap<>();
+    static {
+        sSettingToUserRestrictionMap.put(Settings.Secure.LOCATION_MODE,
                 UserManager.DISALLOW_SHARE_LOCATION);
-        sRestrictedKeys.put(Settings.Secure.INSTALL_NON_MARKET_APPS,
+        sSettingToUserRestrictionMap.put(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                UserManager.DISALLOW_SHARE_LOCATION);
+        sSettingToUserRestrictionMap.put(Settings.Secure.INSTALL_NON_MARKET_APPS,
                 UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
-        sRestrictedKeys.put(Settings.Global.ADB_ENABLED, UserManager.DISALLOW_DEBUGGING_FEATURES);
-        sRestrictedKeys.put(Settings.Global.PACKAGE_VERIFIER_ENABLE,
+        sSettingToUserRestrictionMap.put(Settings.Global.ADB_ENABLED,
+                UserManager.DISALLOW_DEBUGGING_FEATURES);
+        sSettingToUserRestrictionMap.put(Settings.Global.PACKAGE_VERIFIER_ENABLE,
                 UserManager.ENSURE_VERIFY_APPS);
-        sRestrictedKeys.put(Settings.Global.PREFERRED_NETWORK_MODE,
+        sSettingToUserRestrictionMap.put(Settings.Global.PREFERRED_NETWORK_MODE,
                 UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS);
-
-        sSecureCloneToManagedKeys = new HashSet<String>();
-        for (int i = 0; i < Settings.Secure.CLONE_TO_MANAGED_PROFILE.length; i++) {
-            sSecureCloneToManagedKeys.add(Settings.Secure.CLONE_TO_MANAGED_PROFILE[i]);
-        }
-        sSystemCloneToManagedKeys = new HashSet<String>();
-        for (int i = 0; i < Settings.System.CLONE_TO_MANAGED_PROFILE.length; i++) {
-            sSystemCloneToManagedKeys.add(Settings.System.CLONE_TO_MANAGED_PROFILE[i]);
-        }
     }
 
-    private boolean settingMovedToGlobal(final String name) {
-        return sSecureGlobalKeys.contains(name) || sSystemGlobalKeys.contains(name);
+    // Per user secure settings that moved to the for all users global settings.
+    static final Set<String> sSecureMovedToGlobalSettings = new ArraySet<>();
+    static {
+        Settings.Secure.getMovedToGlobalSettings(sSecureMovedToGlobalSettings);
     }
 
-    /**
-     * Decode a content URL into the table, projection, and arguments
-     * used to access the corresponding database rows.
-     */
-    private static class SqlArguments {
-        public String table;
-        public final String where;
-        public final String[] args;
-
-        /** Operate on existing rows. */
-        SqlArguments(Uri url, String where, String[] args) {
-            if (url.getPathSegments().size() == 1) {
-                // of the form content://settings/secure, arbitrary where clause
-                this.table = url.getPathSegments().get(0);
-                if (!DatabaseHelper.isValidTable(this.table)) {
-                    throw new IllegalArgumentException("Bad root path: " + this.table);
-                }
-                this.where = where;
-                this.args = args;
-            } else if (url.getPathSegments().size() != 2) {
-                throw new IllegalArgumentException("Invalid URI: " + url);
-            } else if (!TextUtils.isEmpty(where)) {
-                throw new UnsupportedOperationException("WHERE clause not supported: " + url);
-            } else {
-                // of the form content://settings/secure/element_name, no where clause
-                this.table = url.getPathSegments().get(0);
-                if (!DatabaseHelper.isValidTable(this.table)) {
-                    throw new IllegalArgumentException("Bad root path: " + this.table);
-                }
-                if (TABLE_SYSTEM.equals(this.table) || TABLE_SECURE.equals(this.table) ||
-                    TABLE_GLOBAL.equals(this.table)) {
-                    this.where = Settings.NameValueTable.NAME + "=?";
-                    final String name = url.getPathSegments().get(1);
-                    this.args = new String[] { name };
-                    // Rewrite the table for known-migrated names
-                    if (TABLE_SYSTEM.equals(this.table) || TABLE_SECURE.equals(this.table)) {
-                        if (sSecureGlobalKeys.contains(name) || sSystemGlobalKeys.contains(name)) {
-                            this.table = TABLE_GLOBAL;
-                        }
-                    }
-                } else {
-                    // of the form content://bookmarks/19
-                    this.where = "_id=" + ContentUris.parseId(url);
-                    this.args = null;
-                }
-            }
-        }
-
-        /** Insert new rows (no where clause allowed). */
-        SqlArguments(Uri url) {
-            if (url.getPathSegments().size() == 1) {
-                this.table = url.getPathSegments().get(0);
-                if (!DatabaseHelper.isValidTable(this.table)) {
-                    throw new IllegalArgumentException("Bad root path: " + this.table);
-                }
-                this.where = null;
-                this.args = null;
-            } else {
-                throw new IllegalArgumentException("Invalid URI: " + url);
-            }
-        }
+    // Per user system settings that moved to the for all users global settings.
+    static final Set<String> sSystemMovedToGlobalSettings = new ArraySet<>();
+    static {
+        Settings.System.getMovedToGlobalSettings(sSystemMovedToGlobalSettings);
     }
 
-    /**
-     * Get the content URI of a row added to a table.
-     * @param tableUri of the entire table
-     * @param values found in the row
-     * @param rowId of the row
-     * @return the content URI for this particular row
-     */
-    private Uri getUriFor(Uri tableUri, ContentValues values, long rowId) {
-        if (tableUri.getPathSegments().size() != 1) {
-            throw new IllegalArgumentException("Invalid URI: " + tableUri);
-        }
-        String table = tableUri.getPathSegments().get(0);
-        if (TABLE_SYSTEM.equals(table) ||
-                TABLE_SECURE.equals(table) ||
-                TABLE_GLOBAL.equals(table)) {
-            String name = values.getAsString(Settings.NameValueTable.NAME);
-            return Uri.withAppendedPath(tableUri, name);
-        } else {
-            return ContentUris.withAppendedId(tableUri, rowId);
-        }
+    // Per user system settings that moved to the per user secure settings.
+    static final Set<String> sSystemMovedToSecureSettings = new ArraySet<>();
+    static {
+        Settings.System.getMovedToSecureSettings(sSystemMovedToSecureSettings);
     }
 
-    /**
-     * Send a notification when a particular content URI changes.
-     * Modify the system property used to communicate the version of
-     * this table, for tables which have such a property.  (The Settings
-     * contract class uses these to provide client-side caches.)
-     * @param uri to send notifications for
-     */
-    private void sendNotify(Uri uri, int userHandle) {
-        // Update the system property *first*, so if someone is listening for
-        // a notification and then using the contract class to get their data,
-        // the system property will be updated and they'll get the new data.
-
-        boolean backedUpDataChanged = false;
-        String property = null, table = uri.getPathSegments().get(0);
-        final boolean isGlobal = table.equals(TABLE_GLOBAL);
-        if (table.equals(TABLE_SYSTEM)) {
-            property = Settings.System.SYS_PROP_SETTING_VERSION;
-            backedUpDataChanged = true;
-        } else if (table.equals(TABLE_SECURE)) {
-            property = Settings.Secure.SYS_PROP_SETTING_VERSION;
-            backedUpDataChanged = true;
-        } else if (isGlobal) {
-            property = Settings.Global.SYS_PROP_SETTING_VERSION;    // this one is global
-            backedUpDataChanged = true;
-        }
-
-        if (property != null) {
-            long version = SystemProperties.getLong(property, 0) + 1;
-            if (LOCAL_LOGV) Log.v(TAG, "property: " + property + "=" + version);
-            SystemProperties.set(property, Long.toString(version));
-        }
-
-        // Inform the backup manager about a data change
-        if (backedUpDataChanged) {
-            mBackupManager.dataChanged();
-        }
-        // Now send the notification through the content framework.
-
-        String notify = uri.getQueryParameter("notify");
-        if (notify == null || "true".equals(notify)) {
-            final int notifyTarget = isGlobal ? UserHandle.USER_ALL : userHandle;
-            final long oldId = Binder.clearCallingIdentity();
-            try {
-                getContext().getContentResolver().notifyChange(uri, null, true, notifyTarget);
-            } finally {
-                Binder.restoreCallingIdentity(oldId);
-            }
-            if (LOCAL_LOGV) Log.v(TAG, "notifying for " + notifyTarget + ": " + uri);
-        } else {
-            if (LOCAL_LOGV) Log.v(TAG, "notification suppressed: " + uri);
-        }
+    // Per all users global settings that moved to the per user secure settings.
+    static final Set<String> sGlobalMovedToSecureSettings = new ArraySet<>();
+    static {
+        Settings.Global.getMovedToSecureSettings(sGlobalMovedToSecureSettings);
     }
 
-    /**
-     * Make sure the caller has permission to write this data.
-     * @param args supplied by the caller
-     * @throws SecurityException if the caller is forbidden to write.
-     */
-    private void checkWritePermissions(SqlArguments args) {
-        if ((TABLE_SECURE.equals(args.table) || TABLE_GLOBAL.equals(args.table)) &&
-            getContext().checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS) !=
-            PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(
-                    String.format("Permission denial: writing to secure settings requires %1$s",
-                                  android.Manifest.permission.WRITE_SECURE_SETTINGS));
-        }
+    // Per user secure settings that are cloned for the managed profiles of the user.
+    private static final Set<String> sSecureCloneToManagedSettings = new ArraySet<>();
+    static {
+        Settings.Secure.getCloneToManagedProfileSettings(sSecureCloneToManagedSettings);
     }
 
-    private void checkUserRestrictions(String setting, int userId) {
-        String userRestriction = sRestrictedKeys.get(setting);
-        if (!TextUtils.isEmpty(userRestriction)
-            && mUserManager.hasUserRestriction(userRestriction, new UserHandle(userId))) {
-            throw new SecurityException(
-                    "Permission denial: user is restricted from changing this setting.");
-        }
+    // Per user system settings that are cloned for the managed profiles of the user.
+    private static final Set<String> sSystemCloneToManagedSettings = new ArraySet<>();
+    static {
+        Settings.System.getCloneToManagedProfileSettings(sSystemCloneToManagedSettings);
     }
 
-    // FileObserver for external modifications to the database file.
-    // Note that this is for platform developers only with
-    // userdebug/eng builds who should be able to tinker with the
-    // sqlite database out from under the SettingsProvider, which is
-    // normally the exclusive owner of the database.  But we keep this
-    // enabled all the time to minimize development-vs-user
-    // differences in testing.
-    private static SparseArray<SettingsFileObserver> sObserverInstances
-            = new SparseArray<SettingsFileObserver>();
-    private class SettingsFileObserver extends FileObserver {
-        private final AtomicBoolean mIsDirty = new AtomicBoolean(false);
-        private final int mUserHandle;
-        private final String mPath;
+    private final Object mLock = new Object();
 
-        public SettingsFileObserver(int userHandle, String path) {
-            super(path, FileObserver.CLOSE_WRITE |
-                  FileObserver.CREATE | FileObserver.DELETE |
-                  FileObserver.MOVED_TO | FileObserver.MODIFY);
-            mUserHandle = userHandle;
-            mPath = path;
-        }
+    @GuardedBy("mLock")
+    private SettingsRegistry mSettingsRegistry;
 
-        public void onEvent(int event, String path) {
-            final AtomicInteger mutationCount;
-            synchronized (SettingsProvider.this) {
-                mutationCount = sKnownMutationsInFlight.get(mUserHandle);
-            }
-            if (mutationCount != null && mutationCount.get() > 0) {
-                // our own modification.
-                return;
-            }
-            Log.d(TAG, "User " + mUserHandle + " external modification to " + mPath
-                    + "; event=" + event);
-            if (!mIsDirty.compareAndSet(false, true)) {
-                // already handled. (we get a few update events
-                // during an sqlite write)
-                return;
-            }
-            Log.d(TAG, "User " + mUserHandle + " updating our caches for " + mPath);
-            fullyPopulateCaches(mUserHandle);
-            mIsDirty.set(false);
-        }
-    }
+    @GuardedBy("mLock")
+    private UserManager mUserManager;
+
+    @GuardedBy("mLock")
+    private AppOpsManager mAppOpsManager;
+
+    @GuardedBy("mLock")
+    private PackageManager mPackageManager;
 
     @Override
     public boolean onCreate() {
-        mBackupManager = new BackupManager(getContext());
-        mUserManager = UserManager.get(getContext());
-
-        setAppOps(AppOpsManager.OP_NONE, AppOpsManager.OP_WRITE_SETTINGS);
-        establishDbTracking(UserHandle.USER_OWNER);
-
-        IntentFilter userFilter = new IntentFilter();
-        userFilter.addAction(Intent.ACTION_USER_REMOVED);
-        userFilter.addAction(Intent.ACTION_USER_ADDED);
-        getContext().registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
-                        UserHandle.USER_OWNER);
-                if (intent.getAction().equals(Intent.ACTION_USER_REMOVED)) {
-                    onUserRemoved(userHandle);
-                } else if (intent.getAction().equals(Intent.ACTION_USER_ADDED)) {
-                    onProfilesChanged();
-                }
-            }
-        }, userFilter);
-
-        onProfilesChanged();
-
+        synchronized (mLock) {
+            mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
+            mAppOpsManager = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
+            mPackageManager = getContext().getPackageManager();
+            mSettingsRegistry = new SettingsRegistry();
+        }
+        registerBroadcastReceivers();
         return true;
     }
 
-    void onUserRemoved(int userHandle) {
-        synchronized (this) {
-            // the db file itself will be deleted automatically, but we need to tear down
-            // our caches and other internal bookkeeping.
-            FileObserver observer = sObserverInstances.get(userHandle);
-            if (observer != null) {
-                observer.stopWatching();
-                sObserverInstances.delete(userHandle);
-            }
-
-            mOpenHelpers.delete(userHandle);
-            sSystemCaches.delete(userHandle);
-            sSecureCaches.delete(userHandle);
-            sKnownMutationsInFlight.delete(userHandle);
-            onProfilesChanged();
-        }
-    }
-
-    /**
-     * Updates the list of managed profiles. It assumes that only the primary user
-     * can have managed profiles. Modify this code if that changes in the future.
-     */
-    void onProfilesChanged() {
-        synchronized (this) {
-            mManagedProfiles = mUserManager.getProfiles(UserHandle.USER_OWNER);
-            if (mManagedProfiles != null) {
-                // Remove the primary user from the list
-                for (int i = mManagedProfiles.size() - 1; i >= 0; i--) {
-                    if (mManagedProfiles.get(i).id == UserHandle.USER_OWNER) {
-                        mManagedProfiles.remove(i);
-                    }
-                }
-                // If there are no managed profiles, reset the variable
-                if (mManagedProfiles.size() == 0) {
-                    mManagedProfiles = null;
-                }
-            }
-            if (LOCAL_LOGV) {
-                Slog.d(TAG, "Managed Profiles = " + mManagedProfiles);
-            }
-        }
-    }
-
-    private void establishDbTracking(int userHandle) {
-        if (LOCAL_LOGV) {
-            Slog.i(TAG, "Installing settings db helper and caches for user " + userHandle);
-        }
-
-        DatabaseHelper dbhelper;
-
-        synchronized (this) {
-            dbhelper = mOpenHelpers.get(userHandle);
-            if (dbhelper == null) {
-                dbhelper = new DatabaseHelper(getContext(), userHandle);
-                mOpenHelpers.append(userHandle, dbhelper);
-
-                sSystemCaches.append(userHandle, new SettingsCache(TABLE_SYSTEM));
-                sSecureCaches.append(userHandle, new SettingsCache(TABLE_SECURE));
-                sKnownMutationsInFlight.append(userHandle, new AtomicInteger(0));
-            }
-        }
-
-        // Initialization of the db *outside* the locks.  It's possible that racing
-        // threads might wind up here, the second having read the cache entries
-        // written by the first, but that's benign: the SQLite helper implementation
-        // manages concurrency itself, and it's important that we not run the db
-        // initialization with any of our own locks held, so we're fine.
-        SQLiteDatabase db = dbhelper.getWritableDatabase();
-
-        // Watch for external modifications to the database files,
-        // keeping our caches in sync.  We synchronize the observer set
-        // separately, and of course it has to run after the db file
-        // itself was set up by the DatabaseHelper.
-        synchronized (sObserverInstances) {
-            if (sObserverInstances.get(userHandle) == null) {
-                SettingsFileObserver observer = new SettingsFileObserver(userHandle, db.getPath());
-                sObserverInstances.append(userHandle, observer);
-                observer.startWatching();
-            }
-        }
-
-        ensureAndroidIdIsSet(userHandle);
-
-        startAsyncCachePopulation(userHandle);
-    }
-
-    class CachePrefetchThread extends Thread {
-        private int mUserHandle;
-
-        CachePrefetchThread(int userHandle) {
-            super("populate-settings-caches");
-            mUserHandle = userHandle;
-        }
-
-        @Override
-        public void run() {
-            fullyPopulateCaches(mUserHandle);
-        }
-    }
-
-    private void startAsyncCachePopulation(int userHandle) {
-        new CachePrefetchThread(userHandle).start();
-    }
-
-    private void fullyPopulateCaches(final int userHandle) {
-        DatabaseHelper dbHelper;
-        synchronized (this) {
-            dbHelper = mOpenHelpers.get(userHandle);
-        }
-        if (dbHelper == null) {
-            // User is gone.
-            return;
-        }
-        // Only populate the globals cache once, for the owning user
-        if (userHandle == UserHandle.USER_OWNER) {
-            fullyPopulateCache(dbHelper, TABLE_GLOBAL, sGlobalCache);
-        }
-        fullyPopulateCache(dbHelper, TABLE_SECURE, sSecureCaches.get(userHandle));
-        fullyPopulateCache(dbHelper, TABLE_SYSTEM, sSystemCaches.get(userHandle));
-    }
-
-    // Slurp all values (if sane in number & size) into cache.
-    private void fullyPopulateCache(DatabaseHelper dbHelper, String table, SettingsCache cache) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor c = db.query(
-            table,
-            new String[] { Settings.NameValueTable.NAME, Settings.NameValueTable.VALUE },
-            null, null, null, null, null,
-            "" + (MAX_CACHE_ENTRIES + 1) /* limit */);
-        try {
-            synchronized (cache) {
-                cache.evictAll();
-                cache.setFullyMatchesDisk(true);  // optimistic
-                int rows = 0;
-                while (c.moveToNext()) {
-                    rows++;
-                    String name = c.getString(0);
-                    String value = c.getString(1);
-                    cache.populate(name, value);
-                }
-                if (rows > MAX_CACHE_ENTRIES) {
-                    // Somewhat redundant, as removeEldestEntry() will
-                    // have already done this, but to be explicit:
-                    cache.setFullyMatchesDisk(false);
-                    Log.d(TAG, "row count exceeds max cache entries for table " + table);
-                }
-                if (LOCAL_LOGV) Log.d(TAG, "cache for settings table '" + table
-                        + "' rows=" + rows + "; fullycached=" + cache.fullyMatchesDisk());
-            }
-        } finally {
-            c.close();
-        }
-    }
-
-    private boolean ensureAndroidIdIsSet(int userHandle) {
-        final Cursor c = queryForUser(Settings.Secure.CONTENT_URI,
-                new String[] { Settings.NameValueTable.VALUE },
-                Settings.NameValueTable.NAME + "=?",
-                new String[] { Settings.Secure.ANDROID_ID }, null,
-                userHandle);
-        try {
-            final String value = c.moveToNext() ? c.getString(0) : null;
-            if (value == null) {
-                // sanity-check the user before touching the db
-                final UserInfo user = mUserManager.getUserInfo(userHandle);
-                if (user == null) {
-                    // can happen due to races when deleting users; treat as benign
-                    return false;
+    @Override
+    public Bundle call(String method, String name, Bundle args) {
+        synchronized (mLock) {
+            final int requestingUserId = getRequestingUserId(args);
+            switch (method) {
+                case Settings.CALL_METHOD_GET_GLOBAL: {
+                    Setting setting = getGlobalSettingLocked(name);
+                    return packageValueForCallResult(setting);
                 }
 
-                final SecureRandom random = new SecureRandom();
-                final String newAndroidIdValue = Long.toHexString(random.nextLong());
-                final ContentValues values = new ContentValues();
-                values.put(Settings.NameValueTable.NAME, Settings.Secure.ANDROID_ID);
-                values.put(Settings.NameValueTable.VALUE, newAndroidIdValue);
-                final Uri uri = insertForUser(Settings.Secure.CONTENT_URI, values, userHandle);
-                if (uri == null) {
-                    Slog.e(TAG, "Unable to generate new ANDROID_ID for user " + userHandle);
-                    return false;
+                case Settings.CALL_METHOD_GET_SECURE: {
+                    Setting setting = getSecureSettingLocked(name, requestingUserId);
+                    return packageValueForCallResult(setting);
                 }
-                Slog.d(TAG, "Generated and saved new ANDROID_ID [" + newAndroidIdValue
-                        + "] for user " + userHandle);
-                // Write a dropbox entry if it's a restricted profile
-                if (user.isRestricted()) {
-                    DropBoxManager dbm = (DropBoxManager)
-                            getContext().getSystemService(Context.DROPBOX_SERVICE);
-                    if (dbm != null && dbm.isTagEnabled(DROPBOX_TAG_USERLOG)) {
-                        dbm.addText(DROPBOX_TAG_USERLOG, System.currentTimeMillis()
-                                + ",restricted_profile_ssaid,"
-                                + newAndroidIdValue + "\n");
-                    }
+
+                case Settings.CALL_METHOD_GET_SYSTEM: {
+                    Setting setting = getSystemSettingLocked(name, requestingUserId);
+                    return packageValueForCallResult(setting);
                 }
-            }
-            return true;
-        } finally {
-            c.close();
-        }
-    }
 
-    // Lazy-initialize the settings caches for non-primary users
-    private SettingsCache getOrConstructCache(int callingUser, SparseArray<SettingsCache> which) {
-        getOrEstablishDatabase(callingUser); // ignore return value; we don't need it
-        return which.get(callingUser);
-    }
+                case Settings.CALL_METHOD_PUT_GLOBAL: {
+                    String value = getSettingValue(args);
+                    insertGlobalSettingLocked(name, value, requestingUserId);
+                } break;
 
-    // Lazy initialize the database helper and caches for this user, if necessary
-    private DatabaseHelper getOrEstablishDatabase(int callingUser) {
-        if (callingUser >= Process.SYSTEM_UID) {
-            if (USER_CHECK_THROWS) {
-                throw new IllegalArgumentException("Uid rather than user handle: " + callingUser);
-            } else {
-                Slog.wtf(TAG, "establish db for uid rather than user: " + callingUser);
-            }
-        }
+                case Settings.CALL_METHOD_PUT_SECURE: {
+                    String value = getSettingValue(args);
+                    insertSecureSettingLocked(name, value, requestingUserId);
+                } break;
 
-        long oldId = Binder.clearCallingIdentity();
-        try {
-            DatabaseHelper dbHelper;
-            synchronized (this) {
-                dbHelper = mOpenHelpers.get(callingUser);
-            }
-            if (null == dbHelper) {
-                establishDbTracking(callingUser);
-                synchronized (this) {
-                    dbHelper = mOpenHelpers.get(callingUser);
-                }
-            }
-            return dbHelper;
-        } finally {
-            Binder.restoreCallingIdentity(oldId);
-        }
-    }
+                case Settings.CALL_METHOD_PUT_SYSTEM: {
+                    String value = getSettingValue(args);
+                    insertSystemSettingLocked(name, value, requestingUserId);
+                } break;
 
-    public SettingsCache cacheForTable(final int callingUser, String tableName) {
-        if (TABLE_SYSTEM.equals(tableName)) {
-            return getOrConstructCache(callingUser, sSystemCaches);
-        }
-        if (TABLE_SECURE.equals(tableName)) {
-            return getOrConstructCache(callingUser, sSecureCaches);
-        }
-        if (TABLE_GLOBAL.equals(tableName)) {
-            return sGlobalCache;
+                default: {
+                    Slog.w(LOG_TAG, "call() with invalid method: " + method);
+                } break;
+            }
         }
         return null;
     }
 
-    /**
-     * Used for wiping a whole cache on deletes when we're not
-     * sure what exactly was deleted or changed.
-     */
-    public void invalidateCache(final int callingUser, String tableName) {
-        SettingsCache cache = cacheForTable(callingUser, tableName);
-        if (cache == null) {
-            return;
-        }
-        synchronized (cache) {
-            cache.evictAll();
-            cache.mCacheFullyMatchesDisk = false;
-        }
-    }
-
-    /**
-     * Checks if the calling user is a managed profile of the primary user.
-     * Currently only the primary user (USER_OWNER) can have managed profiles.
-     * @param callingUser the user trying to read/write settings
-     * @return true if it is a managed profile of the primary user
-     */
-    private boolean isManagedProfile(int callingUser) {
-        synchronized (this) {
-            if (mManagedProfiles == null) return false;
-            for (int i = mManagedProfiles.size() - 1; i >= 0; i--) {
-                if (mManagedProfiles.get(i).id == callingUser) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    /**
-     * Fast path that avoids the use of chatty remoted Cursors.
-     */
     @Override
-    public Bundle call(String method, String request, Bundle args) {
-        int callingUser = UserHandle.getCallingUserId();
-        if (args != null) {
-            int reqUser = args.getInt(Settings.CALL_METHOD_USER_KEY, callingUser);
-            if (reqUser != callingUser) {
-                callingUser = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                        Binder.getCallingUid(), reqUser, false, true,
-                        "get/set setting for user", null);
-                if (LOCAL_LOGV) Slog.v(TAG, "   access setting for user " + callingUser);
-            }
-        }
-
-        // Note: we assume that get/put operations for moved-to-global names have already
-        // been directed to the new location on the caller side (otherwise we'd fix them
-        // up here).
-        DatabaseHelper dbHelper;
-        SettingsCache cache;
-
-        // Get methods
-        if (Settings.CALL_METHOD_GET_SYSTEM.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call(system:" + request + ") for " + callingUser);
-            // Check if this request should be (re)directed to the primary user's db
-            if (callingUser != UserHandle.USER_OWNER
-                    && shouldShadowParentProfile(callingUser, sSystemCloneToManagedKeys, request)) {
-                callingUser = UserHandle.USER_OWNER;
-            }
-            dbHelper = getOrEstablishDatabase(callingUser);
-            cache = sSystemCaches.get(callingUser);
-            return lookupValue(dbHelper, TABLE_SYSTEM, cache, request);
-        }
-        if (Settings.CALL_METHOD_GET_SECURE.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call(secure:" + request + ") for " + callingUser);
-            // Check if this is a setting to be copied from the primary user
-            if (shouldShadowParentProfile(callingUser, sSecureCloneToManagedKeys, request)) {
-                // If the request if for location providers and there's a restriction, return none
-                if (Secure.LOCATION_PROVIDERS_ALLOWED.equals(request)
-                        && mUserManager.hasUserRestriction(
-                                UserManager.DISALLOW_SHARE_LOCATION, new UserHandle(callingUser))) {
-                    return sSecureCaches.get(callingUser).putIfAbsent(request, "");
-                }
-                callingUser = UserHandle.USER_OWNER;
-            }
-            dbHelper = getOrEstablishDatabase(callingUser);
-            cache = sSecureCaches.get(callingUser);
-            return lookupValue(dbHelper, TABLE_SECURE, cache, request);
-        }
-        if (Settings.CALL_METHOD_GET_GLOBAL.equals(method)) {
-            if (LOCAL_LOGV) Slog.v(TAG, "call(global:" + request + ") for " + callingUser);
-            // fast path: owner db & cache are immutable after onCreate() so we need not
-            // guard on the attempt to look them up
-            return lookupValue(getOrEstablishDatabase(UserHandle.USER_OWNER), TABLE_GLOBAL,
-                    sGlobalCache, request);
-        }
-
-        // Put methods - new value is in the args bundle under the key named by
-        // the Settings.NameValueTable.VALUE static.
-        final String newValue = (args == null)
-                ? null : args.getString(Settings.NameValueTable.VALUE);
-
-        // Framework can't do automatic permission checking for calls, so we need
-        // to do it here.
-        if (getContext().checkCallingOrSelfPermission(android.Manifest.permission.WRITE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(
-                    String.format("Permission denial: writing to settings requires %1$s",
-                                  android.Manifest.permission.WRITE_SETTINGS));
-        }
-
-        // Also need to take care of app op.
-        if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SETTINGS, Binder.getCallingUid(),
-                getCallingPackage()) != AppOpsManager.MODE_ALLOWED) {
-            return null;
-        }
-
-        final ContentValues values = new ContentValues();
-        values.put(Settings.NameValueTable.NAME, request);
-        values.put(Settings.NameValueTable.VALUE, newValue);
-        if (Settings.CALL_METHOD_PUT_SYSTEM.equals(method)) {
-            if (LOCAL_LOGV) {
-                Slog.v(TAG, "call_put(system:" + request + "=" + newValue + ") for "
-                        + callingUser);
-            }
-            // Extra check for USER_OWNER to optimize for the 99%
-            if (callingUser != UserHandle.USER_OWNER && shouldShadowParentProfile(callingUser,
-                    sSystemCloneToManagedKeys, request)) {
-                // Don't write these settings, as they are cloned from the parent profile
-                return null;
-            }
-            insertForUser(Settings.System.CONTENT_URI, values, callingUser);
-            // Clone the settings to the managed profiles so that notifications can be sent out
-            if (callingUser == UserHandle.USER_OWNER && mManagedProfiles != null
-                    && sSystemCloneToManagedKeys.contains(request)) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    for (int i = mManagedProfiles.size() - 1; i >= 0; i--) {
-                        if (LOCAL_LOGV) {
-                            Slog.v(TAG, "putting to additional user "
-                                    + mManagedProfiles.get(i).id);
-                        }
-                        insertForUser(Settings.System.CONTENT_URI, values,
-                                mManagedProfiles.get(i).id);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
-        } else if (Settings.CALL_METHOD_PUT_SECURE.equals(method)) {
-            if (LOCAL_LOGV) {
-                Slog.v(TAG, "call_put(secure:" + request + "=" + newValue + ") for "
-                        + callingUser);
-            }
-            // Extra check for USER_OWNER to optimize for the 99%
-            if (callingUser != UserHandle.USER_OWNER && shouldShadowParentProfile(callingUser,
-                    sSecureCloneToManagedKeys, request)) {
-                // Don't write these settings, as they are cloned from the parent profile
-                return null;
-            }
-            insertForUser(Settings.Secure.CONTENT_URI, values, callingUser);
-            // Clone the settings to the managed profiles so that notifications can be sent out
-            if (callingUser == UserHandle.USER_OWNER && mManagedProfiles != null
-                    && sSecureCloneToManagedKeys.contains(request)) {
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    for (int i = mManagedProfiles.size() - 1; i >= 0; i--) {
-                        if (LOCAL_LOGV) {
-                            Slog.v(TAG, "putting to additional user "
-                                    + mManagedProfiles.get(i).id);
-                        }
-                        try {
-                            insertForUser(Settings.Secure.CONTENT_URI, values,
-                                    mManagedProfiles.get(i).id);
-                        } catch (SecurityException e) {
-                            // Temporary fix, see b/17450158
-                            Slog.w(TAG, "Cannot clone request '" + request + "' with value '"
-                                    + newValue + "' to managed profile (id "
-                                    + mManagedProfiles.get(i).id + ")", e);
-                        }
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-            }
-        } else if (Settings.CALL_METHOD_PUT_GLOBAL.equals(method)) {
-            if (LOCAL_LOGV) {
-                Slog.v(TAG, "call_put(global:" + request + "=" + newValue + ") for "
-                        + callingUser);
-            }
-            insertForUser(Settings.Global.CONTENT_URI, values, callingUser);
-        } else {
-            Slog.w(TAG, "call() with invalid method: " + method);
-        }
-
-        return null;
-    }
-
-    /**
-     * Check if the user is a managed profile and name is one of the settings to be cloned
-     * from the parent profile.
-     */
-    private boolean shouldShadowParentProfile(int userId, HashSet<String> keys, String name) {
-        return isManagedProfile(userId) && keys.contains(name);
-    }
-
-    // Looks up value 'key' in 'table' and returns either a single-pair Bundle,
-    // possibly with a null value, or null on failure.
-    private Bundle lookupValue(DatabaseHelper dbHelper, String table,
-            final SettingsCache cache, String key) {
-        if (cache == null) {
-           Slog.e(TAG, "cache is null for user " + UserHandle.getCallingUserId() + " : key=" + key);
-           return null;
-        }
-        synchronized (cache) {
-            Bundle value = cache.get(key);
-            if (value != null) {
-                if (value != TOO_LARGE_TO_CACHE_MARKER) {
-                    return value;
-                }
-                // else we fall through and read the value from disk
-            } else if (cache.fullyMatchesDisk()) {
-                // Fast path (very common).  Don't even try touch disk
-                // if we know we've slurped it all in.  Trying to
-                // touch the disk would mean waiting for yaffs2 to
-                // give us access, which could takes hundreds of
-                // milliseconds.  And we're very likely being called
-                // from somebody's UI thread...
-                return NULL_SETTING;
-            }
-        }
-
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = null;
-        try {
-            cursor = db.query(table, COLUMN_VALUE, "name=?", new String[]{key},
-                              null, null, null, null);
-            if (cursor != null && cursor.getCount() == 1) {
-                cursor.moveToFirst();
-                return cache.putIfAbsent(key, cursor.getString(0));
-            }
-        } catch (SQLiteException e) {
-            Log.w(TAG, "settings lookup error", e);
-            return null;
-        } finally {
-            if (cursor != null) cursor.close();
-        }
-        cache.putIfAbsent(key, null);
-        return NULL_SETTING;
-    }
-
-    @Override
-    public Cursor query(Uri url, String[] select, String where, String[] whereArgs, String sort) {
-        return queryForUser(url, select, where, whereArgs, sort, UserHandle.getCallingUserId());
-    }
-
-    private Cursor queryForUser(Uri url, String[] select, String where, String[] whereArgs,
-            String sort, int forUser) {
-        if (LOCAL_LOGV) Slog.v(TAG, "query(" + url + ") for user " + forUser);
-        SqlArguments args = new SqlArguments(url, where, whereArgs);
-        DatabaseHelper dbH;
-        dbH = getOrEstablishDatabase(
-                TABLE_GLOBAL.equals(args.table) ? UserHandle.USER_OWNER : forUser);
-        SQLiteDatabase db = dbH.getReadableDatabase();
-
-        // The favorites table was moved from this provider to a provider inside Home
-        // Home still need to query this table to upgrade from pre-cupcake builds
-        // However, a cupcake+ build with no data does not contain this table which will
-        // cause an exception in the SQL stack. The following line is a special case to
-        // let the caller of the query have a chance to recover and avoid the exception
-        if (TABLE_FAVORITES.equals(args.table)) {
-            return null;
-        } else if (TABLE_OLD_FAVORITES.equals(args.table)) {
-            args.table = TABLE_FAVORITES;
-            Cursor cursor = db.rawQuery("PRAGMA table_info(favorites);", null);
-            if (cursor != null) {
-                boolean exists = cursor.getCount() > 0;
-                cursor.close();
-                if (!exists) return null;
-            } else {
-                return null;
-            }
-        }
-
-        SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(args.table);
-
-        Cursor ret = qb.query(db, select, args.where, args.args, null, null, sort);
-        // the default Cursor interface does not support per-user observation
-        try {
-            AbstractCursor c = (AbstractCursor) ret;
-            c.setNotificationUri(getContext().getContentResolver(), url, forUser);
-        } catch (ClassCastException e) {
-            // details of the concrete Cursor implementation have changed and this code has
-            // not been updated to match -- complain and fail hard.
-            Log.wtf(TAG, "Incompatible cursor derivation!");
-            throw e;
-        }
-        return ret;
-    }
-
-    @Override
-    public String getType(Uri url) {
-        // If SqlArguments supplies a where clause, then it must be an item
-        // (because we aren't supplying our own where clause).
-        SqlArguments args = new SqlArguments(url, null, null);
-        if (TextUtils.isEmpty(args.where)) {
+    public String getType(Uri uri) {
+        Arguments args = new Arguments(uri, null, null, true);
+        if (TextUtils.isEmpty(args.name)) {
             return "vnd.android.cursor.dir/" + args.table;
         } else {
-            return "vnd.android.cursor.item/" + args.table;
+                return "vnd.android.cursor.item/" + args.table;
         }
     }
 
     @Override
-    public int bulkInsert(Uri uri, ContentValues[] values) {
-        final int callingUser = UserHandle.getCallingUserId();
-        if (LOCAL_LOGV) Slog.v(TAG, "bulkInsert() for user " + callingUser);
-        SqlArguments args = new SqlArguments(uri);
-        if (TABLE_FAVORITES.equals(args.table)) {
-            return 0;
-        }
-        checkWritePermissions(args);
-        SettingsCache cache = cacheForTable(callingUser, args.table);
-
-        final AtomicInteger mutationCount;
-        synchronized (this) {
-            mutationCount = sKnownMutationsInFlight.get(callingUser);
-        }
-        if (mutationCount != null) {
-            mutationCount.incrementAndGet();
-        }
-        DatabaseHelper dbH = getOrEstablishDatabase(
-                TABLE_GLOBAL.equals(args.table) ? UserHandle.USER_OWNER : callingUser);
-        SQLiteDatabase db = dbH.getWritableDatabase();
-        db.beginTransaction();
-        try {
-            int numValues = values.length;
-            for (int i = 0; i < numValues; i++) {
-                checkUserRestrictions(values[i].getAsString(Settings.Secure.NAME), callingUser);
-                if (db.insert(args.table, null, values[i]) < 0) return 0;
-                SettingsCache.populate(cache, values[i]);
-                if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + values[i]);
-            }
-            db.setTransactionSuccessful();
-        } finally {
-            db.endTransaction();
-            if (mutationCount != null) {
-                mutationCount.decrementAndGet();
-            }
+    public Cursor query(Uri uri, String[] projection, String where, String[] whereArgs,
+            String order) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "query() for user: " + UserHandle.getCallingUserId());
         }
 
-        sendNotify(uri, callingUser);
-        return values.length;
-    }
+        Arguments args = new Arguments(uri, where, whereArgs, true);
+        String[] normalizedProjection = normalizeProjection(projection);
 
-    /*
-     * Used to parse changes to the value of Settings.Secure.LOCATION_PROVIDERS_ALLOWED.
-     * This setting contains a list of the currently enabled location providers.
-     * But helper functions in android.providers.Settings can enable or disable
-     * a single provider by using a "+" or "-" prefix before the provider name.
-     *
-     * @returns whether the database needs to be updated or not, also modifying
-     *     'initialValues' if needed.
-     */
-    private boolean parseProviderList(Uri url, ContentValues initialValues, int desiredUser) {
-        String value = initialValues.getAsString(Settings.Secure.VALUE);
-        String newProviders = null;
-        if (value != null && value.length() > 1) {
-            char prefix = value.charAt(0);
-            if (prefix == '+' || prefix == '-') {
-                // skip prefix
-                value = value.substring(1);
+        // If a legacy table that is gone, done.
+        if (REMOVED_LEGACY_TABLES.contains(args.table)) {
+            return new MatrixCursor(normalizedProjection, 0);
+        }
 
-                // read list of enabled providers into "providers"
-                String providers = "";
-                String[] columns = {Settings.Secure.VALUE};
-                String where = Settings.Secure.NAME + "=\'" + Settings.Secure.LOCATION_PROVIDERS_ALLOWED + "\'";
-                Cursor cursor = queryForUser(url, columns, where, null, null, desiredUser);
-                if (cursor != null && cursor.getCount() == 1) {
-                    try {
-                        cursor.moveToFirst();
-                        providers = cursor.getString(0);
-                    } finally {
-                        cursor.close();
-                    }
-                }
-
-                int index = providers.indexOf(value);
-                int end = index + value.length();
-                // check for commas to avoid matching on partial string
-                if (index > 0 && providers.charAt(index - 1) != ',') index = -1;
-                if (end < providers.length() && providers.charAt(end) != ',') index = -1;
-
-                if (prefix == '+' && index < 0) {
-                    // append the provider to the list if not present
-                    if (providers.length() == 0) {
-                        newProviders = value;
+        synchronized (mLock) {
+            switch (args.table) {
+                case TABLE_GLOBAL: {
+                    if (args.name != null) {
+                        Setting setting = getGlobalSettingLocked(args.name);
+                        return packageSettingForQuery(setting, normalizedProjection);
                     } else {
-                        newProviders = providers + ',' + value;
+                        return getAllGlobalSettingsLocked(projection);
                     }
-                } else if (prefix == '-' && index >= 0) {
-                    // remove the provider from the list if present
-                    // remove leading or trailing comma
-                    if (index > 0) {
-                        index--;
-                    } else if (end < providers.length()) {
-                        end++;
-                    }
-
-                    newProviders = providers.substring(0, index);
-                    if (end < providers.length()) {
-                        newProviders += providers.substring(end);
-                    }
-                } else {
-                    // nothing changed, so no need to update the database
-                    return false;
                 }
 
-                if (newProviders != null) {
-                    initialValues.put(Settings.Secure.VALUE, newProviders);
+                case TABLE_SECURE: {
+                    final int userId = UserHandle.getCallingUserId();
+                    if (args.name != null) {
+                        Setting setting = getSecureSettingLocked(args.name, userId);
+                        return packageSettingForQuery(setting, normalizedProjection);
+                    } else {
+                        return getAllSecureSettingsLocked(userId, projection);
+                    }
+                }
+
+                case TABLE_SYSTEM: {
+                    final int userId = UserHandle.getCallingUserId();
+                    if (args.name != null) {
+                        Setting setting = getSystemSettingLocked(args.name, userId);
+                        return packageSettingForQuery(setting, normalizedProjection);
+                    } else {
+                        return getAllSystemSettingsLocked(userId, projection);
+                    }
+                }
+
+                default: {
+                    throw new IllegalArgumentException("Invalid Uri path:" + uri);
                 }
             }
         }
-
-        return true;
     }
 
     @Override
-    public Uri insert(Uri url, ContentValues initialValues) {
-        return insertForUser(url, initialValues, UserHandle.getCallingUserId());
-    }
-
-    // Settings.put*ForUser() always winds up here, so this is where we apply
-    // policy around permission to write settings for other users.
-    private Uri insertForUser(Uri url, ContentValues initialValues, int desiredUserHandle) {
-        final int callingUser = UserHandle.getCallingUserId();
-        if (callingUser != desiredUserHandle) {
-            getContext().enforceCallingOrSelfPermission(
-                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "Not permitted to access settings for other users");
+    public Uri insert(Uri uri, ContentValues values) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "insert() for user: " + UserHandle.getCallingUserId());
         }
 
-        if (LOCAL_LOGV) Slog.v(TAG, "insert(" + url + ") for user " + desiredUserHandle
-                + " by " + callingUser);
+        String table = getValidTableOrThrow(uri);
 
-        SqlArguments args = new SqlArguments(url);
-        if (TABLE_FAVORITES.equals(args.table)) {
+        // If a legacy table that is gone, done.
+        if (REMOVED_LEGACY_TABLES.contains(table)) {
             return null;
         }
 
-        // Special case LOCATION_PROVIDERS_ALLOWED.
-        // Support enabling/disabling a single provider (using "+" or "-" prefix)
-        String name = initialValues.getAsString(Settings.Secure.NAME);
-        if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
-            if (!parseProviderList(url, initialValues, desiredUserHandle)) return null;
+        String name = values.getAsString(Settings.Secure.NAME);
+        if (TextUtils.isEmpty(name)) {
+            return null;
         }
 
-        // If this is an insert() of a key that has been migrated to the global store,
-        // redirect the operation to that store
-        if (name != null) {
-            if (sSecureGlobalKeys.contains(name) || sSystemGlobalKeys.contains(name)) {
-                if (!TABLE_GLOBAL.equals(args.table)) {
-                    if (LOCAL_LOGV) Slog.i(TAG, "Rewrite of insert() of now-global key " + name);
+        String value = values.getAsString(Settings.Secure.VALUE);
+
+        synchronized (mLock) {
+            switch (table) {
+                case TABLE_GLOBAL: {
+                    if (insertGlobalSettingLocked(name, value, UserHandle.getCallingUserId())) {
+                        return Uri.withAppendedPath(Settings.Global.CONTENT_URI, name);
+                    }
+                } break;
+
+                case TABLE_SECURE: {
+                    if (insertSecureSettingLocked(name, value, UserHandle.getCallingUserId())) {
+                        return Uri.withAppendedPath(Settings.Secure.CONTENT_URI, name);
+                    }
+                } break;
+
+                case TABLE_SYSTEM: {
+                    if (insertSystemSettingLocked(name, value, UserHandle.getCallingUserId())) {
+                        return Uri.withAppendedPath(Settings.System.CONTENT_URI, name);
+                    }
+                } break;
+
+                default: {
+                    throw new IllegalArgumentException("Bad Uri path:" + uri);
                 }
-                args.table = TABLE_GLOBAL;  // next condition will rewrite the user handle
             }
         }
 
-        // Check write permissions only after determining which table the insert will touch
-        checkWritePermissions(args);
-
-        checkUserRestrictions(name, desiredUserHandle);
-
-        // The global table is stored under the owner, always
-        if (TABLE_GLOBAL.equals(args.table)) {
-            desiredUserHandle = UserHandle.USER_OWNER;
-        }
-
-        SettingsCache cache = cacheForTable(desiredUserHandle, args.table);
-        String value = initialValues.getAsString(Settings.NameValueTable.VALUE);
-        if (SettingsCache.isRedundantSetValue(cache, name, value)) {
-            return Uri.withAppendedPath(url, name);
-        }
-
-        final AtomicInteger mutationCount;
-        synchronized (this) {
-            mutationCount = sKnownMutationsInFlight.get(callingUser);
-        }
-        if (mutationCount != null) {
-            mutationCount.incrementAndGet();
-        }
-        DatabaseHelper dbH = getOrEstablishDatabase(desiredUserHandle);
-        SQLiteDatabase db = dbH.getWritableDatabase();
-        final long rowId = db.insert(args.table, null, initialValues);
-        if (mutationCount != null) {
-            mutationCount.decrementAndGet();
-        }
-        if (rowId <= 0) return null;
-
-        SettingsCache.populate(cache, initialValues);  // before we notify
-
-        if (LOCAL_LOGV) Log.v(TAG, args.table + " <- " + initialValues
-                + " for user " + desiredUserHandle);
-        // Note that we use the original url here, not the potentially-rewritten table name
-        url = getUriFor(url, initialValues, rowId);
-        sendNotify(url, desiredUserHandle);
-        return url;
+        return null;
     }
 
     @Override
-    public int delete(Uri url, String where, String[] whereArgs) {
-        int callingUser = UserHandle.getCallingUserId();
-        if (LOCAL_LOGV) Slog.v(TAG, "delete() for user " + callingUser);
-        SqlArguments args = new SqlArguments(url, where, whereArgs);
-        if (TABLE_FAVORITES.equals(args.table)) {
-            return 0;
-        } else if (TABLE_OLD_FAVORITES.equals(args.table)) {
-            args.table = TABLE_FAVORITES;
-        } else if (TABLE_GLOBAL.equals(args.table)) {
-            callingUser = UserHandle.USER_OWNER;
+    public int bulkInsert(Uri uri, ContentValues[] allValues) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "bulkInsert() for user: " + UserHandle.getCallingUserId());
         }
-        checkWritePermissions(args);
 
-        final AtomicInteger mutationCount;
-        synchronized (this) {
-            mutationCount = sKnownMutationsInFlight.get(callingUser);
+        int insertionCount = 0;
+        final int valuesCount = allValues.length;
+        for (int i = 0; i < valuesCount; i++) {
+            ContentValues values = allValues[i];
+            if (insert(uri, values) != null) {
+                insertionCount++;
+            }
         }
-        if (mutationCount != null) {
-            mutationCount.incrementAndGet();
-        }
-        DatabaseHelper dbH = getOrEstablishDatabase(callingUser);
-        SQLiteDatabase db = dbH.getWritableDatabase();
-        int count = db.delete(args.table, args.where, args.args);
-        if (mutationCount != null) {
-            mutationCount.decrementAndGet();
-        }
-        if (count > 0) {
-            invalidateCache(callingUser, args.table);  // before we notify
-            sendNotify(url, callingUser);
-        }
-        startAsyncCachePopulation(callingUser);
-        if (LOCAL_LOGV) Log.v(TAG, args.table + ": " + count + " row(s) deleted");
-        return count;
+
+        return insertionCount;
     }
 
     @Override
-    public int update(Uri url, ContentValues initialValues, String where, String[] whereArgs) {
-        // NOTE: update() is never called by the front-end Settings API, and updates that
-        // wind up affecting rows in Secure that are globally shared will not have the
-        // intended effect (the update will be invisible to the rest of the system).
-        // This should have no practical effect, since writes to the Secure db can only
-        // be done by system code, and that code should be using the correct API up front.
-        int callingUser = UserHandle.getCallingUserId();
-        if (LOCAL_LOGV) Slog.v(TAG, "update() for user " + callingUser);
-        SqlArguments args = new SqlArguments(url, where, whereArgs);
-        if (TABLE_FAVORITES.equals(args.table)) {
-            return 0;
-        } else if (TABLE_GLOBAL.equals(args.table)) {
-            callingUser = UserHandle.USER_OWNER;
+    public int delete(Uri uri, String where, String[] whereArgs) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "delete() for user: " + UserHandle.getCallingUserId());
         }
-        checkWritePermissions(args);
-        checkUserRestrictions(initialValues.getAsString(Settings.Secure.NAME), callingUser);
 
-        final AtomicInteger mutationCount;
-        synchronized (this) {
-            mutationCount = sKnownMutationsInFlight.get(callingUser);
+        Arguments args = new Arguments(uri, where, whereArgs, false);
+
+        // If a legacy table that is gone, done.
+        if (REMOVED_LEGACY_TABLES.contains(args.table)) {
+            return 0;
         }
-        if (mutationCount != null) {
-            mutationCount.incrementAndGet();
+
+        if (TextUtils.isEmpty(args.name)) {
+            return 0;
         }
-        DatabaseHelper dbH = getOrEstablishDatabase(callingUser);
-        SQLiteDatabase db = dbH.getWritableDatabase();
-        int count = db.update(args.table, initialValues, args.where, args.args);
-        if (mutationCount != null) {
-            mutationCount.decrementAndGet();
+
+        synchronized (mLock) {
+            switch (args.table) {
+                case TABLE_GLOBAL: {
+                    final int userId = UserHandle.getCallingUserId();
+                    return deleteGlobalSettingLocked(args.name, userId) ? 1 : 0;
+                }
+
+                case TABLE_SECURE: {
+                    final int userId = UserHandle.getCallingUserId();
+                    return deleteSecureSettingLocked(args.name, userId) ? 1 : 0;
+                }
+
+                case TABLE_SYSTEM: {
+                    final int userId = UserHandle.getCallingUserId();
+                    return deleteSystemSettingLocked(args.name, userId) ? 1 : 0;
+                }
+
+                default: {
+                    throw new IllegalArgumentException("Bad Uri path:" + uri);
+                }
+            }
         }
-        if (count > 0) {
-            invalidateCache(callingUser, args.table);  // before we notify
-            sendNotify(url, callingUser);
+    }
+
+    @Override
+    public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "update() for user: " + UserHandle.getCallingUserId());
         }
-        startAsyncCachePopulation(callingUser);
-        if (LOCAL_LOGV) Log.v(TAG, args.table + ": " + count + " row(s) <- " + initialValues);
-        return count;
+
+        Arguments args = new Arguments(uri, where, whereArgs, false);
+
+        // If a legacy table that is gone, done.
+        if (REMOVED_LEGACY_TABLES.contains(args.table)) {
+            return 0;
+        }
+
+        String value = values.getAsString(Settings.Secure.VALUE);
+        if (TextUtils.isEmpty(value)) {
+            return 0;
+        }
+
+        synchronized (mLock) {
+            switch (args.table) {
+                case TABLE_GLOBAL: {
+                    final int userId = UserHandle.getCallingUserId();
+                    return updateGlobalSettingLocked(args.name, value, userId) ? 1 : 0;
+                }
+
+                case TABLE_SECURE: {
+                    final int userId = UserHandle.getCallingUserId();
+                    return updateSecureSettingLocked(args.name, value, userId) ? 1 : 0;
+                }
+
+                case TABLE_SYSTEM: {
+                    final int userId = UserHandle.getCallingUserId();
+                    return updateSystemSettingLocked(args.name, value, userId) ? 1 : 0;
+                }
+
+                default: {
+                    throw new IllegalArgumentException("Invalid Uri path:" + uri);
+                }
+            }
+        }
     }
 
     @Override
@@ -1229,102 +479,1360 @@ public class SettingsProvider extends ContentProvider {
                 + "ringtone playback is available through android.media.Ringtone");
     }
 
-    /**
-     * In-memory LRU Cache of system and secure settings, along with
-     * associated helper functions to keep cache coherent with the
-     * database.
+    private void registerBroadcastReceivers() {
+        IntentFilter userFilter = new IntentFilter();
+        userFilter.addAction(Intent.ACTION_USER_REMOVED);
+        userFilter.addAction(Intent.ACTION_USER_STOPPED);
+
+        getContext().registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
+                        UserHandle.USER_OWNER);
+
+                switch (intent.getAction()) {
+                    case Intent.ACTION_USER_REMOVED: {
+                        mSettingsRegistry.removeUserStateLocked(userId, true);
+                    } break;
+
+                    case Intent.ACTION_USER_STOPPED: {
+                        mSettingsRegistry.removeUserStateLocked(userId, false);
+                    } break;
+                }
+            }
+        }, userFilter);
+
+        PackageMonitor monitor = new PackageMonitor() {
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+                synchronized (mLock) {
+                    mSettingsRegistry.onPackageRemovedLocked(packageName,
+                            UserHandle.getUserId(uid));
+                }
+            }
+        };
+
+        // package changes
+        monitor.register(getContext(), BackgroundThread.getHandler().getLooper(),
+                UserHandle.ALL, true);
+    }
+
+    private Cursor getAllGlobalSettingsLocked(String[] projection) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "getAllGlobalSettingsLocked()");
+        }
+
+        // Get the settings.
+        SettingsState settingsState = mSettingsRegistry.getSettingsLocked(
+                SettingsRegistry.SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
+
+        List<String> names = settingsState.getSettingNamesLocked();
+
+        final int nameCount = names.size();
+
+        String[] normalizedProjection = normalizeProjection(projection);
+        MatrixCursor result = new MatrixCursor(normalizedProjection, nameCount);
+
+        // Anyone can get the global settings, so no security checks.
+        for (int i = 0; i < nameCount; i++) {
+            String name = names.get(i);
+            Setting setting = settingsState.getSettingLocked(name);
+            appendSettingToCursor(result, setting);
+        }
+
+        return result;
+    }
+
+    private Setting getGlobalSettingLocked(String name) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "getGlobalSetting(" + name + ")");
+        }
+
+        // Get the value.
+        return mSettingsRegistry.getSettingLocked(SettingsRegistry.SETTINGS_TYPE_GLOBAL,
+                UserHandle.USER_OWNER, name);
+    }
+
+    private boolean updateGlobalSettingLocked(String name, String value, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "updateGlobalSettingLocked(" + name + ", " + value + ")");
+        }
+        return mutateGlobalSettingLocked(name, value, requestingUserId, MUTATION_OPERATION_UPDATE);
+    }
+
+    private boolean insertGlobalSettingLocked(String name, String value, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "insertGlobalSettingLocked(" + name + ", " + value + ")");
+        }
+        return mutateGlobalSettingLocked(name, value, requestingUserId, MUTATION_OPERATION_INSERT);
+    }
+
+    private boolean deleteGlobalSettingLocked(String name, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "deleteGlobalSettingLocked(" + name + ")");
+        }
+        return mutateGlobalSettingLocked(name, null, requestingUserId, MUTATION_OPERATION_DELETE);
+    }
+
+    private boolean mutateGlobalSettingLocked(String name, String value, int requestingUserId,
+            int operation) {
+        // Make sure the caller can change the settings - treated as secure.
+        enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
+
+        // Verify whether this operation is allowed for the calling package.
+        if (!isAppOpWriteSettingsAllowedForCallingPackage()) {
+            return false;
+        }
+
+        // Resolve the userId on whose behalf the call is made.
+        final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
+
+        // If this is a setting that is currently restricted for this user, done.
+        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId)) {
+            return false;
+        }
+
+        // Perform the mutation.
+        switch (operation) {
+            case MUTATION_OPERATION_INSERT: {
+                return mSettingsRegistry.insertSettingLocked(SettingsRegistry.SETTINGS_TYPE_GLOBAL,
+                        UserHandle.USER_OWNER, name, value, getCallingPackage());
+            }
+
+            case MUTATION_OPERATION_DELETE: {
+                return mSettingsRegistry.deleteSettingLocked(
+                        SettingsRegistry.SETTINGS_TYPE_GLOBAL,
+                        UserHandle.USER_OWNER, name);
+            }
+
+            case MUTATION_OPERATION_UPDATE: {
+                return mSettingsRegistry.updateSettingLocked(SettingsRegistry.SETTINGS_TYPE_GLOBAL,
+                        UserHandle.USER_OWNER, name, value, getCallingPackage());
+            }
+        }
+
+        return false;
+    }
+
+    private Cursor getAllSecureSettingsLocked(int userId, String[] projection) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "getAllSecureSettings(" + userId + ")");
+        }
+
+        // Resolve the userId on whose behalf the call is made.
+        final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(userId);
+
+        List<String> names = mSettingsRegistry.getSettingsNamesLocked(
+                SettingsRegistry.SETTINGS_TYPE_SECURE, callingUserId);
+
+        final int nameCount = names.size();
+
+        String[] normalizedProjection = normalizeProjection(projection);
+        MatrixCursor result = new MatrixCursor(normalizedProjection, nameCount);
+
+        for (int i = 0; i < nameCount; i++) {
+            String name = names.get(i);
+
+            // Determine the owning user as some profile settings are cloned from the parent.
+            final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId, name);
+
+            // Special case for location (sigh).
+            if (isLocationProvidersAllowedRestricted(name, callingUserId, owningUserId)) {
+                return null;
+            }
+
+            Setting setting = mSettingsRegistry.getSettingLocked(
+                    SettingsRegistry.SETTINGS_TYPE_SECURE, owningUserId, name);
+            appendSettingToCursor(result, setting);
+        }
+
+        return result;
+    }
+
+    private Setting getSecureSettingLocked(String name, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "getSecureSetting(" + name + ", " + requestingUserId + ")");
+        }
+
+        // Resolve the userId on whose behalf the call is made.
+        final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
+
+        // Determine the owning user as some profile settings are cloned from the parent.
+        final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId, name);
+
+        // Special case for location (sigh).
+        if (isLocationProvidersAllowedRestricted(name, callingUserId, owningUserId)) {
+            return null;
+        }
+
+        // Get the value.
+        return mSettingsRegistry.getSettingLocked(SettingsRegistry.SETTINGS_TYPE_SECURE,
+                owningUserId, name);
+    }
+
+    private boolean insertSecureSettingLocked(String name, String value, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "insertSecureSettingLocked(" + name + ", " + value + ", "
+                    + requestingUserId + ")");
+        }
+
+        return mutateSecureSettingLocked(name, value, requestingUserId, MUTATION_OPERATION_INSERT);
+    }
+
+    private boolean deleteSecureSettingLocked(String name, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "deleteSecureSettingLocked(" + name + ", " + requestingUserId + ")");
+        }
+
+        return mutateSecureSettingLocked(name, null, requestingUserId, MUTATION_OPERATION_DELETE);
+    }
+
+    private boolean updateSecureSettingLocked(String name, String value, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "updateSecureSettingLocked(" + name + ", " + value + ", "
+                    + requestingUserId + ")");
+        }
+
+        return mutateSecureSettingLocked(name, value, requestingUserId, MUTATION_OPERATION_UPDATE);
+    }
+
+    private boolean mutateSecureSettingLocked(String name, String value, int requestingUserId,
+            int operation) {
+        // Make sure the caller can change the settings.
+        enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
+
+        // Verify whether this operation is allowed for the calling package.
+        if (!isAppOpWriteSettingsAllowedForCallingPackage()) {
+            return false;
+        }
+
+        // Resolve the userId on whose behalf the call is made.
+        final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
+
+        // If this is a setting that is currently restricted for this user, done.
+        if (isGlobalOrSecureSettingRestrictedForUser(name, callingUserId)) {
+            return false;
+        }
+
+        // Determine the owning user as some profile settings are cloned from the parent.
+        final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId, name);
+
+        // Only the owning user can change the setting.
+        if (owningUserId != callingUserId) {
+            return false;
+        }
+
+        // Special cases for location providers (sigh).
+        if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
+            return updateLocationProvidersAllowed(value, owningUserId);
+        }
+
+        // Mutate the value.
+        switch(operation) {
+            case MUTATION_OPERATION_INSERT: {
+                return mSettingsRegistry.insertSettingLocked(SettingsRegistry.SETTINGS_TYPE_SECURE,
+                        owningUserId, name, value, getCallingPackage());
+            }
+
+            case MUTATION_OPERATION_DELETE: {
+                return mSettingsRegistry.deleteSettingLocked(
+                        SettingsRegistry.SETTINGS_TYPE_SECURE,
+                        owningUserId, name);
+            }
+
+            case MUTATION_OPERATION_UPDATE: {
+                return mSettingsRegistry.updateSettingLocked(SettingsRegistry.SETTINGS_TYPE_SECURE,
+                        owningUserId, name, value, getCallingPackage());
+            }
+        }
+
+        return false;
+    }
+
+    private Cursor getAllSystemSettingsLocked(int userId, String[] projection) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "getAllSecureSystemLocked(" + userId + ")");
+        }
+
+        // Resolve the userId on whose behalf the call is made.
+        final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(userId);
+
+        List<String> names = mSettingsRegistry.getSettingsNamesLocked(
+                SettingsRegistry.SETTINGS_TYPE_SYSTEM, callingUserId);
+
+        final int nameCount = names.size();
+
+        String[] normalizedProjection = normalizeProjection(projection);
+        MatrixCursor result = new MatrixCursor(normalizedProjection, nameCount);
+
+        for (int i = 0; i < nameCount; i++) {
+            String name = names.get(i);
+
+            // Determine the owning user as some profile settings are cloned from the parent.
+            final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId, name);
+
+            Setting setting = mSettingsRegistry.getSettingLocked(
+                    SettingsRegistry.SETTINGS_TYPE_SYSTEM, owningUserId, name);
+            appendSettingToCursor(result, setting);
+        }
+
+        return result;
+    }
+
+    private Setting getSystemSettingLocked(String name, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "getSystemSetting(" + name + ", " + requestingUserId + ")");
+        }
+
+        // Resolve the userId on whose behalf the call is made.
+        final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
+
+        // Determine the owning user as some profile settings are cloned from the parent.
+        final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId, name);
+
+        // Get the value.
+        return mSettingsRegistry.getSettingLocked(SettingsRegistry.SETTINGS_TYPE_SYSTEM,
+                owningUserId, name);
+    }
+
+    private boolean insertSystemSettingLocked(String name, String value, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "insertSystemSettingLocked(" + name + ", " + value + ", "
+                    + requestingUserId + ")");
+        }
+
+        return mutateSystemSettingLocked(name, value, requestingUserId, MUTATION_OPERATION_INSERT);
+    }
+
+    private boolean deleteSystemSettingLocked(String name, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "deleteSystemSettingLocked(" + name + ", " + requestingUserId + ")");
+        }
+
+        return mutateSystemSettingLocked(name, null, requestingUserId, MUTATION_OPERATION_DELETE);
+    }
+
+    private boolean updateSystemSettingLocked(String name, String value, int requestingUserId) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "updateSystemSettingLocked(" + name + ", " + value + ", "
+                    + requestingUserId + ")");
+        }
+
+        return mutateSystemSettingLocked(name, value, requestingUserId, MUTATION_OPERATION_UPDATE);
+    }
+
+    private boolean mutateSystemSettingLocked(String name, String value, int runAsUserId,
+            int operation) {
+        // Make sure the caller can change the settings.
+        enforceWritePermission(Manifest.permission.WRITE_SETTINGS);
+
+        // Verify whether this operation is allowed for the calling package.
+        if (!isAppOpWriteSettingsAllowedForCallingPackage()) {
+            return false;
+        }
+
+        // Enforce what the calling package can mutate in the system settings.
+        enforceRestrictedSystemSettingsMutationForCallingPackageLocked(operation, name);
+
+        // Resolve the userId on whose behalf the call is made.
+        final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(runAsUserId);
+
+        // Determine the owning user as some profile settings are cloned from the parent.
+        final int owningUserId = resolveOwningUserIdForSystemSettingLocked(callingUserId, name);
+
+        // Only the owning user id can change the setting.
+        if (owningUserId != callingUserId) {
+            return false;
+        }
+
+        // Mutate the value.
+        switch (operation) {
+            case MUTATION_OPERATION_INSERT: {
+                validateSystemSettingValue(name, value);
+                return mSettingsRegistry.insertSettingLocked(SettingsRegistry.SETTINGS_TYPE_SYSTEM,
+                        owningUserId, name, value, getCallingPackage());
+            }
+
+            case MUTATION_OPERATION_DELETE: {
+                return mSettingsRegistry.deleteSettingLocked(
+                        SettingsRegistry.SETTINGS_TYPE_SYSTEM,
+                        owningUserId, name);
+            }
+
+            case MUTATION_OPERATION_UPDATE: {
+                validateSystemSettingValue(name, value);
+                return mSettingsRegistry.updateSettingLocked(SettingsRegistry.SETTINGS_TYPE_SYSTEM,
+                        owningUserId, name, value, getCallingPackage());
+            }
+        }
+
+        return false;
+    }
+
+    private void validateSystemSettingValue(String name, String value) {
+        Settings.System.Validator validator = Settings.System.VALIDATORS.get(name);
+        if (validator != null && !validator.validate(value)) {
+            throw new IllegalArgumentException("Invalid value: " + value
+                    + " for setting: " + name);
+        }
+    }
+
+    private boolean isLocationProvidersAllowedRestricted(String name, int callingUserId,
+            int owningUserId) {
+        // Optimization - location providers are restricted only for managed profiles.
+        if (callingUserId == owningUserId) {
+            return false;
+        }
+        if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)
+                && mUserManager.hasUserRestriction(UserManager.DISALLOW_SHARE_LOCATION,
+                new UserHandle(callingUserId))) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isGlobalOrSecureSettingRestrictedForUser(String setting, int userId) {
+        String restriction = sSettingToUserRestrictionMap.get(setting);
+        if (restriction == null) {
+            return false;
+        }
+        return mUserManager.hasUserRestriction(restriction, new UserHandle(userId));
+    }
+
+    private int resolveOwningUserIdForSecureSettingLocked(int userId, String setting) {
+        return resolveOwningUserIdLocked(userId, sSecureCloneToManagedSettings, setting);
+    }
+
+    private int resolveOwningUserIdForSystemSettingLocked(int userId, String setting) {
+        return resolveOwningUserIdLocked(userId, sSystemCloneToManagedSettings, setting);
+    }
+
+    private int resolveOwningUserIdLocked(int userId, Set<String> keys, String name) {
+        final int parentId = getGroupParentLocked(userId);
+        if (parentId != userId && keys.contains(name)) {
+            return parentId;
+        }
+        return userId;
+    }
+
+    private void enforceRestrictedSystemSettingsMutationForCallingPackageLocked(int operation,
+            String name) {
+        // System/root/shell can mutate whatever secure settings they want.
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid == android.os.Process.SYSTEM_UID
+                || callingUid == Process.SHELL_UID
+                || callingUid == Process.ROOT_UID) {
+            return;
+        }
+
+        switch (operation) {
+            case MUTATION_OPERATION_INSERT:
+                // Insert updates.
+            case MUTATION_OPERATION_UPDATE: {
+                if (Settings.System.PUBLIC_SETTINGS.contains(name)) {
+                    return;
+                }
+
+                // The calling package is already verified.
+                PackageInfo packageInfo = getCallingPackageInfoOrThrow();
+
+                // Privileged apps can do whatever they want.
+                if ((packageInfo.applicationInfo.privateFlags
+                        & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
+                    return;
+                }
+
+                warnOrThrowForUndesiredSecureSettingsMutationForTargetSdk(
+                        packageInfo.applicationInfo.targetSdkVersion, name);
+            } break;
+
+            case MUTATION_OPERATION_DELETE: {
+                if (Settings.System.PUBLIC_SETTINGS.contains(name)
+                        || Settings.System.PRIVATE_SETTINGS.contains(name)) {
+                    throw new IllegalArgumentException("You cannot delete system defined"
+                            + " secure settings.");
+                }
+
+                // The calling package is already verified.
+                PackageInfo packageInfo = getCallingPackageInfoOrThrow();
+
+                // Privileged apps can do whatever they want.
+                if ((packageInfo.applicationInfo.privateFlags &
+                        ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
+                    return;
+                }
+
+                warnOrThrowForUndesiredSecureSettingsMutationForTargetSdk(
+                        packageInfo.applicationInfo.targetSdkVersion, name);
+            } break;
+        }
+    }
+
+    private PackageInfo getCallingPackageInfoOrThrow() {
+        try {
+            return mPackageManager.getPackageInfo(getCallingPackage(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalStateException("Calling package doesn't exist");
+        }
+    }
+
+    private int getGroupParentLocked(int userId) {
+        // Most frequent use case.
+        if (userId == UserHandle.USER_OWNER) {
+            return userId;
+        }
+        // We are in the same process with the user manager and the returned
+        // user info is a cached instance, so just look up instead of cache.
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            UserInfo userInfo = mUserManager.getProfileParent(userId);
+            return (userInfo != null) ? userInfo.id : userId;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private boolean isAppOpWriteSettingsAllowedForCallingPackage() {
+        final int callingUid = Binder.getCallingUid();
+
+        mAppOpsManager.checkPackage(Binder.getCallingUid(), getCallingPackage());
+
+        return mAppOpsManager.noteOp(AppOpsManager.OP_WRITE_SETTINGS, callingUid,
+                getCallingPackage()) == AppOpsManager.MODE_ALLOWED;
+    }
+
+    private void enforceWritePermission(String permission) {
+        if (getContext().checkCallingOrSelfPermission(permission)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Permission denial: writing to settings requires:"
+                    + permission);
+        }
+    }
+
+    /*
+     * Used to parse changes to the value of Settings.Secure.LOCATION_PROVIDERS_ALLOWED.
+     * This setting contains a list of the currently enabled location providers.
+     * But helper functions in android.providers.Settings can enable or disable
+     * a single provider by using a "+" or "-" prefix before the provider name.
+     *
+     * @returns whether the enabled location providers changed.
      */
-    private static final class SettingsCache extends LruCache<String, Bundle> {
-
-        private final String mCacheName;
-        private boolean mCacheFullyMatchesDisk = false;  // has the whole database slurped.
-
-        public SettingsCache(String name) {
-            super(MAX_CACHE_ENTRIES);
-            mCacheName = name;
+    private boolean updateLocationProvidersAllowed(String value, int owningUserId) {
+        if (TextUtils.isEmpty(value)) {
+            return false;
         }
 
-        /**
-         * Is the whole database table slurped into this cache?
-         */
-        public boolean fullyMatchesDisk() {
-            synchronized (this) {
-                return mCacheFullyMatchesDisk;
+        final char prefix = value.charAt(0);
+        if (prefix != '+' && prefix != '-') {
+            return false;
+        }
+
+        // skip prefix
+        value = value.substring(1);
+
+        Setting settingValue = getSecureSettingLocked(
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
+
+        String oldProviders = (settingValue != null) ? settingValue.getValue() : "";
+
+        int index = oldProviders.indexOf(value);
+        int end = index + value.length();
+
+        // check for commas to avoid matching on partial string
+        if (index > 0 && oldProviders.charAt(index - 1) != ',') {
+            index = -1;
+        }
+
+        // check for commas to avoid matching on partial string
+        if (end < oldProviders.length() && oldProviders.charAt(end) != ',') {
+            index = -1;
+        }
+
+        String newProviders;
+
+        if (prefix == '+' && index < 0) {
+            // append the provider to the list if not present
+            if (oldProviders.length() == 0) {
+                newProviders = value;
+            } else {
+                newProviders = oldProviders + ',' + value;
+            }
+        } else if (prefix == '-' && index >= 0) {
+            // remove the provider from the list if present
+            // remove leading or trailing comma
+            if (index > 0) {
+                index--;
+            } else if (end < oldProviders.length()) {
+                end++;
+            }
+
+            newProviders = oldProviders.substring(0, index);
+            if (end < oldProviders.length()) {
+                newProviders += oldProviders.substring(end);
+            }
+        } else {
+            // nothing changed, so no need to update the database
+            return false;
+        }
+
+        updateSecureSettingLocked(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                newProviders, owningUserId);
+
+        return true;
+    }
+
+    private void sendNotify(Uri uri, int userId) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            getContext().getContentResolver().notifyChange(uri, null, true, userId);
+            if (DEBUG) {
+                Slog.v(LOG_TAG, "Notifying for " + userId + ": " + uri);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private static void warnOrThrowForUndesiredSecureSettingsMutationForTargetSdk(
+            int targetSdkVersion, String name) {
+        // If the app targets Lollipop MR1 or older SDK we warn, otherwise crash.
+        if (targetSdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            if (Settings.System.PRIVATE_SETTINGS.contains(name)) {
+                Slog.w(LOG_TAG, "You shouldn't not change private system settings."
+                        + " This will soon become an error.");
+            } else {
+                Slog.w(LOG_TAG, "You shouldn't keep your settings in the secure settings."
+                        + " This will soon become an error.");
+            }
+        } else {
+            if (Settings.System.PRIVATE_SETTINGS.contains(name)) {
+                throw new IllegalArgumentException("You cannot change private secure settings.");
+            } else {
+                throw new IllegalArgumentException("You cannot keep your settings in"
+                        + " the secure settings.");
+            }
+        }
+    }
+
+    private static int resolveCallingUserIdEnforcingPermissionsLocked(int requestingUserId) {
+        if (requestingUserId == UserHandle.getCallingUserId()) {
+            return requestingUserId;
+        }
+        return ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), requestingUserId, false, true,
+                "get/set setting for user", null);
+    }
+
+    private static Bundle packageValueForCallResult(Setting setting) {
+        if (setting == null) {
+            return NULL_SETTING;
+        }
+        return Bundle.forPair(Settings.NameValueTable.VALUE, setting.getValue());
+    }
+
+    private static int getRequestingUserId(Bundle args) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        return (args != null) ? args.getInt(Settings.CALL_METHOD_USER_KEY, callingUserId)
+                : callingUserId;
+    }
+
+    private static String getSettingValue(Bundle args) {
+        return (args != null) ? args.getString(Settings.NameValueTable.VALUE) : null;
+    }
+
+    private static String getValidTableOrThrow(Uri uri) {
+        if (uri.getPathSegments().size() > 0) {
+            String table = uri.getPathSegments().get(0);
+            if (DatabaseHelper.isValidTable(table)) {
+                return table;
+            }
+            throw new IllegalArgumentException("Bad root path: " + table);
+        }
+        throw new IllegalArgumentException("Invalid URI:" + uri);
+    }
+
+    private static MatrixCursor packageSettingForQuery(Setting setting, String[] projection) {
+        if (setting == null) {
+            return new MatrixCursor(projection, 0);
+        }
+        MatrixCursor cursor = new MatrixCursor(projection, 1);
+        appendSettingToCursor(cursor, setting);
+        return cursor;
+    }
+
+    private static String[] normalizeProjection(String[] projection) {
+        if (projection == null) {
+            return ALL_COLUMNS;
+        }
+
+        final int columnCount = projection.length;
+        for (int i = 0; i < columnCount; i++) {
+            String column = projection[i];
+            if (!ArrayUtils.contains(ALL_COLUMNS, column)) {
+                throw new IllegalArgumentException("Invalid column: " + column);
             }
         }
 
-        public void setFullyMatchesDisk(boolean value) {
-            synchronized (this) {
-                mCacheFullyMatchesDisk = value;
+        return projection;
+    }
+
+    private static void appendSettingToCursor(MatrixCursor cursor, Setting setting) {
+        final int columnCount = cursor.getColumnCount();
+
+        String[] values =  new String[columnCount];
+
+        for (int i = 0; i < columnCount; i++) {
+            String column = cursor.getColumnName(i);
+
+            switch (column) {
+                case Settings.NameValueTable._ID: {
+                    values[i] = setting.getId();
+                } break;
+
+                case Settings.NameValueTable.NAME: {
+                    values[i] = setting.getName();
+                } break;
+
+                case Settings.NameValueTable.VALUE: {
+                    values[i] = setting.getValue();
+                } break;
             }
         }
 
-        @Override
-        protected void entryRemoved(boolean evicted, String key, Bundle oldValue, Bundle newValue) {
-            if (evicted) {
-                mCacheFullyMatchesDisk = false;
-            }
-        }
+        cursor.addRow(values);
+    }
 
-        /**
-         * Atomic cache population, conditional on size of value and if
-         * we lost a race.
-         *
-         * @returns a Bundle to send back to the client from call(), even
-         *     if we lost the race.
-         */
-        public Bundle putIfAbsent(String key, String value) {
-            Bundle bundle = (value == null) ? NULL_SETTING : Bundle.forPair("value", value);
-            if (value == null || value.length() <= MAX_CACHE_ENTRY_SIZE) {
-                synchronized (this) {
-                    if (get(key) == null) {
-                        put(key, bundle);
+    private static final class Arguments {
+        private static final Pattern WHERE_PATTERN_WITH_PARAM_NO_BRACKETS =
+                Pattern.compile("[\\s]*name[\\s]*=[\\s]*\\?[\\s]*");
+
+        private static final Pattern WHERE_PATTERN_WITH_PARAM_IN_BRACKETS =
+                Pattern.compile("[\\s]*\\([\\s]*name[\\s]*=[\\s]*\\?[\\s]*\\)[\\s]*");
+
+        private static final Pattern WHERE_PATTERN_NO_PARAM_IN_BRACKETS =
+                Pattern.compile("[\\s]*\\([\\s]*name[\\s]*=[\\s]*['\"].*['\"][\\s]*\\)[\\s]*");
+
+        private static final Pattern WHERE_PATTERN_NO_PARAM_NO_BRACKETS =
+                Pattern.compile("[\\s]*name[\\s]*=[\\s]*['\"].*['\"][\\s]*");
+
+        public final String table;
+        public final String name;
+
+        public Arguments(Uri uri, String where, String[] whereArgs, boolean supportAll) {
+            final int segmentSize = uri.getPathSegments().size();
+            switch (segmentSize) {
+                case 1: {
+                    if (where != null
+                            && (WHERE_PATTERN_WITH_PARAM_NO_BRACKETS.matcher(where).matches()
+                                || WHERE_PATTERN_WITH_PARAM_IN_BRACKETS.matcher(where).matches())
+                            && whereArgs.length == 1) {
+                        name = whereArgs[0];
+                        table = computeTableForSetting(uri, name);
+                    } else if (where != null
+                            && (WHERE_PATTERN_NO_PARAM_NO_BRACKETS.matcher(where).matches()
+                                || WHERE_PATTERN_NO_PARAM_IN_BRACKETS.matcher(where).matches())) {
+                        final int startIndex = Math.max(where.indexOf("'"),
+                                where.indexOf("\"")) + 1;
+                        final int endIndex = Math.max(where.lastIndexOf("'"),
+                                where.lastIndexOf("\""));
+                        name = where.substring(startIndex, endIndex);
+                        table = computeTableForSetting(uri, name);
+                    } else if (supportAll && where == null && whereArgs == null) {
+                        name = null;
+                        table = computeTableForSetting(uri, null);
+                    } else if (uri.getPathSegments().size() == 2
+                            && where == null && whereArgs == null) {
+                        name = uri.getPathSegments().get(1);
+                        table = computeTableForSetting(uri, name);
+                    } else {
+                        EventLogTags.writeUnsupportedSettingsQuery(
+                                uri.toSafeString(), where, Arrays.toString(whereArgs));
+                        throw new IllegalArgumentException("Only null where and args"
+                                + " or name=? where and a single arg or name='SOME_SETTING' "
+                                + "are supported uri: " + uri + " where: " + where + " args: "
+                                + Arrays.toString(whereArgs));
                     }
+                } break;
+
+                default: {
+                    throw new IllegalArgumentException("Invalid URI: " + uri);
                 }
             }
-            return bundle;
         }
 
-        /**
-         * Populates a key in a given (possibly-null) cache.
-         */
-        public static void populate(SettingsCache cache, ContentValues contentValues) {
-            if (cache == null) {
-                return;
+        public static String computeTableForSetting(Uri uri, String name) {
+            String table = getValidTableOrThrow(uri);
+
+            if (name != null) {
+                if (sSystemMovedToSecureSettings.contains(name)) {
+                    table = TABLE_SECURE;
+                }
+
+                if (sSystemMovedToGlobalSettings.contains(name)) {
+                    table = TABLE_GLOBAL;
+                }
+
+                if (sSecureMovedToGlobalSettings.contains(name)) {
+                    table = TABLE_GLOBAL;
+                }
+
+                if (sGlobalMovedToSecureSettings.contains(name)) {
+                    table = TABLE_SECURE;
+                }
             }
-            String name = contentValues.getAsString(Settings.NameValueTable.NAME);
-            if (name == null) {
-                Log.w(TAG, "null name populating settings cache.");
-                return;
-            }
-            String value = contentValues.getAsString(Settings.NameValueTable.VALUE);
-            cache.populate(name, value);
+
+            return table;
+        }
+    }
+
+    final class SettingsRegistry {
+        private static final String DROPBOX_TAG_USERLOG = "restricted_profile_ssaid";
+
+        private static final int SETTINGS_TYPE_GLOBAL = 0;
+        private static final int SETTINGS_TYPE_SYSTEM = 1;
+        private static final int SETTINGS_TYPE_SECURE = 2;
+
+        private static final int SETTINGS_TYPE_MASK = 0xF0000000;
+        private static final int SETTINGS_TYPE_SHIFT = 28;
+
+        private static final String SETTINGS_FILE_GLOBAL = "settings_global.xml";
+        private static final String SETTINGS_FILE_SYSTEM = "settings_system.xml";
+        private static final String SETTINGS_FILE_SECURE = "settings_secure.xml";
+
+        private final SparseArray<SettingsState> mSettingsStates = new SparseArray<>();
+
+        private final BackupManager mBackupManager;
+
+        public SettingsRegistry() {
+            mBackupManager = new BackupManager(getContext());
+            migrateAllLegacySettingsIfNeeded();
         }
 
-        public void populate(String name, String value) {
-            synchronized (this) {
-                if (value == null || value.length() <= MAX_CACHE_ENTRY_SIZE) {
-                    put(name, Bundle.forPair(Settings.NameValueTable.VALUE, value));
+        public List<String> getSettingsNamesLocked(int type, int userId) {
+            final int key = makeKey(type, userId);
+            SettingsState settingsState = peekSettingsStateLocked(key);
+            return settingsState.getSettingNamesLocked();
+        }
+
+        public SettingsState getSettingsLocked(int type, int userId) {
+            final int key = makeKey(type, userId);
+            return peekSettingsStateLocked(key);
+        }
+
+        public void ensureSettingsForUserLocked(int userId) {
+            // Migrate the setting for this user if needed.
+            migrateLegacySettingsForUserIfNeededLocked(userId);
+
+            // Ensure global settings loaded if owner.
+            if (userId == UserHandle.USER_OWNER) {
+                final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
+                ensureSettingsStateLocked(globalKey);
+            }
+
+            // Ensure secure settings loaded.
+            final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
+            ensureSettingsStateLocked(secureKey);
+
+            // Make sure the secure settings have an Android id set.
+            SettingsState secureSettings = getSettingsLocked(SETTINGS_TYPE_SECURE, userId);
+            ensureSecureSettingAndroidIdSetLocked(secureSettings);
+
+            // Ensure system settings loaded.
+            final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
+            ensureSettingsStateLocked(systemKey);
+
+            // Upgrade the settings to the latest version.
+            UpgradeController upgrader = new UpgradeController(userId);
+            upgrader.upgradeIfNeededLocked();
+        }
+
+        private void ensureSettingsStateLocked(int key) {
+            if (mSettingsStates.get(key) == null) {
+                final int maxBytesPerPackage = getMaxBytesPerPackageForType(getTypeFromKey(key));
+                SettingsState settingsState = new SettingsState(mLock, getSettingsFile(key), key,
+                        maxBytesPerPackage);
+                mSettingsStates.put(key, settingsState);
+            }
+        }
+
+        public void removeUserStateLocked(int userId, boolean permanently) {
+            // We always keep the global settings in memory.
+
+            // Nuke system settings.
+            final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
+            final SettingsState systemSettingsState = mSettingsStates.get(systemKey);
+            if (systemSettingsState != null) {
+                if (permanently) {
+                    mSettingsStates.remove(systemKey);
+                    systemSettingsState.destroyLocked(null);
                 } else {
-                    put(name, TOO_LARGE_TO_CACHE_MARKER);
+                    systemSettingsState.destroyLocked(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettingsStates.remove(systemKey);
+                        }
+                    });
+                }
+            }
+
+            // Nuke secure settings.
+            final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
+            final SettingsState secureSettingsState = mSettingsStates.get(secureKey);
+            if (secureSettingsState != null) {
+                if (permanently) {
+                    mSettingsStates.remove(secureKey);
+                    secureSettingsState.destroyLocked(null);
+                } else {
+                    secureSettingsState.destroyLocked(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSettingsStates.remove(secureKey);
+                        }
+                    });
                 }
             }
         }
 
-        /**
-         * For suppressing duplicate/redundant settings inserts early,
-         * checking our cache first (but without faulting it in),
-         * before going to sqlite with the mutation.
-         */
-        public static boolean isRedundantSetValue(SettingsCache cache, String name, String value) {
-            if (cache == null) return false;
-            synchronized (cache) {
-                Bundle bundle = cache.get(name);
-                if (bundle == null) return false;
-                String oldValue = bundle.getPairValue();
-                if (oldValue == null && value == null) return true;
-                if ((oldValue == null) != (value == null)) return false;
-                return oldValue.equals(value);
+        public boolean insertSettingLocked(int type, int userId, String name, String value,
+                String packageName) {
+            final int key = makeKey(type, userId);
+
+            SettingsState settingsState = peekSettingsStateLocked(key);
+            final boolean success = settingsState.insertSettingLocked(name, value, packageName);
+
+            if (success) {
+                notifyForSettingsChange(key, name);
+            }
+            return success;
+        }
+
+        public boolean deleteSettingLocked(int type, int userId, String name) {
+            final int key = makeKey(type, userId);
+
+            SettingsState settingsState = peekSettingsStateLocked(key);
+            final boolean success = settingsState.deleteSettingLocked(name);
+
+            if (success) {
+                notifyForSettingsChange(key, name);
+            }
+            return success;
+        }
+
+        public Setting getSettingLocked(int type, int userId, String name) {
+            final int key = makeKey(type, userId);
+
+            SettingsState settingsState = peekSettingsStateLocked(key);
+            return settingsState.getSettingLocked(name);
+        }
+
+        public boolean updateSettingLocked(int type, int userId, String name, String value,
+                String packageName) {
+            final int key = makeKey(type, userId);
+
+            SettingsState settingsState = peekSettingsStateLocked(key);
+            final boolean success = settingsState.updateSettingLocked(name, value, packageName);
+
+            if (success) {
+                notifyForSettingsChange(key, name);
+            }
+
+            return success;
+        }
+
+        public void onPackageRemovedLocked(String packageName, int userId) {
+            final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
+            SettingsState globalSettings = mSettingsStates.get(globalKey);
+            globalSettings.onPackageRemovedLocked(packageName);
+
+            final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
+            SettingsState secureSettings = mSettingsStates.get(secureKey);
+            secureSettings.onPackageRemovedLocked(packageName);
+
+            final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
+            SettingsState systemSettings = mSettingsStates.get(systemKey);
+            systemSettings.onPackageRemovedLocked(packageName);
+        }
+
+        private SettingsState peekSettingsStateLocked(int key) {
+            SettingsState settingsState = mSettingsStates.get(key);
+            if (settingsState != null) {
+                return settingsState;
+            }
+
+            ensureSettingsForUserLocked(getUserIdFromKey(key));
+            return mSettingsStates.get(key);
+        }
+
+        private void migrateAllLegacySettingsIfNeeded() {
+            synchronized (mLock) {
+                final int key = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
+                File globalFile = getSettingsFile(key);
+                if (globalFile.exists()) {
+                    return;
+                }
+
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    List<UserInfo> users = mUserManager.getUsers(true);
+
+                    final int userCount = users.size();
+                    for (int i = 0; i < userCount; i++) {
+                        final int userId = users.get(i).id;
+
+                        DatabaseHelper dbHelper = new DatabaseHelper(getContext(), userId);
+                        SQLiteDatabase database = dbHelper.getWritableDatabase();
+                        migrateLegacySettingsForUserLocked(dbHelper, database, userId);
+
+                        // Upgrade to the latest version.
+                        UpgradeController upgrader = new UpgradeController(userId);
+                        upgrader.upgradeIfNeededLocked();
+
+                        // Drop from memory if not a running user.
+                        if (!mUserManager.isUserRunning(new UserHandle(userId))) {
+                            removeUserStateLocked(userId, false);
+                        }
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+        }
+
+        private void migrateLegacySettingsForUserIfNeededLocked(int userId) {
+            // Every user has secure settings and if no file we need to migrate.
+            final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
+            File secureFile = getSettingsFile(secureKey);
+            if (secureFile.exists()) {
+                return;
+            }
+
+            DatabaseHelper dbHelper = new DatabaseHelper(getContext(), userId);
+            SQLiteDatabase database = dbHelper.getWritableDatabase();
+
+            migrateLegacySettingsForUserLocked(dbHelper, database, userId);
+        }
+
+        private void migrateLegacySettingsForUserLocked(DatabaseHelper dbHelper,
+                SQLiteDatabase database, int userId) {
+            // Move over the global settings if owner.
+            if (userId == UserHandle.USER_OWNER) {
+                final int globalKey = makeKey(SETTINGS_TYPE_GLOBAL, userId);
+                ensureSettingsStateLocked(globalKey);
+                SettingsState globalSettings = mSettingsStates.get(globalKey);
+                migrateLegacySettingsLocked(globalSettings, database, TABLE_GLOBAL);
+                globalSettings.persistSyncLocked();
+            }
+
+            // Move over the secure settings.
+            final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
+            ensureSettingsStateLocked(secureKey);
+            SettingsState secureSettings = mSettingsStates.get(secureKey);
+            migrateLegacySettingsLocked(secureSettings, database, TABLE_SECURE);
+            ensureSecureSettingAndroidIdSetLocked(secureSettings);
+            secureSettings.persistSyncLocked();
+
+            // Move over the system settings.
+            final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
+            ensureSettingsStateLocked(systemKey);
+            SettingsState systemSettings = mSettingsStates.get(systemKey);
+            migrateLegacySettingsLocked(systemSettings, database, TABLE_SYSTEM);
+            systemSettings.persistSyncLocked();
+
+            // Drop the database as now all is moved and persisted.
+            if (DROP_DATABASE_ON_MIGRATION) {
+                dbHelper.dropDatabase();
+            } else {
+                dbHelper.backupDatabase();
+            }
+        }
+
+        private void migrateLegacySettingsLocked(SettingsState settingsState,
+                SQLiteDatabase database, String table) {
+            SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+            queryBuilder.setTables(table);
+
+            Cursor cursor = queryBuilder.query(database, ALL_COLUMNS,
+                    null, null, null, null, null);
+
+            if (cursor == null) {
+                return;
+            }
+
+            try {
+                if (!cursor.moveToFirst()) {
+                    return;
+                }
+
+                final int nameColumnIdx = cursor.getColumnIndex(Settings.NameValueTable.NAME);
+                final int valueColumnIdx = cursor.getColumnIndex(Settings.NameValueTable.VALUE);
+
+                settingsState.setVersionLocked(database.getVersion());
+
+                while (!cursor.isAfterLast()) {
+                    String name = cursor.getString(nameColumnIdx);
+                    String value = cursor.getString(valueColumnIdx);
+                    settingsState.insertSettingLocked(name, value,
+                            SettingsState.SYSTEM_PACKAGE_NAME);
+                    cursor.moveToNext();
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        private void ensureSecureSettingAndroidIdSetLocked(SettingsState secureSettings) {
+            Setting value = secureSettings.getSettingLocked(Settings.Secure.ANDROID_ID);
+
+            if (value != null) {
+                return;
+            }
+
+            final int userId = getUserIdFromKey(secureSettings.mKey);
+
+            final UserInfo user;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                user = mUserManager.getUserInfo(userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            if (user == null) {
+                // Can happen due to races when deleting users - treat as benign.
+                return;
+            }
+
+            String androidId = Long.toHexString(new SecureRandom().nextLong());
+            secureSettings.insertSettingLocked(Settings.Secure.ANDROID_ID, androidId,
+                    SettingsState.SYSTEM_PACKAGE_NAME);
+
+            Slog.d(LOG_TAG, "Generated and saved new ANDROID_ID [" + androidId
+                    + "] for user " + userId);
+
+            // Write a drop box entry if it's a restricted profile
+            if (user.isRestricted()) {
+                DropBoxManager dbm = (DropBoxManager) getContext().getSystemService(
+                        Context.DROPBOX_SERVICE);
+                if (dbm != null && dbm.isTagEnabled(DROPBOX_TAG_USERLOG)) {
+                    dbm.addText(DROPBOX_TAG_USERLOG, System.currentTimeMillis()
+                            + "," + DROPBOX_TAG_USERLOG + "," + androidId + "\n");
+                }
+            }
+        }
+
+        private void notifyForSettingsChange(int key, String name) {
+            // Update the system property *first*, so if someone is listening for
+            // a notification and then using the contract class to get their data,
+            // the system property will be updated and they'll get the new data.
+
+            boolean backedUpDataChanged = false;
+            String property = null;
+            if (isGlobalSettingsKey(key)) {
+                property = Settings.Global.SYS_PROP_SETTING_VERSION;
+                backedUpDataChanged = true;
+            } else if (isSecureSettingsKey(key)) {
+                property = Settings.Secure.SYS_PROP_SETTING_VERSION;
+                backedUpDataChanged = true;
+            } else if (isSystemSettingsKey(key)) {
+                property = Settings.System.SYS_PROP_SETTING_VERSION;
+                backedUpDataChanged = true;
+            }
+
+            if (property != null) {
+                final long version = SystemProperties.getLong(property, 0) + 1;
+                SystemProperties.set(property, Long.toString(version));
+                if (DEBUG) {
+                    Slog.v(LOG_TAG, "System property " + property + "=" + version);
+                }
+            }
+
+            // Inform the backup manager about a data change
+            if (backedUpDataChanged) {
+                mBackupManager.dataChanged();
+            }
+
+            // Now send the notification through the content framework.
+
+            final int userId = getUserIdFromKey(key);
+            Uri uri = getNotificationUriFor(key, name);
+
+            sendNotify(uri, userId);
+        }
+
+        private int makeKey(int type, int userId) {
+            return (type << SETTINGS_TYPE_SHIFT) | userId;
+        }
+
+        private int getTypeFromKey(int key) {
+            return key >> SETTINGS_TYPE_SHIFT;
+        }
+
+        private int getUserIdFromKey(int key) {
+            return key & ~SETTINGS_TYPE_MASK;
+        }
+
+        private boolean isGlobalSettingsKey(int key) {
+            return getTypeFromKey(key) == SETTINGS_TYPE_GLOBAL;
+        }
+
+        private boolean isSystemSettingsKey(int key) {
+            return getTypeFromKey(key) == SETTINGS_TYPE_SYSTEM;
+        }
+
+        private boolean isSecureSettingsKey(int key) {
+            return getTypeFromKey(key) == SETTINGS_TYPE_SECURE;
+        }
+
+        private File getSettingsFile(int key) {
+            if (isGlobalSettingsKey(key)) {
+                final int userId = getUserIdFromKey(key);
+                return new File(Environment.getUserSystemDirectory(userId),
+                        SETTINGS_FILE_GLOBAL);
+            } else if (isSystemSettingsKey(key)) {
+                final int userId = getUserIdFromKey(key);
+                return new File(Environment.getUserSystemDirectory(userId),
+                        SETTINGS_FILE_SYSTEM);
+            } else if (isSecureSettingsKey(key)) {
+                final int userId = getUserIdFromKey(key);
+                return new File(Environment.getUserSystemDirectory(userId),
+                        SETTINGS_FILE_SECURE);
+            } else {
+                throw new IllegalArgumentException("Invalid settings key:" + key);
+            }
+        }
+
+        private Uri getNotificationUriFor(int key, String name) {
+            if (isGlobalSettingsKey(key)) {
+                return (name != null) ? Uri.withAppendedPath(Settings.Global.CONTENT_URI, name)
+                        : Settings.Global.CONTENT_URI;
+            } else if (isSecureSettingsKey(key)) {
+                return (name != null) ? Uri.withAppendedPath(Settings.Secure.CONTENT_URI, name)
+                        : Settings.Secure.CONTENT_URI;
+            } else if (isSystemSettingsKey(key)) {
+                return (name != null) ? Uri.withAppendedPath(Settings.System.CONTENT_URI, name)
+                        : Settings.System.CONTENT_URI;
+            } else {
+                throw new IllegalArgumentException("Invalid settings key:" + key);
+            }
+        }
+
+        private int getMaxBytesPerPackageForType(int type) {
+            switch (type) {
+                case SETTINGS_TYPE_GLOBAL:
+                case SETTINGS_TYPE_SECURE: {
+                    return SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED;
+                }
+
+                default: {
+                    return SettingsState.MAX_BYTES_PER_APP_PACKAGE_LIMITED;
+                }
+            }
+        }
+
+        private final class UpgradeController {
+            private static final int SETTINGS_VERSION = 118;
+
+            private final int mUserId;
+
+            public UpgradeController(int userId) {
+                mUserId = userId;
+            }
+
+            public void upgradeIfNeededLocked() {
+                // The version of all settings for a user is the same (all users have secure).
+                SettingsState secureSettings = getSettingsLocked(
+                        SettingsRegistry.SETTINGS_TYPE_SECURE, mUserId);
+
+                // Try an update from the current state.
+                final int oldVersion = secureSettings.getVersionLocked();
+                final int newVersion = SETTINGS_VERSION;
+
+                // If up do data - done.
+                if (oldVersion == newVersion) {
+                    return;
+                }
+
+                // Try to upgrade.
+                final int curVersion = onUpgradeLocked(mUserId, oldVersion, newVersion);
+
+                // If upgrade failed start from scratch and upgrade.
+                if (curVersion != newVersion) {
+                    // Drop state we have for this user.
+                    removeUserStateLocked(mUserId, true);
+
+                    // Recreate the database.
+                    DatabaseHelper dbHelper = new DatabaseHelper(getContext(), mUserId);
+                    SQLiteDatabase database = dbHelper.getWritableDatabase();
+                    dbHelper.recreateDatabase(database, newVersion, curVersion, oldVersion);
+
+                    // Migrate the settings for this user.
+                    migrateLegacySettingsForUserLocked(dbHelper, database, mUserId);
+
+                    // Now upgrade should work fine.
+                    onUpgradeLocked(mUserId, oldVersion, newVersion);
+                }
+
+                // Set the global settings version if owner.
+                if (mUserId == UserHandle.USER_OWNER) {
+                    SettingsState globalSettings = getSettingsLocked(
+                            SettingsRegistry.SETTINGS_TYPE_GLOBAL, mUserId);
+                    globalSettings.setVersionLocked(newVersion);
+                }
+
+                // Set the secure settings version.
+                secureSettings.setVersionLocked(newVersion);
+
+                // Set the system settings version.
+                SettingsState systemSettings = getSettingsLocked(
+                        SettingsRegistry.SETTINGS_TYPE_SYSTEM, mUserId);
+                systemSettings.setVersionLocked(newVersion);
+            }
+
+            private SettingsState getGlobalSettingsLocked() {
+                return getSettingsLocked(SETTINGS_TYPE_GLOBAL, UserHandle.USER_OWNER);
+            }
+
+            private SettingsState getSecureSettingsLocked(int userId) {
+                return getSettingsLocked(SETTINGS_TYPE_SECURE, userId);
+            }
+
+            private SettingsState getSystemSettingsLocked(int userId) {
+                return getSettingsLocked(SETTINGS_TYPE_SYSTEM, userId);
+            }
+
+            private int onUpgradeLocked(int userId, int oldVersion, int newVersion) {
+                if (DEBUG) {
+                    Slog.w(LOG_TAG, "Upgrading settings for user: " + userId + " from version: "
+                            + oldVersion + " to version: " + newVersion);
+                }
+
+                // You must perform all necessary mutations to bring the settings
+                // for this user from the old to the new version. When you add a new
+                // upgrade step you *must* update SETTINGS_VERSION.
+
+                /**
+                 * This is an example of moving a setting from secure to global.
+                 *
+                 * int currentVersion = oldVersion;
+                 * if (currentVersion == 118) {
+                 *     // Remove from the secure settings.
+                 *     SettingsState secureSettings = getSecureSettingsLocked(userId);
+                 *     String name = "example_setting_to_move";
+                 *     String value = secureSettings.getSetting(name);
+                 *     secureSettings.deleteSetting(name);
+                 *
+                 *     // Add to the global settings.
+                 *     SettingsState globalSettings = getGlobalSettingsLocked();
+                 *     globalSettings.insertSetting(name, value, SettingsState.SYSTEM_PACKAGE_NAME);
+                 *
+                 *     // Update the current version.
+                 *     currentVersion = 119;
+                 * }
+                 *
+                 * // Return the current version.
+                 * return currentVersion;
+                 */
+
+                return SettingsState.VERSION_UNDEFINED;
             }
         }
     }

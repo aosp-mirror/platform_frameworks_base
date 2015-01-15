@@ -2164,4 +2164,7 @@
 
   <java-symbol type="bool" name="allow_stacked_button_bar" />
   <java-symbol type="id" name="spacer" />
+
+  <java-symbol type="xml" name="bookmarks" />
+
 </resources>

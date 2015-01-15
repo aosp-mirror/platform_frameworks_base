@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Database helper class for {@link SettingsProvider}.
@@ -78,6 +79,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final HashSet<String> mValidTables = new HashSet<String>();
 
+    private static final String DATABASE_JOURNAL_SUFFIX = "-journal";
+    private static final String DATABASE_BACKUP_SUFFIX = "-backup";
+
     private static final String TABLE_SYSTEM = "system";
     private static final String TABLE_SECURE = "secure";
     private static final String TABLE_GLOBAL = "global";
@@ -86,13 +90,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         mValidTables.add(TABLE_SYSTEM);
         mValidTables.add(TABLE_SECURE);
         mValidTables.add(TABLE_GLOBAL);
-        mValidTables.add("bluetooth_devices");
-        mValidTables.add("bookmarks");
 
         // These are old.
+        mValidTables.add("bluetooth_devices");
+        mValidTables.add("bookmarks");
         mValidTables.add("favorites");
-        mValidTables.add("gservices");
         mValidTables.add("old_favorites");
+        mValidTables.add("android_metadata");
     }
 
     static String dbNameForUser(final int userHandle) {
@@ -116,6 +120,33 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static boolean isValidTable(String name) {
         return mValidTables.contains(name);
+    }
+
+    public void dropDatabase() {
+        close();
+        File databaseFile = mContext.getDatabasePath(getDatabaseName());
+        if (databaseFile.exists()) {
+            databaseFile.delete();
+        }
+        File databaseJournalFile = mContext.getDatabasePath(getDatabaseName()
+                + DATABASE_JOURNAL_SUFFIX);
+        if (databaseJournalFile.exists()) {
+            databaseJournalFile.delete();
+        }
+    }
+
+    public void backupDatabase() {
+        close();
+        File databaseFile = mContext.getDatabasePath(getDatabaseName());
+        if (!databaseFile.exists()) {
+            return;
+        }
+        File backupFile = mContext.getDatabasePath(getDatabaseName()
+                + DATABASE_BACKUP_SUFFIX);
+        if (backupFile.exists()) {
+            return;
+        }
+        databaseFile.renameTo(backupFile);
     }
 
     private void createSecureTable(SQLiteDatabase db) {
@@ -1221,9 +1252,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     // Migrate now-global settings. Note that this happens before
                     // new users can be created.
                     createGlobalTable(db);
-                    String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
+                    String[] settingsToMove = setToStringArray(
+                            SettingsProvider.sSystemMovedToGlobalSettings);
                     moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, false);
-                    settingsToMove = hashsetToStringArray(SettingsProvider.sSecureGlobalKeys);
+                    settingsToMove = setToStringArray(
+                            SettingsProvider.sSecureMovedToGlobalSettings);
                     moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, false);
 
                     db.setTransactionSuccessful();
@@ -1489,9 +1522,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.beginTransaction();
                 try {
                     // Migrate now-global settings
-                    String[] settingsToMove = hashsetToStringArray(SettingsProvider.sSystemGlobalKeys);
+                    String[] settingsToMove = setToStringArray(
+                            SettingsProvider.sSystemMovedToGlobalSettings);
                     moveSettingsToNewTable(db, TABLE_SYSTEM, TABLE_GLOBAL, settingsToMove, true);
-                    settingsToMove = hashsetToStringArray(SettingsProvider.sSecureGlobalKeys);
+                    settingsToMove = setToStringArray(
+                            SettingsProvider.sSecureMovedToGlobalSettings);
                     moveSettingsToNewTable(db, TABLE_SECURE, TABLE_GLOBAL, settingsToMove, true);
 
                     db.setTransactionSuccessful();
@@ -1855,7 +1890,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 try {
                     stmt = db.compileStatement("INSERT OR IGNORE INTO global(name,value)"
                             + " VALUES(?,?);");
-                    loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED, ImsConfig.FeatureValueConstants.ON);
+                    loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED,
+                            ImsConfig.FeatureValueConstants.ON);
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
@@ -1895,34 +1931,50 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
             upgradeVersion = 118;
         }
+
+        /**
+         * IMPORTANT: Do not add any more upgrade steps here as the global,
+         * secure, and system settings are no longer stored in a database
+         * but are kept in memory and persisted to XML. The correct places
+         * for adding upgrade steps are:
+         *
+         * Global: SettingsProvider.UpgradeController#onUpgradeGlobalSettings
+         * Secure: SettingsProvider.UpgradeController#onUpgradeSecureSettings
+         * System: SettingsProvider.UpgradeController#onUpgradeSystemSettings
+         */
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
-            Log.w(TAG, "Got stuck trying to upgrade from version " + upgradeVersion
-                    + ", must wipe the settings provider");
-            db.execSQL("DROP TABLE IF EXISTS global");
-            db.execSQL("DROP TABLE IF EXISTS globalIndex1");
-            db.execSQL("DROP TABLE IF EXISTS system");
-            db.execSQL("DROP INDEX IF EXISTS systemIndex1");
-            db.execSQL("DROP TABLE IF EXISTS secure");
-            db.execSQL("DROP INDEX IF EXISTS secureIndex1");
-            db.execSQL("DROP TABLE IF EXISTS gservices");
-            db.execSQL("DROP INDEX IF EXISTS gservicesIndex1");
-            db.execSQL("DROP TABLE IF EXISTS bluetooth_devices");
-            db.execSQL("DROP TABLE IF EXISTS bookmarks");
-            db.execSQL("DROP INDEX IF EXISTS bookmarksIndex1");
-            db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
-            db.execSQL("DROP TABLE IF EXISTS favorites");
-            onCreate(db);
-
-            // Added for diagnosing settings.db wipes after the fact
-            String wipeReason = oldVersion + "/" + upgradeVersion + "/" + currentVersion;
-            db.execSQL("INSERT INTO secure(name,value) values('" +
-                    "wiped_db_reason" + "','" + wipeReason + "');");
+            recreateDatabase(db, oldVersion, upgradeVersion, currentVersion);
         }
     }
 
-    private String[] hashsetToStringArray(HashSet<String> set) {
+    public void recreateDatabase(SQLiteDatabase db, int oldVersion,
+            int upgradeVersion, int currentVersion) {
+        db.execSQL("DROP TABLE IF EXISTS global");
+        db.execSQL("DROP TABLE IF EXISTS globalIndex1");
+        db.execSQL("DROP TABLE IF EXISTS system");
+        db.execSQL("DROP INDEX IF EXISTS systemIndex1");
+        db.execSQL("DROP TABLE IF EXISTS secure");
+        db.execSQL("DROP INDEX IF EXISTS secureIndex1");
+        db.execSQL("DROP TABLE IF EXISTS gservices");
+        db.execSQL("DROP INDEX IF EXISTS gservicesIndex1");
+        db.execSQL("DROP TABLE IF EXISTS bluetooth_devices");
+        db.execSQL("DROP TABLE IF EXISTS bookmarks");
+        db.execSQL("DROP INDEX IF EXISTS bookmarksIndex1");
+        db.execSQL("DROP INDEX IF EXISTS bookmarksIndex2");
+        db.execSQL("DROP TABLE IF EXISTS favorites");
+
+        onCreate(db);
+
+        // Added for diagnosing settings.db wipes after the fact
+        String wipeReason = oldVersion + "/" + upgradeVersion + "/" + currentVersion;
+        db.execSQL("INSERT INTO secure(name,value) values('" +
+                "wiped_db_reason" + "','" + wipeReason + "');");
+    }
+
+    private String[] setToStringArray(Set<String> set) {
         String[] array = new String[set.size()];
         return set.toArray(array);
     }
@@ -2639,7 +2691,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadBooleanSetting(stmt, Settings.Global.GUEST_USER_ENABLED,
                     R.bool.def_guest_user_enabled);
-            loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED, ImsConfig.FeatureValueConstants.ON);
+            loadSetting(stmt, Settings.Global.ENHANCED_4G_MODE_ENABLED,
+                    ImsConfig.FeatureValueConstants.ON);
             // --- New global settings start here
         } finally {
             if (stmt != null) stmt.close();

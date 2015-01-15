@@ -1,0 +1,5 @@
+# See system/core/logcat/e for a description of the format of this file.
+
+option java_package com.android.providers.settings;
+
+52100 unsupported_settings_query (uri|3),(selection|3),(whereArgs|3)
