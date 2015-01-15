@@ -202,6 +202,13 @@ write_snapshot_file(int fd, const KeyedVector<String8,FileRec>& snapshot)
 }
 
 static int
+write_delete_file(BackupDataWriter* dataStream, const String8& key)
+{
+    LOGP("write_delete_file %s\n", key.string());
+    return dataStream->WriteEntityHeader(key, -1);
+}
+
+static int
 write_update_file(BackupDataWriter* dataStream, int fd, int mode, const String8& key,
         char const* realFilename)
 {
