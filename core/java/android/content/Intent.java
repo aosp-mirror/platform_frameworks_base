@@ -3949,10 +3949,12 @@ public class Intent implements Parcelable, Cloneable {
      * is:
      *
      * <pre class="prettyprint">
-     * android-app://{package_id}/{scheme}/{host}/{path}{#Intent;...}</pre>
+     * android-app://{package_id}[/{scheme}[/{host}[/{path}]]][#Intent;{...}]</pre>
      *
-     * <p>In this scheme, only the <code>pacakge_id</code> is required, and all
-     * other components can be included as desired.  Note that this can not be
+     * <p>In this scheme, only the <code>package_id</code> is required.  If you include a host,
+     * you must also include a scheme; including a path also requires both a host and a scheme.
+     * The final #Intent; fragment can be used without a scheme, host, or path.
+     * Note that this can not be
      * used with intents that have a {@link #setSelector}, since the base intent
      * will always have an explicit package name.</p>
      *

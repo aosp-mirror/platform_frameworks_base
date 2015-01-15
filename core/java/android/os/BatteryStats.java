@@ -4083,7 +4083,7 @@ public abstract class BatteryStats implements Parcelable {
         prepareForDumpLocked();
 
         dumpLine(pw, 0 /* uid */, "i" /* category */, VERSION_DATA,
-                "11", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
+                "12", getParcelVersion(), getStartPlatformVersion(), getEndPlatformVersion());
 
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
