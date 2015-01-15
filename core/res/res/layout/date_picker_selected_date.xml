@@ -20,22 +20,22 @@
     android:layout_width="@dimen/datepicker_component_width"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:paddingBottom="8dp"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/date_picker_header"
-        android:layout_width="@dimen/datepicker_component_width"
+        android:layout_width="match_parent"
         android:layout_height="@dimen/datepicker_header_height"
         android:gravity="center"
-        android:importantForAccessibility="no"
-        android:layout_marginBottom="8dp" />
+        android:importantForAccessibility="no" />
 
     <LinearLayout
         android:id="@+id/date_picker_month_day_year_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         android:orientation="vertical"
         android:gravity="center">
 
@@ -57,8 +57,8 @@
                 android:id="@+id/date_picker_day"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-10dip"
-                android:layout_marginBottom="-10dip"
+                android:layout_marginTop="-23dp"
+                android:layout_marginBottom="-20dp"
                 android:duplicateParentState="true"
                 android:gravity="center" />
         </LinearLayout>
