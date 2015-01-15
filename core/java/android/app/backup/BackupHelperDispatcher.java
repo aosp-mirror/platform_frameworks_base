@@ -50,7 +50,6 @@ public class BackupHelperDispatcher {
         Header header = new Header();
         TreeMap<String,BackupHelper> helpers = (TreeMap<String,BackupHelper>)mHelpers.clone();
         FileDescriptor oldStateFD = null;
-        FileDescriptor newStateFD = newState.getFileDescriptor();
 
         if (oldState != null) {
             oldStateFD = oldState.getFileDescriptor();
