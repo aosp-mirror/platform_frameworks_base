@@ -150,7 +150,9 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         addView(mTabSpinner, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         if (mTabSpinner.getAdapter() == null) {
-            mTabSpinner.setAdapter(new TabAdapter());
+            final TabAdapter adapter = new TabAdapter(mContext);
+            adapter.setDropDownViewContext(mTabSpinner.getPopupContext());
+            mTabSpinner.setAdapter(adapter);
         }
         if (mTabSelector != null) {
             removeCallbacks(mTabSelector);
@@ -276,8 +278,8 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         }
     }
 
-    private TabView createTabView(ActionBar.Tab tab, boolean forAdapter) {
-        final TabView tabView = new TabView(getContext(), tab, forAdapter);
+    private TabView createTabView(Context context, ActionBar.Tab tab, boolean forAdapter) {
+        final TabView tabView = new TabView(context, tab, forAdapter);
         if (forAdapter) {
             tabView.setBackgroundDrawable(null);
             tabView.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT,
@@ -294,7 +296,7 @@ public class ScrollingTabContainerView extends HorizontalScrollView
     }
 
     public void addTab(ActionBar.Tab tab, boolean setSelected) {
-        TabView tabView = createTabView(tab, false);
+        TabView tabView = createTabView(mContext, tab, false);
         mTabLayout.addView(tabView, new LinearLayout.LayoutParams(0,
                 LayoutParams.MATCH_PARENT, 1));
         if (mTabSpinner != null) {
@@ -309,7 +311,7 @@ public class ScrollingTabContainerView extends HorizontalScrollView
     }
 
     public void addTab(ActionBar.Tab tab, int position, boolean setSelected) {
-        final TabView tabView = createTabView(tab, false);
+        final TabView tabView = createTabView(mContext, tab, false);
         mTabLayout.addView(tabView, position, new LinearLayout.LayoutParams(
                 0, LayoutParams.MATCH_PARENT, 1));
         if (mTabSpinner != null) {
@@ -514,6 +516,16 @@ public class ScrollingTabContainerView extends HorizontalScrollView
     }
 
     private class TabAdapter extends BaseAdapter {
+        private Context mDropDownContext;
+
+        public TabAdapter(Context context) {
+            setDropDownViewContext(context);
+        }
+
+        public void setDropDownViewContext(Context context) {
+            mDropDownContext = context;
+        }
+
         @Override
         public int getCount() {
             return mTabLayout.getChildCount();
@@ -532,7 +544,18 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = createTabView((ActionBar.Tab) getItem(position), true);
+                convertView = createTabView(mContext, (ActionBar.Tab) getItem(position), true);
+            } else {
+                ((TabView) convertView).bindTab((ActionBar.Tab) getItem(position));
+            }
+            return convertView;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = createTabView(mDropDownContext,
+                        (ActionBar.Tab) getItem(position), true);
             } else {
                 ((TabView) convertView).bindTab((ActionBar.Tab) getItem(position));
             }

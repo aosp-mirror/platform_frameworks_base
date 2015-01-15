@@ -145,8 +145,9 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
      * copied to the query text field.
      * <p>
      *
-     * @param refine which queries to refine. Possible values are {@link #REFINE_NONE},
-     * {@link #REFINE_BY_ENTRY}, and {@link #REFINE_ALL}.
+     * @param refineWhat which queries to refine. Possible values are
+     *                   {@link #REFINE_NONE}, {@link #REFINE_BY_ENTRY}, and
+     *                   {@link #REFINE_ALL}.
      */
     public void setQueryRefinement(int refineWhat) {
         mQueryRefinement = refineWhat;
@@ -327,7 +328,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
             // First check TEXT_2_URL
             CharSequence text2 = getStringOrNull(cursor, mText2UrlCol);
             if (text2 != null) {
-                text2 = formatUrl(text2);
+                text2 = formatUrl(context, text2);
             } else {
                 text2 = getStringOrNull(cursor, mText2Col);
             }
@@ -372,12 +373,12 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
         }
     }
 
-    private CharSequence formatUrl(CharSequence url) {
+    private CharSequence formatUrl(Context context, CharSequence url) {
         if (mUrlColor == null) {
             // Lazily get the URL color from the current theme.
             TypedValue colorValue = new TypedValue();
-            mContext.getTheme().resolveAttribute(R.attr.textColorSearchUrl, colorValue, true);
-            mUrlColor = mContext.getResources().getColorStateList(colorValue.resourceId);
+            context.getTheme().resolveAttribute(R.attr.textColorSearchUrl, colorValue, true);
+            mUrlColor = context.getResources().getColorStateList(colorValue.resourceId);
         }
 
         SpannableString text = new SpannableString(url);
@@ -502,6 +503,30 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
     }
 
     /**
+     * This method is overridden purely to provide a bit of protection against
+     * flaky content providers.
+     *
+     * @see android.widget.CursorAdapter#getDropDownView(int, View, ViewGroup)
+     */
+    @Override
+    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        try {
+            return super.getDropDownView(position, convertView, parent);
+        } catch (RuntimeException e) {
+            Log.w(LOG_TAG, "Search suggestions cursor threw exception.", e);
+            // Put exception string in item title
+            final Context context = mDropDownContext == null ? mContext : mDropDownContext;
+            final View v = newDropDownView(context, mCursor, parent);
+            if (v != null) {
+                final ChildViewCache views = (ChildViewCache) v.getTag();
+                final TextView tv = views.mText1;
+                tv.setText(e.toString());
+            }
+            return v;
+        }
+    }
+
+    /**
      * Gets a drawable given a value provided by a suggestion provider.
      *
      * This value could be just the string value of a resource id
@@ -570,7 +595,7 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
                 OpenResourceIdResult r =
                     mProviderContext.getContentResolver().getResourceId(uri);
                 try {
-                    return r.r.getDrawable(r.id, mContext.getTheme());
+                    return r.r.getDrawable(r.id, mProviderContext.getTheme());
                 } catch (Resources.NotFoundException ex) {
                     throw new FileNotFoundException("Resource does not exist: " + uri);
                 }

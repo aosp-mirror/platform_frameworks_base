@@ -32351,6 +32351,7 @@ package android.view {
   public class ContextThemeWrapper extends android.content.ContextWrapper {
     ctor public ContextThemeWrapper();
     ctor public ContextThemeWrapper(android.content.Context, int);
+    ctor public ContextThemeWrapper(android.content.Context, android.content.res.Resources.Theme);
     method public void applyOverrideConfiguration(android.content.res.Configuration);
     method protected void onApplyThemeResource(android.content.res.Resources.Theme, int, boolean);
   }
@@ -37210,7 +37211,7 @@ package android.widget {
     ctor public AnalogClock(android.content.Context, android.util.AttributeSet, int, int);
   }
 
-  public class ArrayAdapter extends android.widget.BaseAdapter implements android.widget.Filterable {
+  public class ArrayAdapter extends android.widget.BaseAdapter implements android.widget.Filterable android.widget.Spinner.ThemedSpinnerAdapter {
     ctor public ArrayAdapter(android.content.Context, int);
     ctor public ArrayAdapter(android.content.Context, int, int);
     ctor public ArrayAdapter(android.content.Context, int, T[]);
@@ -37224,6 +37225,7 @@ package android.widget {
     method public static android.widget.ArrayAdapter<java.lang.CharSequence> createFromResource(android.content.Context, int, int);
     method public android.content.Context getContext();
     method public int getCount();
+    method public android.content.res.Resources.Theme getDropDownViewTheme();
     method public android.widget.Filter getFilter();
     method public T getItem(int);
     method public long getItemId(int);
@@ -37232,6 +37234,7 @@ package android.widget {
     method public void insert(T, int);
     method public void remove(T);
     method public void setDropDownViewResource(int);
+    method public void setDropDownViewTheme(android.content.res.Resources.Theme);
     method public void setNotifyOnChange(boolean);
     method public void sort(java.util.Comparator<? super T>);
   }
@@ -37448,7 +37451,7 @@ package android.widget {
     method public abstract void onCheckedChanged(android.widget.CompoundButton, boolean);
   }
 
-  public abstract class CursorAdapter extends android.widget.BaseAdapter implements android.widget.Filterable {
+  public abstract class CursorAdapter extends android.widget.BaseAdapter implements android.widget.Filterable android.widget.Spinner.ThemedSpinnerAdapter {
     ctor public deprecated CursorAdapter(android.content.Context, android.database.Cursor);
     ctor public CursorAdapter(android.content.Context, android.database.Cursor, boolean);
     ctor public CursorAdapter(android.content.Context, android.database.Cursor, int);
@@ -37457,6 +37460,7 @@ package android.widget {
     method public java.lang.CharSequence convertToString(android.database.Cursor);
     method public int getCount();
     method public android.database.Cursor getCursor();
+    method public android.content.res.Resources.Theme getDropDownViewTheme();
     method public android.widget.Filter getFilter();
     method public android.widget.FilterQueryProvider getFilterQueryProvider();
     method public java.lang.Object getItem(int);
@@ -37467,6 +37471,7 @@ package android.widget {
     method public abstract android.view.View newView(android.content.Context, android.database.Cursor, android.view.ViewGroup);
     method protected void onContentChanged();
     method public android.database.Cursor runQueryOnBackgroundThread(java.lang.CharSequence);
+    method public void setDropDownViewTheme(android.content.res.Resources.Theme);
     method public void setFilterQueryProvider(android.widget.FilterQueryProvider);
     method public android.database.Cursor swapCursor(android.database.Cursor);
     field public static final deprecated int FLAG_AUTO_REQUERY = 1; // 0x1
@@ -38709,15 +38714,17 @@ package android.widget {
     method public abstract boolean onShareTargetSelected(android.widget.ShareActionProvider, android.content.Intent);
   }
 
-  public class SimpleAdapter extends android.widget.BaseAdapter implements android.widget.Filterable {
+  public class SimpleAdapter extends android.widget.BaseAdapter implements android.widget.Filterable android.widget.Spinner.ThemedSpinnerAdapter {
     ctor public SimpleAdapter(android.content.Context, java.util.List<? extends java.util.Map<java.lang.String, ?>>, int, java.lang.String[], int[]);
     method public int getCount();
+    method public android.content.res.Resources.Theme getDropDownViewTheme();
     method public android.widget.Filter getFilter();
     method public java.lang.Object getItem(int);
     method public long getItemId(int);
     method public android.view.View getView(int, android.view.View, android.view.ViewGroup);
     method public android.widget.SimpleAdapter.ViewBinder getViewBinder();
     method public void setDropDownViewResource(int);
+    method public void setDropDownViewTheme(android.content.res.Resources.Theme);
     method public void setViewBinder(android.widget.SimpleAdapter.ViewBinder);
     method public void setViewImage(android.widget.ImageView, int);
     method public void setViewImage(android.widget.ImageView, java.lang.String);
@@ -38841,6 +38848,7 @@ package android.widget {
     method public int getDropDownWidth();
     method public int getGravity();
     method public android.graphics.drawable.Drawable getPopupBackground();
+    method public android.content.Context getPopupContext();
     method public java.lang.CharSequence getPrompt();
     method public void onClick(android.content.DialogInterface, int);
     method public void setDropDownHorizontalOffset(int);
@@ -38849,10 +38857,16 @@ package android.widget {
     method public void setGravity(int);
     method public void setPopupBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setPopupBackgroundResource(int);
+    method public void setPopupContext(android.content.Context);
     method public void setPrompt(java.lang.CharSequence);
     method public void setPromptId(int);
     field public static final int MODE_DIALOG = 0; // 0x0
     field public static final int MODE_DROPDOWN = 1; // 0x1
+  }
+
+  public static abstract interface Spinner.ThemedSpinnerAdapter {
+    method public abstract android.content.res.Resources.Theme getDropDownViewTheme();
+    method public abstract void setDropDownViewTheme(android.content.res.Resources.Theme);
   }
 
   public abstract interface SpinnerAdapter implements android.widget.Adapter {

@@ -17,11 +17,14 @@
 package android.widget;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.os.Handler;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -35,7 +38,7 @@ import android.view.ViewGroup;
  * columns.
  */
 public abstract class CursorAdapter extends BaseAdapter implements Filterable,
-        CursorFilter.CursorFilterClient {
+        CursorFilter.CursorFilterClient, Spinner.ThemedSpinnerAdapter {
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -56,6 +59,11 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
      * {@hide}
      */
     protected Context mContext;
+    /**
+     * Context used for {@link #getDropDownView(int, View, ViewGroup)}.
+     * {@hide}
+     */
+    protected Context mDropDownContext;
     /**
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
@@ -185,6 +193,33 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
     }
 
     /**
+     * Sets the {@link Resources.Theme} against which drop-down views are
+     * inflated.
+     * <p>
+     * By default, drop-down views are inflated against the theme of the
+     * {@link Context} passed to the adapter's constructor.
+     *
+     * @param theme the theme against which to inflate drop-down views or
+     *              {@code null} to use the theme from the adapter's context
+     * @see #newDropDownView(Context, Cursor, ViewGroup)
+     */
+    @Override
+    public void setDropDownViewTheme(Resources.Theme theme) {
+        if (theme == null) {
+            mDropDownContext = null;
+        } else if (theme == mContext.getTheme()) {
+            mDropDownContext = mContext;
+        } else {
+            mDropDownContext = new ContextThemeWrapper(mContext, theme);
+        }
+    }
+
+    @Override
+    public Resources.Theme getDropDownViewTheme() {
+        return mDropDownContext == null ? null : mDropDownContext.getTheme();
+    }
+
+    /**
      * Returns the cursor.
      * @return the cursor.
      */
@@ -258,20 +293,21 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable,
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         if (mDataValid) {
+            final Context context = mDropDownContext == null ? mContext : mDropDownContext;
             mCursor.moveToPosition(position);
-            View v;
+            final View v;
             if (convertView == null) {
-                v = newDropDownView(mContext, mCursor, parent);
+                v = newDropDownView(context, mCursor, parent);
             } else {
                 v = convertView;
             }
-            bindView(v, mContext, mCursor);
+            bindView(v, context, mCursor);
             return v;
         } else {
             return null;
         }
     }
-    
+
     /**
      * Makes a new view to hold the data pointed to by cursor.
      * @param context Interface to application's global information
