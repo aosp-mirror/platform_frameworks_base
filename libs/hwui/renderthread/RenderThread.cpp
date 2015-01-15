@@ -284,6 +284,14 @@ bool RenderThread::threadLoop() {
             mPendingRegistrationFrameCallbacks.clear();
             requestVsync();
         }
+
+        if (!mFrameCallbackTaskPending && !mVsyncRequested && mFrameCallbacks.size()) {
+            // TODO: Clean this up. This is working around an issue where a combination
+            // of bad timing and slow drawing can result in dropping a stale vsync
+            // on the floor (correct!) but fails to schedule to listen for the
+            // next vsync (oops), so none of the callbacks are run.
+            requestVsync();
+        }
     }
 
     return false;
