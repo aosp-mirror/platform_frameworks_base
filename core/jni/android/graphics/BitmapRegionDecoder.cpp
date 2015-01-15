@@ -236,6 +236,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle,
     }
 
     if (tileBitmap != NULL) {
+        bitmap->notifyPixelsChanged();
         return tileBitmap;
     }
 
