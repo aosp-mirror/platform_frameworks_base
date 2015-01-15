@@ -205,7 +205,8 @@ public class KeyStore {
     public boolean generate(String key, int uid, int keyType, int keySize, int flags,
             byte[][] args) {
         try {
-            return mBinder.generate(key, uid, keyType, keySize, flags, args) == NO_ERROR;
+            return mBinder.generate(key, uid, keyType, keySize, flags,
+                    new KeystoreArguments(args)) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
