@@ -433,7 +433,7 @@ public interface IActivityManager extends IInterface {
 
     public void performIdleMaintenance() throws RemoteException;
 
-    public IActivityContainer createActivityContainer(IBinder parentActivityToken,
+    public IActivityContainer createVirtualActivityContainer(IBinder parentActivityToken,
             IActivityContainerCallback callback) throws RemoteException;
 
     public void deleteActivityContainer(IActivityContainer container) throws RemoteException;
@@ -737,7 +737,7 @@ public interface IActivityManager extends IInterface {
     int KILL_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+164;
     int SET_USER_IS_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+165;
     int HANG_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+166;
-    int CREATE_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+167;
+    int CREATE_VIRTUAL_ACTIVITY_CONTAINER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+167;
     int MOVE_TASK_TO_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+168;
     int RESIZE_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+169;
     int GET_ALL_STACK_INFOS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;

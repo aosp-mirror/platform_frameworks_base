@@ -2183,13 +2183,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case CREATE_ACTIVITY_CONTAINER_TRANSACTION: {
+        case CREATE_VIRTUAL_ACTIVITY_CONTAINER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder parentActivityToken = data.readStrongBinder();
             IActivityContainerCallback callback =
                     IActivityContainerCallback.Stub.asInterface(data.readStrongBinder());
             IActivityContainer activityContainer =
-                    createActivityContainer(parentActivityToken, callback);
+                    createVirtualActivityContainer(parentActivityToken, callback);
             reply.writeNoException();
             if (activityContainer != null) {
                 reply.writeInt(1);
@@ -5205,14 +5205,14 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public IActivityContainer createActivityContainer(IBinder parentActivityToken,
+    public IActivityContainer createVirtualActivityContainer(IBinder parentActivityToken,
             IActivityContainerCallback callback) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(parentActivityToken);
         data.writeStrongBinder(callback == null ? null : callback.asBinder());
-        mRemote.transact(CREATE_ACTIVITY_CONTAINER_TRANSACTION, data, reply, 0);
+        mRemote.transact(CREATE_VIRTUAL_ACTIVITY_CONTAINER_TRANSACTION, data, reply, 0);
         reply.readException();
         final int result = reply.readInt();
         final IActivityContainer res;
