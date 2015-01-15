@@ -270,10 +270,10 @@ methods are just two examples of new notification features available with
 {@link android.support.v4.app.NotificationCompat.WearableExtender#setBackground setBackground()}
 should have a resolution of 400x400 for non-scrolling backgrounds and 640x400 for backgrounds
 that support parallax scrolling. Place these bitmap images in the <code>res/drawable-nodpi</code>
-directory of your handheld app. Place other non-bitmap resources for wearable notifications, such
+directory. Place other non-bitmap resources for wearable notifications, such
 as those used with the
 {@link android.support.v4.app.NotificationCompat.WearableExtender#setContentIcon setContentIcon()}
-method, in the <code>res/drawable-hdpi</code> directory of your handheld app.</p>
+method, in the <code>res/drawable-hdpi</code> directory.</p>
 
 <p>If you ever need to read wearable-specific options at a later time, use the corresponding get
 method for the option. This example calls the
