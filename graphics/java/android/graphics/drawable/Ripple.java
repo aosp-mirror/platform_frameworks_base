@@ -214,7 +214,7 @@ class Ripple {
         final boolean canUseHardware = c.isHardwareAccelerated();
         if (mCanUseHardware != canUseHardware && mCanUseHardware) {
             // We've switched from hardware to non-hardware mode. Panic.
-            cancelHardwareAnimations(false);
+            cancelHardwareAnimations(true);
         }
         mCanUseHardware = canUseHardware;
 
