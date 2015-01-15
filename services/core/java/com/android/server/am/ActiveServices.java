@@ -69,7 +69,7 @@ public final class ActiveServices {
     static final boolean DEBUG_DELAYED_SERVICE = ActivityManagerService.DEBUG_SERVICE;
     static final boolean DEBUG_DELAYED_STARTS = DEBUG_DELAYED_SERVICE;
     static final boolean DEBUG_MU = ActivityManagerService.DEBUG_MU;
-    static final boolean LOG_SERVICE_START_STOP = false;
+    static final boolean LOG_SERVICE_START_STOP = true;
     static final String TAG = ActivityManagerService.TAG;
     static final String TAG_MU = ActivityManagerService.TAG_MU;
 
@@ -1869,7 +1869,7 @@ public final class ActiveServices {
 
     private void serviceDoneExecutingLocked(ServiceRecord r, boolean inDestroying,
             boolean finishing) {
-        if (DEBUG_SERVICE) Slog.v(TAG, "<<< DONE EXECUTING " + r
+        if (true || DEBUG_SERVICE) Slog.v(TAG, "<<< DONE EXECUTING " + r
                 + ": nesting=" + r.executeNesting
                 + ", inDestroying=" + inDestroying + ", app=" + r.app);
         else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG, "<<< DONE EXECUTING " + r.shortName);
