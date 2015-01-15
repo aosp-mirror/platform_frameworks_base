@@ -133,7 +133,8 @@ public final class UsbMidiDevice implements Closeable {
             public void run() {
                 byte[] buffer = new byte[3];
                 try {
-                    while (true) {
+                    boolean done = false;
+                    while (!done) {
                         // look for a readable FileDescriptor
                         for (int index = 0; index < mPollFDs.length; index++) {
                             StructPollfd pfd = mPollFDs[index];
@@ -141,7 +142,11 @@ public final class UsbMidiDevice implements Closeable {
                                 // clear readable flag
                                 pfd.revents = 0;
                                 int count = readMessage(buffer, index);
-                                mOutputPortReceivers[index].onPost(buffer, 0, count, System.nanoTime());
+                                mOutputPortReceivers[index].onPost(buffer, 0, count,
+                                        System.nanoTime());
+                            } else if ((pfd.revents & (OsConstants.POLLERR
+                                                        | OsConstants.POLLHUP)) != 0) {
+                                done = true;
                             }
                         }
 

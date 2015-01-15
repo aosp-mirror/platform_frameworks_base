@@ -57,7 +57,7 @@ public final class MidiDeviceServer implements Closeable {
         @Override
         public void onIOException() {
             synchronized (mOutputPortReceivers) {
-                mOutputPortReceivers[getPortNumber()] = null;
+                mOutputPortReceivers[getPortNumber()].clear();
             }
         }
     }
@@ -88,7 +88,6 @@ public final class MidiDeviceServer implements Closeable {
             }
 
             ParcelFileDescriptor result = null;
-            MidiOutputPort newOutputPort = null;
 
             synchronized (mInputPortSenders) {
                 if (mInputPortSenders[portNumber] != null) {
@@ -99,21 +98,19 @@ public final class MidiDeviceServer implements Closeable {
                 try {
                     ParcelFileDescriptor[] pair = ParcelFileDescriptor.createSocketPair(
                                                         OsConstants.SOCK_SEQPACKET);
-                    newOutputPort = new ServerOutputPort(pair[0], portNumber);
+                    MidiOutputPort newOutputPort = new ServerOutputPort(pair[0], portNumber);
                     mInputPortSenders[portNumber] = newOutputPort;
                     result =  pair[1];
-                } catch (IOException e) {
-                    Log.e(TAG, "unable to create ParcelFileDescriptors in openInputPort");
-                    return null;
-                }
 
-                if (newOutputPort != null) {
                     ArrayList<MidiReceiver> receivers = mInputPortReceivers[portNumber];
                     synchronized (receivers) {
                         for (int i = 0; i < receivers.size(); i++) {
                             newOutputPort.connect(receivers.get(i));
                         }
                     }
+                } catch (IOException e) {
+                    Log.e(TAG, "unable to create ParcelFileDescriptors in openInputPort");
+                    return null;
                 }
             }
 
