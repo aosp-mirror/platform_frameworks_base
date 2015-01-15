@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.UndoManager;
 import android.content.res.ColorStateList;
 import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -520,6 +521,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private final TextPaint mTextPaint;
     private boolean mUserSetTextScaleX;
     private Layout mLayout;
+    private boolean mLocaleChanged = false;
 
     private int mGravity = Gravity.TOP | Gravity.START;
     private boolean mHorizontallyScrolling;
@@ -2587,7 +2589,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @see Paint#setTextLocale
      */
     public void setTextLocale(Locale locale) {
+        mLocaleChanged = true;
         mTextPaint.setTextLocale(locale);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (!mLocaleChanged) {
+            mTextPaint.setTextLocale(Locale.getDefault());
+        }
     }
 
     /**
