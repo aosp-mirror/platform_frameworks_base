@@ -8,3 +8,7 @@ page.metaDescription=Learn how to build notifications, send and sync data, and u
 
 <p>These classes teach you how to build notifications in a handheld app that are automatically
 synced to wearables as well as how to build apps that run on wearables.</p>
+
+<p class="note"><strong>Note:</strong> For more information about the APIs used in these training
+classes, see the <a href="{@docRoot}reference/packages-wearable-support.html">Wear API reference
+documentation</a>.</p>
