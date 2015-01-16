@@ -143,6 +143,20 @@ public class MediaSessionService extends SystemService implements Monitor {
         mHandler.post(MessageHandler.MSG_SESSIONS_CHANGED, record.getUserId(), 0);
     }
 
+    /**
+     * Tells the system UI that volume has changed on a remote session.
+     */
+    public void notifyRemoteVolumeChanged(int flags, MediaSessionRecord session) {
+        if (mRvc == null) {
+            return;
+        }
+        try {
+            mRvc.remoteVolumeChanged(session.getControllerBinder(), flags);
+        } catch (Exception e) {
+            Log.wtf(TAG, "Error sending volume change to system UI.", e);
+        }
+    }
+
     public void onSessionPlaystateChange(MediaSessionRecord record, int oldState, int newState) {
         boolean updateSessions = false;
         synchronized (mLock) {
@@ -864,14 +878,6 @@ public class MediaSessionService extends SystemService implements Monitor {
             } else {
                 session.adjustVolume(direction, flags, getContext().getPackageName(),
                         UserHandle.myUserId(), true);
-                if (session.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE
-                        && mRvc != null && direction != MediaSessionManager.DIRECTION_MUTE) {
-                    try {
-                        mRvc.remoteVolumeChanged(session.getControllerBinder(), flags);
-                    } catch (Exception e) {
-                        Log.wtf(TAG, "Error sending volume change to system UI.", e);
-                    }
-                }
             }
         }
 
