@@ -52,9 +52,11 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
                 while (true) {
                     // read next event
                     int count = mInputStream.read(buffer);
-                    if (count < MIN_PACKED_MESSAGE_SIZE || count > MAX_PACKED_MESSAGE_SIZE) {
-                        Log.e(TAG, "Number of bytes read out of range: " + count);
+                    if (count < 0) {
                         break;
+                    } else if (count < MIN_PACKED_MESSAGE_SIZE || count > MAX_PACKED_MESSAGE_SIZE) {
+                        Log.e(TAG, "Number of bytes read out of range: " + count);
+                        continue;
                     }
 
                     int offset = getMessageOffset(buffer, count);

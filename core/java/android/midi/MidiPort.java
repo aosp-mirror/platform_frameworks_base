@@ -33,15 +33,15 @@ abstract public class MidiPort implements Closeable {
 
     /**
      * Minimum size of packed message as sent through our ParcelFileDescriptor
-     * 8 bytes for timestamp, 1 byte for port number and 1 to 3 bytes for message
+     * 8 bytes for timestamp and 1 to 3 bytes for message
      */
-    protected static final int MIN_PACKED_MESSAGE_SIZE = 10;
+    protected static final int MIN_PACKED_MESSAGE_SIZE = 9;
 
     /**
      * Maximum size of packed message as sent through our ParcelFileDescriptor
-     * 8 bytes for timestamp, 1 byte for port number and 1 to 3 bytes for message
+     * 8 bytes for timestamp and 1 to 3 bytes for message
      */
-    protected static final int MAX_PACKED_MESSAGE_SIZE = 12;
+    protected static final int MAX_PACKED_MESSAGE_SIZE = 11;
 
 
   /* package */ MidiPort(int portNumber) {
