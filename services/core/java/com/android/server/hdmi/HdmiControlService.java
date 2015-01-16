@@ -286,6 +286,69 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private int mLastInputMhl = Constants.INVALID_PORT_ID;
 
+    // Set to true if the logical address allocation is completed.
+    private boolean mAddressAllocated = false;
+
+    // Buffer for processing the incoming cec messages while allocating logical addresses.
+    private final class CecMessageBuffer {
+        private List<HdmiCecMessage> mBuffer = new ArrayList<>();
+
+        public void bufferMessage(HdmiCecMessage message) {
+            switch (message.getOpcode()) {
+                case Constants.MESSAGE_ACTIVE_SOURCE:
+                    bufferActiveSource(message);
+                    break;
+                case Constants.MESSAGE_IMAGE_VIEW_ON:
+                case Constants.MESSAGE_TEXT_VIEW_ON:
+                    bufferImageOrTextViewOn(message);
+                    break;
+                    // Add here if new message that needs to buffer
+                default:
+                    // Do not need to buffer messages other than above
+                    break;
+            }
+        }
+
+        public void processMessages() {
+            for (final HdmiCecMessage message : mBuffer) {
+                runOnServiceThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        handleCecCommand(message);
+                    }
+                });
+            }
+            mBuffer.clear();
+        }
+
+        private void bufferActiveSource(HdmiCecMessage message) {
+            if (!replaceMessageIfBuffered(message, Constants.MESSAGE_ACTIVE_SOURCE)) {
+                mBuffer.add(message);
+            }
+        }
+
+        private void bufferImageOrTextViewOn(HdmiCecMessage message) {
+            if (!replaceMessageIfBuffered(message, Constants.MESSAGE_IMAGE_VIEW_ON) &&
+                !replaceMessageIfBuffered(message, Constants.MESSAGE_TEXT_VIEW_ON)) {
+                mBuffer.add(message);
+            }
+        }
+
+        // Returns true if the message is replaced
+        private boolean replaceMessageIfBuffered(HdmiCecMessage message, int opcode) {
+            for (int i = 0; i < mBuffer.size(); i++) {
+                HdmiCecMessage bufferedMessage = mBuffer.get(i);
+                if (bufferedMessage.getOpcode() == opcode) {
+                    mBuffer.set(i, message);
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private CecMessageBuffer mCecMessageBuffer = new CecMessageBuffer();
+
     public HdmiControlService(Context context) {
         super(context);
         mLocalDevices = getIntList(SystemProperties.get(Constants.PROPERTY_DEVICE_TYPE));
@@ -474,6 +537,7 @@ public final class HdmiControlService extends SystemService {
     }
 
     private void initializeCec(int initiatedBy) {
+        mAddressAllocated = false;
         mCecController.setOption(OPTION_CEC_SERVICE_CONTROL, ENABLED);
         initializeLocalDevices(initiatedBy);
     }
@@ -504,6 +568,8 @@ public final class HdmiControlService extends SystemService {
         mCecController.clearLogicalAddress();
         final ArrayList<HdmiCecLocalDevice> allocatedDevices = new ArrayList<>();
         final int[] finished = new int[1];
+        mAddressAllocated = allocatingDevices.isEmpty();
+
         for (final HdmiCecLocalDevice localDevice : allocatingDevices) {
             mCecController.allocateLogicalAddress(localDevice.getType(),
                     localDevice.getPreferredAddress(), new AllocateAddressCallback() {
@@ -524,12 +590,14 @@ public final class HdmiControlService extends SystemService {
 
                     // Address allocation completed for all devices. Notify each device.
                     if (allocatingDevices.size() == ++finished[0]) {
+                        mAddressAllocated = true;
                         if (initiatedBy != INITIATED_BY_HOTPLUG) {
                             // In case of the hotplug we don't call onInitializeCecComplete()
                             // since we reallocate the logical address only.
                             onInitializeCecComplete(initiatedBy);
                         }
                         notifyAddressAllocated(allocatedDevices, initiatedBy);
+                        mCecMessageBuffer.processMessages();
                     }
                 }
             });
@@ -762,6 +830,10 @@ public final class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     boolean handleCecCommand(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        if (!mAddressAllocated) {
+            mCecMessageBuffer.bufferMessage(message);
+            return true;
+        }
         int errorCode = mMessageValidator.isValid(message);
         if (errorCode != HdmiCecMessageValidator.OK) {
             // We'll not response on the messages with the invalid source or destination
@@ -1990,6 +2062,7 @@ public final class HdmiControlService extends SystemService {
             device.onStandby(mStandbyMessageReceived);
         }
         mStandbyMessageReceived = false;
+        mAddressAllocated = false;
         mCecController.setOption(OPTION_CEC_SERVICE_CONTROL, DISABLED);
     }
 
