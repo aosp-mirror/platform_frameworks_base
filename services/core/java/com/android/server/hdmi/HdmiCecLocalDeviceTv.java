@@ -1427,7 +1427,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         } else {
             int activePath = mService.getPhysicalAddress();
             setActivePath(activePath);
-            if (!routingForBootup) {
+            if (!routingForBootup
+                    && !mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
                 mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(mAddress,
                         activePath));
             }
