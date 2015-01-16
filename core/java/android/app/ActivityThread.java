@@ -2954,6 +2954,8 @@ public final class ActivityThread {
                             token, 0, 0, 0);
                 } catch (RemoteException e) {
                     // nothing to do.
+                    Slog.i(TAG, "handleStopService: unable to execute serviceDoneExecuting for "
+                            + token, e);
                 }
             } catch (Exception e) {
                 if (!mInstrumentation.onException(s, e)) {
@@ -2961,6 +2963,7 @@ public final class ActivityThread {
                             "Unable to stop service " + s
                             + ": " + e.toString(), e);
                 }
+                Slog.i(TAG, "handleStopService: exception for " + token, e);
             }
         } else {
             Slog.i(TAG, "handleStopService: token=" + token + " not found.");
