@@ -145,7 +145,7 @@ public final class StrictMode {
      * in {@link VmPolicy.Builder#detectAll()}. Apps can still always opt-into
      * detection using {@link VmPolicy.Builder#detectCleartextNetwork()}.
      */
-    private static final String CLEARTEXT_PROPERTY = "persist.sys.strictmode.cleartext";
+    private static final String CLEARTEXT_PROPERTY = "persist.sys.strictmode.nonssl";
 
     // Only log a duplicate stack trace to the logs every second.
     private static final long MIN_LOG_INTERVAL_MS = 1000;
