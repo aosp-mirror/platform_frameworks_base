@@ -18,7 +18,7 @@ parent.link=index.html
         <li><a href="#RunningOnEmulator">Running on the Emulator</a></li>
         <li><a href="#RunningOnDevice">Running on a Device</a></li>
         <li><a href="#Signing">Application Signing</a></li>
-        <li><a href="#GradleReference">Gradle Command Reference</a></li>
+        <li><a href="#PluginReference">Plugin Language Reference</a></li>
       </ol>
   <h2>See also</h2>
   <ol>
@@ -364,8 +364,12 @@ adb -d install <em>path/to/your/app</em>.apk
   means to you as an Android application developer. The document also includes a guide to publishing
   and signing your application.</p>
 
-  <h2 id="Grad;eReference">Gradle Build Language Reference</h2>
+ <h2 id="PluginReference">Android Plugin for Gradle</h2>
 
-<p> See the <a href="http://gradle.org/docs/current/dsl/index.html">Gradle Build Language Reference</a> for a complete list and description of the Gradle Domain Specific Language (DSL) and declarative
-language elements.</p>
+ <p>The Android build system uses the Android plugin for Gradle to support the Gradle Domain
+ Specific Language (DSL) and declarative language elements. See the
+ <a href="{@docRoot}tools/building/plugin-for-gradle.html">Android Plug-in for Gradle</a> section for
+ a description of the plugin and a link to the complete list of the supported Gradle DSL elements.</p>
+
+
 
