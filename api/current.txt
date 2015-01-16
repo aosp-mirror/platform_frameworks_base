@@ -38843,6 +38843,7 @@ package android.widget {
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int);
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int, int);
     ctor public Spinner(android.content.Context, android.util.AttributeSet, int, int, int);
+    ctor public Spinner(android.content.Context, android.util.AttributeSet, int, int, int, android.content.Context);
     method public int getDropDownHorizontalOffset();
     method public int getDropDownVerticalOffset();
     method public int getDropDownWidth();
@@ -38857,7 +38858,6 @@ package android.widget {
     method public void setGravity(int);
     method public void setPopupBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setPopupBackgroundResource(int);
-    method public void setPopupContext(android.content.Context);
     method public void setPrompt(java.lang.CharSequence);
     method public void setPromptId(int);
     field public static final int MODE_DIALOG = 0; // 0x0
