@@ -131,7 +131,6 @@ public interface IActivityManager extends IInterface {
     public List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState()
             throws RemoteException;
     public void moveTaskToFront(int task, int flags, Bundle options) throws RemoteException;
-    public void moveTaskToBack(int task) throws RemoteException;
     public boolean moveActivityTaskToBack(IBinder token, boolean nonRoot) throws RemoteException;
     public void moveTaskBackwards(int task) throws RemoteException;
     public void moveTaskToStack(int taskId, int stackId, boolean toTop) throws RemoteException;
@@ -598,7 +597,7 @@ public interface IActivityManager extends IInterface {
     int GET_CALLING_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+21;
     int GET_TASKS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+22;
     int MOVE_TASK_TO_FRONT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+23;
-    int MOVE_TASK_TO_BACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+24;
+
     int MOVE_TASK_BACKWARDS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+25;
     int GET_TASK_FOR_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+26;
 
