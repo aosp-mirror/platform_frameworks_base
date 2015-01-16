@@ -65,7 +65,8 @@ public class Constants {
         }
 
         public static class TaskStackView {
-            public static final int TaskStackOverscrollRange = 150;
+            public static final int TaskStackMinOverscrollRange = 32;
+            public static final int TaskStackMaxOverscrollRange = 128;
             public static final int FilterStartDelay = 25;
         }
     }
