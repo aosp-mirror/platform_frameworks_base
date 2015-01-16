@@ -341,7 +341,6 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 class GlobalScreenshot {
     private static final String TAG = "GlobalScreenshot";
 
-    private static final int SCREENSHOT_NOTIFICATION_ID = 789;
     private static final int SCREENSHOT_FLASH_TO_PEAK_DURATION = 130;
     private static final int SCREENSHOT_DROP_IN_DURATION = 430;
     private static final int SCREENSHOT_DROP_OUT_DELAY = 500;
@@ -464,7 +463,7 @@ class GlobalScreenshot {
             mSaveInBgTask.cancel(false);
         }
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data, mNotificationManager,
-                SCREENSHOT_NOTIFICATION_ID).execute(data);
+                R.id.notification_screenshot).execute(data);
     }
 
     /**
@@ -731,6 +730,6 @@ class GlobalScreenshot {
             new Notification.BigTextStyle(b)
                 .bigText(r.getString(R.string.screenshot_failed_text))
                 .build();
-        nManager.notify(SCREENSHOT_NOTIFICATION_ID, n);
+        nManager.notify(R.id.notification_screenshot, n);
     }
 }
