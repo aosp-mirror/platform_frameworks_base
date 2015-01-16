@@ -198,32 +198,30 @@ public final class ActivityStackSupervisor implements DisplayListener {
 
     /** List of activities that are waiting for a new activity to become visible before completing
      * whatever operation they are supposed to do. */
-    final ArrayList<ActivityRecord> mWaitingVisibleActivities = new ArrayList<ActivityRecord>();
+    final ArrayList<ActivityRecord> mWaitingVisibleActivities = new ArrayList<>();
 
     /** List of processes waiting to find out about the next visible activity. */
-    final ArrayList<IActivityManager.WaitResult> mWaitingActivityVisible =
-            new ArrayList<IActivityManager.WaitResult>();
+    final ArrayList<IActivityManager.WaitResult> mWaitingActivityVisible = new ArrayList<>();
 
     /** List of processes waiting to find out about the next launched activity. */
-    final ArrayList<IActivityManager.WaitResult> mWaitingActivityLaunched =
-            new ArrayList<IActivityManager.WaitResult>();
+    final ArrayList<IActivityManager.WaitResult> mWaitingActivityLaunched = new ArrayList<>();
 
     /** List of activities that are ready to be stopped, but waiting for the next activity to
      * settle down before doing so. */
-    final ArrayList<ActivityRecord> mStoppingActivities = new ArrayList<ActivityRecord>();
+    final ArrayList<ActivityRecord> mStoppingActivities = new ArrayList<>();
 
     /** List of activities that are ready to be finished, but waiting for the previous activity to
      * settle down before doing so.  It contains ActivityRecord objects. */
-    final ArrayList<ActivityRecord> mFinishingActivities = new ArrayList<ActivityRecord>();
+    final ArrayList<ActivityRecord> mFinishingActivities = new ArrayList<>();
 
     /** List of activities that are in the process of going to sleep. */
-    final ArrayList<ActivityRecord> mGoingToSleepActivities = new ArrayList<ActivityRecord>();
+    final ArrayList<ActivityRecord> mGoingToSleepActivities = new ArrayList<>();
 
     /** Used on user changes */
-    final ArrayList<UserStartedState> mStartingUsers = new ArrayList<UserStartedState>();
+    final ArrayList<UserStartedState> mStartingUsers = new ArrayList<>();
 
     /** Used to queue up any background users being started */
-    final ArrayList<UserStartedState> mStartingBackgroundUsers = new ArrayList<UserStartedState>();
+    final ArrayList<UserStartedState> mStartingBackgroundUsers = new ArrayList<>();
 
     /** Set to indicate whether to issue an onUserLeaving callback when a newly launched activity
      * is being brought in front of us. */
@@ -611,7 +609,7 @@ public final class ActivityStackSupervisor implements DisplayListener {
             for (int stackNdx = stacks.size() - 1; stackNdx >= 0; --stackNdx) {
                 final ActivityStack stack = stacks.get(stackNdx);
                 final ActivityRecord r = stack.mResumedActivity;
-                if (r != null && (!r.nowVisible || r.waitingVisible)) {
+                if (r != null && (!r.nowVisible || mWaitingVisibleActivities.contains(r))) {
                     return false;
                 }
             }
@@ -3067,20 +3065,16 @@ public final class ActivityStackSupervisor implements DisplayListener {
     }
 
     final ArrayList<ActivityRecord> processStoppingActivitiesLocked(boolean remove) {
-        int N = mStoppingActivities.size();
-        if (N <= 0) return null;
-
         ArrayList<ActivityRecord> stops = null;
 
         final boolean nowVisible = allResumedActivitiesVisible();
-        for (int i=0; i<N; i++) {
-            ActivityRecord s = mStoppingActivities.get(i);
-            if (localLOGV) Slog.v(TAG, "Stopping " + s + ": nowVisible="
-                    + nowVisible + " waitingVisible=" + s.waitingVisible
-                    + " finishing=" + s.finishing);
-            if (s.waitingVisible && nowVisible) {
+        for (int activityNdx = mStoppingActivities.size() - 1; activityNdx >= 0; --activityNdx) {
+            ActivityRecord s = mStoppingActivities.get(activityNdx);
+            final boolean waitingVisible = mWaitingVisibleActivities.contains(s);
+            if (localLOGV) Slog.v(TAG, "Stopping " + s + ": nowVisible=" + nowVisible
+                    + " waitingVisible=" + waitingVisible + " finishing=" + s.finishing);
+            if (waitingVisible && nowVisible) {
                 mWaitingVisibleActivities.remove(s);
-                s.waitingVisible = false;
                 if (s.finishing) {
                     // If this activity is finishing, it is sitting on top of
                     // everyone else but we now know it is no longer needed...
@@ -3091,15 +3085,13 @@ public final class ActivityStackSupervisor implements DisplayListener {
                     mWindowManager.setAppVisibility(s.appToken, false);
                 }
             }
-            if ((!s.waitingVisible || mService.isSleepingOrShuttingDown()) && remove) {
+            if ((!waitingVisible || mService.isSleepingOrShuttingDown()) && remove) {
                 if (localLOGV) Slog.v(TAG, "Ready to stop: " + s);
                 if (stops == null) {
-                    stops = new ArrayList<ActivityRecord>();
+                    stops = new ArrayList<>();
                 }
                 stops.add(s);
-                mStoppingActivities.remove(i);
-                N--;
-                i--;
+                mStoppingActivities.remove(activityNdx);
             }
         }
 
