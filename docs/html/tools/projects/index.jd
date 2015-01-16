@@ -334,7 +334,7 @@ project and override similar module file settings.</p>
     module feature that generates each library module into its own JAR file.
     You can download the tools and platforms using the
     <em>Android SDK Manager</em>, as described in
-    <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
+    <a href="{@docRoot}tools/help/sdk-manager.html">SDK tools help</a>.</p>
 
     <p>If you have source code and resources that are common to multiple Android projects, you
     can move them to a library module so that it is easier to maintain across applications and
