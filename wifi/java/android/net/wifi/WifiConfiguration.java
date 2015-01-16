@@ -25,8 +25,11 @@ import android.net.StaticIpConfiguration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.annotation.SystemApi;
 
+import java.util.Random;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.BitSet;
 import java.util.ArrayList;
@@ -59,6 +62,9 @@ public class WifiConfiguration implements Parcelable {
     public static final String updateIdentiferVarName = "update_identifier";
     /** {@hide} */
     public static final int INVALID_NETWORK_ID = -1;
+    /**{@hide}*/
+    private static Random mRandom = new Random(Calendar.getInstance().getTimeInMillis());
+
     /**
      * Recognized key management schemes.
      */
@@ -233,6 +239,22 @@ public class WifiConfiguration implements Parcelable {
      * <code>XX:XX:XX:XX:XX:XX</code> where each <code>X</code> is a hex digit.
      */
     public String BSSID;
+
+    /**
+     * The band which AP resides on
+     * 0-2G  1-5G
+     * By default, 2G is chosen
+     */
+    public int apBand = 0;
+
+    /**
+     * The channel which AP resides on,currently, US only
+     * 2G  1-11
+     * 5G  36,40,44,48,149,153,157,161,165
+     * 0 - find a random available channel according to the apBand
+     */
+    public int apChannel = 0;
+
     /**
      * Fully qualified domain name (FQDN) of AAA server or RADIUS server
      * e.g. {@code "mail.example.com"}.
@@ -1315,6 +1337,18 @@ public class WifiConfiguration implements Parcelable {
         }
     }
 
+    public static int chooseApChannel(int apBand) {
+        int apChannel;
+        if (apBand == 0) {
+            apChannel = 1 + mRandom.nextInt(11);
+        } else {
+            int channel[] = {36,40,44,48,149,153,157,161,165};
+            apChannel = channel[mRandom.nextInt(channel.length)];
+        }
+        Log.d(TAG, "AP set on channel " +  apChannel);
+        return apChannel;
+     }
+
     /** @hide */
     public int getAuthType() {
         if (isValid() == false) {
@@ -1464,6 +1498,9 @@ public class WifiConfiguration implements Parcelable {
             naiRealm = source.naiRealm;
             preSharedKey = source.preSharedKey;
 
+            apBand = source.apBand;
+            apChannel = source.apChannel;
+
             wepKeys = new String[4];
             for (int i = 0; i < wepKeys.length; i++) {
                 wepKeys[i] = source.wepKeys[i];
@@ -1553,6 +1590,8 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(disableReason);
         dest.writeString(SSID);
         dest.writeString(BSSID);
+        dest.writeInt(apBand);
+        dest.writeInt(apChannel);
         dest.writeString(autoJoinBSSID);
         dest.writeString(FQDN);
         dest.writeString(naiRealm);
@@ -1615,6 +1654,8 @@ public class WifiConfiguration implements Parcelable {
                 config.disableReason = in.readInt();
                 config.SSID = in.readString();
                 config.BSSID = in.readString();
+                config.apBand = in.readInt();
+                config.apChannel = in.readInt();
                 config.autoJoinBSSID = in.readString();
                 config.FQDN = in.readString();
                 config.naiRealm = in.readString();
