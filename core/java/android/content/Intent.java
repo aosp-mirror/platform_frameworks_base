@@ -3535,6 +3535,10 @@ public class Intent implements Parcelable, Cloneable {
      * the user navigates away from it, the activity is finished.  This may also
      * be set with the {@link android.R.styleable#AndroidManifestActivity_noHistory
      * noHistory} attribute.
+     *
+     * <p>If set, {@link android.app.Activity#onActivityResult onActivityResult()}
+     * is never invoked when the current activity starts a new activity which
+     * sets a result and finishes.
      */
     public static final int FLAG_ACTIVITY_NO_HISTORY = 0x40000000;
     /**
