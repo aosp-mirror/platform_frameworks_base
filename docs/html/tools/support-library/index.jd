@@ -58,9 +58,115 @@ page.title=Support Library
 
 <p>This section provides details about the Support Library package releases.</p>
 
+
 <div class="toggle-content opened">
   <p id="rev21"><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 21.0.3</a> <em>(December 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added several {@link android.support.v4.app.NotificationCompat.WearableExtender}
+          methods to improve the display of barcodes in notifications on wearable devices.
+             <ul>
+             <li>{@link android.support.v4.app.NotificationCompat.WearableExtender#getHintScreenTimeout getHintScreenTimeout()}</li>
+             <li>{@link android.support.v4.app.NotificationCompat.WearableExtender#setHintScreenTimeout setHintScreenTimeout()}</li>
+             <li>{@link android.support.v4.app.NotificationCompat.WearableExtender#getHintAvoidBackgroundClipping getHintAvoidBackgroundClipping()}</li>
+             <li>{@link android.support.v4.app.NotificationCompat.WearableExtender#setHintAvoidBackgroundClipping setHintAvoidBackgroundClipping()}</li>
+             </ul>
+          </li>
+        </ul>
+      </dd>
+
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 21.0.2</a> <em>(November 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for <a href="features.html#v4">v4 support library:</a></dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v4.app.NotificationCompat.CarExtender}
+          class to support Android Auto extensions to notifications.</li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-appcompat">v7 appcompat library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added the {@link android.support.v7.widget.PopupMenu} constructor to support new popup
+          menus.</li>
+          <li>Added support for a Collapse icon description in the {@link android.support.v7.widget.Toolbar}
+          class.</li>
+          <li>Updated the {@link android.support.v7.widget.SearchView} widget to support displaying
+          the {@link android.support.v7.mediarouter.R.attr#commitIcon}. </li>
+          <li>Removed the <code>buttonGravity</code> attribute from the
+          {@link android.support.v7.widget.Toolbar} class. </li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-cardview">v7 cardview library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.widget.CardView#setCardBackgroundColor} API to
+          support changing the background color of the {@link android.support.v7.widget.CardView}.</li>
+          <li>Changed the {@link android.support.v7.widget.CardView} to more accurately report its
+          opacity value as {@link android.graphics.PixelFormat#TRANSLUCENT}.</li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v7-recyclerview">v7 recyclerview
+        library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.widget.RecyclerView#TOUCH_SLOP_DEFAULT} and
+          {@link android.support.v7.widget.RecyclerView#TOUCH_SLOP_PAGING} constants
+          to the {@link android.support.v7.widget.RecyclerView} class
+          to support touch slop configurations for paging.</li>
+        </ul>
+      </dd>
+      <dt>Changes for <a href="features.html#v17-leanback">v17 leanback library</a>:</dt>
+      <dd>
+        <ul>
+          <li>Added support to generate v4 code fragments. </li>
+          <li>Changed the secondary text color on {@link android.support.v7.widget.CardView}. </li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 21.0.1</a> <em>(November 2014)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Added <a href="{@docRoot}tools/support-library/features.html#multidex">
+      multidex support library</a> to support multiple
+      <a href="https://source.android.com/devices/tech/dalvik/">Dalvik</a> Executable (DEX) files
+      for multi-dex file support prior to Android 5.0. </li>
+      </dt>
+    </dl>
+  </div>
+</div>
+
+
+
+
+<div class="toggle-content closed">
+  <p id="rev21"><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
 />Android Support Library, revision 21</a> <em>(October 2014)</em>
   </p>
   <div class="toggle-content-toggleme">
