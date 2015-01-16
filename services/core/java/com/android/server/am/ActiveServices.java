@@ -1638,6 +1638,7 @@ public final class ActiveServices {
         }
 
         if (DEBUG_SERVICE) Slog.v(TAG, "Bringing down " + r + " " + r.intent);
+        r.destroyTime = SystemClock.uptimeMillis();
         if (LOG_SERVICE_START_STOP) {
             EventLogTags.writeAmDestroyService(
                     r.userId, System.identityHashCode(r), (r.app != null) ? r.app.pid : -1);
@@ -1869,7 +1870,7 @@ public final class ActiveServices {
 
     private void serviceDoneExecutingLocked(ServiceRecord r, boolean inDestroying,
             boolean finishing) {
-        if (true || DEBUG_SERVICE) Slog.v(TAG, "<<< DONE EXECUTING " + r
+        if (DEBUG_SERVICE) Slog.v(TAG, "<<< DONE EXECUTING " + r
                 + ": nesting=" + r.executeNesting
                 + ", inDestroying=" + inDestroying + ", app=" + r.app);
         else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG, "<<< DONE EXECUTING " + r.shortName);
@@ -2393,13 +2394,15 @@ public final class ActiveServices {
                 sb.append("sxecuting service ");
                 sb.append(timeout.shortName);
                 sb.append(" (execStart=");
-                TimeUtils.formatDuration(now-timeout.executingStart, sb);
+                TimeUtils.formatDuration(timeout.executingStart - now, sb);
                 sb.append(", nesting=");
                 sb.append(timeout.executeNesting);
+                sb.append(", destroyed=");
+                TimeUtils.formatDuration(timeout.destroyTime - now, sb);
                 sb.append(", fg=");
                 sb.append(proc.execServicesFg);
                 sb.append(", create=");
-                TimeUtils.formatDuration(now-timeout.createTime, sb);
+                TimeUtils.formatDuration(timeout.createTime - now, sb);
                 sb.append(", proc=");
                 sb.append(timeout.app != null ? timeout.app.toShortString() : "null");
                 sb.append(")");
