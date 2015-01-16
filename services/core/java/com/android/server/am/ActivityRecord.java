@@ -154,7 +154,6 @@ final class ActivityRecord {
     int launchMode;         // the launch mode activity attribute.
     boolean visible;        // does this activity's window need to be shown?
     boolean sleeping;       // have we told the activity to sleep?
-    boolean waitingVisible; // true if waiting for a new act to become vis
     boolean nowVisible;     // is this activity's window visible?
     boolean idle;           // has the activity gone idle?
     boolean hasBeenLaunched;// has this activity ever been launched?
@@ -293,6 +292,7 @@ final class ActivityRecord {
                     else TimeUtils.formatDuration(startTime, now, pw);
                     pw.println();
         }
+        final boolean waitingVisible = mStackSupervisor.mWaitingVisibleActivities.contains(this);
         if (lastVisibleTime != 0 || waitingVisible || nowVisible) {
             pw.print(prefix); pw.print("waitingVisible="); pw.print(waitingVisible);
                     pw.print(" nowVisible="); pw.print(nowVisible);
@@ -407,7 +407,6 @@ final class ActivityRecord {
         keysPaused = false;
         inHistory = false;
         visible = true;
-        waitingVisible = false;
         nowVisible = false;
         idle = false;
         hasBeenLaunched = false;
@@ -961,7 +960,6 @@ final class ActivityRecord {
                     if (N > 0) {
                         for (int i=0; i<N; i++) {
                             ActivityRecord r = mStackSupervisor.mWaitingVisibleActivities.get(i);
-                            r.waitingVisible = false;
                             if (ActivityManagerService.DEBUG_SWITCH) Log.v(
                                     ActivityManagerService.TAG,
                                     "Was waiting for visible: " + r);
@@ -986,7 +984,7 @@ final class ActivityRecord {
         // for another app to start, then we have paused dispatching
         // for this activity.
         ActivityRecord r = this;
-        if (r.waitingVisible) {
+        if (mStackSupervisor.mWaitingVisibleActivities.contains(this)) {
             final ActivityStack stack = mStackSupervisor.getFocusedStack();
             // Hmmm, who might we be waiting for?
             r = stack.mResumedActivity;
