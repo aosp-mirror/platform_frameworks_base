@@ -77,11 +77,13 @@ final class DelayedMessageBuffer {
     }
 
     void processAllMessages() {
-        for (HdmiCecMessage message : mBuffer) {
+        // Use the copied buffer.
+        ArrayList<HdmiCecMessage> copiedBuffer = new ArrayList<HdmiCecMessage>(mBuffer);
+        mBuffer.clear();
+        for (HdmiCecMessage message : copiedBuffer) {
             mDevice.onMessage(message);
             HdmiLogger.debug("Processing message:" + message);
         }
-        mBuffer.clear();
     }
 
     /**
@@ -95,15 +97,21 @@ final class DelayedMessageBuffer {
      *        are associated with
      */
     void processMessagesForDevice(int address) {
+        ArrayList<HdmiCecMessage> copiedBuffer = new ArrayList<HdmiCecMessage>(mBuffer);
+        mBuffer.clear();
         HdmiLogger.debug("Checking message for address:" + address);
-        for (Iterator<HdmiCecMessage> iter = mBuffer.iterator(); iter.hasNext(); ) {
-            HdmiCecMessage message = iter.next();
-            if (message.getSource() != address) continue;
+        for (HdmiCecMessage message : copiedBuffer) {
+            if (message.getSource() != address) {
+                mBuffer.add(message);
+                continue;
+            }
             if (message.getOpcode() == Constants.MESSAGE_ACTIVE_SOURCE
-                    && !mDevice.isInputReady(HdmiDeviceInfo.idForCecDevice(address))) continue;
+                    && !mDevice.isInputReady(HdmiDeviceInfo.idForCecDevice(address))) {
+                mBuffer.add(message);
+                continue;
+            }
             mDevice.onMessage(message);
             HdmiLogger.debug("Processing message:" + message);
-            iter.remove();
         }
     }
 
@@ -119,13 +127,15 @@ final class DelayedMessageBuffer {
      * @param address logical address of the device to be the active source
      */
     void processActiveSource(int address) {
-        for (Iterator<HdmiCecMessage> iter = mBuffer.iterator(); iter.hasNext(); ) {
-            HdmiCecMessage message = iter.next();
+        ArrayList<HdmiCecMessage> copiedBuffer = new ArrayList<HdmiCecMessage>(mBuffer);
+        mBuffer.clear();
+        for (HdmiCecMessage message : copiedBuffer) {
             if (message.getOpcode() == Constants.MESSAGE_ACTIVE_SOURCE
                     && message.getSource() == address) {
                 mDevice.onMessage(message);
                 HdmiLogger.debug("Processing message:" + message);
-                iter.remove();
+            } else {
+                mBuffer.add(message);
             }
         }
     }
