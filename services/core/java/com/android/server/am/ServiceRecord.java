@@ -105,6 +105,7 @@ final class ServiceRecord extends Binder {
     long restartDelay;      // delay until next restart attempt.
     long restartTime;       // time of last restart.
     long nextRestartTime;   // time when restartDelay will expire.
+    long destroyTime;       // time at which destory was initiated.
 
     String stringName;      // caching of toString
     
@@ -249,6 +250,10 @@ final class ServiceRecord extends Binder {
                     pw.print(" executingStart=");
                     TimeUtils.formatDuration(executingStart, now, pw);
                     pw.println();
+        }
+        if (destroyTime != 0) {
+            pw.print(" destroyed=");
+            TimeUtils.formatDuration(destroyTime, now, pw);
         }
         if (crashCount != 0 || restartCount != 0
                 || restartDelay != 0 || nextRestartTime != 0) {
