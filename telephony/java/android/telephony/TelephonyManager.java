@@ -3099,7 +3099,7 @@ public class TelephonyManager {
      *
      * @return true on success; false on any failure.
      */
-    public boolean setPreferredNetworkTypeToGlobal() {
+    public boolean setGlobalPreferredNetworkType() {
         return setPreferredNetworkType(RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA);
     }
 
@@ -3141,6 +3141,8 @@ public class TelephonyManager {
      * If any of the packages in the calling UID has carrier privileges, the
      * call will return true. This access is granted by the owner of the UICC
      * card and does not depend on the registered carrier.
+     *
+     * TODO: Add a link to documentation.
      *
      * @return true if the app has carrier privileges.
      */
