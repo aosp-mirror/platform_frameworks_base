@@ -15373,6 +15373,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void serviceDoneExecuting(IBinder token, int type, int startId, int res) {
         synchronized(this) {
             if (!(token instanceof ServiceRecord)) {
+                Slog.e(TAG, "serviceDoneExecuting: Invalid service token=" + token);
                 throw new IllegalArgumentException("Invalid service token");
             }
             mServices.serviceDoneExecutingLocked((ServiceRecord)token, type, startId, res);
