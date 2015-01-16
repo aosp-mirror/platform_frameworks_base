@@ -61,6 +61,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PersistableBundle;
@@ -1349,6 +1350,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             out.endTag(null, "policies");
 
             out.endDocument();
+            stream.flush();
+            FileUtils.sync(stream);
             stream.close();
             journal.commit();
             sendChangedNotification(userHandle);
