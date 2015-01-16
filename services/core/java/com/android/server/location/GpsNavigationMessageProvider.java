@@ -33,7 +33,7 @@ public abstract class GpsNavigationMessageProvider
         extends RemoteListenerHelper<IGpsNavigationMessageListener> {
     private static final String TAG = "GpsNavigationMessageProvider";
 
-    public GpsNavigationMessageProvider(Handler handler) {
+    protected GpsNavigationMessageProvider(Handler handler) {
         super(handler, TAG);
     }
 
@@ -50,15 +50,19 @@ public abstract class GpsNavigationMessageProvider
     }
 
     public void onCapabilitiesUpdated(boolean isGpsNavigationMessageSupported) {
-        int status = isGpsNavigationMessageSupported ?
-                GpsNavigationMessageEvent.STATUS_READY :
-                GpsNavigationMessageEvent.STATUS_NOT_SUPPORTED;
-        setSupported(isGpsNavigationMessageSupported, new StatusChangedOperation(status));
+        setSupported(isGpsNavigationMessageSupported);
+        updateResult();
+    }
+
+    public void onGpsEnabledChanged() {
+        if (tryUpdateRegistrationWithService()) {
+            updateResult();
+        }
     }
 
     @Override
     protected ListenerOperation<IGpsNavigationMessageListener> getHandlerOperation(int result) {
-        final int status;
+        int status;
         switch (result) {
             case RESULT_SUCCESS:
                 status = GpsNavigationMessageEvent.STATUS_READY;
@@ -71,6 +75,8 @@ public abstract class GpsNavigationMessageProvider
             case RESULT_GPS_LOCATION_DISABLED:
                 status = GpsNavigationMessageEvent.STATUS_GPS_LOCATION_DISABLED;
                 break;
+            case RESULT_UNKNOWN:
+                return null;
             default:
                 Log.v(TAG, "Unhandled addListener result: " + result);
                 return null;
@@ -78,15 +84,7 @@ public abstract class GpsNavigationMessageProvider
         return new StatusChangedOperation(status);
     }
 
-    @Override
-    protected void handleGpsEnabledChanged(boolean enabled) {
-        int status = enabled ?
-                GpsNavigationMessageEvent.STATUS_READY :
-                GpsNavigationMessageEvent.STATUS_GPS_LOCATION_DISABLED;
-        foreach(new StatusChangedOperation(status));
-    }
-
-    private class StatusChangedOperation
+    private static class StatusChangedOperation
             implements ListenerOperation<IGpsNavigationMessageListener> {
         private final int mStatus;
 

@@ -26,25 +26,30 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A helper class, that handles operations in remote listeners, and tracks for remote process death.
  */
 abstract class RemoteListenerHelper<TListener extends IInterface> {
+
     protected static final int RESULT_SUCCESS = 0;
     protected static final int RESULT_NOT_AVAILABLE = 1;
     protected static final int RESULT_NOT_SUPPORTED = 2;
     protected static final int RESULT_GPS_LOCATION_DISABLED = 3;
     protected static final int RESULT_INTERNAL_ERROR = 4;
+    protected static final int RESULT_UNKNOWN = 5;
 
     private final Handler mHandler;
     private final String mTag;
 
-    private final HashMap<IBinder, LinkedListener> mListenerMap = new HashMap<>();
+    private final Map<IBinder, LinkedListener> mListenerMap = new HashMap<>();
 
     private boolean mIsRegistered;
     private boolean mHasIsSupported;
     private boolean mIsSupported;
+
+    private int mLastReportedResult = RESULT_UNKNOWN;
 
     protected RemoteListenerHelper(Handler handler, String name) {
         Preconditions.checkNotNull(name);
@@ -110,33 +115,11 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         }
     }
 
-    public void onGpsEnabledChanged(boolean enabled) {
-        // handle first the sub-class implementation, so any error in registration can take
-        // precedence
-        handleGpsEnabledChanged(enabled);
-        synchronized (mListenerMap) {
-            if (!enabled) {
-                tryUnregister();
-                return;
-            }
-            if (mListenerMap.isEmpty()) {
-                return;
-            }
-            if (tryRegister()) {
-                // registration was successful, there is no need to update the state
-                return;
-            }
-            ListenerOperation<TListener> operation = getHandlerOperation(RESULT_INTERNAL_ERROR);
-            foreachUnsafe(operation);
-        }
-    }
-
     protected abstract boolean isAvailableInPlatform();
     protected abstract boolean isGpsEnabled();
     protected abstract boolean registerWithService();
     protected abstract void unregisterFromService();
     protected abstract ListenerOperation<TListener> getHandlerOperation(int result);
-    protected abstract void handleGpsEnabledChanged(boolean enabled);
 
     protected interface ListenerOperation<TListener extends IInterface> {
         void execute(TListener listener) throws RemoteException;
@@ -148,11 +131,40 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         }
     }
 
-    protected void setSupported(boolean value, ListenerOperation<TListener> notifier) {
+    protected void setSupported(boolean value) {
         synchronized (mListenerMap) {
             mHasIsSupported = true;
             mIsSupported = value;
-            foreachUnsafe(notifier);
+        }
+    }
+
+    protected boolean tryUpdateRegistrationWithService() {
+        synchronized (mListenerMap) {
+            if (!isGpsEnabled()) {
+                tryUnregister();
+                return true;
+            }
+            if (mListenerMap.isEmpty()) {
+                return true;
+            }
+            if (tryRegister()) {
+                // registration was successful, there is no need to update the state
+                return true;
+            }
+            ListenerOperation<TListener> operation = getHandlerOperation(RESULT_INTERNAL_ERROR);
+            foreachUnsafe(operation);
+            return false;
+        }
+    }
+
+    protected void updateResult() {
+        synchronized (mListenerMap) {
+            int newResult = calculateCurrentResultUnsafe();
+            if (mLastReportedResult == newResult) {
+                return;
+            }
+            foreachUnsafe(getHandlerOperation(newResult));
+            mLastReportedResult = newResult;
         }
     }
 
@@ -181,6 +193,24 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         }
         unregisterFromService();
         mIsRegistered = false;
+    }
+
+    private int calculateCurrentResultUnsafe() {
+        // update statuses we already know about, starting from the ones that will never change
+        if (!isAvailableInPlatform()) {
+            return RESULT_NOT_AVAILABLE;
+        }
+        if (!mHasIsSupported || mListenerMap.isEmpty()) {
+            // we'll update once we have a supported status available
+            return RESULT_UNKNOWN;
+        }
+        if (!mIsSupported) {
+            return RESULT_NOT_SUPPORTED;
+        }
+        if (!isGpsEnabled()) {
+            return RESULT_GPS_LOCATION_DISABLED;
+        }
+        return RESULT_SUCCESS;
     }
 
     private class LinkedListener implements IBinder.DeathRecipient {

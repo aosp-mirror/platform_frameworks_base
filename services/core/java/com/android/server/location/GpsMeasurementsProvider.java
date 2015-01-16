@@ -33,7 +33,7 @@ public abstract class GpsMeasurementsProvider
         extends RemoteListenerHelper<IGpsMeasurementsListener> {
     private static final String TAG = "GpsMeasurementsProvider";
 
-    public GpsMeasurementsProvider(Handler handler) {
+    protected GpsMeasurementsProvider(Handler handler) {
         super(handler, TAG);
     }
 
@@ -49,15 +49,19 @@ public abstract class GpsMeasurementsProvider
     }
 
     public void onCapabilitiesUpdated(boolean isGpsMeasurementsSupported) {
-        int status = isGpsMeasurementsSupported ?
-                GpsMeasurementsEvent.STATUS_READY :
-                GpsMeasurementsEvent.STATUS_NOT_SUPPORTED;
-        setSupported(isGpsMeasurementsSupported, new StatusChangedOperation(status));
+        setSupported(isGpsMeasurementsSupported);
+        updateResult();
+    }
+
+    public void onGpsEnabledChanged() {
+        if (tryUpdateRegistrationWithService()) {
+            updateResult();
+        }
     }
 
     @Override
     protected ListenerOperation<IGpsMeasurementsListener> getHandlerOperation(int result) {
-        final int status;
+        int status;
         switch (result) {
             case RESULT_SUCCESS:
                 status = GpsMeasurementsEvent.STATUS_READY;
@@ -70,6 +74,8 @@ public abstract class GpsMeasurementsProvider
             case RESULT_GPS_LOCATION_DISABLED:
                 status = GpsMeasurementsEvent.STATUS_GPS_LOCATION_DISABLED;
                 break;
+            case RESULT_UNKNOWN:
+                return null;
             default:
                 Log.v(TAG, "Unhandled addListener result: " + result);
                 return null;
@@ -77,15 +83,8 @@ public abstract class GpsMeasurementsProvider
         return new StatusChangedOperation(status);
     }
 
-    @Override
-    protected void handleGpsEnabledChanged(boolean enabled) {
-        int status = enabled ?
-                GpsMeasurementsEvent.STATUS_READY :
-                GpsMeasurementsEvent.STATUS_GPS_LOCATION_DISABLED;
-        foreach(new StatusChangedOperation(status));
-    }
-
-    private class StatusChangedOperation implements ListenerOperation<IGpsMeasurementsListener> {
+    private static class StatusChangedOperation
+            implements ListenerOperation<IGpsMeasurementsListener> {
         private final int mStatus;
 
         public StatusChangedOperation(int status) {
