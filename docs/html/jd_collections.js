@@ -126,6 +126,72 @@ var RESOURCE_COLLECTIONS = {
       "distribute/monetize/payments.html"
     ]
   },
+  "distribute/analyzelanding": {
+    "resources": [
+      "distribute/analyze/start.html",
+      "distribute/analyze/measure.html",
+      "distribute/analyze/understand-user-value.html",
+      "distribute/analyze/improve-roi.html",
+      "distribute/analyze/build-better-apps.html",
+      "distribute/analyze/google-services.html"
+    ]
+  },
+  "distribute/analyzestart": {
+    "resources": [
+      "https://analyticsacademy.withgoogle.com/course04",
+      "google/play-services/index.html",
+      "https://developers.google.com/analytics/solutions/mobile-implementation-guide",
+      "https://developers.google.com/analytics/devguides/collection/android/",
+      "http://www.google.com/tagmanager/",
+      "https://github.com/googleanalytics/google-analytics-plugin-for-unity"
+    ]
+  },
+  "distribute/analyzemeasure": {
+    "resources": [
+
+      "https://developers.google.com/analytics/solutions/mobile-implementation-guide",
+      "https://developers.google.com/analytics/devguides/collection/android/v4/enhanced-ecommerce",
+      "https://support.google.com/analytics/answer/1032415",
+      "https://developers.google.com/analytics/devguides/collection/android/v4/events",
+      "https://developers.google.com/analytics/devguides/collection/android/v4/customdimsmets",
+      "https://developers.google.com/analytics/devguides/collection/android/v4/user-id"
+    ]
+  },
+  "distribute/analyzeunderstand": {
+    "resources": [
+      "https://developers.google.com/analytics/devguides/collection/android/v4/display-features",
+      "https://support.google.com/analytics/answer/3123906",
+      "https://support.google.com/analytics/answer/2568874?ref_topic=6012392",
+      "https://developers.google.com/analytics/devguides/collection/android/v4/enhanced-ecommerce",
+      "https://support.google.com/analytics/answer/1032415",
+    ]
+  },
+  "distribute/analyzeimprove": {
+    "resources": [
+
+      "https://developers.google.com/analytics/devguides/collection/android/v4/campaigns",
+      "https://support.google.com/analytics/answer/2956981",
+      "https://support.google.com/analytics/answer/1033961",
+      "https://developers.google.com/analytics/devguides/collection/android/v4/campaigns#google-play-url-builder",
+      "https://developers.google.com/analytics/solutions/mobile-campaign-deep-link"
+    ]
+  },
+  "distribute/analyzebuild": {
+    "resources": [
+      "https://support.google.com/tagmanager/answer/6003007",
+      "https://support.google.com/analytics/answer/2785577",
+      "https://support.google.com/analytics/answer/1151300"
+    ]
+  },
+  "distribute/analyzeact": {
+    "resources": [
+      "https://support.google.com/analytics/answer/2611268",
+      "https://support.google.com/analytics/answer/1033961",
+      "https://support.google.com/admob/answer/3508177",
+      "https://support.google.com/analytics/answer/2956981",
+      "https://support.google.com/tagmanager/answer/6003007"
+    ]
+  },
   "distribute/tools/checklists": {
     "title": "",
     "resources": [

@@ -1,0 +1,40 @@
+page.title=Analyze
+page.metaDescription=Understanding what your users do inside your app is the key to engaging and monetizing them.
+section.landing=true
+excludefromsuggestions=true
+nonavpage=true
+
+@jd:body
+
+<p>
+  Successful developers have found that understanding what users do inside
+  their app is the key to engaging and monetizing users in the long run.
+  Various analytics tools are available that let you answer different types of
+  questions. The easiest way to measure what users do in your app is to
+  integrate a single analytics tool, such as Google Analytics, that's capable
+  of answering all of your important questions.
+</p>
+
+<p style="margin-bottom:2em;">
+  With a unique Google Play Developer Console integration, Google Analytics can
+  track how users move through the <a href=
+  "{@docRoot}distribute/analyze/improve-roi.html#flow">acquisition flow</a>
+  from marketing, to a Play store listing, to launching an app. The <a href=
+  "{@docRoot}distribute/analyze/build-better-apps.html#flows">Behavior flow</a>
+  lets you easily identify roadblocks and successful features, so that you can
+  improve user engagement. By implementing <a href=
+  "{@docRoot}distribute/analyze/measure.html#retail">e-commerce tracking</a>
+  you can have a full view of the transactions, such as in-app purchases,
+  happening in your app. And, if you show ads in your app, you can <a href=
+  "{@docRoot}distribute/analyze/google-services.html">access your Analytics
+  data in AdMob</a> and have the full picture of your app revenue.
+</p>
+
+<div class="dynamic-grid">
+
+  <div class="resource-widget resource-flow-layout landing col-16"
+    data-query="collection:distribute/analyzelanding"
+    data-cardSizes="6x6"
+    data-maxResults="10">
+  </div>
+ 
