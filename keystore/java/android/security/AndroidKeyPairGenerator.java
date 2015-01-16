@@ -50,10 +50,50 @@ import java.security.spec.X509EncodedKeySpec;
  *
  * {@hide}
  */
-public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
+public abstract class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
+
+    public static class RSA extends AndroidKeyPairGenerator {
+        public RSA() {
+            super("RSA");
+        }
+    }
+
+    public static class EC extends AndroidKeyPairGenerator {
+        public EC() {
+            super("EC");
+        }
+    }
+
+    /*
+     * These must be kept in sync with system/security/keystore/defaults.h
+     */
+
+    /* EC */
+    private static final int EC_DEFAULT_KEY_SIZE = 256;
+    private static final int EC_MIN_KEY_SIZE = 192;
+    private static final int EC_MAX_KEY_SIZE = 521;
+
+    /* RSA */
+    private static final int RSA_DEFAULT_KEY_SIZE = 2048;
+    private static final int RSA_MIN_KEY_SIZE = 512;
+    private static final int RSA_MAX_KEY_SIZE = 8192;
+
+    private final String mAlgorithm;
+
     private android.security.KeyStore mKeyStore;
 
     private KeyPairGeneratorSpec mSpec;
+    private String mKeyAlgorithm;
+    private int mKeyType;
+    private int mKeySize;
+
+    protected AndroidKeyPairGenerator(String algorithm) {
+        mAlgorithm = algorithm;
+    }
+
+    public String getAlgorithm() {
+        return mAlgorithm;
+    }
 
     /**
      * Generate a KeyPair which is backed by the Android keystore service. You
@@ -88,12 +128,11 @@ public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
 
         Credentials.deleteAllTypesForAlias(mKeyStore, alias);
 
-        final int keyType = KeyStore.getKeyTypeForAlgorithm(mSpec.getKeyType());
-        byte[][] args = getArgsForKeyType(keyType, mSpec.getAlgorithmParameterSpec());
+        byte[][] args = getArgsForKeyType(mKeyType, mSpec.getAlgorithmParameterSpec());
 
         final String privateKeyAlias = Credentials.USER_PRIVATE_KEY + alias;
-        if (!mKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF, keyType,
-                mSpec.getKeySize(), mSpec.getFlags(), args)) {
+        if (!mKeyStore.generate(privateKeyAlias, KeyStore.UID_SELF, mKeyType, mKeySize,
+                mSpec.getFlags(), args)) {
             throw new IllegalStateException("could not generate key in keystore");
         }
 
@@ -109,7 +148,7 @@ public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
 
         final PublicKey pubKey;
         try {
-            final KeyFactory keyFact = KeyFactory.getInstance(mSpec.getKeyType());
+            final KeyFactory keyFact = KeyFactory.getInstance(mKeyAlgorithm);
             pubKey = keyFact.generatePublic(new X509EncodedKeySpec(pubKeyBytes));
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("Can't instantiate key generator", e);
@@ -117,18 +156,9 @@ public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
             throw new IllegalStateException("keystore returned invalid key encoding", e);
         }
 
-        final X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-        certGen.setPublicKey(pubKey);
-        certGen.setSerialNumber(mSpec.getSerialNumber());
-        certGen.setSubjectDN(mSpec.getSubjectDN());
-        certGen.setIssuerDN(mSpec.getSubjectDN());
-        certGen.setNotBefore(mSpec.getStartDate());
-        certGen.setNotAfter(mSpec.getEndDate());
-        certGen.setSignatureAlgorithm(getDefaultSignatureAlgorithmForKeyType(mSpec.getKeyType()));
-
         final X509Certificate cert;
         try {
-            cert = certGen.generate(privKey);
+            cert = generateCertificate(privKey, pubKey);
         } catch (Exception e) {
             Credentials.deleteAllTypesForAlias(mKeyStore, alias);
             throw new IllegalStateException("Can't generate certificate", e);
@@ -151,13 +181,78 @@ public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
         return new KeyPair(pubKey, privKey);
     }
 
-    private static String getDefaultSignatureAlgorithmForKeyType(String keyType) {
-        if ("RSA".equalsIgnoreCase(keyType)) {
+    @SuppressWarnings("deprecation")
+    private X509Certificate generateCertificate(PrivateKey privateKey, PublicKey publicKey)
+            throws Exception {
+        final X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
+        certGen.setPublicKey(publicKey);
+        certGen.setSerialNumber(mSpec.getSerialNumber());
+        certGen.setSubjectDN(mSpec.getSubjectDN());
+        certGen.setIssuerDN(mSpec.getSubjectDN());
+        certGen.setNotBefore(mSpec.getStartDate());
+        certGen.setNotAfter(mSpec.getEndDate());
+        certGen.setSignatureAlgorithm(getDefaultSignatureAlgorithmForKeyAlgorithm(mKeyAlgorithm));
+        return certGen.generate(privateKey);
+    }
+
+    private String getKeyAlgorithm(KeyPairGeneratorSpec spec) {
+        String result = spec.getKeyType();
+        if (result != null) {
+            return result;
+        }
+        return getAlgorithm();
+    }
+
+    private static int getDefaultKeySize(int keyType) {
+        if (keyType == NativeCrypto.EVP_PKEY_EC) {
+            return EC_DEFAULT_KEY_SIZE;
+        } else if (keyType == NativeCrypto.EVP_PKEY_RSA) {
+            return RSA_DEFAULT_KEY_SIZE;
+        }
+        return -1;
+    }
+
+    private static void checkValidKeySize(String keyAlgorithm, int keyType, int keySize)
+            throws InvalidAlgorithmParameterException {
+        if (keyType == NativeCrypto.EVP_PKEY_EC) {
+            if (keySize < EC_MIN_KEY_SIZE || keySize > EC_MAX_KEY_SIZE) {
+                throw new InvalidAlgorithmParameterException("EC keys must be >= "
+                        + EC_MIN_KEY_SIZE + " and <= " + EC_MAX_KEY_SIZE);
+            }
+        } else if (keyType == NativeCrypto.EVP_PKEY_RSA) {
+            if (keySize < RSA_MIN_KEY_SIZE || keySize > RSA_MAX_KEY_SIZE) {
+                throw new InvalidAlgorithmParameterException("RSA keys must be >= "
+                        + RSA_MIN_KEY_SIZE + " and <= " + RSA_MAX_KEY_SIZE);
+            }
+        } else {
+            throw new InvalidAlgorithmParameterException(
+                "Unsupported key algorithm: " + keyAlgorithm);
+        }
+    }
+
+    private static void checkCorrectParametersSpec(int keyType, int keySize,
+            AlgorithmParameterSpec spec) throws InvalidAlgorithmParameterException {
+        if (keyType == NativeCrypto.EVP_PKEY_RSA && spec != null) {
+            if (spec instanceof RSAKeyGenParameterSpec) {
+                RSAKeyGenParameterSpec rsaSpec = (RSAKeyGenParameterSpec) spec;
+                if (keySize != -1 && keySize != rsaSpec.getKeysize()) {
+                    throw new InvalidAlgorithmParameterException("RSA key size must match: "
+                            + keySize + " vs " + rsaSpec.getKeysize());
+                }
+            } else {
+                throw new InvalidAlgorithmParameterException(
+                    "RSA may only use RSAKeyGenParameterSpec");
+            }
+        }
+    }
+
+    private static String getDefaultSignatureAlgorithmForKeyAlgorithm(String algorithm) {
+        if ("RSA".equalsIgnoreCase(algorithm)) {
             return "sha256WithRSA";
-        } else if ("EC".equalsIgnoreCase(keyType)) {
+        } else if ("EC".equalsIgnoreCase(algorithm)) {
             return "sha256WithECDSA";
         } else {
-            throw new IllegalArgumentException("Unsupported key type " + keyType);
+            throw new IllegalArgumentException("Unsupported key type " + algorithm);
         }
     }
 
@@ -190,7 +285,26 @@ public class AndroidKeyPairGenerator extends KeyPairGeneratorSpi {
         }
 
         KeyPairGeneratorSpec spec = (KeyPairGeneratorSpec) params;
+        String keyAlgorithm = getKeyAlgorithm(spec);
+        int keyType = KeyStore.getKeyTypeForAlgorithm(keyAlgorithm);
+        if (keyType == -1) {
+            throw new InvalidAlgorithmParameterException(
+                    "Unsupported key algorithm: " + keyAlgorithm);
+        }
+        int keySize = spec.getKeySize();
+        if (keySize == -1) {
+            keySize = getDefaultKeySize(keyType);
+            if (keySize == -1) {
+                throw new InvalidAlgorithmParameterException(
+                    "Unsupported key algorithm: " + keyAlgorithm);
+            }
+        }
+        checkCorrectParametersSpec(keyType, keySize, spec.getAlgorithmParameterSpec());
+        checkValidKeySize(keyAlgorithm, keyType, keySize);
 
+        mKeyAlgorithm = keyAlgorithm;
+        mKeyType = keyType;
+        mKeySize = keySize;
         mSpec = spec;
         mKeyStore = android.security.KeyStore.getInstance();
     }
