@@ -4872,6 +4872,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                 }
                 mUserManager.setUserRestriction(key, enabled, user);
+                if (enabled != alreadyRestricted) {
+                    if (UserManager.DISALLOW_SHARE_LOCATION.equals(key)) {
+                        // Send out notifications however as some clients may want to reread the
+                        // value which actually changed due to a restriction having been applied.
+                        final String property = Settings.Secure.SYS_PROP_SETTING_VERSION;
+                        long version = SystemProperties.getLong(property, 0) + 1;
+                        SystemProperties.set(property, Long.toString(version));
+
+                        final String name = Settings.Secure.LOCATION_PROVIDERS_ALLOWED;
+                        Uri url = Uri.withAppendedPath(Settings.Secure.CONTENT_URI, name);
+                        mContext.getContentResolver().notifyChange(url, null, true, userHandle);
+                    }
+                }
             } finally {
                 restoreCallingIdentity(id);
             }
