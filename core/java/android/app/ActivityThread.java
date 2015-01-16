@@ -2954,6 +2954,8 @@ public final class ActivityThread {
                             + ": " + e.toString(), e);
                 }
             }
+        } else {
+            Slog.i(TAG, "handleStopService: token=" + token + " not found.");
         }
         //Slog.i(TAG, "Running services: " + mServices);
     }
