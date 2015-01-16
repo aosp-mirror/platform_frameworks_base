@@ -9,7 +9,7 @@ page.title=Building and Running Overview
       Building Your Project from Android Studio</a></li>
     <li><a href="{@docRoot}tools/building/building-cmdline.html">
       Building Your Project from the Command Line</a></li>
-    <li><a href="{@docRoot}sdk/building/studio-build.html">
+    <li><a href="{@docRoot}sdk/installing/studio-build.html">
       Build System</a></li>
   </ol>
 </div>
