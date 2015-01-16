@@ -525,6 +525,7 @@ public class AudioService extends IAudioService.Stub {
 
     // Reference to BluetoothA2dp to query for AbsoluteVolume.
     private BluetoothA2dp mA2dp;
+    // lock always taken synchronized on mConnectedDevices
     private final Object mA2dpAvrcpLock = new Object();
     // If absolute volume is supported in AVRCP device
     private boolean mAvrcpAbsVolSupported = false;
@@ -2876,12 +2877,12 @@ public class AudioService extends IAudioService.Stub {
             List<BluetoothDevice> deviceList;
             switch(profile) {
             case BluetoothProfile.A2DP:
-                synchronized (mA2dpAvrcpLock) {
-                    mA2dp = (BluetoothA2dp) proxy;
-                    deviceList = mA2dp.getConnectedDevices();
-                    if (deviceList.size() > 0) {
-                        btDevice = deviceList.get(0);
-                        synchronized (mConnectedDevices) {
+                synchronized (mConnectedDevices) {
+                    synchronized (mA2dpAvrcpLock) {
+                        mA2dp = (BluetoothA2dp) proxy;
+                        deviceList = mA2dp.getConnectedDevices();
+                        if (deviceList.size() > 0) {
+                            btDevice = deviceList.get(0);
                             int state = mA2dp.getConnectionState(btDevice);
                             int delay = checkSendBecomingNoisyIntent(
                                                 AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
@@ -2976,9 +2977,9 @@ public class AudioService extends IAudioService.Stub {
         public void onServiceDisconnected(int profile) {
             switch(profile) {
             case BluetoothProfile.A2DP:
-                synchronized (mA2dpAvrcpLock) {
-                    mA2dp = null;
-                    synchronized (mConnectedDevices) {
+                synchronized (mConnectedDevices) {
+                    synchronized (mA2dpAvrcpLock) {
+                        mA2dp = null;
                         if (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)) {
                             makeA2dpDeviceUnavailableNow(
                                     mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
