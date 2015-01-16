@@ -1,5 +1,6 @@
 page.title=Google Play Services
 header.hide=1
+page.metaDescription=With Google Play services, your app can take advantage of the latest Google-powered features such as Maps, Analytics, and more: platform updates are distributed automatically as an APK through the Google Play Store.
 
 @jd:body
 

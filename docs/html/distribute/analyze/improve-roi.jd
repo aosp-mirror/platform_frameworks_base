@@ -1,0 +1,163 @@
+page.title=Improve Your Marketing ROI
+page.metaDescription=Combine the power of Analytics with other data sources to understand the performance of each of your marketing channels.
+page.tags="analytics, user behavior"
+
+@jd:body
+
+<p>
+  You want to get your apps in the hands of as many interested people as
+  possible and there are many ways of doing that. Whatever channels you use,
+  measuring their effectiveness is essential. You want to know that they're
+  not just driving installs, but acquiring users who are likely to engage or
+  convert over time &mdash; and that it's being done cost efficiently.
+</p>
+
+<h2 id="campaignattribution">Multi-Network Campaign Attribution</h2>
+
+<p>
+  Advertising campaigns are being used increasingly to drive new users to
+  download your app using different ad networks, formats, and payment methods.
+  A good campaign will bring not only downloads, but also users who are highly
+  engaged. If you want to get more visibility into which campaigns are driving
+  the highest value, measuring cost per download is only a partial view.
+</p>
+
+<p>
+  Combine the power of Google Analytics with other data you have to get an
+  unbiased view of the performance of each network: from cost per download to
+  ROI analysis for each of your marketing channels. You can tailor
+  your acquisition strategies and maximize in-app revenue. Here is an example
+  of how to approach this type of analysis:
+</p>
+
+<table>
+<tr>
+<th>Network</th>
+<th>Cost per Install (from Networks)</th>
+<th>30 day Revenue per user</th>
+<th># of downloads</th>
+<th>Total budget spent</th>
+<th>Total Revenue</th>
+<th>Profit</th>
+</tr>
+<tr>
+<td>Alpha</td>
+<td>$0.80</td>
+<td>$0.95</td>
+<td>3,500</td>
+<td>$2,800.00</td>
+<td>$3,325.00</td>
+<td>$525.00</td>
+</tr>
+<tr>
+<td>Beta</td>
+<td>$2.10</td>
+<td>$2.15</td>
+<td>2,500</td>
+<td>$5,250.00</td>
+<td>$5,375.00</td>
+<td>$125.00</td>
+</tr>
+<tr>
+<td>Gamma</td>
+<td>$5.00</td>
+<td>$6.20</td>
+<td>700</td>
+<td>$3,500.00</td>
+<td>$4,340.00</td>
+<td>$840.00</td>
+</tr>
+</table>
+
+<p>
+  When analyzing networks’ performance, it's important to take into
+  consideration more than just the cost per install. In the example, all the
+  networks are providing positive ROI, as the positive profit illustrates;
+  however, each channel has different strengths depending on the business
+  objective:
+</p>
+
+<ul>
+  <li>Network Alpha is very efficient in driving high download volumes, but
+  users are not spending as much as users from the other networks
+  </li>
+
+  <li>Network Beta is driving more revenue than any other network, but the net
+  profit is not as high
+  </li>
+
+  <li>Network Gamma has a strong profit, but it is not delivering similar
+  download volumes
+  </li>
+</ul>
+
+<p>
+  Depending on your business objectives you can approach acquisition marketing
+  in a variety of ways; for the best analytical approach capture a holistic
+  picture in order to optimize your campaigns &mdash; factoring engagement and
+  monetization data in with download statistics.
+</p>
+
+<h2 id="installs">Install and Post-Download Conversions</h2>
+
+<p>
+  Installs &mdash; or first launches &mdash; are a key type of conversion, but
+  it’s important to keep in mind that successful apps have users that return
+  regularly. Google Analytics has reports to measure post-download user
+  activities such as how often they come back, how much time they spend in the
+  app, and how much they spend. This can be sliced by acquisition channel to
+  understand which has the most impact.
+</p>
+
+<h2 id="campaigntracking">Campaign Tracking</h2>
+
+<p>
+  You can use a wide range of networks to drive installs of your apps. With
+  Google Analytics you can easily report campaign data from many networks. Once
+  you setup your URLs to pass the correct parameters, you'll see network
+  sources associated with in-app behavioral metrics. As a result, Google
+  Analytics provides a holistic view of your campaign performance from
+  downloads to purchases as well as user retention.
+</p>
+
+<h2 id="camaignreports">AdWords Campaign Reporting</h2>
+
+<p>
+  By linking your AdWords account(s) to Google Analytics you unlock the ability
+  to gain insights into acquisition campaigns, such as which keywords or ad
+  creative works best. These automatic reports show exactly how your search and
+  display campaigns are performing and offer rich insights into the kind of
+  users you’re driving to download your app.
+</p>
+
+<div>
+<img itemprop="image" src="{@docRoot}distribute/analyze/images/adwords_reporting.png">
+</div>
+
+
+<h2 id="flow">Google Play Referral Flow</h2>
+
+<p>
+  When you link your Analytics account to the Play Developer Console you'll
+  start seeing Google Play data automatically flowing into your account.
+  Without having to implement any additional code, you'll see traffic sources
+  for your Play listing page in addition to installs. Some of Google Analytics
+  active user reporting is available in the Play Developer Console as well.
+</p>
+
+<div>
+<img src="{@docRoot}distribute/analyze/images/flow.png">
+</div>
+
+  <div class="headerLine clearfloat">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" 
+  data-query="collection:distribute/analyzeimprove"
+  data-sortorder="-timestamp"
+  data-cardsizes="6x3"
+  data-maxresults="6">
+</div>
