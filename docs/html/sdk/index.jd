@@ -420,7 +420,8 @@ href="" >Download Android Studio</a>
   <li>Rich layout editor with support for theme editing.</li>
   <li>Lint tools to catch performance, usability, version compatibility, and other problems.</li>
   <li>ProGuard and app-signing capabilities.</li>
-  <li>Built-in support for Google Cloud Platform, making it easy to integrate Google Cloud Messaging and App Engine.</li>
+  <li>Built-in support for Google Cloud Platform, making it easy to integrate Google Cloud
+  Messaging and App Engine.</li>
   </ul>
 
 <p style="margin:0">
@@ -449,7 +450,8 @@ Studio</a>.</p>
 <ul>
 <li>Microsoft&reg;  Windows&reg;  8/7/Vista/2003 (32 or 64-bit)</li>
 <li>2 GB RAM minimum, 4 GB RAM recommended</li>
-<li>400 MB hard disk space + at least 1 GB for Android SDK, emulator system images, and caches</li>
+<li>400 MB hard disk space</li>
+<li>At least 1 GB for Android SDK, emulator system images, and caches</li>
 <li>1280 x 800  minimum screen resolution</li>
 <li>Java Development Kit (JDK) 7 </li>
 <li>Optional for accelerated emulator: Intel® processor with support for Intel® VT-x, Intel® EM64T
