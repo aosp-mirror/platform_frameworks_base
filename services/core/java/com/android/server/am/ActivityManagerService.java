@@ -1260,6 +1260,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int SEND_LOCALE_TO_MOUNT_DAEMON_MSG = 47;
     static final int DISMISS_DIALOG_MSG = 48;
     static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 49;
+    static final int NOTIFY_CLEARTEXT_NETWORK_MSG = 50;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1794,6 +1795,23 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                     mTaskStackListeners.finishBroadcast();
+                }
+                break;
+            }
+            case NOTIFY_CLEARTEXT_NETWORK_MSG: {
+                final int uid = msg.arg1;
+                final byte[] firstPacket = (byte[]) msg.obj;
+
+                synchronized (mPidsSelfLocked) {
+                    for (int i = 0; i < mPidsSelfLocked.size(); i++) {
+                        final ProcessRecord p = mPidsSelfLocked.valueAt(i);
+                        if (p.uid == uid) {
+                            try {
+                                p.thread.notifyCleartextNetwork(firstPacket);
+                            } catch (RemoteException ignored) {
+                            }
+                        }
+                    }
                 }
                 break;
             }
@@ -10060,6 +10078,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public void notifyCleartextNetwork(int uid, byte[] firstPacket) {
+        mHandler.obtainMessage(NOTIFY_CLEARTEXT_NETWORK_MSG, uid, 0, firstPacket).sendToTarget();
+    }
+
+    @Override
     public boolean shutdown(int timeout) {
         if (checkCallingPermission(android.Manifest.permission.SHUTDOWN)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -11689,8 +11712,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             sb.append("\n");
             if (info.crashInfo != null && info.crashInfo.stackTrace != null) {
                 sb.append(info.crashInfo.stackTrace);
+                sb.append("\n");
             }
-            sb.append("\n");
+            if (info.message != null) {
+                sb.append(info.message);
+                sb.append("\n");
+            }
 
             // Only buffer up to ~64k.  Various logging bits truncate
             // things at 128k.
