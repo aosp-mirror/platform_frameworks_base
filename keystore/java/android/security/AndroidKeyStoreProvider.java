@@ -33,6 +33,7 @@ public class AndroidKeyStoreProvider extends Provider {
         put("KeyStore." + AndroidKeyStore.NAME, AndroidKeyStore.class.getName());
 
         // java.security.KeyPairGenerator
-        put("KeyPairGenerator.RSA", AndroidKeyPairGenerator.class.getName());
+        put("KeyPairGenerator.EC", AndroidKeyPairGenerator.EC.class.getName());
+        put("KeyPairGenerator.RSA", AndroidKeyPairGenerator.RSA.class.getName());
     }
 }
