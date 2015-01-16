@@ -1,0 +1,117 @@
+page.title=Act Across Google Services
+page.metaDescription=Find your Analytics reports where you need them within Google Play, AdMob, and AdWords.
+page.tags="analytics, user behavior"
+
+@jd:body
+
+<p>
+  Google Analytics integrates seamlessly with a wide range of Google products.
+  You’ll find your Google Analytics data available to you in the Google Play
+  Developer Console, AdMob, AdWords, Google Tag Manager, and more. This makes
+  your Analytics data even more valuable, as it's available where you make
+  decisions in the Google products you use the most.
+</p>
+<p class="caution">
+  <strong>Tip</strong>: Make sure to link your Google Analytics account with
+  your Google Play developer account. This lets you set up an Analytics
+  property for each of your apps to track usage and behavior in the apps, all
+  in one place. For details on how to link your see <a href=
+  "https://support.google.com/analytics/answer/2956981">Link Google Analytics
+  and Google Play</a>.
+</p>
+
+<h2 id="remarket">Target and Remarket to Your Users in AdWords</h2>
+
+<p>
+  Google Analytics has one of the easiest to use yet most sophisticated
+  segmentation tools. You can slice and dice your data in tens-of-thousands of
+  different ways, by specifying the criteria you want to zoom-in on. Using
+  these segments you can create Audience Lists of app users to remarket to.
+  Perhaps you notice that certain users haven’t come back in 2 weeks, and you’d
+  like to reach out to remind them to return. Creating lists with this sort of
+  sophistication is easier than ever using Google Analytics. You can even
+  create lists directly from your reports when you find a segment that is
+  particularly interesting.
+</p>
+
+<div>
+<img src="{@docRoot}distribute/analyze/images/adwords_remarketing.png">
+</div>
+
+<h2 id="strategies">No More One-Size-Fits-All Monetization Strategies</h2>
+
+<p>
+  Users are different, so why force them all to have the same experience? Using
+  Audience Lists, you can serve users experiences that are best tuned to their
+  usage patterns. In AdMob, for example, you can select a group of high value
+  users, those who have made purchases, and serve them IAP ads and experiences;
+  however, for users that are less likely to make purchases you can serve them
+  ads instead. Pairing the right users with the right experiences is a key part
+  of a modern, targeted monetization strategy. And Google Analytics’ countless
+  segmentation possibilities means unlimited monetization opportunities.
+</p>
+<div>
+<img src="{@docRoot}distribute/analyze/images/in_app_targeting.png">
+</div>
+
+<p>
+  Delivering users the best experience with Google Analytics in AdMob: past
+  purchasers (left image) see ads for special in-app purchase promotions, while
+  occasional users (right image) contribute to your revenue with monetization
+  from ads.
+</p>
+
+
+<h2 id="richreporting">Rich Reporting Where You Need It Most</h2>
+
+<div>
+<img itemprop="image" src="{@docRoot}distribute/analyze/images/admob_integration.png">
+</div>
+
+<p>
+  See your data in context. Google Analytics is available inside AdMob without
+  leaving the page; with this integration, you can now slice and dice your data
+  in the same place that you Monetize your app. Using Analytics in AdMob, you
+  can identify interesting segments and then create Audience lists based on
+  those criteria. You can then target AdMob monetization strategies to those
+  different user groups, to serve them the best experiences.
+</p>
+
+<div>
+<img src="{@docRoot}distribute/analyze/images/developer_console.png">
+</div>
+
+<p>
+  By linking your Analytics account to the Google Play Developer Console, you
+  can see your in-app data in the context of the Play Store. This allows you to
+  see any differences in usage patterns by variables such as region, device,
+  time, day, and more.
+</p>
+
+<h2 id="optimize">Optimize Your App to Reach Your Objectives</h2>
+
+<p>
+  By using Content Experiments in Google Tag Manager, you can run A/B tests on
+  app elements. Are your social sharing buttons better at the top or bottom? Is
+  algorithm X or algorithm Y better for cross-selling products in your app?
+  With Content Experiments you can gather data from user to guide your
+  optimizations and take the guesswork out of the equation.
+</p>
+
+<div>
+<img src="{@docRoot}distribute/analyze/images/a_b_testing.png">
+</div>
+
+
+  <div class="headerLine clearfloat">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" 
+  data-query="collection:distribute/analyzeact"
+  data-sortorder="-timestamp"
+  data-cardsizes="6x3"
+  data-maxresults="6">
+</div>

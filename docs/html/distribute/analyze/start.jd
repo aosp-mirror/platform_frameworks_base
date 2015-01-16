@@ -1,0 +1,105 @@
+page.title=Get Started with Analytics
+page.metaDescription=Unlock the power of Analytics by choosing the implementation that works best for your app.
+page.tags="analytics, user behavior"
+page.image=distribute/images/gp-analytics-logo.jpg
+
+
+@jd:body
+
+<p>
+  Getting started with Google Analytics is easy. You can usually start
+  measuring your app's use by writing one line of code — or less! Google
+  Analytics is designed around the way you work, with flexible implementation
+  options to fit your needs. Take a look at these options and choose the right
+  one for you.
+</p>
+
+<p class="note">
+  <strong>Tip</strong>: Make sure you're sending Google Analytics the data to
+  help you make the best decisions about your app, by reviewing the <a href=
+  "https://developers.google.com/analytics/solutions/mobile-implementation-guide">
+  mobile app implementation guide</a>.
+</p>
+
+
+<h2 id="playservices">Google Play services SDK</h2>
+
+<img src="/images/google/gps.png" style="width:40%;float:right;padding-left:2em;">
+
+<p>
+  If you’re a Google Play developer, it’s likely you’re already using the
+  Google Play Services SDK. If you are, unlocking the power of Google Analytics
+  is only a line of code away. Here's how:
+</p>
+
+<ul>
+<li><a href="https://accounts.google.com/SignUp?continue=https%3A%2F%2Fwww.google.com%2Fanalytics%2Fmobile%2F&hl=en">Create
+your Google Analytics account</a>.</li>
+<li>Write down your tracking ID. </li>
+<li>Initialize Google Analytics in your app to start measuring activity immediately.</li> 
+</ul>
+
+<p>
+  Read the <a href=
+  "https://developers.google.com/analytics/solutions/mobile-implementation-guide">
+  step-by-step implementation guide</a> to get Google Analytics working in your
+  app and configure advanced customizations.
+</p>
+
+
+<h2 id="unityplugin">Unity Plugin</h2>
+
+<p>
+  If you’re a developer who uses an app engine to build games for multiple
+  platforms, consider using the Google Analytics Unity Plugin. With the Unity
+  Plugin, you add Google Analytics to your app as an in-line part of your
+  development process. When you compile your app for a given platform, the
+  appropriate Google Analytics SDK is added automatically &mdash; giving you
+  Google Analytics across Android, iOS, and other platforms with a single
+  implementation.
+</p>
+
+<p>
+  Find out more about <a href=
+  "https://www.google.com/url?q=https%3A%2F%2Fgithub.com%2Fgoogleanalytics%2Fgoogle-analytics-plugin-for-unity&sa=D&sntz=1&usg=AFrqEzdznBYiRnABaqfhOkFmVWvaYKlf0w">
+  setting up the Google Analytics Plugin for Unity</a>.
+</p>
+
+
+<h2 id="tagmanager">Google Tag Manager</h2>
+
+<p>
+  Looking for a way to update and improve your in-app analytics without having
+  to release a new version of your app waiting for your users to update? Then
+  Google Tag Manager is the solution for you. With Tag Manager for Apps, you
+  instrument your app once and then use the simple web interface to customize
+  your Google Analytics implementation. Updates you make using Tag Manager get
+  pushed to the installed instances of your app on user devices &mdash; so there's no
+  need for you to release an app update!
+</p>
+
+<p>
+  Google Tag Manager can also be used to control in-app configurations and to
+  power <a href="{@docRoot}distribute/analyze/build-better-apps.html#test">A/B
+  testing</a>. And since Tag Manager is a part of the Google Play Services SDK,
+  there’s no additional resources you need to keep track of.
+</p>
+
+<p>
+  Find out more about <a href=
+  "https://developers.google.com/tag-manager/android/v4/">implementing Google
+  Tag Manager</a>.
+</p>
+
+  <div class="headerLine clearfloat">
+  <h2 id="related-resources">
+    Related Resources
+  </h2>
+</div>
+
+<div class="resource-widget resource-flow-layout col-13" 
+  data-query="collection:distribute/analyzestart"
+  data-sortorder="-timestamp"
+  data-cardsizes="6x3"
+  data-maxresults="6">
+</div>
