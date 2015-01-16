@@ -2236,7 +2236,7 @@ adb shell am start -a android.intent.action.DIAL \
 
 
 <p>For more information, see
-<a href="{@docRoot}tools/help/adb.html#am">Using activity manager (am)</a>.</p>
+<a href="{@docRoot}tools/help/shell.html#am">ADB Shell Commands</a>.</p>
 
 
 

@@ -150,7 +150,12 @@
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/index.html"><span
 class="en">Tools Help</span></a></div>
     <ul>
-      <li><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/adb.html">adb</a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/help/shell.html">Shell commands</a></li>
+        </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>tools/help/android.html">android</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/avd-manager.html">AVD Manager</a></li>
       <li><a href="<?cs var:toroot ?>tools/help/bmgr.html">bmgr</a>
@@ -167,6 +172,7 @@ class="en">Tools Help</span></a></div>
       <li><a href="<?cs var:toroot ?>tools/help/mksdcard.html">mksdcard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/proguard.html" zh-cn-lang="ProGuard">ProGuard</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/sdk-manager.html">SDK Manager</a></li>
+       <li><a href="<?cs var:toroot ?>tools/help/sqlite3.html">sqlite3</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/systrace.html">Systrace</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/gltracer.html">Tracer for OpenGL ES</a></li>
        <li><a href="<?cs var:toroot ?>tools/help/traceview.html">Traceview</a></li>
