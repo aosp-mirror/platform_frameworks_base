@@ -146,6 +146,7 @@ public interface IApplicationThread extends IInterface {
     void scheduleCancelVisibleBehind(IBinder token) throws RemoteException;
     void scheduleBackgroundVisibleBehindChanged(IBinder token, boolean enabled) throws RemoteException;
     void scheduleEnterAnimationComplete(IBinder token) throws RemoteException;
+    void notifyCleartextNetwork(byte[] firstPacket) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -203,4 +204,5 @@ public interface IApplicationThread extends IInterface {
     int CANCEL_VISIBLE_BEHIND_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+52;
     int BACKGROUND_VISIBLE_BEHIND_CHANGED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+53;
     int ENTER_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+54;
+    int NOTIFY_CLEARTEXT_NETWORK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+55;
 }

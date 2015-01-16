@@ -24,9 +24,6 @@ import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_TETHERING;
-import static android.net.RouteInfo.RTN_THROW;
-import static android.net.RouteInfo.RTN_UNICAST;
-import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static com.android.server.NetworkManagementService.NetdResponseCode.ClatdStatusResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceGetCfgResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.InterfaceListResult;
@@ -38,6 +35,7 @@ import static com.android.server.NetworkManagementService.NetdResponseCode.Tethe
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
+import android.app.ActivityManagerNative;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetworkManagementEventObserver;
@@ -61,6 +59,7 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.telephony.DataConnectionRealTimeInfo;
@@ -70,9 +69,12 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.NetworkStatsFactory;
+import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
 import com.android.server.NativeDaemonConnector.Command;
 import com.android.server.NativeDaemonConnector.SensitiveArg;
@@ -87,8 +89,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
@@ -145,6 +145,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int InterfaceAddressChange    = 614;
         public static final int InterfaceDnsServerInfo    = 615;
         public static final int RouteChange               = 616;
+        public static final int StrictCleartext           = 617;
     }
 
     static final int DAEMON_MSG_MOBILE_CONN_REAL_TIME_INFO = 1;
@@ -174,12 +175,19 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private final NetworkStatsFactory mStatsFactory = new NetworkStatsFactory();
 
     private Object mQuotaLock = new Object();
+
     /** Set of interfaces with active quotas. */
+    @GuardedBy("mQuotaLock")
     private HashMap<String, Long> mActiveQuotas = Maps.newHashMap();
     /** Set of interfaces with active alerts. */
+    @GuardedBy("mQuotaLock")
     private HashMap<String, Long> mActiveAlerts = Maps.newHashMap();
     /** Set of UIDs with active reject rules. */
+    @GuardedBy("mQuotaLock")
     private SparseBooleanArray mUidRejectOnQuota = new SparseBooleanArray();
+    /** Set of UIDs with cleartext penalties. */
+    @GuardedBy("mQuotaLock")
+    private SparseIntArray mUidCleartextPolicy = new SparseIntArray();
 
     private Object mIdleTimerLock = new Object();
     /** Set of interfaces with active idle timers. */
@@ -198,6 +206,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     private volatile boolean mBandwidthControlEnabled;
     private volatile boolean mFirewallEnabled;
+    private volatile boolean mStrictEnabled;
 
     private boolean mMobileActivityFromRadio = false;
     private int mLastPowerStateFromRadio = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
@@ -495,11 +504,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             }
         }
 
+        try {
+            mConnector.execute("strict", "enable");
+            mStrictEnabled = true;
+        } catch (NativeDaemonConnectorException e) {
+            Log.wtf(TAG, "Failed strict enable", e);
+        }
+
         // push any existing quota or UID rules
         synchronized (mQuotaLock) {
             int size = mActiveQuotas.size();
             if (size > 0) {
-                Slog.d(TAG, "pushing " + size + " active quota rules");
+                Slog.d(TAG, "Pushing " + size + " active quota rules");
                 final HashMap<String, Long> activeQuotas = mActiveQuotas;
                 mActiveQuotas = Maps.newHashMap();
                 for (Map.Entry<String, Long> entry : activeQuotas.entrySet()) {
@@ -509,7 +525,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             size = mActiveAlerts.size();
             if (size > 0) {
-                Slog.d(TAG, "pushing " + size + " active alert rules");
+                Slog.d(TAG, "Pushing " + size + " active alert rules");
                 final HashMap<String, Long> activeAlerts = mActiveAlerts;
                 mActiveAlerts = Maps.newHashMap();
                 for (Map.Entry<String, Long> entry : activeAlerts.entrySet()) {
@@ -519,11 +535,21 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
             size = mUidRejectOnQuota.size();
             if (size > 0) {
-                Slog.d(TAG, "pushing " + size + " active uid rules");
+                Slog.d(TAG, "Pushing " + size + " active UID rules");
                 final SparseBooleanArray uidRejectOnQuota = mUidRejectOnQuota;
                 mUidRejectOnQuota = new SparseBooleanArray();
                 for (int i = 0; i < uidRejectOnQuota.size(); i++) {
                     setUidNetworkRules(uidRejectOnQuota.keyAt(i), uidRejectOnQuota.valueAt(i));
+                }
+            }
+
+            size = mUidCleartextPolicy.size();
+            if (size > 0) {
+                Slog.d(TAG, "Pushing " + size + " active UID cleartext policies");
+                final SparseIntArray local = mUidCleartextPolicy;
+                mUidCleartextPolicy = new SparseIntArray();
+                for (int i = 0; i < local.size(); i++) {
+                    setUidCleartextNetworkPolicy(local.keyAt(i), local.valueAt(i));
                 }
             }
         }
@@ -792,6 +818,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     }
                     throw new IllegalStateException(errorMessage);
                     // break;
+            case NetdResponseCode.StrictCleartext:
+                final int uid = Integer.parseInt(cooked[1]);
+                final byte[] firstPacket = HexDump.hexStringToByteArray(cooked[2]);
+                try {
+                    ActivityManagerNative.getDefault().notifyCleartextNetwork(uid, firstPacket);
+                } catch (RemoteException ignored) {
+                }
+                break;
             default: break;
             }
             return false;
@@ -1634,6 +1668,49 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 } else {
                     mUidRejectOnQuota.delete(uid);
                 }
+            } catch (NativeDaemonConnectorException e) {
+                throw e.rethrowAsParcelableException();
+            }
+        }
+    }
+
+    @Override
+    public void setUidCleartextNetworkPolicy(int uid, int policy) {
+        if (Binder.getCallingUid() != uid) {
+            mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        }
+
+        synchronized (mQuotaLock) {
+            final int oldPolicy = mUidCleartextPolicy.get(uid, StrictMode.NETWORK_POLICY_ACCEPT);
+            if (oldPolicy == policy) {
+                return;
+            }
+
+            if (!mStrictEnabled) {
+                // Module isn't enabled yet; stash the requested policy away to
+                // apply later once the daemon is connected.
+                mUidCleartextPolicy.put(uid, policy);
+                return;
+            }
+
+            final String policyString;
+            switch (policy) {
+                case StrictMode.NETWORK_POLICY_ACCEPT:
+                    policyString = "accept";
+                    break;
+                case StrictMode.NETWORK_POLICY_LOG:
+                    policyString = "log";
+                    break;
+                case StrictMode.NETWORK_POLICY_REJECT:
+                    policyString = "reject";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown policy " + policy);
+            }
+
+            try {
+                mConnector.execute("strict", "set_uid_cleartext_policy", uid, policyString);
+                mUidCleartextPolicy.put(uid, policy);
             } catch (NativeDaemonConnectorException e) {
                 throw e.rethrowAsParcelableException();
             }

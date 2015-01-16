@@ -667,6 +667,15 @@ public abstract class ApplicationThreadNative extends Binder
             reply.writeNoException();
             return true;
         }
+
+        case NOTIFY_CLEARTEXT_NETWORK_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            final byte[] firstPacket = data.createByteArray();
+            notifyCleartextNetwork(firstPacket);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -1344,6 +1353,15 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
         mRemote.transact(ENTER_ANIMATION_COMPLETE_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void notifyCleartextNetwork(byte[] firstPacket) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeByteArray(firstPacket);
+        mRemote.transact(NOTIFY_CLEARTEXT_NETWORK_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 }

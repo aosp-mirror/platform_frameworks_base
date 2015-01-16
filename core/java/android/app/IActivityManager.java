@@ -464,6 +464,8 @@ public interface IActivityManager extends IInterface {
     public void notifyLaunchTaskBehindComplete(IBinder token) throws RemoteException;
     public void notifyEnterAnimationComplete(IBinder token) throws RemoteException;
 
+    public void notifyCleartextNetwork(int uid, byte[] firstPacket) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -782,4 +784,7 @@ public interface IActivityManager extends IInterface {
     int BOOT_ANIMATION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+237;
     int GET_TASK_DESCRIPTION_ICON_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+238;
     int LAUNCH_ASSIST_INTENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+239;
+
+    // Start of M transactions
+    int NOTIFY_CLEARTEXT_NETWORK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+280;
 }
