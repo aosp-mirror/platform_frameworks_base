@@ -518,7 +518,7 @@ public class GameView extends View {
         // Check that the event came from a game controller
         if ((event.getSource() &amp; InputDevice.SOURCE_JOYSTICK) ==
                 InputDevice.SOURCE_JOYSTICK &amp;&amp;
-                event.getAction() == MotionEvent.ACTION_MOVE)
+                event.getAction() == MotionEvent.ACTION_MOVE) {
 
             // Process all historical movement samples in the batch
             final int historySize = event.getHistorySize();
@@ -609,9 +609,6 @@ private void processJoystickInput(MotionEvent event,
     }
 
     // Update the ship object based on the new x and y values
-    ...
-
-    return true;
 }
 </pre>
 <p>To support game controllers that have more sophisticated
