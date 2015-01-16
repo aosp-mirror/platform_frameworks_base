@@ -76,6 +76,15 @@ final class DelayedMessageBuffer {
         }
     }
 
+    boolean isBuffered(int opcode) {
+        for (HdmiCecMessage message : mBuffer) {
+            if (message.getOpcode() == opcode) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void processAllMessages() {
         // Use the copied buffer.
         ArrayList<HdmiCecMessage> copiedBuffer = new ArrayList<HdmiCecMessage>(mBuffer);
