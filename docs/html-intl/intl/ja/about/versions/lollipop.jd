@@ -1,0 +1,256 @@
+page.title=Android Lollipop
+
+@jd:body
+
+
+
+
+
+
+
+
+
+
+  <div style="padding:0px 0px 0px 20px;float:right;margin:0 -10px 0 0">
+    <img src="{@docRoot}images/home/l-hero_2x.png" srcset="{@docRoot}images/home/l-hero.png 1x, {@docRoot}images/home/l-hero_2x.png 2x" width="460" height="300" >
+  </div>
+
+  <div class="landing-docs" style="float:right;clear:both;margin:68px 0 2em 3em;">
+  <div class="col-4 normal-links highlights" style="font-size:12px;">
+    <h3 id="thisd" >主なデベロッパー機能</h3>
+    <ul style="list-style-type:none;">
+  <li><a href="#Material">Material Design</a></li>
+  <li><a href="#Perf">パフォーマンス重視</a></li>
+  <li><a href="#Notifications">通知</a></li>
+  <li><a href="#TV">アプリを大画面で</a></li>
+  <li><a href="#Documents">アプリのドキュメント化</a></li>
+  <li><a href="#Connectivity">進化した接続性</a></li>
+  <li><a href="#Graphics">高性能グラフィックス</a></li>
+  <li><a href="#Audio">さらに強化された音声</a></li>
+  <li><a href="#Camera">カメラと動画の拡張</a></li>
+  <li><a href="#Work">職場での Android</a></li>
+  <li><a href="#ScreenCapture">画面のキャプチャと共有</a></li>
+  <li><a href="#Sensors">新しいタイプのセンサー</a></li>
+  <li><a href="#WebView">Chromium WebView</a></li>
+  <li><a href="#Accessibility">ユーザー補助機能と入力</a></li>
+  <li><a href="#Battery">省電力アプリ用のツール</a></li>
+    </ul>
+  </div>
+</div>
+
+
+
+
+
+
+
+<p>Android 5.0 Lollipop は、これまでの Android の中で最も大きく刷新された意欲的なリリースです。</p>
+
+<p>このリリースには、ユーザー向けの新しい機能だけでなく、デベロッパー向けに数多くの API が追加されています。これらの API を使用することで、携帯電話、タブレット、ウェアラブルに加え、テレビや自動車用にも Android を拡張できます。</p>
+
+<p>新しいデベロッパー向け API の概要については、<a href="{@docRoot}about/versions/android-5.0.html">Android 5.0 API</a> をご覧ください。Android 5.0 のユーザー向けの新機能については <a href="http://www.android.com/versions/lollipop-5-0/">www.android.com</a> をご覧ください。</p>
+
+
+
+<h2 id="Material">Material Design</h2>
+
+<p>Android 5.0 では新たに <a href="http://www.google.com/design/spec">Material Design</a> が導入され、拡張 UI ツールキットを使用することで新しいデザイン パターンをアプリに簡単に統合できるようになりました。  </p>
+
+
+
+<p>新しい <strong>3D ビュー</strong>機能では、z レベルを設定することでビュー階層から要素を持ち上げることができるようになりました。また、<strong>リアルタイム シャドウ</strong>機能により、要素が移動しても影を追随させることができます。</p>
+
+
+<p><strong>アクティビティ遷移</strong>機能が組み込まれたことで、美しいアニメーションを使って次の状態へスムーズに遷移できるようになりました。マテリアル テーマを使用すると、アクティビティの遷移がさらにスムーズになります。たとえば、アクティビティ間で<strong>共有視覚要素</strong>を使用できるようになりました。</p>
+
+
+
+<div style="width:290px;margin-right:35px;float:left">
+  <div class="framed-nexus5-port-span-5">
+  <video class="play-on-hover" autoplay="">
+    <source src="/design/material/videos/ContactsAnim.mp4">
+    <source src="/design/videos/ContactsAnim.webm">
+    <source src="/design/videos/ContactsAnim.ogv">
+  </video>
+  </div>
+  <div style="font-size:10pt;margin-left:20px;margin-bottom:30px">
+    <em></em>端末画面をクリックすると動作が再現されます
+  </div>
+</div>
+
+
+<p>アプリ内のタップ コントロール（ボタン、チェックボックスなど）にリップル アニメーションを適用できます。
+
+<p>XML でベクター ドローアブルを定義して、さまざまな方法でアニメーション化することも可能です。ベクター ドローアブルは定義を変更することなく拡大縮小できるため、単色のアプリ内アイコンに最適です。</p>
+
+<p>システム管理の処理スレッドとして <strong>RenderThread</strong> が追加されており、メインの UI スレッドに遅延が発生してもアニメーションをスムーズに再生できます。 </p>
+
+
+<h2 id="Perf">パフォーマンス重視</h2>
+
+<p>Android 5.0 では、より高速でスムーズな演算処理が実現します。</p>
+
+<p>新しい <strong>ART ランタイム</strong>に完全に移行しました。ART は基礎から徹底的に再構築したランタイムで、AOT（ahead-of-time）、JIT（just-in-time）、インタプリタ型のコードをまとめて処理できます。ARM、x86、MIPS アーキテクチャに対応した 64 ビット完全互換のランタイムです。</p>
+
+<p>ART は、アプリのパフォーマンスと応答性を改善します。ガベージ コレクションを効率的することで、GC イベントによる一時停止の回数や時間を減らしました。垂直同期の期間にうまく適合するようになったことで、アプリがフレームをスキップすることもなくなります。また、メモリを動的に移動してフォアグラウンドのパフォーマンスも最適化しています。 </p>
+
+<p>Android 5.0 では、Nexus 9 の NVIDIA Tegra K1 で採用されている<strong>64 ビット アーキテクチャ</strong>のプラットフォーム サポートを導入しています。最適化によって広いアドレス空間が提供され、特定の演算負荷の処理能力が向上しました。Java で記述されているアプリは、修正なしで自動的に 64 ビット アプリとして実行されます。ネイティブ コードを使用するアプリのためには、ARM v8、x86-64、MIPS-64 用の新しい ABI をサポートするため NDK を拡張しました。</p>
+
+<p>Android 5.0 では、パフォーマンスをさらに向上させるため、A/V 同期についても改善に取り組みました。音声と映像のパイプラインを搭載したことでタイムスタンプの正確性が向上し、動画アプリやゲームのコンテンツの同期がスムーズに行われるようになりました。</p>
+
+
+<h2 id="Notifications">通知</h2>
+
+<p>Android 5.0 の通知は、より見やすく、アクセスしやすく、カスタマイズしやすくなりました。 </p>
+
+<img src="{@docRoot}images/versions/notification-headsup.png" style="float:right; margin:0 0 40px 60px" width="300" height="224" />
+
+<p>さまざまな通知の詳細を<strong>ロック画面</strong>に表示できるようになり、通知内容をすべて表示するか、一部だけ表示するか、表示しないかをユーザーが選択できます。 </p>
+
+<p>着信などの重要な通知は<strong>警告通知</strong>と呼ばれるフローティング ウィンドウに表示されるため、使用中のアプリを表示したまま応答したり破棄したりできます。</p>
+
+<p>Android 5.0 では、通知に<strong>新しいメタデータ</strong>を追加して、関連付けられている連絡先（ランク付け用）、カテゴリ、優先度を収集できるようになりました。</p>
+
+<p>新たに追加されたメディア通知テンプレートを使用すると、最大 6 つの操作ボタンを使用して、一貫性のあるメディア コントロール（例: 「いいね」や「+1」）を通知に追加できます。RemoteViews はもう必要ありません。</p>
+
+
+
+<h2 id="TV">アプリを大画面で</h2>
+
+<p><a href="http://developer.android.com/tv/index.html">Android TV</a> は、アプリを大画面で楽しむためのテレビ用プラットフォームを提供します。シンプルなホーム画面をベースに構成されており、ユーザーへのおすすめや音声検索によってコンテンツを簡単に見つけることができます。</p>
+
+<p>Android TV なら、アプリやゲームを<strong>迫力の大画面</strong>で楽しむことができ、ゲーム コントローラなどの入力デバイスにも対応しています。Android では <a href="{@docRoot}tools/support-library/features.html#v17-leanback">v17 サポート ライブラリ</a>に <strong>Leanback UI フレームワーク</strong>が用意されており、離れた場所からでも操作しやすい 10 フィート UI を簡単に実現できます。</p>
+
+<p><strong>Android TV Input Framework</strong>（TIF）を使用すると、HDMI 入力、テレビチューナー、IPTV 対応受信機などからの動画ストリームを TV アプリで処理できます。TV Input が公開しているメタデータを使用することで、放送中のテレビ番組を検索できるようにしたり、ユーザーへのおすすめを表示したりできます。また、HDMI-CEC コントロール サービスを使用して、複数のデバイスを 1 つのリモコンで操作できるようにすることも可能です。 </p>
+
+<p>TV Input フレームワークを使用すると、さまざまな入力ソースからのテレビ番組をまとめ、ユーザーが 1 つのインターフェースで閲覧したり視聴したりできるようにすることができます。提供するコンテンツの TV Input サービスを作成することで、ユーザーが TV デバイスでコンテンツを視聴する可能性を高めることができます。</p>
+
+
+
+<img src="{@docRoot}images/versions/recents_screen_2x.png" srcset="{@docRoot}images/versions/recents_screen.png 1x, {@docRoot}images/versions/recents_screen_2x.png 2x" style="float:right; margin:0 0 40px 60px" width="300" height="521" />
+
+<h2 id="Documents">アプリのドキュメント化</h2>
+
+<p>Android 5.0 では、[概要]（以前は [最近]）のスペースをデザインしなおして用途を広げ、マルチタスクにも使えるようにしました。</p>
+
+<p>新しい API を使用することで、アプリ内の各アクティビティを個別のドキュメントとして、他の最近の画面と並べて表示できます。</p>
+
+<p>これにより、ユーザーがコンテンツやサービスにすばやくアクセスできるようになります。たとえば、生産性アプリのファイル、ゲームでのプレーヤーの組み合わせ、メッセージ アプリのチャットなどを、別々のドキュメントにして同時に表示できます。 </p>
+
+
+
+<h2 id="Connectivity">進化した接続性</h2>
+
+<p>Android 5.0 に追加された新しい API を使用すると、アプリと <strong>BLE</strong>（Bluetooth Low Energy）の同時処理が可能になり、スキャン（セントラル モード）とアドバタイズ（ペリフェラル モード）の両方を行うことができます。</p>
+
+<p>新しい<strong>マルチネットワーキング</strong>機能により、アプリから特定の機能を利用できるネットワーク（Wi-Fi、モバイル、従量制、特定のネットワーク機能を提供するネットワークなど）を探せるようになりました。ネットワークが見つかったら、アプリから接続を要求したり、切断やネットワーク変更に対して応答したりできます。</p>
+
+<p><strong>NFC</strong> API では、アプリから NFC AID（Application ID）を動的に登録できるようになりました。また、アクティブなサービスごとに望ましいカード エミュレーション サービスを設定したり、UTF-8 テキストデータを格納する NDEF レコードを作成したりすることも可能になりました。</p>
+
+
+
+<h2 id="Graphics">高性能グラフィックス</h2>
+
+<p><strong><a href="http://www.khronos.org/opengles/3_X/">Khronos OpenGL ES 3.1</a></strong> をサポートしたことで、対応デバイスで実行するゲームやアプリに高性能な 2D / 3D グラフィックス機能を利用できるようになりました。 </p>
+
+<p>OpenGL ES 3.1 により、コンピュート シェーダー、ステンシル テクスチャ、アクセラレータによる視覚効果、高品質 ETC2/EAC テクスチャ圧縮、高度なテクスチャ レンダリング、標準化されたテクスチャ サイズ、レンダー バッファ フォーマットなど、さまざまな機能が追加されました。</p>
+
+
+<div class="figure" style="width:350px; margin:0 0 0 60px">
+<img src="{@docRoot}images/versions/rivalknights.png" style="float:right;" width="350" height="525" />
+<p class="img-caption">Gameloft の Rival Knights では、AEP の ASTC（Adaptive Scalable Texture Compression）と ES 3.1 のコンピュート シェーダーを使用して、ハイ ダイナミック レンジ（HDR）によるブルーム効果や詳細なグラフィックスを実現しています。</p>
+</div>
+
+<p>Android 5.0 には OpenGL ES 拡張をまとめた <strong>Android Extension Pack</strong>（AEP）も追加されており、テッセレーション シェーダー、ジオメトリ シェーダー、ASTC テクスチャ圧縮、サンプル単位での補間とシェーディングなど、高度なレンダリング機能を使用できます。AEP を使用することで、GPU を無駄なく利用して高性能なグラフィックスを実現できます。</p>
+
+
+<h2 id="Audio">さらに強化された音声</h2>
+
+<p>新しい音声キャプチャ デザインにより、<strong>音声入力の待ち時間が短縮</strong>されました。新しいデザインには、ブロックが読み込み中にしか発生しない高速キャプチャ スレッド、ネイティブ サンプル レートでの高速トラック キャプチャ クライアント、チャンネル カウント、ビット深度、リサンプリングを提供する通常のキャプチャ クライアント、チャンネルのアップミックスとダウンミックス、ビット深度の調整などが含まれています。</p>
+
+<p>マルチチャンネルの<strong>音声ストリーム ミキシング</strong>を使うと、5.1 や 7.1 を含め最大 8 つのチャンネルをミキシングできる本格的なオーディオ アプリを実現できます。</p>
+
+<p>アプリでは、メディア コンテンツを公開したり、他のアプリが公開している<strong>メディアを閲覧</strong>したり、その再生をリクエストしたりできます。コンテンツはクエリ可能なインターフェースで公開されるため、端末に保持する必要はありません。</p>
+
+<p>また、特定のロケール、音質、レイテンシ速度に関連付けられた音声プロフィールを使うことで、<strong>合成音声によるテキスト読み上げ</strong>をきめ細かくコントロールできます。新しい API では、合成エラーチェック、ネットワーク合成、言語検出、ネットワーク フォールバックなどへの対応も進めました。</p>
+
+<p>Android が標準の <strong>USB オーディオ</strong>機器にも対応したことで、USB ヘッドセット、スピーカー、マイクなどの高性能デジタル機器も使用できるようになりました。Android 5.0 には、<strong>Opus</strong> 音声コーデックのサポートも追加されています。</p>
+
+<p>メディア再生をコントロールするための新しい <strong>{@link android.media.session.MediaSession}</strong> API を使用することで、複数の画面にわたって一貫性のあるメディア コントロールや各種コントローラを簡単に表示できるようになりました。</p>
+
+
+<h2 id="Camera">カメラと動画の拡張</h2>
+
+<p>Android 5.0 では<strong>カメラ用の API</strong> が一新されており、YUV、Bayer RAW などの未加工フォーマットのキャプチャや、露出時間、ISO 感度、フレーム単位のフレーム持続時間などのパラメータ調整が可能です。カメラ パイプラインが完全に同期するようになったことで、対応デバイスを使えば未圧縮のフル解像度 YUV イメージを 30 FPS でキャプチャできます。</p>
+
+<p>イメージと一緒に、ノイズモデルや光情報などのメタデータをカメラからキャプチャすることもできます。</p>
+
+<p>ネットワーク経由で動画ストリームを送信するアプリでは、H.265 <strong>HEVC（High Efficiency Video Coding）</strong>を利用して動画データのエンコードとデコードを最適化できるようになりました。 </p>
+
+<p>Android 5.0 には<strong>マルチメディア トンネリング</strong>のサポートも追加されており、超高解像度（4K）のコンテンツを楽しむための最適な環境を提供するほか、圧縮された音声データと動画データを一緒に再生することも可能です。 </p>
+
+
+
+<div class="figure" style="width:320px; margin:1em 0 0 20px;padding-left:2em;">
+<img style="float:right; margin:0 1em 1em 2em"    src="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png"    srcset="{@docRoot}images/android-5.0/managed_apps_launcher@2x.png 2x"    alt="" width="300"  />
+<p class="img-caption">個人用と仕事用のアプリをまとめて表示し、バッジで簡単に識別できます。</p>
+</div>
+
+
+<h2 id="Work">職場での Android</h2>
+
+<p>企業環境において BYOD（Bring-Your-Own-Device）を実現するには、<a href="{@docRoot}about/versions/android-5.0.html#Enterprise">管理されたプロビジョニング手続き</a>によって端末の安全なワーク プロフィールを作成する必要があります。ランチャー内のアプリにワークバッジが表示されている場合は、そのアプリがワーク プロフィール内で IT 管理者によって管理されていることを表します。</p>
+
+<p>通知の表示は個人プロフィールとワーク プロフィールが 1 つに統合されていますが、データはプロフィール別に分けて管理されます。同じアプリを両方のプロフィールで使用しても、それぞれのデータは別々に保管されます。</p>
+
+<p>会社所有の端末は、IT 管理者が新しい端末として登録して<a href="{@docRoot}about/versions/android-5.0.html#DeviceOwner">端末所有者</a>を設定します。会社所有の端末にグローバル端末設定を定義する端末所有者アプリをインストールすることで、従業員はその端末を持ち出すことができるようになります。</p>
+
+
+
+<h2 id="ScreenCapture">画面のキャプチャと共有</h2>
+
+<p>Android 5.0 では、アプリに画面キャプチャや画面共有の機能を追加できます。 </p>
+
+<p>ユーザーの承諾が得られれば、画面から安全性の低い動画をキャプチャしてネットワークに配信することも可能です。</p>
+
+
+<h2 id="Sensors">新しいタイプのセンサー</h2>
+
+<p>Android 5.0 には、新たに<strong>傾き検出</strong>センサーが追加され、対応デバイスでの操作の認識精度が向上しました。また、<strong>心拍数センサー</strong>も追加され、デバイスに接触している人の心拍数を記録できるようになりました。 </p>
+
+<p>新しい<strong>操作複合センサー</strong>を使用すると、「ウェイクアップ」（オンにする）ジェスチャー、「ピックアップ」（手に取る）ジェスチャー、「グランス」（ちらりと見る）ジェスチャーなどの特殊な操作を検出できます。<em></em><em></em><em></em></p>
+
+
+
+<h2 id="WebView">Chromium WebView</h2>
+
+<div style="float:right;margin:1em 2em 1em 2em;">
+  <img src="/images/kk-chromium-icon.png" alt="" height="160" style="margin-bottom:0em;">
+</div>
+
+<p>Android 5.0 の初期リリースには、Chromium M37 リリースをベースとした Chromium for {@link android.webkit.WebView} が含まれており、これにより <strong>WebRTC</strong>、<strong>WebAudio</strong>、<strong>WebGL</strong> がサポートされます。 </p>
+
+<p>Chromium M37 には、すべての <strong>Web Components</strong> 仕様（Custom Elements、Shadow DOM、HTML Imports、Templates）のネイティブ サポートも含まれています。つまり、<a href="http://polymer-project.org/">Polymer</a> とその <a href="https://www.polymer-project.org/docs/elements/material.html">Material Design 要素</a>を WebView で、Polyfill なしで使用できるということです。</p>
+
+<p>Android 4.4 以降の WebView は Chromium をベースにしていますが、Chromium レイヤは今後は Google Play から更新できるようになります。</p>
+
+<p>Chromium の新バージョンがリリースされたとき、Android 5.0 以上で WebView を使用しているアプリのウェブ API の更新やバグ修正がある場合は、ユーザーが Google Play から更新することで WebView の最新の拡張とバグ修正を確実に適用できます。</p>
+
+
+
+<h2 id="Accessibility">ユーザー補助機能と入力</h2>
+
+<p>新しいユーザー補助機能 API を使用すると、視覚に障がいのないユーザーが操作できる画面上のウィンドウのプロパティに関する詳しい情報を取得し、UI 要素の標準入力操作とカスタム入力操作を定義できます。</p>
+
+<p>新しい IME（Input Method Editor）API を使用すると、入力方法から直接他の IME に切り替えることができます。</p>
+
+
+
+<h2 id="Battery">省電力アプリ用のツール</h2>
+
+<p>新しい<strong>ジョブ スケジューリング</strong> API を使用すると、システムのジョブの実行を延期することで電池消費量を最適化できます。延期したジョブは、後で実行するように指定したり、特定の条件（充電中、Wi-Fi 接続時など）を満たしたときに実行したりできます。</p>
+
+<p>新たに追加された <code>dumpsys batterystats</code> コマンドで<strong>電池の使用統計情報</strong>を生成すると、システム全体での電池使用状況や、アプリが電池使用量にどの程度影響しているかを理解できます。電池が消費されたイベントの履歴、UID やシステム コンポーネントごとのおおよその消費電力量なども把握できます。</p>
+
+<img src="{@docRoot}images/versions/battery_historian.png" srcset="{@docRoot}images/versions/battery_historian@2x.png 2x" alt="" width="760" height="462"  />
+<p class="img-caption">新しい電池履歴ツールを使用すると、<code>dumpsys batterystats</code> で生成した統計情報を視覚化でき、電池関連のデバッグに便利です。このツールは <a href="https://github.com/google/battery-historian">https://github.com/google/battery-historian</a> から入手できます。</p>
