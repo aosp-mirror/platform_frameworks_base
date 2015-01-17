@@ -1,0 +1,633 @@
+page.title=APIs do Android 5.0
+excludeFromSuggestions=true
+sdk.platform.version=5.0
+sdk.platform.apiLevel=21
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>Neste documento <a href="#" onclick="hideNestedItems('#toc44',this);return false;" class="header-toggle"> <span class="more">mostrar mais</span> <span class="less" style="display:none">mostrar menos</span></a></h2>
+
+<ol id="toc44" class="hide-nested">
+  <li><a href="#ApiLevel">Atualizar seu nível de API desejado</a></li>
+  <li><a href="#Behaviors">Alterações importantes de comportamento</a>
+    <ol>
+      <li><a href="#ART">Caso você ainda não tenha testado seu app no novo tempo de execução do Android (ART)…</a></li>
+      <li><a href="#BehaviorNotifications">Caso seu app implemente notificações…</a></li>
+      <li><a href="#BehaviorMediaControl">Caso seu app use RemoteControlClient…</a></li>
+<li><a href="#BehaviorGetRecentTasks">Caso seu app use getRecentTasks()…</a></li>
+<li><a href="#64BitSupport">Caso você esteja usando o Kit de desenvolvimento nativo do Android (NDK, na sigla em inglês)…</a></li>
+<li><a href="#BindService">Caso seu app esteja associado a um serviço…</a></li>
+<li><a href="#BehaviorWebView">Caso seu app use WebView…</a></li>
+    </ol>
+  </li>
+  <li><a href="#UI">Interface do usuário</a>
+    <ol>
+      <li><a href="#MaterialDesign">Suporte ao material design</a></li>
+      <li><a href="#Recents">Documentos simultâneos recentes e atividades na tela de recentes</a></li>
+      <li><a href="#WebView">Atualizações de WebView</a></li>
+      <li><a href="#ScreenCapture">Compartilhamento e captura de tela</a></li>
+    </ol>
+  </li>
+  <li><a href="#Notifications">Notificações</a>
+    <ol>
+      <li><a href="#LockscreenNotifications">Notificações na tela bloqueada</a></li>
+      <li><a href="#NotificationsMetadata">Metadados de notificações</a></li>
+    </ol>
+  </li>
+  <li><a href="#Graphics">Gráficos</a>
+    <ol>
+      <li><a href="#OpenGLES-3-1">Suporte para OpenGL ES 3.1 </a></li>
+      <li><a href="#AndroidExtensionPack">Pacote de extensões para Android</a></li>
+    </ol>
+  </li>
+  <li><a href="#Media">Mídia</a>
+    <ol>
+      <li><a href="#Camera-v2">API de câmera para funcionalidades avançadas da câmera</a></li>
+      <li><a href="#AudioPlayback">Reprodução de áudio</a></li>
+      <li><a href="#MediaPlaybackControl">Controle de reprodução de mídia</a></li>
+      <li><a href="#MediaBrowsing">Navegação de mídia</a></li>
+    </ol>
+  </li>
+  <li><a href="#Storage">Armazenamento</a>
+    <ol>
+      <li><a href="#DirectorySelection">Seleção do diretório</a></li>
+    </ol>
+  </li>
+  <li><a href="#Wireless">Sem fio e conectividade</a>
+    <ol>
+      <li><a href="#Multinetwork">Várias conexões de rede</a></li>
+      <li><a href="#BluetoothBroadcasting">Transmissão por Bluetooth</a></li>
+      <li><a href="#NFCEnhancements">Aprimoramentos na NFC</a></li>
+    </ol>
+  </li>
+  <li><a href="#Power">Project Volta</a>
+    <ol>
+      <li><a href="#JobScheduler">Agendamento de tarefas</a></li>
+      <li><a href="#PowerMeasurementTools">Ferramentas do desenvolvedor para uso da bateria</a>
+    </ol>
+  </li>
+  <li><a href="#Enterprise">Android no local de trabalho e na educação</a>
+    <ol>
+      <li><a href="#ManagedProvisioning">Aprovisionamento gerenciado</a></li>
+      <li><a href="#DeviceOwner">Proprietário do dispositivo</a></li>
+      <li><a href="#ScreenPinning">Fixação de tela</a></li>
+    </ol>
+  </li>
+  <li><a href="#System">Sistema</a>
+    <ol>
+      <li><a href="#AppUsageStatistics">Estatísticas de uso do app</a></li>
+    </ol>
+  </li>
+  <li><a href="#Printing">Estrutura de impressão</a>
+    <ol>
+      <li><a href="#PDFRender">Processar PDF como bitmap</a></li>
+    </ol>
+  </li>
+  <li><a href="#TestingA11y">Testes e acessibilidade</a>
+    <ol>
+      <li><a href="#TestingA11yImprovements">Testes e aprimoramentos na acessibilidade</a></li>
+    </ol>
+  </li>
+  <li><a href="#IME">IME</a>
+    <ol>
+      <li><a href="#Switching">Fácil de alternar entre os idiomas de entrada</a></li>
+    </ol>
+  </li>
+  <li><a href="#Manifest">Declarações do manifesto</a>
+    <ol>
+      <li><a href="#ManifestFeatures">Recursos obrigatórios declaráveis</a></li>
+      <li><a href="#Permissions">Permissões de usuário</a></li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Diferenças de API</h2>
+<ol>
+<li><a href="{@docRoot}sdk/api_diff/21/changes.html">Nível de API de 20 a 21 »</a> </li>
+<li><a href="{@docRoot}sdk/api_diff/preview-21/changes.html">Visualização do desenvolvedor de L a 21 »</a> </li>
+</ol>
+
+</div>
+</div>
+
+<p>Nível de API: {@sdkPlatformApiLevel}</p>
+
+<p>O Android 5.0 (<a href="{@docRoot}reference/android/os/Build.VERSION_CODES.html#LOLLIPOP">LOLLIPOP</a>) oferece novos recursos para usuários e desenvolvedores de apps. Este documento fornece uma introdução às novas APIs mais relevantes.</p>
+
+<p>Para uma visão de alto nível dos novos recursos da plataforma, veja os <a href="{@docRoot}about/versions/lollipop.html">destaques do Android Lollipop</a>.</p>
+
+
+<h3 id="Start">Começar a desenvolver</h3>
+
+<p>Para começar a criar apps para o Android 5.0, primeiro é preciso <a href="{@docRoot}sdk/index.html">conseguir o SDK do Android</a>. Depois disso, use o <a href="{@docRoot}tools/help/sdk-manager.html">Gerenciador de SDK</a> para fazer o download das imagens do sistema e da plataforma de SDK do Android 5.0.</p>
+
+<p style=" padding: 10px; background: #eee; width: 445px; border: 1px solid #ccc; margin-top: 20px;">Para testar seus apps em um dispositivo real, inclua um Nexus 5 ou 7 com a <br><a href="/preview/index.html#Start"><b>IMAGEM DE VISUALIZAÇÃO DO SISTEMA DO ANDROID</b></a>.</p>
+
+
+
+<h3 id="ApiLevel">Atualizar seu nível de API desejado</h3>
+
+<p>Para melhor otimizar seu app para os dispositivos executando Android {@sdkPlatformVersion}, defina <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> como <code>"{@sdkPlatformApiLevel}"</code>, instale o app em uma imagem do sistema do Android {@sdkPlatformVersion}, teste-a e, em seguida, publique o app atualizado com essa alteração.</p>
+
+<p>É possível usar as APIs do Android {@sdkPlatformVersion} ao mesmo tempo em que oferece suporte a versões mais antigas adicionando condições para o nível de API do sistema antes de executar APIs que não são compatíveis com seu <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>. Para saber mais sobre a manutenção de compatibilidade com versões anteriores, leia <a href="{@docRoot}training/basics/supporting-devices/platforms.html">Suporte a diferentes versões de plataforma</a>.</p>
+
+<p>Para mais informações sobre como os níveis de API funcionam, leia <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">O que é um nível de API?</a></p>
+
+<h2 id="Behaviors">Alterações importantes de comportamento </h2>
+
+<p>Se você já tiver publicado um app para Android, esteja ciente de que seu app pode ser afetado por alterações feitas no Android 5.0.</p>
+
+<h3 id="ART">Se você ainda não tiver testado o app com o novo tempo de execução do Android (ART)…</h3>
+
+<p>A versão 4.4 apresentou um novo tempo de execução experimental do Android, o ART. Na versão 4.4, o ART era opcional, e o tempo de execução padrão continuava sendo o Dalvik. Com o Android 5.0, o ART agora é o tempo de execução padrão.</p>
+
+<p>Para uma visão geral dos novos recursos do ART, consulte <a href="https://source.android.com/devices/tech/dalvik/art.html">Introdução ao ART</a>. Alguns dos principais recursos novos são:</p>
+
+<ul>
+  <li>Compilação antecipada (AOT, na sigla em inglês)</li>
+  <li>Coleta de lixo aprimorada (GC, na sigla em inglês)</li>
+  <li>Suporte à depuração aprimorado</li>
+</ul>
+
+<p>A maioria dos apps para Android deve funcionar com o ART sem alterações. No entanto, algumas técnicas que funcionam em Dalvik não funcionam no ART. Para informações sobre os problemas mais importantes, consulte <a href="{@docRoot}guide/practices/verifying-apps-art.html">Verificação do comportamento do app no tempo de execução Android (ART)</a>. Preste especial atenção se:</p>
+
+<ul>
+  <li>O app usar interface nativa Java (JNI, na sigla em inglês) para executar código C/C++.</li>
+  <li>Você usar ferramentas de desenvolvedor que geram código não padrão (como alguns ofuscadores).</li>
+  <li>Você usar técnicas que são incompatíveis com a compactação de coleta de lixo. O ART não implementa a compactação de coleta de GC atualmente, mas essa compactação está em desenvolvimento no projeto de código aberto do Android.</li>
+</ul>
+
+<h3 id="BehaviorNotifications">Caso seu app implemente as notificações…</h3>
+
+<p>Verifique se suas notificações consideram essas alterações do Android 5.0. Para saber mais sobre como fazer as notificações para o Android 5.0 e superior, consulte o <a href="{@docRoot}design/patterns/notifications.html">Guia de design de notificações</a>.
+</p>
+
+<h4 id="NotificationsMaterialDesignStyle">Estilo do material design</h4>
+<p>As notificações são desenhadas com texto escuro em planos de fundo brancos (ou muito claros) para corresponder aos novos widgets de material design. Verifique a aparência de todas as suas notificações com o novo esquema de cores. Se o resultado não estiver bom, corrija-o:</p>
+
+<ul>
+  <li>Use {@link android.app.Notification.Builder#setColor(int) setColor()} para definir uma cor de destaque em um círculo atrás da imagem do ícone. </li>
+  <li>Atualize ou remova recursos que envolvam cor. O sistema ignora todos os canais não Alfa em ícones de ação e no ícone de notificação principal. Você deve partir do princípio de que esses ícones serão somente Alfa. O sistema desenha ícones de notificação em branco e ícones de ação em cinza escuro.</li>
+</ul>
+
+<h4 id="NotificationsSoundVibration">Som e vibração</h4>
+<p>Se atualmente você estiver adicionando sons e vibrações às suas notificações usando as classes {@link android.media.Ringtone}, {@link android.media.MediaPlayer} ou {@link android.os.Vibrator}, remova este código para que o sistema possa apresentar notificações de forma correta no modo de <em>prioridade</em>. Em vez disso, use métodos {@link android.app.Notification.Builder} para adicionar sons e vibração.</p>
+
+<p>Definir o dispositivo como {@link android.media.AudioManager#RINGER_MODE_SILENT RINGER_MODE_SILENT} faz com que o dispositivo entre no novo modo de prioridade. O dispositivo sai do modo prioridade se você o configurar para {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_NORMAL} ou {@link android.media.AudioManager#RINGER_MODE_NORMAL RINGER_MODE_VIBRATE}.</p>
+
+<p>Anteriormente, o Android usava {@link android.media.AudioManager#STREAM_MUSIC STREAM_MUSIC} como o stream principal para controlar o volume em tablets. No Android 5.0, o stream de volume principal para dispositivos smartphone e tablet agora está unificado e é controlado por {@link android.media.AudioManager#STREAM_RING STREAM_RING} ou {@link android.media.AudioManager#STREAM_NOTIFICATION STREAM_NOTIFICATION}.</p>
+
+<h4 id="NotificationsLockscreenVisibility">Bloquear a visibilidade da tela</h4>
+<p>Por padrão, as notificações agora são exibidas na tela de bloqueio no Android 5.0. Os usuários podem optar por proteger informações confidenciais evitando que elas sejam expostas, caso em que o sistema automaticamente redige o texto exibido pela notificação. Para personalizar esta notificação redigida, use {@link android.app.Notification.Builder#setPublicVersion(android.app.Notification) setPublicVersion()}.</p>
+<p>Se a notificação não tiver informações pessoais ou se você desejar permitir o controle de reprodução de mídia na notificação, chame o método {@link android.app.Notification.Builder#setVisibility(int) setVisibility()} e defina o nível de visibilidade da notificação como {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}.
+</p>
+
+<h4 id="NotificationsMediaPlayback">Reprodução de mídia</h4>
+<p>Se você estiver implementando notificações que apresentam controles de transporte ou status de reprodução de mídia, considere a possibilidade de usar o novo modelo {@link android.app.Notification.MediaStyle}, em vez de um objeto {@link android.widget.RemoteViews.RemoteView} personalizado. Qualquer que seja a abordagem escolhida, defina a visibilidade da notificação como {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC} de modo que seus controles sejam acessíveis a partir da tela de bloqueio. Ao iniciar o Android 5.0, o sistema não mostra mais os objetos {@link android.media.RemoteControlClient} na tela de bloqueio. Para mais informações, consulte <a href="#BehaviorMediaControl">Caso seu app use RemoteControlClient</a>.</p>
+
+<h4 id="NotificationsHeadsup">Notificação de alerta</h4>
+<p>As notificações agora podem aparecer em uma pequena janela flutuante (também chamada de notificação de alerta) quando o dispositivo estiver ativo (isto é, o dispositivo estiver desbloqueado e sua tela ativada). Essas notificações aparecem de maneira semelhante à forma compacta da sua notificação, exceto que as de alerta também mostram botões de ação. Os usuários podem utilizar ou dispensar notificações de alerta sem sair do app atual.</p>
+
+<p>Exemplos de condições que podem acionar notificações de alerta incluem:</p>
+
+<ul>
+  <li>As atividades do usuário em modo de tela cheia (o app usa {@link android.app.Notification#fullScreenIntent})</li>
+  <li>A notificação tem prioridade alta e usa toques musicais ou vibrações</li>
+</ul>
+
+<p>Caso seu app implemente notificações em qualquer um desses cenários, verifique se as notificações de alerta são exibidas corretamente.</p>
+
+<h3 id="BehaviorMediaControl">Caso seu app use RemoteControlClient…</h3>
+<p>O uso da classe {@link android.media.RemoteControlClient} foi suspenso. Alterne para a nova {@link android.media.session.MediaSession} API assim que possível.</p>
+
+<p>O bloqueio de telas no Android 5.0 não mostra controles de transporte para {@link android.media.session.MediaSession} ou {@link android.media.RemoteControlClient}. Em vez disso, o app pode fornecer controle de reprodução de mídia de tela de bloqueio por meio de uma notificação. Isso dá ao app mais controle sobre a apresentação dos botões de mídia ao mesmo tempo em que fornece uma experiência consistente para usuários de dispositivos bloqueados e desbloqueados.</p>
+
+<p>O Android 5.0 apresenta um novo modelo {@link android.app.Notification.MediaStyle} para essa finalidade. {@link android.app.Notification.MediaStyle} converte as ações de notificação que você adicionou com {@link android.app.Notification.Builder#addAction(int, java.lang.CharSequence, android.app.PendingIntent) Notification.Builder.addAction()} em botões compactos incorporados às notificações de reprodução de mídia do seu app. Passar o token da sessão para o método {@link android.app.Notification.MediaStyle#setMediaSession(android.media.session.MediaSession.Token) setSession()} para informar o sistema de que essa notificação controla uma sessão de mídia em andamento.</p>
+
+<p>Defina a visibilidade da notificação como {@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC} para marcar a notificação como segura a fim de ser exibida em qualquer tela de bloqueio (protegida ou não). Para mais informações, consulte <a href="#LockscreenNotifications">Notificações na tela de bloqueio</a>.</p>
+
+<p>Para exibir controles de reprodução de mídia se o app estiver em execução na plataforma da Android <a href="{@docRoot}tv/index.html">TV</a> ou do Android <a href="{@docRoot}wear/index.html">Wear</a>, implemente a classe {@link android.media.session.MediaSession}. Você também deve implementar {@link android.media.session.MediaSession} caso seu app precise receber eventos de botão de mídia em dispositivos Android.</p>
+
+<h3 id="BehaviorGetRecentTasks">Se o app usar getRecentTasks()…</h3>
+
+<p>Com a introdução dos novos recursos de <em>tarefas de atividades e documentos simultâneos</em> do Android 5.0 (consulte<a href="#Recents">Documentos simultâneos e atividades na tela de recentes</a> abaixo), o método {@link android.app.ActivityManager#getRecentTasks ActivityManager.getRecentTasks()} teve seu uso suspenso para aprimorar a privacidade do usuário. Para compatibilidade com versões anteriores, esse método ainda retorna um pequeno subconjunto de seus dados, incluindo a chamada de tarefas do próprio app e, possivelmente, outras tarefas não confidenciais (como Início). Se o app estiver usando esse método para recuperar suas próprias tarefas, use {@link android.app.ActivityManager#getAppTasks() getAppTasks()} em vez de recuperar essas informações.</p>
+
+<h3 id="64BitSupport">Caso você esteja usando o Kit de desenvolvimento nativo do Android (NDK, na sigla em inglês)…</h3>
+
+<p>O Android 5.0 apresenta o suporte a sistemas de 64 bits. O aprimoramento de 64 bits aumenta o espaço de endereço e melhora o desempenho ao mesmo tempo em que oferece suporte integral aos apps existentes de 32 bits. O suporte a 64 bits também melhora o desempenho de OpenSSL para criptografia. Além disso, a versão apresenta novas APIs do NDK de mídia nativas, bem como o suporte a OpenGL ES (GLES) 3.1.</p>
+
+<p>Para usar o suporte a 64 bits fornecidos no Android 5.0, faça o download e instale o NDK Revision 10c a partir da <a href="{@docRoot}tools/sdk/ndk/index.html">página NDK do Android</a>. Consulte as <a href="{@docRoot}tools/sdk/ndk/index.html#Revisions">notas da versão</a> do Revision 10c para mais informações sobre alterações importantes e correções de bug no NDK.</p>
+
+<h3 id="BindService">Caso seu app esteja associado a um serviço…</h3>
+
+<p>O método {@link android.content.Context#bindService(android.content.Intent, android.content.ServiceConnection, int) Context.bindService()} agora requer um {@link android.content.Intent} explícito e lança uma exceção se fornecido um propósito implícito. Para garantir que seu app é seguro, use um propósito explícito ao iniciar ou vincular seu {@link android.app.Service} e não declare filtros de intenção para o serviço.</p>
+
+<h3 id="BehaviorWebView">Caso seu app use WebView…</h3>
+
+<p>O Android 5.0 altera o comportamento padrão para o app.</p>
+<ul>
+<li><strong>Caso seu app segmente o nível 21 de API ou superior: </strong>
+  <ul>
+    <li>O sistema bloqueia o <a href="https://developer.mozilla.org/en-US/docs/Security/MixedContent" class="external-link">conteúdo misto</a> e cookies de terceiros por padrão. Para permitir conteúdo misto e cookies de terceiros, use os métodos {@link android.webkit.WebSettings#setMixedContentMode(int) setMixedContentMode()} e {@link android.webkit.CookieManager#setAcceptThirdPartyCookies(android.webkit.WebView, boolean) setAcceptThirdPartyCookies()} respectivamente.</li>
+    <li>O sistema agora escolhe de modo inteligente as partes do documento HTML que serão desenhadas. Esse novo comportamento padrão ajuda a reduzir a área ocupada na memória e aumenta o desempenho. Se você quiser processar o documento inteiro de uma só vez, desative essa otimização chamando {@link android.webkit.WebView#enableSlowWholeDocumentDraw()}.</li>
+  </ul>
+</li>
+<li><strong>Caso seu app segmente níveis de API inferiores a 21:</strong> o sistema permite conteúdo misto e cookies de terceiros, além de sempre processar o documento inteiro de uma vez.</li>
+</ul>
+
+<h2 id="UI">Interface do usuário</h2>
+
+<h3 id="MaterialDesign">Suporte ao material design</h3>
+
+<p>O lançamento futuro adiciona o suporte ao novo estilo do <em>material design</em> do Android. É possível criar apps com material design que é visualmente dinâmico e tem transições de elemento de interface do usuário que parecem naturais para os usuários. Esse suporte inclui:</p>
+
+<ul>
+
+  <li>O tema do material</li>
+  <li>Visualização de sombras</li>
+  <li>O widget {@link android.support.v7.widget.RecyclerView}</li>
+  <li>Animação drawable e efeitos de estilo</li>
+  <li>Animação de material design e efeitos de transição de atividade</li>
+  <li>Animadores para propriedades de visualização com base no estado da visualização</li>
+  <li>Elementos personalizáveis da interface do usuário e barras de app com paletas de cores controladas por você</li>
+  <li>Drawables animados e não animados com base nos gráficos de vetor XML</li>
+</ul>
+
+<p>Para saber mais sobre como adicionar a funcionalidade de material design ao seu app, consulte <a href="{@docRoot}training/material/index.html">Material design</a>.</p>
+
+<h3 id="Recents">Documentos simultâneos e atividades na tela de recentes</h3>
+
+<p>Em versões anteriores, a <a href="{@docRoot}guide/components/recents.html">tela de recentes</a> podia exibir somente uma tarefa para cada app com o qual o usuário tivesse interagido mais recentemente. Agora seu app pode abrir mais tarefas conforme necessário para outras atividades simultâneas para documentos. Esse recurso facilita fazer muitas tarefas ao mesmo tempo ao permitir que os usuários alternem rapidamente entre atividades individuais e documentos da tela de recentes, com uma experiência consistente de alternação entre todos os apps. Exemplos de tarefas simultâneas podem incluir guias abertas em um app para navegadores da Web, documentos em um app de produtividade, partidas simultâneas em um jogo ou bate-papos em um app de mensagens. O app pode gerenciar tarefas por meio da classe {@link android.app.ActivityManager.AppTask}.</p>
+
+<p>Para inserir uma interrupção lógica para que o sistema trate suas atividades como uma nova tarefa, use {@link android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} ao iniciar a atividade com {@link android.app.Activity#startActivity(android.content.Intent) startActivity()}. Também é possível ter esse comportamento definindo o atributo do elemento <a href="{@docRoot}guide/topics/manifest/activity-element.html">&lt;activity&gt;</a>{@code documentLaunchMode} como {@code "intoExisting"} ou {@code "always"} no seu manifesto.</p>
+
+<p>Para evitar que a tela de recentes fique bagunçada, defina o número máximo de tarefas do seu app que podem aparecer na tela. Para fazer isso, defina o atributo <a href="{@docRoot}guide/topics/manifest/application-element.html">&lt;application&gt;</a> {@link android.R.attr#maxRecents android:maxRecents}. O máximo que pode ser especificado atualmente é 50 tarefas por usuário (25 para dispositivos com pouca RAM).</a></p>
+
+<p>As tarefas na tela de recentes podem ser definidas para persistirem em reinicializações. Para controlar o comportamento de persistência, use o atributo <a href="{@docRoot}reference/android/R.attr.html#persistableMode">android:persistableMode</a>. Também é possível alterar as propriedades visuais de uma atividade na tela de recentes, como o rótulo, o ícone e a cor da atividade, chamando o método {@link android.app.Activity#setTaskDescription(android.app.ActivityManager.TaskDescription) setTaskDescription()}.</p>
+
+<h3 id="WebView">Atualizações de WebView</h3>
+<p>O Android 5.0 atualiza a implementação de {@link android.webkit.WebView} para o Chromium M37, com aprimoramentos de segurança e estabilidade, bem como correções de bugs. A string de user-agent padrão para um {@link android.webkit.WebView} executando no Android 5.0 foi atualizada para incorporar 37.0.0.0 como o número de versão.</p>
+
+<p>Essa versão apresenta a classe {@link android.webkit.PermissionRequest}, que permite ao seu app conceder a {@link android.webkit.WebView} permissão para acessar recursos protegidos, como a câmera e o microfone, por meio de APIs da Web, como <a href="https://developer.mozilla.org/en-US/docs/NavigatorUserMedia.getUserMedia" class="external-link">getUserMedia()</a>. Seu app precisa ter as permissões de Android apropriadas para esses recursos a fim de conceder as permissões para {@link android.webkit.WebView}.</p>
+
+<p>Com o novo método <code><a href="{@docRoot}reference/android/webkit/WebChromeClient.html#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams)">onShowFileChooser()</a></code>, é possível usar um campo de formulário de entrada em {@link android.webkit.WebView} e iniciar um seletor de arquivos para selecionar imagens e arquivos do dispositivo Android.</p>
+
+<p>Além disso, essa versão oferece suporte aos padrões abertos de <a href="http://webaudio.github.io/web-audio-api/" class="external-link">WebAudio</a>, <a href="https://www.khronos.org/webgl/" class="external-link">WebGL</a> e <a href="http://www.webrtc.org/" class="external-link">WebRTC</a>. Para saber mais sobre os novos recursos incluídos nessa versão, consulte <a href="https://developer.chrome.com/multidevice/webview/overview" class="external-link">WebView para Android</a>.</p>
+
+<h3 id="ScreenCapture">Compartilhamento e captura de tela</h3>
+<p>O Android 5.0 permite adicionar as funcionalidades de compartilhamento e captura de tela ao seu app com as novas APIs de {@link android.media.projection}. Essa funcionalidade é útil, por exemplo, se você desejar ativar o compartilhamento de tela em um app de conferência de vídeo.</p>
+
+<p>O novo método {@link android.media.projection.MediaProjection#createVirtualDisplay(java.lang.String, int, int, int, int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback, android.os.Handler) createVirtualDisplay()} permite ao seu app capturar o conteúdo da tela principal (a exibição padrão) em um objeto {@link android.view.Surface}, que seu app pode enviar pela rede. A API permite capturar o conteúdo somente de telas não protegidas, e não captura áudio do sistema. Para começar a captura de tela, o app precisa solicitar a permissão do usuário iniciando uma caixa de diálogo de captura de tela usando um {@link android.content.Intent} obtido por meio do método {@link android.media.projection.MediaProjectionManager#createScreenCaptureIntent()}.</p>
+
+<p>Para ver um exemplo de como usar as novas APIs, consulte a classe {@code MediaProjectionDemo} no projeto de amostra.</p>
+
+<h2 id="Notifications">Notificações</h2>
+
+<h3 id="LockscreenNotifications">Notificações na tela bloqueada</h3>
+<p>As telas de bloqueio no Android 5.0 têm a capacidade de mostrar as notificações. Os usuários podem optar por meio das <em>Configurações</em> para permitir que conteúdo de notificação confidencial seja exibido em uma tela de bloqueio protegida.</p>
+
+<p>O app pode controlar o nível de detalhe visível quando as notificações são exibidas na tela de bloqueio segura. Para controlar o nível de visibilidade, chame {@link android.app.Notification.Builder#setVisibility(int) setVisibility()} e especifique um dos seguintes valores:</p>
+
+<ul>
+<li>{@link android.app.Notification#VISIBILITY_PRIVATE VISIBILITY_PRIVATE}: exibe informações básicas, como o ícone da notificação, mas oculta o conteúdo integral da notificação.</li>
+<li>{@link android.app.Notification#VISIBILITY_PUBLIC VISIBILITY_PUBLIC}: mostra o conteúdo integral da notificação.</li>
+<li>{@link android.app.Notification#VISIBILITY_SECRET VISIBILITY_SECRET}: mostra nada, exclui até o ícone de notificação.</li>
+</ul>
+
+<p>Quando o nível de visibilidade é {@link android.app.Notification#VISIBILITY_PRIVATE VISIBILITY_PRIVATE}, é possível fornecer uma versão redigida do conteúdo da notificação que oculta detalhes pessoais. Por exemplo, um app de mensagens SMS pode exibir uma notificação que mostra "Você tem três novas mensagens de texto", mas oculta o conteúdo da mensagem e os remetentes. Para fornecer essa notificação alternativa, crie primeiro a notificação de substituição usando {@link android.app.Notification.Builder}. Quando você criar o objeto de notificação privada, anexe a notificação de substituição a ele por meio do método {@link android.app.Notification.Builder#setPublicVersion(android.app.Notification) setPublicVersion()}.</p>
+
+<h3 id="NotificationsMetadata">Metadados de notificações</h3>
+<p>O Android 5.0 usa os metadados associados com as notificações do seu app para classificá-las de modo mais inteligente. Para definir os metadados, chame os métodos a seguir em {@link android.app.Notification.Builder} ao criar a notificação:</p>
+
+<ul>
+<li>{@link android.app.Notification.Builder#setCategory(java.lang.String) setCategory()}: informa ao sistema como lidar com as notificações do app quando o dispositivo estiver no modo de <em>prioridade</em>. Por exemplo, se uma notificação representar uma chamada de entrada, uma chamada instantânea ou um alarme.
+<li>{@link android.app.Notification.Builder#setPriority(int) setPriority()}: marca a notificação como mais ou menos importante do que as notificações normais. Notificações com o campo de prioridade definido como {@link android.app.Notification#PRIORITY_MAX PRIORITY_MAX} ou {@link android.app.Notification#PRIORITY_HIGH PRIORITY_HIGH} aparecem em uma pequena janela flutuante se a notificação também tem som ou vibração.</li>
+<li>{@link android.app.Notification.Builder#addPerson(java.lang.String) addPerson()}: permite adicionar uma ou mais pessoas que são relevantes para a notificação. O app pode usar isso para sinalizar para o sistema que ele deve agrupar notificações das pessoas especificadas ou classificar as notificações dessas pessoas como sendo mais importantes.</li>
+</ul>
+
+<h2 id="Graphics">Gráficos</h2>
+
+<h3 id="OpenGLES-3-1">Suporte para OpenGL ES 3.1 </h3>
+<p>O Android 5.0 adiciona o suporte nativo ao OpenGL ES 3.1 e interfaces Java. As novas e importantes funcionalidades fornecidas no OpenGL ES 3.1 incluem:</p>
+
+<ul>
+<li>Sombreadores de cálculo
+<li>Objetos sombreadores separados
+<li>Comandos draw indiretos
+<li>Texturas de estêncil e multiamostras
+<li>Aprimoramentos na linguagem de sombreamento
+<li>Extensões para os modos de mesclagem avançada e depuração
+<li>Compatibilidade de versões mais antigas com OpenGL ES 2.0 e 3.0
+</ul>
+
+<p>A interface Java para o OpenGL ES 3.1 no Android é fornecida com {@link android.opengl.GLES31}. Ao usar o OpenGL ES 3.1, declare isso em seu arquivo de manifesto junto com a tag <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a> e o atributo {@code android:glEsVersion}. Por exemplo:</p>
+
+<pre>
+&lt;manifest&gt;
+    &lt;uses-feature android:glEsVersion="0x00030001" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p>Para mais informações sobre como usar o OpenGL ES, inclusive como verificar a versão do OpenGL ES compatível do dispositivo no tempo de execução, consulte o <a href="{@docRoot}guide/topics/graphics/opengl.html">Guia da OpenGL ES API</a>.</p>
+
+<h3 id="AndroidExtensionPack">Pacote de extensões para Android</h3>
+
+<p>Além do OpenGL ES 3.1, essa versão fornece um pacote de extensões com interfaces Java e suporte nativo para a funcionalidade de gráfico avançado. Essas extensões são tratadas como um único pacote pelo Android. Se a extensão {@code ANDROID_extension_pack_es31a} estiver presente, seu app poderá presumir que todas as extensões no pacote estão presentes e ativar os recursos de linguagem de sombreamento com uma única instrução {@code #extension}.</p>
+
+<p>O pacote de extensões oferece suporte a:</p>
+
+<ul>
+<li>Suporte garantido ao sombreador de fragmentos para buffers de armazenamento de sombreador, imagens e atomics (o suporte ao sombreador de fragmento é opcional no OpenGL ES 3.1.)</li>
+<li>Sombreadores de geometria e mosaico</li>
+<li>Formato de compactação de textura ASTC (LDR)</li>
+<li>Sombreamento e interpolação por amostra</li>
+<li>Modos diferentes de mesclagem para cada anexo colorido em um buffer de frame</li>
+</ul>
+
+<p>A interface Java para o pacote de extensões é fornecido com {@link android.opengl.GLES31Ext}. No manifesto do app, é possível declarar que o app precisa ser instalado somente em dispositivos que oferecem suporte ao pacote de extensões. Por exemplo:</p>
+
+<pre>
+&lt;manifest&gt;
+    &lt;uses-feature android:name=“android.hardware.opengles.aep”
+        android:required="true" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<h2 id="Media">Mídia</h2>
+
+<h3 id="Camera-v2">Camera API para funcionalidades avançadas da câmera</h3>
+
+<p>O Android 5.0 apresenta a nova <a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">android.hardware.camera2</a> API para facilitar o processamento de imagens e a captura de fotos com granulação baixa. Agora é possível acessar de maneira programática os dispositivos da câmera disponíveis para o sistema com {@link android.hardware.camera2.CameraManager#getCameraIdList() getCameraIdList()} e conectar um determinado dispositivo com {@link android.hardware.camera2.CameraManager#openCamera(java.lang.String, android.hardware.camera2.CameraDevice.StateCallback, android.os.Handler) openCamera()}. Para começar a capturar imagens, crie um {@link android.hardware.camera2.CameraCaptureSession} e especifique os objetos {@link android.view.Surface} para enviar imagens capturadas. O {@link android.hardware.camera2.CameraCaptureSession} pode ser configurado para tirar uma única foto ou várias imagens em uma sequência.</p>
+
+<p>Para ser notificado quando novas imagens são capturadas, implemente o listener {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback} e defina-o na solicitação de captura. Agora quando o sistema conclui a solicitação de captura de imagem, seu listener {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback} recebe uma chamada a {@link android.hardware.camera2.CameraCaptureSession.CaptureCallback#onCaptureCompleted(android.hardware.camera2.CameraCaptureSession, android.hardware.camera2.CaptureRequest, android.hardware.camera2.TotalCaptureResult) onCaptureCompleted()}, fornecendo a você os metadados da captura de imagem em um {@link android.hardware.camera2.CaptureResult}.</p>
+
+<p>A classe {@link android.hardware.camera2.CameraCharacteristics} permite que seu app detecte quais recursos de câmera estão disponíveis em um dispositivo. A propriedade {@link android.hardware.camera2.CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL INFO_SUPPORTED_HARDWARE_LEVEL} do objeto representa o nível de funcionalidade da câmera.</p>
+
+<ul>
+  <li>Todos os dispositivos oferecem suporte pelo menos ao nível de hardware {@link android.hardware.camera2.CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY}, que tem recursos aproximadamente equivalentes aos da {@link android.hardware.Camera} API que teve seu uso suspenso.</li>
+  <li>Os dispositivos que oferecem suporte ao nível de hardware de {@link android.hardware.camera2.CameraMetadata#INFO_SUPPORTED_HARDWARE_LEVEL_FULL INFO_SUPPORTED_HARDWARE_LEVEL_FULL} são capazes de controlar manualmente a captura e o pós-processamento, além de capturar imagens em alta-resolução em altas taxas de frame.</li>
+</ul>
+
+<p>Para ver como usar a <a href="{@docRoot}reference/android/hardware/camera2/package-summary.html">Camera</a> API atualizada, consulte as amostras de implementação de {@code Camera2Basic} e {@code Camera2Video} nessa versão.</p>
+
+<h3 id="AudioPlayback">Reprodução de áudio</h3>
+<p>Essa versão inclui as seguintes alterações em {@link android.media.AudioTrack}:</p>
+<ul>
+  <li>Seu app agora pode fornecer dados de áudio no formato ponto flutuante ({@link android.media.AudioFormat#ENCODING_PCM_FLOAT ENCODING_PCM_FLOAT}). Isso permite uma maior escala dinâmica, uma precisão mais consistente e mais espaço. A aritmética de ponto flutuante é útil durante os cálculos intermediários. Os pontos de extremidade da reprodução usam o formato inteiro para dados de áudio e com profundidade de bits inferior. No Android 5.0, as partes do fluxo interno ainda não são ponto flutuante.
+  <li>Seu app agora pode fornecer dados de áudio como um {@link java.nio.ByteBuffer} no mesmo formato fornecido por {@link android.media.MediaCodec}.
+  <li>A opção {@link android.media.AudioTrack#WRITE_NON_BLOCKING WRITE_NON_BLOCKING} pode simplificar o armazenamento em buffer e multithreading de alguns apps.
+</ul>
+
+<h3 id="MediaPlaybackControl">Controle de reprodução de mídia</h3>
+<p>Use a nova notificação e APIs de mídia para garantir que a interface do usuário do sistema saiba da sua reprodução de mídia e possa extrair e mostrar a capa do álbum. Controlar a reprodução de mídia em uma interface do usuário agora é mais fácil com as novas classes {@link android.media.session.MediaSession} e {@link android.media.session.MediaController}.</p>
+
+<p>A nova classe {@link android.media.session.MediaSession} substitui a classe {@link android.media.RemoteControlClient} que teve seu uso suspenso e fornece um único conjunto de métodos de chamada de retorno para gerenciar os controles de transporte e os botões de mídia. Se o app fornecer a reprodução de mídia e for executado na plataforma Android <a href="{@docRoot}tv/index.html">TV</a> ou <a href="{@docRoot}wear/index.html">Android Wear</a>, use a classe {@link android.media.session.MediaSession} para lidar com os controles de transporte usando os mesmos métodos de chamada de retorno.</p>
+
+<p>É possível criar seu próprio app controlador de mídia com a nova classe {@link android.media.session.MediaController}. Essa classe oferece uma maneira de thread seguro para monitorar e controlar a reprodução de mídia do processo de interface do seu app. Ao criar um controlador, especifique um objeto {@link android.media.session.MediaSession.Token} para que seu app possa interagir com o {@link android.media.session.MediaSession} determinado. Usando os métodos {@link android.media.session.MediaController.TransportControls}, é possível enviar comandos como {@link android.media.session.MediaController.TransportControls#play() play()}, {@link android.media.session.MediaController.TransportControls#stop() stop()}, {@link android.media.session.MediaController.TransportControls#skipToNext() skipToNext()} e {@link android.media.session.MediaController.TransportControls#setRating(android.media.Rating) setRating()} para controlar a reprodução de mídia nessa sessão. Com o controlador, também é possível registrar um objeto {@link android.media.session.MediaController.Callback} para escutar os metadados e mudanças de estado da sessão.</p>
+
+<p>Além disso, é possível criar notificações ricas que permitem o controle de reprodução ligado a uma sessão de mídia com a nova classe {@link android.app.Notification.MediaStyle}.</p>
+
+<h3 id="MediaBrowsing">Navegação de mídia</h3>
+<p>O Android 5.0 apresenta a capacidade dos apps de procurar a biblioteca de conteúdo de mídia de outro app por meio da nova <a href="{@docRoot}reference/android/media/browse/package-summary.html">android.media.browse</a> API. Para expor o conteúdo de mídia no seu app, estenda a classe {@link android.service.media.MediaBrowserService}. Sua implementação de {@link android.service.media.MediaBrowserService} deve fornecer acesso a um {@link android.media.session.MediaSession.Token} para que apps possam reproduzir conteúdo de mídia fornecido por meio do seu serviço.</p>
+<p>Para interagir com o serviço de navegador de mídia, use a classe {@link android.media.browse.MediaBrowser}. Especifique o nome do componente para um {@link android.media.session.MediaSession} ao criar uma instância {@link android.media.browse.MediaBrowser}. Usando essa instância do navegador, seu app pode se conectar ao serviço associado e obter um objeto {@link android.media.session.MediaSession.Token} para reproduzir conteúdo exposto por meio do serviço.</p>
+
+<h2 id="Storage">Armazenamento</h2>
+
+<h3 id="DirectorySelection">Seleção do diretório</h3>
+
+<p>O Android 5.0 estende a <a href="{@docRoot}guide/topics/providers/document-provider.html">Estrutura de acesso ao armazenamento</a> para permitir que os usuários selecionem uma subárvore inteira de diretório, fornecendo aos apps o acesso de leitura/gravação a todos os documentos existentes sem exigir confirmação do usuário para cada item.</p>
+
+<p>Para selecionar uma subárvore de diretório, crie e envie um propósito {@link android.content.Intent#ACTION_OPEN_DOCUMENT_TREE OPEN_DOCUMENT_TREE}. O sistema exibe todas as instâncias {@link android.provider.DocumentsProvider} que oferecem suporte à seleção de subárvore, permitindo que o usuário procure e selecione um diretório. O URI retornado representa o acesso à subárvore selecionada. É possível usar {@link android.provider.DocumentsContract#buildChildDocumentsUriUsingTree(android.net.Uri, java.lang.String) buildChildDocumentsUriUsingTree()} e {@link android.provider.DocumentsContract#buildDocumentUriUsingTree(android.net.Uri, java.lang.String) buildDocumentUriUsingTree()} juntamente com {@link android.content.ContentResolver#query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String) query()} para explorar a subárvore.</p>
+
+<p>O novo método {@link android.provider.DocumentsContract#createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String) createDocument()} permite criar novos documentos ou diretórios em qualquer lugar abaixo da subárvore. Para gerenciar documentos existentes, use {@link android.provider.DocumentsContract#renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String) renameDocument()} e {@link android.provider.DocumentsProvider#deleteDocument(java.lang.String) deleteDocument()}. Confira o {@link android.provider.DocumentsContract.Document#COLUMN_FLAGS COLUMN_FLAGS} para verificar o suporte do provedor para essas chamadas antes de emiti-las.</p>
+
+<p>Se você estiver implementando um {@link android.provider.DocumentsProvider} e desejar oferecer suporte à seleção de subárvore, implemente {@link android.provider.DocumentsProvider#isChildDocument(java.lang.String, java.lang.String) isChildDocument()} e inclua {@link android.provider.DocumentsContract.Root#FLAG_SUPPORTS_IS_CHILD FLAG_SUPPORTS_IS_CHILD} em {@link android.provider.DocumentsContract.Root#COLUMN_FLAGS COLUMN_FLAGS}.</p>
+
+<p>O Android 5.0 também apresenta novos diretórios específicos ao pacote no armazenamento compartilhado no qual o app pode colocar arquivos de mídia para inclusão em {@link android.provider.MediaStore}. O novo {@link android.content.Context#getExternalMediaDirs()} retorna caminhos para esses diretórios em todos os dispositivos de armazenamento compartilhado. De forma semelhante a {@link android.content.Context#getExternalFilesDir(java.lang.String) getExternalFilesDir()}, permissões adicionais não são necessárias para que o app acesse os caminhos retornados. A plataforma periodicamente verifica novas mídias nesses diretórios, mas também é possível usar o {@link android.media.MediaScannerConnection} para verificar explicitamente se há novo conteúdo.</p>
+
+<h2 id="Wireless">Conectividade e sem fio</h2>
+
+<h3 id="Multinetwork">Várias conexões de rede</h3>
+<p>O Android 5.0 apresenta novas APIs de várias redes que permitem ao seu app verificar dinamicamente as redes disponíveis com recursos específicos, além de estabelecer uma conexão com eles. Essa funcionalidade é útil quando seu app exigir uma rede especializada, como SUPL, MMS ou uma rede de faturamento via operadora. Outro caso de uso é se você desejar enviar os dados usando um determinado tipo de protocolo de transporte.</p>
+
+<p>Para selecionar e se conectar a uma rede dinamicamente a partir do seu app, siga estas etapas:</p>
+
+<ol>
+ <li>Crie um {@link android.net.ConnectivityManager}.</li>
+ <li>Use a classe {@link android.net.NetworkRequest.Builder} para criar um objeto {@link android.net.NetworkRequest} e especificar os recursos de rede e o tipo de transporte nos quais seu app está interessado.</li>
+<li>Para buscar redes adequadas, chame {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) requestNetwork()} ou {@link android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()} e passe o objeto {@link android.net.NetworkRequest} e uma implementação de {@link android.net.ConnectivityManager.NetworkCallback}. Use o método {@link android.net.ConnectivityManager#requestNetwork(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) requestNetwork()} se você quiser alternar para uma rede adequada após ela ser detectada. Para receber notificações somente de redes verificadas sem alternar ativamente, use o método {@link android.net.ConnectivityManager#registerNetworkCallback(android.net.NetworkRequest, android.net.ConnectivityManager.NetworkCallback) registerNetworkCallback()}.</li>
+</ol>
+
+<p>Quando o sistema detectar uma rede adequada, ele se conectará à rede e chamará a chamada de retorno {@link android.net.ConnectivityManager.NetworkCallback#onAvailable(android.net.Network) onAvailable()}. É possível usar o objeto {@link android.net.Network} da chamada de retorno a fim de receber mais informações sobre a rede ou direcionar o tráfego para que a rede selecionada seja usada.</p>
+
+<h3 id="BluetoothBroadcasting">Bluetooth Low Energy</h3>
+<p>O Android 4.3 apresentou o suporte de plataforma para o <a href="{@docRoot}guide/topics/connectivity/bluetooth-le.html">Bluetooth Low Energy</a>(<em>Bluetooth LE</em>) na função central. No Android 5.0, um dispositivo Android agora pode agir como um <em>dispositivo periférico</em> de Bluetooth LE. Os apps podem usar esse recurso para fazer com que sua presença seja percebida pelos dispositivos vizinhos. É possível, por exemplo, criar apps que permitem que um dispositivo funcione como um pedômetro ou um monitor de integridade de dados e envie seus dados para outro dispositivo Bluetooth LE.</p> 
+<p>As novas APIs de {@link android.bluetooth.le} permitem que seus apps divulguem anúncios, verifiquem respostas e formem conexões com dispositivos Bluetooth LE vizinhos. Para usar os novos recursos de publicidade e varredura, adicione a permissão {@link android.Manifest.permission#BLUETOOTH_ADMIN BLUETOOTH_ADMIN} no manifesto. Quando os usuários atualizam ou fazem o download do seu app a partir da Play Store, eles são solicitados a conceder a seguinte permissão para seu app: "Informações da conexão Bluetooth: permite que o app controle o Bluetooth, incluindo a divulgação para dispositivos Bluetooth vizinhos ou a busca de informações sobre esses dispositivos."</p>
+
+<p>Para começar a publicidade de Bluetooth LE para que outros dispositivos possam descobrir seu app, chame {@link android.bluetooth.le.BluetoothLeAdvertiser#startAdvertising(android.bluetooth.le.AdvertiseSettings, android.bluetooth.le.AdvertiseData, android.bluetooth.le.AdvertiseCallback) startAdvertising()} e passe uma implementação da classe {@link android.bluetooth.le.AdvertiseCallback}. O objeto de chamada de retorno recebe um relatório do sucesso ou da falha da operação de publicidade.</p>
+
+<p> O Android 5.0 apresenta a classe {@link android.bluetooth.le.ScanFilter} para que seu app possa buscar somente os tipos específicos de dispositivos nos quais está interessado. Para iniciar a busca de dispositivos Bluetooth LE, chame {@link android.bluetooth.le.BluetoothLeScanner#startScan(android.bluetooth.le.ScanCallback) startScan()} e passe uma lista de filtros. Na chamada de método, você precisa fornecer também uma implementação de {@link android.bluetooth.le.ScanCallback} para informar quando uma publicidade de Bluetooth LE for encontrada. </p>
+
+<h3 id="NFCEnhancements">Aprimoramentos na NFC</h3>
+<p>O Android 5.0 adiciona estas melhorias para permitir um uso mais amplo e flexível da NFC:</p>
+
+<ul>
+<li>O Android Beam agora está disponível no menu <em>Compartilhar</em>.</li>
+<li>Seu app pode chamar o Android Beam no dispositivo do usuário para compartilhar dados chamando {@link android.nfc.NfcAdapter#invokeBeam(android.app.Activity) invokeBeam()}. Isso evita a necessidade de o usuário manualmente tocar no dispositivo em relação a outro com capacidade para NFC a fim de concluir a transferência de dados.</li>
+<li>É possível usar o novo método {@link android.nfc.NdefRecord#createTextRecord(java.lang.String, java.lang.String) createTextRecord()} para criar um registro NDEF contendo dados de texto UTF-8.</li>
+<li>Se você estiver desenvolvendo um app de pagamentos, você agora tem a capacidade de registrar um código de app da NFC (AID, na sigla em inglês) dinamicamente chamando <code><a href="{@docRoot}reference/android/nfc/cardemulation/CardEmulation.html#registerAidsForService(android.content.ComponentName, java.lang.String, java.util.List<java.lang.String>)">registerAidsForService()</a></code>. Também é possível usar {@link android.nfc.cardemulation.CardEmulation#setPreferredService(android.app.Activity, android.content.ComponentName) setPreferredService()} para definir o serviço de emulação de cartão preferencial que deve ser usado quando uma atividade específica estiver em primeiro plano.</li>
+</ul>
+
+<h2 id="Power">Project Volta</h2>
+
+<p>Além de novos recursos, o Android 5.0 enfatiza melhorias na vida útil da bateria. Use as novas APIs e a ferramenta para compreender e otimizar o consumo de energia de seu app.</p>
+
+<h3 id="JobScheduler">Agendamento de tarefas</h3>
+<p>O Android 5.0 apresenta uma nova {@link android.app.job.JobScheduler} API que permite otimizar a vida útil da bateria definindo as tarefas para que o sistema execute de maneira assíncrona em um momento posterior ou sob condições especificadas (como quando o dispositivo está carregando). O agendamento de tarefa é útil em situações como:</p>
+<ul>
+  <li>O app não tem trabalho que não será visto pelo usuário, por isso é possível adiá-lo.</li>
+  <li>O app tem trabalho que você prefere fazer quando a unidade estiver ligada na tomada.</li>
+  <li>O app tem uma tarefa que requer acesso à rede ou uma conexão Wi-Fi.</li>
+  <li>O app tem uma série de tarefas que você deseja gerar como um lote em um agendamento regular.</li>
+
+</ul>
+
+<p>Uma unidade de trabalho está encapsulada por um objeto {@link android.app.job.JobInfo}. Esse objeto especifica os critérios de agendamento.</p>
+
+<p>Use a classe {@link android.app.job.JobInfo.Builder} para configurar como a tarefa agendada deve ser executada. É possível agendar a tarefa para ser executada em condições específicas, como:</p>
+
+<ul>
+  <li>Iniciar quando o dispositivo estiver carregando</li>
+  <li>Iniciar quando o dispositivo estiver conectado a uma rede não medida</li>
+  <li>Iniciar quando o dispositivo estiver ocioso</li>
+  <li>Terminar antes de um determinado prazo ou com o mínimo de atraso</li>
+</ul>
+
+<p>Por exemplo, é possível adicionar código como este para executar a tarefa em uma rede não medida:</p>
+
+<pre>
+JobInfo uploadTask = new JobInfo.Builder(mJobId,
+                                         mServiceComponent /* JobService component */)
+        .setRequiredNetworkCapabilities(JobInfo.NetworkType.UNMETERED)
+        .build();
+JobScheduler jobScheduler =
+        (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+jobScheduler.schedule(uploadTask);
+</pre>
+
+<p>Se o dispositivo tiver energia estável (ou seja, se ele estiver conectado por mais de dois minutos e a bateria estiver em um <a href="{@docRoot}reference/android/content/Intent.html#ACTION_BATTERY_OKAY">nível de integridade</a>), o sistema executará a tarefa agendada que estiver pronta para execução, mesmo se o prazo dela não tiver expirado.</p>
+
+<p>Para ver um exemplo de como usar a {@link android.app.job.JobScheduler}API, consulte a amostra de implementação de {@code JobSchedulerSample} nesta versão.</p>
+
+<h3 id="PowerMeasurementTools">Ferramentas do desenvolvedor para uso da bateria</h3>
+
+<p>O novo comando {@code dumpsys batterystats} gera dados estatísticos interessantes sobre o uso da bateria em um dispositivo, organizados pelo código único do usuário (UID, na sigla em inglês). As estatísticas incluem:</p>
+
+<ul>
+<li>Histórico de eventos relacionados à bateria
+<li>Estatísticas globais para o dispositivo
+<li>Uso de energia aproximado por UID e o componente do sistema
+<li>Dispositivo móvel por app ms por pacote
+<li>Estatísticas agregadas de UID do sistema
+<li>Estatísticas agregadas de UID do app
+</ul>
+
+<p>Use a opção {@code --help} para saber mais sobre as diversas opções para adequar a saída. Por exemplo, para imprimir estatísticas de uso da bateria de um determinado pacote de apps desde que o dispositivo foi carregado pela última vez, execute este comando:
+<pre>
+$ adb shell dumpsys batterystats --charged &lt;package-name&gt;
+</pre>
+
+<p>É possível usar a ferramenta <a href="https://github.com/google/battery-historian" class="external-link">Battery Historian</a> na saída do comando {@code dumpsys} para gerar uma visualização de HTML de eventos relacionados à energia dos registros. Essa informação facilita para você entender e diagnosticar problemas relacionados à bateria.</p>
+
+<h2 id="Enterprise">Android no local de trabalho e na educação</h2>
+<h3 id="ManagedProvisioning">Provisionamento gerenciado</h3>
+
+<p>O Android 5.0 apresenta a nova funcionalidade para a execução de apps em um ambiente corporativo. Um <a href="{@docRoot}guide/topics/admin/device-admin.html">administrador de dispositivo</a> pode iniciar um processo de provisionamento gerenciado para adicionar um <em>perfil gerenciado</em> copresente, mas separado, a um dispositivo se o usuário tiver uma conta pessoal existente. Os apps que estão associados aos perfis gerenciados são exibidos junto a apps não gerenciados no inicializador do usuário, na tela de recentes e nas notificações.</p>
+
+<p>Para iniciar o processo de provisionamento gerenciado, envie {@link android.app.admin.DevicePolicyManager#ACTION_PROVISION_MANAGED_PROFILE ACTION_PROVISION_MANAGED_PROFILE} em um {@link android.content.Intent}. Se a chamada ocorrer, o sistema acionará a chamada de retorno {@link android.app.admin.DeviceAdminReceiver#onProfileProvisioningComplete(android.content.Context, android.content.Intent) onProfileProvisioningComplete()}. Será possível então chamar {@link android.app.admin.DevicePolicyManager#setProfileEnabled(android.content.ComponentName) setProfileEnabled()} para ativar esse perfil gerenciado.</p>
+
+<p>Por padrão, somente um pequeno subconjunto de apps são ativados no perfil gerenciado. É possível instalar mais apps no perfil gerenciado chamando {@link android.app.admin.DevicePolicyManager#enableSystemApp(android.content.ComponentName, android.content.Intent) enableSystemApp()}.</p>
+
+<p>Se você estiver desenvolvendo um app inicializador, será possível usar a nova classe {@link android.content.pm.LauncherApps} para ter uma lista das atividades inicializáveis do usuário atual e de quaisquer perfis gerenciados associados. O inicializador pode destacar visualmente os apps gerenciados acrescentando um selo de trabalho ao drawable do ícone. Para recuperar o ícone com selo, chame {@link android.content.pm.PackageManager#getUserBadgedIcon(android.graphics.drawable.Drawable, android.os.UserHandle) getUserBadgedIcon()}.</p>
+
+<p>Para saber como usar a nova funcionalidade, consulte a amostra de implementação de {@code BasicManagedProfile} nesta versão.</p>
+
+<h3 id="DeviceOwner">Proprietário do dispositivo</h3>
+<p>O Android 5.0 apresenta a capacidade de implantar um app do proprietário do dispositivo. O <em>proprietário do dispositivo</em> é um tipo especializado de <a href="{@docRoot}guide/topics/admin/device-admin.html">administrador de dispositivo</a> que tem a capacidade adicional de criar e remover usuários secundários, bem como definir configurações globais no dispositivo. Seu app de proprietário do dispositivo pode usar os métodos na classe {@link android.app.admin.DevicePolicyManager} para tirar o controle de granulação da configuração, da segurança e dos apps em dispositivos gerenciados. Um dispositivo pode ter somente um proprietário ativo de cada vez.</p>
+
+<p>Para implantar e ativar um proprietário do dispositivo, você precisa realizar uma transferência de dados de NFC de um app de programação para o dispositivo enquanto o dispositivo estiver em seu estado não provisionado. Essa transferência de dados envia as mesmas informações presentes no propósito de provisionamento descrito no <a href="#ManagedProvisioning">Provisionamento gerenciado</a>.</p>
+
+<h3 id="ScreenPinning">Fixação de tela</h3>
+
+<p>O Android 5.0 apresenta uma nova API de fixação de tela que permite restringir temporariamente a saída dos usuários de sua tarefa ou que eles sejam interrompidos por notificações. Isso pode ser usado, por exemplo, se você desenvolve um app educacional compatível com requisitos de avaliação de alto risco no Android ou em um app de quiosque com um único objetivo. Depois que o app ativar a fixação de tela, os usuários não podem ver as notificações, acessar outros apps ou retornar para a tela inicial do app até saírem do modo.</p>
+
+<p>Existem duas maneiras de ativar a fixação de tela:</p>
+
+<ul>
+<li><strong>Manualmente:</strong> os usuários podem ativar a fixação de tela em <em>Configurações &gt; Segurança &gt; Fixação de tela </em> e selecionar as tarefas que desejam fixar tocando no ícone de fixação verde na tela de recentes.</li> <li><strong>De maneira programática: </strong>para ativar a fixação de tela de maneira programática, chame {@link android.app.Activity#startLockTask() startLockTask()} a partir do seu app. Se o app solicitante não for um proprietário do dispositivo, o usuário será solicitado a confirmar. Um app de proprietário do dispositivo pode chamar o método {@link android.app.admin.DevicePolicyManager#setLockTaskPackages(android.content.ComponentName, java.lang.String[]) setLockTaskPackages()} para ativar a opção para que os apps possam ser fixados sem a etapa de confirmação do usuário.</li>
+</ul>
+
+<p>Quando o bloqueio de tarefa estiver ativo, o seguinte comportamento ocorre:</p>
+
+<ul>
+<li>A barra de status está em branco e as notificações do usuário e as informações de status estão ocultas.</li>
+<li>Os botões "Início" e "Recentes" estão ocultos.</li>
+<li>Outros apps não podem lançar novas atividades.</li>
+<li>O app atual pode iniciar novas atividades, contanto que não crie novas tarefas.</li>
+<li>Quando o recurso de fixação de tela é chamado por um proprietário do dispositivo, o usuário permanece bloqueado para seu app, até que o app chame {@link android.app.Activity#stopLockTask() stopLockTask()}.</li>
+<li>Se a fixação de tela é a atividade executada por outro app que não é proprietário do dispositivo ou pelo usuário diretamente, o usuário pode sair mantendo pressionados os botões Voltar e Recentes.</li>
+
+</ul>
+
+<h2 id="Printing">Impressão de framework</h2>
+
+<h3 id="PDFRender">Renderizar PDF como bitmap</h3>
+<p>Agora é possível processar páginas de documentos PDF para imagens de bitmap e imprimi-las usando a nova classe {@link android.graphics.pdf.PdfRenderer}. Você deve especificar um {@link android.os.ParcelFileDescriptor} que seja buscável (isto é, o conteúdo poderá ser acessado aleatoriamente) e no qual o sistema registre o conteúdo imprimível. O app pode obter uma página para processar com {@link android.graphics.pdf.PdfRenderer#openPage(int) openPage()} e depois chamar {@link android.graphics.pdf.PdfRenderer.Page#render(android.graphics.Bitmap, android.graphics.Rect, android.graphics.Matrix, int) render()} para desativar o {@link android.graphics.pdf.PdfRenderer.Page} aberto em um bitmap. Também é possível definir parâmetros adicionais se você somente deseja converter uma parte do documento em uma imagem de bitmap (por exemplo, para implementar uma <a href="http://en.wikipedia.org/wiki/Tiled_rendering" class="external-link">renderização de bloco</a> para zoom no documento).</p>
+
+<p>Para obter um exemplo de como usar as novas APIs, consulte o exemplo {@code PdfRendererBasic}.</p>
+
+<h2 id="System">Sistema</h2>
+<h3 id="AppUsageStatistics">Estatísticas de uso do app</h3>
+<p>Agora é possível acessar o histórico de utilização em um dispositivo Android com a nova {@link android.app.usage} API. Essa API fornece informações mais detalhadas sobre o uso do método suspenso {@link android.app.ActivityManager#getRecentTasks(int, int) getRecentTasks()}. Para usar essa API, primeiro é preciso declarar a permissão {@code "android.permission.PACKAGE_USAGE_STATS"} em seu manifesto. O usuário também deve permitir o acesso do app por meio de <em>Configurações &gt; Segurança &gt; Apps</em> com acesso de uso.</p>
+
+<p>O sistema coleta os dados de uso por apps, agregando os dados em intervalos diários, semanais, mensais e anuais. A duração máxima pela qual o sistema mantém esses dados é:</p>
+
+<ul>
+  <li>Dados diários: sete dias</li>
+  <li>Dados semanais: quatro semanas</li>
+  <li>Dados mensais: seis meses</li>
+  <li>Dados anuais: dois anos</li>
+</ul>
+
+<p>Para cada app, o sistema registra os seguintes dados:</p>
+<ul>
+<li>A última vez em que o app foi usado</li>
+<li>O tempo total em que o app esteve em primeiro plano pelo intervalo de tempo (por dia, semana, mês ou ano)</li>
+<li>Captura de carimbo de hora de um componente (identificado por um pacote e pelo nome da atividade) movido ao primeiro plano ou ao plano de fundo durante um dia</li>
+<li>Captura de carimbo de hora quando a configuração de um dispositivo foi alterada (por exemplo, quando a orientação do dispositivo foi alterada devido à rotação)</li>
+</ul>
+
+<h2 id="TestingA11y">Testes e acessibilidade </h2>
+
+<h3 id="TestingA11yImprovements">Melhorias de testes e acessibilidade</h3>
+<p>O Android 5.0 adiciona o seguinte suporte a testes e acessibilidade:</p>
+
+<ul>
+<li>Os novos métodos {@link android.app.UiAutomation#getWindowAnimationFrameStats() getWindowAnimationFrameStats()} e {@link android.app.UiAutomation#getWindowContentFrameStats(int) getWindowContentFrameStats()} capturam estatísticas de frame para animações de janelas e conteúdos. Esses métodos permitem registrar testes de instrumentação para avaliar se o app processa quadros em uma frequência de atualização suficiente para fornecer uma experiência contínua ao usuário.</li>
+
+<li>O novo método {@link android.app.UiAutomation#executeShellCommand(java.lang.String) executeShellCommand()} permite executar comandos do shell no teste de instrumentação. A execução do comando é semelhante à execução de {@code adb shell} em um host conectado ao dispositivo, permitindo o uso de ferramentas de shell como {@code dumpsys}, {@code am}, {@code content} e {@code pm}.</li>
+
+<li>Serviços de acessibilidade e ferramentas de teste que usam APIs de acessibilidade (como <a href="{@docRoot}tools/help/uiautomator/index.html">{@code UiAutomator}</a>) podem agora recuperar informações detalhadas sobre as propriedades das janelas na tela com as quais os usuários com problemas visuais podem interagir. Para recuperar uma lista de objetos {@link android.view.accessibility.AccessibilityWindowInfo}, chame o novo método {@link android.accessibilityservice.AccessibilityService#getWindows() getWindows()}.</li>
+
+<li>A nova classe {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction} permite definir ações padrão ou personalizadas para executar em um {@link android.view.accessibility.AccessibilityNodeInfo}. A nova classe {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction} substitui as APIs relativas a ações anteriormente encontradas em {@link android.view.accessibility.AccessibilityNodeInfo}.</li>
+
+<li>O Android 5.0 fornece um controle mais detalhado sobre síntese de conversão de texto em voz. A nova classe {@link android.speech.tts.Voice} permite que o app use perfis de voz associados a locais específicos, classificação de qualidade e latência e parâmetros específicos de mecanismos de conversão de texto em voz.</li>
+</ul>
+
+<h2 id="IME">IME</h2>
+
+<h3 id="Switching">Troca facilitada entre idiomas de entrada</h3>
+
+<p>A partir do Android 5.0, os usuários podem facilmente alternar entre todos os <a href="{@docRoot}guide/topics/text/creating-input-method.html">editores de método de entrada (IME)</a> compatíveis com a plataforma. Executar a ação de comutação designada (normalmente tocando o ícone de globo no teclado virtual) percorre todos os IMEs. Essa mudança de comportamento foi implementada pelo método {@link android.view.inputmethod.InputMethodManager#shouldOfferSwitchingToNextInputMethod(android.os.IBinder) shouldOfferSwitchingToNextInputMethod()}.</p>
+
+<p>Além disso, o framework agora verifica se o próximo IME inclui um mecanismo de alternação (e, portanto, se o IME é compatível com a alternação posterior ao IME). Um IME com mecanismo de alternação não passará a outro IME sem esse mecanismo. Essa mudança de comportamento foi implementada pelo método {@link android.view.inputmethod.InputMethodManager#switchToNextInputMethod(android.os.IBinder, boolean) switchToNextInputMethod()}.
+
+<p>Para saber um exemplo de como usar as APIs de alternação de IME atualizadas, consulte o exemplo atualizado de implementação de teclado virtual nesta versão. Para saber mais sobre como implementar a troca entre IMEs, consulte <a href="{@docRoot}guide/topics/text/creating-input-method.html">Criação de um método de entrada</a>.
+</p>
+
+<h2 id="Manifest">Declarações de manifesto</h2>
+
+<h3 id="ManifestFeatures">Recursos necessários declaráveis</h3>
+<p>Os seguintes valores agora são compatíveis no elemento <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code <uses-feature>}</a>, para garantir que o app seja instalado somente em dispositivos que fornecem os recursos necessários.</p>
+
+<ul>
+<li>{@link android.content.pm.PackageManager#FEATURE_AUDIO_OUTPUT}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_MANUAL_POST_PROCESSING}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_MANUAL_SENSOR}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_CAPABILITY_RAW}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_CAMERA_LEVEL_FULL}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_GAMEPAD}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_LIVE_TV}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_MANAGED_USERS}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_LEANBACK}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_OPENGLES_EXTENSION_PACK}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SECURELY_REMOVES_USERS}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_AMBIENT_TEMPERATURE}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_HEART_RATE_ECG}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_SENSOR_RELATIVE_HUMIDITY}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_VERIFIED_BOOT}</li>
+<li>{@link android.content.pm.PackageManager#FEATURE_WEBVIEW}</li>
+</ul>
+
+<h3 id="Permissions">Permissões do usuário</h3>
+
+<p>A seguinte permissão agora é compatível com o elemento <a href="{@docRoot}guide/topics/manifest/uses-permission-element.html">{@code <uses-permission>}</a> para declarar as permissões exigidas por seu app para o acesso a algumas APIs.</p>
+
+<ul>
+<li>{@link android.Manifest.permission#BIND_DREAM_SERVICE}: ao segmentar para a API nível 21 ou superior, essa permissão é necessária por um serviço do <a href="{@docRoot}about/versions/android-4.2.html#Daydream">Daydream</a>, para garantir que somente o sistema pode se vincular a ele.</li>
+</ul>
