@@ -109,8 +109,6 @@ view for the content, along with links to the apps of other providers. This is d
 
 <p>Your application's database class might define the columns as follows:</p>
 
-<p class="code-caption"><a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/VideoDatabase.java#L41" target="_blank">
-VideoDatabase.java</a></p>
 <pre>
 public class VideoDatabase {
   //The columns we'll include in the video database table
@@ -136,8 +134,6 @@ public class VideoDatabase {
 <p>When you build the map from the {@link android.app.SearchManager} columns to your data fields, you
 must also specify the {@link android.provider.BaseColumns#_ID} to give each row a unique ID.</p>
 
-<p class="code-caption"><a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/VideoDatabase.java#L83" target="_blank">
-VideoDatabase.java</a></p>
 <pre>
 ...
   private static HashMap<String, String> buildColumnMap() {
@@ -195,8 +191,6 @@ java.lang.String[], java.lang.String, java.lang.String[], java.lang.String) quer
 provider searches your suggestion data and returns a {@link android.database.Cursor} that points to
 the rows you have designated for suggestions.</p>
 
-<p class="code-caption"><a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/VideoContentProvider.java" target="_blank">
-VideoContentProvider.java</a></p>
 <pre>
 &#64;Override
   public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
@@ -248,8 +242,6 @@ provider includes the {@code android:searchSuggestAuthority} attribute to tell t
 namespace of your content provider. Also, you must set its {@code android:exported} attribute to
 {@code "true"} so that the Android global search can use the results returned from it.</p>
 
-<p class="code-caption"><a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/AndroidManifest.xml" target="_blank">
-AndroidManifest.xml</a></p>
 <pre>
 &lt;provider android:name="com.example.android.tvleanback.VideoContentProvider"
     android:authorities="com.example.android.tvleanback"
@@ -294,8 +286,6 @@ question mark ({@code ?}) value is replaced with the query text.</p>
 <a href="{@docRoot}guide/topics/search/searchable-config.html">{@code searchable.xml}</a>
 file:</p>
 
-<p class="code-caption"><a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/res/xml/searchable.xml" target="_blank">
-Searchable.xml</a></p>
 <pre>
 &lt;searchable xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/search_label"
@@ -320,8 +310,6 @@ intent searches the repository for columns with the given word in their values, 
 of content items with those columns. In your {@code AndroidManifest.xml} file, you designate the
 activity which handles the {@link android.content.Intent#ACTION_SEARCH} intent like this:
 
-<p class="code-caption"><a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/AndroidManifest.xml" target="_blank">
-AndroidManifest.xml</a></p>
 <pre>
 ...
   &lt;activity
@@ -361,8 +349,12 @@ Suggestions</a> and mapped the {@link android.app.SearchManager#SUGGEST_COLUMN_T
 {@link android.app.SearchManager#SUGGEST_COLUMN_CONTENT_TYPE}, and
 {@link android.app.SearchManager#SUGGEST_COLUMN_PRODUCTION_YEAR} fields as described in
 <a href="#columns">Identify Columns</a>, a <a href="{@docRoot}training/app-indexing/deep-linking.html">
-deep link</a> to your content appears in the details screen that launches when the user selects a
-search result.</p>
+deep link</a> to a watch action for your content appears in the details screen that launches when
+the user selects a search result, as shown in figure 1.</p>
+
+<img itemprop="image" src="{@docRoot}images/tv/deep-link.png" alt="Deep link in the details screen"/>
+<p class="img-caption"><b>Figure 1.</b> The details screen displays a deep link for the
+Videos by Google (Leanback) sample app. Sintel: &copy; copyright Blender Foundation, www.sintel.org.</p>
 
 <p>When the user selects the link for your app, identified by the "Available On" button in the
 details screen, the system launches the activity which handles the {@link android.content.Intent#ACTION_VIEW}
