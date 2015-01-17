@@ -86,8 +86,9 @@ public class MidiOutputPort extends MidiPort implements MidiSender {
                     }
                 }
             } catch (IOException e) {
-                Log.e(TAG, "read failed");
                 // report I/O failure
+                Log.e(TAG, "read failed");
+            } finally {
                 IoUtils.closeQuietly(mInputStream);
                 onIOException();
             }
