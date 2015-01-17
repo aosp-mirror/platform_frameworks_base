@@ -620,7 +620,11 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getDeviceId() {
-        return getDeviceId(getDefaultSim());
+        try {
+            return getITelephony().getDeviceId();
+        } catch (RemoteException ex) {
+            return null;
+        }
     }
 
     /**
