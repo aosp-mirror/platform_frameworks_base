@@ -23,12 +23,15 @@ import android.content.Intent;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
-import android.media.AudioManager;
+import android.media.AudioSystem;
+import android.media.IAudioService;
 import android.os.FileObserver;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 
 import libcore.io.IoUtils;
@@ -49,6 +52,7 @@ public final class UsbAlsaManager {
     private static final String ALSA_DIRECTORY = "/dev/snd/";
 
     private final Context mContext;
+    private IAudioService mAudioService;
 
     private final AlsaCardsParser mCardsParser = new AlsaCardsParser();
     private final AlsaDevicesParser mDevicesParser = new AlsaDevicesParser();
@@ -64,6 +68,8 @@ public final class UsbAlsaManager {
 
     private final HashMap<String,AlsaDevice>
         mAlsaDevices = new HashMap<String,AlsaDevice>();
+
+    private UsbAudioDevice mAccessoryAudioDevice = null;
 
     private UsbAudioDevice mSelectedAudioDevice = null;
 
@@ -123,6 +129,9 @@ public final class UsbAlsaManager {
     }
 
     public void systemReady() {
+        mAudioService = IAudioService.Stub.asInterface(
+                        ServiceManager.getService(Context.AUDIO_SERVICE));
+
         mAlsaObserver.startWatching();
 
         // add existing alsa devices
@@ -132,27 +141,59 @@ public final class UsbAlsaManager {
         }
     }
 
-    // Broadcasts the arrival/departure of a USB audio interface
-    // audioDevice - the UsbAudioDevice that was added or removed
+    // Notifies AudioService when a device is added or removed
+    // audioDevice - the AudioDevice that was added or removed
     // enabled - if true, we're connecting a device (it's arrived), else disconnecting
-    private void sendDeviceNotification(UsbAudioDevice audioDevice, boolean enabled) {
-        if (DEBUG) {
-            Slog.d(TAG, "sendDeviceNotification(enabled:" + enabled +
-                    " c:" + audioDevice.mCard +
-                    " d:" + audioDevice.mDevice + ")");
+    private void notifyDeviceState(UsbAudioDevice audioDevice, boolean enabled) {
+       if (DEBUG) {
+            Slog.d(TAG, "notifyDeviceState " + enabled + " " + audioDevice);
         }
 
-        // send a sticky broadcast containing current USB state
-        Intent intent = new Intent(AudioManager.ACTION_USB_AUDIO_DEVICE_PLUG);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        intent.putExtra("state", enabled ? 1 : 0);
-        intent.putExtra("card", audioDevice.mCard);
-        intent.putExtra("device", audioDevice.mDevice);
-        intent.putExtra("hasPlayback", audioDevice.mHasPlayback);
-        intent.putExtra("hasCapture", audioDevice.mHasCapture);
-        intent.putExtra("class", audioDevice.mDeviceClass);
-        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+        if (mAudioService == null) {
+            Slog.e(TAG, "no AudioService");
+            return;
+        }
+
+        // FIXME Does not yet handle the case where the setting is changed
+        // after device connection.  Ideally we should handle the settings change
+        // in SettingsObserver. Here we should log that a USB device is connected
+        // and disconnected with its address (card , device) and force the
+        // connection or disconnection when the setting changes.
+        int isDisabled = Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED, 0);
+        if (isDisabled != 0) {
+            return;
+        }
+
+        int state = (enabled ? 1 : 0);
+        int alsaCard = audioDevice.mCard;
+        int alsaDevice = audioDevice.mDevice;
+        if (alsaCard < 0 || alsaDevice < 0) {
+            Slog.e(TAG, "Invalid alsa card or device alsaCard: " + alsaCard +
+                        " alsaDevice: " + alsaDevice);
+            return;
+        }
+        String params = ("card=" + alsaCard + ";device=" + alsaDevice);
+
+        try {
+            // Playback Device
+            if (audioDevice.mHasPlayback) {
+                int device = (audioDevice == mAccessoryAudioDevice ?
+                        AudioSystem.DEVICE_OUT_USB_ACCESSORY :
+                        AudioSystem.DEVICE_OUT_USB_DEVICE);
+                mAudioService.setWiredDeviceConnectionState(device, state, params);
+            }
+
+            // Capture Device
+            if (audioDevice.mHasCapture) {
+               int device = (audioDevice == mAccessoryAudioDevice ?
+                        AudioSystem.DEVICE_IN_USB_ACCESSORY :
+                        AudioSystem.DEVICE_IN_USB_DEVICE);
+                mAudioService.setWiredDeviceConnectionState(device, state, params);
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException in setWiredDeviceConnectionState");
+        }
     }
 
     private AlsaDevice waitForAlsaDevice(int card, int device, int type) {
@@ -249,7 +290,7 @@ public final class UsbAlsaManager {
                 return false;
             }
             // "disconnect" the AudioPolicyManager from the previously selected device.
-            sendDeviceNotification(mSelectedAudioDevice, false);
+            notifyDeviceState(mSelectedAudioDevice, false);
             mSelectedAudioDevice = null;
         }
 
@@ -284,7 +325,7 @@ public final class UsbAlsaManager {
         mSelectedAudioDevice.mDeviceDescription =
                 mCardsParser.getCardRecordFor(card).mCardDescription;
 
-        sendDeviceNotification(mSelectedAudioDevice, true);
+        notifyDeviceState(mSelectedAudioDevice, true);
 
         return true;
     }
@@ -297,9 +338,9 @@ public final class UsbAlsaManager {
         return selectAudioCard(mCardsParser.getDefaultCard());
     }
 
-    /* package */ void deviceAdded(UsbDevice usbDevice) {
+    /* package */ void usbDeviceAdded(UsbDevice usbDevice) {
        if (DEBUG) {
-          Slog.d(TAG, "deviceAdded(): " + usbDevice);
+          Slog.d(TAG, "usbDeviceAdded(): " + usbDevice);
         }
 
         // Is there an audio interface in there?
@@ -360,7 +401,7 @@ public final class UsbAlsaManager {
         }
     }
 
-    /* package */ void deviceRemoved(UsbDevice usbDevice) {
+    /* package */ void usbDeviceRemoved(UsbDevice usbDevice) {
        if (DEBUG) {
           Slog.d(TAG, "deviceRemoved(): " + usbDevice);
         }
@@ -368,7 +409,7 @@ public final class UsbAlsaManager {
         UsbAudioDevice audioDevice = mAudioDevices.remove(usbDevice);
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasPlayback) {
-                sendDeviceNotification(audioDevice, false);
+                notifyDeviceState(audioDevice, false);
             }
         }
         UsbMidiDevice usbMidiDevice = mMidiDevices.remove(usbDevice);
@@ -380,6 +421,20 @@ public final class UsbAlsaManager {
 
         // if there any external devices left, select one of them
         selectDefaultDevice();
+    }
+
+   /* package */ void setAccessoryAudioState(boolean enabled, int card, int device) {
+       if (DEBUG) {
+            Slog.d(TAG, "setAccessoryAudioState " + enabled + " " + card + " " + device);
+        }
+        if (enabled) {
+            mAccessoryAudioDevice = new UsbAudioDevice(card, device, true, false,
+                    UsbAudioDevice.kAudioDeviceClass_External);
+            notifyDeviceState(mAccessoryAudioDevice, true);
+        } else if (mAccessoryAudioDevice != null) {
+            notifyDeviceState(mAccessoryAudioDevice, false);
+            mAccessoryAudioDevice = null;
+        }
     }
 
     //

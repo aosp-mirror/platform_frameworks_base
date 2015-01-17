@@ -60,16 +60,16 @@ public class UsbHostManager {
     private ArrayList<UsbInterface> mNewInterfaces;
     private ArrayList<UsbEndpoint> mNewEndpoints;
 
-    private UsbAlsaManager mUsbAlsaManager;
+    private final UsbAlsaManager mUsbAlsaManager;
 
     @GuardedBy("mLock")
     private UsbSettingsManager mCurrentSettings;
 
-    public UsbHostManager(Context context) {
+    public UsbHostManager(Context context, UsbAlsaManager alsaManager) {
         mContext = context;
         mHostBlacklist = context.getResources().getStringArray(
                 com.android.internal.R.array.config_usbHostBlacklist);
-        mUsbAlsaManager = new UsbAlsaManager(context);
+        mUsbAlsaManager = alsaManager;
     }
 
     public void setCurrentSettings(UsbSettingsManager settings) {
@@ -222,7 +222,7 @@ public class UsbHostManager {
                 mDevices.put(mNewDevice.getDeviceName(), mNewDevice);
                 Slog.d(TAG, "Added device " + mNewDevice);
                 getCurrentSettings().deviceAttached(mNewDevice);
-                mUsbAlsaManager.deviceAdded(mNewDevice);
+                mUsbAlsaManager.usbDeviceAdded(mNewDevice);
             } else {
                 Slog.e(TAG, "mNewDevice is null in endUsbDeviceAdded");
             }
@@ -238,15 +238,13 @@ public class UsbHostManager {
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceName);
             if (device != null) {
-                mUsbAlsaManager.deviceRemoved(device);
+                mUsbAlsaManager.usbDeviceRemoved(device);
                 getCurrentSettings().deviceDetached(device);
             }
         }
     }
 
     public void systemReady() {
-        mUsbAlsaManager.systemReady();
-
         synchronized (mLock) {
             // Create a thread to call into native code to wait for USB host events.
             // This thread will call us back on usbDeviceAdded and usbDeviceRemoved.
@@ -292,7 +290,6 @@ public class UsbHostManager {
                 pw.println("    " + name + ": " + mDevices.get(name));
             }
         }
-        mUsbAlsaManager.dump(fd, pw);
     }
 
     private native void monitorUsbHostBus();
