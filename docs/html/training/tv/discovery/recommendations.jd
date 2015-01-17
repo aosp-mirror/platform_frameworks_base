@@ -61,11 +61,6 @@ trainingnavtop=true
   create a recommendation service for your application:
 </p>
 
-
-<p class="code-caption">
-  <a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/UpdateRecommendationsService.java" target="_blank">
-  UpdateRecommendationsService.java</a>
-</p>
 <pre>
 public class UpdateRecommendationsService extends IntentService {
     private static final String TAG = "UpdateRecommendationsService";
@@ -136,10 +131,6 @@ public class UpdateRecommendationsService extends IntentService {
   app manifest. The following code snippet illustrates how to declare this class as a service:
 </p>
 
-<p class="code-caption">
-  <a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/AndroidManifest.xml" target="_blank">
-  AndroidManifest.xml</a>
-</p>
 <pre>
 &lt;manifest ... &gt;
   &lt;application ... &gt;
@@ -160,6 +151,11 @@ the recommendations to appear at the end of the recommendations row. Once a cont
 movie, has been played, <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html#Removing">
 remove it</a> from the recommendations.</p>
 
+<p>The order of an app's recommendations is preserved according to the order in which the app
+provides them. The framework interleaves app recommendations based on recommendation quality,
+as measured by user behavior. Better recommendations make an app's recommendations more likely
+to appear near the front of the list.</p>
+
 <h2 id="build">Build Recommendations</h2>
 
 <p>
@@ -175,10 +171,6 @@ remove it</a> from the recommendations.</p>
 the builder pattern described as follows. First, you set the values of the recommendation card
 elements.</p>
 
-<p class="code-caption">
-  <a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/RecommendationBuilder.java" target="_blank">
-  RecommendationBuilder.java</a>
-</p>
 <pre>
 public class RecommendationBuilder {
     ...
@@ -221,13 +213,9 @@ public class RecommendationBuilder {
 </p>
 
 <p>
-  The following code example demonstrates how to build a recommendation, and post it to the manager.
+  The following code example demonstrates how to build a recommendation.
 </p>
 
-<p class="code-caption">
-  <a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/RecommendationBuilder.java" target="_blank">
-  RecommendationBuilder.java</a>
-</p>
 <pre>
 public class RecommendationBuilder {
     ...
@@ -250,8 +238,6 @@ public class RecommendationBuilder {
                         .setExtras(extras))
                 .build();
 
-        mNotificationManager.notify(mId, notification);
-        mNotificationManager = null;
         return notification;
     }
 }
@@ -267,10 +253,6 @@ public class RecommendationBuilder {
   every half hour:
 </p>
 
-<p class="code-caption">
-  <a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/java/com/example/android/tvleanback/BootupActivity.java" target="_blank">
-  BootupActivity.java</a>
-</p>
 <pre>
 public class BootupActivity extends BroadcastReceiver {
     private static final String TAG = "BootupActivity";
@@ -307,10 +289,6 @@ public class BootupActivity extends BroadcastReceiver {
   following sample code demonstrates how to add this configuration to the manifest:
 </p>
 
-<p class="code-caption">
-  <a href="https://github.com/googlesamples/androidtv-Leanback/blob/master/app/src/main/AndroidManifest.xml" target="_blank">
-  AndroidManifest.xml</a>
-</p>
 <pre>
 &lt;manifest ... &gt;
   &lt;application ... &gt;
@@ -330,3 +308,12 @@ public class BootupActivity extends BroadcastReceiver {
   requests the {@link android.Manifest.permission#RECEIVE_BOOT_COMPLETED} permission.
   For more information, see {@link android.content.Intent#ACTION_BOOT_COMPLETED}.
 </p>
+
+<p>In your recommendation service class' {@link android.app.IntentService#onHandleIntent(android.content.Intent)
+onHandleIntent()}
+method, post the recommendation to the manager as follows:</p>
+
+<pre>
+Notification notification = notificationBuilder.build();
+mNotificationManager.notify(id, notification);
+</pre>
