@@ -436,6 +436,8 @@ public interface IActivityManager extends IInterface {
     public IActivityContainer createVirtualActivityContainer(IBinder parentActivityToken,
             IActivityContainerCallback callback) throws RemoteException;
 
+    public IActivityContainer createStackOnDisplay(int displayId) throws RemoteException;
+
     public void deleteActivityContainer(IActivityContainer container) throws RemoteException;
 
     public IActivityContainer getEnclosingActivityContainer(IBinder activityToken)
@@ -797,4 +799,5 @@ public interface IActivityManager extends IInterface {
 
     // Start of M transactions
     int NOTIFY_CLEARTEXT_NETWORK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+280;
+    int CREATE_STACK_ON_DISPLAY = IBinder.FIRST_CALL_TRANSACTION+281;
 }
