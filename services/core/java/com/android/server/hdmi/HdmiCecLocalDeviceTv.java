@@ -222,18 +222,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @Override
-    @ServiceThreadOnly
     protected int getPreferredAddress() {
-        assertRunOnServiceThread();
-        return SystemProperties.getInt(Constants.PROPERTY_PREFERRED_ADDRESS_TV,
-                Constants.ADDR_UNREGISTERED);
+        return Constants.ADDR_TV;
     }
 
     @Override
-    @ServiceThreadOnly
     protected void setPreferredAddress(int addr) {
-        assertRunOnServiceThread();
-        SystemProperties.set(Constants.PROPERTY_PREFERRED_ADDRESS_TV, String.valueOf(addr));
+        Slog.w(TAG, "Preferred addres will not be stored for TV");
     }
 
     @Override
@@ -1631,7 +1626,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             Slog.w(TAG, "Invalid record source." + Arrays.toString(recordSource));
             announceOneTouchRecordResult(recorderAddress,
                     ONE_TOUCH_RECORD_FAIL_TO_RECORD_DISPLAYED_SCREEN);
-            return Constants.ABORT_UNABLE_TO_DETERMINE;
+            return Constants.ABORT_CANNOT_PROVIDE_SOURCE;
         }
 
         addAndStartAction(new OneTouchRecordAction(this, recorderAddress, recordSource));
