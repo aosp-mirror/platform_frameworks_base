@@ -230,12 +230,16 @@ final class Constants {
     static final int OPTION_CEC_ENABLE = 2;
 
     // If set to disabled, system service yields control of CEC to sub-microcontroller.
-    // If enabled, it take the control back.
+    // If enabled, it takes the control back.
     static final int OPTION_CEC_SERVICE_CONTROL = 3;
 
     // Put other devices to standby when TV goes to standby. enabled by default.
     // If set to disabled, TV doesn't send <Standby> to other devices.
     static final int OPTION_CEC_AUTO_DEVICE_OFF = 4;
+
+    // Passes the language used in the system when updated. The value to use is the 3 byte
+    // code as defined in ISO/FDIS 639-2.
+    static final int OPTION_CEC_SET_LANGUAGE = 5;
 
     // If set to disabled, TV does not switch ports when mobile device is connected.
     static final int OPTION_MHL_INPUT_SWITCHING = 101;
@@ -245,6 +249,10 @@ final class Constants {
 
     // If set to disabled, all MHL commands are discarded.
     static final int OPTION_MHL_ENABLE = 103;
+
+    // If set to disabled, system service yields control of MHL to sub-microcontroller.
+    // If enabled, it takes the control back.
+    static final int OPTION_MHL_SERVICE_CONTROL = 104;
 
     static final int DISABLED = 0;
     static final int ENABLED = 1;
