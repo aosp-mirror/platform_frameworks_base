@@ -23,9 +23,11 @@ import static com.android.server.hdmi.Constants.ENABLED;
 import static com.android.server.hdmi.Constants.OPTION_CEC_AUTO_WAKEUP;
 import static com.android.server.hdmi.Constants.OPTION_CEC_ENABLE;
 import static com.android.server.hdmi.Constants.OPTION_CEC_SERVICE_CONTROL;
+import static com.android.server.hdmi.Constants.OPTION_CEC_SET_LANGUAGE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
 import static com.android.server.hdmi.Constants.OPTION_MHL_INPUT_SWITCHING;
 import static com.android.server.hdmi.Constants.OPTION_MHL_POWER_CHARGE;
+import static com.android.server.hdmi.Constants.OPTION_MHL_SERVICE_CONTROL;
 
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
@@ -412,6 +414,7 @@ public final class HdmiControlService extends SystemService {
             // Register ContentObserver to monitor the settings change.
             registerContentObserver();
         }
+        mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, ENABLED);
     }
 
     @Override
@@ -539,6 +542,7 @@ public final class HdmiControlService extends SystemService {
     private void initializeCec(int initiatedBy) {
         mAddressAllocated = false;
         mCecController.setOption(OPTION_CEC_SERVICE_CONTROL, ENABLED);
+        mCecController.setOption(OPTION_CEC_SET_LANGUAGE, HdmiUtils.languageToInt(mLanguage));
         initializeLocalDevices(initiatedBy);
     }
 
@@ -2021,6 +2025,7 @@ public final class HdmiControlService extends SystemService {
 
         if (isTvDeviceEnabled()) {
             tv().broadcastMenuLanguage(language);
+            mCecController.setOption(OPTION_CEC_SET_LANGUAGE, HdmiUtils.languageToInt(language));
         }
     }
 
@@ -2065,6 +2070,7 @@ public final class HdmiControlService extends SystemService {
         mStandbyMessageReceived = false;
         mAddressAllocated = false;
         mCecController.setOption(OPTION_CEC_SERVICE_CONTROL, DISABLED);
+        mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
     }
 
     private void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType) {
