@@ -1192,7 +1192,8 @@ public final class HdmiControlService extends SystemService {
             }
             int activePath = tv.getActivePath();
             if (activePath != HdmiDeviceInfo.PATH_INVALID) {
-                return new HdmiDeviceInfo(activePath, tv.getActivePortId());
+                HdmiDeviceInfo info = tv.getDeviceInfoByPath(activePath);
+                return (info != null) ? info : new HdmiDeviceInfo(activePath, tv.getActivePortId());
             }
             return null;
         }
