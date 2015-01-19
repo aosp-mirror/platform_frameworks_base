@@ -52,7 +52,7 @@ public final class Dpm extends BaseCommand {
                 "usage: dpm [subcommand] [options]\n" +
                 "usage: dpm set-active-admin [ --user <USER_ID> ] <COMPONENT>\n" +
                 "usage: dpm set-device-owner <COMPONENT>\n" +
-                "usage: dpm set-profile-owner <COMPONENT> <USER_ID>\n" +
+                "usage: dpm set-profile-owner [ --user <USER_ID> ] <COMPONENT>\n" +
                 "\n" +
                 "dpm set-active-admin: Sets the given component as active admin" +
                 " for an existing user.\n" +
@@ -125,23 +125,21 @@ public final class Dpm extends BaseCommand {
     }
 
     private void runSetProfileOwner() throws RemoteException {
-        // To be refactored later to use parseArgs(boolean). Currently in use by existing tests.
-        ComponentName component = parseComponentName(nextArgRequired());
-        int userId = parseInt(nextArgRequired());
-        mDevicePolicyManager.setActiveAdmin(component, true /*refreshing*/, userId);
+        parseArgs(true);
+        mDevicePolicyManager.setActiveAdmin(mComponent, true /*refreshing*/, mUserId);
 
         try {
-            if (!mDevicePolicyManager.setProfileOwner(component, "" /*ownerName*/, userId)) {
-                throw new RuntimeException("Can't set component " + component.toShortString() +
-                        " as profile owner for user " + userId);
+            if (!mDevicePolicyManager.setProfileOwner(mComponent, "" /*ownerName*/, mUserId)) {
+                throw new RuntimeException("Can't set component " + mComponent.toShortString() +
+                        " as profile owner for user " + mUserId);
             }
         } catch (Exception e) {
             // Need to remove the admin that we just added.
-            mDevicePolicyManager.removeActiveAdmin(component, userId);
+            mDevicePolicyManager.removeActiveAdmin(mComponent, mUserId);
             throw e;
         }
         System.out.println("Success: Active admin and profile owner set to "
-                + component.toShortString() + " for user " + userId);
+                + mComponent.toShortString() + " for user " + mUserId);
     }
 
     private ComponentName parseComponentName(String component) {
