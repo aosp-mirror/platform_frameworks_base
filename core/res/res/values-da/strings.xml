@@ -54,7 +54,7 @@
     <string name="serviceRegistered" msgid="6275019082598102493">"Registreringen er afsluttet."</string>
     <string name="serviceErased" msgid="1288584695297200972">"Sletningen er fuldført."</string>
     <string name="passwordIncorrect" msgid="7612208839450128715">"Forkert adgangskode."</string>
-    <string name="mmiComplete" msgid="8232527495411698359">"MMI-nummer afsluttet."</string>
+    <string name="mmiComplete" msgid="8232527495411698359">"MMI-nummer fuldført."</string>
     <string name="badPin" msgid="9015277645546710014">"Den gamle pinkode, som du har indtastet, er ikke korrekt."</string>
     <string name="badPuk" msgid="5487257647081132201">"Den indtastede PUK-kode er forkert."</string>
     <string name="mismatchPin" msgid="609379054496863419">"De indtastede pinkoder er ikke ens"</string>
@@ -1018,7 +1018,7 @@
     <string name="lockscreen_access_pattern_start" msgid="3941045502933142847">"Mønster er begyndt"</string>
     <string name="lockscreen_access_pattern_cleared" msgid="5583479721001639579">"Mønster er ryddet"</string>
     <string name="lockscreen_access_pattern_cell_added" msgid="6756031208359292487">"Celle er tilføjet"</string>
-    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Mønster er afsluttet"</string>
+    <string name="lockscreen_access_pattern_detected" msgid="4988730895554057058">"Mønster er fuldført"</string>
     <string name="keyguard_accessibility_widget_changed" msgid="5678624624681400191">"%1$s. Widget %2$d af %3$d."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8273277058724924654">"Tilføj widget."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="1281505703307930757">"Tom"</string>
