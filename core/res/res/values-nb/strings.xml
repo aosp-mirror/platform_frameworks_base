@@ -560,7 +560,7 @@
     <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ta opp fra lydutdata"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Lar appen ta opp og omdirigere lydutdata."</string>
     <string name="permlab_captureAudioHotword" msgid="1890553935650349808">"Gjenkjennelse av kommandoord"</string>
-    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Gir appen tillatelse til å ta opp lyd for å gjenkjenne kommandoord. Opptaket kan skje i bakgrunnen, men forhindrer ikke lydopptak i andre funksjoner (f.eks. i videoopptak)."</string>
+    <string name="permdesc_captureAudioHotword" msgid="9151807958153056810">"Appen tillates å ta opp lyd for å gjenkjenne kommandoord. Opptaket kan skje i bakgrunnen, men forhindrer ikke lydopptak i andre funksjoner (f.eks. i videoopptak)."</string>
     <string name="permlab_modifyAudioRouting" msgid="7738060354490807723">"Lydruting"</string>
     <string name="permdesc_modifyAudioRouting" msgid="7205731074267199735">"Tillater appen å styre lydruting direkte og overstyre angitte lydinnstillinger."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"ta opp fra videoutdata"</string>
@@ -572,11 +572,11 @@
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"endre lydinnstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lar appen endre globale lydinnstillinger slik som volum og hvilken høyttaler som brukes for lydavspilling."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ta opp lyd"</string>
-    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Lar appen ta opp lyd med mikrofonen. Dette betyr at appen kan ta opp lyd når som helst uten at du har bedt om det."</string>
+    <string name="permdesc_recordAudio" msgid="4906839301087980680">"Appen tillates å ta opp lyd med mikrofonen. Det betyr at appen kan ta opp lyd når som helst uten at du har bedt om det."</string>
     <string name="permlab_sim_communication" msgid="1180265879464893029">"sim-kommunikasjon"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Lar appen sende kommandoer til SIM-kortet. Dette er veldig farlig."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder og videoer"</string>
-    <string name="permdesc_camera" msgid="8497216524735535009">"Lar appen ta bilder og filme med kameraet. Denne tillatelsen gjør at appen kan bruke kameraet når som helst uten bekreftelse fra deg."</string>
+    <string name="permdesc_camera" msgid="8497216524735535009">"Appen tillates å ta bilder og filme med kameraet. Det betyr at appen kan bruke kameraet når som helst uten bekreftelse fra deg."</string>
     <string name="permlab_cameraDisableTransmitLed" msgid="2651072630501126222">"deaktiver LED-lyset for indikering av overføring når kameraet er i bruk"</string>
     <string name="permdesc_cameraDisableTransmitLed" msgid="4764585465480295341">"Tillater at forhåndsinnstallerte systemapper deaktiverer LED-indikatoren for kamerabruk."</string>
     <string name="permlab_brick" product="tablet" msgid="2961292205764488304">"deaktivere nettbrettet permanent"</string>
@@ -678,19 +678,19 @@
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"fungere som kontoadministrasjonstjenesten"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Lar appen foreta anrop til kontoautentiseringstjenester."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"finne kontoer på enheten"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Lar appen hente listen over kontoene nettbrettet kjenner. Dette kan inkludere kontoer som er opprettet av apper du har installert."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Appen kan hente listen over kontoene nettbrettet kjenner. Dette kan inkludere kontoer som er opprettet av apper du har installert."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Gjør at appen får listen over kontoer TV-en kjenner til. Dette kan omfatte alle kontoer som er opprettet av appene du har installert."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Lar appen hente listen over kontoene telefonen kjenner. Dette kan inkludere kontoer som er opprettet av apper du har installert."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Appen kan hente listen over kontoene telefonen kjenner. Dette kan inkludere kontoer som er opprettet av apper du har installert."</string>
     <string name="permlab_authenticateAccounts" msgid="5265908481172736933">"opprette kontoer og angi passord"</string>
     <string name="permdesc_authenticateAccounts" msgid="5472124296908977260">"Lar appen bruke kontoadministratoren sine rettigheter til kontoautentisering, herunder oppretting av kontoer samt innhenting og angivelse av passord."</string>
     <string name="permlab_manageAccounts" msgid="4983126304757177305">"legge til eller fjerne kontoer"</string>
     <string name="permdesc_manageAccounts" msgid="8698295625488292506">"Lar appen utføre handlinger som å legge til og fjerne kontoer samt slette passord."</string>
     <string name="permlab_useCredentials" msgid="235481396163877642">"bruke kontoer på enheten"</string>
-    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Lar appen be om autentiseringstokener."</string>
+    <string name="permdesc_useCredentials" msgid="7984227147403346422">"Appen kan be om autentiseringstokener."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"se nettverkstilkoblinger"</string>
-    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Lar appen se informasjon om nettverkstilkoblinger, slik som hvilke nettverk som finnes og er tilkoblet."</string>
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Appen kan se informasjon om nettverkstilkoblinger, slik som hvilke nettverk som finnes og er tilkoblet."</string>
     <string name="permlab_createNetworkSockets" msgid="8018758136404323658">"full nettverkstilgang"</string>
-    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Lar appen opprette nettverkskontakter og bruke tilpassede nettverksprotokoller. Nettleseren og andre apper gjør det mulig å sende data til Internett, så denne tillatelsen er ikke nødvendig for å kunne sende data til Internett."</string>
+    <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Appen kan opprette nettverkskontakter og bruke tilpassede nettverksprotokoller. Nettleseren og andre apper gjør det mulig å sende data til Internett, så denne tillatelsen er ikke nødvendig for å kunne sende data til Internett."</string>
     <string name="permlab_writeApnSettings" msgid="505660159675751896">"endre eller avskjære nettverksinnstillinger og -trafikk"</string>
     <string name="permdesc_writeApnSettings" msgid="5333798886412714193">"Lar appen endre nettverksinnstillinger og avbryte eller undersøke all nettverkstrafikk, for eksempel for å endre mellomtjener og port for alle navn på tilgangspunkt (APN). Ondsinnede apper kan overvåke, viderekoble eller endre nettverkspakker uten at du vet om det."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"endre nettverkskonnektivitet"</string>
@@ -757,7 +757,7 @@
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Lar appen lese innhold på SD-kortet ditt."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"endre eller slette innholdet i USB-lagringen"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"endre eller slette innhold i SD-kortet"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Gir appen tillatelse til å skrive til USB-lagringen."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Appen tillates å skrive til USB-lagringen."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Lar appen skrive til SD-kortet."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"endre eller slette innhold på interne medier"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8189160597698529185">"Lar appen endre innholdet i det interne lagringsmediet."</string>

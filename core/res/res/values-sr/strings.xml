@@ -1611,7 +1611,7 @@
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Додирните за преглед кор. и под."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Нема више 2G-3G података"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Нема више 4G података"</string>
-    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Нема више подат. за мобил. уређ."</string>
+    <string name="data_usage_mobile_limit_title" msgid="557158376602636112">"Нема више података за мобилне"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Нема више Wi-Fi података"</string>
     <string name="data_usage_limit_body" msgid="291731708279614081">"Потрошили сте податке за овај месец"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Прекорачен пренос 2G-3G података"</string>
