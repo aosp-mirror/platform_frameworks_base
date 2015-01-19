@@ -614,9 +614,9 @@ public class Process {
         synchronized(Process.class) {
             ArrayList<String> argsForZygote = new ArrayList<String>();
 
-            // --runtime-init, --setuid=, --setgid=,
+            // --runtime-args, --setuid=, --setgid=,
             // and --setgroups= must go first
-            argsForZygote.add("--runtime-init");
+            argsForZygote.add("--runtime-args");
             argsForZygote.add("--setuid=" + uid);
             argsForZygote.add("--setgid=" + gid);
             if ((debugFlags & Zygote.DEBUG_ENABLE_JNI_LOGGING) != 0) {

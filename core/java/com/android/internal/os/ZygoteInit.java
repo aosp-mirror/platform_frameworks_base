@@ -103,54 +103,6 @@ public class ZygoteInit {
     private static final boolean PRELOAD_RESOURCES = true;
 
     /**
-     * Invokes a static "main(argv[]) method on class "className".
-     * Converts various failing exceptions into RuntimeExceptions, with
-     * the assumption that they will then cause the VM instance to exit.
-     *
-     * @param loader class loader to use
-     * @param className Fully-qualified class name
-     * @param argv Argument vector for main()
-     */
-    static void invokeStaticMain(ClassLoader loader,
-            String className, String[] argv)
-            throws ZygoteInit.MethodAndArgsCaller {
-        Class<?> cl;
-
-        try {
-            cl = loader.loadClass(className);
-        } catch (ClassNotFoundException ex) {
-            throw new RuntimeException(
-                    "Missing class when invoking static main " + className,
-                    ex);
-        }
-
-        Method m;
-        try {
-            m = cl.getMethod("main", new Class[] { String[].class });
-        } catch (NoSuchMethodException ex) {
-            throw new RuntimeException(
-                    "Missing static main on " + className, ex);
-        } catch (SecurityException ex) {
-            throw new RuntimeException(
-                    "Problem getting static main on " + className, ex);
-        }
-
-        int modifiers = m.getModifiers();
-        if (! (Modifier.isStatic(modifiers) && Modifier.isPublic(modifiers))) {
-            throw new RuntimeException(
-                    "Main method is not public and static on " + className);
-        }
-
-        /*
-         * This throw gets caught in ZygoteInit.main(), which responds
-         * by invoking the exception's run() method. This arrangement
-         * clears up all the stack frames that were required in setting
-         * up the process.
-         */
-        throw new ZygoteInit.MethodAndArgsCaller(m, argv);
-    }
-
-    /**
      * Registers a server socket for zygote command connections
      *
      * @throws RuntimeException when open fails
