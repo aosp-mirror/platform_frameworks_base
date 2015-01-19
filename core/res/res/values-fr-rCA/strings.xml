@@ -65,7 +65,7 @@
     <item quantity="one" msgid="6596245285809790142">"Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative avant que votre carte SIM soit verrouillée."</item>
     <item quantity="other" msgid="7530597808358774740">"Il vous reste <xliff:g id="NUMBER">%d</xliff:g> tentative(s) avant que votre carte SIM soit verrouillée."</item>
   </plurals>
-    <string name="imei" msgid="2625429890869005782">"Code IMEI"</string>
+    <string name="imei" msgid="2625429890869005782">"Code IIEM"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Numéro de l\'appelant (entrant)"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Numéro de l\'appelant (sortant)"</string>
