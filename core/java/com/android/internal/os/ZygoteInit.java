@@ -17,7 +17,6 @@
 package com.android.internal.os;
 
 import static android.system.OsConstants.POLLIN;
-import static android.system.OsConstants.POLLOUT;
 import static android.system.OsConstants.S_IRWXG;
 import static android.system.OsConstants.S_IRWXO;
 
@@ -276,11 +275,22 @@ public class ZygoteInit {
         long startTime = SystemClock.uptimeMillis();
 
         // Drop root perms while running static initializers.
-        try {
-            Os.setregid(ROOT_GID, UNPRIVILEGED_GID);
-            Os.setreuid(ROOT_UID, UNPRIVILEGED_UID);
-        } catch (ErrnoException ex) {
-            throw new RuntimeException("Failed to drop root", ex);
+        final int reuid = Os.getuid();
+        final int regid = Os.getgid();
+
+        // We need to drop root perms only if we're already root. In the case of "wrapped"
+        // processes (see WrapperInit), this function is called from an unprivileged uid
+        // and gid.
+        boolean droppedPriviliges = false;
+        if (reuid == ROOT_UID && regid == ROOT_GID) {
+            try {
+                Os.setregid(ROOT_GID, UNPRIVILEGED_GID);
+                Os.setreuid(ROOT_UID, UNPRIVILEGED_UID);
+            } catch (ErrnoException ex) {
+                throw new RuntimeException("Failed to drop root", ex);
+            }
+
+            droppedPriviliges = true;
         }
 
         // Alter the target heap utilization.  With explicit GCs this
@@ -335,12 +345,14 @@ public class ZygoteInit {
             // Fill in dex caches with classes, fields, and methods brought in by preloading.
             runtime.preloadDexCaches();
 
-            // Bring back root. We'll need it later.
-            try {
-                Os.setreuid(ROOT_UID, ROOT_UID);
-                Os.setregid(ROOT_GID, ROOT_GID);
-            } catch (ErrnoException ex) {
-                throw new RuntimeException("Failed to restore root", ex);
+            // Bring back root. We'll need it later if we're in the zygote.
+            if (droppedPriviliges) {
+                try {
+                    Os.setreuid(ROOT_UID, ROOT_UID);
+                    Os.setregid(ROOT_GID, ROOT_GID);
+                } catch (ErrnoException ex) {
+                    throw new RuntimeException("Failed to restore root", ex);
+                }
             }
         }
     }
