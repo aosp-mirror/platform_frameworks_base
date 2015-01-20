@@ -164,7 +164,7 @@ static SkMemoryStream* adaptor_to_mem_stream(SkStream* stream) {
 
 SkStreamRewindable* CopyJavaInputStream(JNIEnv* env, jobject stream,
                                         jbyteArray storage) {
-    SkAutoTUnref<SkStream> adaptor(CreateJavaInputStreamAdaptor(env, stream, storage));
+    SkAutoTDelete<SkStream> adaptor(CreateJavaInputStreamAdaptor(env, stream, storage));
     if (NULL == adaptor.get()) {
         return NULL;
     }

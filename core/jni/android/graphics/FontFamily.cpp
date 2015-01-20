@@ -111,7 +111,8 @@ static jboolean FontFamily_addFontFromAsset(JNIEnv* env, jobject, jlong familyPt
     }
 
     SkAutoTUnref<SkData> data(SkData::NewWithProc(buf, asset->getLength(), releaseAsset, asset));
-    SkAutoTUnref<SkMemoryStream> stream(new SkMemoryStream(data));
+    SkMemoryStream* stream = new SkMemoryStream(data);
+    // CreateFromStream takes ownership of stream.
     SkTypeface* face = SkTypeface::CreateFromStream(stream);
     if (face == NULL) {
         ALOGE("addFontFromAsset failed to create font %s", str.c_str());

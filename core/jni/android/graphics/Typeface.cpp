@@ -19,7 +19,6 @@
 
 #include "GraphicsJNI.h"
 #include <ScopedPrimitiveArray.h>
-#include "SkStream.h"
 #include "SkTypeface.h"
 #include "TypefaceImpl.h"
 #include <android_runtime/android_util_AssetManager.h>

@@ -461,11 +461,11 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
         jobject padding, jobject options) {
 
     jobject bitmap = NULL;
-    SkAutoTUnref<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage));
+    SkAutoTDelete<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage));
 
     if (stream.get()) {
-        SkAutoTUnref<SkStreamRewindable> bufferedStream(
-                SkFrontBufferedStream::Create(stream, BYTES_TO_BUFFER));
+        SkAutoTDelete<SkStreamRewindable> bufferedStream(
+                SkFrontBufferedStream::Create(stream.detach(), BYTES_TO_BUFFER));
         SkASSERT(bufferedStream.get() != NULL);
         bitmap = doDecode(env, bufferedStream, padding, options);
     }
@@ -504,13 +504,13 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
         return nullObjectReturn("Could not open file");
     }
 
-    SkAutoTUnref<SkFILEStream> fileStream(new SkFILEStream(file,
-                         SkFILEStream::kCallerPasses_Ownership));
+    SkAutoTDelete<SkFILEStream> fileStream(new SkFILEStream(file,
+            SkFILEStream::kCallerPasses_Ownership));
 
     // Use a buffered stream. Although an SkFILEStream can be rewound, this
     // ensures that SkImageDecoder::Factory never rewinds beyond the
     // current position of the file descriptor.
-    SkAutoTUnref<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream,
+    SkAutoTDelete<SkStreamRewindable> stream(SkFrontBufferedStream::Create(fileStream.detach(),
             BYTES_TO_BUFFER));
 
     return doDecode(env, stream, padding, bitmapFactoryOptions);
@@ -522,7 +522,7 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jlong native_asset,
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     // since we know we'll be done with the asset when we return, we can
     // just use a simple wrapper
-    SkAutoTUnref<SkStreamRewindable> stream(new AssetStreamAdaptor(asset));
+    SkAutoTDelete<SkStreamRewindable> stream(new AssetStreamAdaptor(asset));
     return doDecode(env, stream, padding, options);
 }
 
@@ -530,8 +530,7 @@ static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
         jint offset, jint length, jobject options) {
 
     AutoJavaByteArray ar(env, byteArray);
-    SkMemoryStream* stream = new SkMemoryStream(ar.ptr() + offset, length, false);
-    SkAutoUnref aur(stream);
+    SkAutoTDelete<SkMemoryStream> stream(new SkMemoryStream(ar.ptr() + offset, length, false));
     return doDecode(env, stream, NULL, options);
 }
 
