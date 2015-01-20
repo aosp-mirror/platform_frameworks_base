@@ -85,7 +85,7 @@ public class LegacyCameraDevice implements AutoCloseable {
     private static final int GRALLOC_USAGE_HW_COMPOSER = 0x00000800;
     private static final int GRALLOC_USAGE_HW_VIDEO_ENCODER = 0x00010000;
 
-    private static final int MAX_DIMEN_FOR_ROUNDING = 1080; // maximum allowed width for rounding
+    public static final int MAX_DIMEN_FOR_ROUNDING = 1080; // maximum allowed width for rounding
 
     private CaptureResultExtras getExtrasFromRequest(RequestHolder holder) {
         if (holder == null) {
@@ -299,15 +299,8 @@ public class LegacyCameraDevice implements AutoCloseable {
                 try {
                     Size s = getSurfaceSize(output);
                     int surfaceType = detectSurfaceType(output);
-                    int usageFlags = detectSurfaceUsageFlags(output);
 
-                    // Keep up to date with allowed consumer types in
-                    // frameworks/av/services/camera/libcameraservice/api2/CameraDeviceClient.cpp
-                    int disallowedFlags = GRALLOC_USAGE_HW_VIDEO_ENCODER | GRALLOC_USAGE_RENDERSCRIPT;
-                    int allowedFlags = GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_SW_READ_OFTEN |
-                            GRALLOC_USAGE_HW_COMPOSER;
-                    boolean flexibleConsumer = ((usageFlags & disallowedFlags) == 0 &&
-                            (usageFlags & allowedFlags) != 0);
+                    boolean flexibleConsumer = isFlexibleConsumer(output);
 
                     Size[] sizes = streamConfigurations.getOutputSizes(surfaceType);
                     if (sizes == null) {
@@ -531,7 +524,7 @@ public class LegacyCameraDevice implements AutoCloseable {
      * @throws NullPointerException if the {@code surface} was {@code null}
      * @throws IllegalStateException if the {@code surface} was invalid
      */
-    static Size getSurfaceSize(Surface surface) throws BufferQueueAbandonedException {
+    public static Size getSurfaceSize(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
 
         int[] dimens = new int[2];
@@ -540,12 +533,31 @@ public class LegacyCameraDevice implements AutoCloseable {
         return new Size(dimens[0], dimens[1]);
     }
 
+    public static boolean isFlexibleConsumer(Surface output) {
+        int usageFlags = detectSurfaceUsageFlags(output);
+
+        // Keep up to date with allowed consumer types in
+        // frameworks/av/services/camera/libcameraservice/api2/CameraDeviceClient.cpp
+        int disallowedFlags = GRALLOC_USAGE_HW_VIDEO_ENCODER | GRALLOC_USAGE_RENDERSCRIPT;
+        int allowedFlags = GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_SW_READ_OFTEN |
+            GRALLOC_USAGE_HW_COMPOSER;
+        boolean flexibleConsumer = ((usageFlags & disallowedFlags) == 0 &&
+                (usageFlags & allowedFlags) != 0);
+        return flexibleConsumer;
+    }
+
+    /**
+     * Query the surface for its currently configured usage flags
+     */
     static int detectSurfaceUsageFlags(Surface surface) {
         checkNotNull(surface);
         return nativeDetectSurfaceUsageFlags(surface);
     }
 
-    static int detectSurfaceType(Surface surface) throws BufferQueueAbandonedException {
+    /**
+     * Query the surface for its currently configured format
+     */
+    public static int detectSurfaceType(Surface surface) throws BufferQueueAbandonedException {
         checkNotNull(surface);
         return LegacyExceptionUtils.throwOnError(nativeDetectSurfaceType(surface));
     }
