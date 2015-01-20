@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.net.Uri;
 import android.os.PowerManager;
@@ -38,11 +39,11 @@ public class AsyncPlayer {
         Context context;
         Uri uri;
         boolean looping;
-        int stream;
+        AudioAttributes attributes;
         long requestTime;
 
         public String toString() {
-            return "{ code=" + code + " looping=" + looping + " stream=" + stream
+            return "{ code=" + code + " looping=" + looping + " attr=" + attributes
                     + " uri=" + uri + " }";
         }
     }
@@ -56,7 +57,7 @@ public class AsyncPlayer {
         try {
             if (mDebug) Log.d(mTag, "Starting playback");
             MediaPlayer player = new MediaPlayer();
-            player.setAudioStreamType(cmd.stream);
+            player.setAudioAttributes(cmd.attributes);
             player.setDataSource(cmd.context, cmd.uri);
             player.setLooping(cmd.looping);
             player.prepare();
@@ -159,21 +160,52 @@ public class AsyncPlayer {
      *          (see {@link MediaPlayer#setLooping(boolean)})
      * @param stream the AudioStream to use.
      *          (see {@link MediaPlayer#setAudioStreamType(int)})
+     * @deprecated use {@link #play(Context, Uri, boolean, AudioAttributes)} instead
      */
     public void play(Context context, Uri uri, boolean looping, int stream) {
+        if (context == null || uri == null) {
+            return;
+        }
+        try {
+            play(context, uri, looping,
+                    new AudioAttributes.Builder().setInternalLegacyStreamType(stream).build());
+        } catch (IllegalArgumentException e) {
+            Log.e(mTag, "Call to deprecated AsyncPlayer.play() method caused:", e);
+        }
+    }
+
+    /**
+     * Start playing the sound.  It will actually start playing at some
+     * point in the future.  There are no guarantees about latency here.
+     * Calling this before another audio file is done playing will stop
+     * that one and start the new one.
+     *
+     * @param context the non-null application's context.
+     * @param uri the non-null URI to play.  (see {@link MediaPlayer#setDataSource(Context, Uri)})
+     * @param looping whether the audio should loop forever.
+     *          (see {@link MediaPlayer#setLooping(boolean)})
+     * @param attributes the non-null {@link AudioAttributes} to use.
+     *          (see {@link MediaPlayer#setAudioAttributes(AudioAttributes)})
+     * @throws IllegalArgumentException
+     */
+    public void play(@NonNull Context context, @NonNull Uri uri, boolean looping,
+            @NonNull AudioAttributes attributes) throws IllegalArgumentException {
+        if (context == null || uri == null || attributes == null) {
+            throw new IllegalArgumentException("Illegal null AsyncPlayer.play() argument");
+        }
         Command cmd = new Command();
         cmd.requestTime = SystemClock.uptimeMillis();
         cmd.code = PLAY;
         cmd.context = context;
         cmd.uri = uri;
         cmd.looping = looping;
-        cmd.stream = stream;
+        cmd.attributes = attributes;
         synchronized (mCmdQueue) {
             enqueueLocked(cmd);
             mState = PLAY;
         }
     }
-    
+
     /**
      * Stop a previously played sound.  It can't be played again or unpaused
      * at this point.  Calling this multiple times has no ill effects.
