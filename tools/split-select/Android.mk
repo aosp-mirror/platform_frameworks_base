@@ -29,12 +29,14 @@ sources := \
     Grouper.cpp \
     Rule.cpp \
     RuleGenerator.cpp \
-    SplitDescription.cpp
+    SplitDescription.cpp \
+    SplitSelector.cpp
 
 testSources := \
     Grouper_test.cpp \
     Rule_test.cpp \
     RuleGenerator_test.cpp \
+    SplitSelector_test.cpp \
     TestRules.cpp
 
 cIncludes := \

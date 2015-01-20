@@ -5338,7 +5338,7 @@ const DynamicRefTable* ResTable::getDynamicRefTableForCookie(int32_t cookie) con
     return NULL;
 }
 
-void ResTable::getConfigurations(Vector<ResTable_config>* configs) const
+void ResTable::getConfigurations(Vector<ResTable_config>* configs, bool ignoreMipmap) const
 {
     const size_t packageCount = mPackageGroups.size();
     for (size_t i = 0; i < packageCount; i++) {
@@ -5349,6 +5349,12 @@ void ResTable::getConfigurations(Vector<ResTable_config>* configs) const
             const size_t numTypes = typeList.size();
             for (size_t k = 0; k < numTypes; k++) {
                 const Type* type = typeList[k];
+                const ResStringPool& typeStrings = type->package->typeStrings;
+                if (ignoreMipmap && typeStrings.string8ObjectAt(
+                            type->typeSpec->id - 1) == "mipmap") {
+                    continue;
+                }
+
                 const size_t numConfigs = type->configs.size();
                 for (size_t m = 0; m < numConfigs; m++) {
                     const ResTable_type* config = type->configs[m];
