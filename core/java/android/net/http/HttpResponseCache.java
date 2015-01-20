@@ -33,15 +33,16 @@ import java.util.Map;
 
 /**
  * Caches HTTP and HTTPS responses to the filesystem so they may be reused,
- * saving time and bandwidth. This class supports {@link HttpURLConnection} and
- * {@link HttpsURLConnection}; there is no platform-provided cache for {@link
- * DefaultHttpClient} or {@link AndroidHttpClient}.
+ * saving time and bandwidth. This class supports {@link
+ * java.net.HttpURLConnection} and {@link javax.net.ssl.HttpsURLConnection};
+ * there is no platform-provided cache for {@link
+ * org.apache.http.impl.client.DefaultHttpClient} or {@link AndroidHttpClient}.
  *
  * <h3>Installing an HTTP response cache</h3>
  * Enable caching of all of your application's HTTP requests by installing the
  * cache at application startup. For example, this code installs a 10 MiB cache
- * in the {@link android.content.Context#getCacheDir() application-specific cache directory} of
- * the filesystem}: <pre>   {@code
+ * in the {@link android.content.Context#getCacheDir() application-specific
+ * cache directory} of the filesystem}: <pre>   {@code
  *   protected void onCreate(Bundle savedInstanceState) {
  *       ...
  *
@@ -73,10 +74,10 @@ import java.util.Map;
  * contain private data.</strong> Although it often has more free space,
  * external storage is optional and&#8212;even if available&#8212;can disappear
  * during use. Retrieve the external cache directory using {@link
- * Context#getExternalCacheDir()}. If this method returns null, your application
- * should fall back to either not caching or caching on non-external storage. If
- * the external storage is removed during use, the cache hit rate will drop to
- * zero and ongoing cache reads will fail.
+ * android.content.Context#getExternalCacheDir()}. If this method returns null,
+ * your application should fall back to either not caching or caching on
+ * non-external storage. If the external storage is removed during use, the
+ * cache hit rate will drop to zero and ongoing cache reads will fail.
  *
  * <p>Flushing the cache forces its data to the filesystem. This ensures that
  * all responses written to the cache will be readable the next time the
