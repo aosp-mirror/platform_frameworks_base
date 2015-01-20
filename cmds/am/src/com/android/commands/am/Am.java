@@ -1694,11 +1694,10 @@ public class Am extends BaseCommand {
         Intent intent = makeIntent(UserHandle.USER_CURRENT);
 
         try {
-            IBinder homeActivityToken = mAm.getHomeActivityToken();
-            IActivityContainer container =
-                    mAm.createVirtualActivityContainer(homeActivityToken, null);
-            container.attachToDisplay(displayId);
-            container.startActivity(intent);
+            IActivityContainer container = mAm.createStackOnDisplay(displayId);
+            if (container != null) {
+                container.startActivity(intent);
+            }
         } catch (RemoteException e) {
         }
     }
