@@ -60,12 +60,14 @@ import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import com.android.systemui.R;
 import com.android.systemui.recents.Constants;
+import com.android.systemui.recents.Recents;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Acts as a shim around the real system services that we need to access data from, and provides
@@ -212,9 +214,40 @@ public class SystemServicesProxy {
     }
 
     /** Returns a list of the running tasks */
-    public List<ActivityManager.RunningTaskInfo> getRunningTasks(int numTasks) {
+    private List<ActivityManager.RunningTaskInfo> getRunningTasks(int numTasks) {
         if (mAm == null) return null;
         return mAm.getRunningTasks(numTasks);
+    }
+
+    /** Returns the top task. */
+    public ActivityManager.RunningTaskInfo getTopMostTask() {
+        List<ActivityManager.RunningTaskInfo> tasks = getRunningTasks(1);
+        if (!tasks.isEmpty()) {
+            return tasks.get(0);
+        }
+        return null;
+    }
+
+    /** Returns whether the recents is currently running */
+    public boolean isRecentsTopMost(ActivityManager.RunningTaskInfo topTask,
+            AtomicBoolean isHomeTopMost) {
+        if (topTask != null) {
+            ComponentName topActivity = topTask.topActivity;
+
+            // Check if the front most activity is recents
+            if (topActivity.getPackageName().equals(Recents.sRecentsPackage) &&
+                    topActivity.getClassName().equals(Recents.sRecentsActivity)) {
+                if (isHomeTopMost != null) {
+                    isHomeTopMost.set(false);
+                }
+                return true;
+            }
+
+            if (isHomeTopMost != null) {
+                isHomeTopMost.set(isInHomeStack(topTask.id));
+            }
+        }
+        return false;
     }
 
     /** Returns whether the specified task is in the home stack */
