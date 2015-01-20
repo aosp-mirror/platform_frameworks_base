@@ -52,6 +52,7 @@ LOCAL_SRC_FILES := \
     RenderState.cpp \
     ResourceCache.cpp \
     ShadowTessellator.cpp \
+    SkiaCanvas.cpp \
     SkiaShader.cpp \
     Snapshot.cpp \
     SpotShadow.cpp \

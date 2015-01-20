@@ -18,7 +18,7 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
-#include "Canvas.h"
+#include <Canvas.h>
 #include "SkDrawFilter.h"
 #include "SkGraphics.h"
 #include "SkPorterDuff.h"

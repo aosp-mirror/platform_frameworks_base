@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-#include "jni.h"
 #include "Canvas.h"
-#include "GraphicsJNI.h"
-#include <android_runtime/AndroidRuntime.h>
 
-#include "SkCanvas.h"
-#include "SkClipStack.h"
-#include "SkDevice.h"
-#include "SkDeque.h"
-#include "SkDrawFilter.h"
-#include "SkGraphics.h"
-#include "SkPorterDuff.h"
-#include "SkShader.h"
-#include "SkTArray.h"
-#include "SkTemplates.h"
-
-#include "MinikinUtils.h"
-
-#include "TypefaceImpl.h"
-
-#include "unicode/ubidi.h"
-#include "unicode/ushape.h"
-
-#include <utils/Log.h>
+#include <SkCanvas.h>
+#include <SkClipStack.h>
+#include <SkDevice.h>
+#include <SkDeque.h>
+#include <SkDrawFilter.h>
+#include <SkGraphics.h>
+#include <SkPorterDuff.h>
+#include <SkShader.h>
+#include <SkTArray.h>
+#include <SkTemplates.h>
 
 namespace android {
 

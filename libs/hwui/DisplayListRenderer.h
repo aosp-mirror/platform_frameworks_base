@@ -25,8 +25,7 @@
 #include <SkTLazy.h>
 #include <cutils/compiler.h>
 
-#include <private/graphics/Canvas.h>
-
+#include "Canvas.h"
 #include "CanvasState.h"
 #include "DisplayList.h"
 #include "DisplayListLogBuffer.h"
