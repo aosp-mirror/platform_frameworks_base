@@ -1029,6 +1029,9 @@
         <!-- The color applied to framework switch thumbs in their normal state. -->
         <attr name="colorSwitchThumbNormal" format="color" />
 
+        <!-- @hide The background used by framework controls. -->
+        <attr name="controlBackground" format="color" />
+
         <!-- The color applied to the edge effect on scrolling containers. -->
         <attr name="colorEdgeEffect" format="color" />
 
