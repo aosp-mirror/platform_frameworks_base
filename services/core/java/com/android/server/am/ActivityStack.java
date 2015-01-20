@@ -1478,7 +1478,7 @@ final class ActivityStack {
         cancelInitializingActivities();
 
         // Find the first activity that is not finishing.
-        ActivityRecord next = topRunningActivityLocked(null);
+        final ActivityRecord next = topRunningActivityLocked(null);
 
         // Remember how we'll process this pause/resume situation, and ensure
         // that the state is reset however we wind up proceeding.
@@ -1820,7 +1820,9 @@ final class ActivityStack {
 
                 EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY,
                         next.userId, System.identityHashCode(next),
-                        next.task.taskId, next.shortComponentName);
+                        next.task.taskId, next.shortComponentName + " top="
+                                + mStacks.get(mStacks.size() - 1).mStackId + " Callers="
+                                + Debug.getCallers(6));
 
                 next.sleeping = false;
                 mService.showAskCompatModeDialogLocked(next);
