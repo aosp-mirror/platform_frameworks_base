@@ -18,27 +18,21 @@ package com.android.databinding.store;
 import com.android.databinding.util.ClassAnalyzer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.JarURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -51,8 +45,6 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-
-import sun.net.www.protocol.jar.URLJarFile;
 
 public class SetterStore {
 
@@ -325,6 +317,12 @@ public class SetterStore {
 
     public String getSetterCall(String attribute, Class<?> viewType, Class<?> valueType,
             String viewExpression, String valueExpression) {
+        if (!attribute.startsWith("android:")) {
+            int colon = attribute.indexOf(':');
+            if (colon >= 0) {
+                attribute = attribute.substring(colon + 1);
+            }
+        }
         ArrayList<AdaptedMethod> adapters = mAdaptedMethods.get(attribute);
 
         AdaptedMethod adapter = null;
