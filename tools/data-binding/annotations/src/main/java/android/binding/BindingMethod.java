@@ -15,10 +15,11 @@
  */
 package android.binding;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-
-@Target(ElementType.METHOD)
-public @interface BindingAdapter {
+/**
+ * Created by mount on 1/12/15.
+ */
+public @interface BindingMethod {
+    String type();
     String attribute();
+    String method();
 }

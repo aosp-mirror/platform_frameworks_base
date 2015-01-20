@@ -31,7 +31,7 @@ import com.android.databinding.util.getMethodOrField
 import com.android.databinding.util.Log
 import com.android.databinding.ext.joinToCamelCaseAsVar
 import com.android.databinding.util.isObservable
-import com.android.databinding.annotationprocessor.BindingAdapterStore
+import com.android.databinding.store.SetterStore
 
 class Binding(val target : BindingTarget, val attr : String, val targetFieldName : String,
         val expr : Expr) {
@@ -47,8 +47,8 @@ class Binding(val target : BindingTarget, val attr : String, val targetFieldName
 
     val setter by Delegates.lazy {
         val viewType = ClassAnalyzer.instance.loadClass(target.viewClass);
-        BindingAdapterStore.get().getSetterCall(attr, viewType, expr.resolvedClass,
-                target.resolvedViewName, expr.toJava(), ClassAnalyzer.instance.classLoader)
+        SetterStore.get(ClassAnalyzer.instance).getSetterCall(attr, viewType,
+                expr.resolvedClass, target.resolvedViewName, expr.toJava())
     }
 
     val isDirtyName by Delegates.lazy {"sDirtyFlag${target.resolvedUniqueName}_${targetFieldName.capitalize()}"}

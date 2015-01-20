@@ -36,11 +36,16 @@ sourceSets {
     }
 }
 
+dependencies {
+    compile project(":annotations")
+    compile project(":compiler")
+}
+
 uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: mavenLocal().url)
-            pom.version = '0.1-SNAPSHOT'
+            pom.version = '0.3-SNAPSHOT'
             pom.artifactId = 'annotationprocessor'
             pom.groupId='com.android.databinding'
         }

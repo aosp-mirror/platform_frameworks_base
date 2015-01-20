@@ -146,22 +146,42 @@ class ClassAnalyzer(val classLoader : URLClassLoader) {
     }
 
     fun loadClass(klassName : String) : Class<*> {
-        var loaded = loadedClasses[klassName] ?: loadPrimitive(klassName)
-        if (loaded == null) {
-            loaded = loadRecursively(klassName)
-            System.out.println("loaded ${loaded}")
-            loaded!!.getInterfaces().forEach {
-                System.out.println("interfaces ${it}")
+        when (klassName) {
+            "int" -> return javaClass<kotlin.Int>()
+            "short" -> return javaClass<kotlin.Short>()
+            "long" -> return javaClass<kotlin.Long>()
+            "float" -> return javaClass<kotlin.Float>()
+            "double" -> return javaClass<kotlin.Double>()
+            "boolean" -> return javaClass<kotlin.Boolean>()
+            "char" -> return javaClass<kotlin.Char>()
+            else -> {
+                var loaded = loadedClasses[klassName] ?: loadPrimitive(klassName)
+                if (loaded == null) {
+                    if (klassName.startsWith("[") && klassName.contains("L")) {
+                        val indexOfL = klassName.indexOf('L');
+                        val baseClass = loadClass(klassName.substring(indexOfL + 1, klassName.length() - 1));
+                        val realClassName = klassName.substring(0, indexOfL + 1) +
+                                baseClass.getCanonicalName() + ';'
+                        loaded = Class.forName(realClassName, false, classLoader);
+                        loadedClasses.put(klassName, loaded)
+                    } else {
+                        loaded = loadRecursively(klassName)
+                        System.out.println("loaded ${loaded}")
+                        loaded!!.getInterfaces().forEach {
+                            System.out.println("interfaces ${it}")
+                        }
+                        loadedClasses.put(klassName, loaded)
+                    }
+                }
+                return loaded!!
             }
-            loadedClasses.put(klassName, loaded)
         }
-        return loaded!!
     }
 
     fun loadRecursively(klassName : String) : Class<*> {
         System.out.println("trying to find class ${klassName}")
         try {
-            return classLoader.loadClass(klassName)
+            return Class.forName(klassName, false, classLoader)
         } catch(ex : ClassNotFoundException) {
             val lastIndexOfDot = klassName.lastIndexOf(".")
             if (lastIndexOfDot == -1) {

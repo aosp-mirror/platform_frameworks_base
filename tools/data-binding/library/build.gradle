@@ -55,6 +55,11 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(":annotations")
+    provided 'com.android.support:cardview-v7:+'
+    provided 'com.android.support:appcompat-v7:+'
+    provided 'com.android.databinding:compiler:+'
+    provided 'com.android.databinding:annotationprocessor:+'
 }
 //create jar tasks
 android.libraryVariants.all { variant ->

@@ -15,31 +15,34 @@
  */
 
 apply plugin: 'java'
-apply plugin: "kotlin"
 apply plugin: 'maven'
-
-
 
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
     }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
     }
 }
 
-
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    compile project(":annotations")
-    compile project(":grammerBuilder")
-    compile project(":xmlGrammer")
-}
 uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: mavenLocal().url)
+            pom.version = '0.3-SNAPSHOT'
+            pom.artifactId = 'annotations'
+            pom.groupId='com.android.databinding'
         }
     }
 }

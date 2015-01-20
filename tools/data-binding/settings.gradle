@@ -1,6 +1,7 @@
 include ':library'
 include ':compiler'
 include ':gradlePlugin'
+include ':annotations'
 include ':grammerBuilder'
 include ':annotationprocessor'
-include 'xmlGrammer'
+include ':xmlGrammer'

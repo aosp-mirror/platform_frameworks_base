@@ -3,8 +3,6 @@ package com.android.databinding.annotationprocessor;
 import android.binding.Bindable;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -15,7 +13,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -27,7 +24,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeKind;
 import javax.tools.Diagnostic;
+import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 
 @SupportedAnnotationTypes({"android.binding.Bindable"})
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
@@ -168,18 +167,28 @@ public class ProcessBindable extends AbstractProcessor {
 
     private HashSet<String> readIntermediateFile() {
         HashSet<String> properties = null;
-        File intermediate = getIntermediateFile();
-        if (intermediate.exists()) {
-            try {
-                ObjectInputStream in = new ObjectInputStream(new FileInputStream(intermediate));
+        ObjectInputStream in = null;
+        try {
+            FileObject intermediate = processingEnv.getFiler()
+                    .getResource(StandardLocation.CLASS_OUTPUT,
+                            ProcessBindable.class.getPackage().getName(), "binding_properties.bin");
+            if (new File(intermediate.getName()).exists()) {
+                in = new ObjectInputStream(intermediate.openInputStream());
                 properties = (HashSet<String>) in.readObject();
-                in.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Could not read Binding properties intermediate file: " +
+                    e.getLocalizedMessage());
+        } catch (ClassNotFoundException e) {
+            System.err.println("Could not read Binding properties intermediate file: " +
+                    e.getLocalizedMessage());
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
             } catch (IOException e) {
-                System.err.println("Could not read Binding properties intermediate file: " +
-                        e.getLocalizedMessage());
-            } catch (ClassNotFoundException e) {
-                System.err.println("Could not read Binding properties intermediate file: " +
-                        e.getLocalizedMessage());
+                e.printStackTrace();
             }
         }
         if (properties == null) {
@@ -190,19 +199,15 @@ public class ProcessBindable extends AbstractProcessor {
 
     private void writeIntermediateFile(HashSet<String> properties) {
         try {
-            File intermediate = getIntermediateFile();
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(intermediate));
+            FileObject intermediate = processingEnv.getFiler().createResource(
+                    StandardLocation.CLASS_OUTPUT, ProcessBindable.class.getPackage().getName(),
+                    "binding_properties.bin");
+            ObjectOutputStream out = new ObjectOutputStream(intermediate.openOutputStream());
             out.writeObject(properties);
             out.close();
         } catch (IOException e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                     "Could not write to intermediate file: " + e.getLocalizedMessage());
         }
-    }
-
-    private static File getIntermediateFile() {
-        File dir = new File(new File("build"),"intermediates");
-        dir.mkdirs();
-        return new File(dir, "binding_properties.bin");
     }
 }
