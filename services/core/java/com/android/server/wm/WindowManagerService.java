@@ -4824,7 +4824,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG, "removeAppToken: "
                         + wtoken + " delayed=" + delayed + " Callers=" + Debug.getCallers(4));
                 final TaskStack stack = mTaskIdToTask.get(wtoken.groupId).mStack;
-                if (delayed) {
+                if (delayed && !wtoken.allAppWindows.isEmpty()) {
                     // set the token aside because it has an active animation to be finished
                     if (DEBUG_ADD_REMOVE || DEBUG_TOKEN_MOVEMENT) Slog.v(TAG,
                             "removeAppToken make exiting: " + wtoken);
@@ -5115,7 +5115,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void removeTaskLocked(Task task) {
         final int taskId = task.taskId;
         final TaskStack stack = task.mStack;
-        if (stack.isAnimating()) {
+        if (!task.mAppTokens.isEmpty() && stack.isAnimating()) {
             if (DEBUG_STACK) Slog.i(TAG, "removeTask: deferring removing taskId=" + taskId);
             task.mDeferRemoval = true;
             return;
@@ -9970,7 +9970,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     mStackIdToStack.valueAt(stackNdx).mExitingAppTokens;
             for (i = exitingAppTokens.size() - 1; i >= 0; i--) {
                 AppWindowToken token = exitingAppTokens.get(i);
-                if (!token.hasVisible && !mClosingApps.contains(token) && !token.mIsExiting) {
+                if (!token.hasVisible && !mClosingApps.contains(token) &&
+                        (!token.mIsExiting || token.allAppWindows.isEmpty())) {
                     // Make sure there is no animation running on this token,
                     // so any windows associated with it will be removed as
                     // soon as their animations are complete
@@ -9980,6 +9981,10 @@ public class WindowManagerService extends IWindowManager.Stub
                             "performLayout: App token exiting now removed" + token);
                     removeAppFromTaskLocked(token);
                     exitingAppTokens.remove(i);
+                    final Task task = mTaskIdToTask.get(token.groupId);
+                    if (task != null && task.mDeferRemoval && task.mAppTokens.isEmpty()) {
+                        removeTaskLocked(task);
+                    }
                 }
             }
         }
