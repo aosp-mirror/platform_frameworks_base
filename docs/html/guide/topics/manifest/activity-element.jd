@@ -593,7 +593,9 @@ visible on screen &mdash; "{@code true}" if it should be finished, and
 <p>
 A value of "{@code true}" means that the activity will not leave a
 historical trace.  It will not remain in the activity stack for the task,
-so the user will not be able to return to it.
+so the user will not be able to return to it. In this case,
+{@link android.app.Activity#onActivityResult onActivityResult()} is never called if you
+start another activity for a result from this activity.
 </p>
 
 <p>

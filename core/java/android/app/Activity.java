@@ -4326,6 +4326,10 @@ public class Activity extends ContextThemeWrapper
      * 
      * <p>You will receive this call immediately before onResume() when your
      * activity is re-starting.
+     *
+     * <p>This method is never invoked if your activity sets
+     * {@link android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
+     * <code>true</code>.
      * 
      * @param requestCode The integer request code originally supplied to
      *                    startActivityForResult(), allowing you to identify who this
