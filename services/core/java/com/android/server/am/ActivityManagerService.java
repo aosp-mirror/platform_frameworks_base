@@ -15464,6 +15464,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                         removeUriPermissionsForPackageLocked(ssp, userId, true);
 
                                         removeTasksByPackageNameLocked(ssp, userId);
+                                        if (userId == UserHandle.USER_OWNER) {
+                                            mTaskPersister.removeFromPackageCache(ssp);
+                                        }
                                     }
                                 } else {
                                     removeTasksByRemovedPackageComponentsLocked(ssp, userId);

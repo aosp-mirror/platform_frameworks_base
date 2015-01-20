@@ -81,7 +81,7 @@ final class ActivityRecord {
     private static final String ATTR_USERID = "user_id";
     private static final String TAG_PERSISTABLEBUNDLE = "persistable_bundle";
     private static final String ATTR_LAUNCHEDFROMUID = "launched_from_uid";
-    private static final String ATTR_LAUNCHEDFROMPACKAGE = "launched_from_package";
+    static final String ATTR_LAUNCHEDFROMPACKAGE = "launched_from_package";
     private static final String ATTR_RESOLVEDTYPE = "resolved_type";
     private static final String ATTR_COMPONENTSPECIFIED = "component_specified";
     static final String ACTIVITY_ICON_SUFFIX = "_activity_icon_";
@@ -90,7 +90,7 @@ final class ActivityRecord {
     final IApplicationToken.Stub appToken; // window manager token
     final ActivityInfo info; // all about me
     final ApplicationInfo appInfo; // information about activity's app
-    final int launchedFromUid; // always the uid who started the activity.
+    int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
     final int userId;          // Which user is this running for?
     final Intent intent;    // the original intent that generated us
@@ -1141,8 +1141,8 @@ final class ActivityRecord {
         }
     }
 
-    static ActivityRecord restoreFromXml(XmlPullParser in,
-            ActivityStackSupervisor stackSupervisor) throws IOException, XmlPullParserException {
+    static ActivityRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
+            throws IOException, XmlPullParserException {
         Intent intent = null;
         PersistableBundle persistentState = null;
         int launchedFromUid = 0;
