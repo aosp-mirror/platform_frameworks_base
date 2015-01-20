@@ -100,7 +100,6 @@ public abstract class PanelView extends FrameLayout {
     private boolean mCollapseAfterPeek;
     private boolean mExpanding;
     private boolean mGestureWaitForTouchSlop;
-    private boolean mDozingOnDown;
     private Runnable mPeekRunnable = new Runnable() {
         @Override
         public void run() {
@@ -247,7 +246,6 @@ public abstract class PanelView extends FrameLayout {
                 mUpdateFlingOnLayout = false;
                 mPeekTouching = mPanelClosedOnDown;
                 mTouchAboveFalsingThreshold = false;
-                mDozingOnDown = isDozing();
                 if (mVelocityTracker == null) {
                     initVelocityTracker();
                 }
@@ -431,7 +429,6 @@ public abstract class PanelView extends FrameLayout {
                 mHasLayoutedSinceDown = false;
                 mUpdateFlingOnLayout = false;
                 mTouchAboveFalsingThreshold = false;
-                mDozingOnDown = isDozing();
                 initVelocityTracker();
                 trackMovement(event);
                 break;
@@ -942,35 +939,14 @@ public abstract class PanelView extends FrameLayout {
         }
     }
 
-    private final Runnable mPostCollapseRunnable = new Runnable() {
+    protected final Runnable mPostCollapseRunnable = new Runnable() {
         @Override
         public void run() {
             collapse(false /* delayed */);
         }
     };
-    private boolean onMiddleClicked() {
-        switch (mStatusBar.getBarState()) {
-            case StatusBarState.KEYGUARD:
-                if (!mDozingOnDown) {
-                    EventLogTags.writeSysuiLockscreenGesture(
-                            EventLogConstants.SYSUI_LOCKSCREEN_GESTURE_TAP_UNLOCK_HINT,
-                            0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
-                    startUnlockHintAnimation();
-                }
-                return true;
-            case StatusBarState.SHADE_LOCKED:
-                mStatusBar.goToKeyguard();
-                return true;
-            case StatusBarState.SHADE:
 
-                // This gets called in the middle of the touch handling, where the state is still
-                // that we are tracking the panel. Collapse the panel after this is done.
-                post(mPostCollapseRunnable);
-                return false;
-            default:
-                return true;
-        }
-    }
+    protected abstract boolean onMiddleClicked();
 
     protected abstract void onEdgeClicked(boolean right);
 
