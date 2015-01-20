@@ -59,7 +59,7 @@ final class TaskRecord {
     private static final String TAG_AFFINITYINTENT = "affinity_intent";
     static final String ATTR_REALACTIVITY = "real_activity";
     private static final String ATTR_ORIGACTIVITY = "orig_activity";
-    private static final String TAG_ACTIVITY = "activity";
+    static final String TAG_ACTIVITY = "activity";
     private static final String ATTR_AFFINITY = "affinity";
     private static final String ATTR_ROOT_AFFINITY = "root_affinity";
     private static final String ATTR_ROOTHASRESET = "root_has_reset";
