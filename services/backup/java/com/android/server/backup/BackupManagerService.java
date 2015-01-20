@@ -130,6 +130,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -2695,6 +2696,84 @@ public class BackupManagerService {
             }
         }
 
+        // SHA-1 a byte array and return the result in hex
+        private String SHA1Checksum(byte[] input) {
+            final byte[] checksum;
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-1");
+                checksum = md.digest(input);
+            } catch (NoSuchAlgorithmException e) {
+                Slog.e(TAG, "Unable to use SHA-1!");
+                return "00";
+            }
+
+            StringBuffer sb = new StringBuffer(checksum.length * 2);
+            for (int i = 0; i < checksum.length; i++) {
+                sb.append(Integer.toHexString(checksum[i]));
+            }
+            return sb.toString();
+        }
+
+        private void writeWidgetPayloadIfAppropriate(FileDescriptor fd, String pkgName)
+                throws IOException {
+            byte[] widgetState = AppWidgetBackupBridge.getWidgetState(pkgName,
+                    UserHandle.USER_OWNER);
+            // has the widget state changed since last time?
+            final File widgetFile = new File(mStateDir, pkgName + "_widget");
+            final boolean priorStateExists = widgetFile.exists();
+
+            if (MORE_DEBUG) {
+                if (priorStateExists || widgetState != null) {
+                    Slog.i(TAG, "Checking widget update: state=" + (widgetState != null)
+                            + " prior=" + priorStateExists);
+                }
+            }
+
+            if (!priorStateExists && widgetState == null) {
+                // no prior state, no new state => nothing to do
+                return;
+            }
+
+            // if the new state is not null, we might need to compare checksums to
+            // determine whether to update the widget blob in the archive.  If the
+            // widget state *is* null, we know a priori at this point that we simply
+            // need to commit a deletion for it.
+            String newChecksum = null;
+            if (widgetState != null) {
+                newChecksum = SHA1Checksum(widgetState);
+                if (priorStateExists) {
+                    final String priorChecksum;
+                    try (
+                        FileInputStream fin = new FileInputStream(widgetFile);
+                        DataInputStream in = new DataInputStream(fin)
+                    ) {
+                        priorChecksum = in.readUTF();
+                    }
+                    if (Objects.equals(newChecksum, priorChecksum)) {
+                        // Same checksum => no state change => don't rewrite the widget data
+                        return;
+                    }
+                }
+            } // else widget state *became* empty, so we need to commit a deletion
+
+            BackupDataOutput out = new BackupDataOutput(fd);
+            if (widgetState != null) {
+                try (
+                    FileOutputStream fout = new FileOutputStream(widgetFile);
+                    DataOutputStream stateOut = new DataOutputStream(fout)
+                ) {
+                    stateOut.writeUTF(newChecksum);
+                }
+
+                out.writeEntityHeader(KEY_WIDGET_STATE, widgetState.length);
+                out.writeEntityData(widgetState, widgetState.length);
+            } else {
+                // Widget state for this app has been removed; commit a deletion
+                out.writeEntityHeader(KEY_WIDGET_STATE, -1);
+                widgetFile.delete();
+            }
+        }
+
         @Override
         public void operationComplete() {
             // Okay, the agent successfully reported back to us!
@@ -2733,17 +2812,7 @@ public class BackupManagerService {
                 }
 
                 // Piggyback the widget state payload, if any
-                BackupDataOutput out = new BackupDataOutput(fd);
-                byte[] widgetState = AppWidgetBackupBridge.getWidgetState(pkgName,
-                        UserHandle.USER_OWNER);
-                if (widgetState != null) {
-                    out.writeEntityHeader(KEY_WIDGET_STATE, widgetState.length);
-                    out.writeEntityData(widgetState, widgetState.length);
-                } else {
-                    // No widget state for this app, but push a 'delete' operation for it
-                    // in case they're trying to play games with the payload.
-                    out.writeEntityHeader(KEY_WIDGET_STATE, -1);
-                }
+                writeWidgetPayloadIfAppropriate(fd, pkgName);
             } catch (IOException e) {
                 // Hard disk error; recovery/failure policy TBD.  For now roll back,
                 // but we may want to consider this a transport-level failure (i.e.
